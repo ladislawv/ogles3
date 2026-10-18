@@ -1476,8 +1476,9 @@ M6's exit criterion. Each row is a workload measured on the test A1200 (Pi 4B, E
 1. **After the release:**
    - `amictld`'s large-reply stall (postponed: the test station, not the library);
    - the backend's authors asked whether their code may become MIT (D6).
-2. **The rest of M6's scope:** optional: native ETC1 sampling. glmark2's `buffer` scenes (49–83 fps: half of a 200-column buffer rewritten every frame) are a candidate for the buffer path.
-3. **Postponed (2026-10-13, the developer's decision):** per-draw CPU time for gl4es programs (the gl4es build: 23.3 ms a frame against MiniGL's 16.4; ogles2's draw about 28 us, 32 us for renderergl2's), and minigl.library coexistence (D3: the shared submission component with PiStorm3D's maintainers; the turn across programs above is ogles2's half).
+2. **OpenGL ES 3.0 and 3.1** (branch `gles3`): `docs/GLES3_PLAN.md`, stages A-D; released as ogles2.library 2.0 after stage B.
+3. **The rest of M6's scope:** optional: native ETC1 sampling. glmark2's `buffer` scenes (49–83 fps: half of a 200-column buffer rewritten every frame) are a candidate for the buffer path.
+4. **Postponed (2026-10-13, the developer's decision):** per-draw CPU time for gl4es programs (the gl4es build: 23.3 ms a frame against MiniGL's 16.4; ogles2's draw about 28 us, 32 us for renderergl2's), and minigl.library coexistence (D3: the shared submission component with PiStorm3D's maintainers; the turn across programs above is ogles2's half).
 
 ---
 
