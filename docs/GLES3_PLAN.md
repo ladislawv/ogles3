@@ -11,7 +11,7 @@ III) and the host `v3dglslc`. Appendix B holds the research each stage
 needs, with its sources; the few facts not confirmed are marked
 "unverified". "The main plan" is `docs/DEVELOPMENT_PLAN.md`.
 
-ogles2.library 1.3 is a complete OpenGL ES 2.0 with 32 extensions. The GPU it
+ogles2.library 1.3 is a complete OpenGL ES 2.0 with 33 extensions. The GPU it
 drives, the Raspberry Pi 4's V3D 4.2, is OpenGL ES 3.1 capable: Mesa's V3D
 driver, which `v3dglslc` is built from, is conformant for GLES 3.1 on it
 under Linux. This plan extends ogles2 to OpenGL ES 3.0, then 3.1, as far as
@@ -53,7 +53,7 @@ Mesa's driver, so they could follow later as an extension
     implementation does not support. The check is the library's own (it
     reads the `#version` line), so it also works without the compiler, and
     it comes before the shader record lookup (`.v3ds`).
-  - **`OGLES2_VERSION`.** `ogles2.doc` (`:221`) and
+  - **`OGLES2_VERSION`.** `ogles2.doc` (`:242`) and
     `<libraries/ogles2.h>` (`:21-25`) say a program may define it on its
     compile line to require a newer library. That has no effect:
     `OGLES2Open()` is compiled into `libogles2.a` with the header's value 1
@@ -87,15 +87,16 @@ Mesa's driver, so they could follow later as an extension
   - **2.0, after stage B:** stage B's features as **GLES2 extensions** in
     GLES2 contexts: `OES_vertex_array_object`, `EXT_instanced_arrays`,
     `OES_texture_3D`, `EXT_texture_storage`, `EXT_texture_rg`, `EXT_sRGB`,
-    `EXT_color_buffer_half_float`, `EXT_map_buffer_range` (the GLES2
-    extensions of ES 3.0 features stage B builds; all in Khronos' registry,
-    all ES 2.0 ones, as Mesa's `extensions_table.h` agrees), and
+    `EXT_map_buffer_range` (the GLES2 extensions of ES 3.0 features stage B
+    builds; all in Khronos' registry, all ES 2.0 ones, as Mesa's
+    `extensions_table.h` agrees; `EXT_color_buffer_half_float` is in 1.3
+    since GitHub issue 5, `main` 7f4b91d), and
     `OES_depth24` and `EXT_frag_depth`: 24-bit depth renderbuffers come with
     stage B, and the compiler and the draw already handle depth writes
-    (tested 2026-10-19: `gl_FragDepthEXT` compiles; `draw.c:855`). Of the
-    programs here, gl4es looks for `EXT_texture_rg`, `OES_depth24`,
-    `EXT_frag_depth` and, with its `floattex` option,
-    `EXT_color_buffer_half_float` (`gl4es/src/glx/hardext.c:327-377`);
+    (tested 2026-10-19: `gl_FragDepthEXT` compiles; `draw.c:863`). Of the
+    programs here, gl4es looks for `EXT_texture_rg`, `OES_depth24` and
+    `EXT_frag_depth` (`gl4es/src/glx/hardext.c:327-377`; with its
+    `floattex` option also for `EXT_color_buffer_half_float`, which 1.3 has);
     SDL3 looks for none of these (only for `EXT_sRGB_write_control`, an ES
     3.0 extension, §10); Quake III's GLES2 renderer looks for
     `EXT_occlusion_query_boolean`, `EXT_shadow_samplers`, `NV_read_depth`,
@@ -169,18 +170,21 @@ Mesa's driver, so they could follow later as an extension
   buffers, 16 texture units a stage, 32 in all), so GLSL's `gl_Max*`
   constants equal the library's queries. It has a build stamp
   (`$V3DGLSLC-STAMP:`, `v3dglslc.c:62`) but no `$VER:` string.
-- **Library:** the GLES 2.0 core, 32 extensions, 164 dispatch entries,
+- **Library:** the GLES 2.0 core, 33 extensions, 164 dispatch entries,
   `GL_VERSION` "OpenGL ES 2.0 ogles2.library 1.3", library version 1
-  (`lib_Version`), dispatch ABI 1, 229,924 bytes. Share groups
-  (`OGLES2_CCT_SHARE_WITH`, `share.c`) hold textures, buffers, shaders and
-  programs, and renderbuffers. Already covering parts of ES 3.0: several
+  (`lib_Version`), dispatch ABI 1, 239,872 bytes (the rebuilt 1.3). Share
+  groups (`OGLES2_CCT_SHARE_WITH`, `share.c`) hold textures, buffers, shaders
+  and programs, and renderbuffers. Already covering parts of ES 3.0: several
   render targets (`EXT_draw_buffers`), float, half-float and depth textures
-  (sampled), 32-bit index buffers, program binaries, standard derivatives,
-  32 texture units, 4x MSAA on the default framebuffer, base and max level
-  and LOD clamps (`SGIS_texture_lod`), the vertex and instance ID flags of
-  the shader record (`draw.c`, from prog data's `uses_vid`/`uses_iid`), and
-  `glDrawRangeElements` (AmigaOS 4's entry, which is ES 3.0's). Unknown
-  context tags are logged and ignored.
+  (sampled), half-float colour targets (`EXT_color_buffer_half_float`, GitHub
+  issue 5: RGBA16F textures and RGBA16F, RGB16F, RG16F and R16F renderbuffers,
+  all stored as RGBA16F), `glCopyTexImage2D` and `glCopyTexSubImage2D` drawn
+  by the GPU (`copy.c`), 32-bit index buffers, program binaries, standard
+  derivatives, 32 texture units, 4x MSAA on the default framebuffer, base and
+  max level and LOD clamps (`SGIS_texture_lod`), the vertex and instance ID
+  flags of the shader record (`draw.c`, from prog data's
+  `uses_vid`/`uses_iid`), and `glDrawRangeElements` (AmigaOS 4's entry, which
+  is ES 3.0's). Unknown context tags are logged and ignored.
 - **What the library lacks, besides the API** (Appendix B.2 has the places):
   - **no GPU copy of a buffer object:** a buffer is a CPU copy in the 68k's
     byte order (`buffer.c`), and draws read converted copies per attribute
@@ -194,45 +198,53 @@ Mesa's driver, so they could follow later as an extension
     `draw.c` sends only the "zero all" packets;
   - **vertex numbering:** draws start the attribute copies at `first` and
     draw from vertex 0, and indexed draws rebase their indices
-    (`draw.c:1646`, `:1593-1617`), so a vertex's index is not the one ES
+    (`draw.c:1654`, `:1601-1625`), so a vertex's index is not the one ES
     3.0 gives `gl_VertexID` (GLSL ES 1.00 has no `gl_VertexID`); 32-bit
     indices of 2^31 or more are refused, so a restart index would be
     rebased, refused or widen the copied vertex range;
   - **vertex attributes:** float, fixed, short and byte only; no divisor, no
     integer reads; a disabled array reads a float record
-    (`constant_attrib`, `draw.c:786-800`) and missing components come from
+    (`constant_attrib`, `draw.c:794-808`) and missing components come from
     one (0, 0, 0, 1.0) block per control list (`default_attribs`,
-    `:600-616`); matrix attributes get columns only for `mat2`, `mat3` and
+    `:608-624`); matrix attributes get columns only for `mat2`, `mat3` and
     `mat4` (`v3dp.c:344-345`);
   - **uniforms:** `glUniformMatrix*fv` refuse `transpose` (GLES 2.0's rule,
     `program.c:1789-1817`);
   - **one framebuffer binding** (`ctx->draw_fb`), no separate read binding;
     attachment queries refuse the default framebuffer and answer
-    `GL_INVALID_ENUM` on an empty attachment (`fbo.c:1166-1182`);
-  - **framebuffer objects:** 32 bpp, internal type 8, not multisampled
-    (`job.c:553`, `:568`); their tile size comes from the target count
-    alone (`fbo.c:1016-1019`) and their tile pools are sized for 32x32
-    tiles at the smallest (`fbo.c:970-978`); one of size 0 cannot be drawn
-    (`fbo.c:1020`, `job.c:788-790`); renderbuffers: `DEPTH_COMPONENT16`,
-    `STENCIL_INDEX8`, `DEPTH24_STENCIL8` and the colour formats of GLES2
-    (`fbo.c:153-171`), no `DEPTH_COMPONENT24`, which ES 3.0 requires;
+    `GL_INVALID_ENUM` on an empty attachment (`fbo.c:1297-1313`);
+  - **framebuffer objects:** each target 32 bpp of internal type 8 or, for
+    a half-float one, 64 bpp of type 16F, clamped never
+    (`TileRenderingModeCFGColorEach`, `job.c:602-627`), the clear colour in
+    parts 1 and 2 (`clear_colors`, `:482-501`); never multisampled; tiles
+    and pools follow Mesa for 32- and 64-bit targets, down to 32x16
+    (`fbo.c:1097-1116`, pools at `:1050-1060`); no 128-bit, integer or sRGB
+    targets, no part 3 clear colour but for a UIF pad; one of size 0 cannot
+    be drawn (`fbo.c:1117`, `job.c:847-849`); renderbuffers:
+    `DEPTH_COMPONENT16`, `STENCIL_INDEX8`, `DEPTH24_STENCIL8`, the colour
+    formats of GLES2 and the four half-float ones (`fbo.c:166-193`), no
+    `DEPTH_COMPONENT24`, which ES 3.0 requires; `glReadPixels` reads a
+    half-float target as clamped bytes only (`read_half`,
+    `texture.c:1841`; a deviation in `ogles2.doc`, `:193-195`);
   - **blending:** one blend state and one `BLEND_CFG` for all render targets
-    (`BLEND_ENABLES 0x0F`, `draw.c:1258-1264`);
+    (`BLEND_ENABLES 0x0F`, `draw.c:1266-1272`);
   - **clear and blend colours** are clamped to 0-1 when set
     (`state.c:157-160`, `:435`); clears the tile buffer cannot do
-    (scissored, masked, mid-frame) draw with built-in programs compiled for
-    RGBA8 targets (`draw.c`'s built-in image, `clear_mrt_v3dp.h`);
+    (scissored, masked, mid-frame) and `glCopyTex*` on the GPU draw with
+    built-in programs (`draw.c`'s built-in image, `clear_mrt_v3dp.h`,
+    `copy_tex_v3dp.h`), whose variants serve 8-bit and 16F targets alike
+    (Mesa's key does not change for 16F);
   - **textures:** texture and sampler records are cached in the texture and
-    reused while its parameters are unchanged (`texture.c:2578-2587`);
+    reused while its parameters are unchanged (`texture.c:2762-2771`);
     completeness measures the mip chain from level 0 (`complete`,
-    `:1148-1168`); 32-bit float and depth textures with linear filters are
-    sampled nearest, a GLES2 deviation (`:2662`); ES 3.0 makes such a
+    `:1150-1170`); 32-bit float and depth textures with linear filters are
+    sampled nearest, a GLES2 deviation (`:2846`); ES 3.0 makes such a
     texture incomplete instead, except a depth texture with compare mode on
     (§3.8.13 of the specification);
   - **queries** answer at most 8 values (`state.c:544`), which ES3's
     compressed format list (15) exceeds;
   - **jobs:** renders into framebuffer objects are left running while the
-    next job is built (`may_defer`, `job.c:694-700`); no cache clean after
+    next job is built (`may_defer`, `job.c:753-759`); no cache clean after
     a job (only invalidation before one, `v3d_invalidate_caches`); no CSD
     code or registers;
   - **CPU and GPU memory:** CPU reads of memory the GPU wrote happen only
@@ -491,14 +503,15 @@ Mesa's driver, so they could follow later as an extension
     before tests, since a package's `libs` are added after the system's, §2),
     so the regression packages run unchanged; packages of this work also put
     their `libs` first (`Assign LIBS: <package>:libs SYS:Libs`, the old
-    assignment restored afterwards) and flush the library first
+    assignment restored afterwards; never a bare `Assign LIBS:`, which
+    removes the assign, `CONTRIBUTING.md`) and flush the library first
     (`Avail FLUSH`);
   - the GLES2 regression set runs unchanged at each stage's end, as at 1.3's
     release: dEQP-GLES2 (`m7-1`, 17,165 cases), `m5-1`, the corpus `m2-5`,
     `m6-6`, `m6-8`, `m6-10`, SDL `m6-3`/`m6-4`, glmark2 `m6-7`, `m7-2`,
     `m7-3`, `m7-4`, Quake III `m6-5`, the examples, and gl4es `m6-1` and
     Quake III through gl4es `m6-2` (gl4es compiles its shaders at run time,
-    so stage A's variant path meets it first, and it looks for four of
+    so stage A's variant path meets it first, and it looks for three of
     2.0's extensions);
   - **speed:** Quake III's timedemo (80.4 fps at 1.3) and glmark2's score
     (242) are measured at each stage's end against 1.x on the same day; a
@@ -659,7 +672,7 @@ contexts as that extension (the 2.0 release).
    ES 3.x; transform feedback writes 32-bit words; indirect commands are
    read on the CPU, stage D item 3), so the copy is the CPU copy swapped
    per 32-bit word; the data cache clean before every submission
-   (`clean_all`, `job.c:621-624`, called at `:823`) covers it, as it covers
+   (`clean_all`, `job.c:680-683`, called at `:882`) covers it, as it covers
    every block the CPU writes for the GPU now. 16- and 8-bit data
    (indices, vertex attributes) would be
    scrambled by that swap; they keep going through the converted copies.
@@ -716,9 +729,9 @@ contexts as that extension (the 2.0 release).
    never gives them to the hardware; whether it could read them is
    unverified). The current values of disabled attributes become typed
    (float, int or uint, as the last `glVertexAttrib*` call gave them):
-   `constant_attrib`'s record (`draw.c:786-800`) gets the INT type with
+   `constant_attrib`'s record (`draw.c:794-808`) gets the INT type with
    "read as int/uint" and the raw words for an integer one; and
-   `default_attribs`' block (`:600-616`), which supplies components an
+   `default_attribs`' block (`:608-624`), which supplies components an
    array lacks, gives an integer input slot the integer 1 in w (Mesa does
    the same, `v3dx_state.c:440-456`), which makes that block per program
    rather than per control list.
@@ -729,7 +742,7 @@ contexts as that extension (the 2.0 release).
    block map names (§3).
 7. **Sampler objects** (`glGenSamplers`, ...): the sampler state record per
    unit from the sampler object when one is bound (`ogles2_texture_state`).
-   The texture's cached records (`texture.c:2578-2587`) are keyed on the
+   The texture's cached records (`texture.c:2762-2771`) are keyed on the
    bound sampler object and its version too; filters, completeness and the
    forced-nearest rule read the sampler's parameters, not the texture's
    (dEQP-GLES3's `samplers` draws with a sampler, unbinds it and draws
@@ -772,17 +785,21 @@ contexts as that extension (the 2.0 release).
 10. **Render targets beyond 8 bits:** 16- and 32-bit float, integer, sRGB.
     - Per format the render target's internal type, bpp and clamp, the tile
       size from the largest bpp, the render-target count and MSAA
-      (`v3d_choose_tile_size`; `fbo.c`'s choice from the target count alone
-      goes), tile pools sized from the job's actual tile size (`fbo.c`'s are
-      sized for 32x32 tiles at the smallest, and two RGBA32F targets give
-      32x16, three or four 16x16), and the clear colour in up to three
-      packets (Appendix B.3; `job.c`'s `build_render_fbo`).
+      (`v3d_choose_tile_size`), tile pools sized from the job's actual tile
+      size, and the clear colour in up to three packets (Appendix B.3;
+      `job.c`'s `build_render_fbo`). GitHub issue 5 did this for 8-bit and
+      16F targets: per target bpp, type and clamp
+      (`TileRenderingModeCFGColorEach`), parts 1 and 2, Mesa's tiles down to
+      32x16 and pools for them (`fbo.c:1097-1116`). Left: 128-bit targets
+      (part 3; two RGBA32F targets give 32x16 tiles, three or four 16x16,
+      and MSAA two steps more, so the pools and the tile table go further),
+      the integer and sRGB internal types and their clamps, MSAA.
     - Renderable formats (`fbo.c`): the ES 3.0 colour formats,
-      `EXT_color_buffer_float` in ES3 contexts, `EXT_color_buffer_half_float`
-      and `EXT_sRGB` in GLES2 contexts, and the R8 and RG8 targets
-      `EXT_texture_rg` makes renderable; renderbuffers in the sized ES 3.0
-      formats, `DEPTH_COMPONENT24` (also as `OES_depth24` in GLES2
-      contexts) and `DEPTH_COMPONENT32F` among them.
+      `EXT_color_buffer_float` in ES3 contexts, `EXT_sRGB` in GLES2 contexts
+      (`EXT_color_buffer_half_float` is there since issue 5), and the R8 and
+      RG8 targets `EXT_texture_rg` makes renderable; renderbuffers in the
+      sized ES 3.0 formats, `DEPTH_COMPONENT24` (also as `OES_depth24` in
+      GLES2 contexts) and `DEPTH_COMPONENT32F` among them.
     - **Blending as Mesa does it** (Appendix B.3): when every bound colour
       target can be blended in the tile buffer (internal types 8 and 16F),
       the tile buffer blends, through the `BLEND_ENABLES` mask and a
@@ -799,11 +816,15 @@ contexts as that extension (the 2.0 release).
       only for fixed-point targets, as Mesa does (`clear.c`,
       `blend.c:771-791`, `get.c:1164-1172`), not when set as now; clears the
       tile buffer cannot do and the blit's textured quad (item 11) draw with
-      built-in programs **precompiled for every target kind** (8-bit, 16F,
-      32F, signed and unsigned integer, depth), since no compiler may be
-      present, with the occlusion counter off while they draw.
+      built-in programs **precompiled for every target kind** (8-bit and 16F
+      share variants; 32F, signed and unsigned integer and depth need their
+      own), since no compiler may be present, with the occlusion counter off
+      while they draw; `glCopyTex*`'s program (`copy_tex_v3dp.h`) as well,
+      for copies into the new formats.
     - `glReadPixels` from every target, with each format's
-      `GL_IMPLEMENTATION_COLOR_READ_FORMAT` and `_TYPE`.
+      `GL_IMPLEMENTATION_COLOR_READ_FORMAT` and `_TYPE`: in ES3 contexts a
+      float target reads as `GL_FLOAT` (half-float ones as clamped bytes
+      only in 1.3, `read_half`).
 11. **Framebuffers:** separate draw and read framebuffer bindings
     (`GL_DRAW_FRAMEBUFFER`, `GL_READ_FRAMEBUFFER`), `glBlitFramebuffer` in
     Mesa's `v3d_blit` order (`v3d_tlb_blit_fast`, `v3d_tfu_blit`,
@@ -813,7 +834,7 @@ contexts as that extension (the 2.0 release).
     `glInvalidateSubFramebuffer` (as `EXT_discard_framebuffer`),
     `glReadBuffer`, `glDrawBuffers`, `glFramebufferTextureLayer`, the
     `GL_DEPTH_STENCIL_ATTACHMENT` point, ES 3.0's attachment queries
-    (`fbo.c:1166-1182`: the default framebuffer's `GL_BACK`, `GL_DEPTH` and
+    (`fbo.c:1297-1313`: the default framebuffer's `GL_BACK`, `GL_DEPTH` and
     `GL_STENCIL`; on an empty attachment `OBJECT_NAME` 0 and
     `GL_INVALID_OPERATION` for the rest; the new `*_SIZE`, `COMPONENT_TYPE`,
     `COLOR_ENCODING` and `TEXTURE_LAYER` names; dEQP-GLES3's
@@ -980,7 +1001,7 @@ does; **release 2.1** with ES 3.0 contexts.
      buffer and image bits (`v3d_context.c:94-114`).
    - **Image stores mark the texture's RAM copy stale** per level and layer,
      as rendering into a texture does now (`texture.c`'s `rendered`, set
-     from `fbo.c:1069-1083`), so renaming, `glGenerateMipmap` and partial
+     from `fbo.c:1166-1180`), so renaming, `glGenerateMipmap` and partial
      uploads never use stale texels.
    - **No MMU:** the V3D's MMU is unused (`v3d_regs.h:191-194`), so a store
      outside its buffer or image lands in AmigaOS memory. ES 3.1 programs'
@@ -1042,7 +1063,7 @@ does; **release 2.1** with ES 3.0 contexts.
    its size and samples from the default parameters, has one render target
    and stores none (`STORE_TILE_BUFFER_GENERAL` with buffer NONE, as Mesa,
    `v3dx_rcl.c:314-321`); today such a framebuffer cannot be drawn
-   (`fbo.c:1020`, `job.c:788-790`; dEQP-GLES31's 72 `fbo.no_attachments`
+   (`fbo.c:1117`, `job.c:847-849`; dEQP-GLES31's 72 `fbo.no_attachments`
    cases).
 7. **dEQP-GLES31's must-pass lists** on the A1200 (package `m8-3`),
    `gles31-main` and `gles31-multisample`; the ES 3.2 extensions' groups
@@ -1068,7 +1089,7 @@ GLES3 do; `GL_VERSION` "OpenGL ES 3.1 ogles2.library 2.2"; **release 2.2**.
 | ES3 programs' files reach a 1.x or older 2.x library | wrong drawing | format 2: 1.x refuses them at the header; 2.x readers refuse unknown feature bits (§3) |
 | Cached files from an older compiler | a built-in limit compiled with an old value | the installer clears `OGLES2Cache:` when the compiler's output changes (§3) |
 | Texture memory: 1.3 keeps a RAM copy of every level (`texture.c`'s `shadow`, for `glGenerateMipmap` and renaming) | 3D and array textures take twice their size, in RAM and GPU memory | measured in stage B; immutable textures (`glTexStorage*`) may drop the copy where nothing needs it |
-| Library and compiler size, memory | a bigger `ogles2.library` (229,924 bytes at 1.3); a `v3dglslc` above today's 19 MB | measured per stage |
+| Library and compiler size, memory | a bigger `ogles2.library` (239,872 bytes at 1.3 with GitHub issue 5); a `v3dglslc` above today's 19 MB | measured per stage |
 | A 2.x library with a 1.x compiler in `LIBS:` | no ES3 shaders | the info log says so; `Install-ogles2` replaces the compiler with the library (§3); GLES2 programs served as by 1.3 |
 | GLES2 regressions from shared code (`job.c`, `draw.c`, `buffer.c`, `texture.c`, `fbo.c`, the reader) | breaks released programs | the GLES2 regression set at each stage's end; `main` stays releasable |
 | dEQP-GLES3/31 on a big-endian CPU | false failures from dEQP itself | the GLES2 port needed three big-endian fixes in dEQP (patches 0001-0003: delibs' CPU, the ETC1 `.pkm` loader, the point-size check's pixel read); the GLES3 and GLES31 modules use more of the framework (texture formats, ETC2 and EAC references, buffer read-backs), so failures are checked for that cause before the library is blamed, and fixes join `ports/deqp/patches` |
@@ -1101,9 +1122,8 @@ B's first dEQP runs: `amictld`'s large-reply stall (§3).
 - The release split (§1): 2.0 after B with GLES2 extensions, ES3 contexts in
   2.1 after C, ES 3.1 in 2.2 (recommended: stage A and B's changes to
   shared code reach users while they are still small to bisect, gl4es gains
-  `EXT_texture_rg`, `OES_depth24`, `EXT_frag_depth` and, with its
-  `floattex` option, `EXT_color_buffer_half_float`, and no half ES 3.0 is
-  ever offered; format 2 is not frozen before 2.1); or one release after
+  `EXT_texture_rg`, `OES_depth24` and `EXT_frag_depth`, and no half ES 3.0
+  is ever offered; format 2 is not frozen before 2.1); or one release after
   C, which is then 2.0, and what this plan says of 2.0 and 2.1 applies to
   it.
 - `EXT_occlusion_query_boolean` and `EXT_shadow_samplers` in GLES2 contexts:
@@ -1350,60 +1370,68 @@ search for.
 ### B.2 The library: where each change lands
 
 - **Context and queries:** `known_tag` (`context.c:22-45`, unknown tags
-  logged at `:84-87`), `ogles2_glGetString` (`:295-324`),
-  `ogles2_unimplemented` (`:329`); limits in `state.c`'s `lookup`
+  logged at `:84-87`), `ogles2_glGetString` (`:297-327`),
+  `ogles2_unimplemented` (`:332`); limits in `state.c`'s `lookup`
   (`:546-790`, at most 8 values, `struct value` at `:544`), then
-  `ogles2_texture_query` (`texture.c:677-700`), `ogles2_buffer_query`,
-  `ogles2_fbo_query` (`fbo.c:1203`); clear and blend colours clamped at
+  `ogles2_texture_query` (`texture.c:679-702`), `ogles2_buffer_query`,
+  `ogles2_fbo_query` (`fbo.c:1337`); clear and blend colours clamped at
   `state.c:157-160`, `:435`; defines in `ogles2_internal.h`
   (`OGLES2_MAX_VERTEX_ATTRIBS` 16, `_TEXTURE_UNITS` 32, `_STAGE_SAMPLERS` 16,
   `_DRAW_BUFFERS` 4, `_IMAGE_ATTRIBS` 64); `struct OGLES2Context`
-  (`ogles2_internal.h:436-524`; `share_lock` must stay at offset 4);
+  (`ogles2_internal.h:437-528`; `share_lock` must stay at offset 4);
   `struct OGLES2Share` (`:58-72`). `OGLES2_CCT_PISTORM_MIN + 6` is free
   (`include/libraries/ogles2.h:68`).
-- **Draws** (`draw.c`): `ogles2_glDrawArrays` (`:1702`), `draw_elements`
-  (`:1735`), the core `draw_arrays` (`:1437-1655`: variant choice
-  `:1456-1527`, uniform upload `write_uniforms` `:485-556`, `ubo_copies`
-  `:354` (the default block's little-endian copy for `QUNIFORM_UBO_ADDR`
-  unit 0), `spill_area` `:381`, `texture_states` `:454`), the attribute
-  record `attr_record` (`:809-818`: divisor bytes always 0, "read as
-  int/uint" never set), `copy_array` (`:736`, float, fixed, short, byte),
-  `constant_attrib` (`:786-800`), `default_attribs` (`:600-616`),
-  `shader_record` (`:823-889`), `emit_state` (`:1082-1316`: one
-  `BLEND_ENABLES 0x0F` and `BLEND_CFG` at `:1258-1264`; the "zero all"
+- **Draws** (`draw.c`): `ogles2_glDrawArrays` (`:1710`), `draw_elements`
+  (`:1743`), the core `draw_arrays` (`:1445-1663`: variant choice
+  `:1464-1535`, uniform upload `write_uniforms` `:493-564`, `ubo_copies`
+  `:362` (the default block's little-endian copy for `QUNIFORM_UBO_ADDR`
+  unit 0), `spill_area` `:389`, `texture_states` `:462`), the attribute
+  record `attr_record` (`:817-826`: divisor bytes always 0, "read as
+  int/uint" never set), `copy_array` (`:744`, float, fixed, short, byte),
+  `constant_attrib` (`:794-808`), `default_attribs` (`:608-624`),
+  `shader_record` (`:831-897`), `emit_state` (`:1090-1324`: one
+  `BLEND_ENABLES 0x0F` and `BLEND_CFG` at `:1266-1272`; the "zero all"
   flat, non-perspective and centroid packets, transform feedback specs off
-  and occlusion counter 0 at `:1297-1302`), `draw_packets` (`:1334`:
+  and occlusion counter 0 at `:1305-1310`), `draw_packets` (`:1342`:
   `VERTEX_ARRAY_PRIMS` from vertex 0 or `INDEX_BUFFER_SETUP` +
   `INDEXED_PRIM_LIST`, restart off); the indices are scanned for their range
-  (`:1787-1829`) and copied rebased to the lowest one, 16- and 32-bit
-  swapped (`:1593-1617`). The command writers exist only for some packets
+  (`:1795-1837`) and copied rebased to the lowest one, 16- and 32-bit
+  swapped (`:1601-1625`). The command writers exist only for some packets
   (`v3dcore/include/v3d_commands.h`); the opcodes of the instanced,
   indirect, base vertex, transform feedback and occlusion packets are in
   `v3d_hw.h`.
-- **Jobs** (`job.c`): `ogles2_job_begin` (`:175-251`, the tile size at
-  `:211-212`, `TileBinningModeCfg` with 32 bpp), `ogles2_job_clear`
-  (`:261-287`, the colour packed to 8 bits), `build_render` for the default
-  framebuffer (`:290-429`) and `build_render_fbo` (`:472-600`: 32 bpp, type
-  8, no MSAA, clear colour part 1 only), `may_defer` and `take_gpu`
-  (`:694-737`), `ogles2_job_flush` (`:748-948`; a framebuffer object
-  without GPU memory drops the job at `:788-790`), the depth/stencil save
-  across flushes `zs_save` (`:115-161`).
+- **Jobs** (`job.c`): `ogles2_job_begin` (`:175-258`, the tile size at
+  `:210-219`, from the framebuffer object's target; `TileBinningModeCfg` with
+  its bpp, `:238`), `ogles2_job_clear` (`:268-297`, the colour packed to 8
+  bits, and kept as floats for a 16F target), `build_render` for the default
+  framebuffer (`:300-439`) and `build_render_fbo` (`:514-659`: per target
+  32-bit type 8 or 64-bit 16F, `TileRenderingModeCFGColorEach` at `:627`; no
+  MSAA; `clear_colors`, parts 1 and 2, `:482-501`), `may_defer` and `take_gpu`
+  (`:753-796`), `ogles2_job_flush` (`:807-1007`; a framebuffer object without
+  GPU memory drops the job at `:847-849`), the depth/stencil save across
+  flushes `zs_save` (`:115-161`).
 - **Textures and framebuffers:** `struct OGLES2Texture` (`texture.c:58-92`),
-  `OGLES2TexState` (`:99-109`, 2D, cube and rectangle units only), the
-  copy classes (`:714-718`), `complete` (`:1148-1168`), `storage_of`
-  (`:1186-1244`), `pack`/`pack_wide`, `ogles2_texture_state`
-  (`:2557-2713`: the record cache at `:2578-2587`, no wrap R, compare
+  `OGLES2TexState` (`:99-110`, 2D, cube and rectangle units only), the
+  copy classes (`:716-720`), `complete` (`:1150-1170`), `storage_of`
+  (`:1188-1246`), `pack`/`pack_wide`, `ogles2_texture_state`
+  (`:2741-2897`: the record cache at `:2762-2771`, no wrap R, compare
   fixed to NEVER, 32-bit float and depth textures forced to nearest at
-  `:2662`, `unfilterable_type`), renaming `before_change` (`:229-272`), the
+  `:2846`, `unfilterable_type`), renaming `before_change` (`:231-274`), the
   `rendered` mark of a level drawn into (`:53`, set from
-  `fbo.c:1069-1083`), the TFU path `store_tfu` (`:1503-1529`), ETC1 decode
-  (`:2252-2288`), `tex_image` (2D, rectangle and cube only, `:1915`),
-  `ogles2_texture_renderable` (`:1701-1716`: RGBA8, 565, 4444, 5551);
+  `fbo.c:1166-1180`), the TFU path `store_tfu` (`:1517-1543`), ETC1 decode
+  (`:2436-2472`), `tex_image` (2D, rectangle and cube only, `:2072`),
+  `ogles2_texture_renderable` (`:1718-1734`: RGBA8, 565, 4444, 5551, and
+  half-float RGBA), `ogles2_texture_half` (`:1736`), `read_half` (`:1841`),
+  the scratch texture for copies from the default framebuffer
+  (`ogles2_texture_scratch`, `:1930`); `copy.c` (`glCopyTex*` on the GPU),
+  `ogles2_draw_copy` (`draw.c:1951`), the context's own framebuffer object
+  for copies (`ogles2_fbo_copy_target`, `fbo.c:312`);
   `fbo.c`: `struct OGLES2Renderbuffer`/`Attachment`/`Framebuffer`
-  (`:57-88`), renderbuffer formats (`:153-171`), `status_of` (`:798-839`),
-  `ogles2_fb_update` (`:858`), the pools (`:970-978`), `ogles2_fbo_target`
-  (`:997`; tile size at `:1016-1019`, size 0 refused at `:1020`), the
-  attachment queries (`:1166-1182`).
+  (`:69-100`), renderbuffer formats (`:166-193`), `status_of` (`:878-919`),
+  `ogles2_fb_update` (`:938`), the pools (`:1050-1060`), `ogles2_fbo_target`
+  (`:1079`; the widest target and the tile size at `:1097-1116`, size 0
+  refused at `:1117`), the attachment queries (`:1297-1313`; component type
+  at `:1247`).
 - **Buffers** (`buffer.c`): `struct OGLES2Buffer` (`:56-66`, `data` in the
   68k's byte order, `copy[8]`), `glDeleteBuffers` (`:215-237`), the target
   and usage checks (`:256`, `:293`, `:297`, `:390`, `:426`, `:461`, `:479`,
@@ -1429,7 +1457,7 @@ search for.
 - **GPU** (`v3dcore/hw/`): the lock (`v3d_gpu_lock.c`), binning and render
   submission with bounded waits (`v3d_submit_timeout.c`; the queue registers
   in `v3d_hw.c:89-118`; 8-bit frame counters), `v3d_invalidate_caches`
-  (`v3d_hw.c:16-36`, before binning and rendering, `job.c:824`, `:855`), the
+  (`v3d_hw.c:16-36`, before binning and rendering, `job.c:883`, `:914`), the
   TFU's `run` (`v3d_tfu.c:107-136`), memory from `AllocVec` with bus address
   = CPU address, aligned to 64 bytes (`v3d_mem_allocvec.c:45`, `:81-98`; no
   MMU: its registers are defined but unused, `v3d_regs.h:191-194`),
@@ -1442,10 +1470,10 @@ search for.
   `L2TFLS | FLM_CLEAN` (0x5) raw 0x05000000, and reads of it are compared
   the same way (derived from the existing constant; checked on the A1200
   in stage D). **CPU caches:** `CachePreDMA` or `CacheClearE` after the CPU
-  writes what the GPU reads (`job.c:95`, `:623`, `draw.c:215`, `:780`,
-  `texture.c:1514`), and `CachePostDMA` before the CPU reads what the GPU
-  wrote (`display.c:439`, `:460`, `texture.c:1527`). **Job serials:**
-  `OGLES2LibBase->serial`, handed out per job (`job.c:241-243`), unique
+  writes what the GPU reads (`job.c:95`, `:682`, `draw.c:219`, `:788`,
+  `texture.c:1528`), and `CachePostDMA` before the CPU reads what the GPU
+  wrote (`display.c:439`, `:460`, `texture.c:1541`). **Job serials:**
+  `OGLES2LibBase->serial`, handed out per job (`job.c:248-250`), unique
   across contexts.
 - **Generator:** `gen/gen_ogles2.py` (`read_gl`, `resolve_order`
   `:141-164`, which exits when `abi_order.txt` lacks an entry unless
@@ -1456,9 +1484,9 @@ search for.
   compiled-in `OGLES2_VERSION`, the ABI and size checks at `:60`).
 - **Release:** `build_release.sh` (`VERSION` `:42`; the SDK from `include/`
   and the generated headers), `Install-ogles2` (the library `:20-33`, the
-  compiler `:38-53`), `ogles2.doc` (EXTENSIONS `:73`, LIMITS `:96`,
-  deviations `:165`, `OGLES2Open` and `OGLES2_VERSION` `:189-221`,
-  `aglCreateContext2` `:244`), `OGLES2_LIB_VERSION` and `_REVISION`
+  compiler `:38-53`), `ogles2.doc` (EXTENSIONS `:73`, LIMITS `:113`,
+  deviations `:183`, `OGLES2Open` and `OGLES2_VERSION` `:210-242`,
+  `aglCreateContext2` `:265`), `OGLES2_LIB_VERSION` and `_REVISION`
   (`ogles2_internal.h:21-23`).
 
 ### B.3 The GPU for ES 3.0 (Mesa's V3D driver, version 42)
