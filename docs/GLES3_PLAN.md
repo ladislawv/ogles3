@@ -446,14 +446,16 @@ Mesa's driver, so they could follow later as an extension
   Mesa commit with the same changes, configured afresh with its own prefix
   (`meson setup` as `dev/host-setup/build_mesa.sh:24` does, with
   `~/mesa-install-gles3`), not a copy (`build.ninja` holds absolute paths
-  into the tree it was made in). The changes are uncommitted edits in
-  `~/mesa-build/mesa` that no script applies (patches 0001-0014 of
-  `tools/v3dglslc/patches/` and `dev/host-setup/patch_drmshim.sh`'s
-  `memfd_create` fallback for WSL1), so `git -C ~/mesa-build/mesa diff`,
-  applied to the new tree with `git apply`, carries exactly them; stage A's
-  own patch is then 0015. `build_host.sh` (`M=`, `build =`) and `replay.py`
-  (`MESA_BUILD`, which `build_m68k.sh` uses too) take its path from a
-  variable set in `local.env`.
+  into the tree it was made in). The compiler's Mesa changes, patches
+  0001-0014 of `tools/v3dglslc/patches/`, are applied by
+  `dev/host-setup/apply_mesa_patches.sh <tree>` (added 2026-10-21: before
+  it no script applied them, and `~/mesa-build/mesa` held them as
+  uncommitted edits; on a clean checkout of the pinned commit it gives that
+  tree's changes exactly), on WSL1 with `patch_drmshim.sh`'s
+  `memfd_create` fallback as well; stage A's own patch is then 0015.
+  `build_host.sh` (`M=`, `build =`) and `replay.py` (`MESA_BUILD`, which
+  `build_m68k.sh` uses too) take its path from a variable set in
+  `local.env`.
 - **`.v3dp` format 2 for ES 3.x programs.**
   - **Why a major version:** a 1.x reader skips unknown sections and accepts
     any minor version, so an ES3 program's file read by 1.x would draw

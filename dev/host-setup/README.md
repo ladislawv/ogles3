@@ -9,6 +9,7 @@ Scripts that set up the build machine described in §2.4 of [`docs/DEVELOPMENT_P
 | `clib2-ndk32.patch` | Lets adtools clib2 `master` (`c026659`) build against the NDK 3.2 headers amiga-gcc now ships: an invalid `##` paste in the constructor macros, `<time.h>`'s `tv_sec` macro clashing with NDK 3.2's `struct timeval`, and a missing `IntuitionBase` declaration. Applied to GCC 6 only; under GCC 16 clib2's inline asm no longer compiles. |
 | `pthread-timersub.patch` | Adds the BSD `timersub` macro to amiga-gcc's libpthread. Without it GCC 6 leaves `_timersub` unresolved, and GCC 16 stops, which also skips libgcc and libstdc++. |
 | `build_mesa.sh` | Builds Mesa at the pinned commit `74b6971` with the gallium `v3d` driver, the v3d drm-shim and llvmpipe into `~/mesa-install`. |
+| `apply_mesa_patches.sh` | Applies `tools/v3dglslc/patches/*.patch` (the compiler's Mesa changes) in order to a Mesa tree, `~/mesa-build/mesa` by default; skips a patch already applied. Run after `build_mesa.sh`, then rebuild the tree (`ninja -C ~/mesa-build/mesa/build install`). |
 | `patch_drmshim.sh`, `drm-shim-wsl1.patch` | WSL1 has no `memfd_create`, which drm-shim needs. The patch falls back to an unlinked temporary file. Test tooling only. |
 | `build_emu68.sh` | Builds Emu68 (default `v1.1.0-beta.1`, the test machine's version) for PiStorm into `~/emu68/`. Emu68 is big-endian AArch64: copy `stubs-lp64.h` to `stubs-lp64_be.h` in `/usr/aarch64-linux-gnu/include/gnu/` first, as Emu68's README says. Packages are listed in the script. |
 | `build_vbcc.sh` | Installs vbcc 0.9h patch 2 (m68k-amigaos target), vasm 1.9 and vlink 0.17 into `~/vbcc` (checksums in the script), for the vbcc client test (`make vbcc`, plan §6.3). Uses the GCC 6 toolchain's NDK 3.2 headers, so it runs after `build_toolchains.sh`. vbcc is free for non-commercial use. |
@@ -25,7 +26,7 @@ apt-get install make wget curl git gcc g++ lhasa libgmp-dev libmpfr-dev libmpc-d
   libxshmfence-dev libxxf86vm-dev libwayland-dev wayland-protocols libwayland-egl-backend-dev glslang-tools \n  libegl-dev libgles-dev libegl-mesa0 libgl1-mesa-dri
 ```
 
-Order: prerequisites, then `build_tools.sh`, `build_toolchains.sh` and `build_mesa.sh` (independent, can run together; the toolchains take the longest, a few hours), then `patch_drmshim.sh` and `run_shimtest.sh`; `build_vbcc.sh` after the toolchains. The last four packages are for the corpus's reference renders (`tests/corpus`, Mesa llvmpipe through EGL).
+Order: prerequisites, then `build_tools.sh`, `build_toolchains.sh` and `build_mesa.sh` (independent, can run together; the toolchains take the longest, a few hours), then `apply_mesa_patches.sh`, `patch_drmshim.sh` and `run_shimtest.sh`; `build_vbcc.sh` after the toolchains. The last four packages are for the corpus's reference renders (`tests/corpus`, Mesa llvmpipe through EGL).
 
 Installed and verified on 2026-10-09/10 (`~/toolchain-build/summary.log`):
 
