@@ -20,7 +20,10 @@
  * glGetString's GL_VERSION (context.c) names the same revision. */
 #define OGLES2_LIB_VERSION  1
 #define OGLES2_LIB_REVISION 3
-#define OGLES2_LIB_DATE     "13.10.2026"
+#define OGLES2_LIB_DATE     "21.10.2026"
+/* the release's name (its archives, release/build_release.sh): a release may
+   rebuild a library without a new version.revision */
+#define OGLES2_RELEASE      "1.3.1"
 
 struct OGLES2Library
 {
@@ -391,6 +394,8 @@ struct OGLES2Display
     struct RastPort rastport;       /* window mode: ClipBlit source over bitmap */
     UWORD width, height;
     BOOL own_screen, own_window, own_bitmap, vsync;
+    BOOL direct;                    /* window mode, the window its private screen's whole size:
+                                     * bitmap is the screen's, no copy (display.c) */
     int rb_swap;                    /* 1: BGRA32 target, 0: RGBA32 */
     APTR lock;                      /* cybergraphics bitmap lock, one frame long */
     ULONG bprow, base;              /* valid while locked */
