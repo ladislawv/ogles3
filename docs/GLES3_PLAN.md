@@ -182,7 +182,8 @@ Mesa's driver, so they could follow later as an extension
   stamp (`$V3DGLSLC-STAMP:`, `v3dglslc.c:62`) but no `$VER:` string.
 - **Library:** the GLES 2.0 core, 33 extensions, 164 dispatch entries,
   `GL_VERSION` "OpenGL ES 2.0 ogles2.library 1.3", library version 1
-  (`lib_Version`), dispatch ABI 1, 239,872 bytes (the rebuilt 1.3). Share
+  (`lib_Version`), dispatch ABI 1, 240,312 bytes (release 1.3.1, the same
+  library version). Share
   groups (`OGLES2_CCT_SHARE_WITH`, `share.c`) hold textures, buffers, shaders
   and programs, and renderbuffers. Already covering parts of ES 3.0: several
   render targets (`EXT_draw_buffers`), float, half-float and depth textures
@@ -230,7 +231,7 @@ Mesa's driver, so they could follow later as an extension
     and pools follow Mesa for 32- and 64-bit targets, down to 32x16
     (`fbo.c:1097-1116`, the pools at `:1035-1077`); no 128-bit, integer or sRGB
     targets, no part 3 clear colour but for a UIF pad; one of size 0 cannot
-    be drawn (`fbo.c:1117`, `job.c:847-849`); renderbuffers:
+    be drawn (`fbo.c:1117`, `job.c:848-850`); renderbuffers:
     `DEPTH_COMPONENT16`, `STENCIL_INDEX8`, `DEPTH24_STENCIL8`, the colour
     formats of GLES2 and the four half-float ones (`fbo.c:166-190`), no
     `DEPTH_COMPONENT24`, which ES 3.0 requires; `glReadPixels` reads a
@@ -254,7 +255,7 @@ Mesa's driver, so they could follow later as an extension
   - **queries** answer at most 8 values (`state.c:544`), which ES3's
     compressed format list (15) exceeds;
   - **jobs:** renders into framebuffer objects are left running while the
-    next job is built (`may_defer`, `job.c:749-759`); no cache clean after
+    next job is built (`may_defer`, `job.c:749-760`); no cache clean after
     a job (only invalidation before one, `v3d_invalidate_caches`); no CSD
     code or registers;
   - **CPU and GPU memory:** CPU reads of memory the GPU wrote happen only
@@ -614,7 +615,7 @@ The base everything else stands on.
    (`mat2x3` ... `mat4x3`: their columns, as the writer already stores every
    matrix's column mask, `v3dp_writer.c:473-489`); every sampler type of GLSL
    ES 3.00 as a uniform (`type_shape` and `ogles2_sampler_kind`,
-   `ogles2_internal.h:649`, know 2D, cube and rectangle samplers only, and
+   `ogles2_internal.h:654`, know 2D, cube and rectangle samplers only, and
    take the rest for 2D): until stage B item 8 brings their textures, 3D,
    array, shadow and integer samplers read the incomplete texture's (0, 0, 0,
    1); the draw's side of integer samplers (the TMU's integer return; 32 bits
@@ -763,7 +764,7 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    ES 3.x; transform feedback writes 32-bit words; indirect commands are
    read on the CPU, stage D item 3), so the copy is the CPU copy swapped
    per 32-bit word; the data cache clean before every submission
-   (`clean_all`, `job.c:680-683`, called at `:882`) covers it, as it covers
+   (`clean_all`, `job.c:680-683`, called at `:883`) covers it, as it covers
    every block the CPU writes for the GPU now. 16- and 8-bit data
    (indices, vertex attributes) would be
    scrambled by that swap; they keep going through the converted copies.
@@ -1251,7 +1252,7 @@ does; **release 2.1** with ES 3.0 contexts.
    its size and samples from the default parameters, has one render target
    and stores none (`STORE_TILE_BUFFER_GENERAL` with buffer NONE, as Mesa,
    `v3dx_rcl.c:314-321`); today such a framebuffer cannot be drawn
-   (`fbo.c:1117`, `job.c:847-849`; dEQP-GLES31's 72 `fbo.no_attachments`
+   (`fbo.c:1117`, `job.c:848-850`; dEQP-GLES31's 72 `fbo.no_attachments`
    cases).
 7. **dEQP-GLES31's must-pass lists** on the A1200 (package `m8-3`),
    `gles31-main` and `gles31-multisample`; the ES 3.2 extensions' groups
@@ -1278,7 +1279,7 @@ GLES3 do; `GL_VERSION` "OpenGL ES 3.1 ogles2.library 2.2"; **release 2.2**.
 | ES3 programs' files reach a 1.x or older 2.x library | wrong drawing | format 2: 1.x refuses them at the header; 2.x readers refuse unknown feature bits (§3) |
 | Cached files from an older compiler | a built-in limit compiled with an old value | the installer clears `OGLES2Cache:` when the compiler's output changes (§3) |
 | Texture memory: 1.3 keeps a RAM copy of every level (`texture.c`'s `shadow`, for `glGenerateMipmap` and renaming) | 3D and array textures take twice their size, in RAM and GPU memory | measured in stage B; immutable textures (`glTexStorage*`) may drop the copy where nothing needs it |
-| Library and compiler size, memory | a bigger `ogles2.library` (239,872 bytes at 1.3 with GitHub issue 5); a `v3dglslc` above today's 19 MB | measured per stage |
+| Library and compiler size, memory | a bigger `ogles2.library` (240,312 bytes at 1.3.1); a `v3dglslc` above today's 19 MB | measured per stage |
 | A 2.x library with a 1.x compiler in `LIBS:` | no ES3 shaders | the info log says so; `Install-ogles2` replaces the compiler with the library (§3); GLES2 programs served as by 1.3 |
 | GLES2 regressions from shared code (`job.c`, `draw.c`, `buffer.c`, `texture.c`, `fbo.c`, the reader) | breaks released programs | the GLES2 regression set at each stage's end; `main` stays releasable |
 | dEQP-GLES3/31 on a big-endian CPU | false failures from dEQP itself | the GLES2 port needed three big-endian fixes in dEQP (patches 0001-0003: delibs' CPU, the ETC1 `.pkm` loader, the point-size check's pixel read); the GLES3 and GLES31 modules use more of the framework (texture formats, ETC2 and EAC references, buffer read-backs), so failures are checked for that cause before the library is blamed, and fixes join `ports/deqp/patches` |
@@ -1564,8 +1565,8 @@ search for.
   `state.c:157-160`, `:435`; defines in `ogles2_internal.h`
   (`OGLES2_MAX_VERTEX_ATTRIBS` 16, `_TEXTURE_UNITS` 32, `_STAGE_SAMPLERS` 16,
   `_DRAW_BUFFERS` 4, `_IMAGE_ATTRIBS` 64); `struct OGLES2Context`
-  (`ogles2_internal.h:437-528`; `share_lock` must stay at offset 4);
-  `struct OGLES2Share` (`:58-73`). `OGLES2_CCT_PISTORM_MIN + 6` is free
+  (`ogles2_internal.h:442-533`; `share_lock` must stay at offset 4);
+  `struct OGLES2Share` (`:61-76`). `OGLES2_CCT_PISTORM_MIN + 6` is free
   (`include/libraries/ogles2.h:68`).
 - **Draws** (`draw.c`): `ogles2_glDrawArrays` (`:1710`), `draw_elements`
   (`:1743`), the core `draw_arrays` (`:1445-1663`: variant choice
@@ -1593,8 +1594,8 @@ search for.
   framebuffer (`:300-439`) and `build_render_fbo` (`:514-659`: per target
   32-bit type 8 or 64-bit 16F, `TileRenderingModeCFGColorEach` at `:627`; no
   MSAA; `clear_colors`, parts 1 and 2, `:482-501`), `may_defer` and `take_gpu`
-  (`:749-796`), `ogles2_job_flush` (`:807-1007`; a framebuffer object without
-  GPU memory drops the job at `:847-849`), the depth/stencil save across
+  (`:749-797`), `ogles2_job_flush` (`:808-1008`; a framebuffer object without
+  GPU memory drops the job at `:848-850`), the depth/stencil save across
   flushes `zs_save` (`:115-161`).
 - **Textures and framebuffers:** `struct OGLES2Texture` (`texture.c:58-92`),
   `OGLES2TexState` (`:99-110`, 2D, cube and rectangle units only), the copy
@@ -1625,7 +1626,7 @@ search for.
   (`:351-381`), `glMapBufferOES` (`:455`, write-only, the CPU copy),
   `ogles2_buffer_copy` (`:576-634`).
 - **Programs:** `struct OGLES2Program`, `OGLES2Image`, `OGLES2Variant`
-  (`ogles2_internal.h:178-361`; a variant keeps only `per_vertex_point_size`,
+  (`ogles2_internal.h:181-364`; a variant keeps only `per_vertex_point_size`,
   `is_points`, `is_lines`, `cbufs` of its key); `program_hash`
   (`program.c:677-700`: vertex, fragment, then "BIND"); `load_image`
   (`:913-955`, the lookup that stops at a refused file at `:926`),
@@ -1643,7 +1644,7 @@ search for.
 - **GPU** (`v3dcore/hw/`): the lock (`v3d_gpu_lock.c`), binning and render
   submission with bounded waits (`v3d_submit_timeout.c`; the queue registers
   in `v3d_hw.c:89-118`; 8-bit frame counters), `v3d_invalidate_caches`
-  (`v3d_hw.c:16-36`, before binning and rendering, `job.c:883`, `:914`), the
+  (`v3d_hw.c:16-36`, before binning and rendering, `job.c:884`, `:915`), the
   TFU's `run` (`v3d_tfu.c:107-136`), memory from `AllocVec` with bus address
   = CPU address, aligned to 64 bytes (`v3d_mem_allocvec.c:45`, `:81-98`; no
   MMU: its registers are defined but unused, `v3d_regs.h:191-194`),
@@ -1658,7 +1659,7 @@ search for.
   in stage D). **CPU caches:** `CachePreDMA` or `CacheClearE` after the CPU
   writes what the GPU reads (`job.c:95`, `:682`, `draw.c:219`, `:788`,
   `texture.c:1528`), and `CachePostDMA` before the CPU reads what the GPU
-  wrote (`display.c:439`, `:460`, `texture.c:1541`). **Job serials:**
+  wrote (`display.c:503`, `:524`, `texture.c:1541`). **Job serials:**
   `OGLES2LibBase->serial`, handed out per job (`job.c:248-250`), unique
   across contexts.
 - **Generator:** `gen/gen_ogles2.py` (`read_gl`, `resolve_order`
