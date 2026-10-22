@@ -2,9 +2,10 @@
 
 **Status: plan (2026-10-18; revised eight times, research added and checked
 2026-10-19, every line citation and each stage reviewed for implementation
-the same day), work on branch `gles3`.** Stage A began 2026-10-22: items 1
-and 3 are done, items 2 and 4 in part, all tested on the A1200 (§4, each
-item's "Done" paragraph); items 5-7 and stages B-D are not implemented yet.
+the same day), work on branch `gles3`.** Stage A began 2026-10-22: items 1,
+3 and 4 are done, item 2 but for its `$VER:` string, all tested on the
+A1200 (§4, each item's "Done" paragraph); items 5-7 and stages B-D are not
+implemented yet.
 Its facts were checked against this repository, Mesa at the pinned commit
 (`~/mesa-build/mesa`), Khronos' `gl.xml` (`gen/khronos/`) and extension
 specifications, the Linux kernel's V3D driver (`drivers/gpu/drm/v3d`,
@@ -79,7 +80,7 @@ Mesa's driver, so they could follow later as an extension
     ogles2-m8-1-20261022-212632`). A GLES2 drawing regression: package
     `m7-4` built from this copy's sync build (`B=$BS V=$V bash
     tests/a1200/build_package.sh m7-4`).
-  - **Where to go on:** stage A item 4's `gl_VertexID` numbering, item 5
+  - **Where to go on:** item 5
     (draw-time variants by key, with `V3DGLSL_COMPILE_VARIANT`, the Mesa
     patch 0015 in this work's tree and the `.v3dx` files), item 2's
     `$VER:` string, item 6 (the dEQP port's ES3 context) (§4, each item's
@@ -800,7 +801,18 @@ The base everything else stands on.
    fragment variant changes (`varying_flags`, Mesa's
    `emit_varying_flags`), and a "zero all" packet only where an earlier
    shader of the pass set a kind, so GLES2 programs send nothing new
-   (`m8_draw`'s flat triangle). `gl_VertexID`'s numbering is still to do.
+   (`m8_draw`'s flat triangle). **`gl_VertexID` done (2026-10-22, on the
+   A1200):** a draw whose binning or vertex shader reads it numbers from
+   `first` (`VERTEX_ARRAY_PRIMS`' first index; the indices as given plus
+   the base vertex, written as `index - min + first`), each array's
+   address moved back by `first` elements, a copy from element 0 where
+   that address would leave the memory the GPU reaches; indices that
+   outgrow 8 or 16 bits so are written as 32-bit ones. Other draws are as
+   before. `m8_draw` (`tests/a1200/results/ogles2-m8-1-20261022-222729`, 9
+   of 9): `glDrawArrays` from vertex 3, indices as given, a base vertex, and
+   8-bit indices with base vertex 297; the covering triangle lies only at
+   the vertices each draw names, so a wrong address would draw nothing. The
+   GLES2 drawing tests as before (`ogles2-m7-4-20261022-222739`).
 5. **Draw-time variants by key.** The two special files (`.v3dw`, `.v3da`)
    become one general path, which ES3's states need (integer and float
    render targets, sRGB, multisampled framebuffer objects, transform

@@ -10,6 +10,8 @@
  *          whole triangle, not a blend of the three
  *   block  a uniform block member reads zeros (no buffers before stage B)
  *   size   textureSize of a 16x8 texture, and of its base level 1 (8x4)
+ *   vertex id  gl_VertexID's real numbers: glDrawArrays from vertex 3,
+ *          indices as given, with a base vertex, and past 8-bit indices
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -183,6 +185,58 @@ static void test_size(void)
     glDeleteProgram(p);
 }
 
+/* gl_VertexID's numbers, and the attributes read at them: the covering
+ * triangle lies only at the vertices each draw names (the others far off
+ * screen), so a wrong address draws nothing, a wrong number the wrong
+ * colour. 300 vertices: the last draw's numbers outgrow 8-bit indices. */
+static void test_vertex_id(void)
+{
+    static GLfloat v[300 * 2];
+    static const GLubyte i8[3] = { 0, 1, 2 };
+    static const GLushort i16[3] = { 6, 7, 8 };
+    GLuint p = program("es3vid");
+    GLint pos;
+    int k;
+    if (!p) {
+        check(0, "vertex id: es3vid links");
+        return;
+    }
+    for (k = 0; k < 300; k++) { /* far off screen... */
+        v[2 * k] = 5.0f;
+        v[2 * k + 1] = 5.0f;
+    }
+    for (k = 0; k < 3; k++) { /* ...but at 3-5, 6-8 and 297-299 */
+        int at[3], j;
+        at[0] = 3 + k; at[1] = 6 + k; at[2] = 297 + k;
+        for (j = 0; j < 3; j++) {
+            v[2 * at[j]] = cover[2 * k];
+            v[2 * at[j] + 1] = cover[2 * k + 1];
+        }
+    }
+    pos = glGetAttribLocation(p, "pos");
+    glUseProgram(p);
+    glVertexAttribPointer((GLuint)pos, 2, GL_FLOAT, GL_FALSE, 0, v);
+    glEnableVertexAttribArray((GLuint)pos);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawArrays(GL_TRIANGLES, 3, 3);
+    check(pixel_is(30, 30, 5, 0, 0, 255, 0), "vertex id: glDrawArrays from vertex 3 (the last is 5)");
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, i16);
+    check(pixel_is(30, 30, 8, 0, 0, 255, 0), "vertex id: indices 6, 7, 8 as given");
+    glClear(GL_COLOR_BUFFER_BIT);
+    {
+        static const GLushort z16[3] = { 0, 1, 2 };
+        glDrawElementsBaseVertexOES(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, z16, 6);
+    }
+    check(pixel_is(30, 30, 8, 0, 0, 255, 0), "vertex id: indices 0, 1, 2 with base vertex 6");
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawElementsBaseVertexOES(GL_TRIANGLES, 3, GL_UNSIGNED_BYTE, i8, 297);
+    check(pixel_is(30, 30, 299 & 255, 299 >> 8, 0, 255, 0),
+          "vertex id: 8-bit indices with base vertex 297 (299: past 8 bits)");
+    glDisableVertexAttribArray((GLuint)pos);
+    glDeleteProgram(p);
+}
+
 int main(void)
 {
     struct BitMap *bm;
@@ -211,6 +265,7 @@ int main(void)
     test_flat();
     test_block();
     test_size();
+    test_vertex_id();
     check(glGetError() == GL_NO_ERROR, "no GL error left over");
     aglDestroyContext(ctx);
     FreeBitMap(bm);

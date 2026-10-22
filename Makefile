@@ -351,7 +351,7 @@ $(B)/v3dp/.stamp: $(wildcard tests/common/*.h) tools/v3dp_tests/emit.c v3dp/v3dp
 	    tools/v3dglslc/test/shaders/state.* tools/v3dglslc/test/shaders/tex.* \
 	    tools/v3dglslc/test/shaders/es3.* tools/v3dglslc/test/shaders/es3tex.* tools/v3dglslc/test/shaders/es3uni.* \
 	    tools/v3dglslc/test/shaders/es3flat.* tools/v3dglslc/test/shaders/es3block.* \
-	    tools/v3dglslc/test/shaders/es3size.* $(B)/v3dp/src/
+	    tools/v3dglslc/test/shaders/es3size.* tools/v3dglslc/test/shaders/es3vid.* $(B)/v3dp/src/
 	cd $(B)/v3dp/src && ../emit && for v in *.vert; do \
 	    $(V3DGLSLC) -o .. $$v $${v%.vert}.frag || exit 1; done
 	$(PYTHON) v3dp/v3dp_hashname.py $(B)/v3dp/*.v3dp $$(ls $(B)/v3dp/*.v3dw 2>/dev/null)

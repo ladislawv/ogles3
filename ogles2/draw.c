@@ -1439,7 +1439,7 @@ static void put_le32(UBYTE *b, ULONG x)
  * about a microsecond a draw on Emu68. 31 or 22 bytes; checked against
  * theirs once (packets_ok). */
 static ULONG draw_packets(UBYTE *b, UBYTE vcm_cs, UBYTE vcm_vs, ULONG rec, int nrec, UBYTE mode,
-                          int itype, ULONG idx_addr, ULONG idx_size, ULONG count)
+                          int itype, ULONG idx_addr, ULONG idx_size, ULONG count, ULONG first)
 {
     b[0] = v3d_OP_POINT_SIZE;
     put_le32(b + 1, 0x3F800000UL); /* 1.0f */
@@ -1460,7 +1460,7 @@ static ULONG draw_packets(UBYTE *b, UBYTE vcm_cs, UBYTE vcm_vs, ULONG rec, int n
     b[12] = v3d_OP_VERTEX_ARRAY_PRIMS;
     b[13] = mode;
     put_le32(b + 14, count);
-    put_le32(b + 18, 0);
+    put_le32(b + 18, first); /* the index of the first vertex */
     return 22;
 }
 
@@ -1490,14 +1490,14 @@ static BOOL packets_ok(V3DContext *v)
     PointSize(v, 1.0f);
     VCMCacheSize(v, 2, 1);
     glShaderState(v, 0x0FEDCBA0UL, 1);
-    VertexArrayPrims(v, 5, 0x30201, 0);
+    VertexArrayPrims(v, 5, 0x30201, 0x4321);
     glShaderStateAttributeRecord(v, (APTR)0x08123456UL, FALSE, TRUE, TRUE, v3d_VEC_3, v3d_ATTRIBUTE_SHORT,
                                  3, 2, 0, 0x0C, 0xFFFFFF);
     glShaderStateAttributeRecord(v, (APTR)0x08654320UL, FALSE, FALSE, FALSE, v3d_VEC_4, v3d_ATTRIBUTE_FLOAT,
                                  4, 1, 0, 0x10, 0xFFFFFF);
     v->current_buf = saved;
-    n = draw_packets(mine, 3, 5, 0x12345660UL, 3, 4, v3d_INDEX_TYPE_16_BIT, 0x0ABCDEF4UL, 0x1236, 0x10203);
-    n += draw_packets(mine + n, 2, 1, 0x0FEDCBA0UL, 1, 5, -1, 0, 0, 0x30201);
+    n = draw_packets(mine, 3, 5, 0x12345660UL, 3, 4, v3d_INDEX_TYPE_16_BIT, 0x0ABCDEF4UL, 0x1236, 0x10203, 0);
+    n += draw_packets(mine + n, 2, 1, 0x0FEDCBA0UL, 1, 5, -1, 0, 0, 0x30201, 0x4321);
     attr_record(mine + n, 0x08123456UL, TRUE, TRUE, v3d_VEC_3, v3d_ATTRIBUTE_SHORT, 3, 2, 0x0C, 0xFFFFFF);
     n += 16;
     attr_record(mine + n, 0x08654320UL, FALSE, FALSE, v3d_VEC_4, v3d_ATTRIBUTE_FLOAT, 4, 1, 0x10, 0xFFFFFF);
@@ -1552,6 +1552,8 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
     V3DContext *v = ctx->v3d;
     struct attr_src src[OGLES2_MAX_VERTEX_ATTRIBS];
     struct tex_states tst;
+    BOOL vid;        /* a shader reads gl_VertexID: the real vertex numbers (below) */
+    GLenum itype_gl; /* the indices' type as the GPU gets them */
     ULONG unif[3], code[3], defattr, rec, idx_addr = 0, idx_size = 0;
     int a, nslots = 0, i;
 
@@ -1634,6 +1636,11 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
     }
 
     ogles2_job_begin(ctx);
+    vid = cs->uses_vid || vs->uses_vid;
+    itype_gl = !el ? 0
+             : vid && el->type != GL_UNSIGNED_INT &&
+                       (ULONG)first + (ULONG)count - 1 > (el->type == GL_UNSIGNED_SHORT ? 0xffffUL : 0xffUL)
+                   ? GL_UNSIGNED_INT : el->type;
 
     /* State buffer: uniform streams, vertex data, the record. */
     mark(ctx, 1);
@@ -1693,30 +1700,58 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
         if (!ok)
             goto nomem;
     }
+    /* gl_VertexID (GLSL ES 3.00, docs/GLES3_PLAN.md stage A item 4): a
+     * shader that reads it sees the real vertex numbers, so the draw numbers
+     * from `first` (the indices as given, plus the base vertex) and each
+     * array's address moves back by `first` elements: the GPU reads
+     * address + index x stride, so the copies (made from `first`) stay as
+     * small as for any draw. An address that would leave the memory the GPU
+     * reaches gets a copy from element 0 instead. */
+    if (vid && first > 0)
+        for (i = 0; i < nslots; i++) {
+            ULONG back = (ULONG)first * src[i].stride;
+            if (!src[i].stride)
+                continue; /* a current value: every vertex reads the same */
+            if (src[i].address >= back && ogles2_device_gpu_reachable(src[i].address - back, 4)) {
+                src[i].address -= back;
+                continue;
+            }
+            if (!copy_array(ctx, &ctx->array[p->slot_attrib[i]], 0, first + count, &src[i], FALSE))
+                goto nomem;
+        }
     mark(ctx, 4);
     if (!(rec = shader_record(ctx, p, defattr, code, unif, cs, vs, fs, mode, src, nslots)))
         goto nomem;
     mark(ctx, 5);
     if (el) {
         /* The indices, rebased to the copied range: 8-bit as they are,
-         * 16- and 32-bit swapped to little-endian (plan 7.4). */
-        ULONG isize = (ULONG)el->count * index_size(el->type), k;
+         * 16- and 32-bit swapped to little-endian (plan 7.4). With
+         * gl_VertexID (above) they are the real vertex numbers: as given
+         * plus the base vertex (first = the smallest + the base vertex),
+         * written 32-bit when that outgrows their type. */
+        ULONG sub = vid ? el->min - (ULONG)first : el->min, k;
+        ULONG isize = (ULONG)el->count * index_size(itype_gl);
         UBYTE *ib = claim(v, isize + 4, 4);
         if (!ib)
             goto nomem;
-        if (el->type == GL_UNSIGNED_INT) {
-            swap_indices((ULONG *)ib, el->indices, (ULONG)el->count, el->min);
+        if (itype_gl != el->type) { /* widened: 8- or 16-bit indices to 32 */
+            ULONG *out = (ULONG *)ib;
+            for (k = 0; k < (ULONG)el->count; k++)
+                out[k] = le32((el->type == GL_UNSIGNED_SHORT ? (ULONG)((const UWORD *)el->indices)[k]
+                                                              : (ULONG)((const UBYTE *)el->indices)[k]) - sub);
+        } else if (el->type == GL_UNSIGNED_INT) {
+            swap_indices((ULONG *)ib, el->indices, (ULONG)el->count, sub);
         } else if (el->type == GL_UNSIGNED_SHORT) {
             const UWORD *in = el->indices;
             for (k = 0; k < (ULONG)el->count; k++) {
-                UWORD x = (UWORD)(in[k] - el->min);
+                UWORD x = (UWORD)(in[k] - sub);
                 ib[2 * k] = (UBYTE)x;
                 ib[2 * k + 1] = (UBYTE)(x >> 8);
             }
         } else {
             const UBYTE *in = el->indices;
             for (k = 0; k < (ULONG)el->count; k++)
-                ib[k] = (UBYTE)(in[k] - el->min);
+                ib[k] = (UBYTE)(in[k] - sub);
         }
         idx_addr = (ULONG)ib;
         idx_size = isize;
@@ -1729,12 +1764,13 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
     emit_state(ctx, &d->dd, (int)mode, fs);
     if (packets_ok(v)) {
         int itype = !el ? -1
-                  : el->type == GL_UNSIGNED_INT ? v3d_INDEX_TYPE_32_BIT
-                  : el->type == GL_UNSIGNED_SHORT ? v3d_INDEX_TYPE_16_BIT : v3d_INDEX_TYPE_8_BIT;
+                  : itype_gl == GL_UNSIGNED_INT ? v3d_INDEX_TYPE_32_BIT
+                  : itype_gl == GL_UNSIGNED_SHORT ? v3d_INDEX_TYPE_16_BIT : v3d_INDEX_TYPE_8_BIT;
         UBYTE *b = v3d_buffer_claim_memory(v->current_buf, el ? 31 : 22);
         if (b)
             draw_packets(b, cs->vcm_cache_size, vs->vcm_cache_size, rec, nslots ? nslots : 1, (UBYTE)mode,
-                         itype, idx_addr, idx_size, el ? (ULONG)el->count : (ULONG)count);
+                         itype, idx_addr, idx_size, el ? (ULONG)el->count : (ULONG)count,
+                         vid ? (ULONG)first : 0);
         mark(ctx, 7);
         return;
     }
@@ -1745,12 +1781,14 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
         /* Mesa's order: INDEX_BUFFER_SETUP, then INDEXED_PRIM_LIST. No
          * primitive restart in GLES2 (plan 7.5). */
         IndexBufferSetup(v, idx_addr, idx_size);
-        IndexedPrimList(v, (UBYTE)mode, el->type == GL_UNSIGNED_INT     ? v3d_INDEX_TYPE_32_BIT
-                                        : el->type == GL_UNSIGNED_SHORT ? v3d_INDEX_TYPE_16_BIT
+        IndexedPrimList(v, (UBYTE)mode, itype_gl == GL_UNSIGNED_INT     ? v3d_INDEX_TYPE_32_BIT
+                                        : itype_gl == GL_UNSIGNED_SHORT ? v3d_INDEX_TYPE_16_BIT
                                                                         : v3d_INDEX_TYPE_8_BIT,
                         (ULONG)el->count, FALSE, 0);
     } else {
-        VertexArrayPrims(v, (UBYTE)mode, (ULONG)count, 0); /* the copies start at `first` */
+        /* The copies start at `first`: vertex 0 is their first, except for
+         * gl_VertexID (the addresses moved back, above). */
+        VertexArrayPrims(v, (UBYTE)mode, (ULONG)count, vid ? (ULONG)first : 0);
     }
     mark(ctx, 7);
     return;

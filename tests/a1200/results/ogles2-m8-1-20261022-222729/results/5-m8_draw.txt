@@ -1,0 +1,11 @@
+ogles2 M8: GLSL ES 3.00 programs drawn in an OpenGL ES 3.0 context
+PASS: flat: the last vertex's blue everywhere (not a blend of red, green and blue)
+PASS: block: a uniform block member reads zero (0.25, 0.5, 0.75 + 0)
+PASS: size: textureSize of a 16x8 texture
+PASS: size: textureSize at base level 1 (8x4)
+PASS: vertex id: glDrawArrays from vertex 3 (the last is 5)
+PASS: vertex id: indices 6, 7, 8 as given
+PASS: vertex id: indices 0, 1, 2 with base vertex 6
+PASS: vertex id: 8-bit indices with base vertex 297 (299: past 8 bits)
+PASS: no GL error left over
+PASSED: 9 of 9
