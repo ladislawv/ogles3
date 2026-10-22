@@ -75,22 +75,50 @@ Mesa's driver, so they could follow later as an extension
     the test's drawer and assigns are missing from the DOS list, so the
     library's cache is `T:`); `B=~/ogles3-build/m68k-es3 bash
     tests/m8_es3/check_limits.sh` (the library's limits against
-    `v3dglslc -L`). GLES2 programs' files must stay byte for byte what the
+    `v3dglslc -L`); `B=$B bash tests/vamos.sh m2_link NOGPU` (GLES2
+    programs linked from their files, 27 checks); after a compiler or
+    writer change `python3 tools/v3dglslc/test/variant_roundtrip.py
+    $V3DGLSLC <dir> <vs> <fs>` for each test program (every variant
+    compiled again from its key alone, byte for byte: the draw-time
+    variants' ground), and after a Mesa change the m68k compiler again
+    (`replay.py`, `build_m68k.sh`: the Mesa objects are replayed from the
+    tree). GLES2 programs' files must stay byte for byte what the
     compiler wrote before (keep a compiler built before a change and
     compare its output on `tools/v3dglslc/test/shaders`). The smoke test
     has two failures under vamos that predate this work ("stub sets
     GL_INVALID_OPERATION", "call through the context-free thunk": no
     entry is a stub any more), not regressions.
-  - **On the A1200:** package `m8-1` (`bash tests/a1200/build_package.sh
-    m8-1`, then `amictl.py runpkg`): `smoke` and `m8_es3` with the
-    release build, `m8_es3 ES3`, `LIMITS` and `m8_draw` with the test
-    build. Passed on 2026-10-22 (`tests/a1200/results/
-    ogles2-m8-1-20261022-212632`). A GLES2 drawing regression: package
-    `m7-4` built from this copy's sync build (`B=$BS V=$V bash
-    tests/a1200/build_package.sh m7-4`).
-  - **Where to go on:** what item 5 leaves (its "Done so far"), item 2's
-    `$VER:` string, item 6 (the dEQP port's ES3 context) (§4, each item's
-    "Done" paragraph says what is in).
+  - **On the A1200:** check `List LIBS:ogles2#? LIBS:v3dglslc` is empty
+    first (`amictl.py run`), then package `m8-1` (`bash
+    tests/a1200/build_package.sh m8-1` after `. ./local.env`, then
+    `python3 tools/amictl/amictl.py runpkg tests/a1200/out/ogles2-m8-1 -t
+    900`), six steps: `smoke` and `m8_es3` with the release build;
+    `m8_es3 ES3`, `LIMITS` and `m8_draw` with the test build and the
+    m68k compiler in `LIBS:` (a draw-time variant compiled into the run's
+    `cache/`); `m8_draw` again without the compiler (that variant from
+    the cache). Last passed 2026-10-22 (`tests/a1200/results/
+    ogles2-m8-1-20261022-232345`: 14, 42, 42 limits identical, 10, 10). A
+    GLES2 drawing regression after any change to the draw, the reader or
+    the textures: package `m7-4` from this copy's sync build (`B=$BS V=$V
+    bash tests/a1200/build_package.sh m7-4`; 23, 44, 33 and 29 checks as
+    at 1.3, `ogles2-m7-4-20261022-232417`). Results directories are
+    committed (`tests/a1200/results/`), screenshots never.
+  - **Where to go on, in order:** item 6 (the dEQP port's ES3 context:
+    Appendix B.5), item 2's `$VER:` string (`v3dglslc.c`, and
+    `Install-ogles2` comparing it), what item 5 leaves (its "Done so
+    far": the host test of keys, one request for both variants), item 7's
+    remaining tests, then stage A's end: the GLES2 regression set and
+    the speed figures (§3, "Tests"). §4's items each have a "Done"
+    paragraph that says what is in and where; the code of this work so far
+    is in `context.c` (versions, extensions), `state.c` (limits),
+    `program.c` (the `#version` check, uniforms, `glGetFragDataLocation`,
+    the lookup, `.v3dx` images), `v3dp.c` (format 2), `draw.c` (blocks,
+    `textureSize`, varying flags, `gl_VertexID`, `es3_variants`),
+    `texture.c` (`OGLES2_TEX_NONE`, `ogles2_texture_size`),
+    `compiler.c` (`V3DGLSL_COMPILE_VARIANT`), and on the compiler's side
+    `v3dglslc.c` (`-L`, `-x`, the key-state draws, the server),
+    `v3dp_writer.c` (format 2, `.v3dx`, `v3dp_key_parse`) and Mesa patch
+    0015.
 - **`main`** (public) is the released 1.x line. Fixes and small additions go
   there and are released as 1.4, 1.5 and so on (the library's revision; the
   dispatch table only grows, the ABI version stays).
