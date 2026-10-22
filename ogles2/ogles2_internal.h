@@ -217,7 +217,14 @@ struct OGLES2Variant
     UBYTE cbufs;                  /* fragment key: the render targets it writes (bit i: target i;
                                    * 0 in the built-in image: target 0) */
     UBYTE uses_blocks;            /* OGLES2_U_UBO_ADDR of a uniform block (unit 1 or up: format 2) */
+    /* Its whole key as the file has it (v3dp/FORMAT.md's field order,
+     * little-endian; OGLES2_VS_KEY_BYTES or OGLES2_FS_KEY_BYTES), for the
+     * draw-time variants (docs/GLES3_PLAN.md stage A item 5); NULL in the
+     * built-in image. */
+    const UBYTE *key;
 };
+#define OGLES2_VS_KEY_BYTES 88  /* struct v3d_vs_key as the file writes it */
+#define OGLES2_FS_KEY_BYTES 296 /* struct v3d_fs_key */
 
 struct OGLES2ImageAttrib
 {

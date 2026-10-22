@@ -401,15 +401,21 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
         }
         case 6: { /* VARIANT */
             struct OGLES2Variant *v = &vars[im->nvariants];
-            ULONG n, j, codelen;
+            ULONG n, j, codelen, klen;
             ULONG *rt, *rd2;
+            const UBYTE *kstart;
+            UBYTE *key;
             v->stage = (UBYTE)u32(&s);
+            kstart = s.p;
             if (v->stage == OGLES2_VARIANT_VS || v->stage == OGLES2_VARIANT_CS) {
                 skip(&s, COMMON_KEY_BYTES);
                 skip(&s, 4 + 64 + 4);             /* num_used_outputs+pad, used_outputs, va_swap_rb_mask */
                 (void)u8(&s);                     /* is_coord (the stage says it) */
                 v->per_vertex_point_size = u8(&s);
                 skip(&s, 2);                      /* clamp_color, pad */
+                klen = OGLES2_VS_KEY_BYTES;
+                if (!s.bad && (ULONG)(s.p - kstart) != klen)
+                    FAIL("a vertex key of another size:", 0, (ULONG)(s.p - kstart));
                 read_common_prog_data(&s, v);
                 v->uses_iid = u8(&s);
                 (void)u8(&s);                     /* uses_biid */
@@ -431,6 +437,9 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                 v->cbufs = u8(&s);
                 skip(&s, 6 + 3);                  /* the other key bytes, pad */
                 skip(&s, 8 * 8 + 8 * 24 + 4 + 4); /* colour formats, blend, logicop, sprite mask */
+                klen = OGLES2_FS_KEY_BYTES;
+                if (!s.bad && (ULONG)(s.p - kstart) != klen)
+                    FAIL("a fragment key of another size:", 0, (ULONG)(s.p - kstart));
                 read_common_prog_data(&s, v);
                 v->uses_pid = u8(&s);
                 v->num_inputs = u8(&s);
@@ -450,6 +459,12 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             } else {
                 FAIL("variant of an unknown stage", 0, v->stage);
             }
+            /* The whole key, kept as the file has it (the draw-time
+             * variants match keys byte for byte). */
+            if (s.bad || (ULONG)(s.end - kstart) < klen || !(key = alloc(im, klen)))
+                FAIL("truncated or unreadable variant key", 0, ~0UL);
+            memcpy(key, kstart, klen);
+            v->key = key;
             n = u32(&s);
             if (n > 4096)
                 FAIL("uniform recipe too long:", 0, n);

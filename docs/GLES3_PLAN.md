@@ -50,6 +50,14 @@ Mesa's driver, so they could follow later as an extension
     `MESA_INSTALL` (this work's Mesa tree, §3). A new machine builds that
     tree with `build_mesa.sh`, `apply_mesa_patches.sh` and
     `ninja -C $MESA/build install` after `. ./local.env`.
+  - **Trap: the Mesa trees.** This copy's `tools/v3dglslc/patches` has
+    0015 on, which the 1.x tree (`~/mesa-build/mesa`) must never get, and
+    `apply_mesa_patches.sh` without an argument works on `$MESA`, or on the
+    1.x tree when `MESA` is unset. So from this copy run it only after
+    `. ./local.env`, or with the tree named; check another tree with
+    `git apply --check [--reverse]`, never with the script (it applies).
+    (Found 2026-10-22: a script without `local.env` put 0015 into the 1.x
+    tree; taken out again, that tree not rebuilt meanwhile.)
   - **Builds:** `make -j8` (as a release builds the library: ES 3.0
     contexts refused) and `make -j8 ES3=1 B=~/ogles3-build/m68k-es3` (the
     test build with ES 3.0 contexts); the compiler with
@@ -504,7 +512,8 @@ Mesa's driver, so they could follow later as an extension
   edits; on a clean checkout of the pinned commit it gives that tree's
   changes exactly), on WSL1 with `patch_drmshim.sh`'s `memfd_create`
   fallback as well (that script still names `~/mesa-build/mesa`); stage A's
-  own patch is then 0015. A new machine: `. ./local.env`, `build_mesa.sh`,
+  own patch is 0015 (2026-10-22, `v3d_compile_variant`, item 5), in this
+  work's tree only (§1, "Working on it": the trap). A new machine: `. ./local.env`, `build_mesa.sh`,
   `apply_mesa_patches.sh`, `ninja -C $MESA/build install`.
 - **`.v3dp` format 2 for ES 3.x programs.**
   - **Why a major version:** a 1.x reader skips unknown sections and accepts
@@ -889,6 +898,24 @@ The base everything else stands on.
      feedback outputs missing): that draw is skipped and logged
      (`draw: no variant for program <hash> and no compiler for it`).
      Programs that need such states ship their `.v3dx`;
+   - **Done so far (2026-10-22, on the host), in four steps of which two
+     are in:** (1) the reader keeps every variant's whole key as the file
+     has it (`OGLES2Variant`'s `key`: 88 bytes vertex and binning, 296
+     fragment), so the library can compute a draw's key in the same layout
+     and compare bytes; (2) Mesa patch 0015 (`v3d_compile_variant`, at the
+     end of `v3d_program.c`: the shader the last draw bound, compiled for
+     exactly the key given), `v3dp_key_parse` (the inverse of the writer's
+     key fields), the `.v3dx` writer (`v3dp_write_variants`: the existing
+     file's variants of the same program and layout kept, new ones added,
+     the oldest dropped past 253, written to a temporary file and renamed),
+     and `v3dglslc -x KEYS` to compile given keys from the command line.
+     `tools/v3dglslc/test/variant_roundtrip.py`: every variant of every
+     test program, compiled again from its key alone, comes out byte for
+     byte (`mrt`'s 14 included), so the file's key fields are all of Mesa's
+     key; the `.v3dx`'s `VARIANT_OF` is the `.v3dp`'s layout CRC, and a
+     second run adds nothing. Left: (3) the library's key per draw and the
+     request (`V3DGLSL_COMPILE_VARIANT`) with the server's side, (4) the
+     `.v3dx` lookup and the rule without a compiler.
    - existing `.v3dw` and `.v3da` files stay readable. With a compiler that
      knows `V3DGLSL_COMPILE_VARIANT` the library asks for no new ones; with
      an older one it asks for them as 1.3 does (`V3DGLSL_LINK32`,

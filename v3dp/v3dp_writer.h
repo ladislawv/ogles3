@@ -8,6 +8,9 @@
 #ifndef V3DP_WRITER_H
 #define V3DP_WRITER_H
 
+#include <stddef.h>
+#include <stdint.h>
+
 struct gl_shader_program;
 
 /* Start capturing variants: installs the driver hook and forgets earlier ones. */
@@ -33,5 +36,21 @@ void v3dp_capture_end(void);
 int v3dp_write(const char *path, struct gl_shader_program *prog,
                unsigned num_sources, const unsigned *stages,
                const char *const *sources);
+
+/* The program's draw-time variants file (.v3dx, FORMAT.md): the captured
+ * variants added to those of the file already at path (the same program
+ * and link layout), the oldest dropped past 253. Same arguments. */
+int v3dp_write_variants(const char *path, struct gl_shader_program *prog,
+                        unsigned num_sources, const unsigned *stages,
+                        const char *const *sources);
+
+/* A variant's key from its bytes as the files and ogles2.library have them:
+ * a u32 VARIANT stage (0 vertex, 1 binning, 4 fragment), then the key
+ * (FORMAT.md's fields). Fills *vs or *fs, zeroed first; the bytes used, or
+ * 0 for keys it cannot read. */
+struct v3d_vs_key;
+struct v3d_fs_key;
+size_t v3dp_key_parse(const uint8_t *b, size_t len, unsigned *variant_stage,
+                      struct v3d_vs_key *vs, struct v3d_fs_key *fs);
 
 #endif

@@ -1,6 +1,7 @@
 /*
  * Mesa's V3D driver on a fake DRM device, no window system.
- *   usage: v3dglslc [-d <V3D_DEBUG flags>] [-o <dir>] vs.vert fs.frag [vs2 fs2 ...]
+ *   usage: v3dglslc [-d <V3D_DEBUG flags>] [-o <dir>] [-x <keys>] vs.vert fs.frag [vs2 fs2 ...]
+ *          (-x: the variants of the keys in the file, into a .v3dx: write_program)
  *          v3dglslc SERVER   (AmigaOS: the on-target compiler, v3dp/v3dglsl_port.h)
  *          v3dglslc -L       (the limits, as the context reports them: print_limits)
  * Creates a V3D 4.2 screen (compat/fake_drm.c), a surfaceless GLES2 context
@@ -25,6 +26,7 @@
 #include "util/xmlconfig.h"
 #include "util/macros.h"
 #include "v3d_screen.h"
+#include "compiler/v3d_compiler.h" /* the variant keys (-x) */
 #include "xf86drm.h"
 #include "v3dp_writer.h"
 
@@ -114,6 +116,14 @@ static GLuint mrt_fbo[3];
 #define WRITE_A2C 3 /* the alpha-to-coverage fragment variants: a .v3da (server only) */
 static int write_mode = WRITE_BOTH;
 extern bool v3d_force_alpha_to_coverage; /* Mesa patch 0014 */
+/* Mesa patch 0015: one variant for exactly `key` (the draw-time variants). */
+extern bool v3d_compile_variant(struct pipe_context *pctx, mesa_shader_stage stage, struct v3d_key *key,
+                                size_t key_size);
+static struct pipe_context *the_pipe;
+/* -x: the keys of the variants to compile (a .v3dx instead of the .v3dp):
+ * each a u32 VARIANT stage and the key's bytes (v3dp_key_parse). */
+static const uint8_t *variant_keys;
+static size_t variant_keys_len;
 
 static int make_target(void)
 {
@@ -595,6 +605,36 @@ static int write_program(GLuint p, const char *path, const char *vs_src, const c
     sources[0] = vs_src;
     sources[1] = fs_src;
     sources[2] = link_bindings;
+    /* Draw-time variants (docs/GLES3_PLAN.md stage A item 5): one draw so
+     * the driver has the program's shaders bound, then each key compiled
+     * as it is (Mesa patch 0015), into the program's .v3dx. */
+    if (variant_keys) {
+        char xpath[512];
+        size_t n = strlen(path), at = 0, used;
+        int ok = 1;
+        if (n <= 5 || n >= sizeof(xpath) || !draw_key_states(p, 0))
+            return 0;
+        snprintf(xpath, sizeof(xpath), "%.*s.v3dx", (int)(n - 5), path);
+        v3dp_capture_begin();
+        while (ok && at < variant_keys_len) {
+            struct v3d_vs_key vk;
+            struct v3d_fs_key fk;
+            unsigned vstage;
+            used = v3dp_key_parse(variant_keys + at, variant_keys_len - at, &vstage, &vk, &fk);
+            if (!used) {
+                fprintf(stderr, "v3dglslc: unreadable variant key at byte %u\n", (unsigned)at);
+                ok = 0;
+                break;
+            }
+            ok = vstage == 4 ? v3d_compile_variant(the_pipe, MESA_SHADER_FRAGMENT, &fk.base, sizeof(fk))
+                             : v3d_compile_variant(the_pipe, MESA_SHADER_VERTEX, &vk.base, sizeof(vk));
+            if (!ok)
+                fprintf(stderr, "v3dglslc: the variant at byte %u did not compile\n", (unsigned)at);
+            at += used;
+        }
+        v3dp_capture_end();
+        return ok && v3dp_write_variants(xpath, prog, nsrc, stages, sources) == 0;
+    }
     /* The alpha-to-coverage variants: the same draws with the fragment key's
      * msaa and sample_alpha_to_coverage set (patch 0014). Only the fragment
      * shaders compile again, so the file holds fragment variants only; the
@@ -848,7 +888,26 @@ int main(int argc, char **argv)
             debug = argv[first + 1];
         else if (!strcmp(argv[first], "-o"))
             out_dir = argv[first + 1];
-        else
+        else if (!strcmp(argv[first], "-x")) {
+            FILE *kf = fopen(argv[first + 1], "rb");
+            long kn;
+            uint8_t *kb;
+            if (!kf) {
+                fprintf(stderr, "v3dglslc: cannot read %s\n", argv[first + 1]);
+                return 20;
+            }
+            fseek(kf, 0, SEEK_END);
+            kn = ftell(kf);
+            fseek(kf, 0, SEEK_SET);
+            kb = malloc(kn > 0 ? (size_t)kn : 1);
+            if (!kb || fread(kb, 1, (size_t)kn, kf) != (size_t)kn) {
+                fprintf(stderr, "v3dglslc: cannot read %s\n", argv[first + 1]);
+                return 20;
+            }
+            fclose(kf);
+            variant_keys = kb;
+            variant_keys_len = (size_t)kn;
+        } else
             break;
         first += 2;
     }
@@ -885,6 +944,7 @@ int main(int argc, char **argv)
         fprintf(stderr, "v3dglslc: st_api_make_current failed\n");
         return 20;
     }
+    the_pipe = st->pipe;
     /* ogles2.library's limits, which its GL queries report too (GLSL's
      * gl_Max* constants must equal them: dEQP-GLES2 builtin_variable): four
      * draw buffers (EXT_draw_buffers, M7 step 5; OGLES2_MAX_DRAW_BUFFERS), 16

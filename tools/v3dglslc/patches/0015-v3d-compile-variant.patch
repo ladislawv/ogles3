@@ -1,0 +1,36 @@
+ogles2: v3dglslc compiles a program's draw-time variants, each for exactly
+the key ogles2.library computed for a draw (docs/GLES3_PLAN.md stage A item
+5): v3d_compile_variant() hands the vertex or fragment shader the last draw
+bound to v3d_get_compiled_shader(), which is static, with that key. The
+compiled variant hook (patch 0009) reports the result. Unused, nothing
+changes. At the end of the file, away from patch 0014's lines.
+
+--- a/src/gallium/drivers/v3d/v3d_program.c
++++ b/src/gallium/drivers/v3d/v3d_program.c
+@@ -1244,3 +1244,26 @@
+ 
+         v3d_bo_unreference(&v3d->prog.spill_bo);
+ }
++
++/* ogles2 (v3dglslc): compiles the vertex or fragment shader the last draw
++ * bound with exactly `key` (a draw-time variant ogles2.library asks for:
++ * docs/GLES3_PLAN.md stage A item 5); the vertex shader's key says whether
++ * it is the binning (coordinate) shader. The compiled variant hook reports
++ * it. The key must be zeroed before it is filled, padding included: the
++ * driver's cache compares keys with memcmp. */
++bool v3d_compile_variant(struct pipe_context *pctx, mesa_shader_stage stage,
++                         struct v3d_key *key, size_t key_size);
++
++bool
++v3d_compile_variant(struct pipe_context *pctx, mesa_shader_stage stage,
++                    struct v3d_key *key, size_t key_size)
++{
++        struct v3d_context *v3d = v3d_context(pctx);
++        struct v3d_uncompiled_shader *so =
++                stage == MESA_SHADER_VERTEX ? v3d->prog.bind_vs :
++                stage == MESA_SHADER_FRAGMENT ? v3d->prog.bind_fs : NULL;
++
++        if (!so)
++                return false;
++        return v3d_get_compiled_shader(v3d, key, key_size, so) != NULL;
++}

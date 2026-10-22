@@ -185,7 +185,11 @@ def dump(path, show_qpu):
         raise Bad("header says %d sections, found %d" % (nsec, len(secs)))
     if [t for t, _ in secs[:2]] != [1, 2]:
         raise Bad("PROGRAM and STRINGS must come first")
-    for t in (4, 5) + ((7, 8) if v2 else ()):
+    # A .v3dx (draw-time variants): PROGRAM, STRINGS, VARIANT_OF, VARIANTs only.
+    v3dx = len(secs) > 2 and secs[2][0] == 9
+    if v3dx and any(t not in (1, 2, 9, 6) for t, _ in secs):
+        raise Bad("a .v3dx with sections other than its variants")
+    for t in () if v3dx else (4, 5) + ((7, 8) if v2 else ()):
         if sum(1 for s, _ in secs if s == t) != 1:
             raise Bad("need exactly one %s section" % SECTIONS[t])
     if not v2 and any(t in (7, 8) for t, _ in secs):
@@ -302,6 +306,10 @@ def dump(path, show_qpu):
             if show_qpu:
                 for i, q in enumerate(qpu):
                     print("  %4d %016x" % (i, q))
+        elif t == 9:
+            crc = r.u32()
+            r.done()
+            print("VARIANT_OF the program file whose layout sections' CRC is %08x" % crc)
         elif t == 7 and v2:
             n = r.u32()
             print("UNIFORM_BLOCKS %d" % n)
