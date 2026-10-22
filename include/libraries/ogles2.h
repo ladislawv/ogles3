@@ -66,6 +66,15 @@ extern "C" {
  * the environment variable OGLES2/MSAA (4 or 0) decides, so a program can
  * be given it from the Shell. Framebuffer objects are not multisampled. */
 #define OGLES2_CCT_PISTORM_MSAA             (OGLES2_CCT_PISTORM_MIN + 5)
+/* ULONG: the OpenGL ES version the context offers, major x 10 + minor: 20
+ * (the default) an OpenGL ES 2.0 context; 30 or 31 an OpenGL ES 3.x one, the
+ * highest the library has and at least the one asked for. A version the
+ * library lacks fails with OGLES2_CCE_UNSUPPORTED, any other value with
+ * OGLES2_CCE_BAD_TAGS. Libraries before 2.0 ignore the tag (and give an ES
+ * 2.0 context). Contexts that share objects (OGLES2_CCT_SHARE_WITH) must be of
+ * the same version. Name and values provisional until release 2.0
+ * (docs/GLES3_PLAN.md §3, §10). */
+#define OGLES2_CCT_PISTORM_ES_VERSION       (OGLES2_CCT_PISTORM_MIN + 6)
 
 /* Error codes written to aglCreateContext2's *errcode. */
 #define OGLES2_CCE_OK              0

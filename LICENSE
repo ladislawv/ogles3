@@ -38,8 +38,9 @@ keeps its own. The licence decision is D6 in docs/DEVELOPMENT_PLAN.md
    stay MIT on their own.
 
 3. Third-party code keeps its own licence and notices:
-   - include/GLES2/, include/KHR/: Khronos headers (MIT / Apache-2.0, see
-     the file headers); gen/khronos/gl.xml: Apache-2.0.
+   - include/GLES2/, include/GLES3/, include/KHR/: Khronos headers (MIT /
+     Apache-2.0, see the file headers; include/GLES3/gl3ext.h is this
+     project's, MIT); gen/khronos/gl.xml: Apache-2.0.
    - v3dcore/: code by Macoy Madson and code derived from Mesa (Broadcom,
      VMware), MIT: licences/License_V3D_ThirdParty.txt. These notices must
      ship with the library.

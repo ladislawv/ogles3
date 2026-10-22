@@ -9,6 +9,7 @@
 #include <proto/utility.h>
 #include <dos/var.h>
 #include <proto/dos.h>
+#include <string.h>
 #include <libraries/ogles2.h>
 #include "ogles2_internal.h"
 
@@ -38,6 +39,7 @@ static BOOL known_tag(Tag t)
     case OGLES2_CCT_PISTORM_MSAA:
     case OGLES2_CCT_DEBUG_SHADER_LOG:
     case OGLES2_CCT_SHARE_WITH:
+    case OGLES2_CCT_PISTORM_ES_VERSION:
         return TRUE;
     default:
         return FALSE;
@@ -53,10 +55,34 @@ struct OGLES2Context *ogles2_aglCreateContext2(ULONG *errcode, struct TagItem *t
     ULONG stencil = GetTagData(OGLES2_CCT_STENCIL, 0, tags);
     BOOL debug_shader_log = GetTagData(OGLES2_CCT_DEBUG_SHADER_LOG, FALSE, tags) ? TRUE : FALSE;
     struct OGLES2Context *with = (struct OGLES2Context *)GetTagData(OGLES2_CCT_SHARE_WITH, 0, tags);
+    ULONG asked = GetTagData(OGLES2_CCT_PISTORM_ES_VERSION, 20, tags);
+    UBYTE version;
     ULONG why = OGLES2_CCE_OK;
 
+    /* The version (docs/GLES3_PLAN.md §3): 20, or for 30 and 31 the highest
+     * ES 3.x the library has, if that is at least the one asked for. ES 3.0
+     * only in test builds while it is incomplete (Makefile, ES3=1). */
+    if (asked != 20 && asked != 30 && asked != 31) {
+        ogles2_log("aglCreateContext2: OGLES2_CCT_PISTORM_ES_VERSION %ld is no OpenGL ES version", asked);
+        why = OGLES2_CCE_BAD_TAGS;
+        goto fail;
+    }
+    version = asked == 20 ? 20 : OGLES2_ES_MAX;
+    if (version < asked) {
+        ogles2_log("aglCreateContext2: OpenGL ES %ld.%ld is not supported", asked / 10, asked % 10);
+        why = OGLES2_CCE_UNSUPPORTED;
+        goto fail;
+    }
     if (with && !ogles2_context_valid(with)) {
         ogles2_log("aglCreateContext2: OGLES2_CCT_SHARE_WITH 0x%08lx is not a context", (ULONG)with);
+        why = OGLES2_CCE_BAD_TAGS;
+        goto fail;
+    }
+    /* The group's contexts are of one version (this library's rule: a GLES2
+     * member would see objects it cannot use). */
+    if (with && with->es_version != version) {
+        ogles2_log("aglCreateContext2: OGLES2_CCT_SHARE_WITH 0x%08lx is an OpenGL ES %ld.%ld context", (ULONG)with,
+                   (ULONG)with->es_version / 10, (ULONG)with->es_version % 10);
         why = OGLES2_CCE_BAD_TAGS;
         goto fail;
     }
@@ -72,6 +98,7 @@ struct OGLES2Context *ogles2_aglCreateContext2(ULONG *errcode, struct TagItem *t
         goto fail;
     }
     ctx->magic = OGLES2_CONTEXT_MAGIC;
+    ctx->es_version = version;
     ctx->debug_shader_log = debug_shader_log;
     ctx->error = GL_NO_ERROR;
     ogles2_state_init(ctx);
@@ -182,7 +209,8 @@ struct OGLES2Context *ogles2_aglCreateContext2(ULONG *errcode, struct TagItem *t
     if ((t = FindTagItem(OGLES2_CCT_PISTORM_GET_WINDOW, tags)) && t->ti_Data)
         *(struct Window **)t->ti_Data =
             ctx->display.input_window ? ctx->display.input_window : ctx->display.window;
-    ogles2_log("aglCreateContext2: context 0x%08lx, %ldx%ld%s", (ULONG)ctx, ctx->width, ctx->height,
+    ogles2_log("aglCreateContext2: context 0x%08lx, OpenGL ES %ld.%ld, %ldx%ld%s", (ULONG)ctx,
+               (ULONG)version / 10, (ULONG)version % 10, ctx->width, ctx->height,
                (ULONG)(state_only ? ", state only" : ""));
     if (with)
         ogles2_log("aglCreateContext2: context 0x%08lx shares objects with 0x%08lx (%ld in the group)",
@@ -294,6 +322,83 @@ GLenum ogles2_glGetError(struct OGLES2Context *ctx)
     return e;
 }
 
+/* The extensions and the context versions that offer each (docs/GLES3_PLAN.md
+ * stage A item 1): GL_EXTENSIONS lists their names in this order, and
+ * glGetStringi(GL_EXTENSIONS, i) the same list. ES3 contexts offer every
+ * extension GLES2 contexts have, as Mesa does, and their own. */
+#define EXT_ES2 1
+#define EXT_ES3 2
+#define EXT_ALL (EXT_ES2 | EXT_ES3)
+static const struct { const char *name; UBYTE in; } extensions[] = {
+    {"GL_OES_element_index_uint", EXT_ALL}, {"GL_OES_compressed_ETC1_RGB8_texture", EXT_ALL},
+    {"GL_EXT_texture_format_BGRA8888", EXT_ALL}, {"GL_OES_mapbuffer", EXT_ALL},
+    {"GL_EXT_blend_minmax", EXT_ALL}, {"GL_OES_draw_elements_base_vertex", EXT_ALL},
+    {"GL_OES_rgb8_rgba8", EXT_ALL}, {"GL_OES_packed_depth_stencil", EXT_ALL},
+    {"GL_OES_fbo_render_mipmap", EXT_ALL}, {"GL_EXT_discard_framebuffer", EXT_ALL},
+    {"GL_OES_texture_npot", EXT_ALL}, {"GL_EXT_read_format_bgra", EXT_ALL},
+    {"GL_EXT_texture_filter_anisotropic", EXT_ALL}, {"GL_EXT_texture_lod_bias", EXT_ALL},
+    {"GL_SGIS_texture_lod", EXT_ALL}, {"GL_ARB_texture_mirror_clamp_to_edge", EXT_ALL},
+    {"GL_OES_standard_derivatives", EXT_ALL}, {"GL_OES_get_program_binary", EXT_ALL},
+    {"GL_OES_texture_float", EXT_ALL}, {"GL_OES_texture_half_float", EXT_ALL},
+    {"GL_OES_texture_half_float_linear", EXT_ALL}, {"GL_OES_depth_texture", EXT_ALL},
+    {"GL_ARB_texture_rectangle", EXT_ALL}, {"GL_EXT_debug_marker", EXT_ALL},
+    {"GL_EXT_texture_compression_dxt1", EXT_ALL}, {"GL_EXT_texture_compression_s3tc", EXT_ALL},
+    {"GL_ANGLE_texture_compression_dxt3", EXT_ALL}, {"GL_ANGLE_texture_compression_dxt5", EXT_ALL},
+    {"GL_EXT_clip_control", EXT_ALL}, {"GL_EXT_draw_buffers", EXT_ALL},
+    {"GL_NV_fbo_color_attachments", EXT_ALL}, {"GL_OES_required_internalformat", EXT_ALL},
+    {"GL_EXT_color_buffer_half_float", EXT_ALL},
+};
+#define NUM_EXTENSIONS (sizeof(extensions) / sizeof(extensions[0]))
+
+static UBYTE ext_mask(const struct OGLES2Context *ctx)
+{
+    return ogles2_es3(ctx) ? EXT_ES3 : EXT_ES2;
+}
+
+ULONG ogles2_num_extensions(const struct OGLES2Context *ctx)
+{
+    ULONG k, n = 0;
+    for (k = 0; k < NUM_EXTENSIONS; k++)
+        if (extensions[k].in & ext_mask(ctx))
+            n++;
+    return n;
+}
+
+/* GL_EXTENSIONS of a context version, built at its first query. */
+static const char *ext_string(const struct OGLES2Context *ctx)
+{
+    static char s[2][2048];
+    static BOOL made[2];
+    int v = ogles2_es3(ctx);
+    if (!made[v]) {
+        ObtainSemaphore(&OGLES2LibBase->lock);
+        if (!made[v]) {
+            ULONG k, len = 0, n;
+            for (k = 0; k < NUM_EXTENSIONS; k++) {
+                if (!(extensions[k].in & ext_mask(ctx)))
+                    continue;
+                n = strlen(extensions[k].name);
+                if (len + n + 2 > sizeof(s[v])) {
+                    ogles2_log("glGetString: GL_EXTENSIONS longer than %ld bytes", (ULONG)sizeof(s[v]));
+                    break;
+                }
+                if (len)
+                    s[v][len++] = ' ';
+                memcpy(s[v] + len, extensions[k].name, n);
+                len += n;
+            }
+            s[v][len] = 0;
+            made[v] = TRUE;
+        }
+        ReleaseSemaphore(&OGLES2LibBase->lock);
+    }
+    return s[v];
+}
+
+#define STR_(x) #x
+#define STR(x) STR_(x)
+#define LIB_VERSION_TEXT "ogles2.library " STR(OGLES2_LIB_VERSION) "." STR(OGLES2_LIB_REVISION)
+
 const GLubyte *ogles2_glGetString(struct OGLES2Context *ctx, GLenum name)
 {
     if (!ogles2_context_valid(ctx))
@@ -303,27 +408,33 @@ const GLubyte *ogles2_glGetString(struct OGLES2Context *ctx, GLenum name)
         return (const GLubyte *)"ogles2.library";
     case GL_RENDERER:
         return (const GLubyte *)ogles2_device_renderer();
-    case GL_VERSION: /* must begin "OpenGL ES 2.0" (plan section 7.10) */
-        return (const GLubyte *)"OpenGL ES 2.0 ogles2.library 1.3";
-    case GL_SHADING_LANGUAGE_VERSION: /* must begin "OpenGL ES GLSL ES 1.00" */
-        return (const GLubyte *)"OpenGL ES GLSL ES 1.00";
+    case GL_VERSION: /* must begin "OpenGL ES 2.0" or "OpenGL ES 3.0" (plan section 7.10) */
+        return (const GLubyte *)(ogles2_es3(ctx) ? "OpenGL ES 3.0 " LIB_VERSION_TEXT
+                                                 : "OpenGL ES 2.0 " LIB_VERSION_TEXT);
+    case GL_SHADING_LANGUAGE_VERSION: /* must begin "OpenGL ES GLSL ES 1.00" or "3.00" */
+        return (const GLubyte *)(ogles2_es3(ctx) ? "OpenGL ES GLSL ES 3.00" : "OpenGL ES GLSL ES 1.00");
     case GL_EXTENSIONS:
-        return (const GLubyte *)"GL_OES_element_index_uint GL_OES_compressed_ETC1_RGB8_texture GL_EXT_texture_format_BGRA8888 "
-                                 "GL_OES_mapbuffer GL_EXT_blend_minmax GL_OES_draw_elements_base_vertex "
-                                 "GL_OES_rgb8_rgba8 GL_OES_packed_depth_stencil GL_OES_fbo_render_mipmap "
-                                 "GL_EXT_discard_framebuffer GL_OES_texture_npot GL_EXT_read_format_bgra "
-                                 "GL_EXT_texture_filter_anisotropic GL_EXT_texture_lod_bias GL_SGIS_texture_lod "
-                                 "GL_ARB_texture_mirror_clamp_to_edge GL_OES_standard_derivatives "
-                                 "GL_OES_get_program_binary GL_OES_texture_float GL_OES_texture_half_float "
-                                 "GL_OES_texture_half_float_linear GL_OES_depth_texture GL_ARB_texture_rectangle "
-                                 "GL_EXT_debug_marker GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_s3tc "
-                                 "GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_EXT_clip_control "
-                                 "GL_EXT_draw_buffers GL_NV_fbo_color_attachments GL_OES_required_internalformat "
-                                 "GL_EXT_color_buffer_half_float";
+        return (const GLubyte *)ext_string(ctx);
     default:
         ogles2_error(ctx, GL_INVALID_ENUM);
         return 0;
     }
+}
+
+const GLubyte *ogles2_glGetStringi(struct OGLES2Context *ctx, GLenum name, GLuint index)
+{
+    ULONG k;
+    if (!ogles2_es3_entry(ctx))
+        return 0;
+    if (name != GL_EXTENSIONS) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return 0;
+    }
+    for (k = 0; k < NUM_EXTENSIONS; k++)
+        if ((extensions[k].in & ext_mask(ctx)) && !index--)
+            return (const GLubyte *)extensions[k].name;
+    ogles2_error(ctx, GL_INVALID_VALUE);
+    return 0;
 }
 
 /* Generated stubs (stubs.c) call this for entries not written yet. Each name

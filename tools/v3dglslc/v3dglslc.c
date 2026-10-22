@@ -2,6 +2,7 @@
  * Mesa's V3D driver on a fake DRM device, no window system.
  *   usage: v3dglslc [-d <V3D_DEBUG flags>] [-o <dir>] vs.vert fs.frag [vs2 fs2 ...]
  *          v3dglslc SERVER   (AmigaOS: the on-target compiler, v3dp/v3dglsl_port.h)
+ *          v3dglslc -L       (the limits, as the context reports them: print_limits)
  * Creates a V3D 4.2 screen (compat/fake_drm.c), a surfaceless GLES2 context
  * through the state tracker, and calls Mesa's GL entry points directly.
  * -o writes each program as <dir>/<vs>-<fs>.v3dp (dev/v3dp/FORMAT.md), with
@@ -97,7 +98,7 @@ static void base_name(char *out, const char *path)
 /* The render target of the key-state draws: an RGBA8 colour texture and a
  * 16-bit depth buffer, created once; and the textures the samplers get:
  * RGBA8, or RGBA32F for the variants that sample 32-bit returns. */
-static GLuint draw_fbo, tex_2d, tex_cube, tex_2d32, tex_cube32, tex_rect, tex_rect32;
+static GLuint draw_fbo, draw_depth, tex_2d, tex_cube, tex_2d32, tex_cube32, tex_rect, tex_rect32;
 /* EXT_draw_buffers: targets with 2, 3 and 4 RGBA8 colour images, all drawn
  * into (the fragment key's cbufs 0x3, 0x7, 0xF). */
 static GLuint mrt_fbo[3];
@@ -119,12 +120,14 @@ static int make_target(void)
     GLuint tex, depth;
     GLenum status;
 
+    _mesa_GenRenderbuffers(1, &draw_depth);
+    depth = draw_depth;
+
     _mesa_GenTextures(1, &tex);
     _mesa_BindTexture(GL_TEXTURE_2D, tex);
     _mesa_TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 64, 64, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     _mesa_TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     _mesa_BindTexture(GL_TEXTURE_2D, 0);
-    _mesa_GenRenderbuffers(1, &depth);
     _mesa_BindRenderbuffer(GL_RENDERBUFFER, depth);
     _mesa_RenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, 64, 64);
     _mesa_GenFramebuffers(1, &draw_fbo);
@@ -223,6 +226,76 @@ static int make_target(void)
     return 1;
 }
 
+/* The sampler types beyond GLSL ES 1.00's three (2D, cube and rectangle,
+ * whose textures make_target makes): OES_texture_3D's sampler3D, and GLSL ES
+ * 3.00's (docs/GLES3_PLAN.md stage A item 2). Each gets a complete 1x1 (x1)
+ * texture of its target and kind, made when first bound: f RGBA8, d
+ * DEPTH_COMPONENT16 compared (shadow samplers), i RGBA8I, u RGBA8UI; and for
+ * the variants of samplers returning 32 bits RGBA32F, DEPTH_COMPONENT32F,
+ * RGBA32I, RGBA32UI, as real draws with such textures give the key's
+ * sampler_is_32b. */
+static struct { GLenum type, target; char kind; GLuint tex[2]; } more_samplers[] = {
+    { GL_SAMPLER_3D, GL_TEXTURE_3D, 'f' },
+    { GL_SAMPLER_2D_ARRAY, GL_TEXTURE_2D_ARRAY, 'f' },
+    { GL_SAMPLER_2D_SHADOW, GL_TEXTURE_2D, 'd' },
+    { GL_SAMPLER_CUBE_SHADOW, GL_TEXTURE_CUBE_MAP, 'd' },
+    { GL_SAMPLER_2D_ARRAY_SHADOW, GL_TEXTURE_2D_ARRAY, 'd' },
+    { GL_INT_SAMPLER_2D, GL_TEXTURE_2D, 'i' },
+    { GL_INT_SAMPLER_3D, GL_TEXTURE_3D, 'i' },
+    { GL_INT_SAMPLER_CUBE, GL_TEXTURE_CUBE_MAP, 'i' },
+    { GL_INT_SAMPLER_2D_ARRAY, GL_TEXTURE_2D_ARRAY, 'i' },
+    { GL_UNSIGNED_INT_SAMPLER_2D, GL_TEXTURE_2D, 'u' },
+    { GL_UNSIGNED_INT_SAMPLER_3D, GL_TEXTURE_3D, 'u' },
+    { GL_UNSIGNED_INT_SAMPLER_CUBE, GL_TEXTURE_CUBE_MAP, 'u' },
+    { GL_UNSIGNED_INT_SAMPLER_2D_ARRAY, GL_TEXTURE_2D_ARRAY, 'u' },
+};
+
+static int more_sampler(GLenum type)
+{
+    unsigned i;
+    for (i = 0; i < ARRAY_SIZE(more_samplers); i++)
+        if (more_samplers[i].type == type)
+            return (int)i;
+    return -1;
+}
+
+static int is_sampler(GLenum type)
+{
+    return type == GL_SAMPLER_2D || type == GL_SAMPLER_CUBE || type == GL_SAMPLER_2D_RECT || more_sampler(type) >= 0;
+}
+
+static GLuint make_key_texture(GLenum target, char kind, int wide)
+{
+    static const GLuint zeros[4 * 6]; /* a texel of any of the formats, six cube faces' worth */
+    GLenum ifmt, fmt, type;
+    GLuint t;
+    switch (kind) {
+    case 'd': ifmt = wide ? GL_DEPTH_COMPONENT32F : GL_DEPTH_COMPONENT16; fmt = GL_DEPTH_COMPONENT;
+              type = wide ? GL_FLOAT : GL_UNSIGNED_SHORT; break;
+    case 'i': ifmt = wide ? GL_RGBA32I : GL_RGBA8I; fmt = GL_RGBA_INTEGER; type = wide ? GL_INT : GL_BYTE; break;
+    case 'u': ifmt = wide ? GL_RGBA32UI : GL_RGBA8UI; fmt = GL_RGBA_INTEGER;
+              type = wide ? GL_UNSIGNED_INT : GL_UNSIGNED_BYTE; break;
+    default:  ifmt = wide ? GL_RGBA32F : GL_RGBA8; fmt = GL_RGBA; type = wide ? GL_FLOAT : GL_UNSIGNED_BYTE; break;
+    }
+    _mesa_GenTextures(1, &t);
+    _mesa_BindTexture(target, t);
+    if (target == GL_TEXTURE_CUBE_MAP) {
+        GLenum face;
+        for (face = GL_TEXTURE_CUBE_MAP_POSITIVE_X; face <= GL_TEXTURE_CUBE_MAP_NEGATIVE_Z; face++)
+            _mesa_TexImage2D(face, 0, ifmt, 1, 1, 0, fmt, type, zeros);
+    } else if (target == GL_TEXTURE_3D || target == GL_TEXTURE_2D_ARRAY) {
+        _mesa_TexImage3D(target, 0, ifmt, 1, 1, 1, 0, fmt, type, zeros);
+    } else {
+        _mesa_TexImage2D(target, 0, ifmt, 1, 1, 0, fmt, type, zeros);
+    }
+    _mesa_TexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    _mesa_TexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    if (kind == 'd')
+        _mesa_TexParameteri(target, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+    _mesa_BindTexture(target, 0);
+    return t;
+}
+
 /* The program has a sampler uniform. */
 static int has_samplers(GLuint p)
 {
@@ -232,7 +305,7 @@ static int has_samplers(GLuint p)
     _mesa_GetProgramiv(p, GL_ACTIVE_UNIFORMS, &n);
     for (i = 0; i < n; i++) {
         _mesa_GetActiveUniform(p, i, sizeof(name), NULL, &size, &type, name);
-        if (type == GL_SAMPLER_2D || type == GL_SAMPLER_CUBE || type == GL_SAMPLER_2D_RECT)
+        if (is_sampler(type))
             return 1;
     }
     return 0;
@@ -241,6 +314,13 @@ static int has_samplers(GLuint p)
 /* The texture target and the key-state texture a sampler of `type` gets. */
 static GLenum sampler_target(GLenum type, int wide, GLuint *tex)
 {
+    int k = more_sampler(type);
+    if (k >= 0) {
+        if (!more_samplers[k].tex[wide])
+            more_samplers[k].tex[wide] = make_key_texture(more_samplers[k].target, more_samplers[k].kind, wide);
+        *tex = more_samplers[k].tex[wide];
+        return more_samplers[k].target;
+    }
     if (type == GL_SAMPLER_CUBE) {
         *tex = wide ? tex_cube32 : tex_cube;
         return GL_TEXTURE_CUBE_MAP;
@@ -272,7 +352,7 @@ static void bind_samplers(GLuint p, int restore, int wide)
         GLint size, loc, units[32];
         GLenum type;
         _mesa_GetActiveUniform(p, i, sizeof(name), NULL, &size, &type, name);
-        if (type != GL_SAMPLER_2D && type != GL_SAMPLER_CUBE && type != GL_SAMPLER_2D_RECT)
+        if (!is_sampler(type))
             continue;
         loc = _mesa_GetUniformLocation(p, name);
         if (loc < 0 || size > 32)
@@ -292,6 +372,124 @@ static void bind_samplers(GLuint p, int restore, int wide)
     _mesa_ActiveTexture(GL_TEXTURE0);
 }
 
+/* The columns of a matrix attribute (matCxR has C), 1 for the others. */
+static int attrib_columns(GLenum type)
+{
+    switch (type) {
+    case GL_FLOAT_MAT2: case GL_FLOAT_MAT2x3: case GL_FLOAT_MAT2x4: return 2;
+    case GL_FLOAT_MAT3: case GL_FLOAT_MAT3x2: case GL_FLOAT_MAT3x4: return 3;
+    case GL_FLOAT_MAT4: case GL_FLOAT_MAT4x2: case GL_FLOAT_MAT4x3: return 4;
+    default: return 1;
+    }
+}
+
+/* An integer attribute (GLSL ES 3.00), read through glVertexAttribIPointer. */
+static int attrib_integer(GLenum type)
+{
+    switch (type) {
+    case GL_INT: case GL_INT_VEC2: case GL_INT_VEC3: case GL_INT_VEC4:
+    case GL_UNSIGNED_INT: case GL_UNSIGNED_INT_VEC2: case GL_UNSIGNED_INT_VEC3: case GL_UNSIGNED_INT_VEC4:
+        return 1;
+    default:
+        return 0;
+    }
+}
+
+/* GLSL ES 3.x programs: a target whose colour attachments match the fragment
+ * outputs' types at their locations (float RGBA8, int RGBA8I, unsigned
+ * RGBA8UI; docs/GLES3_PLAN.md Appendix B.1), so the variants are those a real
+ * draw into such a framebuffer uses: an integer output drawn into RGBA8 gives
+ * one no draw uses. One target per combination, made when first needed; 0
+ * for one float output at location 0, which draw_fbo is. */
+static GLuint typed_target(GLuint p)
+{
+    static struct { char kinds[5]; GLuint fbo; } made[16];
+    static unsigned nmade;
+    static const GLenum bufs[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2,
+                                    GL_COLOR_ATTACHMENT3 };
+    char kinds[5] = "----";
+    GLint n = 0, i, k;
+    GLenum draw[4];
+    GLuint fbo;
+
+    _mesa_GetProgramInterfaceiv(p, GL_PROGRAM_OUTPUT, GL_ACTIVE_RESOURCES, &n);
+    for (i = 0; i < n; i++) {
+        static const GLenum props[3] = { GL_TYPE, GL_LOCATION, GL_ARRAY_SIZE };
+        GLint v[3] = { 0, -1, 1 };
+        char kind;
+        _mesa_GetProgramResourceiv(p, GL_PROGRAM_OUTPUT, (GLuint)i, 3, props, 3, NULL, v);
+        if (v[1] < 0)
+            continue; /* gl_FragDepth */
+        kind = attrib_integer((GLenum)v[0]) ? (v[0] == GL_INT || v[0] == GL_INT_VEC2 || v[0] == GL_INT_VEC3 ||
+                                                v[0] == GL_INT_VEC4 ? 'i' : 'u')
+                                             : 'f';
+        for (k = v[1]; k < v[1] + (v[2] > 0 ? v[2] : 1) && k < 4; k++)
+            kinds[k] = kind;
+    }
+    if (!strcmp(kinds, "f---"))
+        return 0;
+    for (i = 0; i < (GLint)nmade; i++)
+        if (!strcmp(made[i].kinds, kinds))
+            return made[i].fbo;
+    if (nmade == ARRAY_SIZE(made))
+        return 0;
+    _mesa_GenFramebuffers(1, &fbo);
+    _mesa_BindFramebuffer(GL_FRAMEBUFFER, fbo);
+    for (k = 0; k < 4; k++) {
+        GLuint t;
+        draw[k] = kinds[k] == '-' ? GL_NONE : bufs[k];
+        if (kinds[k] == '-')
+            continue;
+        _mesa_GenTextures(1, &t);
+        _mesa_BindTexture(GL_TEXTURE_2D, t);
+        if (kinds[k] == 'f')
+            _mesa_TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 64, 64, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+        else if (kinds[k] == 'i')
+            _mesa_TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8I, 64, 64, 0, GL_RGBA_INTEGER, GL_BYTE, NULL);
+        else
+            _mesa_TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8UI, 64, 64, 0, GL_RGBA_INTEGER, GL_UNSIGNED_BYTE, NULL);
+        _mesa_TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        _mesa_TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        _mesa_FramebufferTexture2D(GL_FRAMEBUFFER, bufs[k], GL_TEXTURE_2D, t, 0);
+    }
+    _mesa_BindTexture(GL_TEXTURE_2D, 0);
+    _mesa_FramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, draw_depth);
+    _mesa_DrawBuffers(4, draw);
+    if (_mesa_CheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        fprintf(stderr, "v3dglslc: the target for outputs %s is incomplete\n", kinds);
+        _mesa_BindFramebuffer(GL_FRAMEBUFFER, draw_fbo);
+        return 0;
+    }
+    _mesa_BindFramebuffer(GL_FRAMEBUFFER, draw_fbo);
+    memcpy(made[nmade].kinds, kinds, sizeof(kinds));
+    made[nmade++].fbo = fbo;
+    return fbo;
+}
+
+/* A zeroed buffer bound at every binding the program's uniform blocks name
+ * (GLSL ES 3.00): a block without a buffer is an error to draw with. 64 KB,
+ * the largest block (GL_MAX_UNIFORM_BLOCK_SIZE). */
+static void bind_uniform_blocks(GLuint p)
+{
+    static GLuint ubo;
+    GLint n = 0, i, binding;
+    _mesa_GetProgramiv(p, GL_ACTIVE_UNIFORM_BLOCKS, &n);
+    if (!n)
+        return;
+    if (!ubo) {
+        void *zeros = calloc(1, 65536);
+        _mesa_GenBuffers(1, &ubo);
+        _mesa_BindBuffer(GL_UNIFORM_BUFFER, ubo);
+        _mesa_BufferData(GL_UNIFORM_BUFFER, 65536, zeros, GL_STATIC_DRAW);
+        free(zeros);
+    }
+    for (i = 0; i < n; i++) {
+        binding = 0;
+        _mesa_GetActiveUniformBlockiv(p, (GLuint)i, GL_UNIFORM_BLOCK_BINDING, &binding);
+        _mesa_BindBufferBase(GL_UNIFORM_BUFFER, (GLuint)binding, ubo);
+    }
+}
+
 /* Draw once per default key state (plan section 8.2) so the driver compiles
  * the variants real draws use: triangles, lines and points into an RGBA8
  * target with depth on. The fake device runs nothing; the draws only make
@@ -307,6 +505,7 @@ static int draw_key_states(GLuint p, int wide)
         return 0;
     _mesa_UseProgram(p);
     bind_samplers(p, 0, wide);
+    bind_uniform_blocks(p);
     _mesa_GetProgramiv(p, GL_ACTIVE_ATTRIBUTES, &n);
     for (i = 0; i < n; i++) {
         char name[256];
@@ -316,25 +515,35 @@ static int draw_key_states(GLuint p, int wide)
         loc = _mesa_GetAttribLocation(p, name);
         if (loc < 0)
             continue; /* built-in input such as gl_VertexID */
-        cols = type == GL_FLOAT_MAT2 ? 2 : type == GL_FLOAT_MAT3 ? 3 : type == GL_FLOAT_MAT4 ? 4 : 1;
+        cols = attrib_columns(type);
         for (col = 0; col < cols; col++) {
             _mesa_EnableVertexAttribArray(loc + col);
-            _mesa_VertexAttribPointer(loc + col, 4, GL_FLOAT, GL_FALSE, 0, zeros);
+            if (attrib_integer(type))
+                _mesa_VertexAttribIPointer(loc + col, 4, GL_INT, 0, zeros);
+            else
+                _mesa_VertexAttribPointer(loc + col, 4, GL_FLOAT, GL_FALSE, 0, zeros);
         }
     }
-    for (m = 0; m < ARRAY_SIZE(modes); m++)
-        _mesa_DrawArrays(modes[m], 0, 3);
-    /* EXT_draw_buffers: a fragment shader that writes gl_FragData[1] or up
-     * is also drawn into 2, 3 and 4 targets. gl_FragColor would be broadcast
-     * to them too, but every program would then compile nine more fragment
-     * shaders: ogles2 draws such a program into the first target only. */
     {
         GET_CURRENT_CONTEXT(ctx);
         struct gl_shader_program *sp = _mesa_lookup_shader_program(ctx, p);
         struct gl_linked_shader *fsh = sp ? sp->_LinkedShaders[MESA_SHADER_FRAGMENT] : NULL;
         const uint64_t more = BITFIELD64_BIT(FRAG_RESULT_DATA1) | BITFIELD64_BIT(FRAG_RESULT_DATA2) |
                               BITFIELD64_BIT(FRAG_RESULT_DATA3);
-        if (fsh && fsh->Program && (fsh->Program->info.outputs_written & more)) {
+        /* GLSL ES 3.x: one target with the outputs' locations and types. */
+        GLuint typed = sp && sp->GLSL_Version >= 300 ? typed_target(p) : 0;
+        if (typed)
+            _mesa_BindFramebuffer(GL_FRAMEBUFFER, typed);
+        for (m = 0; m < ARRAY_SIZE(modes); m++)
+            _mesa_DrawArrays(modes[m], 0, 3);
+        if (typed)
+            _mesa_BindFramebuffer(GL_FRAMEBUFFER, draw_fbo);
+        /* EXT_draw_buffers (GLSL ES 1.00): a fragment shader that writes
+         * gl_FragData[1] or up is also drawn into 2, 3 and 4 targets.
+         * gl_FragColor would be broadcast to them too, but every program
+         * would then compile nine more fragment shaders: ogles2 draws such a
+         * program into the first target only. */
+        if (sp && sp->GLSL_Version < 300 && fsh && fsh->Program && (fsh->Program->info.outputs_written & more)) {
             int n;
             for (n = 0; n < 3; n++) {
                 _mesa_BindFramebuffer(GL_FRAMEBUFFER, mrt_fbo[n]);
@@ -427,6 +636,86 @@ static int write_program(GLuint p, const char *path, const char *vs_src, const c
         return 0; /* nothing samples: no such file */
     }
     return 1;
+}
+
+/* -L: the ES 3.0 and 3.1 limits as Mesa's context answers them, after the
+ * limits main() sets: GLSL's gl_Max* constants and the compiler's and
+ * linker's checks come from the same ctx->Const, so ogles2.library's queries
+ * must answer these values (docs/GLES3_PLAN.md, Appendix B.1). One line
+ * each: the enum's name and its values. */
+static int print_limits(void)
+{
+#define L(e, n) { e, #e, n }
+    static const struct { GLenum e; const char *name; int n; } limits[] = {
+        /* ES 2.0 */
+        L(GL_MAX_VERTEX_ATTRIBS, 1), L(GL_MAX_VERTEX_UNIFORM_VECTORS, 1),
+        L(GL_MAX_FRAGMENT_UNIFORM_VECTORS, 1), L(GL_MAX_VARYING_VECTORS, 1),
+        L(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, 1), L(GL_MAX_TEXTURE_IMAGE_UNITS, 1),
+        L(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, 1), L(GL_MAX_TEXTURE_SIZE, 1),
+        L(GL_MAX_CUBE_MAP_TEXTURE_SIZE, 1), L(GL_MAX_RENDERBUFFER_SIZE, 1), L(GL_MAX_VIEWPORT_DIMS, 2),
+        L(GL_ALIASED_POINT_SIZE_RANGE, 2), L(GL_ALIASED_LINE_WIDTH_RANGE, 2), L(GL_SUBPIXEL_BITS, 1),
+        /* ES 3.0 */
+        L(GL_MAX_3D_TEXTURE_SIZE, 1), L(GL_MAX_ARRAY_TEXTURE_LAYERS, 1), L(GL_MAX_TEXTURE_LOD_BIAS, 1),
+        L(GL_MAX_DRAW_BUFFERS, 1), L(GL_MAX_COLOR_ATTACHMENTS, 1), L(GL_MAX_SAMPLES, 1),
+        L(GL_MAX_ELEMENT_INDEX, 1), L(GL_MAX_ELEMENTS_INDICES, 1), L(GL_MAX_ELEMENTS_VERTICES, 1),
+        L(GL_MAX_SERVER_WAIT_TIMEOUT, 1),
+        L(GL_MAX_VERTEX_UNIFORM_COMPONENTS, 1), L(GL_MAX_VERTEX_UNIFORM_BLOCKS, 1),
+        L(GL_MAX_VERTEX_OUTPUT_COMPONENTS, 1), L(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS, 1),
+        L(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, 1), L(GL_MAX_FRAGMENT_INPUT_COMPONENTS, 1),
+        L(GL_MIN_PROGRAM_TEXEL_OFFSET, 1), L(GL_MAX_PROGRAM_TEXEL_OFFSET, 1),
+        L(GL_MAX_UNIFORM_BUFFER_BINDINGS, 1), L(GL_MAX_UNIFORM_BLOCK_SIZE, 1),
+        L(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, 1), L(GL_MAX_COMBINED_UNIFORM_BLOCKS, 1),
+        L(GL_MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS, 1), L(GL_MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS, 1),
+        L(GL_MAX_VARYING_COMPONENTS, 1), L(GL_MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS, 1),
+        L(GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS, 1), L(GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS, 1),
+        /* ES 3.1 */
+        L(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, 1), L(GL_MAX_COMPUTE_UNIFORM_BLOCKS, 1),
+        L(GL_MAX_COMPUTE_TEXTURE_IMAGE_UNITS, 1), L(GL_MAX_COMPUTE_SHARED_MEMORY_SIZE, 1),
+        L(GL_MAX_COMPUTE_UNIFORM_COMPONENTS, 1), L(GL_MAX_COMPUTE_ATOMIC_COUNTER_BUFFERS, 1),
+        L(GL_MAX_COMPUTE_ATOMIC_COUNTERS, 1), L(GL_MAX_COMBINED_COMPUTE_UNIFORM_COMPONENTS, 1),
+        L(GL_MAX_COMPUTE_IMAGE_UNIFORMS, 1), L(GL_MAX_COMPUTE_SHADER_STORAGE_BLOCKS, 1),
+        L(GL_MAX_UNIFORM_LOCATIONS, 1), L(GL_MAX_FRAMEBUFFER_WIDTH, 1), L(GL_MAX_FRAMEBUFFER_HEIGHT, 1),
+        L(GL_MAX_FRAMEBUFFER_SAMPLES, 1), L(GL_MAX_VERTEX_ATOMIC_COUNTER_BUFFERS, 1),
+        L(GL_MAX_FRAGMENT_ATOMIC_COUNTER_BUFFERS, 1), L(GL_MAX_COMBINED_ATOMIC_COUNTER_BUFFERS, 1),
+        L(GL_MAX_VERTEX_ATOMIC_COUNTERS, 1), L(GL_MAX_FRAGMENT_ATOMIC_COUNTERS, 1),
+        L(GL_MAX_COMBINED_ATOMIC_COUNTERS, 1), L(GL_MAX_ATOMIC_COUNTER_BUFFER_SIZE, 1),
+        L(GL_MAX_ATOMIC_COUNTER_BUFFER_BINDINGS, 1), L(GL_MAX_VERTEX_IMAGE_UNIFORMS, 1),
+        L(GL_MAX_FRAGMENT_IMAGE_UNIFORMS, 1), L(GL_MAX_COMBINED_IMAGE_UNIFORMS, 1),
+        L(GL_MAX_VERTEX_SHADER_STORAGE_BLOCKS, 1), L(GL_MAX_FRAGMENT_SHADER_STORAGE_BLOCKS, 1),
+        L(GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS, 1), L(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS, 1),
+        L(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, 1), L(GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT, 1),
+        L(GL_MAX_IMAGE_UNITS, 1), L(GL_MAX_COMBINED_SHADER_OUTPUT_RESOURCES, 1),
+        L(GL_MIN_PROGRAM_TEXTURE_GATHER_OFFSET, 1), L(GL_MAX_PROGRAM_TEXTURE_GATHER_OFFSET, 1),
+        L(GL_MAX_SAMPLE_MASK_WORDS, 1), L(GL_MAX_COLOR_TEXTURE_SAMPLES, 1),
+        L(GL_MAX_DEPTH_TEXTURE_SAMPLES, 1), L(GL_MAX_INTEGER_SAMPLES, 1),
+        L(GL_MAX_VERTEX_ATTRIB_RELATIVE_OFFSET, 1), L(GL_MAX_VERTEX_ATTRIB_BINDINGS, 1),
+        L(GL_MAX_VERTEX_ATTRIB_STRIDE, 1),
+    };
+#undef L
+    static const GLenum indexed[] = { GL_MAX_COMPUTE_WORK_GROUP_COUNT, GL_MAX_COMPUTE_WORK_GROUP_SIZE };
+    unsigned i, k;
+    for (i = 0; i < ARRAY_SIZE(limits); i++) {
+        GLint64 v[2] = { 0, 0 };
+        _mesa_GetInteger64v(limits[i].e, v);
+        printf("%s", limits[i].name);
+        for (k = 0; k < (unsigned)limits[i].n; k++)
+            printf(" %lld", (long long)v[k]);
+        printf("\n");
+    }
+    for (i = 0; i < ARRAY_SIZE(indexed); i++) {
+        printf("%s", i ? "GL_MAX_COMPUTE_WORK_GROUP_SIZE" : "GL_MAX_COMPUTE_WORK_GROUP_COUNT");
+        for (k = 0; k < 3; k++) {
+            GLint64 v = 0;
+            _mesa_GetInteger64i_v(indexed[i], k, &v);
+            printf(" %lld", (long long)v);
+        }
+        printf("\n");
+    }
+    if (_mesa_GetError() != GL_NO_ERROR) {
+        fprintf(stderr, "v3dglslc: a limit query failed\n");
+        return 20;
+    }
+    return 0;
 }
 
 #ifdef __amigaos__
@@ -553,6 +842,7 @@ int main(int argc, char **argv)
 #ifdef __amigaos__
     int server = argc == 2 && !strcmp(argv[1], "SERVER");
 #endif
+    int limits = argc == 2 && !strcmp(argv[1], "-L");
     while (first + 1 < argc && argv[first][0] == '-') {
         if (!strcmp(argv[first], "-d"))
             debug = argv[first + 1];
@@ -599,15 +889,27 @@ int main(int argc, char **argv)
      * gl_Max* constants must equal them: dEQP-GLES2 builtin_variable): four
      * draw buffers (EXT_draw_buffers, M7 step 5; OGLES2_MAX_DRAW_BUFFERS), 16
      * texture units in each stage (OGLES2_MAX_STAGE_SAMPLERS; the driver
-     * offers 24) and 32 in all (OGLES2_MAX_TEXTURE_UNITS, M7 step 2; the
-     * driver offers 96). */
+     * offers 24) and 48 in all (OGLES2_MAX_TEXTURE_UNITS: ES 3.1's minimum,
+     * in every context version, so a GLSL ES 1.00 program's file is the same
+     * in both, docs/GLES3_PLAN.md §2; the driver offers 96). */
     {
         GET_CURRENT_CONTEXT(ctx);
         ctx->Const.MaxDrawBuffers = 4;
         ctx->Const.Program[MESA_SHADER_VERTEX].MaxTextureImageUnits = 16;
         ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxTextureImageUnits = 16;
-        ctx->Const.MaxCombinedTextureImageUnits = 32;
+        ctx->Const.Program[MESA_SHADER_COMPUTE].MaxTextureImageUnits = 16;
+        ctx->Const.MaxCombinedTextureImageUnits = 48;
+        /* Not GLSL's, but kept equal so -L lists exactly what ogles2.library
+         * answers: indices up to 2^24 - 1 (ES 3.0's minimum; the draws rebase
+         * indices on the CPU), no server-side wait (glWaitSync waits for
+         * nothing the CPU must), an LOD bias up to 15 (texture.c's
+         * MAX_LOD_BIAS; the driver offers 16). */
+        ctx->Const.MaxElementIndex = 0xffffff;
+        ctx->Const.MaxServerWaitTimeout = 0;
+        ctx->Const.MaxTextureLodBias = 15.0f;
     }
+    if (limits)
+        return print_limits();
     fprintf(stderr, "v3dglslc: renderer %s\n", (const char *)_mesa_GetString(GL_RENDERER));
 #ifdef __amigaos__
     if (server)

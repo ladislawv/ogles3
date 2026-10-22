@@ -11,6 +11,7 @@
 #include <utility/tagitem.h>
 #include "ogles2_api.h" /* generated: dispatch struct and every ogles2_* prototype */
 #include <GLES2/gl2ext.h>
+#include <GLES3/gl31.h>       /* the OpenGL ES 3.0 and 3.1 enums (ES3 contexts) */
 #include <libraries/ogles2.h> /* the extensions' enums gl2ext.h lacks */
 
 /* 1.1: glDrawRangeElements appended to the dispatch table. 1.2: the
@@ -78,11 +79,12 @@ struct OGLES2Share
 /* A GL context. Opaque to clients (struct OGLES2Context in the headers). */
 #define OGLES2_CONTEXT_MAGIC 0x474c4532UL /* "GLE2" */
 #define OGLES2_MAX_VERTEX_ATTRIBS 16
-/* Texture units are binding points: a program may use units 0-31 across its
- * stages (GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS), but a stage has at most 16
- * samplers, its texture indices 0-15 (GL_MAX_TEXTURE_IMAGE_UNITS, the
+/* Texture units are binding points: a program may use units 0-47 across its
+ * stages (GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS: ES 3.1's minimum, in every
+ * context version, docs/GLES3_PLAN.md §2; 32 until 1.3), but a stage has at
+ * most 16 samplers, its texture indices 0-15 (GL_MAX_TEXTURE_IMAGE_UNITS, the
  * TMU_CONFIG recipes' index). M7 step 2; plan 7.6. */
-#define OGLES2_MAX_TEXTURE_UNITS  32
+#define OGLES2_MAX_TEXTURE_UNITS  48
 #define OGLES2_MAX_STAGE_SAMPLERS 16
 #define OGLES2_MAX_VIEWPORT 4096 /* V3D_MAX_FRAMEBUFFER_SIZE on 4.2; GL_MAX_VIEWPORT_DIMS */
 
@@ -454,6 +456,7 @@ struct OGLES2Context
     UBYTE depth_bits, stencil_bits; /* of the default framebuffer */
     UBYTE depth_format;             /* OGLES2_DEPTH_*: the tile buffer's depth type */
     BOOL msaa;                      /* 4x MSAA on the default framebuffer (OGLES2_CCT_PISTORM_MSAA) */
+    UBYTE es_version;               /* OGLES2_CCT_PISTORM_ES_VERSION: 20, or 30 (ogles2_es3) */
     UBYTE job_clear_stencil;        /* the open job's stencil clear value (job.c) */
     GLfloat job_clear_rgba[4];      /* its colour clear value, for 16F targets (job.c) */
     UBYTE copy_logged;              /* glCopyTex* on the GPU: 1 from the default framebuffer, 2 from
@@ -775,6 +778,32 @@ void ogles2_error(struct OGLES2Context *ctx, GLenum error);
 static inline BOOL ogles2_context_valid(struct OGLES2Context *ctx)
 {
     return ctx && ctx->magic == OGLES2_CONTEXT_MAGIC;
+}
+/* The highest OpenGL ES version contexts may have: 3.0 only in test builds
+ * until it is complete (Makefile, ES3=1; docs/GLES3_PLAN.md §3). */
+#ifdef OGLES2_ES3_CONTEXTS
+#define OGLES2_ES_MAX 30
+#else
+#define OGLES2_ES_MAX 20
+#endif
+/* context.c: the extensions a context of its version offers (GL_NUM_EXTENSIONS). */
+ULONG ogles2_num_extensions(const struct OGLES2Context *ctx);
+/* An OpenGL ES 3.x context (OGLES2_CCT_PISTORM_ES_VERSION 30 or 31). */
+static inline BOOL ogles2_es3(const struct OGLES2Context *ctx)
+{
+    return ctx->es_version >= 30;
+}
+/* An ES 3.0-only entry (docs/GLES3_PLAN.md §3): a valid ES3 context, else
+ * FALSE, with GL_INVALID_OPERATION in a GLES2 context, as an entry it lacks. */
+static inline BOOL ogles2_es3_entry(struct OGLES2Context *ctx)
+{
+    if (!ogles2_context_valid(ctx))
+        return FALSE;
+    if (ctx->es_version < 30) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return FALSE;
+    }
+    return TRUE;
 }
 
 /* ---- device (device.c) ----

@@ -2,7 +2,8 @@
 
 **Status: plan (2026-10-18; revised eight times, research added and checked
 2026-10-19, every line citation and each stage reviewed for implementation
-the same day), work on branch `gles3`.** Nothing of it is implemented yet.
+the same day), work on branch `gles3`.** Stage A began 2026-10-22: item 1
+is done on the host (§4); the rest is not implemented yet.
 Its facts were checked against this repository, Mesa at the pinned commit
 (`~/mesa-build/mesa`), Khronos' `gl.xml` (`gen/khronos/`) and extension
 specifications, the Linux kernel's V3D driver (`drivers/gpu/drm/v3d`,
@@ -41,6 +42,39 @@ Mesa's driver, so they could follow later as an extension
   `local.env` says, or a 1.x build is overwritten. Another machine is set
   up with `setup_gles3.sh` from `gles3-setup.zip` (from the developer; not
   in the repository).
+- **Working on it** (the commands as of 2026-10-22; in WSL, in this copy):
+  - **Set-up:** `setup_gles3.sh` (above), then `. ./local.env` before every
+    build: it sets `B`, `BS`, `V`, `V3DGLSLC` (`~/ogles3-build`) and `MESA`,
+    `MESA_INSTALL` (this work's Mesa tree, §3). A new machine builds that
+    tree with `build_mesa.sh`, `apply_mesa_patches.sh` and
+    `ninja -C $MESA/build install` after `. ./local.env`.
+  - **Builds:** `make -j8` (as a release builds the library: ES 3.0
+    contexts refused) and `make -j8 ES3=1 B=~/ogles3-build/m68k-es3` (the
+    test build with ES 3.0 contexts); the compiler with
+    `OUT=$V bash tools/v3dglslc/build_host.sh`, and for the m68k one
+    `OUT=$V python3 tools/v3dglslc/replay.py` then
+    `OUT=$V bash tools/v3dglslc/build_m68k.sh`.
+  - **Checks on the PC, after every change:**
+    `OUT=$V bash tools/v3dglslc/test/compare_v3dp.sh` (host and m68k
+    compilers byte for byte, the ES3 test programs included; every file
+    decoded by `v3dp_dump.py`); `make es3-header-probe`;
+    `B=... bash tests/vamos.sh m8_es3 NOGPU` with the release build and
+    `... m8_es3 NOGPU ES3` with the test build (vamos runs state-only
+    tests: no GPU, no FPU); `B=~/ogles3-build/m68k-es3 bash
+    tests/m8_es3/check_limits.sh` (the library's limits against
+    `v3dglslc -L`). GLES2 programs' files must stay byte for byte what the
+    compiler wrote before (keep a compiler built before a change and
+    compare its output on `tools/v3dglslc/test/shaders`). The smoke test
+    has two failures under vamos that predate this work ("stub sets
+    GL_INVALID_OPERATION", "call through the context-free thunk": no
+    entry is a stub any more), not regressions.
+  - **On the A1200:** package `m8-1` (`bash tests/a1200/build_package.sh
+    m8-1`, then `amictl.py runpkg`): `smoke` and `m8_es3` with the
+    release build, `m8_es3 ES3` and `LIMITS` with the test build. Built,
+    not yet run (2026-10-22).
+  - **Where to go on:** stage A item 2's request codes and ES3 link state
+    together with item 3 (the reader of format 2), then items 4 and 5
+    (§4, each item's "Done" paragraph says what is in).
 - **`main`** (public) is the released 1.x line. Fixes and small additions go
   there and are released as 1.4, 1.5 and so on (the library's revision; the
   dispatch table only grows, the ABI version stays).
@@ -593,6 +627,39 @@ The base everything else stands on.
    compiles in `#version 300 es` shaders with its `#extension`, tested
    2026-10-19). The share groups' version check (§3). The headers' probe
    (§3).
+   **Done (2026-10-22, on the host; not yet on the A1200):**
+   `OGLES2_CCT_PISTORM_ES_VERSION` (`OGLES2_CCT_PISTORM_MIN + 6`), 30 only
+   in `make ES3=1` builds (`OGLES2_ES_MAX`), 31 refused until stage D;
+   `ctx->es_version`; ES3-only entries refuse in GLES2 contexts through
+   `ogles2_es3_entry`; the version strings from `OGLES2_LIB_VERSION` and
+   `_REVISION`; one extension table with a version mask (`context.c`)
+   behind `GL_EXTENSIONS`, `GL_NUM_EXTENSIONS` and `glGetStringi`;
+   `glGetInteger64v`; queries of up to 16 values; ES 3.0's limits in ES3
+   contexts (`state.c`'s `es3_limits`); 48 combined texture units in every
+   context (`OGLES2_MAX_TEXTURE_UNITS`, and `v3dglslc` sets the same); the
+   share groups' version check; `include/GLES3/` (`gl3.h`, `gl31.h`,
+   `gl3platform.h` from the registry as of 2026-08-03, the same as our
+   `gl2.h`). Found on the way: Khronos no longer publishes `gl3ext.h` (its
+   URL answers 404; ES3 extensions are in `gl2ext.h`), so the SDK's is a
+   placeholder of ours that includes `<GLES2/gl2ext.h>`; and the probe
+   (`make es3-header-probe`, five orders, GCC 6.5, GCC 16 and vbcc) found
+   that vbcc refuses a program that includes `<GLES2/gl2.h>` before
+   `<proto/ogles2.h>` and `<GLES3/gl3.h>` after it (Khronos' prototypes
+   come back under the wrappers' names), so `<proto/ogles2.h>` now ends by
+   setting `GL_GLES_PROTOTYPES` to 0; vbcc's warnings about typedefs
+   repeated inside Khronos' own headers (`gl2ext.h`'s
+   `GL_MESA_sampler_objects`) are accepted. **The limits:** `v3dglslc -L`
+   prints every ES 3.0 and 3.1 limit as its Mesa context answers it, and
+   `m8_es3 LIMITS` the library's in the same format; the two lists are
+   identical (42 lines up to ES 3.0). `v3dglslc` sets the limits that are
+   the library's own besides those of §3 (`GL_MAX_ELEMENT_INDEX` 2^24 - 1,
+   `GL_MAX_SERVER_WAIT_TIMEOUT` 0, `GL_MAX_TEXTURE_LOD_BIAS` 15, where Mesa
+   now offers 16), so the lists stay comparable; Mesa's others stand (15
+   uniform blocks a stage, 108 uniform buffer bindings, 69 combined
+   blocks). `m8_es3` (12 checks with a release build, 23 with an ES3
+   build) passes under vamos; the library is 243,024 bytes (+2,712).
+   "All of ES 3.0's state tables" grow with the features that own the
+   state (stages B and C).
 2. **GLSL ES 3.00 programs through the compiler:** the version check per
    context (`glCompileShader`), the new request codes, ES3 link state and
    its hash (tested on the host, `tools/v3dglslc/test/`: the library sends
@@ -606,6 +673,41 @@ The base everything else stands on.
    unsigned types, non-square matrices, `texelFetch`, `textureSize`,
    `textureLod`, switch, bit operations, array constructors, `flat`,
    `centroid` and `invariant` already compile (§2).
+   **Done so far (2026-10-22, on the host):** format 2 in `v3dp/FORMAT.md`
+   (provisional, major 0x8002) and in the writer: `PROGRAM`'s feature word,
+   `UNIFORMS`' block fields, `ATTRIBUTES`' explicit-location bit,
+   `UNIFORM_BLOCKS` with each stage's map, `INTERFACE`; the `.v3dx` layout
+   (`VARIANT_OF`) is specified for item 5. The writer refuses storage blocks,
+   atomic counters and images until stage D. `v3dp_dump.py` decodes format
+   2. The key-state draws of GLSL ES 3.x programs: a zeroed 64 KB buffer at
+   every binding the uniform blocks name (Mesa asserted in `u_upload_alloc`
+   without one), integer inputs through `glVertexAttribIPointer`, every
+   column of non-square matrices, and one target whose colour attachments
+   match the outputs' locations and types (RGBA8, RGBA8I, RGBA8UI) instead
+   of 1.3's two- to four-target RGBA8 draws, which gave a `uvec4` output
+   nine variants no draw uses. Seen in the test program (`es3.vert`,
+   `es3.frag`): Mesa gives the vertex stage the fragment-only block too
+   (its map has all three), so the map is what the state tracker binds, not
+   what each shader declares. GLES2 programs' files are byte for byte what
+   the compiler wrote before these changes (8 of 8). Every sampler type in
+   the key-state draws: the three of GLSL ES 1.00 keep their textures, the
+   others (3D, 2D array, the three shadow ones, integer and unsigned) get
+   1x1 textures of their kind, made when first bound (`more_samplers`):
+   RGBA8, DEPTH_COMPONENT16 compared, RGBA8I, RGBA8UI, and for the 32-bit
+   variants RGBA32F, DEPTH_COMPONENT32F, RGBA32I, RGBA32UI. Seen in the
+   test program (`es3tex.vert`, `es3tex.frag`): depth textures return 32
+   bits even at 16 bits of depth, so shadow samplers have their
+   `sampler_is_32b` bit in the plain variants too; 8-bit integer ones
+   return 16. The offline compiler writes format 2 for ES3 programs as it
+   is (`v3dglslc -o`), and `compare_v3dp.sh` checks the m68k compiler's
+   ES3 files against the host's. The version check per context
+   (`glCompileShader`'s `glsl_version`, the library's own reading of the
+   `#version` line after whitespace and comments, before any record or
+   compiler: `300 es` refused in GLES2 contexts, `310 es` until stage D,
+   with the reason in the info log; `m8_es3` checks both). Still to do in
+   this item: the request codes and the ES3 link state (with item 3: the
+   library cannot load a format 2 file before its reader can), the
+   `$VER:` string.
 3. **The reader and the draw:** format 2 (§3) and the lookup that goes on past
    a refused file; the recipe types GLSL ES 3.00 brings (Mesa's
    `QUNIFORM_TEXTURE_WIDTH`, `_HEIGHT`, `_DEPTH` and `_ARRAY_SIZE` for

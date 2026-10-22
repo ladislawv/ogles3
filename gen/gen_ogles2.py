@@ -241,6 +241,13 @@ def gen_proto_h(table):
         L.append("OGLES2_INLINE %s OGLES2_%s(%s)\n{ %s%s; }\n#define %s OGLES2_%s\n"
                  % (e.ret, e.name, ", ".join(decls) if decls else "void",
                     "" if e.ret == "void" else "return ", call, e.name, e.name))
+    # A Khronos header included after this one (<GLES3/gl3.h> after a
+    # program's <GLES2/gl2.h> turned its prototypes on) would declare the
+    # entries again under the wrappers' names, which vbcc refuses after their
+    # static definitions (docs/GLES3_PLAN.md §3, the headers' probe).
+    L.append("\n/* The wrappers above are the declarations: Khronos headers included\n"
+             " * after this one declare no prototypes of their own. */\n"
+             "#undef GL_GLES_PROTOTYPES\n#define GL_GLES_PROTOTYPES 0\n")
     L.append("\n#ifdef __cplusplus\n}\n#endif\n\n#endif\n")
     return "".join(L)
 

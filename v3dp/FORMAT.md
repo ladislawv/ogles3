@@ -239,8 +239,123 @@ Prog data (`struct v3d_fs_prog_data`), after the common part: `u8` each: `uses_p
 `force_per_sample_msaa`, `u8 pad[3]`, `u8 input_slots[64]`, `u32 flat_shade_flags[3]`,
 `u32 noperspective_flags[3]`, `u32 centroid_flags[3]`.
 
+## Format 2: OpenGL ES 3.x programs
+
+**Status: provisional (2026-10-22, docs/GLES3_PLAN.md §3).** Frozen with release 2.1, the
+first library that writes it; until then the `gles3` builds write major version **0x8002**,
+which every released reader refuses, and section numbers may still change.
+
+A program is written in format 2 when one of its shaders is GLSL ES 3.00 or 3.10
+(`#version 300 es`, `310 es`: Mesa's `GLSL_Version` 300 or more) or it was linked with ES3
+link state (below). Every other program keeps format 1.0, byte for byte as above, so GLES2
+programs' files stay readable by 1.x. A 1.x reader refuses format 2 at the header ("unknown
+format major version"): an ES3 program's file read by it would otherwise draw wrongly (1.x
+skips sections it does not know). A GLES2 context refuses a format 2 file from
+`glProgramBinary`.
+
+Everything not named here is as in 1.0: the encoding, the header (major 2, minor 0), the
+section framing, and the sections `STRINGS`, `STAGE_PARAMS` and `VARIANT`. A reader takes up
+to 256 sections (1.x: 64).
+
+### Changed sections
+
+**`PROGRAM`**, after the hash and the stages: `u32 features`, the must-understand feature
+bits. A reader refuses a file with a bit it does not know, so a library never misreads a
+program a newer one compiled (`glProgramBinary`, or a cache after a downgrade). Additions an
+older reader may skip go into new sections and minor versions, as in 1.0. Stage A defines no
+bit; transform feedback (stage C) and the ES 3.1 objects (stage D: storage blocks, atomic
+counters, images, compute, separable programs, explicit uniform locations) add theirs. Stages
+may also be bit 5 (compute, Mesa's `MESA_SHADER_COMPUTE`), and a separable program may have
+one stage only (stage D).
+
+**The hash** covers the program's link state after the shaders and the bindings, each as a
+pseudo-stage written the way the bindings' `"BIND"` is (stage `u32`, length `u32`, text),
+and only when the state is there:
+- `0x58464256` (`"XFBV"`), transform feedback: the buffer mode as four lowercase hex digits
+  (`8c8c` interleaved, `8c8d` separate) and `\n`, then each varying's name and `\n`, **in the
+  order given** (it is the buffers' layout; `"BIND"` is sorted by name, this is not);
+- `0x53455041` (`"SEPA"`), a separable program: the text `1`.
+
+So two programs of the same sources and different link state never share a file.
+
+**`UNIFORMS`**, each uniform after its two sampler words: `i32` block (its index in
+`UNIFORM_BLOCKS`, -1 outside a block), `i32` offset in the block in bytes, `i32` array stride,
+`i32` matrix stride (-1 each outside a block; Mesa's `gl_uniform_storage` fields), `u32` flags2:
+bit 0 row-major. A block member has no storage places.
+
+**`ATTRIBUTES`**: the GL type may be an integer one (`GL_INT_VEC4`, `GL_UNSIGNED_INT`, ...)
+or a non-square matrix (`GL_FLOAT_MAT2x3`, ...; its columns as for square ones). In the
+location word, bit 30: the input has a location of its own (`layout(location)`, Mesa's
+`explicit_location`); bits 0-7 are then that location, which the runtime keeps and
+`glBindAttribLocation` cannot move. Without it the runtime numbers inputs as in 1.0.
+
+### New sections
+
+| Type | Name | Count |
+|---|---|---|
+| 7 | `UNIFORM_BLOCKS` | exactly 1 |
+| 8 | `INTERFACE` | exactly 1 |
+| 9 | `VARIANT_OF` | `.v3dx` files only, exactly 1, third |
+
+**`UNIFORM_BLOCKS`**: the program's uniform blocks, then each stage's map to them.
+
+| Type | Field |
+|---|---|
+| `u32` | number of blocks (Mesa's `UniformBlocks`, in its order; an array of blocks is one block per element, `name[i]`) |
+| per block: | |
+| `str` | name |
+| `u32` | initial binding (`Binding`: 0, or `layout(binding)`) |
+| `u32` | data size in bytes (`UniformBufferSize`) |
+| `u32` | stages that reference it (bit per stage, `stageref`) |
+| `u32` | packing: 0 std140, 1 shared, 2 packed, 3 std430 (`_Packing`) |
+| `u32` | active members, then `u32[n]` their indices in `UNIFORMS` |
+| `u32` | number of stage maps, one per linked stage |
+| per stage: | |
+| `u32` | stage |
+| `u32` | blocks the stage reads, then `u32[m]`: for its block *i* the program's block index |
+
+A stage reads its block *i* as `QUNIFORM_UBO_ADDR` unit *i* + 1 (unit 0 is its own constant
+buffer, as in 1.0) and `QUNIFORM_GET_UBO_SIZE` data *i*. A stage's order is not the
+program's: the program's list appends each stage's blocks in stage order, so the map is
+needed.
+
+**`INTERFACE`**: the program's inputs and outputs, as Mesa's `ProgramResourceList` has them
+(`GL_PROGRAM_INPUT` and `GL_PROGRAM_OUTPUT` entries, built-ins such as `gl_VertexID` and
+`gl_FragDepth` included): `glGetFragDataLocation` now, and `glGetProgramResource*` and
+program pipelines in stage D.
+
+| Type | Field |
+|---|---|
+| `u32` | number of entries |
+| per entry: | |
+| `u32` | interface: `GL_PROGRAM_INPUT` (0x92E3) or `GL_PROGRAM_OUTPUT` (0x92E4) |
+| `str` | name |
+| `u32` | GL type of one element |
+| `u32` | array elements (0 if not an array) |
+| `i32` | location: an input's attribute location, an output's colour number (relative to `FRAG_RESULT_DATA0`); -1 for a built-in |
+| `u8` | interpolation: 0 none, 1 smooth, 2 flat, 3 no perspective (`INTERP_MODE_*`) |
+| `u8` | precision: 0 none, 1 high, 2 medium, 3 low (`GLSL_PRECISION_*`) |
+| `u8` | flags: bit 0 explicit location |
+| `u8` | index (an output's; 0 in ES) |
+| `u32` | stages that reference it (bit per stage, `StageReferences`) |
+
+### `.v3dx`: a program's draw-time variants
+
+The variants compiled for draw states a program's own file lacks (docs/GLES3_PLAN.md stage A
+item 5), in a file of their own: `<24 hex digits>.v3dx`, in the cache, or shipped beside the
+program's file. Its format version is that of the program's file (1.0 for a GLES2 program).
+Sections: `PROGRAM` (the program's), `STRINGS` (the empty string), `VARIANT_OF`, then
+`VARIANT`s, at most 256 sections in all; a writer that would exceed that drops the oldest
+variants.
+
+**`VARIANT_OF`**: `u32` the CRC-32 (as the header's) of the program file's `STAGE_PARAMS`,
+`UNIFORMS` and `ATTRIBUTES` sections, their headers and payloads in file order. A variant's
+uniform recipe indexes the constant buffer as its program's link laid it out, so a runtime
+takes variants only from a `.v3dx` whose CRC is that of the program file it loaded.
+
 ## Versioning
 
 Adding a section type or appending fields at the end of a section is a minor version change.
 Anything else is a major version change. The reader skips unknown sections and ignores
-trailing bytes it does not know.
+trailing bytes it does not know. A format 2 file may also carry feature bits (`PROGRAM`); a
+reader refuses bits it does not know.

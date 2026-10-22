@@ -21,6 +21,7 @@
 #endif
 
 #define V3DP_MAJOR 1
+#define V3DP_MAJOR2 0x8002 /* format 2 (ES3 programs): provisional until release 2.1, FORMAT.md */
 #define V3DP_MINOR 0
 #define V3DP_V3D_VER 42
 
@@ -31,6 +32,8 @@ enum {
     SEC_UNIFORMS = 4,
     SEC_ATTRIBUTES = 5,
     SEC_VARIANT = 6,
+    SEC_UNIFORM_BLOCKS = 7, /* format 2 */
+    SEC_INTERFACE = 8,      /* format 2 */
 };
 
 enum { VARIANT_VS = 0, VARIANT_VS_BIN = 1, VARIANT_FS = 4 };
@@ -394,7 +397,7 @@ static int put_stage_params(struct buf *b, struct buf *strings, mesa_shader_stag
     return 0;
 }
 
-static int put_uniforms(struct buf *b, struct buf *strings, struct gl_shader_program *prog)
+static int put_uniforms(struct buf *b, struct buf *strings, struct gl_shader_program *prog, int format2)
 {
     const struct gl_shader_program_data *data = prog->data;
     unsigned i, j, s;
@@ -444,11 +447,95 @@ static int put_uniforms(struct buf *b, struct buf *strings, struct gl_shader_pro
             mesa_shader_stage st = stages_in_file[s];
             put_u32(b, sampler && u->opaque[st].active ? u->opaque[st].index : 0xffffffffu);
         }
+        /* Format 2: a uniform block member's place in its block (its
+         * storage places are none: the block's buffer holds it). */
+        if (format2) {
+            int in_block = u->block_index >= 0 && !u->is_shader_storage;
+            put_u32(b, in_block ? (uint32_t)u->block_index : 0xffffffffu);
+            put_u32(b, in_block ? (uint32_t)u->offset : 0xffffffffu);
+            put_u32(b, in_block ? (uint32_t)u->array_stride : 0xffffffffu);
+            put_u32(b, in_block ? (uint32_t)u->matrix_stride : 0xffffffffu);
+            put_u32(b, in_block && u->row_major ? 1u : 0u);
+        }
     }
     return 0;
 }
 
-static int put_attributes(struct buf *b, struct buf *strings, struct gl_shader_program *prog)
+/* Format 2: the program's uniform blocks, then each stage's map from its
+ * block numbers (QUNIFORM_UBO_ADDR's unit - 1) to the program's. */
+static int put_uniform_blocks(struct buf *b, struct buf *strings, struct gl_shader_program *prog)
+{
+    const struct gl_shader_program_data *d = prog->data;
+    unsigned i, j, n, s;
+
+    put_u32(b, d->NumUniformBlocks);
+    for (i = 0; i < d->NumUniformBlocks; i++) {
+        const struct gl_uniform_block *ub = &d->UniformBlocks[i];
+        put_u32(b, str_add(strings, ub->name.string));
+        put_u32(b, ub->Binding);
+        put_u32(b, ub->UniformBufferSize);
+        put_u32(b, ub->stageref);
+        put_u32(b, (uint32_t)ub->_Packing);
+        for (j = 0, n = 0; j < d->NumUniformStorage; j++)
+            if (d->UniformStorage[j].block_index == (int)i && !d->UniformStorage[j].is_shader_storage)
+                n++;
+        put_u32(b, n);
+        for (j = 0; j < d->NumUniformStorage; j++)
+            if (d->UniformStorage[j].block_index == (int)i && !d->UniformStorage[j].is_shader_storage)
+                put_u32(b, j);
+    }
+    for (s = 0, n = 0; s < 2; s++)
+        if (prog->_LinkedShaders[stages_in_file[s]])
+            n++;
+    put_u32(b, n);
+    for (s = 0; s < 2; s++) {
+        const struct gl_linked_shader *sh = prog->_LinkedShaders[stages_in_file[s]];
+        if (!sh)
+            continue;
+        put_u32(b, stages_in_file[s]);
+        put_u32(b, sh->Program->sh.NumUniformBlocks);
+        for (i = 0; i < sh->Program->sh.NumUniformBlocks; i++) {
+            const struct gl_uniform_block *ub = sh->Program->sh.UniformBlocks[i];
+            if (ub < d->UniformBlocks || ub >= d->UniformBlocks + d->NumUniformBlocks) {
+                fprintf(stderr, "v3dp: a stage's uniform block is not the program's\n");
+                return -1;
+            }
+            put_u32(b, (uint32_t)(ub - d->UniformBlocks));
+        }
+    }
+    return 0;
+}
+
+/* Format 2: the program's inputs and outputs (Mesa's GL_PROGRAM_INPUT and
+ * GL_PROGRAM_OUTPUT resources, built-ins included). */
+static int put_interface(struct buf *b, struct buf *strings, struct gl_shader_program *prog)
+{
+    const struct gl_program_resource *res = prog->data->ProgramResourceList;
+    unsigned i, n = 0;
+
+    for (i = 0; i < prog->data->NumProgramResourceList; i++)
+        if (res[i].Type == GL_PROGRAM_INPUT || res[i].Type == GL_PROGRAM_OUTPUT)
+            n++;
+    put_u32(b, n);
+    for (i = 0; i < prog->data->NumProgramResourceList; i++) {
+        const struct gl_shader_variable *var = res[i].Data;
+        if (res[i].Type != GL_PROGRAM_INPUT && res[i].Type != GL_PROGRAM_OUTPUT)
+            continue;
+        put_u32(b, res[i].Type);
+        put_u32(b, str_add(strings, var->name.string));
+        put_u32(b, glsl_without_array(var->type)->gl_type);
+        put_u32(b, glsl_type_is_array(var->type) ? glsl_get_length(var->type) : 0);
+        put_u32(b, (uint32_t)var->location);
+        put_u8(b, var->interpolation);
+        put_u8(b, var->precision);
+        put_u8(b, var->explicit_location ? 1 : 0);
+        put_u8(b, var->index);
+        put_u32(b, res[i].StageReferences);
+    }
+    return 0;
+}
+
+static int put_attributes(struct buf *b, struct buf *strings, struct gl_shader_program *prog, int format2)
 {
     const struct gl_linked_shader *vs = prog->_LinkedShaders[MESA_SHADER_VERTEX];
     const struct gl_program_resource *res = prog->data->ProgramResourceList;
@@ -485,7 +572,9 @@ static int put_attributes(struct buf *b, struct buf *strings, struct gl_shader_p
                 }
             put_u32(b, str_add(strings, var->name.string));
             put_u32(b, var->type->gl_type);
-            put_u32(b, (uint32_t)var->location | (mask << 8) | 0x80000000u);
+            /* Format 2: bit 30, a location of its own (layout(location)). */
+            put_u32(b, (uint32_t)var->location | (mask << 8) | 0x80000000u |
+                           (format2 && var->explicit_location ? 0x40000000u : 0u));
             put_u32(b, first >= 0 ? (uint32_t)util_bitcount64(inputs_read & BITFIELD64_MASK(attr + first))
                                   : 0xffffffffu);
         }
@@ -511,12 +600,28 @@ int v3dp_write(const char *path, struct gl_shader_program *prog, unsigned num_so
     blake3_hash hash;
     char commit[12];
     unsigned i, num_sections = 0, stage_mask = 0;
-    int rc = -1;
+    int rc = -1, format2 = prog->GLSL_Version >= 300;
     FILE *f;
 
     if (capture_failed) {
         fprintf(stderr, "v3dp: variant capture failed\n");
         return -1;
+    }
+    for (i = 0; i < num_sources; i++)
+        if (stages[i] == V3DP_HASH_XFBV || stages[i] == V3DP_HASH_SEPA)
+            format2 = 1;
+    /* ES 3.1's objects have no place in the file before stage D
+     * (docs/GLES3_PLAN.md §7): no ES 3.1 context asks for them yet. */
+    if (prog->data->NumShaderStorageBlocks || prog->data->NumAtomicBuffers) {
+        fprintf(stderr, "v3dp: storage blocks and atomic counters are not supported yet\n");
+        return -1;
+    }
+    for (i = 0; i < 2; i++) {
+        const struct gl_linked_shader *sh = prog->_LinkedShaders[stages_in_file[i]];
+        if (sh && sh->Program->info.num_images) {
+            fprintf(stderr, "v3dp: images are not supported yet\n");
+            return -1;
+        }
     }
     put_u8(&strings, 0);
 
@@ -538,6 +643,8 @@ int v3dp_write(const char *path, struct gl_shader_program *prog, unsigned num_so
             stage_mask |= 1u << stages_in_file[i];
     put_bytes(&sec, hash, sizeof(hash));
     put_u32(&sec, stage_mask);
+    if (format2)
+        put_u32(&sec, 0); /* features: none defined yet (FORMAT.md, format 2) */
     put_section(&program, SEC_PROGRAM, &sec);
     num_sections++;
     buf_free(&sec);
@@ -554,17 +661,29 @@ int v3dp_write(const char *path, struct gl_shader_program *prog, unsigned num_so
         buf_free(&sec);
     }
 
-    /* UNIFORMS, ATTRIBUTES */
-    if (put_uniforms(&sec, &strings, prog))
+    /* UNIFORMS, ATTRIBUTES; format 2: UNIFORM_BLOCKS, INTERFACE */
+    if (put_uniforms(&sec, &strings, prog, format2))
         goto out;
     put_section(&body, SEC_UNIFORMS, &sec);
     num_sections++;
     buf_free(&sec);
-    if (put_attributes(&sec, &strings, prog))
+    if (put_attributes(&sec, &strings, prog, format2))
         goto out;
     put_section(&body, SEC_ATTRIBUTES, &sec);
     num_sections++;
     buf_free(&sec);
+    if (format2) {
+        if (put_uniform_blocks(&sec, &strings, prog))
+            goto out;
+        put_section(&body, SEC_UNIFORM_BLOCKS, &sec);
+        num_sections++;
+        buf_free(&sec);
+        if (put_interface(&sec, &strings, prog))
+            goto out;
+        put_section(&body, SEC_INTERFACE, &sec);
+        num_sections++;
+        buf_free(&sec);
+    }
 
     /* VARIANT, in compile order */
     for (i = 0; i < num_variants; i++) {
@@ -586,7 +705,7 @@ int v3dp_write(const char *path, struct gl_shader_program *prog, unsigned num_so
     memcpy(commit, V3DP_MESA_COMMIT,
            strlen(V3DP_MESA_COMMIT) < sizeof(commit) ? strlen(V3DP_MESA_COMMIT) : sizeof(commit));
     put_bytes(&file, "V3DP", 4);
-    put_u16(&file, V3DP_MAJOR);
+    put_u16(&file, format2 ? V3DP_MAJOR2 : V3DP_MAJOR);
     put_u16(&file, V3DP_MINOR);
     put_u32(&file, V3DP_V3D_VER);
     put_bytes(&file, commit, sizeof(commit));
@@ -612,8 +731,8 @@ int v3dp_write(const char *path, struct gl_shader_program *prog, unsigned num_so
         fprintf(stderr, "v3dp: write error on %s\n", path);
         goto out;
     }
-    fprintf(stderr, "v3dp: wrote %s (%u bytes, %u variants)\n", path, (unsigned)file.len,
-            num_variants);
+    fprintf(stderr, "v3dp: wrote %s (%u bytes, %u variants%s)\n", path, (unsigned)file.len,
+            num_variants, format2 ? ", format 2" : "");
     rc = 0;
 out:
     buf_free(&program);

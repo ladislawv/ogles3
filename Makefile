@@ -22,6 +22,12 @@ CPU    := -mcpu=68020 -m68881 -fbbb=abcfhilmnprsz0
 # a hang loses nothing). Use its own B, e.g. B=~/ogles2-build/m68k-sync.
 CFLAGS := -std=gnu99 -O2 -Wall -Wextra -Wno-unused-parameter -fno-strict-aliasing $(CPU) -mcrt=clib2 \
           $(EXTRA_CFLAGS)
+# ES3=1: a test build whose contexts accept OGLES2_CCT_PISTORM_ES_VERSION 30
+# (OpenGL ES 3.0 while it is being built: no release offers part of one,
+# docs/GLES3_PLAN.md §3). Use its own B, e.g. B=~/ogles3-build/m68k-es3.
+ifeq ($(ES3),1)
+CFLAGS += -DOGLES2_ES3_CONTEXTS
+endif
 INC    := -Iinclude -I$(B)/gen/include -Iogles2 -I$(B)/gen/ogles2
 # Library objects must not pull C library or startup code.
 LIBLINK := $(CPU) -mcrt=clib2 -nostdlib -nostartfiles -nodefaultlibs -noixemul
@@ -55,7 +61,7 @@ CLIENT_OBJ := $(patsubst %.c,$(B)/obj/%.o,$(CLIENT_SRC)) $(B)/obj/client/lvo.o \
 .PHONY: all gen clean vbcc
 all: $(B)/fpcheck.ok $(B)/libv3dcore.a $(B)/ogles2.library $(B)/libogles2.a $(B)/tests/abi_layout $(B)/tests/smoke \
      $(B)/tests/abi_probe $(B)/tests/m1_clear $(B)/tests/m1_probe $(B)/tests/m1_draw $(B)/tests/m1_hwprobe $(B)/tests/m1_soak $(B)/tests/m2_link $(B)/tests/m2_texture $(B)/tests/m2_elements $(B)/tests/m2_buffers $(B)/tests/m4_stress $(B)/tests/m4_depth $(B)/tests/m4_setbitmap $(B)/tests/gears_gles2 $(B)/tests/cachetime $(B)/tests/emuspeed $(B)/tests/m5_fbo \
-     $(B)/tests/rtt_churn $(B)/tests/m6_share $(B)/tests/m6_tasks $(B)/tests/m6_ext $(B)/tests/m6_tfu $(B)/tests/m6_flip $(B)/tests/m6_vsync $(B)/tests/m6_msaa $(B)/tests/m7_points $(B)/tests/m7_s3tc $(B)/tests/m7_clip $(B)/tests/m7_mrt $(B)/tests/m7_half $(B)/tests/m7_copy $(B)/cmd/OGLES2Log $(B)/amictl/amictld
+     $(B)/tests/rtt_churn $(B)/tests/m6_share $(B)/tests/m6_tasks $(B)/tests/m6_ext $(B)/tests/m6_tfu $(B)/tests/m6_flip $(B)/tests/m6_vsync $(B)/tests/m6_msaa $(B)/tests/m7_points $(B)/tests/m7_s3tc $(B)/tests/m7_clip $(B)/tests/m7_mrt $(B)/tests/m7_half $(B)/tests/m7_copy $(B)/tests/m8_es3 $(B)/cmd/OGLES2Log $(B)/amictl/amictld
 
 # ---- generated code (plan section 6.6). Re-run when the inputs or the set of
 # implemented ogles2_* functions change.
@@ -200,6 +206,27 @@ $(B)/tests/m7_half: tests/m7_half/m7_half.c $(B)/libogles2.a
 $(B)/tests/m7_copy: tests/m7_copy/m7_copy.c tests/common/smooth_shaders.h tests/common/tex_shaders.h $(B)/libogles2.a
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
+$(B)/tests/m8_es3: tests/m8_es3/m8_es3.c $(B)/libogles2.a
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
+# The GLES3 headers with <proto/ogles2.h> in every order (docs/GLES3_PLAN.md
+# §3): GCC 6.5 and GCC 16 with -Werror, vbcc without a message but its
+# warnings inside Khronos' headers (gl2ext.h's GL_MESA_sampler_objects repeats
+# ES 3.0's sampler typedefs, which vbcc's C99 mode warns about).
+GCC16 ?= $(HOME)/amiga-gcc162-install/bin/m68k-amigaos-gcc
+.PHONY: es3-header-probe
+es3-header-probe: $(GEN_STAMP)
+	@for o in 1 2 3 4 5; do \
+	  $(CC) $(CFLAGS) -Werror $(INC) -DORDER=$$o -fsyntax-only tests/es3_headers/probe.c || exit 1; \
+	  $(GCC16) -std=gnu99 -O2 -Wall -Wextra -Werror -mcrt=nix20 $(INC) -DORDER=$$o -fsyntax-only \
+	      tests/es3_headers/probe.c || exit 1; \
+	  if [ -x $(VBCC)/bin/vc ]; then \
+	    out=$$($(VC) $(VCFLAGS) -DORDER=$$o -c tests/es3_headers/probe.c -o /dev/null 2>&1) || { echo "$$out"; exit 1; }; \
+	    ours=$$(echo "$$out" | grep -E '^(warning|error)' | grep -vE ' of "(GLES2|GLES3|KHR)/'); \
+	    [ -z "$$ours" ] || { echo "vbcc, ORDER $$o:"; echo "$$out"; exit 1; }; \
+	  fi; \
+	  echo "es3-header-probe: order $$o ok"; \
+	done
 $(B)/tests/m6_flip: tests/m6_flip/m6_flip.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(INC) $< -o $@

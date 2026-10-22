@@ -394,6 +394,41 @@ static void write_record(const char *path, const char *log);
 static void write_fail_record(const char *path, ULONG compiler, const char *log);
 static char *dup_text(const char *t, ULONG n);
 
+/* The GLSL ES version a source asks for: its #version line, which only
+ * whitespace and comments may precede (GLSL ES 3.00 3.4), as major x 100 +
+ * minor (300 for "300 es"); 100 without one; 0 for a line this does not
+ * understand (the compiler then says what is wrong). */
+static ULONG glsl_version(const char *p)
+{
+    ULONG v = 0;
+    for (;;) {
+        while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n')
+            p++;
+        if (p[0] == '/' && p[1] == '/') {
+            while (*p && *p != '\n')
+                p++;
+        } else if (p[0] == '/' && p[1] == '*') {
+            for (p += 2; *p && !(p[0] == '*' && p[1] == '/'); p++)
+                ;
+            if (*p)
+                p += 2;
+        } else {
+            break;
+        }
+    }
+    if (*p != '#')
+        return 100;
+    for (p++; *p == ' ' || *p == '\t'; p++)
+        ;
+    if (strncmp(p, "version", 7) || (p[7] != ' ' && p[7] != '\t'))
+        return 100; /* another directive first: no #version */
+    for (p += 7; *p == ' ' || *p == '\t'; p++)
+        ;
+    while (*p >= '0' && *p <= '9' && v < 10000)
+        v = v * 10 + (ULONG)(*p++ - '0');
+    return v;
+}
+
 /* With the on-target compiler (plan 8.4) a shader is compiled here, for
  * its GL_COMPILE_STATUS and info log; its record in the disk cache
  * (shader_record) answers for it next time without the compiler. Without
@@ -403,7 +438,7 @@ void ogles2_glCompileShader(struct OGLES2Context *ctx, GLuint shader)
 {
     struct OGLES2Shader *s;
     char path[96], *log;
-    ULONG compiler;
+    ULONG compiler, version;
     int rc;
     if (!ogles2_context_valid(ctx))
         return;
@@ -415,6 +450,19 @@ void ogles2_glCompileShader(struct OGLES2Context *ctx, GLuint shader)
     s->compiled = GL_FALSE;
     if (!s->source)
         return;
+    /* The GLSL ES versions the context's version allows (docs/GLES3_PLAN.md
+     * §1, §3): 1.00 in every context, 3.00 in ES 3 contexts, 3.10 in ES 3.1
+     * ones. The compiler's Mesa context accepts them all, so this is the
+     * library's own check, before any record or compiler, and so also
+     * without the compiler. */
+    version = glsl_version(s->source);
+    if ((version == 300 && !ogles2_es3(ctx)) || (version == 310 && ctx->es_version < 31)) {
+        static const char *const msg[2] = {"ERROR: 0:1: GLSL ES 3.00 needs an OpenGL ES 3 context\n",
+                                           "ERROR: 0:1: GLSL ES 3.10 needs an OpenGL ES 3.1 context\n"};
+        const char *m = msg[version == 310];
+        s->info_log = dup_text(m, str_len(m));
+        return;
+    }
     if (!(compiler = ogles2_compiler_id())) {
         s->compiled = GL_TRUE;
         return;
@@ -1653,7 +1701,7 @@ static void set_uniform(struct OGLES2Context *ctx, GLint location, GLsizei count
         count = ne - first; /* past the array's end: ignored (GLES 2.0 2.10.4) */
     if (ukind == K_SAMPLER) {
         for (i = 0; i < count; i++)
-            if (iv[i] < 0 || iv[i] >= OGLES2_MAX_TEXTURE_UNITS) { /* a unit, 0-31 (combined) */
+            if (iv[i] < 0 || iv[i] >= OGLES2_MAX_TEXTURE_UNITS) { /* a unit, 0-47 (combined) */
                 ogles2_error(ctx, GL_INVALID_VALUE);
                 return;
             }

@@ -535,13 +535,70 @@ void ogles2_glClearStencil(struct OGLES2Context *ctx, GLint s)
 }
 
 /* ---- queries ----
- * Each query yields up to eight values of one kind; glGetBooleanv,
- * glGetIntegerv and glGetFloatv convert them as GLES 2.0 section 6.1.2 says.
- * "Normalised" floats (colours, depth values) map linearly to the full
- * integer range in glGetIntegerv; others round to the nearest integer. */
+ * Each query yields up to 16 values of one kind; glGetBooleanv,
+ * glGetIntegerv, glGetInteger64v and glGetFloatv convert them as GLES 2.0
+ * section 6.1.2 (ES 3.0 6.1.2) says. "Normalised" floats (colours, depth
+ * values) map linearly to the full integer range in glGetIntegerv; others
+ * round to the nearest integer. */
 
 enum kind { K_BOOL, K_INT, K_UINT, K_FLOAT, K_NFLOAT }; /* K_UINT: a mask, unsigned as a float */
-struct value { enum kind kind; int n; GLint i[8]; GLfloat f[8]; };
+struct value { enum kind kind; int n; GLint i[16]; GLfloat f[16]; };
+
+/* ES 3.0's limits that GLES2 contexts lack, answered in ES3 contexts only
+ * (docs/GLES3_PLAN.md stage A item 1). The values are those `v3dglslc -L`
+ * lists (Mesa's, with v3dglslc's own limits): GLSL's gl_Max* constants and
+ * the compiler's checks come from the same values. */
+static const struct { GLenum pname; GLint value; } es3_limits[] = {
+    {GL_MAX_3D_TEXTURE_SIZE, 4096},
+    {GL_MAX_ARRAY_TEXTURE_LAYERS, 2048},
+    {GL_MAX_SAMPLES, 4},
+    {GL_MAX_ELEMENT_INDEX, 0xffffff},       /* ES 3.0's minimum: indices are rebased on the CPU */
+    {GL_MAX_ELEMENTS_INDICES, 3000},        /* Mesa's recommendation (MAX_ARRAY_LOCK_SIZE) */
+    {GL_MAX_ELEMENTS_VERTICES, 3000},
+    {GL_MAX_SERVER_WAIT_TIMEOUT, 0},        /* glWaitSync has nothing to wait for on the GPU */
+    {GL_MAX_VERTEX_UNIFORM_COMPONENTS, 16352},
+    {GL_MAX_VERTEX_UNIFORM_BLOCKS, 15},     /* 16 constant buffers a stage, the default one included */
+    {GL_MAX_VERTEX_OUTPUT_COMPONENTS, 64},
+    {GL_MAX_FRAGMENT_UNIFORM_COMPONENTS, 16380},
+    {GL_MAX_FRAGMENT_UNIFORM_BLOCKS, 15},
+    {GL_MAX_FRAGMENT_INPUT_COMPONENTS, 64},
+    {GL_MIN_PROGRAM_TEXEL_OFFSET, -8},
+    {GL_MAX_PROGRAM_TEXEL_OFFSET, 7},
+    {GL_MAX_UNIFORM_BUFFER_BINDINGS, 108},
+    {GL_MAX_UNIFORM_BLOCK_SIZE, 65536},
+    {GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, 256},
+    {GL_MAX_COMBINED_UNIFORM_BLOCKS, 69},
+    {GL_MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS, 262112},
+    {GL_MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS, 262140},
+    {GL_MAX_VARYING_COMPONENTS, 64},
+    {GL_MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS, 64},
+    {GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS, 4},
+    {GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS, 4},
+};
+
+static int lookup_es3(struct OGLES2Context *ctx, GLenum pname, struct value *v)
+{
+    ULONG k;
+    v->kind = K_INT;
+    v->n = 1;
+    switch (pname) {
+    case GL_MAJOR_VERSION:
+        v->i[0] = ctx->es_version / 10;
+        return 1;
+    case GL_MINOR_VERSION:
+        v->i[0] = ctx->es_version % 10;
+        return 1;
+    case GL_NUM_EXTENSIONS:
+        v->i[0] = (GLint)ogles2_num_extensions(ctx);
+        return 1;
+    }
+    for (k = 0; k < sizeof(es3_limits) / sizeof(es3_limits[0]); k++)
+        if (es3_limits[k].pname == pname) {
+            v->i[0] = es3_limits[k].value;
+            return 1;
+        }
+    return 0;
+}
 
 static int lookup(struct OGLES2Context *ctx, GLenum pname, struct value *v)
 {
@@ -785,7 +842,7 @@ static int lookup(struct OGLES2Context *ctx, GLenum pname, struct value *v)
             v->n = 1;
             return 1;
         }
-        return 0;
+        return ogles2_es3(ctx) && lookup_es3(ctx, pname, v);
     }
 }
 
@@ -832,6 +889,18 @@ void ogles2_glGetIntegerv(struct OGLES2Context *ctx, GLenum pname, GLint *data)
     for (k = 0; k < v.n; k++)
         data[k] = (v.kind == K_FLOAT || v.kind == K_NFLOAT) ? float_to_int(v.f[k], v.kind == K_NFLOAT)
                                                              : v.i[k];
+}
+
+void ogles2_glGetInteger64v(struct OGLES2Context *ctx, GLenum pname, GLint64 *data)
+{
+    struct value v;
+    int k;
+    if (!ogles2_es3_entry(ctx) || !data || !query(ctx, pname, &v, "glGetInteger64v"))
+        return;
+    for (k = 0; k < v.n; k++)
+        data[k] = (v.kind == K_FLOAT || v.kind == K_NFLOAT) ? (GLint64)float_to_int(v.f[k], v.kind == K_NFLOAT)
+                  : v.kind == K_UINT                         ? (GLint64)(GLuint)v.i[k]
+                                                             : (GLint64)v.i[k];
 }
 
 void ogles2_glGetFloatv(struct OGLES2Context *ctx, GLenum pname, GLfloat *data)

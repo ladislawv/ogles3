@@ -206,7 +206,9 @@ Each of these cost real time once.
   later program, across reboots. The library now resets the GPU after such a job and when it
   finds it stopped at device open (`device: GPU reset ...` in the log); if a GPU problem
   survives that, only switching the machine off clears it.
-- **vamos has no FPU:** test FPU code (maths, float conversions) on the Amiga.
+- **vamos has no FPU:** test FPU code (maths, float conversions) on the Amiga. State-only
+  tests (those taking `NOGPU`) run under it with `B=<build> bash tests/vamos.sh <test> NOGPU`;
+  vamos prints a traceback when it expunges the library at the end, which is harmless.
 - **Paths with spaces** break unquoted shell commands; `build_corpus.sh` reaches the
   repository through a link for that reason.
 - **Large screenshots over amictl sometimes stall** (an open issue in §13); smaller results

@@ -20,3 +20,6 @@ command glPushGroupMarkerEXT
 command glPopGroupMarkerEXT
 command glClipControlEXT
 command glDrawBuffersEXT
+# OpenGL ES 3.0 (docs/GLES3_PLAN.md, Appendix A); the feature line comes when all of it is in
+command glGetStringi
+command glGetInteger64v

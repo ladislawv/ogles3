@@ -7,11 +7,17 @@ this exits with status 1. Usage: v3dp_dump.py file.v3dp [--qpu]
 """
 import struct, sys, zlib
 
-STAGES = {0: "vertex", 4: "fragment"}
+STAGES = {0: "vertex", 4: "fragment", 5: "compute"}
 VARIANT_STAGES = {0: "vertex", 1: "vertex binning", 4: "fragment"}
 KINDS = {0: "uniform", 1: "constant", 2: "state"}
 SECTIONS = {1: "PROGRAM", 2: "STRINGS", 3: "STAGE_PARAMS", 4: "UNIFORMS", 5: "ATTRIBUTES",
-            6: "VARIANT"}
+            6: "VARIANT", 7: "UNIFORM_BLOCKS", 8: "INTERFACE", 9: "VARIANT_OF"}
+# Format 2 (ES3 programs) is written as major 0x8002 until release 2.1 (FORMAT.md).
+FORMAT2 = (2, 0x8002)
+PACKING = {0: "std140", 1: "shared", 2: "packed", 3: "std430"}
+INTERP = {0: "", 1: "smooth", 2: "flat", 3: "noperspective"}
+PRECISION = {0: "", 1: "highp", 2: "mediump", 3: "lowp"}
+INTERFACES = {0x92E3: "in", 0x92E4: "out"}
 # enum quniform_contents at Mesa 74b69717c52b (values printed by the compiler),
 # with ogles2's patch 0013's CLIP_Z_COEFF (46)
 QUNIFORM = ("CONSTANT UNIFORM VIEWPORT_X_SCALE VIEWPORT_Y_SCALE VIEWPORT_Z_OFFSET "
@@ -159,8 +165,9 @@ def dump(path, show_qpu):
         raise Bad("CRC mismatch: header %08x, data %08x" % (crc, zlib.crc32(data[32:])))
     print("%s: format %d.%d, V3D %d, Mesa %s, %d sections, %d bytes" %
           (path, major, minor, ver, commit.rstrip(b"\0").decode(), nsec, len(data)))
-    if major != 1:
+    if major != 1 and major not in FORMAT2:
         raise Bad("unknown major version %d" % major)
+    v2 = major in FORMAT2
 
     secs, o = [], 32
     while o < len(data):
@@ -178,9 +185,12 @@ def dump(path, show_qpu):
         raise Bad("header says %d sections, found %d" % (nsec, len(secs)))
     if [t for t, _ in secs[:2]] != [1, 2]:
         raise Bad("PROGRAM and STRINGS must come first")
-    for t in (4, 5):
+    for t in (4, 5) + ((7, 8) if v2 else ()):
         if sum(1 for s, _ in secs if s == t) != 1:
             raise Bad("need exactly one %s section" % SECTIONS[t])
+    if not v2 and any(t in (7, 8) for t, _ in secs):
+        raise Bad("format 2 sections in a format 1 file")
+    nuniforms = None
 
     strings = secs[1][1]
     if not strings or strings[0] != 0 or strings[-1] != 0:
@@ -192,7 +202,10 @@ def dump(path, show_qpu):
         if t == 1:
             h = r.take(32).hex()
             mask = r.u32()
+            features = r.u32() if v2 else 0
             r.done()
+            if features:
+                raise Bad("unknown feature bits %08x" % features)
             print("PROGRAM hash %s, stages %s" %
                   (h, ", ".join(STAGES[s] for s in STAGES if mask & (1 << s))))
         elif t == 2:
@@ -236,20 +249,35 @@ def dump(path, show_qpu):
                     places.append("%s@%d es=%d vs=%d%s" % (STAGES.get(stage, stage), off, es, vs,
                                                           " int-as-float" if fmt else ""))
                 samp = r.u32s(2)
+                block = ""
+                if v2:
+                    bi, boff, astride, mstride, flags2 = r.i32(), r.i32(), r.i32(), r.i32(), r.u32()
+                    if bi >= 0:
+                        if nst:
+                            raise Bad("block member with storage places")
+                        block = " block %d +%d astride %d mstride %d%s" % (
+                            bi, boff, astride, mstride, " row_major" if flags2 & 1 else "")
+                    elif (boff, astride, mstride, flags2) != (-1, -1, -1, 0):
+                        raise Bad("block fields outside a block")
                 fl = [f for b, f in ((1, "sampler"), (2, "builtin"), (4, "hidden")) if flags & b]
-                print("  %-24s type 0x%04x%s %s %s%s" %
+                print("  %-24s type 0x%04x%s %s %s%s%s" %
                       (string(strings, nm), gtype, "[%d]" % arr if arr else "", ",".join(fl),
                        " ".join(places),
                        " units vs=%s fs=%s" % tuple("-" if x == 0xffffffff else x for x in samp)
-                       if flags & 1 else ""))
+                       if flags & 1 else "", block))
             r.done()
+            nuniforms = n
         elif t == 5:
             n = r.u32()
             print("ATTRIBUTES %d" % n)
             for _ in range(n):
                 nm, gtype, loc, slot = r.u32(), r.u32(), r.u32(), r.u32()
-                print("  %-24s type 0x%04x location %d slot %s" %
-                      (string(strings, nm), gtype, loc, "-" if slot == 0xffffffff else slot))
+                if loc & 0x40000000 and not v2:
+                    raise Bad("explicit location in a format 1 file")
+                print("  %-24s type 0x%04x location %d%s slot %s" %
+                      (string(strings, nm), gtype, loc & 0xff,
+                       " (explicit)" if loc & 0x40000000 else "",
+                       "-" if slot == 0xffffffff else slot))
             r.done()
         elif t == 6:
             stage = r.u32()
@@ -274,6 +302,41 @@ def dump(path, show_qpu):
             if show_qpu:
                 for i, q in enumerate(qpu):
                     print("  %4d %016x" % (i, q))
+        elif t == 7 and v2:
+            n = r.u32()
+            print("UNIFORM_BLOCKS %d" % n)
+            for _ in range(n):
+                nm, binding, size, stageref, packing, nmem = (r.u32(), r.u32(), r.u32(), r.u32(),
+                                                              r.u32(), r.u32())
+                members = r.u32s(nmem)
+                if packing not in PACKING:
+                    raise Bad("block packing %d" % packing)
+                if nuniforms is not None and any(m >= nuniforms for m in members):
+                    raise Bad("block member outside UNIFORMS")
+                print("  %-24s binding %d, %d bytes, %s, stages %s, members %s" %
+                      (string(strings, nm), binding, size, PACKING[packing],
+                       ",".join(STAGES[s] for s in STAGES if stageref & (1 << s)), members))
+            for _ in range(r.u32()):
+                stage, m = r.u32(), r.u32()
+                blocks = r.u32s(m)
+                if any(b >= n for b in blocks):
+                    raise Bad("stage map names a block past the last")
+                print("  %s: unit i+1 -> block %s" % (STAGES.get(stage, stage), blocks))
+            r.done()
+        elif t == 8 and v2:
+            n = r.u32()
+            print("INTERFACE %d" % n)
+            for _ in range(n):
+                iface, nm, gtype, arr, loc = r.u32(), r.u32(), r.u32(), r.u32(), r.i32()
+                interp, prec, flags, index, stageref = r.u8(), r.u8(), r.u8(), r.u8(), r.u32()
+                if iface not in INTERFACES or interp not in INTERP or prec not in PRECISION:
+                    raise Bad("interface entry %08x/%d/%d" % (iface, interp, prec))
+                print("  %-3s %-24s type 0x%04x%s location %d%s%s%s index %d stages %s" %
+                      (INTERFACES[iface], string(strings, nm), gtype, "[%d]" % arr if arr else "",
+                       loc, " (explicit)" if flags & 1 else "",
+                       " " + INTERP[interp] if interp else "", " " + PRECISION[prec] if prec else "",
+                       index, ",".join(STAGES[s] for s in STAGES if stageref & (1 << s))))
+            r.done()
         else:
             print("%s %d bytes (skipped)" % (name, len(payload)))
 
