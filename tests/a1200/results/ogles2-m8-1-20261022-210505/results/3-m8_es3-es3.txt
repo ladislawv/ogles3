@@ -1,0 +1,30 @@
+m8_es3: OpenGL ES 3.0 contexts (library 1.3, an ES3 build)
+PASS: version 25: OGLES2_CCE_BAD_TAGS
+PASS: version 31: OGLES2_CCE_UNSUPPORTED (no ES 3.1 yet)
+PASS: version 30: an ES 3.0 context
+PASS: version 20: an ES 2.0 context
+PASS: ES 2.0: GL_VERSION
+PASS: ES 2.0: GLSL ES 1.00
+PASS: ES 2.0: 48 combined texture units
+PASS: ES 2.0: GL_MAJOR_VERSION is GL_INVALID_ENUM
+PASS: ES 2.0: glGetStringi is GL_INVALID_OPERATION
+PASS: ES 2.0: glGetInteger64v is GL_INVALID_OPERATION
+PASS: ES 2.0: glActiveTexture(GL_TEXTURE47)
+PASS: ES 2.0: glActiveTexture(GL_TEXTURE48) is GL_INVALID_ENUM
+PASS: ES 2.0: #version 300 es (after comments) refused, with the reason in the log
+PASS: ES 2.0: #version 100 compiles
+PASS: an ES 3.0 context cannot share with an ES 2.0 one
+PASS: an ES 2.0 context cannot share with an ES 3.0 one
+PASS: two ES 3.0 contexts share objects
+PASS: ES 3.0: GL_VERSION
+PASS: ES 3.0: GLSL ES 3.00
+PASS: ES 3.0: GL_MAJOR_VERSION 3, GL_MINOR_VERSION 0
+PASS: ES 3.0: glGetStringi lists GL_EXTENSIONS
+PASS: ES 3.0: glGetStringi past the last is GL_INVALID_VALUE
+PASS: ES 3.0: glGetStringi(GL_VENDOR) is GL_INVALID_ENUM
+PASS: ES 3.0: GL_MAX_ELEMENT_INDEX 2^24 - 1
+PASS: ES 3.0: 48 combined texture units, uniform buffer offsets aligned to 256
+PASS: ES 3.0: #version 300 es compiles
+PASS: ES 3.0: #version 100 compiles
+PASS: ES 3.0: #version 310 es refused, with the reason in the log
+PASSED: 28 of 28

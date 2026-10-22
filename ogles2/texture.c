@@ -1818,7 +1818,7 @@ BOOL ogles2_texture_wide(struct OGLES2Context *ctx, int unit, int kind)
 {
     struct OGLES2TexState *ts = ctx->tex;
     const struct OGLES2Texture *t;
-    if (!ts)
+    if (!ts || kind == OGLES2_TEX_NONE)
         return FALSE;
     t = kind == OGLES2_TEX_CUBE ? ts->unitcube[unit] : kind == OGLES2_TEX_RECT ? ts->unitrect[unit] : ts->unit2d[unit];
     return (t->f[0].defined & 1) && wide_class(t->f[0].format[0], t->f[0].type[0]);
@@ -2696,6 +2696,25 @@ void ogles2_glGenerateMipmap(struct OGLES2Context *ctx, GLenum target)
 
 /* ---- for the draw path ---- */
 
+/* textureSize's recipe values (Mesa's get_texture_size): the base level's
+ * width or height (level 0's minified to it), the depth and the layers
+ * (1: no 3D or array textures before stage B). A kind without textures
+ * answers 1, as the fallback it samples. */
+ULONG ogles2_texture_size(struct OGLES2Context *ctx, int unit, int kind, int what)
+{
+    struct OGLES2TexState *ts = ts_get(ctx);
+    struct OGLES2Texture *t;
+    ULONG s;
+    if (!ts || kind == OGLES2_TEX_NONE || what >= 2)
+        return 1;
+    t = kind == OGLES2_TEX_CUBE ? ts->unitcube[unit] : kind == OGLES2_TEX_RECT ? ts->unitrect[unit] : ts->unit2d[unit];
+    s = what ? t->f[0].h[0] : t->f[0].w[0];
+    if (!s)
+        return 0;
+    s = t->base_level > 0 && t->base_level < 32 ? s >> t->base_level : s;
+    return s ? s : 1;
+}
+
 /* The fallback texture, 1x1 (0,0,0,1) (GLES 2.0 3.8.2: an incomplete
  * texture samples that). */
 static struct OGLES2Texture *fallback(struct OGLES2TexState *ts)
@@ -2756,7 +2775,13 @@ BOOL ogles2_texture_state(struct OGLES2Context *ctx, int unit, int kind, ULONG *
 
     if (!ts)
         return FALSE;
-    t = kind == OGLES2_TEX_CUBE ? ts->unitcube[unit] : kind == OGLES2_TEX_RECT ? ts->unitrect[unit] : ts->unit2d[unit];
+    /* A sampler of a kind with no textures yet (OGLES2_TEX_NONE: GLSL ES
+     * 3.00's 3D, array, shadow and integer samplers until stage B) reads
+     * what an incomplete texture reads. */
+    if (kind == OGLES2_TEX_NONE && !(t = fallback(ts)))
+        return FALSE;
+    if (kind != OGLES2_TEX_NONE)
+        t = kind == OGLES2_TEX_CUBE ? ts->unitcube[unit] : kind == OGLES2_TEX_RECT ? ts->unitrect[unit] : ts->unit2d[unit];
     /* The same records as the last draw with it: a texture a draw of a job
      * not yet rendered used gets a new GPU copy (another address) when its
      * images change (before_change); its parameters are compared here.

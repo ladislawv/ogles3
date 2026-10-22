@@ -2,8 +2,9 @@
 
 **Status: plan (2026-10-18; revised eight times, research added and checked
 2026-10-19, every line citation and each stage reviewed for implementation
-the same day), work on branch `gles3`.** Stage A began 2026-10-22: item 1
-is done on the host (§4); the rest is not implemented yet.
+the same day), work on branch `gles3`.** Stage A began 2026-10-22: items 1
+and 3 are done, items 2 and 4 in part, all tested on the A1200 (§4, each
+item's "Done" paragraph); items 5-7 and stages B-D are not implemented yet.
 Its facts were checked against this repository, Mesa at the pinned commit
 (`~/mesa-build/mesa`), Khronos' `gl.xml` (`gen/khronos/`) and extension
 specifications, the Linux kernel's V3D driver (`drivers/gpu/drm/v3d`,
@@ -60,7 +61,10 @@ Mesa's driver, so they could follow later as an extension
     decoded by `v3dp_dump.py`); `make es3-header-probe`;
     `B=... bash tests/vamos.sh m8_es3 NOGPU` with the release build and
     `... m8_es3 NOGPU ES3` with the test build (vamos runs state-only
-    tests: no GPU, no FPU); `B=~/ogles3-build/m68k-es3 bash
+    tests: no GPU, no FPU; `make test-v3dp` first, for the programs'
+    files, which `vamos.sh` puts in `T:`: under vamos `PROGDIR:` is not
+    the test's drawer and assigns are missing from the DOS list, so the
+    library's cache is `T:`); `B=~/ogles3-build/m68k-es3 bash
     tests/m8_es3/check_limits.sh` (the library's limits against
     `v3dglslc -L`). GLES2 programs' files must stay byte for byte what the
     compiler wrote before (keep a compiler built before a change and
@@ -70,11 +74,16 @@ Mesa's driver, so they could follow later as an extension
     entry is a stub any more), not regressions.
   - **On the A1200:** package `m8-1` (`bash tests/a1200/build_package.sh
     m8-1`, then `amictl.py runpkg`): `smoke` and `m8_es3` with the
-    release build, `m8_es3 ES3` and `LIMITS` with the test build. Built,
-    not yet run (2026-10-22).
-  - **Where to go on:** stage A item 2's request codes and ES3 link state
-    together with item 3 (the reader of format 2), then items 4 and 5
-    (§4, each item's "Done" paragraph says what is in).
+    release build, `m8_es3 ES3`, `LIMITS` and `m8_draw` with the test
+    build. Passed on 2026-10-22 (`tests/a1200/results/
+    ogles2-m8-1-20261022-212632`). A GLES2 drawing regression: package
+    `m7-4` built from this copy's sync build (`B=$BS V=$V bash
+    tests/a1200/build_package.sh m7-4`).
+  - **Where to go on:** stage A item 4's `gl_VertexID` numbering, item 5
+    (draw-time variants by key, with `V3DGLSL_COMPILE_VARIANT`, the Mesa
+    patch 0015 in this work's tree and the `.v3dx` files), item 2's
+    `$VER:` string, item 6 (the dEQP port's ES3 context) (§4, each item's
+    "Done" paragraph says what is in).
 - **`main`** (public) is the released 1.x line. Fixes and small additions go
   there and are released as 1.4, 1.5 and so on (the library's revision; the
   dispatch table only grows, the ABI version stays).
@@ -627,7 +636,7 @@ The base everything else stands on.
    compiles in `#version 300 es` shaders with its `#extension`, tested
    2026-10-19). The share groups' version check (§3). The headers' probe
    (§3).
-   **Done (2026-10-22, on the host; not yet on the A1200):**
+   **Done (2026-10-22; on the A1200 the same day, run `ogles2-m8-1`):**
    `OGLES2_CCT_PISTORM_ES_VERSION` (`OGLES2_CCT_PISTORM_MIN + 6`), 30 only
    in `make ES3=1` builds (`OGLES2_ES_MAX`), 31 refused until stage D;
    `ctx->es_version`; ES3-only entries refuse in GLES2 contexts through
@@ -657,7 +666,10 @@ The base everything else stands on.
    now offers 16), so the lists stay comparable; Mesa's others stand (15
    uniform blocks a stage, 108 uniform buffer bindings, 69 combined
    blocks). `m8_es3` (12 checks with a release build, 23 with an ES3
-   build) passes under vamos; the library is 243,024 bytes (+2,712).
+   build) passes under vamos and on the A1200 (`tests/a1200/results/ogles2-m8-1-20261022-210505`: 14 of 14 with the
+   release build, 28 of 28 with the ES3 build, the limits read there
+   identical to `v3dglslc -L`, the smoke test as before); the library was
+   243,024 bytes then (+2,712).
    "All of ES 3.0's state tables" grow with the features that own the
    state (stages B and C).
 2. **GLSL ES 3.00 programs through the compiler:** the version check per
@@ -704,9 +716,16 @@ The base everything else stands on.
    (`glCompileShader`'s `glsl_version`, the library's own reading of the
    `#version` line after whitespace and comments, before any record or
    compiler: `300 es` refused in GLES2 contexts, `310 es` until stage D,
-   with the reason in the info log; `m8_es3` checks both). Still to do in
-   this item: the request codes and the ES3 link state (with item 3: the
-   library cannot load a format 2 file before its reader can), the
+   with the reason in the info log; `m8_es3` checks both). **The request
+   codes wait for stage C (decided 2026-10-22):** the writer chooses the
+   format itself (a GLSL ES 3.x program gets format 2 whatever request
+   asked for it), so a 2.x compiler answers `V3DGLSL_LINK` with a format 2
+   file, and a 1.x compiler's 1.0 file of an ES3 program is refused by the
+   library ("a GLSL ES 3.x program in a format 1.0 file (made by an older
+   compiler)"), which is the "compiler too old" answer this item asked
+   for. `V3DGLSL_LINK_ES3` comes when there is ES3 link state to send
+   (stage C's transform feedback varyings, stage D's separable flag), and
+   `V3DGLSL_COMPILE_VARIANT` with item 5. Still to do in this item: the
    `$VER:` string.
 3. **The reader and the draw:** format 2 (§3) and the lookup that goes on past
    a refused file; the recipe types GLSL ES 3.00 brings (Mesa's
@@ -731,6 +750,35 @@ The base everything else stands on.
    stage's block map; a block with no buffer reads a zeroed block of the
    library's until stage B item 6 binds buffers); explicit locations of vertex
    inputs (§3) and fragment outputs (`glGetFragDataLocation`).
+   **Done (2026-10-22; on the A1200 the same day):** the reader takes
+   majors 2 and 0x8002, refuses unknown feature bits, takes up to 256
+   sections (an allocated index), and reads `UNIFORMS`' block fields,
+   `ATTRIBUTES`' explicit locations, `UNIFORM_BLOCKS` (into
+   `OGLES2Image`'s `ublocks` and each stage's map) and `INTERFACE`; a
+   variant may read `QUNIFORM_UBO_ADDR` units its stage's map names; the
+   recipe types 10-13 and 21. The lookup goes on past a refused file, and
+   the compiler then replaces the cache's; an ES3 program takes only a
+   format 2 file; `glProgramBinaryOES` refuses format 2 in a GLES2 context.
+   `glUniform*ui`, `glGetUniformuiv`, the six non-square
+   `glUniformMatrix*fv`, `transpose` in ES3 contexts (GLES2 contexts still
+   refuse it), every GLSL ES 3.00 sampler type as a sampler uniform; the
+   new ones read the fallback texture (`OGLES2_TEX_NONE`) until stage B.
+   Uniform blocks read a zeroed 64 KB block of the context's
+   (`ubo_copies`); `textureSize` from the base level (Mesa's
+   `get_texture_size`). Explicit attribute locations come before
+   `glBindAttribLocation`'s. 18 more dispatch entries (182). **Trap:** the
+   built-in image's structures are initialised by position
+   (`program.c`), so new fields of `OGLES2Variant`, `OGLES2Image`,
+   `OGLES2ImageAttrib` and `OGLES2ImageUniform` go at their ends, with
+   explicit values there (an attribute's `location` 0xff, a uniform's
+   `block` -1). Tests: `m8_es3` links the ES3 test programs from their
+   files and checks the uniforms (42 checks); the new `m8_draw` draws
+   GLSL ES 3.00 programs into a bitmap (`tests/a1200/results/
+   ogles2-m8-1-20261022-212632`: 5 of 5, the flat varying, a block read as
+   zeros, `textureSize` at two base levels); the GLES2 drawing tests as at
+   1.3 (`ogles2-m7-4-20261022-212706`: 23, 44, 33 and 29 of the same).
+   The library is 251,840 bytes (+11.5 KB on 1.3.1). Left for stage B:
+   the integer samplers' textures.
 4. **`flat` and `centroid` varyings, `gl_VertexID`:** the `FLAT_SHADE_FLAGS`
    and `CENTROID_FLAGS` packets from the fragment variant's flags, as Mesa's
    `emit_varying_flags` does (Appendix B.3), instead of the "zero all"
@@ -747,6 +795,12 @@ The base everything else stands on.
    draws with the real first vertex and the indices as given and passes
    conformance, so that index includes them. `gl_InstanceID` is 0 until
    stage B's instanced draws.
+   **The flags done (2026-10-22, on the A1200):** `emit_state` sends the
+   fragment shader's flat, no-perspective and centroid flags when the
+   fragment variant changes (`varying_flags`, Mesa's
+   `emit_varying_flags`), and a "zero all" packet only where an earlier
+   shader of the pass set a kind, so GLES2 programs send nothing new
+   (`m8_draw`'s flat triangle). `gl_VertexID`'s numbering is still to do.
 5. **Draw-time variants by key.** The two special files (`.v3dw`, `.v3da`)
    become one general path, which ES3's states need (integer and float
    render targets, sRGB, multisampled framebuffer objects, transform

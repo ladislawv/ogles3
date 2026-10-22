@@ -36,14 +36,14 @@
 /* ---- the built-in image ---- */
 
 static const struct OGLES2ImageAttrib smooth_attribs[] = {
-    {"a_position", GL_FLOAT_VEC3, 0, 1, 0}, /* VPM inputs 0-2, both shaders */
-    {"a_color", GL_FLOAT_VEC4, 1, 1, 0},    /* VPM inputs 3-6, vertex shader only */
+    {"a_position", GL_FLOAT_VEC3, 0, 1, 0, 0xff}, /* VPM inputs 0-2, both shaders; no location */
+    {"a_color", GL_FLOAT_VEC4, 1, 1, 0, 0xff},    /* VPM inputs 3-6, vertex shader only */
 };
 
 static const struct OGLES2Place smooth_mvp_place[] = {{0, 16, 4, 0, 0}};
 
 static const struct OGLES2ImageUniform smooth_uniforms[] = {
-    {"u_mvp", GL_FLOAT_MAT4, 0, 0, 1, smooth_mvp_place, {~0UL, ~0UL}},
+    {"u_mvp", GL_FLOAT_MAT4, 0, 0, 1, smooth_mvp_place, {~0UL, ~0UL}, -1, 0, 0, 0, 0}, /* in no block */
 };
 
 /* The vertex and coordinate shaders read the same stream (v3d_assembler.c:
@@ -65,14 +65,14 @@ static const ULONG smooth_rdata[20] = {0, 0, 0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10,
 static const struct OGLES2Variant smooth_variants[3] = {
     {OGLES2_VARIANT_CS, 4, 1, 0, 0, 4, 0, 0, 0, {3}, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
      {0}, {0}, {0}, 0, builtin_coordinate, sizeof(builtin_coordinate), 0, 20, smooth_rtype,
-     smooth_rdata, 0, 0, 0, 0, 0, 0},
+     smooth_rdata, 0, 0, 0, 0, 0, 0, 0},
     {OGLES2_VARIANT_VS, 4, 1, 0, 0, 4, 0, 0, 0, {3, 4}, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
      {0}, {0}, {0}, 0, builtin_vertex_smooth, sizeof(builtin_vertex_smooth),
-     sizeof(builtin_coordinate), 20, smooth_rtype, smooth_rdata, 0, 0, 0, 0, 0, 0},
+     sizeof(builtin_coordinate), 20, smooth_rtype, smooth_rdata, 0, 0, 0, 0, 0, 0, 0},
     {OGLES2_VARIANT_FS, 4, 0, 0, 0, 0, 0, 0, 0, {0}, 0, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 0,
      {0}, {0}, {0}, 0, builtin_fragment_smooth, sizeof(builtin_fragment_smooth),
      sizeof(builtin_coordinate) + sizeof(builtin_vertex_smooth), 0, 0, 0, 0, 0, 0, 0, 0,
-     1 /* render target 0 */},
+     1 /* render target 0 */, 0},
 };
 
 static const struct OGLES2Image builtin_smooth = {
@@ -91,6 +91,7 @@ static const struct OGLES2Image builtin_smooth = {
     0, 0,       /* no alpha-to-coverage variants */
     0, 0,       /* no sources */
     0,          /* in no program cache */
+    0, 0, 0, {0, 0}, {0, 0}, 0, 0, /* format 1.0: no uniform blocks or interface */
 };
 
 const struct OGLES2Image *ogles2_builtin_image(void)
@@ -911,6 +912,14 @@ static void note_missing(const struct OGLES2Program *p, const char *hex)
 
 #define FILE_HASH_DIGITS 24 /* + ".v3dp": 29 characters, FFS's limit is 30 */
 
+/* A program of GLSL ES 3.x shaders, whose file must be in format 2 (an
+ * older compiler, or 1.3, made 1.0 files of such programs without their
+ * ES3 parts: docs/GLES3_PLAN.md §3). */
+static BOOL es3_program(const struct OGLES2Program *p)
+{
+    return glsl_version(p->vs->source) >= 300 || glsl_version(p->fs->source) >= 300;
+}
+
 /* Reads and checks one .v3dp file: the image, or 0 (with *refused set and
  * the program's log when the file exists but is not usable). */
 static struct OGLES2Image *try_file(struct OGLES2Program *p, const UBYTE *hash, const char *path,
@@ -936,6 +945,11 @@ static struct OGLES2Image *try_file(struct OGLES2Program *p, const UBYTE *hash, 
         ogles2_image_free(im, 0);
         return 0;
     }
+    if (im && !im->format2 && es3_program(p)) {
+        ogles2_image_free(im, 0);
+        im = 0;
+        strcpy(why, "a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)");
+    }
     if (im) {
         ogles2_log("glLinkProgram: %s (%ld variants, %ld bytes of code)", (ULONG)path,
                    (LONG)im->nvariants, im->code_total);
@@ -957,13 +971,15 @@ static void file_path(char *path, const char *dir, const char *hex)
 /* Plan 7.8: the program's drawer (its shaders/ drawer, then the drawer
  * itself), the disk cache (OGLES2Cache:, or T: when it is not assigned:
  * that is where compiled programs go then), the on-target compiler, else the
- * sources go to T:ogles2_missing_shaders.txt. */
+ * sources go to T:ogles2_missing_shaders.txt. A file the library cannot use
+ * does not end the search (docs/GLES3_PLAN.md §3): the next place is tried,
+ * and the compiler replaces the cache's. */
 static struct OGLES2Image *load_image(struct OGLES2Program *p, const UBYTE *hash, const char *hex,
                                       const char *bindings)
 {
     char path[96];
     struct OGLES2Image *im;
-    BOOL refused;
+    BOOL refused, any_refused = FALSE;
     const char *dirs[3];
     int d;
     dirs[0] = "PROGDIR:shaders/";
@@ -971,8 +987,9 @@ static struct OGLES2Image *load_image(struct OGLES2Program *p, const UBYTE *hash
     dirs[2] = ogles2_cache_dir();
     for (d = 0; d < 3; d++) {
         file_path(path, dirs[d], hex);
-        if ((im = try_file(p, hash, path, &refused)) || refused)
+        if ((im = try_file(p, hash, path, &refused)))
             return im;
+        any_refused |= refused;
     }
     if (ogles2_compiler_installed()) {
         char *log = AllocVec(4096, MEMF_ANY | MEMF_CLEAR);
@@ -995,6 +1012,8 @@ static struct OGLES2Image *load_image(struct OGLES2Program *p, const UBYTE *hash
         FreeVec(log);
         return 0;
     }
+    if (any_refused)
+        return 0; /* try_file said why, in the log and the program's log */
     ogles2_log("glLinkProgram: no binary for program %s (sources in T:ogles2_missing_shaders.txt)",
                (ULONG)hex);
     set_log(p, "no program binary for this program: ", hex);
@@ -1105,10 +1124,17 @@ static BOOL bind_image(struct OGLES2Program *p, const struct OGLES2Image *im)
     p->nsamplers = 0xff;
     p->nslots = 0xff;
 
-    /* Attribute locations: glBindAttribLocation first, then the lowest free
-     * run (a matrix takes one location per column). */
+    /* Attribute locations: a location of its own (layout(location), format
+     * 2: glBindAttribLocation cannot move it), then glBindAttribLocation's,
+     * then the lowest free run (a matrix takes one location per column). */
     for (a = 0; a < im->nattribs; a++) {
         p->attrib_index[a] = 0xff;
+        if (im->attribs[a].location != 0xff) {
+            p->attrib_index[a] = im->attribs[a].location;
+            for (k = 0; k < im->attribs[a].columns; k++)
+                used |= 1UL << (im->attribs[a].location + k);
+            continue;
+        }
         for (i = 0; i < p->nbindings; i++)
             if (str_eq(p->bind_name[i], im->attribs[a].name)) {
                 p->attrib_index[a] = (UBYTE)p->bind_index[i];
@@ -1460,6 +1486,13 @@ void ogles2_glProgramBinaryOES(struct OGLES2Context *ctx, GLuint program, GLenum
         set_log(p, "the program binary was refused: ", why);
         return;
     }
+    /* An OpenGL ES 3 program's file (format 2) needs an ES3 context. */
+    if (im->format2 && !ogles2_es3(ctx)) {
+        ogles2_image_free(im, 0);
+        ogles2_log("glProgramBinaryOES: refused: an OpenGL ES 3 program in an OpenGL ES 2.0 context");
+        set_log(p, "the program binary was refused: ", "an OpenGL ES 3 program needs an OpenGL ES 3 context");
+        return;
+    }
     /* The program cache: an image of the same program is already loaded. */
     for (c = ctx->share->images; c && memcmp(c->hash, im->hash, 32); c = c->next)
         ;
@@ -1523,6 +1556,48 @@ GLint ogles2_glGetAttribLocation(struct OGLES2Context *ctx, GLuint program, cons
     for (a = 0; a < p->image->nattribs; a++)
         if (p->image->attribs[a].slot != 0xff && str_eq(p->image->attribs[a].name, name))
             return p->attrib_index[a];
+    return -1;
+}
+
+/* ES 3.0 3.9.2: a fragment output's colour number, from the program's
+ * interface (format 2): "name", or "name[i]" of an array; -1 for any other
+ * name, a built-in, and a GLSL ES 1.00 program (gl_FragColor and
+ * gl_FragData are no outputs of its own). */
+GLint ogles2_glGetFragDataLocation(struct OGLES2Context *ctx, GLuint program, const GLchar *name)
+{
+    struct OGLES2Program *p;
+    const struct OGLES2ImageVar *v;
+    UWORD k;
+    if (!ogles2_es3_entry(ctx) || !(p = lookup(ctx, program, OGLES2_OBJ_PROGRAM)))
+        return -1;
+    if (!p->linked) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return -1;
+    }
+    if (!name)
+        return -1;
+    for (k = 0; k < p->image->ninterface; k++) {
+        ULONG n, e = 0;
+        const char *q;
+        v = &p->image->interface[k];
+        if (v->iface != GL_PROGRAM_OUTPUT || v->location < 0)
+            continue;
+        n = str_len(v->name);
+        if (v->array && n > 3 && !strncmp(v->name + n - 3, "[0]", 3))
+            n -= 3; /* an array may be named for its first element */
+        if (strncmp(v->name, name, n))
+            continue;
+        q = name + n;
+        if (*q == '[' && v->array) { /* an element: "name[i]" */
+            for (q++; *q >= '0' && *q <= '9' && e < 0x10000; q++)
+                e = e * 10 + (ULONG)(*q - '0');
+            if (q == name + n + 1 || *q != ']' || q[1] || e >= v->array)
+                continue;
+        } else if (*q) {
+            continue;
+        }
+        return v->location + (GLint)e;
+    }
     return -1;
 }
 
@@ -1623,6 +1698,7 @@ void ogles2_glGetActiveUniform(struct OGLES2Context *ctx, GLuint program, GLuint
 #define K_INT   1
 #define K_BOOL  2
 #define K_SAMPLER 3
+#define K_UINT  4 /* GLSL ES 3.00 */
 
 /* Kind, components per column and columns of a GL uniform type; 0 if unknown. */
 static int type_shape(GLenum t, int *kind, int *comps, int *cols)
@@ -1644,9 +1720,25 @@ static int type_shape(GLenum t, int *kind, int *comps, int *cols)
     case GL_FLOAT_MAT2:   *kind = K_FLOAT; *comps = 2; *cols = 2; return 1;
     case GL_FLOAT_MAT3:   *kind = K_FLOAT; *comps = 3; *cols = 3; return 1;
     case GL_FLOAT_MAT4:   *kind = K_FLOAT; *comps = 4; *cols = 4; return 1;
+    /* GLSL ES 3.00: unsigned, and non-square matrices (matCxR: C columns of R) */
+    case GL_UNSIGNED_INT:      *kind = K_UINT; *comps = 1; return 1;
+    case GL_UNSIGNED_INT_VEC2: *kind = K_UINT; *comps = 2; return 1;
+    case GL_UNSIGNED_INT_VEC3: *kind = K_UINT; *comps = 3; return 1;
+    case GL_UNSIGNED_INT_VEC4: *kind = K_UINT; *comps = 4; return 1;
+    case GL_FLOAT_MAT2x3: *kind = K_FLOAT; *comps = 3; *cols = 2; return 1;
+    case GL_FLOAT_MAT2x4: *kind = K_FLOAT; *comps = 4; *cols = 2; return 1;
+    case GL_FLOAT_MAT3x2: *kind = K_FLOAT; *comps = 2; *cols = 3; return 1;
+    case GL_FLOAT_MAT3x4: *kind = K_FLOAT; *comps = 4; *cols = 3; return 1;
+    case GL_FLOAT_MAT4x2: *kind = K_FLOAT; *comps = 2; *cols = 4; return 1;
+    case GL_FLOAT_MAT4x3: *kind = K_FLOAT; *comps = 3; *cols = 4; return 1;
     case GL_SAMPLER_2D:
     case GL_SAMPLER_CUBE:
     case GL_SAMPLER_2D_RECT: /* ARB_texture_rectangle */
+    case GL_SAMPLER_3D: case GL_SAMPLER_2D_ARRAY: case GL_SAMPLER_2D_SHADOW:
+    case GL_SAMPLER_CUBE_SHADOW: case GL_SAMPLER_2D_ARRAY_SHADOW:
+    case GL_INT_SAMPLER_2D: case GL_INT_SAMPLER_3D: case GL_INT_SAMPLER_CUBE: case GL_INT_SAMPLER_2D_ARRAY:
+    case GL_UNSIGNED_INT_SAMPLER_2D: case GL_UNSIGNED_INT_SAMPLER_3D: case GL_UNSIGNED_INT_SAMPLER_CUBE:
+    case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
         *kind = K_SAMPLER; *comps = 1; return 1;
     default:              return 0;
     }
@@ -1660,8 +1752,9 @@ static ULONG fbits(GLfloat f)
 }
 
 /* glUniform* and glUniformMatrix*: `count` values of `comps` x `cols`
- * components, floats (fv) or ints (iv), into the current program's uniform
- * at `location`. `kind` is the call's (K_FLOAT for f, K_INT for i). */
+ * components, floats (fv) or ints (iv; unsigned ones too), into the current
+ * program's uniform at `location`. `kind` is the call's (K_FLOAT for f,
+ * K_INT for i, K_UINT for ui). */
 static void set_uniform(struct OGLES2Context *ctx, GLint location, GLsizei count, int kind,
                         int comps, int cols, const GLfloat *fv, const GLint *iv)
 {
@@ -1722,6 +1815,8 @@ static void set_uniform(struct OGLES2Context *ctx, GLint location, GLsizei count
                         w = place->int_as_float ? (b ? fbits(1.0f) : 0) : (b ? ~0UL : 0);
                     } else if (ukind == K_INT) {
                         w = place->int_as_float ? fbits((GLfloat)iv[src]) : (ULONG)iv[src];
+                    } else if (ukind == K_UINT) {
+                        w = place->int_as_float ? fbits((GLfloat)(GLuint)iv[src]) : (ULONG)iv[src];
                     } else {
                         w = fbits(fv[src]);
                     }
@@ -1834,39 +1929,153 @@ void ogles2_glUniform4i(struct OGLES2Context *ctx, GLint location, GLint v0, GLi
     set_uniform(ctx, location, 1, K_INT, 4, 1, 0, v);
 }
 
-void ogles2_glUniformMatrix2fv(struct OGLES2Context *ctx, GLint location, GLsizei count,
-                               GLboolean transpose, const GLfloat *value)
+/* glUniformMatrix*: GLES 2.0 refuses `transpose` (GL_INVALID_VALUE); ES 3.0
+ * takes it, the matrices then given row by row. `cols` x `rows` values each. */
+static void set_matrix(struct OGLES2Context *ctx, GLint location, GLsizei count, GLboolean transpose,
+                       const GLfloat *value, int cols, int rows)
 {
-    if (ogles2_context_valid(ctx) && transpose != GL_FALSE) { /* GLES 2.0: must be FALSE */
+    GLfloat *t;
+    GLsizei i;
+    int c, r;
+    if (!ogles2_context_valid(ctx))
+        return;
+    if (transpose != GL_FALSE && !ogles2_es3(ctx)) { /* GLES 2.0: must be FALSE */
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
-    set_uniform(ctx, location, count, K_FLOAT, 2, 2, value, 0);
+    if (transpose == GL_FALSE || count <= 0 || !value) {
+        set_uniform(ctx, location, count, K_FLOAT, rows, cols, value, 0);
+        return;
+    }
+    if (!(t = AllocVec((ULONG)count * cols * rows * sizeof(GLfloat), MEMF_ANY))) {
+        ogles2_error(ctx, GL_OUT_OF_MEMORY);
+        return;
+    }
+    for (i = 0; i < count; i++)
+        for (c = 0; c < cols; c++)
+            for (r = 0; r < rows; r++)
+                t[(i * cols + c) * rows + r] = value[(i * rows + r) * cols + c];
+    set_uniform(ctx, location, count, K_FLOAT, rows, cols, t, 0);
+    FreeVec(t);
+}
+
+void ogles2_glUniformMatrix2fv(struct OGLES2Context *ctx, GLint location, GLsizei count,
+                               GLboolean transpose, const GLfloat *value)
+{
+    set_matrix(ctx, location, count, transpose, value, 2, 2);
 }
 
 void ogles2_glUniformMatrix3fv(struct OGLES2Context *ctx, GLint location, GLsizei count,
                                GLboolean transpose, const GLfloat *value)
 {
-    if (ogles2_context_valid(ctx) && transpose != GL_FALSE) { /* GLES 2.0: must be FALSE */
-        ogles2_error(ctx, GL_INVALID_VALUE);
-        return;
-    }
-    set_uniform(ctx, location, count, K_FLOAT, 3, 3, value, 0);
+    set_matrix(ctx, location, count, transpose, value, 3, 3);
 }
 
 void ogles2_glUniformMatrix4fv(struct OGLES2Context *ctx, GLint location, GLsizei count,
                                GLboolean transpose, const GLfloat *value)
 {
-    if (ogles2_context_valid(ctx) && transpose != GL_FALSE) { /* GLES 2.0: must be FALSE */
-        ogles2_error(ctx, GL_INVALID_VALUE);
-        return;
-    }
-    set_uniform(ctx, location, count, K_FLOAT, 4, 4, value, 0);
+    set_matrix(ctx, location, count, transpose, value, 4, 4);
 }
 
-/* glGetUniformfv / iv: the value as the first storage place holds it. */
+/* ES 3.0's non-square matrices: matCxR, C columns of R. (Written out: the
+ * generator finds implemented entries by their definitions.) */
+void ogles2_glUniformMatrix2x3fv(struct OGLES2Context *ctx, GLint location, GLsizei count,
+                                 GLboolean transpose, const GLfloat *value)
+{
+    if (ogles2_es3_entry(ctx))
+        set_matrix(ctx, location, count, transpose, value, 2, 3);
+}
+
+void ogles2_glUniformMatrix3x2fv(struct OGLES2Context *ctx, GLint location, GLsizei count,
+                                 GLboolean transpose, const GLfloat *value)
+{
+    if (ogles2_es3_entry(ctx))
+        set_matrix(ctx, location, count, transpose, value, 3, 2);
+}
+
+void ogles2_glUniformMatrix2x4fv(struct OGLES2Context *ctx, GLint location, GLsizei count,
+                                 GLboolean transpose, const GLfloat *value)
+{
+    if (ogles2_es3_entry(ctx))
+        set_matrix(ctx, location, count, transpose, value, 2, 4);
+}
+
+void ogles2_glUniformMatrix4x2fv(struct OGLES2Context *ctx, GLint location, GLsizei count,
+                                 GLboolean transpose, const GLfloat *value)
+{
+    if (ogles2_es3_entry(ctx))
+        set_matrix(ctx, location, count, transpose, value, 4, 2);
+}
+
+void ogles2_glUniformMatrix3x4fv(struct OGLES2Context *ctx, GLint location, GLsizei count,
+                                 GLboolean transpose, const GLfloat *value)
+{
+    if (ogles2_es3_entry(ctx))
+        set_matrix(ctx, location, count, transpose, value, 3, 4);
+}
+
+void ogles2_glUniformMatrix4x3fv(struct OGLES2Context *ctx, GLint location, GLsizei count,
+                                 GLboolean transpose, const GLfloat *value)
+{
+    if (ogles2_es3_entry(ctx))
+        set_matrix(ctx, location, count, transpose, value, 4, 3);
+}
+
+/* ES 3.0's unsigned uniforms. */
+void ogles2_glUniform1uiv(struct OGLES2Context *ctx, GLint location, GLsizei count, const GLuint *value)
+{
+    if (ogles2_es3_entry(ctx))
+        set_uniform(ctx, location, count, K_UINT, 1, 1, 0, (const GLint *)value);
+}
+
+void ogles2_glUniform2uiv(struct OGLES2Context *ctx, GLint location, GLsizei count, const GLuint *value)
+{
+    if (ogles2_es3_entry(ctx))
+        set_uniform(ctx, location, count, K_UINT, 2, 1, 0, (const GLint *)value);
+}
+
+void ogles2_glUniform3uiv(struct OGLES2Context *ctx, GLint location, GLsizei count, const GLuint *value)
+{
+    if (ogles2_es3_entry(ctx))
+        set_uniform(ctx, location, count, K_UINT, 3, 1, 0, (const GLint *)value);
+}
+
+void ogles2_glUniform4uiv(struct OGLES2Context *ctx, GLint location, GLsizei count, const GLuint *value)
+{
+    if (ogles2_es3_entry(ctx))
+        set_uniform(ctx, location, count, K_UINT, 4, 1, 0, (const GLint *)value);
+}
+
+void ogles2_glUniform1ui(struct OGLES2Context *ctx, GLint location, GLuint v0)
+{
+    ogles2_glUniform1uiv(ctx, location, 1, &v0);
+}
+
+void ogles2_glUniform2ui(struct OGLES2Context *ctx, GLint location, GLuint v0, GLuint v1)
+{
+    GLuint v[2];
+    v[0] = v0; v[1] = v1;
+    ogles2_glUniform2uiv(ctx, location, 1, v);
+}
+
+void ogles2_glUniform3ui(struct OGLES2Context *ctx, GLint location, GLuint v0, GLuint v1, GLuint v2)
+{
+    GLuint v[3];
+    v[0] = v0; v[1] = v1; v[2] = v2;
+    ogles2_glUniform3uiv(ctx, location, 1, v);
+}
+
+void ogles2_glUniform4ui(struct OGLES2Context *ctx, GLint location, GLuint v0, GLuint v1, GLuint v2, GLuint v3)
+{
+    GLuint v[4];
+    v[0] = v0; v[1] = v1; v[2] = v2; v[3] = v3;
+    ogles2_glUniform4uiv(ctx, location, 1, v);
+}
+
+/* glGetUniformfv / iv / uiv: the value as the first storage place holds it
+ * (uns: iv receives unsigned values). */
 static void get_uniform(struct OGLES2Context *ctx, GLuint program, GLint location, GLfloat *fv,
-                        GLint *iv)
+                        GLint *iv, BOOL uns)
 {
     struct OGLES2Program *p;
     const struct OGLES2ImageUniform *u;
@@ -1900,10 +2109,10 @@ static void get_uniform(struct OGLES2Context *ctx, GLuint program, GLint locatio
             cv.u = w;
             if (kind == K_FLOAT || place->int_as_float) {
                 f = cv.f;
-                n = (GLint)f;
+                n = uns ? (GLint)(GLuint)f : (GLint)f;
             } else {
                 n = (GLint)w;
-                f = (GLfloat)n;
+                f = kind == K_UINT ? (GLfloat)w : (GLfloat)n;
             }
             if (kind == K_BOOL) {
                 n = w != 0;
@@ -1918,14 +2127,20 @@ void ogles2_glGetUniformfv(struct OGLES2Context *ctx, GLuint program, GLint loca
                            GLfloat *params)
 {
     if (params)
-        get_uniform(ctx, program, location, params, 0);
+        get_uniform(ctx, program, location, params, 0, FALSE);
 }
 
 void ogles2_glGetUniformiv(struct OGLES2Context *ctx, GLuint program, GLint location,
                            GLint *params)
 {
     if (params)
-        get_uniform(ctx, program, location, 0, params);
+        get_uniform(ctx, program, location, 0, params, FALSE);
+}
+
+void ogles2_glGetUniformuiv(struct OGLES2Context *ctx, GLuint program, GLint location, GLuint *params)
+{
+    if (ogles2_es3_entry(ctx) && params)
+        get_uniform(ctx, program, location, 0, (GLint *)params, TRUE);
 }
 
 /* All precisions are fp32 and 32-bit ints on V3D (plan 7.8). */

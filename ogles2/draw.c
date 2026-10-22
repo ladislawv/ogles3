@@ -57,6 +57,11 @@ struct dedup
     BOOL vp_down;
     BOOL do_valid;
     int prim;
+    /* The varying flags (flat, no-perspective, centroid: varying_flags):
+     * the fragment shader they were sent for this pass, and which kinds the
+     * hardware holds set (bit 0 flat, 1 no-perspective, 2 centroid). */
+    const struct OGLES2Variant *flags_fs;
+    UBYTE flags_set;
 };
 
 struct OGLES2Draw
@@ -79,6 +84,7 @@ struct OGLES2Draw
     const struct OGLES2Image *missed_rt; /* and a render-target miss (EXT_draw_buffers) */
     v3d_mem spill;                 /* register spilling's scratch area (spill_area) */
     ULONG spill_size;              /* bytes a thread has in it */
+    v3d_mem zero_ubo;              /* zeros a uniform block reads while no buffer can be bound (ubo_copies) */
 };
 
 /* ---- vertex arrays ---- */
@@ -230,6 +236,8 @@ void ogles2_draw_free(struct OGLES2Context *ctx)
         v3d_mem_free(ogles2_device(), &d->builtin_code);
     if (d->spill.hostptr)
         v3d_mem_free(ogles2_device(), &d->spill);
+    if (d->zero_ubo.hostptr)
+        v3d_mem_free(ogles2_device(), &d->zero_ubo);
     if (d->quad_ready)
         ogles2_program_builtin_free(&d->quad);
     if (d->mrt_ready)
@@ -352,8 +360,13 @@ static void update_state_vars(struct OGLES2Context *ctx, struct OGLES2Program *p
 struct tex_states
 {
     ULONG tex[2][OGLES2_MAX_STAGE_SAMPLERS], smp[2][OGLES2_MAX_STAGE_SAMPLERS];
+    UBYTE unit[2][OGLES2_MAX_STAGE_SAMPLERS], kind[2][OGLES2_MAX_STAGE_SAMPLERS]; /* textureSize's */
     ULONG ubo[2];   /* little-endian copy of each stage's constant buffer, if read */
+    ULONG zero_ubo; /* what the uniform blocks read until buffers can be bound (stage B) */
 };
+
+/* The largest uniform block (GL_MAX_UNIFORM_BLOCK_SIZE). */
+#define ZERO_UBO_BYTES 65536
 
 /* QUNIFORM_UBO_ADDR (indirectly indexed uniform arrays, plan 7.8): the
  * shader reads its constant buffer through the TMU, so a stage whose recipe
@@ -374,6 +387,22 @@ static BOOL ubo_copies(struct OGLES2Context *ctx, const struct OGLES2Program *p,
                 return FALSE;
             memcpy(c, p->cbuf_le[si], n * 4UL);
             ts->ubo[si] = (ULONG)c;
+        }
+        /* A uniform block (GLSL ES 3.00) reads zeros until stage B binds
+         * buffers to them: one block of the context's, made once. Only the
+         * GPU reads it; the cache clean before every submission covers the
+         * zeros written here. */
+        if (v[k]->uses_blocks && !ts->zero_ubo) {
+            struct OGLES2Draw *d = ctx->draw;
+            if (!d->zero_ubo.hostptr) {
+                if (v3d_mem_alloc(ogles2_device(), &d->zero_ubo, ZERO_UBO_BYTES + 256) < 0) {
+                    memset(&d->zero_ubo, 0, sizeof(d->zero_ubo));
+                    return FALSE;
+                }
+                memset(d->zero_ubo.hostptr, 0, ZERO_UBO_BYTES + 256);
+                ogles2_log("draw: uniform blocks read zeros (no uniform buffers yet)");
+            }
+            ts->zero_ubo = (ULONG)V3D_ALIGN_UP((v3d_uintptr)d->zero_ubo.hostptr, 256);
         }
     }
     return TRUE;
@@ -478,8 +507,10 @@ static BOOL texture_states(struct OGLES2Context *ctx, struct OGLES2Program *p,
                 ULONG idx = un->sampler[st] + e;
                 if (un->sampler[st] >= OGLES2_MAX_STAGE_SAMPLERS || idx >= OGLES2_MAX_STAGE_SAMPLERS)
                     break;
-                if (!ogles2_texture_state(ctx, unit_of(p, u, e), ogles2_sampler_kind(un->type),
-                                          &ts->tex[st][idx], &ts->smp[st][idx]))
+                ts->unit[st][idx] = unit_of(p, u, e);
+                ts->kind[st][idx] = (UBYTE)ogles2_sampler_kind(un->type);
+                if (!ogles2_texture_state(ctx, ts->unit[st][idx], ts->kind[st][idx], &ts->tex[st][idx],
+                                          &ts->smp[st][idx]))
                     return FALSE;
             }
         }
@@ -551,7 +582,19 @@ static ULONG write_uniforms(struct OGLES2Context *ctx, const struct OGLES2Progra
         case OGLES2_U_TMU_CONFIG_P1:
             w = tst->smp[si][(d >> 24) & (OGLES2_MAX_STAGE_SAMPLERS - 1)] | (d & 0xffffff);
             break;
-        case OGLES2_U_UBO_ADDR:          w = tst->ubo[si] + (d & 0xffffff); break;
+        case OGLES2_U_UBO_ADDR: /* unit 0 the constant buffer, the others uniform blocks */
+            w = ((d >> 24) ? tst->zero_ubo : tst->ubo[si]) + (d & 0xffffff);
+            break;
+        case OGLES2_U_GET_UBO_SIZE:
+            w = p->image->ublocks[p->image->stage_block[si][d]].size;
+            break;
+        case OGLES2_U_TEXTURE_WIDTH:
+        case OGLES2_U_TEXTURE_HEIGHT:
+        case OGLES2_U_TEXTURE_DEPTH:
+        case OGLES2_U_TEXTURE_ARRAY_SIZE:
+            d &= OGLES2_MAX_STAGE_SAMPLERS - 1;
+            w = ogles2_texture_size(ctx, tst->unit[si][d], tst->kind[si][d], (int)(rtype[i] - OGLES2_U_TEXTURE_WIDTH));
+            break;
         case OGLES2_U_SPILL_OFFSET:
             w = (ULONG)V3D_ALIGN_UP((v3d_uintptr)ctx->draw->spill.hostptr, 256);
             break;
@@ -1044,6 +1087,37 @@ static void stencil_bytes(const struct OGLES2State *s, int face, UBYTE *b)
     b[4] = (UBYTE)s->stencil_write_mask[face];
 }
 
+/* One kind of varying flags of a fragment shader (GLSL ES 3.00's flat and
+ * centroid; Mesa's emit_varying_flags): a packet per word of 24 varyings
+ * that has any, the first zeroing the varyings around it; FALSE if none. */
+static BOOL varying_flags(V3DContext *v, const ULONG *flags, UBYTE op)
+{
+    BOOL any = FALSE;
+    int i;
+    for (i = 0; i < 3; i++) {
+        ULONG lower, higher, w;
+        UBYTE *b;
+        if (!flags[i])
+            continue;
+        if (any)
+            lower = higher = V3D_VARYING_FLAGS_ACTION_UNCHANGED;
+        else if (i == 0)
+            lower = V3D_VARYING_FLAGS_ACTION_UNCHANGED, higher = V3D_VARYING_FLAGS_ACTION_ZEROED;
+        else
+            lower = higher = V3D_VARYING_FLAGS_ACTION_ZEROED;
+        w = (ULONG)i | lower << 4 | higher << 6 | (flags[i] & 0xffffff) << 8;
+        if ((b = v3d_buffer_claim_memory(v->current_buf, 5))) {
+            b[0] = op;
+            b[1] = (UBYTE)w;
+            b[2] = (UBYTE)(w >> 8);
+            b[3] = (UBYTE)(w >> 16);
+            b[4] = (UBYTE)(w >> 24);
+        }
+        any = TRUE;
+    }
+    return any;
+}
+
 static void emit_stencil(V3DContext *v, const UBYTE *b)
 {
     UBYTE *p = v3d_buffer_claim_memory(v->current_buf, 6);
@@ -1311,6 +1385,8 @@ static void emit_state(struct OGLES2Context *ctx, struct dedup *dd, int prim,
         dd->smask = smask;
         v->draw_state_configured = TRUE;
         dd->prim = prim;
+        dd->flags_fs = 0;
+        dd->flags_set = 0;
     } else {
         if (dd->prim != prim) { /* Mesa: on every primitive-type change */
             TransformFeedbackSpecs(v, FALSE, 0);
@@ -1320,6 +1396,29 @@ static void emit_state(struct OGLES2Context *ctx, struct dedup *dd, int prim,
             SampleState(v, 1, smask);
             dd->smask = smask;
         }
+    }
+    /* The fragment shader's flat, no-perspective and centroid varyings
+     * (Mesa sends them on every fragment shader change); a kind it has none
+     * of is zeroed only if an earlier shader of the pass set some, so GLES2
+     * programs (none) send nothing here. */
+    if (fs && fs != dd->flags_fs) {
+        static const UBYTE op[3] = {v3d_OP_FLAT_SHADE_FLAGS, v3d_OP_NON_PERSPECTIVE_FLAGS, v3d_OP_CENTROID_FLAGS};
+        static const UBYTE zero[3] = {v3d_OP_ZERO_ALL_FLAT_SHADE_FLAGS, v3d_OP_ZERO_ALL_NON_PERSPECTIVE_FLAGS,
+                                      v3d_OP_ZERO_ALL_CENTROID_FLAGS};
+        const ULONG *f[3];
+        int k;
+        f[0] = fs->flat_shade_flags;
+        f[1] = fs->noperspective_flags;
+        f[2] = fs->centroid_flags;
+        for (k = 0; k < 3; k++) {
+            if (varying_flags(v, f[k], op[k])) {
+                dd->flags_set |= 1 << k;
+            } else if (dd->flags_set & (1 << k)) {
+                DoCommand(v, zero[k]);
+                dd->flags_set &= ~(1 << k);
+            }
+        }
+        dd->flags_fs = fs;
     }
 }
 

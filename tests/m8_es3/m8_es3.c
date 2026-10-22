@@ -9,9 +9,14 @@
  * Covered so far (stage A item 1): the version tag and its errors, the
  * version strings, GL_MAJOR/MINOR_VERSION, GL_EXTENSIONS against
  * glGetStringi, ES3-only entries and queries refused in GLES2 contexts, the
- * share groups' one version, 48 combined texture units in both versions.
+ * share groups' one version, 48 combined texture units in both versions;
+ * (items 2 and 3) the #version check, GLSL ES 3.00 programs linked from
+ * their format 2 files (shaders/ in the current directory, the files in
+ * PROGDIR:, as `make test-v3dp` names them), explicit locations,
+ * glGetFragDataLocation, the unsigned and non-square uniforms, transpose.
  */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <exec/memory.h>
 #include <proto/exec.h>
@@ -108,6 +113,154 @@ static const char vs300[] = "/* a comment */\n  // and another\n#version 300 es\
                             "in vec4 p;\nvoid main() { gl_Position = p; }\n";
 static const char vs310[] = "#version 310 es\nin vec4 p;\nvoid main() { gl_Position = p; }\n";
 static const char vs100[] = "#version 100\nattribute vec4 p;\nvoid main() { gl_Position = p; }\n";
+
+/* A shader from shaders/ in the current directory (tools/v3dglslc/test/shaders,
+ * whose programs `make test-v3dp` compiles into files named by their hash). */
+static char *read_text(const char *name)
+{
+    char path[64];
+    FILE *f;
+    long n;
+    char *s;
+    snprintf(path, sizeof(path), "shaders/%s", name);
+    if (!(f = fopen(path, "rb")))
+        return 0;
+    fseek(f, 0, SEEK_END);
+    n = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    s = malloc(n + 1);
+    if (s && fread(s, 1, n, f) != (size_t)n) {
+        free(s);
+        s = 0;
+    }
+    if (s)
+        s[n] = 0;
+    fclose(f);
+    return s;
+}
+
+/* Links shaders/<name>.vert and .frag; the program, its status in *ok. */
+static GLuint link_files(const char *name, GLint *ok)
+{
+    char vn[32], fn[32];
+    char *vs, *fs;
+    GLuint p = glCreateProgram(), s;
+    *ok = 0;
+    snprintf(vn, sizeof(vn), "%s.vert", name);
+    snprintf(fn, sizeof(fn), "%s.frag", name);
+    vs = read_text(vn);
+    fs = read_text(fn);
+    if (!vs || !fs) {
+        printf("     (no shaders/%s or %s)\n", vn, fn);
+        free(vs);
+        free(fs);
+        return p;
+    }
+    s = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(s, 1, (const GLchar *const *)&vs, 0);
+    glCompileShader(s);
+    glAttachShader(p, s);
+    glDeleteShader(s);
+    s = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(s, 1, (const GLchar *const *)&fs, 0);
+    glCompileShader(s);
+    glAttachShader(p, s);
+    glDeleteShader(s);
+    glLinkProgram(p);
+    glGetProgramiv(p, GL_LINK_STATUS, ok);
+    if (!*ok) {
+        char log[256];
+        log[0] = 0;
+        glGetProgramInfoLog(p, sizeof(log), 0, log);
+        printf("     link %s: %s\n", name, log);
+    }
+    free(vs);
+    free(fs);
+    return p;
+}
+
+/* GLSL ES 3.00 programs in an ES3 context (stage A item 3): their files
+ * (format 2) load, explicit locations hold, the ES3 uniform entries work. */
+static void es3_programs(void)
+{
+    GLint ok, v[8];
+    GLuint p = link_files("es3", &ok), q;
+    check(ok, "ES 3.0: the GLSL ES 3.00 program es3 links from its format 2 file");
+    if (ok) {
+        check(glGetAttribLocation(p, "position") == 3, "ES 3.0: layout(location = 3) holds");
+        check(glGetFragDataLocation(p, "colour") == 0 && glGetFragDataLocation(p, "id") == 1 &&
+                  glGetFragDataLocation(p, "nothing") == -1 && glGetFragDataLocation(p, "gl_FragDepth") == -1 &&
+                  glGetError() == GL_NO_ERROR,
+              "ES 3.0: glGetFragDataLocation from the program's outputs");
+        glGetProgramiv(p, GL_ACTIVE_UNIFORMS, v);
+        check(v[0] == 5, "ES 3.0: the uniform blocks' 5 members are active uniforms");
+    }
+    q = link_files("es3tex", &ok);
+    check(ok, "ES 3.0: es3tex, every sampler type, links");
+    glDeleteProgram(q);
+    glDeleteProgram(p);
+
+    p = link_files("es3uni", &ok);
+    check(ok, "ES 3.0: es3uni links");
+    if (ok) {
+        static const GLfloat rows[6] = { 1, 2, 3, 4, 5, 6 }; /* mat2x3 row by row: 3 rows of 2 */
+        GLfloat f[6];
+        GLuint u[3];
+        GLint m23 = glGetUniformLocation(p, "m23"), u3 = glGetUniformLocation(p, "u3");
+        GLint u1 = glGetUniformLocation(p, "u1"), flag = glGetUniformLocation(p, "flag");
+        glUseProgram(p);
+        glUniformMatrix2x3fv(m23, 1, GL_FALSE, rows);
+        glGetUniformfv(p, m23, f);
+        check(glGetError() == GL_NO_ERROR && f[0] == 1 && f[5] == 6, "ES 3.0: glUniformMatrix2x3fv");
+        glUniformMatrix2x3fv(m23, 1, GL_TRUE, rows);
+        glGetUniformfv(p, m23, f);
+        /* column-major back: column 0 is rows' 1, 3, 5, column 1 2, 4, 6 */
+        check(glGetError() == GL_NO_ERROR && f[0] == 1 && f[1] == 3 && f[2] == 5 && f[3] == 2 && f[5] == 6,
+              "ES 3.0: transpose");
+        glUniform3ui(u3, 7, 0x80000000u, 9);
+        glUniform1ui(u1, 4000000000u);
+        glGetUniformuiv(p, u3, u);
+        check(glGetError() == GL_NO_ERROR && u[0] == 7 && u[1] == 0x80000000u && u[2] == 9,
+              "ES 3.0: glUniform3ui and glGetUniformuiv");
+        glGetUniformuiv(p, u1, u);
+        check(u[0] == 4000000000u, "ES 3.0: glUniform1ui keeps all 32 bits");
+        glUniform1i(u1, 3);
+        check(glGetError() == GL_INVALID_OPERATION, "ES 3.0: glUniform1i on a uint is GL_INVALID_OPERATION");
+        glUniform1ui(flag, 1);
+        glGetUniformiv(p, flag, v);
+        check(glGetError() == GL_NO_ERROR && v[0] == 1, "ES 3.0: glUniform1ui sets a bool");
+        glUseProgram(0);
+    }
+    glDeleteProgram(p);
+}
+
+/* The same programs in a GLES2 context: not linked, and their binary
+ * (format 2) refused. */
+static void es3_programs_in_es2(void *c3, void *c2)
+{
+    GLint ok, len = 0;
+    GLenum fmt = 0;
+    GLuint p, q;
+    void *bin;
+    aglMakeCurrent(c3);
+    p = link_files("es3", &ok);
+    glGetProgramiv(p, GL_PROGRAM_BINARY_LENGTH, &len); /* = OES_get_program_binary's */
+    bin = len > 0 ? malloc(len) : 0;
+    if (bin)
+        glGetProgramBinaryOES(p, len, 0, &fmt, bin);
+    glDeleteProgram(p);
+    aglMakeCurrent(c2);
+    q = link_files("es3", &ok);
+    check(!ok, "ES 2.0: a GLSL ES 3.00 program does not link");
+    glDeleteProgram(q);
+    q = glCreateProgram();
+    if (bin)
+        glProgramBinaryOES(q, fmt, bin, len);
+    glGetProgramiv(q, GL_LINK_STATUS, &ok);
+    check(bin && !ok, "ES 2.0: its format 2 binary is refused (glProgramBinaryOES)");
+    glDeleteProgram(q);
+    free(bin);
+}
 
 /* GL_EXTENSIONS and glGetStringi list the same names in the same order. */
 static int extensions_agree(void)
@@ -243,6 +396,8 @@ int main(int argc, char **argv)
             check(!compiles(GL_VERTEX_SHADER, vs310, "needs an OpenGL ES 3.1 context", &has) && has,
                   "ES 3.0: #version 310 es refused, with the reason in the log");
         }
+        es3_programs();
+        es3_programs_in_es2(c3, c2);
         aglDestroyContext(c3);
     }
     aglDestroyContext(c2);

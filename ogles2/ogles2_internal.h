@@ -159,7 +159,13 @@ struct OGLES2Array
 #define OGLES2_U_VIEWPORT_Z_SCALE  5
 #define OGLES2_U_TMU_CONFIG_P0     6  /* data: texture index << 24 | config bits */
 #define OGLES2_U_TMU_CONFIG_P1     7
-#define OGLES2_U_UBO_ADDR          16 /* data: unit << 24 | byte offset; unit 0 only */
+#define OGLES2_U_TEXTURE_WIDTH     10 /* textureSize (GLSL ES 3.00): the base level's size; data: */
+#define OGLES2_U_TEXTURE_HEIGHT    11 /* the texture index */
+#define OGLES2_U_TEXTURE_DEPTH     12
+#define OGLES2_U_TEXTURE_ARRAY_SIZE 13 /* the layers */
+#define OGLES2_U_UBO_ADDR          16 /* data: unit << 24 | byte offset; unit 0 the stage's constant
+                                       * buffer, unit i + 1 its uniform block i (format 2) */
+#define OGLES2_U_GET_UBO_SIZE      21 /* data: the stage's uniform block index */
 #define OGLES2_U_LINE_WIDTH        26
 #define OGLES2_U_AA_LINE_WIDTH     27
 #define OGLES2_U_SPILL_OFFSET      31 /* the context's spill area (register spilling, draw.c) */
@@ -210,6 +216,7 @@ struct OGLES2Variant
     UBYTE no_textures;            /* no TMU or UBO entries: its stream depends on no texture */
     UBYTE cbufs;                  /* fragment key: the render targets it writes (bit i: target i;
                                    * 0 in the built-in image: target 0) */
+    UBYTE uses_blocks;            /* OGLES2_U_UBO_ADDR of a uniform block (unit 1 or up: format 2) */
 };
 
 struct OGLES2ImageAttrib
@@ -220,6 +227,31 @@ struct OGLES2ImageAttrib
     UBYTE columns;        /* 1, or 2-4 for a matrix */
     UBYTE colmask;        /* the columns read, each in the next slot (bit k: column k); 0: from a
                            * compiler that did not say, every column from `slot` on */
+    UBYTE location;       /* format 2: layout(location), which glBindAttribLocation cannot move;
+                           * 0xff: none (the runtime numbers it) */
+};
+
+/* Format 2 (v3dp/FORMAT.md): a uniform block (UNIFORM_BLOCKS). */
+struct OGLES2ImageBlock
+{
+    const char *name;
+    ULONG binding;        /* initial binding (layout(binding), or 0) */
+    ULONG size;           /* data size in bytes */
+    UBYTE stages;         /* bit per mesa stage that references it */
+    UBYTE packing;        /* 0 std140, 1 shared, 2 packed, 3 std430 */
+    UWORD nmembers;
+    const UWORD *members; /* their indices in the image's uniforms */
+};
+
+/* Format 2: one input or output of the program (INTERFACE). */
+struct OGLES2ImageVar
+{
+    const char *name;
+    GLenum iface;         /* GL_PROGRAM_INPUT, GL_PROGRAM_OUTPUT */
+    GLenum type;          /* of one element */
+    UWORD array;          /* elements, 0 if not an array */
+    WORD location;        /* -1: a built-in */
+    UBYTE interpolation, precision, flags, index, stages;
 };
 /* Attribute names of a program: 16 locations, more names with aliasing
  * (GLES 2.0 2.10.4: two names bound to one location). */
@@ -248,6 +280,10 @@ struct OGLES2ImageUniform
     UBYTE nplaces;
     const struct OGLES2Place *places;
     ULONG sampler[2];     /* texture index in the vertex and fragment stage, ~0: none */
+    /* Format 2: a uniform block member's place in its block (block -1: none). */
+    WORD block;
+    UBYTE row_major;
+    LONG offset, array_stride, matrix_stride;
 };
 
 /* A state variable (STAGE_PARAMS kind 2): four values the runtime computes. */
@@ -296,6 +332,16 @@ struct OGLES2Image
     BOOL a2c_tried;
     char *vs_src, *fs_src;
     struct OGLES2Image *next;             /* the context's program cache (program.c) */
+    /* Format 2 (an OpenGL ES 3 program; v3dp/FORMAT.md): its uniform blocks,
+     * each stage's map from its block i (QUNIFORM_UBO_ADDR unit i + 1) to
+     * them, its inputs and outputs. */
+    BOOL format2;
+    UWORD nublocks;
+    const struct OGLES2ImageBlock *ublocks;
+    UBYTE stage_nblocks[2];               /* vertex, fragment */
+    const UWORD *stage_block[2];
+    UWORD ninterface;
+    const struct OGLES2ImageVar *interface;
 };
 
 /* GL shader and program objects share one name space (GLES 2.0 section 2.10). */
@@ -654,10 +700,16 @@ BOOL ogles2_texture_zs_surface(struct OGLES2Context *ctx, struct OGLES2Texture *
 #define OGLES2_TEX_2D   0
 #define OGLES2_TEX_CUBE 1
 #define OGLES2_TEX_RECT 2 /* ARB_texture_rectangle */
+#define OGLES2_TEX_NONE 3 /* GLSL ES 3.00's other samplers (3D, array, shadow, integer) until stage B
+                           * brings their textures: they read the incomplete texture's (0, 0, 0, 1) */
 static inline int ogles2_sampler_kind(GLenum type)
 {
-    return type == GL_SAMPLER_CUBE ? OGLES2_TEX_CUBE : type == GL_SAMPLER_2D_RECT ? OGLES2_TEX_RECT : OGLES2_TEX_2D;
+    return type == GL_SAMPLER_2D ? OGLES2_TEX_2D : type == GL_SAMPLER_CUBE ? OGLES2_TEX_CUBE
+         : type == GL_SAMPLER_2D_RECT ? OGLES2_TEX_RECT : OGLES2_TEX_NONE;
 }
+/* textureSize's values for unit's texture of that kind: what 0 width, 1
+ * height, 2 depth, 3 layers (texture.c). */
+ULONG ogles2_texture_size(struct OGLES2Context *ctx, int unit, int kind, int what);
 /* draw.c: the texture a sampler of that kind on `unit` reads returns 32 bits. */
 BOOL ogles2_texture_wide(struct OGLES2Context *ctx, int unit, int kind);
 extern ULONG ogles2_wide_seen; /* such a texture was ever given an image */

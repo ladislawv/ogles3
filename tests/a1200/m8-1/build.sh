@@ -3,8 +3,9 @@
 # (docs/GLES3_PLAN.md §4 item 7), m8_es3 with a release build of the library
 # (the version tag's 30 refused) and with an ES3=1 test build (ES 3.0
 # contexts), its limits for comparison with `v3dglslc -L`, and the smoke
-# test. Both libraries log every line at once. Nothing draws: state-only
-# contexts. Called by ../build_package.sh.
+# test (state-only contexts); then m8_draw, GLSL ES 3.00 programs drawn into
+# a hidden bitmap. Both libraries log every line at once. Called by
+# ../build_package.sh.
 set -eu
 PKG=$1
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -14,7 +15,14 @@ B3=${B3:-$(dirname "$BS")/m68k-es3-sync}
 
 make -C "$REPO" -j8 B="$BS" EXTRA_CFLAGS=-DOGLES2_LOG_SYNC > /dev/null
 make -C "$REPO" -j8 B="$B3" EXTRA_CFLAGS=-DOGLES2_LOG_SYNC ES3=1 > /dev/null
-mkdir -p "$PKG/libs-release" "$PKG/libs-es3" "$PKG/bin"
+# The test programs' files (format 2 for the GLSL ES 3.00 ones), named by
+# their hash: m8_es3 and m8_draw link them from PROGDIR: without a compiler.
+make -C "$REPO" B="$B3" test-v3dp > /dev/null
+mkdir -p "$PKG/libs-release" "$PKG/libs-es3" "$PKG/bin/shaders"
 cp "$BS/ogles2.library" "$PKG/libs-release/"
 cp "$B3/ogles2.library" "$PKG/libs-es3/"
-cp "$BS/tests/m8_es3" "$BS/tests/smoke" "$BS/cmd/OGLES2Log" "$PKG/bin/"
+cp "$BS/tests/m8_es3" "$BS/tests/m8_draw" "$BS/tests/smoke" "$BS/cmd/OGLES2Log" "$PKG/bin/"
+cp "$B3"/v3dp/*.v3dp "$B3"/v3dp/*.v3dw "$PKG/bin/"
+for f in "$REPO"/tools/v3dglslc/test/shaders/*; do
+    sed 's/\r$//' "$f" > "$PKG/bin/shaders/$(basename "$f")"
+done

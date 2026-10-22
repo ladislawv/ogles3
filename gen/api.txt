@@ -23,3 +23,19 @@ command glDrawBuffersEXT
 # OpenGL ES 3.0 (docs/GLES3_PLAN.md, Appendix A); the feature line comes when all of it is in
 command glGetStringi
 command glGetInteger64v
+command glUniform1ui
+command glUniform2ui
+command glUniform3ui
+command glUniform4ui
+command glUniform1uiv
+command glUniform2uiv
+command glUniform3uiv
+command glUniform4uiv
+command glGetUniformuiv
+command glUniformMatrix2x3fv
+command glUniformMatrix3x2fv
+command glUniformMatrix2x4fv
+command glUniformMatrix4x2fv
+command glUniformMatrix3x4fv
+command glUniformMatrix4x3fv
+command glGetFragDataLocation

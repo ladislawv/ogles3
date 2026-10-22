@@ -25,17 +25,19 @@ Date >>M8R1:results/00-progress.txt
 ; An ogles2 installed in LIBS: would win over the package's (added after it).
 List LIBS:ogles2#? LIBS:v3dglslc >M8R1:results/00-libs.txt
 SetEnv OGLES2/LogFile M8R1:results/ogles2.log
+; m8_es3 and m8_draw read their shaders from shaders/ here.
+CD M8R1:bin
 
 ; The release build: ES 3.0 contexts refused.
 Assign LIBS: M8R1:libs-release ADD
 Avail FLUSH >NIL:
 If NOT {FROM} GT 1 VAL
-  Echo "Step 1 of 4: the smoke test (release build), a few seconds."
+  Echo "Step 1 of 5: the smoke test (release build), a few seconds."
   M8R1:bin/smoke >M8R1:results/1-smoke.txt
   Echo "step 1 done" >>M8R1:results/00-progress.txt
 EndIf
 If NOT {FROM} GT 2 VAL
-  Echo "Step 2 of 4: m8_es3 with the release build, a few seconds."
+  Echo "Step 2 of 5: m8_es3 with the release build, a few seconds."
   M8R1:bin/m8_es3 >M8R1:results/2-m8_es3-release.txt
   Echo "step 2 done" >>M8R1:results/00-progress.txt
 EndIf
@@ -46,18 +48,24 @@ Assign LIBS: M8R1:libs-release REMOVE
 Assign LIBS: M8R1:libs-es3 ADD
 Avail FLUSH >NIL:
 If NOT {FROM} GT 3 VAL
-  Echo "Step 3 of 4: m8_es3 with the ES3 test build, a few seconds."
+  Echo "Step 3 of 5: m8_es3 with the ES3 test build, a few seconds."
   M8R1:bin/m8_es3 ES3 >M8R1:results/3-m8_es3-es3.txt
   Echo "step 3 done" >>M8R1:results/00-progress.txt
 EndIf
 If NOT {FROM} GT 4 VAL
-  Echo "Step 4 of 4: the ES 3.0 limits, a second."
+  Echo "Step 4 of 5: the ES 3.0 limits, a second."
   M8R1:bin/m8_es3 LIMITS >M8R1:results/4-limits.txt
   Echo "step 4 done" >>M8R1:results/00-progress.txt
+EndIf
+If NOT {FROM} GT 5 VAL
+  Echo "Step 5 of 5: GLSL ES 3.00 programs drawn into a hidden bitmap, a second."
+  M8R1:bin/m8_draw >M8R1:results/5-m8_draw.txt
+  Echo "step 5 done" >>M8R1:results/00-progress.txt
 EndIf
 Avail FLUSH >NIL:
 Assign LIBS: M8R1:libs-es3 REMOVE
 
+CD M8R1:
 UnSetEnv OGLES2/LogFile
 If NOT EXISTS M8R1:results/notes.txt
   Copy M8R1:notes-template.txt M8R1:results/notes.txt
