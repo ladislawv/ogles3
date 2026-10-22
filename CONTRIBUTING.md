@@ -30,9 +30,9 @@ Windows drive, `/mnt/c/...`); the build output goes to `~/ogles2-build`.
 2. `bash dev/host-setup/build_tools.sh`: lha and vamos (minutes).
 3. `bash dev/host-setup/build_toolchains.sh`: GCC 6.5.0b with clib2 and GCC 16.2, pinned to
    the tested commits (`dev/host-setup/toolchain-pins.txt`); a few hours.
-4. `bash dev/host-setup/build_mesa.sh`, then
-   `for p in tools/v3dglslc/patches/*.patch; do git -C ~/mesa-build/mesa apply "$p"; done`
-   (the v3dglslc builds expect them in that tree), then the v3dglslc steps of the README's
+4. `bash dev/host-setup/build_mesa.sh`, then `bash dev/host-setup/apply_mesa_patches.sh` and
+   `ninja -C ~/mesa-build/mesa/build install` (the v3dglslc builds expect the patches in that
+   tree; `MESA` and `MESA_INSTALL` name another tree and prefix), then the v3dglslc steps of the README's
    Building section, for the shader compiler (needed for anything that compiles GLSL,
    including the corpus and `make test-v3dp`).
 5. `bash dev/host-setup/build_vbcc.sh` if you work on the vbcc client side.

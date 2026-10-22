@@ -334,7 +334,8 @@ etc1-test:
 	$(B)/host/etc1_test
 
 # ---- host check of ogles2/blake3.c against Mesa's BLAKE3
-MESA_SRC ?= $(HOME)/mesa-build/mesa/src
+MESA ?= $(HOME)/mesa-build/mesa
+MESA_SRC ?= $(MESA)/src
 .PHONY: blake3-test
 blake3-test:
 	@mkdir -p $(B)/host

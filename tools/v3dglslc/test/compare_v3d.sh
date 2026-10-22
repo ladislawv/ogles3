@@ -8,7 +8,7 @@ OUT=${OUT:-$HOME/ogles2-build/v3dglslc}
 FLAGS=${1:-precompile,qpu}
 T="$(dirname "$(readlink -f "$0")")"
 H="$(dirname "$T")"
-MI=~/mesa-install
+MI=${MESA_INSTALL:-$HOME/mesa-install}
 L=$MI/lib/x86_64-linux-gnu
 W=$OUT/v3dcmp && rm -rf $W && mkdir -p $W && cd $W
 cp "$T"/shaders/*.vert "$T"/shaders/*.frag . || exit 1

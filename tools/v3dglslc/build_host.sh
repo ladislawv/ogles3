@@ -4,11 +4,13 @@
 # host Mesa build's own objects (same commit and patches). Its .v3dp files are
 # the reference the m68k ones must match byte for byte (test/compare_v3dp.sh).
 #   usage: build_host.sh            -> $OUT/host/v3dglslc
+# MESA names the Mesa tree (default ~/mesa-build/mesa; the gles3 copy's local.env
+# sets its own).
 set -u
 OUT=${OUT:-$HOME/ogles2-build/v3dglslc}
 H="$(dirname "$(readlink -f "$0")")"
 V="$(dirname "$(dirname "$H")")/v3dp"
-M=~/mesa-build/mesa
+M=${MESA:-$HOME/mesa-build/mesa}
 B=$M/build
 W=$OUT/host
 mkdir -p $W/lib && rm -f $W/lib/*.a
@@ -17,10 +19,9 @@ mkdir -p $W/lib && rm -f $W/lib/*.a
 ninja -C $B > $W/ninja.log 2>&1 || { echo "ninja failed, see $W/ninja.log"; tail -20 $W/ninja.log; exit 1; }
 
 # ---- compile v3dglslc.c, the writer and the fake device with st_manager.c's host flags
-python3 -I - "$H" "$W" "$V" "$H/compat" <<'PY'
+python3 -I - "$H" "$W" "$V" "$H/compat" "$B" <<'PY'
 import json, os, shlex, subprocess, sys
-h, w, v, compat = sys.argv[1:5]
-build = os.path.expanduser("~/mesa-build/mesa/build")
+h, w, v, compat, build = sys.argv[1:6]
 src_root = os.path.dirname(build)
 cc = json.load(open(os.path.join(build, "compile_commands.json")))
 ref = next(e for e in cc if e["file"].endswith("state_tracker/st_manager.c"))
@@ -59,7 +60,7 @@ PY
 [ $? -eq 0 ] || exit 1
 
 # ---- archives of the same Mesa targets the m68k build uses (replay.py TOOL)
-DIRS=$(python3 -I -c "
+DIRS=$(MESA=$M python3 -I -c "
 import sys; sys.path.insert(0, '$H'); import replay
 print(' '.join(replay.LIBS[n] for n in replay.TOOL))")
 # x86-only helpers the m68k build replaces (compat/driver_stubs.c, plain C paths)

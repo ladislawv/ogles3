@@ -15,7 +15,9 @@ standalone GLSL compiler (the stream C spike's part 1, needs patch 0005).
 import argparse, collections, json, os, re, shlex, subprocess, sys
 from concurrent.futures import ThreadPoolExecutor
 
-MESA_BUILD = os.path.expanduser("~/mesa-build/mesa/build")
+# MESA names the Mesa tree (default ~/mesa-build/mesa; the gles3 copy's local.env
+# sets its own).
+MESA_BUILD = os.path.join(os.path.expanduser(os.environ.get("MESA", "~/mesa-build/mesa")), "build")
 # Toolchain root. Default: GCC 16.2 (amiga16.2). M68K_TC=~/amiga-gcc16-install selects
 # GCC 16.1 (amiga16.1), which miscompiles (see README.md) and is kept only for comparison.
 TC_ROOT = os.path.expanduser(os.environ.get("M68K_TC", "~/amiga-gcc162-install"))

@@ -31,10 +31,11 @@ Mesa's driver, so they could follow later as an extension
 
 - **Private until released.** The branch `gles3` lives in the private
   repository `github.com/ladislawv/ogles3.1`, in a working copy of its own
-  (here `C:\- CPP\ogles3`); the public `github.com/ladislawv/ogles2` is a
+  beside the ogles2 clone; the public `github.com/ladislawv/ogles2` is a
   fetch-only remote there (`ogles2`), and a `pre-push` hook refuses `gles3`
   to it. `local.env` (not in git) sends this copy's builds to
-  `~/ogles3-build`. The compiler, test and release scripts default `OUT` to
+  `~/ogles3-build` and names its own Mesa tree (`MESA`, `MESA_INSTALL`;
+  §3). The compiler, test and release scripts default `OUT` to
   `~/ogles2-build` (`tools/v3dglslc/build_host.sh:8`, `build_m68k.sh:6`,
   `release/build_release.sh:28`), so `OUT` is given per command, as
   `local.env` says, or a 1.x build is overwritten. Another machine is set
@@ -441,22 +442,26 @@ Mesa's driver, so they could follow later as an extension
   - The offline compiler writes the same files as the on-target one. Every
     compiler change rebuilds both compilers (host and m68k, byte-identical:
     `tools/v3dglslc/test/compare_v3dp.sh`).
-- **The Mesa tree.** Today both working copies build the compiler from
-  `~/mesa-build/mesa`. Stage A needs a Mesa patch of its own (item 5), so at
-  its start this work gets a separate tree, `~/mesa-build-gles3`: the same
-  Mesa commit with the same changes, configured afresh with its own prefix
-  (`meson setup` as `dev/host-setup/build_mesa.sh:24` does, with
-  `~/mesa-install-gles3`), not a copy (`build.ninja` holds absolute paths
-  into the tree it was made in). The compiler's Mesa changes, patches
-  0001-0014 of `tools/v3dglslc/patches/`, are applied by
-  `dev/host-setup/apply_mesa_patches.sh <tree>` (added 2026-10-21: before
-  it no script applied them, and `~/mesa-build/mesa` held them as
-  uncommitted edits; on a clean checkout of the pinned commit it gives that
-  tree's changes exactly), on WSL1 with `patch_drmshim.sh`'s
-  `memfd_create` fallback as well; stage A's own patch is then 0015.
-  `build_host.sh` (`M=`, `build =`) and `replay.py` (`MESA_BUILD`, which
-  `build_m68k.sh` uses too) take its path from a variable set in
-  `local.env`.
+- **The Mesa tree.** Stage A needs a Mesa patch of its own (item 5), which
+  must not reach the 1.x compiler, so this work has a separate tree
+  (2026-10-22), `~/mesa-build-gles3/mesa`, installed into
+  `~/mesa-install-gles3`: the same Mesa commit with the same changes,
+  configured afresh (a copy would not do: `build.ninja` holds absolute paths
+  into the tree it was made in). The scripts take the tree from `MESA` and
+  the prefix from `MESA_INSTALL`, which `local.env` sets; unset, they mean
+  `~/mesa-build/mesa` and `~/mesa-install` as before: `build_mesa.sh`
+  (which checks out a tree already there instead of cloning it),
+  `apply_mesa_patches.sh`, `build_host.sh`, `replay.py` (and with it
+  `build_m68k.sh`), `test/compare_v3d.sh`, the Makefile's host checks and
+  `build_release.sh`. The compiler's Mesa changes, patches 0001-0014 of
+  `tools/v3dglslc/patches/`, are applied by
+  `dev/host-setup/apply_mesa_patches.sh` (added 2026-10-21: before it no
+  script applied them, and `~/mesa-build/mesa` held them as uncommitted
+  edits; on a clean checkout of the pinned commit it gives that tree's
+  changes exactly), on WSL1 with `patch_drmshim.sh`'s `memfd_create`
+  fallback as well (that script still names `~/mesa-build/mesa`); stage A's
+  own patch is then 0015. A new machine: `. ./local.env`, `build_mesa.sh`,
+  `apply_mesa_patches.sh`, `ninja -C $MESA/build install`.
 - **`.v3dp` format 2 for ES 3.x programs.**
   - **Why a major version:** a 1.x reader skips unknown sections and accepts
     any minor version, so an ES3 program's file read by 1.x would draw
