@@ -15,7 +15,8 @@ cp "$T"/shaders/*.vert "$T"/shaders/*.frag . || exit 1
 sed -i 's/\r$//' *.vert *.frag
 PAIRS="tex.vert tex.frag light.vert light.frag skin.vert skin.frag tex.vert proc.frag state.vert state.frag mrt.vert mrt.frag
        es3.vert es3.frag es3tex.vert es3tex.frag es3uni.vert es3uni.frag es3flat.vert es3flat.frag
-       es3block.vert es3block.frag es3size.vert es3size.frag es3vid.vert es3vid.frag"
+       es3block.vert es3block.frag es3size.vert es3size.frag es3vid.vert es3vid.frag
+       es3out.vert es3out.frag"
 
 $OUT/host/v3dglslc -o host $PAIRS > host.txt 2>&1
 echo "host v3dglslc rc=$?"

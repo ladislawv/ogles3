@@ -65,14 +65,14 @@ static const ULONG smooth_rdata[20] = {0, 0, 0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10,
 static const struct OGLES2Variant smooth_variants[3] = {
     {OGLES2_VARIANT_CS, 4, 1, 0, 0, 4, 0, 0, 0, {3}, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
      {0}, {0}, {0}, 0, builtin_coordinate, sizeof(builtin_coordinate), 0, 20, smooth_rtype,
-     smooth_rdata, 0, 0, 0, 0, 0, 0, 0, 0},
+     smooth_rdata, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {OGLES2_VARIANT_VS, 4, 1, 0, 0, 4, 0, 0, 0, {3, 4}, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
      {0}, {0}, {0}, 0, builtin_vertex_smooth, sizeof(builtin_vertex_smooth),
-     sizeof(builtin_coordinate), 20, smooth_rtype, smooth_rdata, 0, 0, 0, 0, 0, 0, 0, 0},
+     sizeof(builtin_coordinate), 20, smooth_rtype, smooth_rdata, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {OGLES2_VARIANT_FS, 4, 0, 0, 0, 0, 0, 0, 0, {0}, 0, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 0,
      {0}, {0}, {0}, 0, builtin_fragment_smooth, sizeof(builtin_fragment_smooth),
      sizeof(builtin_coordinate) + sizeof(builtin_vertex_smooth), 0, 0, 0, 0, 0, 0, 0, 0,
-     1 /* render target 0 */, 0, 0},
+     1 /* render target 0 */, 0, 0, 0},
 };
 
 static const struct OGLES2Image builtin_smooth = {
@@ -92,6 +92,7 @@ static const struct OGLES2Image builtin_smooth = {
     0, 0,       /* no sources */
     0,          /* in no program cache */
     0, 0, 0, {0, 0}, {0, 0}, 0, 0, /* format 1.0: no uniform blocks or interface */
+    0, 0, 0, 0, 0, 0, 0, 0, 0,     /* no draw-time variants */
 };
 
 const struct OGLES2Image *ogles2_builtin_image(void)
@@ -1111,6 +1112,126 @@ const struct OGLES2Image *ogles2_image_a2c(struct OGLES2Image *im)
                        ogles2_compile_program_a2c);
 }
 
+/* ---- draw-time variants (docs/GLES3_PLAN.md stage A item 5) ----
+ * A program's .v3dx: the variants compiled for draw states its own file
+ * lacks. Taken only when it is the program's (its hash), of the same
+ * layout (its VARIANT_OF is the program file's layout CRC: a variant's
+ * uniform recipe indexes the constant buffers as that link laid them out)
+ * and its variants read only uniform blocks the program's stages have. */
+static void image_hex(const struct OGLES2Image *im, char *hex)
+{
+    static const char digits[] = "0123456789abcdef";
+    int k;
+    for (k = 0; k < FILE_HASH_DIGITS / 2; k++) {
+        hex[2 * k] = digits[im->hash[k] >> 4];
+        hex[2 * k + 1] = digits[im->hash[k] & 15];
+    }
+    hex[FILE_HASH_DIGITS] = 0;
+}
+
+static struct OGLES2Image *try_x(const struct OGLES2Image *im, const char *path)
+{
+    char why[120];
+    struct OGLES2Image *x;
+    UBYTE *file;
+    ULONG len = 0, k, j;
+    if (!(file = read_file(path, &len)))
+        return 0;
+    x = ogles2_v3dp_load(file, len, why, sizeof(why));
+    FreeVec(file);
+    if (!x) {
+        ogles2_log("draw: %s refused: %s", (ULONG)path, (ULONG)why);
+        return 0;
+    }
+    if (!x->v3dx || memcmp(x->hash, im->hash, 32) || x->variant_of != im->layout_crc) {
+        ogles2_log("draw: %s is not this program's, or of another link of it (another compiler)", (ULONG)path);
+        ogles2_image_free(x, 0);
+        return 0;
+    }
+    for (k = 0; k < x->nvariants; k++) {
+        const struct OGLES2Variant *v = &x->variants[k];
+        ULONG si = v->stage == OGLES2_VARIANT_FS;
+        for (j = 0; j < v->nrecipe; j++)
+            if ((v->rtype[j] == OGLES2_U_UBO_ADDR && (v->rdata[j] >> 24) > im->stage_nblocks[si]) ||
+                (v->rtype[j] == OGLES2_U_GET_UBO_SIZE && v->rdata[j] >= im->stage_nblocks[si])) {
+                ogles2_log("draw: %s reads a uniform block the program does not have", (ULONG)path);
+                ogles2_image_free(x, 0);
+                return 0;
+            }
+    }
+    ogles2_log("draw: %s (%ld variants)", (ULONG)path, (LONG)x->nvariants);
+    return x;
+}
+
+const struct OGLES2Image *ogles2_image_x(struct OGLES2Image *im, BOOL cache)
+{
+    char hex[FILE_HASH_DIGITS + 1], path[96];
+    image_hex(im, hex);
+    if (cache) {
+        if (!im->xc_tried) {
+            im->xc_tried = TRUE;
+            strcpy(path, ogles2_cache_dir());
+            strcat(path, hex);
+            strcat(path, ".v3dx");
+            im->xc = try_x(im, path);
+        }
+        return im->xc;
+    }
+    if (!im->xs_tried) {
+        static const char *const dirs[2] = {"PROGDIR:shaders/", "PROGDIR:"};
+        int d;
+        im->xs_tried = TRUE;
+        for (d = 0; d < 2 && !im->xs; d++) {
+            strcpy(path, dirs[d]);
+            strcat(path, hex);
+            strcat(path, ".v3dx");
+            im->xs = try_x(im, path);
+        }
+    }
+    return im->xs;
+}
+
+BOOL ogles2_image_compile_variants(struct OGLES2Context *ctx, struct OGLES2Image *im, const UBYTE *keys,
+                                   ULONG keys_len)
+{
+    char hex[FILE_HASH_DIGITS + 1], path[96], *log;
+    int rc;
+    if (im->x_failed || !im->vs_src || !im->fs_src || !ogles2_compiler_installed())
+        return FALSE;
+    if (!(log = AllocVec(1024, MEMF_ANY | MEMF_CLEAR)))
+        return FALSE;
+    image_hex(im, hex);
+    file_path(path, ogles2_cache_dir(), hex);
+    rc = ogles2_compile_variants(im->vs_src, im->fs_src, im->bind_src, keys, keys_len, im->layout_crc, path,
+                                 log, 1024);
+    if (rc < 0) {
+        im->x_failed = TRUE; /* no compiler for these: asked no more */
+        ogles2_log("draw: program %s: the compiler cannot compile draw-time variants (none, or too old)",
+                   (ULONG)hex);
+    } else if (!rc) {
+        ogles2_log("draw: program %s: the compiler made no variant: %s", (ULONG)hex, (ULONG)log);
+    }
+    FreeVec(log);
+    if (rc <= 0)
+        return FALSE;
+    /* The cache's .v3dx again: the compiler added to it. The old image
+     * stays (programs drawing with this image may hold its variants, and
+     * the open job its code), chained in the new one's own xc slot, which
+     * a .v3dx image does not use otherwise; all go with the program's. */
+    {
+        struct OGLES2Image *old = im->xc;
+        im->xc = 0;
+        im->xc_tried = FALSE;
+        if (!ogles2_image_x(im, TRUE)) {
+            im->xc = old;
+            return FALSE;
+        }
+        im->xc->xc = old;
+    }
+    (void)ctx;
+    return TRUE;
+}
+
 /* After an image is set: attribute locations, uniform locations, constant
  * buffers. FALSE (with the log set) if the attributes do not fit. */
 static BOOL bind_image(struct OGLES2Program *p, const struct OGLES2Image *im)
@@ -1234,6 +1355,9 @@ void ogles2_glLinkProgram(struct OGLES2Context *ctx, GLuint program)
         ;
     if (!im) {
         im = load_image(p, hash, hex, bindings);
+        /* Kept for the draw-time variants' compiles (the same link). */
+        if (im && bindings)
+            im->bind_src = dup_text(bindings, str_len(bindings));
         if (bindings)
             FreeVec(bindings);
         bindings = 0;

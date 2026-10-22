@@ -771,7 +771,7 @@ static unsigned old_variants(const char *path, const uint8_t *hash, uint32_t lay
  * 1: the captured variants added to those of the existing file, which a
  * temporary file and a rename replace). */
 static int write_file(const char *path, struct gl_shader_program *prog, unsigned num_sources,
-                      const unsigned *stages, const char *const *sources, int v3dx)
+                      const unsigned *stages, const char *const *sources, int v3dx, uint32_t expect_crc)
 {
     /* program = PROGRAM section, body = the sections after STRINGS (STRINGS
      * is complete only once they are written). */
@@ -875,6 +875,11 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
          * ones that are not among them. */
         uint32_t crc = crc32_le(body.p, layout_end);
         unsigned keep, j;
+        if (expect_crc && crc != expect_crc) {
+            fprintf(stderr, "v3dp: the program's link lays it out otherwise (%08x, not %08x): another "
+                            "compiler made its .v3dp\n", (unsigned)crc, (unsigned)expect_crc);
+            goto out;
+        }
         if (body.failed || !(old = calloc(MAX_V3DX_VARIANTS, sizeof(*old))))
             goto out;
         nold = old_variants(path, hash, crc, format2 ? V3DP_MAJOR2 : V3DP_MAJOR, old, MAX_V3DX_VARIANTS);
@@ -982,11 +987,11 @@ out:
 int v3dp_write(const char *path, struct gl_shader_program *prog, unsigned num_sources,
                const unsigned *stages, const char *const *sources)
 {
-    return write_file(path, prog, num_sources, stages, sources, 0);
+    return write_file(path, prog, num_sources, stages, sources, 0, 0);
 }
 
 int v3dp_write_variants(const char *path, struct gl_shader_program *prog, unsigned num_sources,
-                        const unsigned *stages, const char *const *sources)
+                        const unsigned *stages, const char *const *sources, uint32_t expect_layout_crc)
 {
-    return write_file(path, prog, num_sources, stages, sources, 1);
+    return write_file(path, prog, num_sources, stages, sources, 1, expect_layout_crc);
 }

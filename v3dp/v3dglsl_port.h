@@ -39,6 +39,14 @@
                               * location, which Mesa's linker must know of); they are part of the
                               * program's hash (v3dp/FORMAT.md). A compiler older than this
                               * answers 3. */
+#define V3DGLSL_COMPILE_VARIANT 7 /* link vs and fs (with `bindings` if not NULL), then compile the
+                                   * variants of `keys` (each a u32 VARIANT stage and the key's
+                                   * bytes, v3dp/FORMAT.md) into the program's .v3dx: out_path with
+                                   * ".v3dp" turned into ".v3dx", its variants kept. Nothing is
+                                   * written (result 1) if the link's layout CRC is not
+                                   * `layout_crc` (another compiler made the program's .v3dp).
+                                   * docs/GLES3_PLAN.md stage A item 5. A compiler older than this
+                                   * answers 3. */
 
 struct V3DGLSLRequest
 {
@@ -51,7 +59,12 @@ struct V3DGLSLRequest
     ULONG log_size;
     LONG result;          /* reply: 0 done (written); 1 compile or link failed; 2 not written; 3 bad request */
     const char *bindings; /* V3DGLSL_LINK_BOUND only (read for no other op: an older sender's
-                           * request ends before it): "<index> <name>\n" lines, sorted by name */
+                           * request ends before it): "<index> <name>\n" lines, sorted by name;
+                           * also V3DGLSL_COMPILE_VARIANT's (NULL: none) */
+    /* V3DGLSL_COMPILE_VARIANT only (read for no other op): */
+    const UBYTE *keys;
+    ULONG keys_len;
+    ULONG layout_crc;     /* the program's .v3dp's (FORMAT.md, VARIANT_OF) */
 };
 
 #endif

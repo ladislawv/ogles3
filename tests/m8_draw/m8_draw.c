@@ -237,6 +237,24 @@ static void test_vertex_id(void)
     glDeleteProgram(p);
 }
 
+/* A draw-time variant (stage A item 5): es3out's precompiled fragment
+ * variants are for a float and an unsigned target; drawn into the RGBA8
+ * default framebuffer, the draw takes one compiled for its own key (now, or
+ * earlier into the cache's .v3dx). The library's log says which. */
+static void test_variant(void)
+{
+    GLuint p = program("es3out");
+    if (!p) {
+        check(0, "draw-time variant: es3out links");
+        return;
+    }
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    check(pixel_is(30, 30, 0, 255, 0, 255, 0) && pixel_is(5, 58, 0, 255, 0, 255, 0),
+          "draw-time variant: two outputs into one RGBA8 target draw its green");
+    glDeleteProgram(p);
+}
+
 int main(void)
 {
     struct BitMap *bm;
@@ -266,6 +284,7 @@ int main(void)
     test_block();
     test_size();
     test_vertex_id();
+    test_variant();
     check(glGetError() == GL_NO_ERROR, "no GL error left over");
     aglDestroyContext(ctx);
     FreeBitMap(bm);

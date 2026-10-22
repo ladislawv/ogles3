@@ -222,6 +222,7 @@ struct OGLES2Variant
      * draw-time variants (docs/GLES3_PLAN.md stage A item 5); NULL in the
      * built-in image. */
     const UBYTE *key;
+    const UBYTE *input_slots;     /* fragment: prog data's 64 input slots (a vertex key's used outputs) */
 };
 #define OGLES2_VS_KEY_BYTES 88  /* struct v3d_vs_key as the file writes it */
 #define OGLES2_FS_KEY_BYTES 296 /* struct v3d_fs_key */
@@ -349,6 +350,19 @@ struct OGLES2Image
     const UWORD *stage_block[2];
     UWORD ninterface;
     const struct OGLES2ImageVar *interface;
+    /* Draw-time variants (docs/GLES3_PLAN.md stage A item 5). A program
+     * file's layout CRC (its STAGE_PARAMS, UNIFORMS and ATTRIBUTES: a .v3dx
+     * of it must carry it); for a .v3dx image, v3dx and its VARIANT_OF. */
+    ULONG layout_crc;
+    BOOL v3dx;
+    ULONG variant_of;
+    /* A program's .v3dx images: shipped (PROGDIR:shaders/ or PROGDIR:) and
+     * the cache's (compiled here), loaded at the first draw that misses a
+     * variant (program.c, ogles2_image_x); its link's bindings, for those
+     * compiles (NULL: none). */
+    struct OGLES2Image *xs, *xc;
+    BOOL xs_tried, xc_tried, x_failed;
+    char *bind_src;
 };
 
 /* GL shader and program objects share one name space (GLES 2.0 section 2.10). */
@@ -416,6 +430,8 @@ struct OGLES2Program
     struct OGLES2Context *us_ctx[2];
     UBYTE nslots;                     /* vertex input slots (0xff: not mapped yet) */
     UBYTE slot_attrib[16];            /* the generic attribute of each (0xff: none) */
+    UBYTE var_cbufs;                  /* draw.c: the colour buffers drawn into at the last choice */
+    BOOL var_logged;                  /* a draw-time variant miss logged (draw.c) */
 };
 
 struct OGLES2Context;
@@ -762,6 +778,16 @@ BOOL ogles2_compile_program_wide(const char *vs, const char *fs, const char *pat
                                  ULONG log_size);
 BOOL ogles2_compile_program_a2c(const char *vs, const char *fs, const char *path, char *log,
                                 ULONG log_size);
+/* A program's draw-time variants into its .v3dx beside path: 1 written, 0
+ * not, -1 no compiler that knows the request (stage A item 5). */
+int ogles2_compile_variants(const char *vs, const char *fs, const char *bindings, const UBYTE *keys,
+                            ULONG keys_len, ULONG layout_crc, const char *path, char *log, ULONG log_size);
+/* program.c: the program's .v3dx image shipped with it (cache FALSE) or
+ * compiled here (TRUE), found the first time; NULL if none. And the keys'
+ * variants compiled into the cache's (it is read again): FALSE if not. */
+const struct OGLES2Image *ogles2_image_x(struct OGLES2Image *im, BOOL cache);
+BOOL ogles2_image_compile_variants(struct OGLES2Context *ctx, struct OGLES2Image *im, const UBYTE *keys,
+                                   ULONG keys_len);
 /* One shader through the front end: 1 compiled, 0 GLSL errors (in log),
  * -1 the compiler could not be run. */
 int ogles2_compile_shader(BOOL fragment, const char *src, char *log, ULONG log_size);

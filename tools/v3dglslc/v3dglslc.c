@@ -124,6 +124,7 @@ static struct pipe_context *the_pipe;
  * each a u32 VARIANT stage and the key's bytes (v3dp_key_parse). */
 static const uint8_t *variant_keys;
 static size_t variant_keys_len;
+static uint32_t variant_layout_crc; /* V3DGLSL_COMPILE_VARIANT's (0: not checked) */
 
 static int make_target(void)
 {
@@ -633,7 +634,7 @@ static int write_program(GLuint p, const char *path, const char *vs_src, const c
             at += used;
         }
         v3dp_capture_end();
-        return ok && v3dp_write_variants(xpath, prog, nsrc, stages, sources) == 0;
+        return ok && v3dp_write_variants(xpath, prog, nsrc, stages, sources, variant_layout_crc) == 0;
     }
     /* The alpha-to-coverage variants: the same draws with the fragment key's
      * msaa and sample_alpha_to_coverage set (patch 0014). Only the fragment
@@ -802,11 +803,13 @@ static int serve(void)
                 r->log[0] = 0;
             if (r->version != V3DGLSL_VERSION ||
                 (r->op != V3DGLSL_LINK && r->op != V3DGLSL_QUIT && r->op != V3DGLSL_COMPILE &&
-                 r->op != V3DGLSL_LINK32 && r->op != V3DGLSL_LINK_BOUND && r->op != V3DGLSL_LINK_A2C) ||
+                 r->op != V3DGLSL_LINK32 && r->op != V3DGLSL_LINK_BOUND && r->op != V3DGLSL_LINK_A2C &&
+                 r->op != V3DGLSL_COMPILE_VARIANT) ||
                 ((r->op == V3DGLSL_LINK || r->op == V3DGLSL_LINK32 || r->op == V3DGLSL_LINK_BOUND ||
-                  r->op == V3DGLSL_LINK_A2C) &&
+                  r->op == V3DGLSL_LINK_A2C || r->op == V3DGLSL_COMPILE_VARIANT) &&
                  (!r->vs || !r->fs || !r->out_path)) ||
                 (r->op == V3DGLSL_LINK_BOUND && !r->bindings) ||
+                (r->op == V3DGLSL_COMPILE_VARIANT && (!r->keys || !r->keys_len)) ||
                 (r->op == V3DGLSL_COMPILE && !r->vs == !r->fs)) {
                 log_add(r->log, r->log_size, "the compiler does not understand this request", NULL);
                 r->result = 3;
@@ -828,10 +831,20 @@ static int serve(void)
             } else {
                 write_mode = r->op == V3DGLSL_LINK32 ? WRITE_WIDE : r->op == V3DGLSL_LINK_A2C ? WRITE_A2C
                                                                                   : WRITE_PLAIN;
-                link_bindings = r->op == V3DGLSL_LINK_BOUND ? r->bindings : NULL;
+                link_bindings = r->op == V3DGLSL_LINK_BOUND || r->op == V3DGLSL_COMPILE_VARIANT ? r->bindings
+                                                                                              : NULL;
+                /* The draw-time variants: write_program compiles the keys. */
+                if (r->op == V3DGLSL_COMPILE_VARIANT) {
+                    variant_keys = r->keys;
+                    variant_keys_len = r->keys_len;
+                    variant_layout_crc = r->layout_crc;
+                }
                 r->result = link_pair("vertex shader", "fragment shader", r->vs, r->fs, r->out_path,
                                       r->log, r->log_size) ? 0 : 1;
                 link_bindings = NULL;
+                variant_keys = NULL;
+                variant_keys_len = 0;
+                variant_layout_crc = 0;
                 served++;
             }
             done(r);

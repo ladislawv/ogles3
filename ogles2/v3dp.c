@@ -449,7 +449,15 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                 v->uses_center_w = u8(&s);
                 v->uses_implicit_point_line_varyings = u8(&s);
                 v->lock_scoreboard_on_first_thrsw = u8(&s);
-                skip(&s, 1 + 3 + 64);             /* force_per_sample_msaa, pad, input_slots */
+                skip(&s, 1 + 3);                  /* force_per_sample_msaa, pad */
+                {
+                    UBYTE *slots = need(&s, 64) ? alloc(im, 64) : 0;
+                    if (!slots)
+                        FAIL("truncated or unreadable input slots", 0, ~0UL);
+                    memcpy(slots, s.p, 64);       /* a vertex variant's used outputs */
+                    v->input_slots = slots;
+                    s.p += 64;
+                }
                 for (j = 0; j < 3; j++)
                     v->flat_shade_flags[j] = u32(&s);
                 for (j = 0; j < 3; j++)
@@ -577,6 +585,10 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             have_blocks = TRUE;
             break;
         }
+        case 9: /* VARIANT_OF: a .v3dx, a program's draw-time variants */
+            im->v3dx = TRUE;
+            im->variant_of = u32(&s);
+            break;
         case 8: { /* INTERFACE (format 2) */
             ULONG n;
             struct OGLES2ImageVar *v;
@@ -614,11 +626,24 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
     }
     if (stages != 0x11)
         FAIL("not a vertex and fragment program", 0, ~0UL);
-    if (format2 && (!have_blocks || !have_interface))
+    if (format2 && !im->v3dx && (!have_blocks || !have_interface))
         FAIL("a format 2 file without UNIFORM_BLOCKS or INTERFACE", 0, ~0UL);
     im->format2 = format2;
-    /* Uniform blocks the variants read must be the stage's (its map). */
-    for (k = 0; k < im->nvariants; k++) {
+    /* The layout CRC (FORMAT.md, VARIANT_OF): STAGE_PARAMS, UNIFORMS and
+     * ATTRIBUTES, their headers and payloads, one after another in the file. */
+    if (!im->v3dx) {
+        const UBYTE *from = 0, *to = 0;
+        for (k = 0; k < nsections; k++)
+            if (sec_type[k] >= 3 && sec_type[k] <= 5) {
+                if (!from)
+                    from = sec_start[k] - 8;
+                to = sec_start[k] + ((sec_len[k] + 3) & ~3UL);
+            }
+        im->layout_crc = from ? crc32(from, (ULONG)(to - from)) : 0;
+    }
+    /* Uniform blocks the variants read must be the stage's (its map; a
+     * .v3dx's are checked against its program's when it is taken). */
+    for (k = 0; k < im->nvariants && !im->v3dx; k++) {
         const struct OGLES2Variant *v = &vars[k];
         ULONG j, si = v->stage == OGLES2_VARIANT_FS;
         for (j = 0; j < v->nrecipe; j++)
@@ -714,6 +739,10 @@ void ogles2_image_free(struct OGLES2Image *im, struct OGLES2Context *ctx)
         FreeVec(im->binary);
     ogles2_image_free(im->wide, ctx); /* its code: deferred the same way */
     ogles2_image_free(im->a2c, ctx);
+    ogles2_image_free(im->xs, ctx);
+    ogles2_image_free(im->xc, ctx);
+    if (im->bind_src)
+        FreeVec(im->bind_src);
     if (im->vs_src)
         FreeVec(im->vs_src);
     if (im->fs_src)

@@ -206,7 +206,7 @@ static BOOL send(struct V3DGLSLRequest *r)
 /* One request, start to reply: FALSE if the compiler could not be run;
  * else *result is the server's. */
 static BOOL request(ULONG op, const char *vs, const char *fs, const char *bindings, const char *path,
-                    char *log, ULONG log_size, LONG *result)
+                    char *log, ULONG log_size, LONG *result, const UBYTE *keys, ULONG keys_len, ULONG crc)
 {
     struct V3DGLSLRequest r;
     struct MsgPort *reply;
@@ -227,6 +227,9 @@ static BOOL request(ULONG op, const char *vs, const char *fs, const char *bindin
     r.fs = fs;
     r.out_path = path;
     r.bindings = bindings;
+    r.keys = keys;
+    r.keys_len = keys_len;
+    r.layout_crc = crc;
     r.log = log;
     r.log_size = log_size;
     r.result = 2;
@@ -255,7 +258,8 @@ static BOOL request(ULONG op, const char *vs, const char *fs, const char *bindin
     }
     DeleteMsgPort(reply);
     DateStamp(&t1);
-    ogles2_log("compiler: %s %s in %ld ms%s%s", (ULONG)(op == V3DGLSL_COMPILE ? "shader" : "program"),
+    ogles2_log("compiler: %s %s in %ld ms%s%s",
+               (ULONG)(op == V3DGLSL_COMPILE ? "shader" : op == V3DGLSL_COMPILE_VARIANT ? "variants" : "program"),
                (ULONG)(r.result ? "failed" : "compiled"),
                ((t1.ds_Days - t0.ds_Days) * 86400L * 50 + (t1.ds_Minute - t0.ds_Minute) * 3000L +
                 (t1.ds_Tick - t0.ds_Tick)) * 20,
@@ -268,7 +272,7 @@ BOOL ogles2_compile_program(const char *vs, const char *fs, const char *path, ch
                             ULONG log_size)
 {
     LONG result;
-    return request(V3DGLSL_LINK, vs, fs, 0, path, log, log_size, &result) && result == 0;
+    return request(V3DGLSL_LINK, vs, fs, 0, path, log, log_size, &result, 0, 0, 0) && result == 0;
 }
 
 /* As ogles2_compile_program, with glBindAttribLocation's bindings applied
@@ -278,7 +282,7 @@ BOOL ogles2_compile_program_bound(const char *vs, const char *fs, const char *bi
                                   char *log, ULONG log_size)
 {
     LONG result;
-    return request(V3DGLSL_LINK_BOUND, vs, fs, bindings, path, log, log_size, &result) && result == 0;
+    return request(V3DGLSL_LINK_BOUND, vs, fs, bindings, path, log, log_size, &result, 0, 0, 0) && result == 0;
 }
 
 /* The variants for samplers that return 32 bits (the program's .v3dw). A
@@ -287,7 +291,7 @@ BOOL ogles2_compile_program_wide(const char *vs, const char *fs, const char *pat
                                  ULONG log_size)
 {
     LONG result;
-    return request(V3DGLSL_LINK32, vs, fs, 0, path, log, log_size, &result) && result == 0;
+    return request(V3DGLSL_LINK32, vs, fs, 0, path, log, log_size, &result, 0, 0, 0) && result == 0;
 }
 
 /* The alpha-to-coverage variants (the program's .v3da). A compiler older
@@ -296,13 +300,28 @@ BOOL ogles2_compile_program_a2c(const char *vs, const char *fs, const char *path
                                 ULONG log_size)
 {
     LONG result;
-    return request(V3DGLSL_LINK_A2C, vs, fs, 0, path, log, log_size, &result) && result == 0;
+    return request(V3DGLSL_LINK_A2C, vs, fs, 0, path, log, log_size, &result, 0, 0, 0) && result == 0;
+}
+
+/* A program's draw-time variants (docs/GLES3_PLAN.md stage A item 5): the
+ * keys' variants into the .v3dx beside `path` (a .v3dp's name), the
+ * compiler checking the link against the program file's layout CRC. 1
+ * written, 0 not (the log says why), -1 no compiler that knows the request
+ * (none, or older than V3DGLSL_COMPILE_VARIANT: result 3). */
+int ogles2_compile_variants(const char *vs, const char *fs, const char *bindings, const UBYTE *keys,
+                            ULONG keys_len, ULONG layout_crc, const char *path, char *log, ULONG log_size)
+{
+    LONG result;
+    if (!request(V3DGLSL_COMPILE_VARIANT, vs, fs, bindings, path, log, log_size, &result, keys, keys_len,
+                 layout_crc))
+        return -1;
+    return result == 0 ? 1 : result == 3 ? -1 : 0;
 }
 
 int ogles2_compile_shader(BOOL fragment, const char *src, char *log, ULONG log_size)
 {
     LONG result;
-    if (!request(V3DGLSL_COMPILE, fragment ? 0 : src, fragment ? src : 0, 0, 0, log, log_size, &result))
+    if (!request(V3DGLSL_COMPILE, fragment ? 0 : src, fragment ? src : 0, 0, 0, log, log_size, &result, 0, 0, 0))
         return -1;
     return result == 0 ? 1 : result == 1 ? 0 : -1;
 }

@@ -3,9 +3,9 @@
 **Status: plan (2026-10-18; revised eight times, research added and checked
 2026-10-19, every line citation and each stage reviewed for implementation
 the same day), work on branch `gles3`.** Stage A began 2026-10-22: items 1,
-3 and 4 are done, item 2 but for its `$VER:` string, all tested on the
-A1200 (§4, each item's "Done" paragraph); items 5-7 and stages B-D are not
-implemented yet.
+3 and 4 are done, item 2 but for its `$VER:` string, item 5 for OpenGL ES 3
+programs, all tested on the A1200 (§4, each item's "Done" paragraph); items
+6-7 and stages B-D are not implemented yet.
 Its facts were checked against this repository, Mesa at the pinned commit
 (`~/mesa-build/mesa`), Khronos' `gl.xml` (`gen/khronos/`) and extension
 specifications, the Linux kernel's V3D driver (`drivers/gpu/drm/v3d`,
@@ -88,9 +88,7 @@ Mesa's driver, so they could follow later as an extension
     ogles2-m8-1-20261022-212632`). A GLES2 drawing regression: package
     `m7-4` built from this copy's sync build (`B=$BS V=$V bash
     tests/a1200/build_package.sh m7-4`).
-  - **Where to go on:** item 5
-    (draw-time variants by key, with `V3DGLSL_COMPILE_VARIANT`, the Mesa
-    patch 0015 in this work's tree and the `.v3dx` files), item 2's
+  - **Where to go on:** what item 5 leaves (its "Done so far"), item 2's
     `$VER:` string, item 6 (the dEQP port's ES3 context) (§4, each item's
     "Done" paragraph says what is in).
 - **`main`** (public) is the released 1.x line. Fixes and small additions go
@@ -913,9 +911,38 @@ The base everything else stands on.
      test program, compiled again from its key alone, comes out byte for
      byte (`mrt`'s 14 included), so the file's key fields are all of Mesa's
      key; the `.v3dx`'s `VARIANT_OF` is the `.v3dp`'s layout CRC, and a
-     second run adds nothing. Left: (3) the library's key per draw and the
-     request (`V3DGLSL_COMPILE_VARIANT`) with the server's side, (4) the
-     `.v3dx` lookup and the rule without a compiler.
+     second run adds nothing. (3) and (4), for OpenGL ES 3 programs
+     (format 2 images), done 2026-10-22 on the A1200: the draw builds the
+     key it needs from the closest variant's (1.x's choice) with the fields
+     stage A's states give (primitive class, `cbufs` from the draw buffers,
+     no software blending, every target's format and blend 0,
+     `f32_color_rb`, `norm_16`, `snorm` 0, the logic op COPY; a .v3dw's or
+     .v3da's 32-bit samplers and alpha to coverage as their image has
+     them), takes a fragment variant of that key from the program's file or
+     its `.v3dx` images (shipped in `PROGDIR:shaders/` or `PROGDIR:`, the
+     cache's), else has it compiled (`V3DGLSL_COMPILE_VARIANT`: sources,
+     bindings, the keys, the program file's layout CRC, which the compiler
+     checks), then the vertex variant whose used outputs are that fragment
+     variant's input slots the same way (`es3_variants`, `draw.c`). A
+     `.v3dx` is taken only when its hash, `VARIANT_OF` and uniform blocks
+     are the program's (`try_x`); a newer cache `.v3dx` keeps the older
+     image chained (programs may hold its variants). Without a compiler,
+     or with one too old, the closest variant is used and logged once.
+     `m8_draw`'s `es3out` (two outputs, one `uvec4`, precompiled for a
+     float and an unsigned target) drawn into RGBA8: with the compiler its
+     fragment variant is compiled at the first draw (180 ms on the A1200),
+     without it read from the cache's `.v3dx`
+     (`tests/a1200/results/ogles2-m8-1-20261022-232345`, 10 of 10 both
+     ways); the GLES2 drawing tests as before
+     (`ogles2-m7-4-20261022-232417`). **Decided:** GLES2 programs keep 1.x's
+     choice in stage A (so the same variants as in 1.3, trivially): their
+     key fields change with no state stage A brings; they join the key path
+     when stage B's float, integer and sRGB targets reach GLES2 contexts.
+     Left for later in this item: the host test of computed keys against
+     the compiler's (the A1200 run stands in for it), skipping a draw whose
+     closest variant cannot be right (integer targets: stage B), one
+     request for a fragment and a vertex variant together (two now), the
+     `.v3dw` and `.v3da` paths folded in.
    - existing `.v3dw` and `.v3da` files stay readable. With a compiler that
      knows `V3DGLSL_COMPILE_VARIANT` the library asks for no new ones; with
      an older one it asks for them as 1.3 does (`V3DGLSL_LINK32`,

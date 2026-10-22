@@ -39,10 +39,12 @@ int v3dp_write(const char *path, struct gl_shader_program *prog,
 
 /* The program's draw-time variants file (.v3dx, FORMAT.md): the captured
  * variants added to those of the file already at path (the same program
- * and link layout), the oldest dropped past 253. Same arguments. */
+ * and link layout), the oldest dropped past 253. Same arguments, and the
+ * layout CRC the program's .v3dp has (0: not checked): nothing is written
+ * if this link's is another. */
 int v3dp_write_variants(const char *path, struct gl_shader_program *prog,
                         unsigned num_sources, const unsigned *stages,
-                        const char *const *sources);
+                        const char *const *sources, uint32_t expect_layout_crc);
 
 /* A variant's key from its bytes as the files and ogles2.library have them:
  * a u32 VARIANT stage (0 vertex, 1 binning, 4 fragment), then the key
