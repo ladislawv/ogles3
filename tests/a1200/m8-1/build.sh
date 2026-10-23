@@ -30,3 +30,17 @@ cp "$B3"/v3dp/*.v3dp "$B3"/v3dp/*.v3dw "$PKG/bin/"
 for f in "$REPO"/tools/v3dglslc/test/shaders/*; do
     sed 's/\r$//' "$f" > "$PKG/bin/shaders/$(basename "$f")"
 done
+# A 1.x compiler's file of an OpenGL ES 3 program (format 1.0), named by its
+# hash, which Run-M1 puts into the cache before step 5: the library must
+# refuse it and compile a format 2 file in its place (GLES3 plan stage A
+# item 7). V1: a 1.x compiler's build (the ogles2 clone's).
+V1=${V1:-$HOME/ogles2-build/v3dglslc}
+O=$(mktemp -d)
+cp "$PKG/bin/shaders/es3old.vert" "$PKG/bin/shaders/es3old.frag" "$O/"
+(cd "$O" && "$V1/host/v3dglslc" -o . es3old.vert es3old.frag > /dev/null 2>&1) ||
+    { echo "no 1.x compiler in $V1 for es3old's format 1.0 file"; exit 1; }
+python3 "$REPO/v3dp/v3dp_hashname.py" "$O"/*.v3dp > /dev/null
+[ "$(od -An -tu2 -j4 -N2 "$O"/*.v3dp | tr -d ' ')" = 1 ] || { echo "es3old's file is not format 1.0"; exit 1; }
+mkdir -p "$PKG/oldcache"
+cp "$O"/*.v3dp "$PKG/oldcache/"
+rm -rf "$O"

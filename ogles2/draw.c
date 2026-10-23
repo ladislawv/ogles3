@@ -29,6 +29,8 @@
 #include "v3d_commands.h"
 #include "v3d_clbuf.h"
 #include "v3d_hw.h"
+#include "../v3dp/v3dglsl_port.h" /* V3DGLSL_KEY_OUTPUTS_FROM_FS */
+#include "variant_key.h"
 
 extern v3d_u32 g_v3d_cl_generation; /* v3d_frame.c: bumped whenever a control list restarts */
 
@@ -1548,55 +1550,40 @@ struct elements
  * In stage A every render target is 8-bit or 16F, so no draw blends in the
  * shader: software_blend, the targets' formats and blend state,
  * f32_color_rb, norm_16 and snorm are 0, and the logic op is COPY (12; 0
- * would be CLEAR). GLES2 programs keep 1.x's choice (the same variants as
- * in 1.3). Key bytes are FORMAT.md's: the fragment key's fields at their
- * offsets in OGLES2_FS_KEY_BYTES, the vertex key's in OGLES2_VS_KEY_BYTES. */
-#define FK_POINTS 12
-#define FK_LINES  13
-#define FK_SOFTWARE_BLEND 20
-#define FK_CBUFS  22
-#define FK_F32    24   /* f32_color_rb, norm_16, snorm */
-#define FK_FMT    32   /* color_fmt[8], blend[8]: to the logic op */
-#define FK_LOGICOP 288
-#define VK_NUM_OUTPUTS 12
-#define VK_OUTPUTS 16  /* used_outputs[64] */
-#define VK_PSIZE  85   /* per_vertex_point_size */
-
-static void fs_want(UBYTE *want, const UBYTE *base, GLenum fsmode, UBYTE cbufs)
+ * would be CLEAR). The 32-bit samplers (Mesa's sampler_is_32b, from the
+ * bound textures) and alpha to coverage (msaa and sample_alpha_to_coverage
+ * set, ignore_sample_mask clear: a 4x MSAA default framebuffer with
+ * GL_SAMPLE_ALPHA_TO_COVERAGE) are in the key too, so an ES3 program needs
+ * no .v3dw or .v3da compiled; shipped or cached ones are still looked in.
+ * GLES2 programs keep 1.x's choice (the same variants as in 1.3). Key bytes
+ * are FORMAT.md's; the keys' fields are computed and matched in
+ * variant_key.c. */
+/* Stage st's (0 vertex, 1 fragment) 32-bit samplers: Mesa's sampler_is_32b,
+ * a bit per texture index whose bound texture returns 32 bits a channel
+ * (v3d_setup_shared_key); 0 while no such texture was ever given an image. */
+static ULONG sampler_bits(struct OGLES2Context *ctx, struct OGLES2Program *p, int st)
 {
-    memcpy(want, base, OGLES2_FS_KEY_BYTES);
-    want[FK_POINTS] = fsmode == GL_POINTS;
-    want[FK_LINES] = fsmode == GL_LINES || fsmode == GL_LINE_LOOP || fsmode == GL_LINE_STRIP;
-    want[FK_SOFTWARE_BLEND] = 0;
-    want[FK_CBUFS] = cbufs;
-    want[FK_F32] = want[FK_F32 + 1] = want[FK_F32 + 2] = 0;
-    memset(want + FK_FMT, 0, FK_LOGICOP - FK_FMT);
-    want[FK_LOGICOP] = 12; /* PIPE_LOGICOP_COPY, little-endian */
-    want[FK_LOGICOP + 1] = want[FK_LOGICOP + 2] = want[FK_LOGICOP + 3] = 0;
-}
-
-/* A variant serves the draw when its key has the computed fields, and those
- * its image stands for (the 32-bit samplers of a .v3dw, a .v3da's alpha to
- * coverage), as `want` does. */
-static BOOL fs_fits(const UBYTE *k, const UBYTE *want)
-{
-    return k && !memcmp(k, want, 4) && k[16] == want[16] && k[17] == want[17] &&
-           k[FK_POINTS] == want[FK_POINTS] && k[FK_LINES] == want[FK_LINES] &&
-           k[FK_SOFTWARE_BLEND] == want[FK_SOFTWARE_BLEND] && k[FK_CBUFS] == want[FK_CBUFS] &&
-           !memcmp(k + FK_F32, want + FK_F32, 3) && !memcmp(k + FK_FMT, want + FK_FMT, FK_LOGICOP + 4 - FK_FMT);
-}
-
-static void vs_want(UBYTE *want, const UBYTE *base, const struct OGLES2Variant *fs)
-{
-    memcpy(want, base, OGLES2_VS_KEY_BYTES);
-    want[VK_NUM_OUTPUTS] = fs->num_inputs;
-    memcpy(want + VK_OUTPUTS, fs->input_slots, 64);
-}
-
-static BOOL vs_fits(const UBYTE *k, const UBYTE *want)
-{
-    return k && k[VK_NUM_OUTPUTS] == want[VK_NUM_OUTPUTS] && !memcmp(k + VK_OUTPUTS, want + VK_OUTPUTS, 64) &&
-           k[VK_PSIZE] == want[VK_PSIZE] && !memcmp(k, want, 4);
+    const struct OGLES2Image *im = p->image;
+    UWORD k, n;
+    ULONG bits = 0;
+    if (!ogles2_wide_seen)
+        return 0;
+    n = list_samplers(p);
+    for (k = 0; k < n; k++) {
+        UWORD u = p->nsamplers == 0xfe ? k : p->samplers[k];
+        const struct OGLES2ImageUniform *un = &im->uniforms[u];
+        UWORD e, ne = un->array ? un->array : 1;
+        if (!(un->flags & OGLES2_UNIFORM_SAMPLER))
+            continue;
+        for (e = 0; e < ne; e++) {
+            ULONG idx = un->sampler[st] + e;
+            if (un->sampler[st] >= OGLES2_MAX_STAGE_SAMPLERS || idx >= OGLES2_MAX_STAGE_SAMPLERS)
+                break;
+            if (ogles2_texture_wide(ctx, unit_of(p, u, e), ogles2_sampler_kind(un->type)))
+                bits |= 1UL << idx;
+        }
+    }
+    return bits;
 }
 
 /* A variant of `stage` fitting `want` in one image, or 0. */
@@ -1605,21 +1592,34 @@ static const struct OGLES2Variant *find_in(const struct OGLES2Image *im, UBYTE s
     UWORD i;
     for (i = 0; im && i < im->nvariants; i++) {
         const struct OGLES2Variant *v = &im->variants[i];
-        if (v->stage == stage && (stage == OGLES2_VARIANT_FS ? fs_fits(v->key, want) : vs_fits(v->key, want)))
+        if (v->stage == stage &&
+            (stage == OGLES2_VARIANT_FS ? ogles2_vk_fs_fits(v->key, want) : ogles2_vk_vs_fits(v->key, want)))
             return v;
     }
     return 0;
 }
 
-/* In the image the 1.x choice came from, then the program's .v3dx images
- * (shipped, the cache's and its older ones); its image in *owner. */
-static const struct OGLES2Variant *find_x(struct OGLES2Image *im, const struct OGLES2Image *first, UBYTE stage,
-                                          const UBYTE *want, const struct OGLES2Image **owner)
+/* In the program's file, then (fragment variants) its shipped or cached
+ * .v3dw and .v3da where the key has 32-bit samplers or alpha to coverage,
+ * then its .v3dx images (shipped, the cache's and its older ones); its
+ * image in *owner. */
+static const struct OGLES2Variant *find_x(struct OGLES2Image *im, UBYTE stage, const UBYTE *want,
+                                          const struct OGLES2Image **owner)
 {
     const struct OGLES2Variant *v;
     const struct OGLES2Image *x;
-    if ((v = find_in(first, stage, want))) {
-        *owner = first;
+    if ((v = find_in(im, stage, want))) {
+        *owner = im;
+        return v;
+    }
+    if (stage == OGLES2_VARIANT_FS && ogles2_vk_bits(want) && (x = ogles2_image_wide_file(im)) &&
+        (v = find_in(x, stage, want))) {
+        *owner = x;
+        return v;
+    }
+    if (stage == OGLES2_VARIANT_FS && want[OGLES2_VK_FS_A2C] && (x = ogles2_image_a2c_file(im)) &&
+        (v = find_in(x, stage, want))) {
+        *owner = x;
         return v;
     }
     if ((x = ogles2_image_x(im, FALSE)) && (v = find_in(x, stage, want))) {
@@ -1634,42 +1634,53 @@ static const struct OGLES2Variant *find_x(struct OGLES2Image *im, const struct O
     return 0;
 }
 
-/* The variant of `stage` for `want`: found, or compiled now (once per key:
- * a key the compiler gave nothing for is not asked again); 0 if neither. */
-static const struct OGLES2Variant *variant_for(struct OGLES2Context *ctx, struct OGLES2Image *im,
-                                               const struct OGLES2Image *first, UBYTE stage, const UBYTE *want,
-                                               const struct OGLES2Image **owner)
+/* One entry of a V3DGLSL_COMPILE_VARIANT request: the u32 stage word (with
+ * `flags` in its second byte) and the key; its length. */
+static ULONG key_entry(UBYTE *e, UBYTE stage, UBYTE flags, const UBYTE *key)
 {
-    const struct OGLES2Variant *v = find_x(im, first, stage, want, owner);
     ULONG n = stage == OGLES2_VARIANT_FS ? OGLES2_FS_KEY_BYTES : OGLES2_VS_KEY_BYTES;
-    UBYTE req[4 + OGLES2_FS_KEY_BYTES];
-    if (v)
-        return v;
-    req[0] = stage;
-    req[1] = req[2] = req[3] = 0;
-    memcpy(req + 4, want, n);
-    if (!ogles2_image_compile_variants(ctx, im, req, 4 + n))
-        return 0;
-    return find_x(im, first, stage, want, owner);
+    e[0] = stage;
+    e[1] = flags;
+    e[2] = e[3] = 0;
+    memcpy(e + 4, key, n);
+    return 4 + n;
 }
 
-/* An ES3 program's variants for this draw (from 1.x's choice, *fs and *vs,
- * and their images); FALSE leaves them as they are (logged once). */
-static BOOL es3_variants(struct OGLES2Context *ctx, struct OGLES2Program *p, const struct OGLES2Image *fim,
-                         GLenum fsmode, UBYTE cbufs, const struct OGLES2Variant **vs,
+/* An ES3 program's variants for this draw (from 1.x's choice, *fs and *vs);
+ * FALSE leaves them as they are (logged once). A fragment variant not found
+ * is compiled with the vertex variant that goes with it, in one request: the
+ * compiler gives the vertex key the fragment variant's inputs as its used
+ * outputs (V3DGLSL_KEY_OUTPUTS_FROM_FS), as Mesa's v3d_update_compiled_vs
+ * does. A vertex variant alone is asked for when only it is missing. */
+static BOOL es3_variants(struct OGLES2Context *ctx, struct OGLES2Program *p, GLenum fsmode, UBYTE cbufs,
+                         const ULONG *bits, BOOL a2c, const struct OGLES2Variant **vs,
                          const struct OGLES2Variant **fs, const struct OGLES2Image **vown,
                          const struct OGLES2Image **fown)
 {
     struct OGLES2Image *im = (struct OGLES2Image *)p->image;
-    UBYTE want[OGLES2_FS_KEY_BYTES];
-    const struct OGLES2Variant *f, *v;
+    UBYTE want[OGLES2_FS_KEY_BYTES], vwant[OGLES2_VS_KEY_BYTES];
+    UBYTE req[8 + OGLES2_FS_KEY_BYTES + OGLES2_VS_KEY_BYTES];
+    const struct OGLES2Variant *f, *v = 0;
+    int prim;
     if (!(*fs)->key || !(*vs)->key)
         return FALSE;
-    fs_want(want, (*fs)->key, fsmode, cbufs);
-    f = variant_for(ctx, im, fim, OGLES2_VARIANT_FS, want, fown);
+    prim = fsmode == GL_POINTS ? OGLES2_VK_POINTS
+         : fsmode == GL_LINES || fsmode == GL_LINE_LOOP || fsmode == GL_LINE_STRIP ? OGLES2_VK_LINES
+                                                                                   : OGLES2_VK_TRIANGLES;
+    ogles2_vk_fs_want(want, (*fs)->key, prim, cbufs, bits[1], a2c);
+    f = find_x(im, OGLES2_VARIANT_FS, want, fown);
+    if (!f) {
+        ULONG n = key_entry(req, OGLES2_VARIANT_FS, 0, want);
+        ogles2_vk_vs_want(vwant, (*vs)->key, 0, 0, bits[0]);
+        n += key_entry(req + n, OGLES2_VARIANT_VS, V3DGLSL_KEY_OUTPUTS_FROM_FS >> 8, vwant);
+        if (ogles2_image_compile_variants(ctx, im, req, n))
+            f = find_x(im, OGLES2_VARIANT_FS, want, fown);
+    }
     if (f) {
-        vs_want(want, (*vs)->key, f);
-        v = variant_for(ctx, im, im, OGLES2_VARIANT_VS, want, vown);
+        ogles2_vk_vs_want(vwant, (*vs)->key, f->num_inputs, f->input_slots, bits[0]);
+        v = find_x(im, OGLES2_VARIANT_VS, vwant, vown);
+        if (!v && ogles2_image_compile_variants(ctx, im, req, key_entry(req, OGLES2_VARIANT_VS, 0, vwant)))
+            v = find_x(im, OGLES2_VARIANT_VS, vwant, vown);
         if (v) {
             *fs = f;
             *vs = v;
@@ -1689,7 +1700,7 @@ static BOOL es3_variants(struct OGLES2Context *ctx, struct OGLES2Program *p, con
         ogles2_log("draw: no variant for program %s in this state and no compiler for it: the closest is used",
                    (ULONG)hex);
     }
-    *fown = fim;
+    *fown = im;
     *vown = im;
     return FALSE;
 }
@@ -1709,6 +1720,8 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
     struct attr_src src[OGLES2_MAX_VERTEX_ATTRIBS];
     struct tex_states tst;
     BOOL vid;        /* a shader reads gl_VertexID: the real vertex numbers (below) */
+    BOOL a2c;        /* alpha to coverage in an ES3 program's key */
+    ULONG bits[2];   /* an ES3 program's 32-bit samplers, vertex and fragment */
     GLenum itype_gl; /* the indices' type as the GPU gets them */
     ULONG unif[3], code[3], defattr, rec, idx_addr = 0, idx_size = 0;
     int a, nslots = 0, i;
@@ -1725,25 +1738,35 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
      * v3d_rasterizes_lines/points). */
     fsmode = mode >= GL_TRIANGLES && ctx->state.polygon_mode != GL_FILL
                  ? (ctx->state.polygon_mode == GL_POINT ? GL_POINTS : GL_LINES) : mode;
-    /* And from the program's 32-bit-sampler variants while a float or depth
-     * texture is bound to one of its samplers (program.c, the .v3dw). */
+    /* A 4x MSAA default framebuffer with GL_SAMPLE_ALPHA_TO_COVERAGE (Mesa
+     * turns alpha into the sample mask in the fragment shader). */
+    a2c = ctx->msaa && !ctx->draw_fb && (ctx->state.caps & OGLES2_CAP_SAMPLE_ALPHA_TO_COVERAGE) != 0;
     fim = im;
-    if (ogles2_wide_seen && wants_wide(ctx, p)) {
-        const struct OGLES2Image *w = ogles2_image_wide((struct OGLES2Image *)im);
-        if (w)
-            fim = w;
-    }
-    /* A 4x MSAA default framebuffer with GL_SAMPLE_ALPHA_TO_COVERAGE: the
-     * program's alpha-to-coverage variants (the .v3da; Mesa turns alpha into
-     * the sample mask in the fragment shader). Not with 32-bit samplers at
-     * the same time: no file holds both, and those keep their variants. */
-    if (ctx->msaa && !ctx->draw_fb && (ctx->state.caps & OGLES2_CAP_SAMPLE_ALPHA_TO_COVERAGE) && fim == im) {
-        const struct OGLES2Image *a = ogles2_image_a2c((struct OGLES2Image *)im);
-        if (a)
-            fim = a;
+    bits[0] = bits[1] = 0;
+    if (im->format2) {
+        /* An OpenGL ES 3 program: both in the variants' keys (es3_variants). */
+        bits[0] = sampler_bits(ctx, p, 0);
+        bits[1] = sampler_bits(ctx, p, 1);
+    } else {
+        /* A GLES2 one: from the program's 32-bit-sampler variants while a
+         * float or depth texture is bound to one of its samplers (program.c,
+         * the .v3dw), else its alpha-to-coverage variants (the .v3da). Not
+         * both: no file holds both, and the 32-bit ones keep theirs. */
+        if (ogles2_wide_seen && wants_wide(ctx, p)) {
+            const struct OGLES2Image *w = ogles2_image_wide((struct OGLES2Image *)im);
+            if (w)
+                fim = w;
+        }
+        if (a2c && fim == im) {
+            const struct OGLES2Image *a = ogles2_image_a2c((struct OGLES2Image *)im);
+            if (a)
+                fim = a;
+        }
+        a2c = FALSE;
     }
     if (p->var_ok && p->var_mode == mode && p->var_fsmode == fsmode && p->var_fim == fim &&
-        p->var_nrt == ctx->fb_nrt && p->var_cbufs == (ctx->draw_fb ? ctx->fb_draw_mask : 1)) {
+        p->var_nrt == ctx->fb_nrt && p->var_cbufs == (ctx->draw_fb ? ctx->fb_draw_mask : 1) &&
+        p->var_bits[0] == bits[0] && p->var_bits[1] == bits[1] && p->var_a2c == a2c) {
         cs = p->var[0];
         vs = p->var[1];
         fs = p->var[2];
@@ -1776,7 +1799,8 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
              * (above); a GLES2 one keeps 1.x's. */
             const struct OGLES2Image *vown = im, *fown = fim;
             if (im->format2)
-                es3_variants(ctx, p, fim, fsmode, ctx->draw_fb ? ctx->fb_draw_mask : 1, &vs, &fs, &vown, &fown);
+                es3_variants(ctx, p, fsmode, ctx->draw_fb ? ctx->fb_draw_mask : 1, bits, a2c, &vs, &fs, &vown,
+                             &fown);
             code[0] = code_address(d, im, cs);
             code[1] = code_address(d, vown, vs);
             code[2] = code_address(d, fown, fs);
@@ -1796,6 +1820,9 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
         p->var_fim = fim;
         p->var_nrt = ctx->fb_nrt;
         p->var_cbufs = (UBYTE)(ctx->draw_fb ? ctx->fb_draw_mask : 1);
+        p->var_bits[0] = bits[0];
+        p->var_bits[1] = bits[1];
+        p->var_a2c = a2c;
         p->var_ok = TRUE;
     }
 

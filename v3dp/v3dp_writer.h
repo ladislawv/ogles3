@@ -17,6 +17,10 @@ struct gl_shader_program;
 void v3dp_capture_begin(void);
 /* Stop capturing (removes the hook); the captured variants stay until the next begin. */
 void v3dp_capture_end(void);
+/* The inputs (num_inputs, input_slots[64]) of the last fragment variant compiled since
+ * v3dp_capture_begin: the used outputs of a vertex key that follows it
+ * (V3DGLSL_KEY_OUTPUTS_FROM_FS). 0 if none was compiled. */
+int v3dp_last_fs_inputs(uint8_t *num_inputs, uint8_t *slots);
 
 /* The "stage" of the program's attribute bindings in the hash (v3dp/FORMAT.md,
  * PROGRAM): a program linked with them (V3DGLSL_LINK_BOUND) hashes them as a

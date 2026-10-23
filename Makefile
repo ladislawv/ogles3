@@ -46,7 +46,7 @@ LIB_SRC   := ogles2/library.c ogles2/log.c ogles2/context.c ogles2/device.c ogle
              ogles2/state.c ogles2/display.c ogles2/job.c ogles2/frame.c ogles2/program.c \
              ogles2/draw.c ogles2/v3dp.c ogles2/blake3.c ogles2/texture.c \
              ogles2/buffer.c ogles2/compiler.c ogles2/etc1.c ogles2/fbo.c ogles2/copy.c ogles2/share.c \
-             ogles2/debug.c
+             ogles2/debug.c ogles2/variant_key.c
 # Library files that use v3dcore directly
 V3D_USERS := device job draw v3dp texture buffer fbo share
 GEN_LIB   := $(B)/gen/ogles2/dispatch_table.c $(B)/gen/ogles2/stubs.c
@@ -352,7 +352,7 @@ $(B)/v3dp/.stamp: $(wildcard tests/common/*.h) tools/v3dp_tests/emit.c v3dp/v3dp
 	    tools/v3dglslc/test/shaders/es3.* tools/v3dglslc/test/shaders/es3tex.* tools/v3dglslc/test/shaders/es3uni.* \
 	    tools/v3dglslc/test/shaders/es3flat.* tools/v3dglslc/test/shaders/es3block.* \
 	    tools/v3dglslc/test/shaders/es3size.* tools/v3dglslc/test/shaders/es3vid.* \
-	    tools/v3dglslc/test/shaders/es3out.* $(B)/v3dp/src/
+	    tools/v3dglslc/test/shaders/es3out.* tools/v3dglslc/test/shaders/es3wide.* $(B)/v3dp/src/
 	cd $(B)/v3dp/src && ../emit && for v in *.vert; do \
 	    $(V3DGLSLC) -o .. $$v $${v%.vert}.frag || exit 1; done
 	$(PYTHON) v3dp/v3dp_hashname.py $(B)/v3dp/*.v3dp $$(ls $(B)/v3dp/*.v3dw 2>/dev/null)
@@ -366,6 +366,22 @@ etc1-test:
 	    tools/etc1_test/etc1_test.c ogles2/etc1.c $(MESA_SRC)/util/format/u_format_etc.c \
 	    -o $(B)/host/etc1_test
 	$(B)/host/etc1_test
+
+# ---- host check of ogles2/variant_key.c (the draw-time variants' keys)
+# against the keys Mesa computed for the same states: the host compiler's
+# .v3dp, .v3dw and (-a) .v3da files of the test programs.
+VKEY_PROGS := es3 es3block es3flat es3out es3size es3tex es3uni es3vid es3wide es3old light mrt skin state tex
+.PHONY: variant-key-test
+variant-key-test:
+	@mkdir -p $(B)/host/vkey/src
+	gcc -O2 -Wall -Wextra -DVARIANT_KEY_HOST_TEST -Iogles2 tools/variant_key_test/variant_key_test.c \
+	    ogles2/variant_key.c -o $(B)/host/variant_key_test
+	cd $(B)/host/vkey && rm -f *.v3dp *.v3dw *.v3da && \
+	    for n in $(VKEY_PROGS); do sed 's/\r$$//' "$(CURDIR)/tools/v3dglslc/test/shaders/$$n.vert" > src/$$n.vert; \
+	        sed 's/\r$$//' "$(CURDIR)/tools/v3dglslc/test/shaders/$$n.frag" > src/$$n.frag; \
+	        $(V3DGLSLC) -o . src/$$n.vert src/$$n.frag > /dev/null 2>&1 || exit 1; \
+	        $(V3DGLSLC) -a -o . src/$$n.vert src/$$n.frag > /dev/null 2>&1 || exit 1; done
+	$(B)/host/variant_key_test $(B)/host/vkey $(foreach n,$(VKEY_PROGS),$(n)-$(n))
 
 # ---- host check of ogles2/blake3.c against Mesa's BLAKE3
 MESA ?= $(HOME)/mesa-build/mesa

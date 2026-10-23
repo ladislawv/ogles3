@@ -12,6 +12,9 @@
  *   size   textureSize of a 16x8 texture, and of its base level 1 (8x4)
  *   vertex id  gl_VertexID's real numbers: glDrawArrays from vertex 3,
  *          indices as given, with a base vertex, and past 8-bit indices
+ *   variant, 32-bit samplers, alpha to coverage  draw-time variants by key
+ *          (item 5): compiled at the first draw with the compiler, from the
+ *          cache's .v3dx without it, or from a shipped .v3dw
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -255,6 +258,80 @@ static void test_variant(void)
     glDeleteProgram(p);
 }
 
+/* A format 1.0 file of an OpenGL ES 3 program, as a 1.x compiler made it,
+ * in the cache (Run-M1 puts it there, item 7): the library refuses it and,
+ * with the compiler, puts a format 2 file in its place; without the
+ * compiler, in the next step, that file links. */
+static void test_old(void)
+{
+    GLuint p = program("es3old");
+    if (!p) {
+        check(0, "a 1.x compiler's file of es3old refused and replaced: es3old links");
+        return;
+    }
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    check(pixel_is(30, 30, 255, 128, 0, 255, 1), "a 1.x compiler's file of es3old refused and replaced");
+    glDeleteProgram(p);
+}
+
+/* The keys' 32-bit samplers and alpha to coverage (stage A item 5), in a 4x
+ * MSAA context: es3wide outputs one texel. A float texture needs the
+ * sampler's 32-bit bit in the fragment key (a 16-bit return reads it
+ * wrong); the shipped .v3dw has it. Alpha to coverage, its alpha 0.5,
+ * covers two of the four samples, so the resolved pixel is half the texel's
+ * (no file has that variant: compiled at the first draw, then from the
+ * cache's .v3dx). The float texture with alpha to coverage needs both in
+ * one key, which no file has either. */
+static void test_wide_a2c(void)
+{
+    static const GLfloat fl[4] = { 0.25f, 0.5f, 0.75f, 0.5f };
+    static const GLubyte by[4] = { 64, 128, 192, 128 };
+    GLuint p = program("es3wide"), t[2];
+    GLint samples = 0;
+    int k;
+    glGetIntegerv(GL_SAMPLES, &samples);
+    check(samples == 4, "32-bit samplers and alpha to coverage: a 4x MSAA context");
+    if (!p) {
+        check(0, "32-bit samplers and alpha to coverage: es3wide links");
+        return;
+    }
+    glGenTextures(2, t);
+    for (k = 0; k < 2; k++) {
+        glBindTexture(GL_TEXTURE_2D, t[k]);
+        if (k)
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_FLOAT, fl);
+        else
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, by);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    }
+    glUseProgram(p);
+    glUniform1i(glGetUniformLocation(p, "tex"), 0);
+    glClearColor(0, 0, 0, 0);
+
+    glBindTexture(GL_TEXTURE_2D, t[1]);
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    check(pixel_is(20, 20, 64, 128, 191, 128, 2), "32-bit samplers: a float texture read right");
+    glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+    glBindTexture(GL_TEXTURE_2D, t[0]);
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    check(pixel_is(20, 20, 32, 64, 96, 64, 20), "alpha to coverage: alpha 0.5 covers half the samples");
+    glBindTexture(GL_TEXTURE_2D, t[1]);
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    check(pixel_is(20, 20, 32, 64, 96, 64, 20), "both: a float texture with alpha to coverage");
+    glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+    glBindTexture(GL_TEXTURE_2D, t[0]);
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    check(pixel_is(20, 20, 64, 128, 192, 128, 2), "neither: an RGBA8 texture covers every sample");
+    glDeleteTextures(2, t);
+    glDeleteProgram(p);
+}
+
 int main(void)
 {
     struct BitMap *bm;
@@ -285,8 +362,19 @@ int main(void)
     test_size();
     test_vertex_id();
     test_variant();
+    test_old();
     check(glGetError() == GL_NO_ERROR, "no GL error left over");
     aglDestroyContext(ctx);
+    if ((ctx = aglCreateContextTags2(&e, OGLES2_CCT_BITMAP, (ULONG)bm, OGLES2_CCT_PISTORM_ES_VERSION, 30,
+                                     OGLES2_CCT_PISTORM_MSAA, 4, TAG_DONE))) {
+        aglMakeCurrent(ctx);
+        glViewport(0, 0, 64, 64);
+        test_wide_a2c();
+        check(glGetError() == GL_NO_ERROR, "no GL error left over (4x MSAA)");
+        aglDestroyContext(ctx);
+    } else {
+        check(0, "a 4x MSAA ES 3.0 context");
+    }
     FreeBitMap(bm);
     OGLES2Close();
     CloseLibrary((struct Library *)GfxBase);

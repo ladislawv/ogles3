@@ -432,6 +432,10 @@ struct OGLES2Program
     UBYTE slot_attrib[16];            /* the generic attribute of each (0xff: none) */
     UBYTE var_cbufs;                  /* draw.c: the colour buffers drawn into at the last choice */
     BOOL var_logged;                  /* a draw-time variant miss logged (draw.c) */
+    /* An OpenGL ES 3 program's last choice also by these (draw.c's
+     * es3_variants): each stage's 32-bit samplers, alpha to coverage. */
+    ULONG var_bits[2];
+    BOOL var_a2c;
 };
 
 struct OGLES2Context;
@@ -454,6 +458,10 @@ const struct OGLES2Variant *ogles2_image_variant(const struct OGLES2Image *im, U
 const struct OGLES2Image *ogles2_image_wide(struct OGLES2Image *im);
 /* program.c: its alpha-to-coverage variants (im->a2c), the same way. */
 const struct OGLES2Image *ogles2_image_a2c(struct OGLES2Image *im);
+/* program.c: the same files as shipped or cached, never compiled: an OpenGL
+ * ES 3 program's draws compile the variants they need by key (draw.c). */
+const struct OGLES2Image *ogles2_image_wide_file(struct OGLES2Image *im);
+const struct OGLES2Image *ogles2_image_a2c_file(struct OGLES2Image *im);
 
 /* The default framebuffer's surface (display.c). */
 struct OGLES2Display

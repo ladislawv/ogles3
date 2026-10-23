@@ -3,9 +3,9 @@
 **Status: plan (2026-10-18; revised eight times, research added and checked
 2026-10-19, every line citation and each stage reviewed for implementation
 the same day), work on branch `gles3`.** Stage A began 2026-10-22: items
-1-4 and 6 are done, item 5 for OpenGL ES 3 programs, all tested on the
-A1200 (§4, each item's "Done" paragraph); what item 5 leaves, item 7 and
-stages B-D are not implemented yet.
+1-6 are done and item 7 but for gl4es, all tested on the A1200 (§4, each
+item's "Done" paragraph); stage A's end (the GLES2 regression set and the
+speed figures) and stages B-D are still to come.
 Its facts were checked against this repository, Mesa at the pinned commit
 (`~/mesa-build/mesa`), Khronos' `gl.xml` (`gen/khronos/`) and extension
 specifications, the Linux kernel's V3D driver (`drivers/gpu/drm/v3d`,
@@ -83,8 +83,11 @@ Mesa's driver, so they could follow later as an extension
     programs linked from their files, 27 checks); after a compiler or
     writer change `python3 tools/v3dglslc/test/variant_roundtrip.py
     $V3DGLSLC <dir> <vs> <fs>` for each test program (every variant
-    compiled again from its key alone, byte for byte: the draw-time
-    variants' ground), and after a Mesa change the m68k compiler again
+    compiled again from its key alone, byte for byte, and each fragment
+    variant with its vertex variant in one request: the draw-time
+    variants' ground); after a change to the keys (`ogles2/variant_key.c`)
+    or the compiler `make variant-key-test` (the library's keys against
+    Mesa's, 486 checks); and after a Mesa change the m68k compiler again
     (`replay.py`, `build_m68k.sh`: the Mesa objects are replayed from the
     tree). GLES2 programs' files must stay byte for byte what the
     compiler wrote before (keep a compiler built before a change and
@@ -96,16 +99,18 @@ Mesa's driver, so they could follow later as an extension
     first (`amictl.py run`), then package `m8-1` (`bash
     tests/a1200/build_package.sh m8-1` after `. ./local.env`, then
     `python3 tools/amictl/amictl.py runpkg tests/a1200/out/ogles2-m8-1 -t
-    900`), six steps: `smoke` and `m8_es3` with the release build;
+    900`), seven steps: `smoke` and `m8_es3` with the release build;
     `m8_es3 ES3`, `LIMITS` and `m8_draw` with the test build and the
-    m68k compiler in `LIBS:` (a draw-time variant compiled into the run's
-    `cache/`); `m8_draw` again without the compiler (that variant from
-    the cache). Last passed 2026-10-22 (`tests/a1200/results/
-    ogles2-m8-1-20261022-232345`: 14, 42, 42 limits identical, 10, 10). A
+    m68k compiler in `LIBS:` (draw-time variants compiled into the run's
+    `cache/`, a 1.x compiler's file there replaced); `m8_draw` again
+    without the compiler (from the cache), then with the cache's `.v3dx`
+    files beside the program. Last passed 2026-10-23 (`tests/a1200/results/
+    ogles2-m8-1-20261023-143820`: 14, 42, 42 limits identical, 17, 17, 17;
+    the package needs a 1.x compiler in `~/ogles2-build/v3dglslc`, `V1`). A
     GLES2 drawing regression after any change to the draw, the reader or
     the textures: package `m7-4` from this copy's sync build (`B=$BS V=$V
     bash tests/a1200/build_package.sh m7-4`; 23, 44, 33 and 29 checks as
-    at 1.3, `ogles2-m7-4-20261022-232417`). Results directories are
+    at 1.3, `ogles2-m7-4-20261023-143829`). Results directories are
     committed (`tests/a1200/results/`), screenshots never.
   - **dEQP-GLES3** (item 6): `MODULE=gles3 B=~/ogles3-build/m68k-es3 bash
     ports/deqp/build.sh`, package `m8-2` (`bash tests/a1200/build_package.sh
@@ -113,15 +118,15 @@ Mesa's driver, so they could follow later as an extension
     After a crash on the A1200 the library stays in memory, open (`Version
     ogles2.library` answers though `LIBS:` has none): reboot, with the
     developer's leave, before the next run.
-  - **Where to go on, in order:** what item 5 leaves (its "Done so
-    far": the host test of keys, one request for both variants), item 7's
-    remaining tests, then stage A's end: the GLES2 regression set and
-    the speed figures (§3, "Tests"). §4's items each have a "Done"
+  - **Where to go on, in order:** stage A's end: the GLES2 regression set
+    (gl4es `m6-1` and `m6-2` in it, item 7) and the speed figures (§3,
+    "Tests"). §4's items each have a "Done"
     paragraph that says what is in and where; the code of this work so far
     is in `context.c` (versions, extensions), `state.c` (limits),
     `program.c` (the `#version` check, uniforms, `glGetFragDataLocation`,
     the lookup, `.v3dx` images), `v3dp.c` (format 2), `draw.c` (blocks,
     `textureSize`, varying flags, `gl_VertexID`, `es3_variants`),
+    `variant_key.c` (the keys),
     `texture.c` (`OGLES2_TEX_NONE`, `ogles2_texture_size`),
     `compiler.c` (`V3DGLSL_COMPILE_VARIANT`), and on the compiler's side
     `v3dglslc.c` (`-L`, `-x`, the key-state draws, the server),
@@ -990,11 +995,37 @@ The base everything else stands on.
      choice in stage A (so the same variants as in 1.3, trivially): their
      key fields change with no state stage A brings; they join the key path
      when stage B's float, integer and sRGB targets reach GLES2 contexts.
-     Left for later in this item: the host test of computed keys against
-     the compiler's (the A1200 run stands in for it), skipping a draw whose
-     closest variant cannot be right (integer targets: stage B), one
-     request for a fragment and a vertex variant together (two now), the
-     `.v3dw` and `.v3da` paths folded in.
+     **The rest done (2026-10-23, on the A1200):** an ES3 program's keys
+     carry the draw's 32-bit samplers (Mesa's `sampler_is_32b`, a bit per
+     texture index whose bound texture returns 32 bits, both stages; a
+     variant matches when its bits include the draw's) and alpha to coverage
+     (`msaa` and `sample_alpha_to_coverage` set, `ignore_sample_mask` clear,
+     as Mesa's multisampled job), so it never asks for a `.v3dw` or `.v3da`
+     (`V3DGLSL_LINK32`, `_A2C`); shipped or cached ones are still looked in
+     (`ogles2_image_wide_file`, `_a2c_file`), GLES2 programs keep 1.x's
+     path. A missing fragment variant comes with its vertex variant in one
+     request: the vertex key's stage word carries
+     `V3DGLSL_KEY_OUTPUTS_FROM_FS` (0x100, FORMAT.md), and the compiler
+     takes its used outputs from the fragment variant it compiled just
+     before (`v3dp_last_fs_inputs`, from the capture hook: no Mesa change);
+     the program's last choice is kept by the sampler bits and alpha to
+     coverage too (`var_bits`, `var_a2c`). The keys are computed and matched
+     in `ogles2/variant_key.c`, which the host test
+     `make variant-key-test` (`tools/variant_key_test`) checks against
+     Mesa's own keys in the host compiler's `.v3dp`, `.v3dw` and `.v3da`
+     (`v3dglslc -a`, new) of 15 test programs: every key computed from its
+     own state is Mesa's byte for byte, the `.v3da`'s and `.v3dw`'s follow
+     from the plain ones, the vertex keys from the fragment variants' inputs
+     (486 checks; the keys of integer targets wait for stage B).
+     `variant_roundtrip.py` checks the one-request path: every fragment
+     variant with its vertex variant, the latter's outputs wiped, gives both
+     byte for byte. `m8_draw` (17 checks; `tests/a1200/results/
+     ogles2-m8-1-20261023-143820`): a float texture through the shipped
+     `.v3dw`, alpha to coverage in a 4x MSAA context compiled by key (one
+     request, 100 ms), both together, then all of it without the compiler
+     from the cache and from `.v3dx` files shipped in `PROGDIR:`. Left for
+     stage B: skipping a draw whose closest variant cannot be right
+     (integer targets).
    - existing `.v3dw` and `.v3da` files stay readable. With a compiler that
      knows `V3DGLSL_COMPILE_VARIANT` the library asks for no new ones; with
      an older one it asks for them as 1.3 does (`V3DGLSL_LINK32`,
@@ -1038,6 +1069,15 @@ The base everything else stands on.
    precompiled variant, then from the cache without the compiler, then from
    a shipped `.v3dx`), a 1.0 file of an ES3 program refused and replaced;
    gl4es `m6-1` and `m6-2` with the regression set.
+   **Done but for gl4es (2026-10-23, on the A1200):** `m8-1` has seven
+   steps: `smoke`, `m8_es3` with the release build (14), `m8_es3 ES3` (42),
+   the limits (identical to `v3dglslc -L`), `m8_draw` with the compiler,
+   without it, and with the `.v3dx` files moved beside the program (17
+   each). Its cache starts with a 1.x compiler's format 1.0 file of
+   `es3old` (`m8-1/build.sh`, from `~/ogles2-build/v3dglslc`), which the
+   library refuses ("a GLSL ES 3.x program in a format 1.0 file") and
+   replaces with a format 2 one that the later steps link
+   (`ogles2-m8-1-20261023-143820`). gl4es with the regression set (§3).
 
 Done when: GLSL ES 3.00 programs compile, link and draw in an ES3 context;
 dEQP-GLES2, the GLES2 regression set and the speed figures unchanged.

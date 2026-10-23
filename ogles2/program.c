@@ -1077,6 +1077,8 @@ static struct OGLES2Image *extra_image(struct OGLES2Image *im, struct OGLES2Imag
         strcat(path, ext);
         *slot = try_wide(im->hash, path);
     }
+    if (!compile) /* the files only (ogles2_image_wide_file): quiet either way */
+        return *slot;
     if (!*slot && im->vs_src && im->fs_src && ogles2_compiler_installed()) {
         char *log = AllocVec(1024, MEMF_ANY | MEMF_CLEAR);
         if (log && compile(im->vs_src, im->fs_src, path, log, 1024))
@@ -1110,6 +1112,19 @@ const struct OGLES2Image *ogles2_image_a2c(struct OGLES2Image *im)
 {
     return extra_image(im, &im->a2c, &im->a2c_tried, ".v3da", "alpha-to-coverage variants",
                        ogles2_compile_program_a2c);
+}
+
+/* An OpenGL ES 3 program's: shipped or cached files are read (their keys
+ * serve where they match), nothing is compiled; the draw asks for the
+ * variant of its key instead (draw.c, es3_variants). */
+const struct OGLES2Image *ogles2_image_wide_file(struct OGLES2Image *im)
+{
+    return extra_image(im, &im->wide, &im->wide_tried, ".v3dw", "32-bit sampler variants", 0);
+}
+
+const struct OGLES2Image *ogles2_image_a2c_file(struct OGLES2Image *im)
+{
+    return extra_image(im, &im->a2c, &im->a2c_tried, ".v3da", "alpha-to-coverage variants", 0);
 }
 
 /* ---- draw-time variants (docs/GLES3_PLAN.md stage A item 5) ----

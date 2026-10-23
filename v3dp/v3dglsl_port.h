@@ -47,6 +47,11 @@
                                    * `layout_crc` (another compiler made the program's .v3dp).
                                    * docs/GLES3_PLAN.md stage A item 5. A compiler older than this
                                    * answers 3. */
+#define V3DGLSL_KEY_OUTPUTS_FROM_FS 0x100 /* in a vertex key's stage word: its used outputs are
+                                           * the inputs of the fragment variant compiled just
+                                           * before it in the same request (Mesa's
+                                           * v3d_update_compiled_vs), whatever its bytes say:
+                                           * both variants in one request */
 
 struct V3DGLSLRequest
 {

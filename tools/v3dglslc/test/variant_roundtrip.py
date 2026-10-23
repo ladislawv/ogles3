@@ -68,8 +68,37 @@ def main():
             same = sum(1 for p in variants if p in xvars)
             sys.exit("%s, run %d: %d variants, %d of the .v3dp's %d the same" %
                      (xpath, attempt, len(xvars), same, len(variants)))
-    print("%s: %d variants compiled again from their keys, byte for byte; merged twice" %
-          (base, len(variants)))
+    # One request for both (V3DGLSL_KEY_OUTPUTS_FROM_FS): each fragment
+    # variant's key, then the key of the vertex variant drawn with it (its
+    # used outputs are the fragment variant's inputs) with those outputs
+    # wiped and the flag set: the compiler must fill them in, giving that
+    # vertex variant byte for byte.
+    FS_IN = 4 + KEY_BYTES[4] + 28 + 1  # num_inputs, after the common prog data and uses_pid
+    FS_SLOTS = 4 + KEY_BYTES[4] + 28 + 12
+    pairs = 0
+    for f in (p for p in variants if struct.unpack_from("<I", p)[0] == 4):
+        n, slots = f[FS_IN], f[FS_SLOTS:FS_SLOTS + 64]
+        mates = [p for p in variants if struct.unpack_from("<I", p)[0] == 0 and
+                 p[4 + 12] == n and p[4 + 16:4 + 80] == slots]
+        if not mates:
+            continue
+        v = mates[0]
+        vkey = bytearray(v[:4 + KEY_BYTES[0]])
+        struct.pack_into("<I", vkey, 0, 0x100)
+        vkey[4 + 12] = 0
+        vkey[4 + 16:4 + 80] = bytes(64)
+        open(os.path.join(d, base + ".keys"), "wb").write(f[:4 + KEY_BYTES[4]] + bytes(vkey))
+        os.remove(xpath)
+        run(v3dglslc, d, ["-x", base + ".keys", "-o", ".", vs, fs])
+        xvars = [p for t, p, _ in sections(xpath)[1] if t == 6]
+        if v not in xvars or f not in xvars:
+            sys.exit("%s: a fragment variant with its vertex one (outputs from it): %s" %
+                     (base, "the vertex variant differs" if f in xvars else "the fragment variant differs"))
+        pairs += 1
+    if not pairs:
+        sys.exit("%s: no fragment variant has a vertex variant drawn with it" % base)
+    print("%s: %d variants compiled again from their keys, byte for byte; merged twice; "
+          "%d fragment and vertex pairs in one request" % (base, len(variants), pairs))
 
 
 if __name__ == "__main__":

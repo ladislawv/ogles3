@@ -9,8 +9,10 @@ limits, and the rule that a GLES2 context refuses GLSL ES 3.00 shaders. It
 runs twice: with a library as it would be released (ES 3.0 refused) and
 with a test build that gives ES 3.0 contexts.
 
-The last step draws a few pictures with OpenGL ES 3 shaders into a hidden
-bitmap and checks their pixels: there is nothing to watch. The whole run
+The last three steps draw a few pictures with OpenGL ES 3 shaders into a
+hidden bitmap and check their pixels: once with the shader compiler, once
+without it (what it compiled comes from the cache), and once with that
+shipped beside the program. There is nothing to watch. The whole run
 takes less than a minute. Normally it runs remotely (amictl); it works by
 hand too.
 
@@ -36,7 +38,9 @@ Contents
 --------
 Run-M1                       the test script
 libs-release/ogles2.library  the library as a release builds it
-libs-es3/ogles2.library      a test build with OpenGL ES 3.0 contexts
+libs-es3/ogles2.library      a test build with OpenGL ES 3.0 contexts, with
+                             the shader compiler (libs-es3n: without it)
+oldcache/                    an old compiler's file the library must replace
 bin/m8_es3                   the OpenGL ES 3 test
 bin/m8_draw                  the OpenGL ES 3 drawing test
 bin/shaders/, bin/*.v3dp     the test programs' shaders and their compiled files

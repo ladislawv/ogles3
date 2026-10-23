@@ -1,7 +1,8 @@
 /*
  * Mesa's V3D driver on a fake DRM device, no window system.
- *   usage: v3dglslc [-d <V3D_DEBUG flags>] [-o <dir>] [-x <keys>] vs.vert fs.frag [vs2 fs2 ...]
- *          (-x: the variants of the keys in the file, into a .v3dx: write_program)
+ *   usage: v3dglslc [-d <V3D_DEBUG flags>] [-o <dir>] [-a] [-x <keys>] vs.vert fs.frag [vs2 fs2 ...]
+ *          (-x: the variants of the keys in the file, into a .v3dx: write_program;
+ *          -a: the alpha-to-coverage variants, a .v3da, as V3DGLSL_LINK_A2C writes it)
  *          v3dglslc SERVER   (AmigaOS: the on-target compiler, v3dp/v3dglsl_port.h)
  *          v3dglslc -L       (the limits, as the context reports them: print_limits)
  * Creates a V3D 4.2 screen (compat/fake_drm.c), a surfaceless GLES2 context
@@ -124,7 +125,7 @@ static GLuint mrt_fbo[3];
 #define WRITE_BOTH 0
 #define WRITE_PLAIN 1
 #define WRITE_WIDE 2
-#define WRITE_A2C 3 /* the alpha-to-coverage fragment variants: a .v3da (server only) */
+#define WRITE_A2C 3 /* the alpha-to-coverage fragment variants: a .v3da (the server's, -a) */
 static int write_mode = WRITE_BOTH;
 extern bool v3d_force_alpha_to_coverage; /* Mesa patch 0014 */
 /* Mesa patch 0015: one variant for exactly `key` (the draw-time variants). */
@@ -136,6 +137,9 @@ static struct pipe_context *the_pipe;
 static const uint8_t *variant_keys;
 static size_t variant_keys_len;
 static uint32_t variant_layout_crc; /* V3DGLSL_COMPILE_VARIANT's (0: not checked) */
+#ifndef V3DGLSL_KEY_OUTPUTS_FROM_FS
+#define V3DGLSL_KEY_OUTPUTS_FROM_FS 0x100 /* v3dp/v3dglsl_port.h (AmigaOS only): also for -x */
+#endif
 
 static int make_target(void)
 {
@@ -597,8 +601,9 @@ static void program_path(char *out, size_t size, const char *vs_path, const char
     size_t n = strlen(out_dir);
     base_name(vs_base, vs_path);
     base_name(fs_base, fs_path);
-    snprintf(out, size, "%s%s%s-%s.v3dp", out_dir,
-             n && out_dir[n - 1] != '/' && out_dir[n - 1] != ':' ? "/" : "", vs_base, fs_base);
+    snprintf(out, size, "%s%s%s-%s.%s", out_dir,
+             n && out_dir[n - 1] != '/' && out_dir[n - 1] != ':' ? "/" : "", vs_base, fs_base,
+             write_mode == WRITE_A2C ? "v3da" : "v3dp");
 }
 
 static int write_program(GLuint p, const char *path, const char *vs_src, const char *fs_src)
@@ -632,11 +637,35 @@ static int write_program(GLuint p, const char *path, const char *vs_src, const c
             struct v3d_vs_key vk;
             struct v3d_fs_key fk;
             unsigned vstage;
-            used = v3dp_key_parse(variant_keys + at, variant_keys_len - at, &vstage, &vk, &fk);
-            if (!used) {
+            /* A vertex key whose outputs follow the fragment variant before
+             * it (V3DGLSL_KEY_OUTPUTS_FROM_FS): read without the flag. */
+            uint8_t one[4 + 512];
+            const uint8_t *key = variant_keys + at;
+            int from_fs = variant_keys_len - at >= 4 && (key[1] & (V3DGLSL_KEY_OUTPUTS_FROM_FS >> 8));
+            if (from_fs) {
+                size_t n = variant_keys_len - at < sizeof(one) ? variant_keys_len - at : sizeof(one);
+                memcpy(one, key, n);
+                one[1] &= ~(V3DGLSL_KEY_OUTPUTS_FROM_FS >> 8);
+                used = v3dp_key_parse(one, n, &vstage, &vk, &fk);
+            } else {
+                used = v3dp_key_parse(key, variant_keys_len - at, &vstage, &vk, &fk);
+            }
+            if (!used || (from_fs && vstage == 4)) {
                 fprintf(stderr, "v3dglslc: unreadable variant key at byte %u\n", (unsigned)at);
                 ok = 0;
                 break;
+            }
+            if (from_fs) {
+                uint8_t slots[64];
+                unsigned i;
+                if (!v3dp_last_fs_inputs(&vk.num_used_outputs, slots)) {
+                    fprintf(stderr, "v3dglslc: the vertex key at byte %u follows no fragment variant\n",
+                            (unsigned)at);
+                    ok = 0;
+                    break;
+                }
+                for (i = 0; i < 64; i++) /* as Mesa copies them: the rest zeroed */
+                    vk.used_outputs[i].slot_and_component = i < vk.num_used_outputs ? slots[i] : 0;
             }
             ok = vstage == 4 ? v3d_compile_variant(the_pipe, MESA_SHADER_FRAGMENT, &fk.base, sizeof(fk))
                              : v3d_compile_variant(the_pipe, MESA_SHADER_VERTEX, &vk.base, sizeof(vk));
@@ -912,7 +941,11 @@ int main(int argc, char **argv)
             debug = argv[first + 1];
         else if (!strcmp(argv[first], "-o"))
             out_dir = argv[first + 1];
-        else if (!strcmp(argv[first], "-x")) {
+        else if (!strcmp(argv[first], "-a")) { /* the .v3da instead (no argument) */
+            write_mode = WRITE_A2C;
+            first++;
+            continue;
+        } else if (!strcmp(argv[first], "-x")) {
             FILE *kf = fopen(argv[first + 1], "rb");
             long kn;
             uint8_t *kb;

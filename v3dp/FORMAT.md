@@ -353,6 +353,14 @@ variants.
 uniform recipe indexes the constant buffer as its program's link laid it out, so a runtime
 takes variants only from a `.v3dx` whose CRC is that of the program file it loaded.
 
+**Requests for variants** (`V3DGLSL_COMPILE_VARIANT`, `v3dp/v3dglsl_port.h`, and `v3dglslc -x`)
+list keys as a `VARIANT` section begins: `u32` stage, then the key's bytes as above. A vertex
+key's stage word may carry `V3DGLSL_KEY_OUTPUTS_FROM_FS` (0x100): its `num_used_outputs` and
+`used_outputs` are then the inputs (`num_inputs`, `input_slots`) of the fragment variant
+compiled just before it in the same list, as Mesa's `v3d_update_compiled_vs` takes them, so a
+fragment variant and its vertex variant come in one request. The stored variant's key has the
+plain stage value.
+
 ## Versioning
 
 Adding a section type or appending fields at the end of a section is a minor version change.

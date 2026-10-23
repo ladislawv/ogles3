@@ -20,11 +20,13 @@ Assign M8R1: ""
 If NOT EXISTS M8R1:results
   MakeDir M8R1:results
 EndIf
-; The cache of the run: empty at the start (step 5 compiles into it).
+; The cache of the run: at the start only a 1.x compiler's format 1.0 file
+; of es3old, which step 5 must replace (step 5 compiles into it).
 If EXISTS M8R1:cache
   Delete M8R1:cache ALL QUIET >NIL:
 EndIf
 MakeDir M8R1:cache
+Copy M8R1:oldcache/#? M8R1:cache/ QUIET
 Assign OGLES2Cache: M8R1:cache
 Echo "ogles2 M8 run 1, starting at step {FROM}" >>M8R1:results/00-progress.txt
 Date >>M8R1:results/00-progress.txt
@@ -38,12 +40,12 @@ CD M8R1:bin
 Assign LIBS: M8R1:libs-release ADD
 Avail FLUSH >NIL:
 If NOT {FROM} GT 1 VAL
-  Echo "Step 1 of 6: the smoke test (release build), a few seconds."
+  Echo "Step 1 of 7: the smoke test (release build), a few seconds."
   M8R1:bin/smoke >M8R1:results/1-smoke.txt
   Echo "step 1 done" >>M8R1:results/00-progress.txt
 EndIf
 If NOT {FROM} GT 2 VAL
-  Echo "Step 2 of 6: m8_es3 with the release build, a few seconds."
+  Echo "Step 2 of 7: m8_es3 with the release build, a few seconds."
   M8R1:bin/m8_es3 >M8R1:results/2-m8_es3-release.txt
   Echo "step 2 done" >>M8R1:results/00-progress.txt
 EndIf
@@ -54,17 +56,17 @@ Assign LIBS: M8R1:libs-release REMOVE
 Assign LIBS: M8R1:libs-es3 ADD
 Avail FLUSH >NIL:
 If NOT {FROM} GT 3 VAL
-  Echo "Step 3 of 6: m8_es3 with the ES3 test build, a few seconds."
+  Echo "Step 3 of 7: m8_es3 with the ES3 test build, a few seconds."
   M8R1:bin/m8_es3 ES3 >M8R1:results/3-m8_es3-es3.txt
   Echo "step 3 done" >>M8R1:results/00-progress.txt
 EndIf
 If NOT {FROM} GT 4 VAL
-  Echo "Step 4 of 6: the ES 3.0 limits, a second."
+  Echo "Step 4 of 7: the ES 3.0 limits, a second."
   M8R1:bin/m8_es3 LIMITS >M8R1:results/4-limits.txt
   Echo "step 4 done" >>M8R1:results/00-progress.txt
 EndIf
 If NOT {FROM} GT 5 VAL
-  Echo "Step 5 of 6: GLSL ES 3.00 programs drawn into a hidden bitmap, with the"
+  Echo "Step 5 of 7: GLSL ES 3.00 programs drawn into a hidden bitmap, with the"
   Echo "  compiler (a draw-time variant is compiled), a few seconds."
   M8R1:bin/m8_draw >M8R1:results/5-m8_draw.txt
   Echo "step 5 done" >>M8R1:results/00-progress.txt
@@ -76,10 +78,23 @@ Assign LIBS: M8R1:libs-es3 REMOVE
 Assign LIBS: M8R1:libs-es3n ADD
 Avail FLUSH >NIL:
 If NOT {FROM} GT 6 VAL
-  Echo "Step 6 of 6: the same without the compiler, a second."
+  Echo "Step 6 of 7: the same without the compiler, a second."
   M8R1:bin/m8_draw >M8R1:results/6-m8_draw-nocompiler.txt
   List M8R1:cache >M8R1:results/6-cache.txt
   Echo "step 6 done" >>M8R1:results/00-progress.txt
+EndIf
+Avail FLUSH >NIL:
+; The draw-time variants shipped beside the program instead: the cache's
+; .v3dx files (from step 5) moved to PROGDIR:, still without the compiler.
+If NOT {FROM} GT 7 VAL
+  Echo "Step 7 of 7: the same with the variants shipped beside it, a second."
+  Copy M8R1:cache/#?.v3dx M8R1:bin/ QUIET
+  Delete M8R1:cache/#?.v3dx QUIET >NIL:
+  M8R1:bin/m8_draw >M8R1:results/7-m8_draw-shipped.txt
+  List M8R1:cache >M8R1:results/7-cache.txt
+  List M8R1:bin/#?.v3dx >M8R1:results/7-shipped.txt
+  Delete M8R1:bin/#?.v3dx QUIET >NIL:
+  Echo "step 7 done" >>M8R1:results/00-progress.txt
 EndIf
 Avail FLUSH >NIL:
 Assign LIBS: M8R1:libs-es3n REMOVE

@@ -377,6 +377,10 @@ size_t v3dp_key_parse(const uint8_t *b, size_t len, unsigned *variant_stage, str
     return r.bad || r.p > r.end ? 0 : (size_t)(r.p - b);
 }
 
+/* The last fragment variant's inputs (v3dp_last_fs_inputs). */
+static int last_fs_valid;
+static uint8_t last_fs_num_inputs, last_fs_slots[64];
+
 static void variant_hook(mesa_shader_stage stage, const struct v3d_key *key, size_t key_size,
                          const struct v3d_prog_data *prog_data,
                          const uint64_t *qpu_insts, uint32_t qpu_size)
@@ -397,8 +401,13 @@ static void variant_hook(mesa_shader_stage stage, const struct v3d_key *key, siz
         put_u32(b, k->is_coord ? VARIANT_VS_BIN : VARIANT_VS);
         put_vs(b, k, (const struct v3d_vs_prog_data *)prog_data);
     } else if (stage == MESA_SHADER_FRAGMENT && key_size == sizeof(struct v3d_fs_key)) {
+        const struct v3d_fs_prog_data *fd = (const struct v3d_fs_prog_data *)prog_data;
         put_u32(b, VARIANT_FS);
-        put_fs(b, (const struct v3d_fs_key *)key, (const struct v3d_fs_prog_data *)prog_data);
+        put_fs(b, (const struct v3d_fs_key *)key, fd);
+        last_fs_num_inputs = fd->num_inputs;
+        for (i = 0; i < 64; i++)
+            last_fs_slots[i] = fd->input_slots[i].slot_and_component;
+        last_fs_valid = 1;
     } else {
         fprintf(stderr, "v3dp: unexpected variant (stage %d, key size %u)\n", (int)stage,
                 (unsigned)key_size);
@@ -439,12 +448,22 @@ void v3dp_capture_begin(void)
         buf_free(&variants[i]);
     num_variants = 0;
     capture_failed = 0;
+    last_fs_valid = 0;
     v3d_compiled_variant_hook = variant_hook;
 }
 
 void v3dp_capture_end(void)
 {
     v3d_compiled_variant_hook = NULL;
+}
+
+int v3dp_last_fs_inputs(uint8_t *num_inputs, uint8_t *slots)
+{
+    if (!last_fs_valid)
+        return 0;
+    *num_inputs = last_fs_num_inputs;
+    memcpy(slots, last_fs_slots, 64);
+    return 1;
 }
 
 /* ---- program tables ---- */
