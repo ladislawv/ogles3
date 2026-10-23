@@ -1,7 +1,11 @@
 #!/bin/bash
 # WSL1 has no memfd_create(); let drm-shim fall back to an unlinked temp file.
+# Works on $MESA (default ~/mesa-build/mesa), as build_mesa.sh does: the gles3
+# copy's local.env names its own tree.
 set -e
-F=~/mesa-build/mesa/src/drm-shim/device.c
+MESA=${MESA:-$HOME/mesa-build/mesa}
+W=$(dirname "$MESA")
+F=$MESA/src/drm-shim/device.c
 if ! grep -q "WSL1 fallback" "$F"; then
 python3 - "$F" <<'PY'
 import sys
@@ -26,8 +30,8 @@ open(p, 'w').write(s)
 print("patched")
 PY
 fi
-cd ~/mesa-build/mesa
+cd "$MESA"
 git diff --stat
-. ~/mesa-build/venv/bin/activate
-ninja -C build -j24 >~/mesa-build/rebuild.log 2>&1 && ninja -C build install >>~/mesa-build/rebuild.log 2>&1 && echo rebuilt
-git diff > ~/mesa-build/drm-shim-wsl1.patch
+. "$W/venv/bin/activate"
+ninja -C build -j24 >"$W/rebuild.log" 2>&1 && ninja -C build install >>"$W/rebuild.log" 2>&1 && echo rebuilt
+git diff > "$W/drm-shim-wsl1.patch"

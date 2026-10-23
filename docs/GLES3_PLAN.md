@@ -49,7 +49,11 @@ Mesa's driver, so they could follow later as an extension
     build: it sets `B`, `BS`, `V`, `V3DGLSLC` (`~/ogles3-build`) and `MESA`,
     `MESA_INSTALL` (this work's Mesa tree, §3). A new machine builds that
     tree with `build_mesa.sh`, `apply_mesa_patches.sh` and
-    `ninja -C $MESA/build install` after `. ./local.env`.
+    `ninja -C $MESA/build install` after `. ./local.env` (on WSL1 also
+    `patch_drmshim.sh`, which takes `$MESA` since 2026-10-23: before, it
+    patched and rebuilt the 1.x tree whatever `local.env` said). Cloning
+    `~/mesa-build/mesa` into `$MESA` first (`git clone`, the 1.x tree's
+    patches stay out: they are not committed) saves the download.
   - **Trap: the Mesa trees.** This copy's `tools/v3dglslc/patches` has
     0015 on, which the 1.x tree (`~/mesa-build/mesa`) must never get, and
     `apply_mesa_patches.sh` without an argument works on `$MESA`, or on the
