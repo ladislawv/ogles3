@@ -31,7 +31,9 @@ From a Shell, in this drawer:
     Execute Install-ogles2
 
 It asks before each step:
-- copies ogles2.library to LIBS:;
+- copies ogles2.library to LIBS:, and replaces a LIBS:v3dglslc older than
+  it (any from 1.3.1 or before) without asking, since the library uses
+  that one first;
 - copies the shader compiler v3dglslc to LIBS: (optional, see "Shaders");
 - makes the drawer SYS:OGLES2Cache and adds "Assign OGLES2Cache:
   SYS:OGLES2Cache" to S:User-Startup, so compiled shaders are kept across

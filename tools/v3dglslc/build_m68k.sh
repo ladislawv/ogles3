@@ -29,6 +29,11 @@ ours = subprocess.run(["git", "rev-parse", "--short=12", "HEAD"], cwd=h,
 dirty = subprocess.run(["git", "diff", "--quiet", "HEAD"], cwd=h).returncode != 0
 stamp = "%s %s%s mesa %s" % (time.strftime("%Y%m%d-%H%M%S", time.gmtime()), ours,
                              "+" if dirty else "", commit)
+# Its $VER: the library's version.revision and date (ogles2_internal.h).
+import re
+lib = open(os.path.join(os.path.dirname(os.path.dirname(h)), "ogles2", "ogles2_internal.h")).read()
+ver = "%s.%s (%s)" % tuple(re.search(r"#define OGLES2_LIB_%s\s+\"?([^\"\s]+)" % n, lib).group(1)
+                           for n in ("VERSION", "REVISION", "DATE"))
 rc = 0
 for src in (os.path.join(h, "v3dglslc.c"), os.path.join(v, "v3dp_writer.c")):
     cmd, obj, rel = replay.rewrite(ref, out, [])
@@ -40,7 +45,7 @@ for src in (os.path.join(h, "v3dglslc.c"), os.path.join(v, "v3dp_writer.c")):
                 "-I" + os.path.join(replay.MESA_SRC, "src/broadcom"),
                 "-I" + os.path.join(replay.MESA_BUILD, "src/broadcom"),
                 "-I" + h, "-I" + v, '-DV3DP_MESA_COMMIT="%s"' % commit,
-                '-DV3DGLSLC_STAMP="%s"' % stamp]
+                '-DV3DGLSLC_STAMP="%s"' % stamp, '-DV3DGLSLC_VER="%s"' % ver]
     p = subprocess.run(cmd, cwd=replay.MESA_BUILD, capture_output=True, text=True)
     print("%s compile rc=%d%s" % (os.path.basename(src), p.returncode,
                                   " (stamp %s)" % stamp if src.endswith("v3dglslc.c") else ""))

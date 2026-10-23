@@ -64,6 +64,17 @@ int fake_drm_open(void);
 #endif
 __attribute__((used)) char v3dglslc_stamp[] = "$V3DGLSLC-STAMP:" V3DGLSLC_STAMP "$";
 
+/* The release's version, for AmigaDOS' Version command: the library's
+ * version.revision and date (ogles2/ogles2_internal.h), which build_m68k.sh
+ * and build_host.sh pass. Install-ogles2 replaces an older LIBS:v3dglslc, or
+ * one without it (1.x), whenever it installs the library (docs/GLES3_PLAN.md
+ * section 3). Beside the stamp in the data hunk, so the file's tail still
+ * holds that. */
+#ifndef V3DGLSLC_VER
+#define V3DGLSLC_VER "0.0 (unversioned)"
+#endif
+__attribute__((used)) char v3dglslc_ver[] = "$VER: v3dglslc " V3DGLSLC_VER " PiStorm V3D 4.2";
+
 #ifdef __amigaos__
 void os_amiga_set_option(const char *name, const char *value);
 #define set_option os_amiga_set_option

@@ -23,14 +23,35 @@ If "{ALL}" EQ ""
     Skip compiler
   EndIf
 EndIf
+; Copy answers 0 even when it copied nothing (a full disk, a protected
+; file), so each copy is checked with Version, which answers 5 for an older
+; version and 20 for none. The numbers are this library's (build_release.sh
+; checks them).
 Copy Libs/ogles2.library LIBS: CLONE
-If ERROR
+Version >NIL: LIBS:ogles2.library 1 3 FILE
+If WARN
   Echo "Could not copy ogles2.library to LIBS:."
   Quit 20
 EndIf
 ; an older version still in memory is replaced at its next opening
 Avail FLUSH >NIL:
 Echo "  LIBS:ogles2.library installed."
+; An installed compiler older than this library, or one without a version
+; string (1.3.1's and before), is replaced with it: the library uses
+; LIBS:v3dglslc first.
+If EXISTS LIBS:v3dglslc
+  Version >NIL: LIBS:v3dglslc 1 3 FILE
+  If WARN
+    Copy Libs/v3dglslc LIBS: CLONE
+    Version >NIL: LIBS:v3dglslc 1 3 FILE
+    If WARN
+      Echo "Could not replace the older LIBS:v3dglslc (19 MB free? write-protected?)."
+      Quit 20
+    EndIf
+    Echo "  LIBS:v3dglslc replaced: the one installed was older."
+    Skip cache
+  EndIf
+EndIf
 
 ; ---- the shader compiler
 Lab compiler
@@ -46,8 +67,9 @@ If "{ALL}" EQ ""
   EndIf
 EndIf
 Copy Libs/v3dglslc LIBS: CLONE
-If ERROR
-  Echo "Could not copy v3dglslc to LIBS: (is there 19 MB free?)."
+Version >NIL: LIBS:v3dglslc 1 3 FILE
+If WARN
+  Echo "Could not copy v3dglslc to LIBS: (19 MB free? write-protected?)."
   Quit 20
 EndIf
 Echo "  LIBS:v3dglslc installed."

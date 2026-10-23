@@ -53,6 +53,13 @@ make -C "$REPO" B="$B" vbcc > /dev/null
     echo "needs $V/v3dglslc.stripped and $V/host/v3dglslc (tools/v3dglslc/build_m68k.sh, build_host.sh)"
     exit 1
 }
+# The compiler's $VER is the library's version (build_m68k.sh), which
+# Install-ogles2 compares the installed compiler with.
+LC_ALL=C grep -aq "\$VER: v3dglslc $VERSION " "$V/v3dglslc.stripped" ||
+    { echo "$V/v3dglslc.stripped is not v3dglslc $VERSION: build_m68k.sh again"; exit 1; }
+[ "$(grep -c "Version >NIL: LIBS:" "$HERE/Install-ogles2")" = \
+  "$(grep -cE "Version >NIL: LIBS:(ogles2.library|v3dglslc) $VER $REV FILE" "$HERE/Install-ogles2")" ] ||
+    { echo "Install-ogles2 compares LIBS: with another version than $VER $REV"; exit 1; }
 
 rm -rf "$R" "$OUT/ogles2-$RELEASE.lha" "$OUT/work"
 mkdir -p "$R"/{Libs,C,Examples,SDK/include,SDK/lib,SDK/doc,SDK/examples,licences/Mesa} "$OUT/work"

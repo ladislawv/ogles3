@@ -2,10 +2,10 @@
 
 **Status: plan (2026-10-18; revised eight times, research added and checked
 2026-10-19, every line citation and each stage reviewed for implementation
-the same day), work on branch `gles3`.** Stage A began 2026-10-22: items 1,
-3, 4 and 6 are done, item 2 but for its `$VER:` string, item 5 for OpenGL ES 3
-programs, all tested on the A1200 (§4, each item's "Done" paragraph); item
-7 and stages B-D are not implemented yet.
+the same day), work on branch `gles3`.** Stage A began 2026-10-22: items
+1-4 and 6 are done, item 5 for OpenGL ES 3 programs, all tested on the
+A1200 (§4, each item's "Done" paragraph); what item 5 leaves, item 7 and
+stages B-D are not implemented yet.
 Its facts were checked against this repository, Mesa at the pinned commit
 (`~/mesa-build/mesa`), Khronos' `gl.xml` (`gen/khronos/`) and extension
 specifications, the Linux kernel's V3D driver (`drivers/gpu/drm/v3d`,
@@ -113,8 +113,7 @@ Mesa's driver, so they could follow later as an extension
     After a crash on the A1200 the library stays in memory, open (`Version
     ogles2.library` answers though `LIBS:` has none): reboot, with the
     developer's leave, before the next run.
-  - **Where to go on, in order:** item 2's `$VER:` string (`v3dglslc.c`, and
-    `Install-ogles2` comparing it), what item 5 leaves (its "Done so
+  - **Where to go on, in order:** what item 5 leaves (its "Done so
     far": the host test of keys, one request for both variants), item 7's
     remaining tests, then stage A's end: the GLES2 regression set and
     the speed figures (§3, "Tests"). §4's items each have a "Done"
@@ -267,7 +266,8 @@ Mesa's driver, so they could follow later as an extension
   ("Supported versions are: 1.00 ES, 3.00 ES, and 3.10 ES"). `v3dglslc` sets
   ogles2's limits in it (4 draw buffers, 16 texture units a stage, 32 in all),
   so GLSL's `gl_Max*` constants equal the library's queries. It has a build
-  stamp (`$V3DGLSLC-STAMP:`, `v3dglslc.c:62`) but no `$VER:` string.
+  stamp (`$V3DGLSLC-STAMP:`, `v3dglslc.c:62`) but no `$VER:` string (one
+  since stage A item 2, 2026-10-23).
 - **Library:** the GLES 2.0 core, 33 extensions, 164 dispatch entries,
   `GL_VERSION` "OpenGL ES 2.0 ogles2.library 1.3", library version 1
   (`lib_Version`), dispatch ABI 1, 240,312 bytes (release 1.3.1, the same
@@ -514,7 +514,7 @@ Mesa's driver, so they could follow later as an extension
     `Install-ogles2` (which asks about the library and the compiler
     separately, `:20-53`) compares it with the installed one (the
     `Version` command) and replaces an older `LIBS:v3dglslc` whenever it
-    installs the library.
+    installs the library (done 2026-10-23, §4 item 2).
   - **Caches across compiler changes.** A cached file is used whatever
     compiler made it (main plan, M7): the program's hash covers its sources,
     bindings and link state, nothing of the compiler, and the header's Mesa
@@ -770,8 +770,23 @@ The base everything else stands on.
    compiler)"), which is the "compiler too old" answer this item asked
    for. `V3DGLSL_LINK_ES3` comes when there is ES3 link state to send
    (stage C's transform feedback varyings, stage D's separable flag), and
-   `V3DGLSL_COMPILE_VARIANT` with item 5. Still to do in this item: the
-   `$VER:` string.
+   `V3DGLSL_COMPILE_VARIANT` with item 5. **The `$VER:` string done
+   (2026-10-23, on the A1200):** `v3dglslc` carries `$VER: v3dglslc
+   <version>.<revision> (<date>) PiStorm V3D 4.2`, the library's
+   (`OGLES2_LIB_VERSION`, `_REVISION`, `_DATE` in `ogles2_internal.h`, which
+   `build_m68k.sh` and `build_host.sh` read and pass as `V3DGLSLC_VER`),
+   in the data hunk beside the stamp (still in the file's last 64 KB, which
+   `ogles2_compiler_id` reads). `Install-ogles2`, after installing the
+   library, replaces a `LIBS:v3dglslc` older than it or without a version
+   string (`Version ... 1 3 FILE` answers 5 and 20) without asking, and
+   then skips the compiler question; every copy is checked with `Version`
+   afterwards, because AmigaDOS' `Copy` answers 0 when it copied nothing
+   (found on the A1200: "object is in use", "protected from deletion").
+   `build_release.sh` checks that the shipped compiler's `$VER:` and every
+   `Version` line of the installer carry the library's numbers. Tested on
+   the A1200 against a scratch drawer standing for `LIBS:`: a 1.x compiler
+   replaced, the same version kept, none installed by the compiler step, a
+   protected one refused with rc 20. Item 2 is done.
 3. **The reader and the draw:** format 2 (§3) and the lookup that goes on past
    a refused file; the recipe types GLSL ES 3.00 brings (Mesa's
    `QUNIFORM_TEXTURE_WIDTH`, `_HEIGHT`, `_DEPTH` and `_ARRAY_SIZE` for
