@@ -13,6 +13,12 @@ In WSL, after `make` (which builds `libogles2.a`):
 The result is `$B/deqp/deqp-gles2` (`B` defaults to `~/ogles2-build/m68k`) with
 its data in `$B/deqp/gles2`. The A1200 package `tests/a1200/m7-1` carries both.
 
+`MODULE=gles3 bash ports/deqp/build.sh` builds dEQP-GLES3 instead, from a
+copy of its own: `$B/deqp-gles3/deqp-gles3`, its data in `$B/deqp-gles3/gles3`
+(`data/gles3` and the GraphicsFuzz cases). It runs on an ES3 build of the
+library (`make ES3=1`, `docs/GLES3_PLAN.md`), with package `tests/a1200/m8-2`;
+see "dEQP-GLES3" below.
+
 - **Sources:** VK-GL-CTS `opengl-es-cts-3.2.14.1` (commit `067e883`). It is a
   shallow clone into `~/vk-gl-cts`, because the full history is several GB;
   `CTS_SRC` names another tree. zlib 1.2.13 and libpng 1.6.50 are the versions
@@ -25,8 +31,10 @@ its data in `$B/deqp/gles2`. The A1200 package `tests/a1200/m7-1` carries both.
   glslang and amber too:
   - the framework: delibs, qphelper, tcutil, glutil, the simple reference
     renderer, the reference rasterizer and the random shader generator;
-  - `modules/glshared` and `modules/gles2`.
-- **`patches/`** are applied to a copy of the sources in `$B/deqp/src`:
+  - `modules/glshared` and `modules/gles2` (or `modules/gles3`, without the
+    desktop GL package `tgl45es3*`).
+- **`patches/`** are applied to a copy of the sources in `$B/deqp/src`, then
+  those of the module's own directory (`patches/gles2/`: 0003 and 0004):
   - `0001-amiga-m68k.patch`: delibs gains a 68k CPU (32-bit, big-endian).
     An assertion prints on stdout, then aborts. Aligned allocation uses
     delibs' own header, since libnix has no `posix_memalign`. There is no
@@ -37,12 +45,16 @@ its data in `$B/deqp/gles2`. The A1200 package `tests/a1200/m7-1` carries both.
   - `0003-big-endian-point-check.patch`: `rasterization.limits.points` read
     RGBA8 pixels as `uint32_t` and took red from the low byte, so it saw the
     green it wanted as red. It now builds the colour from the bytes.
+  - `0004-clip-control-without-vao.patch`: `clip_control` bound a vertex
+    array object without checking for `OES_vertex_array_object`, which
+    ogles2's GLES2 contexts do not offer; it now draws with the default
+    vertex array state there.
 - **`src/`**:
   - `tcuAmigaPlatform.cpp`: the platform. A render context is an ogles2
-    context with a window on the Workbench screen. It is RGBA8, depth 24,
-    stencil 8, 4x multisampled for an `ms4` configuration, and has no vsync.
-    The GL functions come from `aglGetProcAddress`, and Ctrl-C stops the run
-    between tests.
+    context with a window on the Workbench screen, OpenGL ES 2.0 or 3.0 as
+    the module asks. It is RGBA8, depth 24, stencil 8, 4x multisampled for
+    an `ms4` configuration, and has no vsync. The GL functions come from
+    `aglGetProcAddress`, and Ctrl-C stops the run between tests.
   - `deqp-amiga-os.c`: delibs' OS layer where libnix has no Unix equivalent.
     - Threads: none. Every test runs in the one task, so mutexes, semaphores
       and thread-locals belong to that task.
@@ -79,10 +91,12 @@ does all this, and takes the keys `LIST`, `CASES`, `NAME` and `MSAA`.
 From the PC:
 - `caselists.sh OUTDIR` splits the CTS's must-pass list for GLES2 (17,165
   cases) into a file per group, `shaders-<subgroup>.txt` for the shader
-  tests. Package `m7-1` ships them as `caselists/`.
+  tests. Package `m7-1` ships them as `caselists/`. With `MODULE=gles3` it
+  splits GLES3's (44,768 cases) for package `m8-2`.
 - `python ports/deqp/run_groups.py [GROUP...] [--shaders | --all]` runs
   groups on the A1200 through `amictl runpkg`, one package run per list.
-  Without arguments it runs every non-shader group.
+  Without arguments it runs every non-shader group. `--package=m8-2` runs
+  dEQP-GLES3's.
 - `python ports/deqp/summary.py RESULTS...` totals the `.qpa` logs by result
   and group, and lists what did not pass. A later run of a case replaces an
   earlier one, and `--depth N` sets the group depth.
@@ -96,6 +110,26 @@ From the PC:
 
 `Run-M1 TEST=points` runs ogles2's own point-size test (`tests/m7_points`)
 instead of dEQP.
+
+## dEQP-GLES3
+
+Package `m8-2` (`Run-M1` with the same keys, default `CASES` the
+`dEQP-GLES3.info.*` cases) runs `deqp-gles3` on an ES3 build of the library,
+which offers ES 3.0 contexts before all of ES 3.0 is in (`docs/GLES3_PLAN.md`,
+stages B and C). Two things follow:
+
+- **Functions the library lacks** are null from `aglGetProcAddress`, and a
+  call jumps to address 0 (it did: SmartCrash in the first case, 2026-10-23,
+  since `glu::resetState` calls many of them after every case). In an ES 3.0
+  context the platform puts a stub of its own in each such slot: it does
+  nothing, returns 0 and prints the function's name once. A throw would end
+  the run instead (an exception in a case's deinit terminates dEQP). The run's
+  `.txt` lists them all when the first context is made (88 on 2026-10-23).
+  ES 2.0 contexts keep the null pointers, which `0004` tests for.
+- **One case a run, for now:** `glu::resetState` checks `glGetError` after
+  each part of the state it resets, and an error there ends the run after
+  the case. Until the library takes ES 3.0's state (`GL_PRIMITIVE_RESTART_FIXED_INDEX`
+  was the first refused, 2026-10-23), a run gets through one case.
 
 ## Known deviation
 

@@ -3,11 +3,12 @@
 tests/a1200/out/ogles2-m7-1) per case list, and prints where each one's
 results went.
 
-    python ports/deqp/run_groups.py [GROUP...] [--shaders] [--all]
+    python ports/deqp/run_groups.py [GROUP...] [--shaders] [--all] [--package=m8-2]
 
 GROUPs name files of the package's caselists/ (without .txt). Without any:
 every group except the shader ones; --shaders: the shader ones; --all: all.
-Run from the repository's root on the PC (amictl's station file).
+--package names another package with the same Run-M1 arguments: m8-2 runs
+dEQP-GLES3. Run from the repository's root on the PC (amictl's station file).
 """
 import os
 import re
@@ -32,6 +33,10 @@ def lists():
 
 
 def main(argv):
+    global PKG
+    for a in argv:
+        if a.startswith("--package="):
+            PKG = os.path.join(REPO, "tests", "a1200", "out", "ogles2-" + a.split("=", 1)[1])
     sizes = lists()
     named = [a for a in argv if not a.startswith("--")]
     if named:

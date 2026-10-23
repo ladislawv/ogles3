@@ -4,20 +4,30 @@
 # $B/deqp/deqp-gles2, with its data in $B/deqp/gles2. Run in WSL after
 # `make` (libogles2.a):
 #   bash ports/deqp/build.sh
+# MODULE=gles3 builds dEQP-GLES3 instead, into $B/deqp-gles3 (deqp-gles3 and
+# its data in gles3/), from a copy of its own: it needs an ES3 build of the
+# library to run (docs/GLES3_PLAN.md stage A item 6).
 # VK-GL-CTS (pinned below) is C++17, so it is built with GCC 16.2 ($TC16),
 # as glmark2 is (ports/glmark2). Only what deqp-gles2 needs is compiled, by
 # this script rather than the CTS's CMake (which would configure Vulkan,
 # glslang and amber too): the framework (delibs, qphelper, tcutil, glutil,
 # the reference renderer, the random shader generator), modules/glshared and
-# modules/gles2. The CTS's own zlib and libpng (external/fetch_sources.py's
-# versions) are downloaded into $DEPS. patches/ are applied to a copy of the
-# sources in $B/deqp/src; src/ adds the AmigaOS 3 platform (one ogles2
-# context in a window), delibs' OS layer for one task and libnix's gaps.
+# the module. The CTS's own zlib and libpng (external/fetch_sources.py's
+# versions) are downloaded into $DEPS. patches/ and patches/<module>/ are
+# applied to a copy of the sources in $B/deqp/src; src/ adds the AmigaOS 3
+# platform (one ogles2 context in a window), delibs' OS layer for one task
+# and libnix's gaps.
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
 ln -sfn "$(cd "$HERE/../.." && pwd)" "$HOME/.ogles2-repo" # a path without the space of "- CPP"
 REPO=$HOME/.ogles2-repo
 B=${B:-$HOME/ogles2-build/m68k}
+MODULE=${MODULE:-gles2}
+case $MODULE in
+gles2) OUT=$B/deqp ;;
+gles3) OUT=$B/deqp-gles3 ;;
+*) echo "MODULE is gles2 or gles3"; exit 1 ;;
+esac
 TC16=${TC16:-$HOME/amiga-gcc162-install}
 J=${J:-8}
 CTS_URL=${CTS_URL:-https://github.com/KhronosGroup/VK-GL-CTS.git}
@@ -58,11 +68,12 @@ cp "$DEPS/libpng/scripts/pnglibconf.h.prebuilt" "$DEPS/libpng/pnglibconf.h"
 [ -f "$B/libogles2.a" ] || { echo "run make first (B=$B)"; exit 1; }
 [ -x "$TC16/bin/m68k-amigaos-g++" ] || { echo "no GCC 16.2 in $TC16 (CONTRIBUTING.md)"; exit 1; }
 
-OUT=$B/deqp
 ROOT=$OUT/src
 OBJ=$OUT/obj
 mkdir -p "$ROOT"
-for d in framework modules/glshared modules/gles2 data/gles2; do
+DIRS="framework modules/glshared modules/$MODULE data/$MODULE"
+[ "$MODULE" = gles3 ] && DIRS="$DIRS external/graphicsfuzz/data/gles3/graphicsfuzz"
+for d in $DIRS; do
     mkdir -p "$ROOT/$d"
     rsync -a --delete "$CTS_SRC/$d/" "$ROOT/$d/"
 done
@@ -70,7 +81,7 @@ for d in zlib libpng; do
     mkdir -p "$ROOT/external/$d"
     rsync -a --delete "$DEPS/$d/" "$ROOT/external/$d/"
 done
-for p in "$HERE"/patches/*.patch; do
+for p in "$HERE"/patches/*.patch "$HERE/patches/$MODULE"/*.patch; do
     [ -f "$p" ] || continue
     (cd "$ROOT" && git apply "$p") || { echo "deqp: $p does not apply"; exit 1; }
 done
@@ -83,9 +94,9 @@ F=$ROOT/framework
 D=$F/delibs
 INC="-I$D/debase -I$D/depool -I$D/dethread -I$D/destream -I$D/deutil -I$D/decpp -I$F/qphelper
 -I$F/common -I$F/xexml -I$F/opengl -I$F/opengl/wrapper -I$F/opengl/simplereference
--I$F/referencerenderer -I$F/randomshaders -I$ROOT/modules/glshared -I$ROOT/modules/gles2
--I$ROOT/modules/gles2/accuracy -I$ROOT/modules/gles2/functional -I$ROOT/modules/gles2/performance
--I$ROOT/modules/gles2/stress -I$ROOT/external/libpng -I$ROOT/external/zlib -I$F/egl -I$F/egl/wrapper
+-I$F/referencerenderer -I$F/randomshaders -I$ROOT/modules/glshared -I$ROOT/modules/$MODULE
+-I$ROOT/modules/$MODULE/accuracy -I$ROOT/modules/$MODULE/functional -I$ROOT/modules/$MODULE/performance
+-I$ROOT/modules/$MODULE/stress -I$ROOT/external/libpng -I$ROOT/external/zlib -I$F/egl -I$F/egl/wrapper
 -I$ROOT/amiga/include -I$REPO/include"
 # DE_OS_UNIX: libnix is close enough for delibs' file and string code; its
 # threads, clock, sockets, processes and dynamic libraries are left out and
@@ -96,7 +107,7 @@ INC="-I$D/debase -I$D/depool -I$D/dethread -I$D/destream -I$D/deutil -I$D/decpp 
 DEFS="-DDE_OS=DE_OS_UNIX -DDE_PTR_SIZE=4 -DNDEBUG
 -U__INT32_TYPE__ -D__INT32_TYPE__=int -U__UINT32_TYPE__
 -U__INT_LEAST32_TYPE__ -D__INT_LEAST32_TYPE__=int -U__UINT_LEAST32_TYPE__
--DDEQP_TARGET_NAME=\"AmigaOS3\" -DDEQP_SUPPORT_GLES2=1 -DQP_SUPPORT_PNG -DPNG_ARM_NEON_OPT=0"
+-DDEQP_TARGET_NAME=\"AmigaOS3\" -DDEQP_SUPPORT_${MODULE^^}=1 -DQP_SUPPORT_PNG -DPNG_ARM_NEON_OPT=0"
 FLAGS="-O2 -mcpu=68020 -m68881 -noixemul -fno-strict-aliasing"
 CXXFLAGS="-std=gnu++17 $FLAGS $DEFS $INC"
 CFLAGS="-std=gnu99 $FLAGS $DEFS $INC -DZ_HAVE_UNISTD_H"
@@ -162,13 +173,15 @@ amiga tcuAmigaPlatform.cpp amiga-compat.cpp
 EOF
 )
 $(cd "$ROOT" && ls framework/randomshaders/rsg*.cpp | grep -v rsgTest.cpp)
-$(cd "$ROOT" && ls modules/glshared/*.cpp modules/gles2/*.cpp modules/gles2/accuracy/*.cpp \
-    modules/gles2/functional/*.cpp modules/gles2/performance/*.cpp modules/gles2/stress/*.cpp)"
+$(cd "$ROOT" && ls modules/glshared/*.cpp modules/$MODULE/*.cpp modules/$MODULE/accuracy/*.cpp \
+    modules/$MODULE/functional/*.cpp modules/$MODULE/performance/*.cpp modules/$MODULE/stress/*.cpp |
+    grep -v '/tgl45')"
 
 # Compiles what changed, in up to $J jobs; a failure leaves its log beside its
 # object. A change to this script, a patch or a header in src/include
 # recompiles everything (headers are not tracked otherwise).
-NEWEST=$(ls -t "$HERE/build.sh" "$HERE"/patches/* "$HERE"/src/include/* | head -1)
+NEWEST=$(find "$HERE/build.sh" "$HERE/patches" "$HERE/src/include" -type f -printf '%T@ %p\n' |
+    sort -n | tail -1 | cut -d' ' -f2-)
 cc_one() { # compiler flags source
     local o=$OBJ/$(echo "$3" | tr / _).o
     o=${o%.*}.o
@@ -190,9 +203,10 @@ if [ -f "$OBJ/FAILED" ]; then
     exit 1
 fi
 
-"$TC16/bin/m68k-amigaos-g++" -mcpu=68020 -m68881 -noixemul -o "$OUT/deqp-gles2" "$OBJ"/*.o \
+"$TC16/bin/m68k-amigaos-g++" -mcpu=68020 -m68881 -noixemul -o "$OUT/deqp-$MODULE" "$OBJ"/*.o \
     -L"$B" -logles2 -lm
-rm -rf "$OUT/gles2"
-mkdir -p "$OUT/gles2"
-cp -r "$ROOT/data/gles2/data" "$ROOT/data/gles2/shaders" "$OUT/gles2/"
-ls -l "$OUT/deqp-gles2"
+rm -rf "$OUT/$MODULE"
+mkdir -p "$OUT/$MODULE"
+cp -r "$ROOT/data/$MODULE/data" "$ROOT/data/$MODULE/shaders" "$OUT/$MODULE/"
+[ "$MODULE" = gles3 ] && cp -r "$ROOT/external/graphicsfuzz/data/gles3/graphicsfuzz" "$OUT/gles3/"
+ls -l "$OUT/deqp-$MODULE"

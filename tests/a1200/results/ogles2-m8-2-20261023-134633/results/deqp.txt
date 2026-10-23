@@ -1,0 +1,5 @@
+Writing test log into M8R2:results/deqp.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+
+Test case 'dEQP-GLES3.info.vendor'..

@@ -3,9 +3,9 @@
 **Status: plan (2026-10-18; revised eight times, research added and checked
 2026-10-19, every line citation and each stage reviewed for implementation
 the same day), work on branch `gles3`.** Stage A began 2026-10-22: items 1,
-3 and 4 are done, item 2 but for its `$VER:` string, item 5 for OpenGL ES 3
-programs, all tested on the A1200 (§4, each item's "Done" paragraph); items
-6-7 and stages B-D are not implemented yet.
+3, 4 and 6 are done, item 2 but for its `$VER:` string, item 5 for OpenGL ES 3
+programs, all tested on the A1200 (§4, each item's "Done" paragraph); item
+7 and stages B-D are not implemented yet.
 Its facts were checked against this repository, Mesa at the pinned commit
 (`~/mesa-build/mesa`), Khronos' `gl.xml` (`gen/khronos/`) and extension
 specifications, the Linux kernel's V3D driver (`drivers/gpu/drm/v3d`,
@@ -107,8 +107,13 @@ Mesa's driver, so they could follow later as an extension
     bash tests/a1200/build_package.sh m7-4`; 23, 44, 33 and 29 checks as
     at 1.3, `ogles2-m7-4-20261022-232417`). Results directories are
     committed (`tests/a1200/results/`), screenshots never.
-  - **Where to go on, in order:** item 6 (the dEQP port's ES3 context:
-    Appendix B.5), item 2's `$VER:` string (`v3dglslc.c`, and
+  - **dEQP-GLES3** (item 6): `MODULE=gles3 B=~/ogles3-build/m68k-es3 bash
+    ports/deqp/build.sh`, package `m8-2` (`bash tests/a1200/build_package.sh
+    m8-2` after `. ./local.env`); one case a run until stage B (§4 item 6).
+    After a crash on the A1200 the library stays in memory, open (`Version
+    ogles2.library` answers though `LIBS:` has none): reboot, with the
+    developer's leave, before the next run.
+  - **Where to go on, in order:** item 2's `$VER:` string (`v3dglslc.c`, and
     `Install-ogles2` comparing it), what item 5 leaves (its "Done so
     far": the host test of keys, one request for both variants), item 7's
     remaining tests, then stage A's end: the GLES2 regression set and
@@ -982,6 +987,34 @@ The base everything else stands on.
      programs exactly as 1.3 does. The compiler keeps both codes.
 6. **The dEQP port** creates an ES3 context (Appendix B.5: the platform's
    API check, the tag's 30, `glw::initES30`).
+   **Done (2026-10-23, on the A1200):** the platform takes ES 2.0 and 3.0,
+   passes the tag's 20 or 30, refuses 3.0 as not supported when the library
+   answers `OGLES2_CCE_UNSUPPORTED` (a release build) or gives a context
+   whose `GL_VERSION` is not "OpenGL ES 3.0" (a library before 2.0 ignores
+   the tag), and loads `glw::initES30`. `ports/deqp/build.sh` builds
+   dEQP-GLES3 with `MODULE=gles3` into `$B/deqp-gles3` (its own copy of the
+   sources; `modules/gles3` without `tgl45es3*`, `data/gles3`, the
+   GraphicsFuzz cases; the patches of `modules/gles2` moved to
+   `patches/gles2/`), `caselists.sh` splits `gles3-main.txt` with
+   `MODULE=gles3`, `run_groups.py` takes `--package=m8-2`; package `m8-2`
+   (Appendix B.5) is `m7-1`'s for dEQP-GLES3 with the ES3 sync build.
+   **Found on the A1200:** the first run hit SmartCrash in its first case:
+   `aglGetProcAddress` answers 0 for the 88 ES 3.0 functions the library
+   lacks (the list the run's `.txt` prints: VAOs, samplers, queries, sync,
+   transform feedback, 3D textures, `glDrawBuffers`, `glReadBuffer`,
+   `glBlitFramebuffer`, `glClearBuffer*`, `glMapBufferRange`, the uniform
+   block queries, `glVertexAttribI*`, instancing, ...), and `glu::resetState`
+   calls many of them after every case. In ES 3.0 contexts the platform now
+   gives each a stub that does nothing, returns 0 and names it once (a throw
+   would end the run: an exception in a case's deinit terminates dEQP); ES
+   2.0 contexts keep null pointers, which `patches/gles2/0004` tests for.
+   Then `dEQP-GLES3.info.vendor` passes in an ES 3.0 context, freed cleanly
+   (`tests/a1200/results/ogles2-m8-2-20261023-135140`), but the run ends
+   there: `resetState` checks `glGetError` after each part of the state, and
+   `glDisable(GL_PRIMITIVE_RESTART_FIXED_INDEX)` is `GL_INVALID_ENUM`, which
+   terminates dEQP. So dEQP-GLES3 runs one case a run until stage B gives
+   the state `resetState` touches (§5 item 13). dEQP-GLES2 as before
+   (`ogles2-m7-1-20261023-135452`: info 6 of 6).
 7. **Tests:** a new `m8_es3` in a new package `m8-1` (GLSL ES 3.00 features
    against expected pixels,
    `flat`, `centroid` and `gl_VertexID` among them, a GLES2 context
@@ -1247,6 +1280,22 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
     `EXT_frag_depth` in GLES2 contexts (the extension string and its test: the
     compiler and the draw already handle depth writes).
 13. **Tests:** `m8_es3` grows per feature (package `m8-1`); dEQP-GLES3
+    runs past its first case only once `glu::resetState`
+    (`framework/opengl/gluStateReset.cpp`, after every case) raises no GL
+    error in an ES 3.0 context (stage A item 6, 2026-10-23): the enables
+    `PRIMITIVE_RESTART_FIXED_INDEX` and `RASTERIZER_DISCARD`; the buffer
+    targets `COPY_READ`, `COPY_WRITE`, `PIXEL_PACK`, `PIXEL_UNPACK`,
+    `UNIFORM` (with `glBindBufferBase` up to `MAX_UNIFORM_BUFFER_BINDINGS`)
+    and `TRANSFORM_FEEDBACK`; `glBindVertexArray(0)`, `glBindSampler`,
+    `glBindTransformFeedback`, `glDrawBuffers`, `glReadBuffer`; ES 3.0's
+    pixel store (`PACK_`/`UNPACK_ROW_LENGTH`, `_SKIP_*`, `UNPACK_IMAGE_HEIGHT`,
+    `_SKIP_IMAGES`); `TEXTURE_3D` and `TEXTURE_2D_ARRAY` bindings and the new
+    texture parameters (`BASE_LEVEL`, `MAX_LEVEL`, `MIN_LOD`, `MAX_LOD`,
+    `COMPARE_MODE`, `COMPARE_FUNC`, the four swizzles, `WRAP_R`);
+    `FRAGMENT_SHADER_DERIVATIVE_HINT`; `GL_CURRENT_QUERY` and
+    `TRANSFORM_FEEDBACK_ACTIVE` queries. The state alone, before each
+    feature works, is the first step that lets the groups below run;
+    then dEQP-GLES3
     groups as their features land (`functional.vertex_array_objects`,
     `vertex_arrays`, `default_vertex_attrib`, `attribute_location`,
     `instanced`, `draw`, `buffer`, `ubo`, `samplers`, `texture` without its
@@ -2165,7 +2214,9 @@ search for.
   `initES30`/`initES31`, which the CTS has. `caselists.sh` reads
   `gles2-main.txt` only (`:10`), `run_groups.py` runs package
   `ogles2-m7-1` only (`:20`): both are to take the module, the list and the
-  package as arguments. The must-pass configurations
+  package as arguments. (Done for ES 3.0 in stage A item 6, 2026-10-23:
+  `MODULE=gles3` for `build.sh` and `caselists.sh`, `--package=` for
+  `run_groups.py`, package `m8-2`; ES 3.1 adds `gles31` the same way.) The must-pass configurations
   (`cts/external/openglcts/data/gl_cts/data/mustpass/gles/aosp_mustpass/main/mustpass.xml`):
   `main` with `rgba8888d24s8ms0` and `multisample` with `rgba8888d24s8ms4`,
   256x256, on any OS.
