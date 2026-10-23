@@ -1,0 +1,14 @@
+Directory "M6R3:results" on Friday 23-Oct-26
+00-progress.txt                 146 ----rwed Today     14:47:15
+1-testgles2.txt                1229 ----rwed Today     14:46:29
+ogles2.log                     7124 ----rwed Today     14:47:15
+2-sprites-gles2.txt            1463 ----rwed Today     14:46:38
+3-sprites-software.txt         1760 ----rwed Today     14:46:46
+4-copyex.txt                    842 ----rwed Today     14:46:55
+5-draw2.txt                     841 ----rwed Today     14:47:03
+6-testgles2-fullscreen.txt       1230 ----rwed Today     14:47:12
+7-rtt-churn.txt                 966 ----rwed Today     14:47:15
+notes.txt                       607 ----rwed Today     14:47:15
+98-cache.txt                   1945 ----rwed Today     14:47:15
+99-files.txt                    588 ----rwed Today     14:47:15
+12 files - 18K bytes - 54 blocks used

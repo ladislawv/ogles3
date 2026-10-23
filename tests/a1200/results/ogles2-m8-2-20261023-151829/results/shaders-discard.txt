@@ -1,0 +1,90 @@
+Writing test log into M8R2:results/shaders-discard.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles2.library: 88 functions of the ES 3.0 table not implemented yet: glBeginQuery glBeginTransformFeedback glBindBufferBase glBindBufferRange glBindSampler glBindTransformFeedback glBindVertexArray glBlitFramebuffer glClearBufferfi glClearBufferfv glClearBufferiv glClearBufferuiv glClientWaitSync glCompressedTexImage3D glCompressedTexSubImage3D glCopyBufferSubData glCopyTexSubImage3D glDeleteQueries glDeleteSamplers glDeleteSync glDeleteTransformFeedbacks glDeleteVertexArrays glDrawArraysInstanced glDrawBuffers glDrawElementsInstanced glEndQuery glEndTransformFeedback glFenceSync glFlushMappedBufferRange glFramebufferTextureLayer glGenQueries glGenSamplers glGenTransformFeedbacks glGenVertexArrays glGetActiveUniformBlockName glGetActiveUniformBlockiv glGetActiveUniformsiv glGetBufferParameteri64v glGetBufferPointerv glGetInteger64i_v glGetIntegeri_v glGetInternalformativ glGetProgramBinary glGetQueryObjectuiv glGetQueryiv glGetSamplerParameterfv glGetSamplerParameteriv glGetSynciv glGetTransformFeedbackVarying glGetUniformBlockIndex glGetUniformIndices glGetVertexAttribIiv glGetVertexAttribIuiv glInvalidateFramebuffer glInvalidateSubFramebuffer glIsQuery glIsSampler glIsSync glIsTransformFeedback glIsVertexArray glMapBufferRange glPauseTransformFeedback glProgramBinary glProgramParameteri glReadBuffer glRenderbufferStorageMultisample glResumeTransformFeedback glSamplerParameterf glSamplerParameterfv glSamplerParameteri glSamplerParameteriv glTexImage3D glTexStorage2D glTexStorage3D glTexSubImage3D glTransformFeedbackVaryings glUniformBlockBinding glUnmapBuffer glVertexAttribDivisor glVertexAttribI4i glVertexAttribI4iv glVertexAttribI4ui glVertexAttribI4uiv glVertexAttribIPointer glWaitSync glDrawElementsInstancedBaseVertexOES glDrawRangeElementsBaseVertexOES glMultiDrawElementsBaseVertexEXT
+
+Test case 'dEQP-GLES3.functional.shaders.discard.basic_always'..
+ogles2.library: glBindVertexArray is not implemented yet (called as a no-op)
+ogles2.library: glVertexAttribDivisor is not implemented yet (called as a no-op)
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.discard.basic_never'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.discard.basic_uniform'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.discard.basic_dynamic'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.discard.basic_texture'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.discard.function_always'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.discard.function_never'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.discard.function_uniform'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.discard.function_dynamic'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.discard.function_texture'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.discard.static_loop_always'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.discard.static_loop_never'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.discard.static_loop_uniform'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.discard.static_loop_dynamic'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.discard.static_loop_texture'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.discard.dynamic_loop_always'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.discard.dynamic_loop_never'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.discard.dynamic_loop_uniform'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.discard.dynamic_loop_dynamic'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.discard.dynamic_loop_texture'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.discard.function_static_loop_always'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.discard.function_static_loop_never'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.discard.function_static_loop_uniform'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.discard.function_static_loop_dynamic'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.discard.function_static_loop_texture'..
+  Pass (Pass)
+
+DONE!
+
+Test run totals:
+  Passed:        25/25 (100.0%)
+  Failed:        0/25 (0.0%)
+  Not supported: 0/25 (0.0%)
+  Warnings:      0/25 (0.0%)
+  Waived:        0/25 (0.0%)

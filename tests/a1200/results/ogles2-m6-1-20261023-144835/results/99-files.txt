@@ -1,0 +1,11 @@
+Directory "M6R1:results" on Friday 23-Oct-26
+00-progress.txt                 110 ----rwed Today     14:49:19
+1-bitmap.txt                   6816 ----rwed Today     14:48:53
+ogles2.log                     8970 ----rwed Today     14:49:19
+2-bitmap.txt                   6816 ----rwed Today     14:49:09
+3-window.txt                   2209 ----rwed Today     14:49:14
+4-screen.txt                   2209 ----rwed Today     14:49:19
+notes.txt                       373 ----rwed Today     14:49:20
+98-cache.txt                    493 ----rwed Today     14:49:20
+99-files.txt                    392 ----rwed Today     14:49:20
+9 files - 27K bytes - 69 blocks used

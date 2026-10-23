@@ -1,0 +1,8 @@
+Directory "EXR:results" on Friday 23-Oct-26
+1-boingocean.txt                 59 ----rwed Today     15:16:21
+ogles2.log                     5883 ----rwed Today     15:16:36
+2-boing2026.txt                 153 ----rwed Today     15:16:27
+3-triangle.txt                    9 ----rwed Today     15:16:27
+4-cube.txt                        9 ----rwed Today     15:16:33
+99-files.txt                    196 ----rwed Today     15:16:38
+6 files - 6K bytes - 23 blocks used

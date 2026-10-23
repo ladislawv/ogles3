@@ -1,0 +1,10 @@
+Directory "M6R8:results" on Friday 23-Oct-26
+00-progress.txt                  98 ----rwed Today     14:46:04
+1-tfu-cpu.txt                  1579 ----rwed Today     14:46:04
+ogles2.log                     5693 ----rwed Today     14:46:04
+2-tfu.txt                      1573 ----rwed Today     14:46:04
+3-texture.txt                  2418 ----rwed Today     14:46:04
+3-fbo.txt                      2949 ----rwed Today     14:46:04
+notes.txt                       366 ----rwed Today     14:46:04
+99-files.txt                    392 ----rwed Today     14:46:04
+8 files - 14K bytes - 42 blocks used

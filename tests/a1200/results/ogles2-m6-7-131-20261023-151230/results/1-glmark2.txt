@@ -1,0 +1,46 @@
+=======================================================
+    glmark2 2023.01-amiga
+=======================================================
+    OpenGL Information
+    GL_VENDOR:      ogles2.library
+    GL_RENDERER:    V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM
+    GL_VERSION:     OpenGL ES 2.0 ogles2.library 1.3
+    Surface Config: buf=32 r=8 g=8 b=8 a=8 depth=24 stencil=8 samples=0
+    Surface Size:   800x600 windowed
+=======================================================
+[build] use-vbo=false: FPS: 349 FrameTime: 2.869 ms
+[build] use-vbo=true: FPS: 382 FrameTime: 2.622 ms
+[texture] texture-filter=nearest: FPS: 367 FrameTime: 2.731 ms
+[texture] texture-filter=linear: FPS: 363 FrameTime: 2.757 ms
+[texture] texture-filter=mipmap: FPS: 366 FrameTime: 2.733 ms
+[shading] shading=gouraud: FPS: 362 FrameTime: 2.768 ms
+[shading] shading=blinn-phong-inf: FPS: 329 FrameTime: 3.041 ms
+[shading] shading=phong: FPS: 301 FrameTime: 3.324 ms
+[shading] shading=cel: FPS: 298 FrameTime: 3.358 ms
+[bump] bump-render=high-poly: FPS: 273 FrameTime: 3.671 ms
+[bump] bump-render=normals: FPS: 369 FrameTime: 2.715 ms
+[bump] bump-render=height: FPS: 361 FrameTime: 2.777 ms
+[effect2d] kernel=0,1,0;1,-4,1;0,1,0;: FPS: 269 FrameTime: 3.724 ms
+[effect2d] kernel=1,1,1,1,1;1,1,1,1,1;1,1,1,1,1;: FPS: 173 FrameTime: 5.785 ms
+[pulsar] light=false:quads=5:texture=false: FPS: 364 FrameTime: 2.749 ms
+[desktop] blur-radius=5:effect=blur:passes=1:separable=true:windows=4: FPS: 78 FrameTime: 12.945 ms
+[desktop] effect=shadow:windows=4: FPS: 139 FrameTime: 7.244 ms
+[buffer] columns=200:interleave=false:update-dispersion=0.9:update-fraction=0.5:update-method=map: FPS: 61 FrameTime: 16.645 ms
+[buffer] columns=200:interleave=false:update-dispersion=0.9:update-fraction=0.5:update-method=subdata: FPS: 60 FrameTime: 16.718 ms
+[buffer] columns=200:interleave=true:update-dispersion=0.9:update-fraction=0.5:update-method=map: FPS: 96 FrameTime: 10.426 ms
+[ideas] speed=duration: FPS: 174 FrameTime: 5.753 ms
+[jellyfish] <default>: FPS: 234 FrameTime: 4.284 ms
+[terrain] <default>: FPS: 25 FrameTime: 40.724 ms
+[shadow] <default>: FPS: 124 FrameTime: 8.114 ms
+[refract] <default>: FPS: 42 FrameTime: 24.281 ms
+[conditionals] fragment-steps=0:vertex-steps=0: FPS: 382 FrameTime: 2.622 ms
+[conditionals] fragment-steps=5:vertex-steps=0: FPS: 314 FrameTime: 3.189 ms
+[conditionals] fragment-steps=0:vertex-steps=5: FPS: 378 FrameTime: 2.646 ms
+[function] fragment-complexity=low:fragment-steps=5: FPS: 349 FrameTime: 2.872 ms
+[function] fragment-complexity=medium:fragment-steps=5: FPS: 297 FrameTime: 3.377 ms
+[loop] fragment-loop=false:fragment-steps=5:vertex-steps=5: FPS: 340 FrameTime: 2.943 ms
+[loop] fragment-steps=5:fragment-uniform=false:vertex-steps=5: FPS: 338 FrameTime: 2.967 ms
+[loop] fragment-steps=5:fragment-uniform=true:vertex-steps=5: FPS: 286 FrameTime: 3.502 ms
+=======================================================
+                                  glmark2 Score: 260 
+=======================================================

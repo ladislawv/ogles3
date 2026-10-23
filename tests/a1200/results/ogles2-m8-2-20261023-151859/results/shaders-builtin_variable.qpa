@@ -1,0 +1,447 @@
+#sessionInfo releaseName unknown
+#sessionInfo releaseId 0xcafebabe
+#sessionInfo targetName "AmigaOS3"
+#sessionInfo logFormatVersion "0.3.4"
+#sessionInfo vendor "ogles2.library"
+#sessionInfo renderer "V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM"
+#sessionInfo commandLineParameters "--deqp-caselist-file M8R2:caselists/shaders-builtin_variable.txt --deqp-archive-dir=M8R2:bin --deqp-log-filename=M8R2:results/shaders-builtin_variable.qpa --deqp-log-images=disable --deqp-log-shader-sources=disable --deqp-surface-width=256 --deqp-surface-height=256 --deqp-gl-config-name=rgba8888d24s8ms0"
+
+#beginSession
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_attribs_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_attribs_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1393808</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_attribs_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_attribs_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">190543</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_uniform_vectors_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_uniform_vectors_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">158509</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_uniform_vectors_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_uniform_vectors_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">158464</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_fragment_uniform_vectors_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_fragment_uniform_vectors_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">158841</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_fragment_uniform_vectors_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_fragment_uniform_vectors_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">157034</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_texture_image_units_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_texture_image_units_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">158723</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_texture_image_units_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_texture_image_units_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">157475</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_texture_image_units_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_texture_image_units_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">159909</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_texture_image_units_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_texture_image_units_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">161089</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_combined_texture_image_units_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_combined_texture_image_units_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">154542</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_combined_texture_image_units_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_combined_texture_image_units_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">156877</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_draw_buffers_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_draw_buffers_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">157917</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_draw_buffers_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_draw_buffers_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">158474</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_output_vectors_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_output_vectors_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">159301</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_output_vectors_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_output_vectors_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">158150</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_fragment_input_vectors_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_fragment_input_vectors_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">157449</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_fragment_input_vectors_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_fragment_input_vectors_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">158727</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.min_program_texel_offset_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.min_program_texel_offset_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">157967</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.min_program_texel_offset_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.min_program_texel_offset_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">157552</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_program_texel_offset_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_program_texel_offset_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">155761</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_program_texel_offset_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_program_texel_offset_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">158555</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.depth_range_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.depth_range_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">31.454000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.144000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">122.195999</Number>
+ <Text>glDepthRangef(0, 1)</Text>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>glDepthRangef(1.5, -1)</Text>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>glDepthRangef(0.7, 0.3)</Text>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">589109</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.depth_range_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.depth_range_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">39.792000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">39.216000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">123.975998</Number>
+ <Text>glDepthRangef(0, 1)</Text>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>glDepthRangef(1.5, -1)</Text>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>glDepthRangef(0.7, 0.3)</Text>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">593533</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.vertex_id
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.vertex_id" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">37.556000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">39.098999</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">124.458000</Number>
+ <Section Name="Iter0" Description="glDrawArrays()" />
+ <ImageSet Name="Result" Description="Image comparison result" />
+ <Section Name="Iter1" Description="glDrawElements(), indices in client-side array" />
+ <ImageSet Name="Result" Description="Image comparison result" />
+ <Section Name="Iter2" Description="glDrawElements(), indices in buffer" />
+ <ImageSet Name="Result" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">286271</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.fragcoord_xyz
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.fragcoord_xyz" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.739000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">27.396999</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">123.970001</Number>
+ <Text>Image comparison failed: max difference = (223, 191, 130, 0), threshold = (2, 2, 2, 2)</Text>
+ <ImageSet Name="Result" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">217754</Number>
+ <Result StatusCode="Fail">Image comparison failed</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.fragcoord_w
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.fragcoord_w" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.719000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">29.288000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">122.754997</Number>
+ <Text>Image comparison failed: max difference = (32, 190, 128, 0), threshold = (2, 2, 2, 2)</Text>
+ <ImageSet Name="Result" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">223482</Number>
+ <Result StatusCode="Fail">Image comparison failed</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.pointcoord
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.pointcoord" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">25.679001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">38.910000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">164.656998</Number>
+ <ImageSet Name="Result" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">537435</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.frontfacing
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.frontfacing" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.403000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">39.921001</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">125.341003</Number>
+ <ImageSet Name="Result" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">175270</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+Run took 7.54 seconds
+
+#endSession

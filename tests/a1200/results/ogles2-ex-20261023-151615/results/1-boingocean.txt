@@ -1,0 +1,1 @@
+300 frames in 5.4 s: 55.48 fps at 640x480 (window 640x480)

@@ -1,0 +1,139 @@
+     1 ogles2.library 1.3 init
+     2 open (count 1)
+     3 GPU submission lock "V3D 4.2 submit" at 0x084E2028
+     4 device: V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM, clipper granularity 256
+     5 device: GPU-visible RAM (device tree memory): 0x01000000-0x3C9FFFFF
+     6 device: GPU-visible RAM (device tree memory): 0x40000000-0x79DFFFFF
+     7 device: memory region "expansion memory" 0x08000020-0x3C9FFFFF fast: the GPU reaches it
+     8 device: memory region "expansion memory" 0x01000020-0x07FFFFFF fast: the GPU reaches it
+     9 device: memory region "expansion memory" 0x41000020-0x79DFFFFF fast: the GPU reaches it
+    10 device: memory region "memory" 0x00C00020-0x00C7FFFF fast: OUTSIDE the GPU-visible RAM
+    11 device: memory region "chip memory" 0x00001020-0x001FFFFF chip: OUTSIDE the GPU-visible RAM
+    12 display: own window, 256x256, BGRA
+    13 device: context pools for 256x256, D32F, 17783168 bytes of GPU memory in use
+    14 aglCreateContext2: context 0x090280EC, OpenGL ES 3.0, 256x256
+    15 compiler: Stuff:amictld/work/ogles2-m8-2/libs/v3dglslc, 19025780 bytes, id DDAB0F33
+    16 compiler: started (0 s)
+    17 compiler: shader compiled in 1220 ms
+    18 compiler: program compiled in 120 ms, OGLES2Cache:a0775afc8d827635e3dfd99c.v3dp
+    19 glLinkProgram: OGLES2Cache:a0775afc8d827635e3dfd99c.v3dp (5 variants, 608 bytes of code)
+    20 job: depth and stencil kept across a mid-frame flush (logged once)
+    21 compiler: shader compiled in 40 ms
+    22 compiler: shader compiled in 40 ms
+    23 compiler: program compiled in 120 ms, OGLES2Cache:89712df3024a9bdc7f44beab.v3dp
+    24 glLinkProgram: OGLES2Cache:89712df3024a9bdc7f44beab.v3dp (5 variants, 608 bytes of code)
+    25 compiler: shader compiled in 40 ms
+    26 compiler: program compiled in 120 ms, OGLES2Cache:b128630a8284ce3c72217503.v3dp
+    27 glLinkProgram: OGLES2Cache:b128630a8284ce3c72217503.v3dp (5 variants, 616 bytes of code)
+    28 compiler: shader compiled in 20 ms
+    29 compiler: program compiled in 120 ms, OGLES2Cache:0abffba6678945bcd087974f.v3dp
+    30 glLinkProgram: OGLES2Cache:0abffba6678945bcd087974f.v3dp (5 variants, 608 bytes of code)
+    31 compiler: shader compiled in 40 ms
+    32 compiler: program compiled in 120 ms, OGLES2Cache:c94cf5021a457ef269700fdf.v3dp
+    33 glLinkProgram: OGLES2Cache:c94cf5021a457ef269700fdf.v3dp (5 variants, 608 bytes of code)
+    34 compiler: shader compiled in 20 ms
+    35 compiler: program compiled in 120 ms, OGLES2Cache:938e7ae9d3dd27464ae4963b.v3dp
+    36 glLinkProgram: OGLES2Cache:938e7ae9d3dd27464ae4963b.v3dp (5 variants, 608 bytes of code)
+    37 compiler: shader compiled in 40 ms
+    38 compiler: program compiled in 160 ms, OGLES2Cache:12e2b14c631112a09fbd88fd.v3dp
+    39 glLinkProgram: OGLES2Cache:12e2b14c631112a09fbd88fd.v3dp (5 variants, 656 bytes of code)
+    40 compiler: shader compiled in 20 ms
+    41 compiler: program compiled in 160 ms, OGLES2Cache:cba9675c455e2b2740a98890.v3dp
+    42 glLinkProgram: OGLES2Cache:cba9675c455e2b2740a98890.v3dp (5 variants, 768 bytes of code)
+    43 compiler: shader compiled in 40 ms
+    44 compiler: program compiled in 120 ms, OGLES2Cache:5add5b8b3964b14b73e5c01d.v3dp
+    45 glLinkProgram: OGLES2Cache:5add5b8b3964b14b73e5c01d.v3dp (5 variants, 608 bytes of code)
+    46 compiler: shader compiled in 20 ms
+    47 compiler: program compiled in 120 ms, OGLES2Cache:fe5472e2bf676a3cd1815f0d.v3dp
+    48 glLinkProgram: OGLES2Cache:fe5472e2bf676a3cd1815f0d.v3dp (5 variants, 608 bytes of code)
+    49 compiler: shader compiled in 20 ms
+    50 compiler: program compiled in 120 ms, OGLES2Cache:37ce6fbca715a0498b1906ec.v3dp
+    51 glLinkProgram: OGLES2Cache:37ce6fbca715a0498b1906ec.v3dp (5 variants, 608 bytes of code)
+    52 compiler: shader compiled in 20 ms
+    53 compiler: program compiled in 120 ms, OGLES2Cache:3791d82db56259601f19e160.v3dp
+    54 glLinkProgram: OGLES2Cache:3791d82db56259601f19e160.v3dp (5 variants, 608 bytes of code)
+    55 compiler: shader compiled in 40 ms
+    56 compiler: program compiled in 100 ms, OGLES2Cache:79a8ab1888e8cec8ffa420c0.v3dp
+    57 glLinkProgram: OGLES2Cache:79a8ab1888e8cec8ffa420c0.v3dp (5 variants, 616 bytes of code)
+    58 compiler: shader compiled in 20 ms
+    59 compiler: program compiled in 120 ms, OGLES2Cache:c29d3479a1ddba92d5b826f4.v3dp
+    60 glLinkProgram: OGLES2Cache:c29d3479a1ddba92d5b826f4.v3dp (5 variants, 608 bytes of code)
+    61 compiler: shader compiled in 40 ms
+    62 compiler: program compiled in 100 ms, OGLES2Cache:8c42c22d90fd57fccbf7abae.v3dp
+    63 glLinkProgram: OGLES2Cache:8c42c22d90fd57fccbf7abae.v3dp (5 variants, 608 bytes of code)
+    64 compiler: shader compiled in 40 ms
+    65 compiler: program compiled in 100 ms, OGLES2Cache:f3cad914b24be9eba600fc26.v3dp
+    66 glLinkProgram: OGLES2Cache:f3cad914b24be9eba600fc26.v3dp (5 variants, 608 bytes of code)
+    67 compiler: shader compiled in 20 ms
+    68 compiler: program compiled in 140 ms, OGLES2Cache:6c923ce4ed8b3e192fe0a3d9.v3dp
+    69 glLinkProgram: OGLES2Cache:6c923ce4ed8b3e192fe0a3d9.v3dp (5 variants, 648 bytes of code)
+    70 compiler: shader compiled in 20 ms
+    71 compiler: program compiled in 140 ms, OGLES2Cache:90ce9ca495bd06ae23948f1b.v3dp
+    72 glLinkProgram: OGLES2Cache:90ce9ca495bd06ae23948f1b.v3dp (5 variants, 768 bytes of code)
+    73 compiler: shader compiled in 40 ms
+    74 compiler: program compiled in 100 ms, OGLES2Cache:c16d521641b5532a2d753708.v3dp
+    75 glLinkProgram: OGLES2Cache:c16d521641b5532a2d753708.v3dp (5 variants, 616 bytes of code)
+    76 compiler: shader compiled in 20 ms
+    77 compiler: program compiled in 100 ms, OGLES2Cache:28c428502456b7fb45a13158.v3dp
+    78 glLinkProgram: OGLES2Cache:28c428502456b7fb45a13158.v3dp (5 variants, 608 bytes of code)
+    79 compiler: shader compiled in 40 ms
+    80 compiler: program compiled in 120 ms, OGLES2Cache:7a0bf25c084521a5915c0429.v3dp
+    81 glLinkProgram: OGLES2Cache:7a0bf25c084521a5915c0429.v3dp (5 variants, 608 bytes of code)
+    82 compiler: shader compiled in 40 ms
+    83 compiler: program compiled in 120 ms, OGLES2Cache:4876dd7fa8338ea42d3614f8.v3dp
+    84 glLinkProgram: OGLES2Cache:4876dd7fa8338ea42d3614f8.v3dp (5 variants, 608 bytes of code)
+    85 compiler: shader compiled in 40 ms
+    86 compiler: program compiled in 160 ms, OGLES2Cache:096fd5979beec5a1cafbcae3.v3dp
+    87 glLinkProgram: OGLES2Cache:096fd5979beec5a1cafbcae3.v3dp (5 variants, 648 bytes of code)
+    88 compiler: shader compiled in 40 ms
+    89 compiler: program compiled in 160 ms, OGLES2Cache:d638b570d44d25308898716b.v3dp
+    90 glLinkProgram: OGLES2Cache:d638b570d44d25308898716b.v3dp (5 variants, 768 bytes of code)
+    91 compiler: shader compiled in 40 ms
+    92 compiler: program compiled in 160 ms, OGLES2Cache:ad5d6cf554f80c455f9b86fd.v3dp
+    93 glLinkProgram: OGLES2Cache:ad5d6cf554f80c455f9b86fd.v3dp (5 variants, 616 bytes of code)
+    94 compiler: shader compiled in 40 ms
+    95 compiler: program compiled in 160 ms, OGLES2Cache:054699b7b0691e33a1d20be7.v3dp
+    96 glLinkProgram: OGLES2Cache:054699b7b0691e33a1d20be7.v3dp (5 variants, 608 bytes of code)
+    97 compiler: shader compiled in 40 ms
+    98 compiler: program compiled in 160 ms, OGLES2Cache:b7a7e2176c374c9bb987adb3.v3dp
+    99 glLinkProgram: OGLES2Cache:b7a7e2176c374c9bb987adb3.v3dp (5 variants, 608 bytes of code)
+   100 compiler: shader compiled in 20 ms
+   101 compiler: program compiled in 160 ms, OGLES2Cache:8b898227f76ff340673ca647.v3dp
+   102 glLinkProgram: OGLES2Cache:8b898227f76ff340673ca647.v3dp (5 variants, 608 bytes of code)
+   103 compiler: shader compiled in 40 ms
+   104 compiler: program compiled in 160 ms, OGLES2Cache:bc5fe54c020eb7dc0d605e69.v3dp
+   105 glLinkProgram: OGLES2Cache:bc5fe54c020eb7dc0d605e69.v3dp (5 variants, 656 bytes of code)
+   106 compiler: shader compiled in 40 ms
+   107 compiler: program compiled in 160 ms, OGLES2Cache:03456df6e056d16133faf40c.v3dp
+   108 glLinkProgram: OGLES2Cache:03456df6e056d16133faf40c.v3dp (5 variants, 768 bytes of code)
+   109 compiler: shader compiled in 40 ms
+   110 compiler: program compiled in 160 ms, OGLES2Cache:68448208bb1c19e09abe1f85.v3dp
+   111 glLinkProgram: OGLES2Cache:68448208bb1c19e09abe1f85.v3dp (5 variants, 616 bytes of code)
+   112 compiler: shader compiled in 40 ms
+   113 compiler: program compiled in 120 ms, OGLES2Cache:ad22ec6a5d613844b16226cf.v3dp
+   114 glLinkProgram: OGLES2Cache:ad22ec6a5d613844b16226cf.v3dp (5 variants, 608 bytes of code)
+   115 compiler: shader compiled in 40 ms
+   116 compiler: program compiled in 160 ms, OGLES2Cache:e355f46defac937079b15e85.v3dp
+   117 glLinkProgram: OGLES2Cache:e355f46defac937079b15e85.v3dp (5 variants, 712 bytes of code)
+   118 compiler: shader compiled in 20 ms
+   119 compiler: program compiled in 160 ms, OGLES2Cache:e15788f3429a9d8844e01d73.v3dp
+   120 glLinkProgram: OGLES2Cache:e15788f3429a9d8844e01d73.v3dp (5 variants, 1032 bytes of code)
+   121 compiler: shader compiled in 40 ms
+   122 compiler: program compiled in 200 ms, OGLES2Cache:c4438db1c72e8e3a0bfe1a46.v3dp
+   123 glLinkProgram: OGLES2Cache:c4438db1c72e8e3a0bfe1a46.v3dp (5 variants, 952 bytes of code)
+   124 compiler: shader compiled in 20 ms
+   125 compiler: program compiled in 160 ms, OGLES2Cache:9cbac84b817472b64f5fb75d.v3dp
+   126 glLinkProgram: OGLES2Cache:9cbac84b817472b64f5fb75d.v3dp (5 variants, 1680 bytes of code)
+   127 compiler: shader compiled in 40 ms
+   128 compiler: program compiled in 160 ms, OGLES2Cache:6a07f7191fd140201157836f.v3dp
+   129 glLinkProgram: OGLES2Cache:6a07f7191fd140201157836f.v3dp (5 variants, 608 bytes of code)
+   130 compiler: shader compiled in 40 ms
+   131 compiler: program compiled in 120 ms, OGLES2Cache:01d2cf8d1c87b5de973f6562.v3dp
+   132 glLinkProgram: OGLES2Cache:01d2cf8d1c87b5de973f6562.v3dp (5 variants, 608 bytes of code)
+   133 aglDestroyContext: context 0x090280EC: freeing
+   134 device: context freed, 0 bytes of GPU memory still in use
+   135 aglDestroyContext: context 0x090280EC (38 frames, 0 dropped, 0 binning blocks added)
+   136 timing: 38 jobs, each on average: 1848 us of CPU work before its flush, 60 us waiting for binning, 280 us for the render
+   137 timing: and in each flush 109 us building the render list, 224 us for the CPU cache before the GPU, 53 us after
+   138 timing: 38 swaps, 322371 us from one to the next on average, 407 us of it presenting
+   139 timing: per frame 1 draws, 682 us in them; in all 0 ms in glBuffer(Sub)Data, 0 ms in glTex(Sub)Image2D

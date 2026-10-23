@@ -1,0 +1,431 @@
+#sessionInfo releaseName unknown
+#sessionInfo releaseId 0xcafebabe
+#sessionInfo targetName "AmigaOS3"
+#sessionInfo logFormatVersion "0.3.4"
+#sessionInfo vendor "ogles2.library"
+#sessionInfo renderer "V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM"
+#sessionInfo commandLineParameters "--deqp-caselist-file M8R2:caselists/shaders-negative.txt --deqp-archive-dir=M8R2:bin --deqp-log-filename=M8R2:results/shaders-negative.qpa --deqp-log-images=disable --deqp-log-shader-sources=disable --deqp-surface-width=256 --deqp-surface-height=256 --deqp-gl-config-name=rgba8888d24s8ms0"
+
+#beginSession
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.negative.c_cast.float_0_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.negative.c_cast.float_0_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision highp float;
+in highp vec4 dEQP_Position;
+
+void main ()
+{
+    float a = 0.0;
+    float b = (float)a;
+    gl_Position = vec4(0.0);
+}
+</ShaderSource>
+   <InfoLog>0:8(18): error: syntax error, unexpected &apos;)&apos;, expecting &apos;(&apos;
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1252.338989</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">41.953999</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1307781</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.negative.c_cast.float_0_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.negative.c_cast.float_0_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision highp float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+void main ()
+{
+    float a = 0.0;
+    float b = (float)a;
+    dEQP_FragColor = vec4(0.0);
+}
+</ShaderSource>
+   <InfoLog>0:8(18): error: syntax error, unexpected &apos;)&apos;, expecting &apos;(&apos;
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">41.330002</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">39.998001</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">89552</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.negative.c_cast.float_1_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.negative.c_cast.float_1_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision highp float;
+in highp vec4 dEQP_Position;
+
+void main ()
+{
+    int a = 0;
+    float b = (float)a;
+    gl_Position = vec4(b);
+}
+</ShaderSource>
+   <InfoLog>0:8(18): error: syntax error, unexpected &apos;)&apos;, expecting &apos;(&apos;
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">30.740999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.627000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">36711</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.negative.c_cast.float_1_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.negative.c_cast.float_1_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision highp float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+void main ()
+{
+    int a = 0;
+    float b = (float)a;
+    dEQP_FragColor = vec4(b);
+}
+</ShaderSource>
+   <InfoLog>0:8(18): error: syntax error, unexpected &apos;)&apos;, expecting &apos;(&apos;
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.731000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">31.749001</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">36532</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.negative.c_cast.float_2_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.negative.c_cast.float_2_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+in highp vec4 dEQP_Position;
+
+void main ()
+{
+    highp float a = 0.0;
+    mediump float b = (mediump float)a;
+    gl_Position = vec4(0.0);
+}
+</ShaderSource>
+   <InfoLog>0:7(21): error: syntax error, unexpected MEDIUMP
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">35.707001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.617000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">41028</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.negative.c_cast.float_2_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.negative.c_cast.float_2_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+void main ()
+{
+    highp float a = 0.0;
+    mediump float b = (mediump float)a;
+    dEQP_FragColor = vec4(0.0);
+}
+</ShaderSource>
+   <InfoLog>0:7(21): error: syntax error, unexpected MEDIUMP
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.725000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">33.645000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">40376</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.negative.c_cast.int_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.negative.c_cast.int_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision highp float;
+in highp vec4 dEQP_Position;
+
+void main ()
+{
+    float a = 0.0;
+    int b = (int)a;
+    gl_Position = vec4(0.0);
+}
+</ShaderSource>
+   <InfoLog>0:8(14): error: syntax error, unexpected &apos;)&apos;, expecting &apos;(&apos;
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">28.802999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.623000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">34017</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.negative.c_cast.int_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.negative.c_cast.int_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision highp float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+void main ()
+{
+    float a = 0.0;
+    int b = (int)a;
+    dEQP_FragColor = vec4(0.0);
+}
+</ShaderSource>
+   <InfoLog>0:8(14): error: syntax error, unexpected &apos;)&apos;, expecting &apos;(&apos;
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.729000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">32.801998</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">37974</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.negative.c_cast.uint_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.negative.c_cast.uint_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision highp float;
+in highp vec4 dEQP_Position;
+
+void main ()
+{
+    float a = 0.0;
+    uint b = (uint)a;
+    gl_Position = vec4(0.0);
+}
+</ShaderSource>
+   <InfoLog>0:8(16): error: syntax error, unexpected &apos;)&apos;, expecting &apos;(&apos;
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">35.754002</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.003000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">42250</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.negative.c_cast.uint_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.negative.c_cast.uint_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision highp float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+void main ()
+{
+    float a = 0.0;
+    uint b = (uint)a;
+    dEQP_FragColor = vec4(0.0);
+}
+</ShaderSource>
+   <InfoLog>0:8(16): error: syntax error, unexpected &apos;)&apos;, expecting &apos;(&apos;
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.123000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">28.011999</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">34113</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.negative.c_cast.bool_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.negative.c_cast.bool_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision highp float;
+in highp vec4 dEQP_Position;
+
+void main ()
+{
+    int a = 1;
+    bool b = (bool)a;
+    gl_Position = vec4(0.0);
+}
+</ShaderSource>
+   <InfoLog>0:8(16): error: syntax error, unexpected &apos;)&apos;, expecting &apos;(&apos;
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">34.678001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.630000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">38700</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.negative.c_cast.bool_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.negative.c_cast.bool_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision highp float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+void main ()
+{
+    int a = 1;
+    bool b = (bool)a;
+    dEQP_FragColor = vec4(0.0);
+}
+</ShaderSource>
+   <InfoLog>0:8(16): error: syntax error, unexpected &apos;)&apos;, expecting &apos;(&apos;
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.728000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">31.891001</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">36009</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+Run took 1.89 seconds
+
+#endSession

@@ -1,0 +1,3 @@
+Boing 2026 on V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM, 640x480, MSAA 4x
+render scale 100%: the room at 640x480
+300 frames in 5.4 s: 55.12 fps at 640x480

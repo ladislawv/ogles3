@@ -1,0 +1,1207 @@
+#sessionInfo releaseName unknown
+#sessionInfo releaseId 0xcafebabe
+#sessionInfo targetName "AmigaOS3"
+#sessionInfo logFormatVersion "0.3.4"
+#sessionInfo vendor "ogles2.library"
+#sessionInfo renderer "V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM"
+#sessionInfo commandLineParameters "--deqp-caselist-file M8R2:caselists/shaders-conditionals.txt --deqp-archive-dir=M8R2:bin --deqp-log-filename=M8R2:results/shaders-conditionals.qpa --deqp-log-images=disable --deqp-log-shader-sources=disable --deqp-surface-width=256 --deqp-surface-height=256 --deqp-gl-config-name=rgba8888d24s8ms0"
+
+#beginSession
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.if.single_statement_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.if.single_statement_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1264.728027</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">40.101002</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">243.914993</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1575238</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.if.single_statement_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.if.single_statement_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">28.874001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">41.108002</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">163.278000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">247725</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.if.compound_statement_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.if.compound_statement_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">41.233002</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">38.691002</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">164.264008</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">258225</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.if.compound_statement_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.if.compound_statement_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.852000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">39.702000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">164.580002</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">221447</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.if.sequence_statements_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.if.sequence_statements_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">37.973999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.685000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">162.363998</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">216329</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.if.sequence_statements_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.if.sequence_statements_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.753000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">37.438999</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">163.990005</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">219481</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.if.sequence_condition_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.if.sequence_condition_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog>0:12(6): warning: left-hand operand of comma expression has no effect
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">39.060001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.698000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">161.988998</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">216979</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.if.sequence_condition_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.if.sequence_condition_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog>0:15(6): warning: left-hand operand of comma expression has no effect
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.750000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">39.584000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">163.091995</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">220614</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.if.complex_condition_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.if.complex_condition_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">36.577000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.418000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">162.660004</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">214330</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.if.complex_condition_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.if.complex_condition_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.761000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">39.250000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">164.716003</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">221140</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.if.if_else_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.if.if_else_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">37.847000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.101000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">162.158005</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">215542</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.if.if_else_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.if.if_else_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.771000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">39.851002</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">163.311996</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">219933</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.if.if_elseif_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.if.if_elseif_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">39.988998</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.668000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">162.649002</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">219769</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.if.if_elseif_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.if.if_elseif_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.755000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">39.126999</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">163.865997</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">218422</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.if.if_elseif_else_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.if.if_elseif_else_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">37.999001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.670000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">164.253998</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">217263</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.if.if_elseif_else_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.if.if_elseif_else_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.764000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">37.888000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">164.339005</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">220012</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.if.mixed_if_elseif_else_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.if.mixed_if_elseif_else_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">38.765999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.672000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">164.082001</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">217634</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.if.mixed_if_elseif_else_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.if.mixed_if_elseif_else_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.756000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">38.695000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">163.020004</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">218425</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.if.constant_conditional_assignment_to_matrix
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.if.constant_conditional_assignment_to_matrix" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">37.659000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">40.991001</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">122.935997</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">209448</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.if.input_conditional_assignment_to_matrix
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.if.input_conditional_assignment_to_matrix" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">28.111000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.078000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">121.036003</Number>
+ <Text>Warning: no location found for attribute &apos;in0&apos;</Text>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">158007</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.if.uniform_conditional_assignment_to_matrix
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.if.uniform_conditional_assignment_to_matrix" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">25.080999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">40.859001</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">127.190002</Number>
+ <Text>WARNING // Uniform &quot;uni0&quot; location is not valid, location = -1. Cannot set value to the uniform.</Text>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">204900</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.invalid_if.missing_parenthesis_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.invalid_if.missing_parenthesis_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+void main()
+{
+    if true
+        gl_Position = vec4(1.0);
+}
+</ShaderSource>
+   <InfoLog>0:7(5): error: syntax error, unexpected BOOLCONSTANT, expecting &apos;(&apos;
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">38.102001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.089000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">45952</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.invalid_if.missing_parenthesis_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.invalid_if.missing_parenthesis_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+void main()
+{
+    if true
+        dEQP_FragColor = vec4(1.0);
+}
+</ShaderSource>
+   <InfoLog>0:7(5): error: syntax error, unexpected BOOLCONSTANT, expecting &apos;(&apos;
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.836000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">28.070999</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">33312</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.invalid_if.unclosed_parenthesis_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.invalid_if.unclosed_parenthesis_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+void main()
+{
+    if (true
+        gl_Position = vec4(1.0);
+}
+</ShaderSource>
+   <InfoLog>0:8(2): error: syntax error, unexpected NEW_IDENTIFIER, expecting &apos;)&apos; or &apos;,&apos;
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">34.683998</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.683000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">42618</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.invalid_if.unclosed_parenthesis_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.invalid_if.unclosed_parenthesis_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+void main()
+{
+    if (true
+        dEQP_FragColor = vec4(1.0);
+}
+</ShaderSource>
+   <InfoLog>0:8(2): error: syntax error, unexpected IDENTIFIER, expecting &apos;)&apos; or &apos;,&apos;
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.794000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">25.730000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">31354</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.invalid_if.int_condition_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.invalid_if.int_condition_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+void main()
+{
+    if (5)
+        gl_Position = vec4(1.0);
+}
+</ShaderSource>
+   <InfoLog>0:7(6): error: if-statement condition must be scalar boolean
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">34.426998</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.697000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">39781</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.invalid_if.int_condition_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.invalid_if.int_condition_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+void main()
+{
+    if (5)
+        dEQP_FragColor = vec4(1.0);
+}
+</ShaderSource>
+   <InfoLog>0:7(6): error: if-statement condition must be scalar boolean
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.791000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">31.806000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">36979</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.invalid_if.int_zero_condition_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.invalid_if.int_zero_condition_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+void main()
+{
+    if (0)
+        gl_Position = vec4(1.0);
+}
+</ShaderSource>
+   <InfoLog>0:7(6): error: if-statement condition must be scalar boolean
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">33.820999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.692000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">38446</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.invalid_if.int_zero_condition_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.invalid_if.int_zero_condition_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+void main()
+{
+    if (0)
+        dEQP_FragColor = vec4(1.0);
+}
+</ShaderSource>
+   <InfoLog>0:7(6): error: if-statement condition must be scalar boolean
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.785000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">31.899000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">36852</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.invalid_if.int_one_condition_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.invalid_if.int_one_condition_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+void main()
+{
+    if (1)
+        gl_Position = vec4(1.0);
+}
+</ShaderSource>
+   <InfoLog>0:7(6): error: if-statement condition must be scalar boolean
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">34.000000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.163000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">40521</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.invalid_if.int_one_condition_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.invalid_if.int_one_condition_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+void main()
+{
+    if (1)
+        dEQP_FragColor = vec4(1.0);
+}
+</ShaderSource>
+   <InfoLog>0:7(6): error: if-statement condition must be scalar boolean
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.201000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">30.041000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">36794</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.invalid_if.int_uniform_condition_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.invalid_if.int_uniform_condition_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+precision mediump int;
+uniform int u0;
+in highp vec4 dEQP_Position;
+
+void main()
+{
+    if (u0)
+        gl_Position = vec4(1.0);
+}
+</ShaderSource>
+   <InfoLog>0:9(6): error: if-statement condition must be scalar boolean
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">33.902000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.696000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">40278</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.invalid_if.int_uniform_condition_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.invalid_if.int_uniform_condition_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+precision mediump int;
+uniform int u0;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+void main()
+{
+    if (u0)
+        dEQP_FragColor = vec4(1.0);
+}
+</ShaderSource>
+   <InfoLog>0:9(6): error: if-statement condition must be scalar boolean
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.789000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">29.834999</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">35003</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.invalid_if.float_condition_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.invalid_if.float_condition_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+void main()
+{
+    if (5.0)
+        gl_Position = vec4(1.0);
+}
+</ShaderSource>
+   <InfoLog>0:7(6): error: if-statement condition must be scalar boolean
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">35.356998</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.684000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">39446</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.invalid_if.float_condition_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.invalid_if.float_condition_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+void main()
+{
+    if (5.0)
+        dEQP_FragColor = vec4(1.0);
+}
+</ShaderSource>
+   <InfoLog>0:7(6): error: if-statement condition must be scalar boolean
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.791000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">32.919998</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">38411</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.invalid_if.float_zero_condition_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.invalid_if.float_zero_condition_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+void main()
+{
+    if (0.0)
+        gl_Position = vec4(1.0);
+}
+</ShaderSource>
+   <InfoLog>0:7(6): error: if-statement condition must be scalar boolean
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">33.916000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.696000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">39148</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.invalid_if.float_zero_condition_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.invalid_if.float_zero_condition_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+void main()
+{
+    if (0.0)
+        dEQP_FragColor = vec4(1.0);
+}
+</ShaderSource>
+   <InfoLog>0:7(6): error: if-statement condition must be scalar boolean
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.791000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">36.112000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">43099</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.invalid_if.float_one_condition_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.invalid_if.float_one_condition_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+void main()
+{
+    if (1.0)
+        gl_Position = vec4(1.0);
+}
+</ShaderSource>
+   <InfoLog>0:7(6): error: if-statement condition must be scalar boolean
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">27.330000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.090000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">32804</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.invalid_if.float_one_condition_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.invalid_if.float_one_condition_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+void main()
+{
+    if (1.0)
+        dEQP_FragColor = vec4(1.0);
+}
+</ShaderSource>
+   <InfoLog>0:7(6): error: if-statement condition must be scalar boolean
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.208000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">31.959999</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">37344</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.invalid_if.sampler_condition_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.invalid_if.sampler_condition_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+uniform sampler2D s0;
+in highp vec4 dEQP_Position;
+
+void main()
+{
+    if (s0)
+        gl_Position = vec4(1.0);
+}
+</ShaderSource>
+   <InfoLog>0:8(6): error: if-statement condition must be scalar boolean
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">33.270000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.801000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">38327</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.conditionals.invalid_if.sampler_condition_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.conditionals.invalid_if.sampler_condition_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+uniform sampler2D s0;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+void main()
+{
+    if (s0)
+        dEQP_FragColor = vec4(1.0);
+}
+</ShaderSource>
+   <InfoLog>0:8(6): error: if-statement condition must be scalar boolean
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.797000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">31.976999</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">37949</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+Run took 6.90 seconds
+
+#endSession

@@ -34,7 +34,8 @@ see "dEQP-GLES3" below.
   - `modules/glshared` and `modules/gles2` (or `modules/gles3`, without the
     desktop GL package `tgl45es3*`).
 - **`patches/`** are applied to a copy of the sources in `$B/deqp/src`, then
-  those of the module's own directory (`patches/gles2/`: 0003 and 0004):
+  those of the module's own directory (`patches/gles2/`: 0003 and 0004;
+  `patches/gles3/`: 0001, see "dEQP-GLES3"):
   - `0001-amiga-m68k.patch`: delibs gains a 68k CPU (32-bit, big-endian).
     An assertion prints on stdout, then aborts. Aligned allocation uses
     delibs' own header, since libnix has no `posix_memalign`. There is no
@@ -126,10 +127,14 @@ stages B and C). Two things follow:
   the run instead (an exception in a case's deinit terminates dEQP). The run's
   `.txt` lists them all when the first context is made (88 on 2026-10-23).
   ES 2.0 contexts keep the null pointers, which `0004` tests for.
-- **One case a run, for now:** `glu::resetState` checks `glGetError` after
-  each part of the state it resets, and an error there ends the run after
-  the case. Until the library takes ES 3.0's state (`GL_PRIMITIVE_RESTART_FIXED_INDEX`
-  was the first refused, 2026-10-23), a run gets through one case.
+- **The state reset after each case:** `glu::resetState` checks
+  `glGetError` after each part of the state it resets, and an error in a
+  case's deinit ends the run. Until the library takes ES 3.0's state
+  (`GL_PRIMITIVE_RESTART_FIXED_INDEX` was the first refused, 2026-10-23),
+  `patches/gles3/0001-reset-state-errors-not-fatal.patch` logs that error
+  ("ogles2: state reset incomplete") and the run goes on; the part of the
+  state it failed on may stay as the case left it. Drop the patch once the
+  library takes all of ES 3.0's state (`docs/GLES3_PLAN.md` stage B item 13).
 
 ## Known deviation
 

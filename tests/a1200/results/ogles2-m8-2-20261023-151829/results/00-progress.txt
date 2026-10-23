@@ -1,0 +1,5 @@
+ogles2 M8 run 2: --deqp-caselist-file M8R2:caselists/shaders-discard.txt
+Friday 23-Oct-26 15:18:29
+shaders-discard done
+finished
+Friday 23-Oct-26 15:18:42

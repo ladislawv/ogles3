@@ -1,0 +1,8 @@
+Directory "M8R2:results" on Friday 23-Oct-26
+00-progress.txt                 138 ----rwed Today     15:19:09
+shaders-builtin_variable.txt       7558 ----rwed Today     15:19:09
+shaders-builtin_variable.qpa      29377 ----rwed Today     15:19:09
+ogles2.log                     8609 ----rwed Today     15:19:09
+notes.txt                       228 ----rwed Today     15:19:09
+99-files.txt                    196 ----rwed Today     15:19:09
+6 files - 45K bytes - 99 blocks used

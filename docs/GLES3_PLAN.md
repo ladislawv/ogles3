@@ -2,10 +2,12 @@
 
 **Status: plan (2026-10-18; revised eight times, research added and checked
 2026-10-19, every line citation and each stage reviewed for implementation
-the same day), work on branch `gles3`.** Stage A began 2026-10-22: items
-1-6 are done and item 7 but for gl4es, all tested on the A1200 (§4, each
-item's "Done" paragraph); stage A's end (the GLES2 regression set and the
-speed figures) and stages B-D are still to come.
+the same day), work on branch `gles3`.** Stage A (begun 2026-10-22) is
+done, tested on the A1200 (§4, each item's "Done" paragraph and "Stage A's
+end", 2026-10-23): the GLES2 regression set and the speed figures as at
+1.3.1; dEQP-GLES2's whole list is postponed until the ES3 library is
+finished. Stages B-D are still to come; §1 "Where to go on" is the
+hand-off.
 Its facts were checked against this repository, Mesa at the pinned commit
 (`~/mesa-build/mesa`), Khronos' `gl.xml` (`gen/khronos/`) and extension
 specifications, the Linux kernel's V3D driver (`drivers/gpu/drm/v3d`,
@@ -114,13 +116,29 @@ Mesa's driver, so they could follow later as an extension
     committed (`tests/a1200/results/`), screenshots never.
   - **dEQP-GLES3** (item 6): `MODULE=gles3 B=~/ogles3-build/m68k-es3 bash
     ports/deqp/build.sh`, package `m8-2` (`bash tests/a1200/build_package.sh
-    m8-2` after `. ./local.env`); one case a run until stage B (§4 item 6).
+    m8-2` after `. ./local.env`), groups with `python ports/deqp/run_groups.py
+    --package=m8-2 <group>...`; patch `gles3/0001` lets a run go on past
+    the state reset stage A's library refuses (§4, "Stage A's end").
+  - **The GLES2 regression set** (§3): the packages take `B`, `BS`, `V`
+    from `local.env`, except `m5-1`, `m6-6`, `m6-8`, `m6-10`, `m7-2` and
+    `m7-3`, whose `B` is the sync build (`B=$BS V=$V bash
+    tests/a1200/build_package.sh <name>`). The corpus is judged on the PC:
+    `python3 tests/corpus/compare.py ~/ogles3-build/m68k/corpus/ref
+    <results>/results`. Speed against 1.x needs 1.x's binaries
+    (`~/ogles2-build/m68k/ioq3gl2`, `glmark2`), §4 "Stage A's end".
     After a crash on the A1200 the library stays in memory, open (`Version
     ogles2.library` answers though `LIBS:` has none): reboot, with the
     developer's leave, before the next run.
-  - **Where to go on, in order:** stage A's end: the GLES2 regression set
-    (gl4es `m6-1` and `m6-2` in it, item 7) and the speed figures (§3,
-    "Tests"). §4's items each have a "Done"
+  - **Where to go on, in order** (hand-off of 2026-10-23: stage A is done
+    but for dEQP-GLES2, §4 "Stage A's end"): (1) dEQP-GLES3's
+    `builtin_variable.fragcoord_xyz` and `fragcoord_w` (their qpa in
+    `ogles2-m8-2-20261023-151859`; run `Run-M1 CASES=... IMAGES=1` and
+    `ports/deqp/qpa_images.py` for the images); (2) the four groups not
+    run (`python ports/deqp/run_groups.py --package=m8-2 shaders-declarations
+    shaders-qualification_order shaders-linkage shaders-switch`, about 10
+    minutes); (3) stage B (§5), item 13's state first, which lets
+    dEQP-GLES3 run without patch `gles3/0001` (drop it then); dEQP-GLES2's
+    whole list when the ES3 library is finished. §4's items each have a "Done"
     paragraph that says what is in and where; the code of this work so far
     is in `context.c` (versions, extensions), `state.c` (limits),
     `program.c` (the `#version` check, uniforms, `glGetFragDataLocation`,
@@ -1081,6 +1099,45 @@ The base everything else stands on.
 
 Done when: GLSL ES 3.00 programs compile, link and draw in an ES3 context;
 dEQP-GLES2, the GLES2 regression set and the speed figures unchanged.
+
+**Stage A's end (2026-10-23, on the A1200; all but dEQP-GLES2):**
+- **dEQP-GLES2 postponed** (the developer's decision, 2026-10-23): its
+  17,165 cases take about 4 hours; it runs once the ES3 library is
+  finished. `m7-1`'s `info` passes 6 of 6 with this work's library
+  (`ogles2-m7-1-20261023-135452`).
+- **The GLES2 regression set**, built from this copy (release and sync
+  builds of `gles3` at ecfbeae), each against its last 1.x run: `m5-1`,
+  `m6-6`, `m6-8`, `m6-10`, `m7-2`, `m7-3`, `m7-4` every check as before;
+  the corpus `m2-5` 14 of 14 against llvmpipe's references
+  (`tests/corpus/compare.py`); SDL2 `m6-3` and SDL3 `m6-4` the same output
+  (pointer values aside; SDL3's extension list now has 1.3's
+  `EXT_color_buffer_half_float`), frame rates no lower; gl4es `m6-1`
+  (gears 731, 355, 452 and 1095 fps against 706, 333, 412 and 1044) and
+  Quake III through gl4es `m6-2` ran; Quake III `m6-5` drew its demo; the
+  release's four examples from `PROGDIR:shaders/`, nothing compiled (a
+  drawer of the release build's `Examples/` with this library;
+  `ogles2-ex-20261023-151615`). Results: `tests/a1200/results/*-20261023-14*`.
+- **Speed, against 1.3.1 the same day, with 1.x's binaries** (a binary
+  linked against this work's `libogles2.a` refuses 1.3.1: its dispatch
+  table is larger, the import library's size check, as intended; so the
+  comparison runs 1.x's Quake III and glmark2, of 2026-10-14/15, on each
+  library): Quake III's timedemo `four` 88.0 and 87.1 fps against 88.3
+  and 88.3 (about 0.9% slower), glmark2 251, 258, 257 against 260, 251,
+  260 (means 255.3 and 257.0, 0.7%; runs of one library differ by 9). Both
+  within the 2% (§3). Packages `ogles2-m6-5-new`/`-131`, `ogles2-m6-7-new`/
+  `-131` (copies of `m6-5` and `m6-7` with the library swapped,
+  `tests/a1200/out/`, not in git).
+- **dEQP-GLES3, the groups of stage A's features** (package `m8-2`, with
+  `ports/deqp/patches/gles3/0001`: a state reset that fails after a case is
+  logged instead of ending the run): `info` 6/6, `shaders.fragdata` 8/8,
+  `function` 4/4, `negative` 12/12, `discard` 25/25, `return` 38/38,
+  `conditionals` 41/41, `builtin_variable` 5/29 (`vertex_id`, `frontfacing`,
+  `pointcoord`, `depth_range` pass; 22 fail setting up the shader
+  executor's framebuffer, `GL_INVALID_ENUM` at `glsShaderExecUtil.cpp:670`:
+  its sized formats, stage B; `fragcoord_xyz` and `fragcoord_w` fail their
+  image comparison, **not looked at yet**). Stopped there (the developer):
+  `declarations`, `qualification_order`, `linkage` and `switch` not run.
+  Runs `ogles2-m8-2-20261023-1517*` to `-151958`.
 
 ## 5. Stage B: the ES 3.0 core that saves CPU (5-6 weeks)
 

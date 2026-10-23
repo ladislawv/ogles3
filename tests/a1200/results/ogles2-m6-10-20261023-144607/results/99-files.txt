@@ -1,0 +1,13 @@
+Directory "M6R10:results" on Friday 23-Oct-26
+00-progress.txt                  99 ----rwed Today     14:46:08
+1-msaa.txt                      790 ----rwed Today     14:46:07
+ogles2.log                    10530 ----rwed Today     14:46:08
+2-draw.txt                     1870 ----rwed Today     14:46:07
+2-texture.txt                  2418 ----rwed Today     14:46:07
+2-fbo.txt                      2949 ----rwed Today     14:46:07
+3-draw-msaa.txt                1870 ----rwed Today     14:46:07
+3-texture-msaa.txt             2418 ----rwed Today     14:46:08
+3-fbo-msaa.txt                 2949 ----rwed Today     14:46:08
+notes.txt                       367 ----rwed Today     14:46:08
+99-files.txt                    588 ----rwed Today     14:46:08
+11 files - 26K bytes - 68 blocks used

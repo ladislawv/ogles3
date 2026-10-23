@@ -1,0 +1,8 @@
+Directory "M8R2:results" on Friday 23-Oct-26
+00-progress.txt                  98 ----rwed Today     15:17:08
+info.txt                       2615 ----rwed Today     15:17:08
+info.qpa                       5916 ----rwed Today     15:17:08
+ogles2.log                     1666 ----rwed Today     15:17:08
+notes.txt                       228 ----rwed Today     15:17:08
+99-files.txt                    196 ----rwed Today     15:17:08
+6 files - 10K bytes - 31 blocks used

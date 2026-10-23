@@ -1,0 +1,5 @@
+ogles2 M8 run 2: --deqp-caselist-file M8R2:caselists/shaders-return.txt
+Friday 23-Oct-26 15:19:26
+shaders-return done
+finished
+Friday 23-Oct-26 15:19:41

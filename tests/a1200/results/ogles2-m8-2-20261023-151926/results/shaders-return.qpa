@@ -1,0 +1,963 @@
+#sessionInfo releaseName unknown
+#sessionInfo releaseId 0xcafebabe
+#sessionInfo targetName "AmigaOS3"
+#sessionInfo logFormatVersion "0.3.4"
+#sessionInfo vendor "ogles2.library"
+#sessionInfo renderer "V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM"
+#sessionInfo commandLineParameters "--deqp-caselist-file M8R2:caselists/shaders-return.txt --deqp-archive-dir=M8R2:bin --deqp-log-filename=M8R2:results/shaders-return.qpa --deqp-log-images=disable --deqp-log-shader-sources=disable --deqp-surface-width=256 --deqp-surface-height=256 --deqp-gl-config-name=rgba8888d24s8ms0"
+
+#beginSession
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.single_return_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.single_return_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1233.613037</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">4.297000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">119.487000</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1511380</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.single_return_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.single_return_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">37.671001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">39.660999</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">128.597000</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">335165</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.conditional_return_always_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.conditional_return_always_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">38.550999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.659000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">122.306000</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">309544</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.conditional_return_always_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.conditional_return_always_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.715000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">26.672001</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">124.000000</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">284018</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.conditional_return_never_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.conditional_return_never_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">38.924999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.641000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">123.163002</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">307581</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.conditional_return_never_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.conditional_return_never_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.235000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">25.865000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">123.852997</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">280425</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.conditional_return_dynamic_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.conditional_return_dynamic_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">42.022999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.467000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">161.977005</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">346355</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.conditional_return_dynamic_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.conditional_return_dynamic_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.131000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">29.983999</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">164.158005</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">331071</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.double_return_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.double_return_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">38.981998</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.753000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">122.075996</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">304901</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.double_return_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.double_return_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.718000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">27.730000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">123.915001</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">284184</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.last_statement_in_main_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.last_statement_in_main_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">22.940001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.653000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">124.477997</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">288797</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.last_statement_in_main_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.last_statement_in_main_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.716000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">29.216000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">124.094002</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">287250</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.output_write_always_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.output_write_always_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">42.438999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.661000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">124.383003</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">305377</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.output_write_always_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.output_write_always_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">4.787000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">30.731001</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">124.168999</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">292595</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.output_write_never_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.output_write_never_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">42.317001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.660000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">124.254997</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">310722</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.output_write_never_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.output_write_never_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.825000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">42.273998</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">123.717003</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">300003</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.output_write_dynamic_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.output_write_dynamic_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">24.254999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.658000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">162.352005</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">331014</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.output_write_dynamic_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.output_write_dynamic_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.719000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">34.889999</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">159.869003</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">334156</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.output_write_in_func_always_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.output_write_in_func_always_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">37.676998</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.788000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">121.313004</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">304635</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.output_write_in_func_always_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.output_write_in_func_always_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.305000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">42.088001</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">124.261002</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">304610</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.output_write_in_func_never_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.output_write_in_func_never_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">38.214001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.672000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">122.379997</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">303460</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.output_write_in_func_never_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.output_write_in_func_never_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.235000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">25.632000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">124.028999</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">282698</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.output_write_in_func_dynamic_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.output_write_in_func_dynamic_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">37.426998</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.656000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">163.119995</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">340829</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.output_write_in_func_dynamic_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.output_write_in_func_dynamic_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.730000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">31.584999</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">163.927994</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">326789</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.return_in_static_loop_always_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.return_in_static_loop_always_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">28.539000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.664000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">160.209000</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">336710</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.return_in_static_loop_always_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.return_in_static_loop_always_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.742000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">25.788000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">164.250000</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">319754</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.return_in_static_loop_never_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.return_in_static_loop_never_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">46.585999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.678000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">159.270004</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">354164</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.return_in_static_loop_never_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.return_in_static_loop_never_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.225000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">25.934999</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">162.412994</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">319509</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.return_in_static_loop_dynamic_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.return_in_static_loop_dynamic_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">41.007999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.673000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">163.507004</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">348290</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.return_in_static_loop_dynamic_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.return_in_static_loop_dynamic_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.740000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">31.629000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">163.313995</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">328280</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.return_in_dynamic_loop_always_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.return_in_dynamic_loop_always_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">38.191002</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.675000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">166.554001</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">350537</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.return_in_dynamic_loop_always_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.return_in_dynamic_loop_always_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.739000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">40.252998</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">124.825996</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">300424</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.return_in_dynamic_loop_never_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.return_in_dynamic_loop_never_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">40.094002</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.669000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">162.830994</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">350574</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.return_in_dynamic_loop_never_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.return_in_dynamic_loop_never_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.239000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">29.403000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">160.641998</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">327293</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.return_in_dynamic_loop_dynamic_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.return_in_dynamic_loop_dynamic_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">37.667000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.676000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">202.746994</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">385826</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.return_in_dynamic_loop_dynamic_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.return_in_dynamic_loop_dynamic_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.741000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">24.846001</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">164.669006</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">328242</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.return_in_infinite_loop_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.return_in_infinite_loop_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">36.026001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.695000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">163.847000</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">341928</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.return.return_in_infinite_loop_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.return.return_in_infinite_loop_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.744000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">35.469002</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">120.344002</Number>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">292621</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+Run took 13.53 seconds
+
+#endSession

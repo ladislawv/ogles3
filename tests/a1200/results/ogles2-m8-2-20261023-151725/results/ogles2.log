@@ -1,0 +1,43 @@
+     1 ogles2.library 1.3 init
+     2 open (count 1)
+     3 GPU submission lock "V3D 4.2 submit" at 0x084E2028
+     4 device: V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM, clipper granularity 256
+     5 device: GPU-visible RAM (device tree memory): 0x01000000-0x3C9FFFFF
+     6 device: GPU-visible RAM (device tree memory): 0x40000000-0x79DFFFFF
+     7 device: memory region "expansion memory" 0x08000020-0x3C9FFFFF fast: the GPU reaches it
+     8 device: memory region "expansion memory" 0x01000020-0x07FFFFFF fast: the GPU reaches it
+     9 device: memory region "expansion memory" 0x41000020-0x79DFFFFF fast: the GPU reaches it
+    10 device: memory region "memory" 0x00C00020-0x00C7FFFF fast: OUTSIDE the GPU-visible RAM
+    11 device: memory region "chip memory" 0x00001020-0x001FFFFF chip: OUTSIDE the GPU-visible RAM
+    12 display: own window, 256x256, BGRA
+    13 device: context pools for 256x256, D32F, 17783168 bytes of GPU memory in use
+    14 aglCreateContext2: context 0x090280EC, OpenGL ES 3.0, 256x256
+    15 compiler: Stuff:amictld/work/ogles2-m8-2/libs/v3dglslc, 19025780 bytes, id DDAB0F33
+    16 compiler: started (0 s)
+    17 compiler: shader compiled in 1240 ms
+    18 compiler: shader compiled in 20 ms
+    19 compiler: program compiled in 220 ms, OGLES2Cache:a16ba1770fc76b45fc17a34a.v3dp
+    20 glLinkProgram: OGLES2Cache:a16ba1770fc76b45fc17a34a.v3dp (5 variants, 648 bytes of code)
+    21 job: depth and stencil kept across a mid-frame flush (logged once)
+    22 compiler: shader compiled in 20 ms
+    23 compiler: program compiled in 500 ms, OGLES2Cache:6ade19c508e860fc005e59fb.v3dp
+    24 glLinkProgram: OGLES2Cache:6ade19c508e860fc005e59fb.v3dp (14 variants, 6168 bytes of code)
+    25 draw: a shader spills registers: a 33024-byte area (1024 bytes a thread)
+    26 compiler: shader compiled in 20 ms
+    27 compiler: program compiled in 520 ms, OGLES2Cache:4f4b1e746dfab78bd535ffba.v3dp
+    28 glLinkProgram: OGLES2Cache:4f4b1e746dfab78bd535ffba.v3dp (14 variants, 6472 bytes of code)
+    29 compiler: shader compiled in 40 ms
+    30 compiler: shader compiled in 40 ms
+    31 compiler: program compiled in 480 ms, OGLES2Cache:b0eb9a200f3e2d6b5e19ee4a.v3dp
+    32 glLinkProgram: OGLES2Cache:b0eb9a200f3e2d6b5e19ee4a.v3dp (14 variants, 6168 bytes of code)
+    33 compiler: shader compiled in 40 ms
+    34 compiler: shader failed in 40 ms
+    35 compiler: shader failed in 40 ms
+    36 compiler: shader failed in 40 ms
+    37 aglDestroyContext: context 0x090280EC: freeing
+    38 device: context freed, 0 bytes of GPU memory still in use
+    39 aglDestroyContext: context 0x090280EC (10 frames, 0 dropped, 0 binning blocks added)
+    40 timing: 10 jobs, each on average: 338959 us of CPU work before its flush, 7 us waiting for binning, 132 us for the render
+    41 timing: and in each flush 293 us building the render list, 88 us for the CPU cache before the GPU, 38 us after
+    42 timing: 8 swaps, 266925 us from one to the next on average, 340 us of it presenting
+    43 timing: per frame 0 draws, 723 us in them; in all 0 ms in glBuffer(Sub)Data, 0 ms in glTex(Sub)Image2D

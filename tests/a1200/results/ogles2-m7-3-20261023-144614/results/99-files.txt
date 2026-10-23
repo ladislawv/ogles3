@@ -1,0 +1,10 @@
+Directory "M7R3:results" on Friday 23-Oct-26
+00-progress.txt                  86 ----rwed Today     14:46:16
+1-draw.txt                     1873 ----rwed Today     14:46:14
+ogles2.log                     6404 ----rwed Today     14:46:16
+1-depth.txt                     821 ----rwed Today     14:46:14
+1-fbo.txt                      2949 ----rwed Today     14:46:14
+2-clip.txt                     2373 ----rwed Today     14:46:16
+notes.txt                       366 ----rwed Today     14:46:16
+99-files.txt                    392 ----rwed Today     14:46:16
+8 files - 14K bytes - 41 blocks used

@@ -1,0 +1,8 @@
+Directory "M7R2:results" on Friday 23-Oct-26
+00-progress.txt                  86 ----rwed Today     14:46:09
+1-s3tc.txt                     1997 ----rwed Today     14:46:09
+ogles2.log                     3064 ----rwed Today     14:46:09
+2-texture.txt                  2418 ----rwed Today     14:46:09
+notes.txt                       366 ----rwed Today     14:46:09
+99-files.txt                    196 ----rwed Today     14:46:09
+6 files - 7K bytes - 24 blocks used
