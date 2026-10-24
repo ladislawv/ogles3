@@ -1,0 +1,392 @@
+     1 ogles2.library 1.3 init
+     2 open (count 1)
+     3 GPU submission lock "V3D 4.2 submit" at 0x083D6238
+     4 device: V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM, clipper granularity 256
+     5 device: GPU-visible RAM (device tree memory): 0x01000000-0x2E9FFFFF
+     6 device: GPU-visible RAM (device tree memory): 0x40000000-0x79DFFFFF
+     7 device: memory region "expansion memory" 0x08000020-0x2E9FFFFF fast: the GPU reaches it
+     8 device: memory region "expansion memory" 0x01000020-0x07FFFFFF fast: the GPU reaches it
+     9 device: memory region "expansion memory" 0x41000020-0x79DFFFFF fast: the GPU reaches it
+    10 device: memory region "memory" 0x00C00020-0x00C7FFFF fast: OUTSIDE the GPU-visible RAM
+    11 device: memory region "chip memory" 0x00001020-0x001FFFFF chip: OUTSIDE the GPU-visible RAM
+    12 display: own window, 256x256, BGRA
+    13 device: context pools for 256x256, D32F, 17783168 bytes of GPU memory in use
+    14 aglCreateContext2: context 0x08433E8C, OpenGL ES 3.0, 256x256
+    15 compiler: Stuff:amictld/work/ogles2-m8-2/libs/v3dglslc, 19025780 bytes, id B972F903
+    16 glLinkProgram: OGLES2Cache:3c51c17c88b5e8690f6497db.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+    17 compiler: started (0 s)
+    18 compiler: program compiled in 1460 ms, OGLES2Cache:3c51c17c88b5e8690f6497db.v3dp
+    19 glLinkProgram: OGLES2Cache:3c51c17c88b5e8690f6497db.v3dp (5 variants, 688 bytes of code)
+    20 job: depth and stencil kept across a mid-frame flush (logged once)
+    21 glLinkProgram: OGLES2Cache:43115c4e8237134c58008fcf.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+    22 compiler: program compiled in 120 ms, OGLES2Cache:43115c4e8237134c58008fcf.v3dp
+    23 glLinkProgram: OGLES2Cache:43115c4e8237134c58008fcf.v3dp (5 variants, 520 bytes of code)
+    24 glLinkProgram: OGLES2Cache:044d427c69c22b48175f65ab.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+    25 compiler: program compiled in 120 ms, OGLES2Cache:044d427c69c22b48175f65ab.v3dp
+    26 glLinkProgram: OGLES2Cache:044d427c69c22b48175f65ab.v3dp (5 variants, 520 bytes of code)
+    27 glLinkProgram: OGLES2Cache:b197c2334fb8b1e3c5ccaaf4.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+    28 compiler: program compiled in 120 ms, OGLES2Cache:b197c2334fb8b1e3c5ccaaf4.v3dp
+    29 glLinkProgram: OGLES2Cache:b197c2334fb8b1e3c5ccaaf4.v3dp (5 variants, 520 bytes of code)
+    30 glLinkProgram: OGLES2Cache:47f5a7d22bafc57e4a7ec1bd.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+    31 compiler: program compiled in 120 ms, OGLES2Cache:47f5a7d22bafc57e4a7ec1bd.v3dp
+    32 glLinkProgram: OGLES2Cache:47f5a7d22bafc57e4a7ec1bd.v3dp (5 variants, 520 bytes of code)
+    33 glLinkProgram: OGLES2Cache:1a72809e2b460fa0e368fa37.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+    34 compiler: program compiled in 100 ms, OGLES2Cache:1a72809e2b460fa0e368fa37.v3dp
+    35 glLinkProgram: OGLES2Cache:1a72809e2b460fa0e368fa37.v3dp (5 variants, 520 bytes of code)
+    36 glLinkProgram: OGLES2Cache:e6abbb0075ce4e12b6af3876.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+    37 compiler: program compiled in 120 ms, OGLES2Cache:e6abbb0075ce4e12b6af3876.v3dp
+    38 glLinkProgram: OGLES2Cache:e6abbb0075ce4e12b6af3876.v3dp (5 variants, 520 bytes of code)
+    39 glLinkProgram: OGLES2Cache:629256349688375364accb1e.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+    40 compiler: program compiled in 160 ms, OGLES2Cache:629256349688375364accb1e.v3dp
+    41 glLinkProgram: OGLES2Cache:629256349688375364accb1e.v3dp (5 variants, 728 bytes of code)
+    42 glLinkProgram: OGLES2Cache:508f604b262e6adea9203439.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+    43 compiler: program compiled in 140 ms, OGLES2Cache:508f604b262e6adea9203439.v3dp
+    44 glLinkProgram: OGLES2Cache:508f604b262e6adea9203439.v3dp (5 variants, 744 bytes of code)
+    45 glLinkProgram: OGLES2Cache:a4123a82da04ccb02015b9fb.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+    46 compiler: program compiled in 140 ms, OGLES2Cache:a4123a82da04ccb02015b9fb.v3dp
+    47 glLinkProgram: OGLES2Cache:a4123a82da04ccb02015b9fb.v3dp (5 variants, 728 bytes of code)
+    48 compiler: program failed in 20 ms, OGLES2Cache:c4921fc78fce9b3f27f9d344.v3dp
+    49 glLinkProgram: the compiler failed: link failed: error: vertex shader output `var' declared as type `float', but fragment shader input declared as type `vec2'
+
+
+    50 compiler: program failed in 20 ms, OGLES2Cache:fb480f1e1b8827b5d6b3c935.v3dp
+    51 glLinkProgram: the compiler failed: link failed: error: vertex shader output `var' declared as type `float', but fragment shader input declared as type `vec2'
+
+
+    52 compiler: program failed in 20 ms, OGLES2Cache:aa568f9999e6523c95bf3305.v3dp
+    53 glLinkProgram: the compiler failed: link failed: error: vertex shader output `var' declared as type `int', but fragment shader input declared as type `uint'
+
+
+    54 compiler: program failed in 20 ms, OGLES2Cache:f0b01499c3c608ad1f2505d1.v3dp
+    55 glLinkProgram: the compiler failed: link failed: error: vertex shader output `var' declared as struct `S', doesn't match in type with fragment shader input declared as struct `S'
+
+
+    56 compiler: program failed in 20 ms, OGLES2Cache:fa10698e61b03926bd0b5770.v3dp
+    57 glLinkProgram: the compiler failed: link failed: error: vertex shader output `var' declared as struct `S', doesn't match in type with fragment shader input declared as struct `S'
+
+
+    58 compiler: program failed in 20 ms, OGLES2Cache:a16ac9e8085b988597c39555.v3dp
+    59 glLinkProgram: the compiler failed: link failed: error: vertex shader output `var' declared as struct `S', doesn't match in type with fragment shader input declared as struct `S'
+
+
+    60 compiler: program failed in 20 ms, OGLES2Cache:c2125306538601f5501b3003.v3dp
+    61 glLinkProgram: the compiler failed: link failed: error: vertex shader output `var' specifies flat interpolation qualifier, but fragment shader input specifies no interpolation qualifier
+
+
+    62 glLinkProgram: OGLES2Cache:d03946a8114fe05e68676762.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+    63 compiler: program compiled in 140 ms, OGLES2Cache:d03946a8114fe05e68676762.v3dp
+    64 glLinkProgram: OGLES2Cache:d03946a8114fe05e68676762.v3dp (5 variants, 728 bytes of code)
+    65 compiler: program failed in 20 ms, OGLES2Cache:09f52f7563ac0b6ac8685108.v3dp
+    66 glLinkProgram: the compiler failed: link failed: error: fragment shader input `var' has no matching output in the previous stage
+
+
+    67 compiler: shader failed in 20 ms
+    68 compiler: shader failed in 20 ms
+    69 compiler: shader failed in 20 ms
+    70 compiler: shader failed in 40 ms
+    71 compiler: shader failed in 40 ms
+    72 compiler: shader failed in 40 ms
+    73 compiler: shader failed in 20 ms
+    74 compiler: shader failed in 40 ms
+    75 compiler: shader failed in 20 ms
+    76 compiler: shader failed in 40 ms
+    77 compiler: shader failed in 20 ms
+    78 compiler: shader failed in 40 ms
+    79 glLinkProgram: OGLES2Cache:520f3b084e033e0298534633.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+    80 compiler: program compiled in 140 ms, OGLES2Cache:520f3b084e033e0298534633.v3dp
+    81 glLinkProgram: OGLES2Cache:520f3b084e033e0298534633.v3dp (5 variants, 728 bytes of code)
+    82 glLinkProgram: OGLES2Cache:c4be91d15148a401c71b74f3.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+    83 compiler: program compiled in 160 ms, OGLES2Cache:c4be91d15148a401c71b74f3.v3dp
+    84 glLinkProgram: OGLES2Cache:c4be91d15148a401c71b74f3.v3dp (5 variants, 896 bytes of code)
+    85 glLinkProgram: OGLES2Cache:12c0aa0a37cbf17580c2e692.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+    86 compiler: program compiled in 160 ms, OGLES2Cache:12c0aa0a37cbf17580c2e692.v3dp
+    87 glLinkProgram: OGLES2Cache:12c0aa0a37cbf17580c2e692.v3dp (5 variants, 1024 bytes of code)
+    88 glLinkProgram: OGLES2Cache:92140401fc07bbbebf9e9dcf.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+    89 compiler: program compiled in 160 ms, OGLES2Cache:92140401fc07bbbebf9e9dcf.v3dp
+    90 glLinkProgram: OGLES2Cache:92140401fc07bbbebf9e9dcf.v3dp (5 variants, 1192 bytes of code)
+    91 glLinkProgram: OGLES2Cache:1ee18f6a50440b5b95253bc2.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+    92 compiler: program compiled in 160 ms, OGLES2Cache:1ee18f6a50440b5b95253bc2.v3dp
+    93 glLinkProgram: OGLES2Cache:1ee18f6a50440b5b95253bc2.v3dp (5 variants, 896 bytes of code)
+    94 glLinkProgram: OGLES2Cache:b73018d65d991a35e19fb3d7.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+    95 compiler: program compiled in 160 ms, OGLES2Cache:b73018d65d991a35e19fb3d7.v3dp
+    96 glLinkProgram: OGLES2Cache:b73018d65d991a35e19fb3d7.v3dp (5 variants, 1056 bytes of code)
+    97 glLinkProgram: OGLES2Cache:ad779030f133942c3f527391.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+    98 compiler: program compiled in 160 ms, OGLES2Cache:ad779030f133942c3f527391.v3dp
+    99 glLinkProgram: OGLES2Cache:ad779030f133942c3f527391.v3dp (5 variants, 1224 bytes of code)
+   100 glLinkProgram: OGLES2Cache:c3e85d6e2a93bc2040e3699c.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   101 compiler: program compiled in 160 ms, OGLES2Cache:c3e85d6e2a93bc2040e3699c.v3dp
+   102 glLinkProgram: OGLES2Cache:c3e85d6e2a93bc2040e3699c.v3dp (5 variants, 1032 bytes of code)
+   103 glLinkProgram: OGLES2Cache:265447dfaf67f74c4af84fd0.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   104 compiler: program compiled in 200 ms, OGLES2Cache:265447dfaf67f74c4af84fd0.v3dp
+   105 glLinkProgram: OGLES2Cache:265447dfaf67f74c4af84fd0.v3dp (5 variants, 1280 bytes of code)
+   106 glLinkProgram: OGLES2Cache:801e78045a6bb8b83844e1c7.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   107 compiler: program compiled in 180 ms, OGLES2Cache:801e78045a6bb8b83844e1c7.v3dp
+   108 glLinkProgram: OGLES2Cache:801e78045a6bb8b83844e1c7.v3dp (5 variants, 1504 bytes of code)
+   109 glLinkProgram: OGLES2Cache:013537cd8093a4e74ffb1eff.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   110 compiler: program compiled in 160 ms, OGLES2Cache:013537cd8093a4e74ffb1eff.v3dp
+   111 glLinkProgram: OGLES2Cache:013537cd8093a4e74ffb1eff.v3dp (5 variants, 1208 bytes of code)
+   112 glLinkProgram: OGLES2Cache:60b8767aaf8f6ba7323b0ef0.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   113 compiler: program compiled in 200 ms, OGLES2Cache:60b8767aaf8f6ba7323b0ef0.v3dp
+   114 glLinkProgram: OGLES2Cache:60b8767aaf8f6ba7323b0ef0.v3dp (5 variants, 1472 bytes of code)
+   115 glLinkProgram: OGLES2Cache:e5b7c8af1b061afe47b1eb4b.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   116 compiler: program compiled in 200 ms, OGLES2Cache:e5b7c8af1b061afe47b1eb4b.v3dp
+   117 glLinkProgram: OGLES2Cache:e5b7c8af1b061afe47b1eb4b.v3dp (5 variants, 1808 bytes of code)
+   118 glLinkProgram: OGLES2Cache:113198fbadbc8301751e3091.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   119 compiler: program compiled in 140 ms, OGLES2Cache:113198fbadbc8301751e3091.v3dp
+   120 glLinkProgram: OGLES2Cache:113198fbadbc8301751e3091.v3dp (5 variants, 712 bytes of code)
+   121 glLinkProgram: OGLES2Cache:5f98d95e50fed6209bb227c1.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   122 compiler: program compiled in 120 ms, OGLES2Cache:5f98d95e50fed6209bb227c1.v3dp
+   123 glLinkProgram: OGLES2Cache:5f98d95e50fed6209bb227c1.v3dp (5 variants, 760 bytes of code)
+   124 glLinkProgram: OGLES2Cache:79e190bc09d8ff3dea439dc0.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   125 compiler: program compiled in 140 ms, OGLES2Cache:79e190bc09d8ff3dea439dc0.v3dp
+   126 glLinkProgram: OGLES2Cache:79e190bc09d8ff3dea439dc0.v3dp (5 variants, 776 bytes of code)
+   127 glLinkProgram: OGLES2Cache:cbb06c5b77abc4566c837aee.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   128 compiler: program compiled in 140 ms, OGLES2Cache:cbb06c5b77abc4566c837aee.v3dp
+   129 glLinkProgram: OGLES2Cache:cbb06c5b77abc4566c837aee.v3dp (5 variants, 808 bytes of code)
+   130 glLinkProgram: OGLES2Cache:4c86b445ee7395ed006ca22c.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   131 compiler: program compiled in 140 ms, OGLES2Cache:4c86b445ee7395ed006ca22c.v3dp
+   132 glLinkProgram: OGLES2Cache:4c86b445ee7395ed006ca22c.v3dp (5 variants, 712 bytes of code)
+   133 glLinkProgram: OGLES2Cache:e0830ac60186f6db2e674b8e.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   134 compiler: program compiled in 140 ms, OGLES2Cache:e0830ac60186f6db2e674b8e.v3dp
+   135 glLinkProgram: OGLES2Cache:e0830ac60186f6db2e674b8e.v3dp (5 variants, 760 bytes of code)
+   136 glLinkProgram: OGLES2Cache:a05434e1cd9156186ed96687.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   137 compiler: program compiled in 160 ms, OGLES2Cache:a05434e1cd9156186ed96687.v3dp
+   138 glLinkProgram: OGLES2Cache:a05434e1cd9156186ed96687.v3dp (5 variants, 776 bytes of code)
+   139 glLinkProgram: OGLES2Cache:7c828fa8de52df25a979f3b7.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   140 compiler: program compiled in 120 ms, OGLES2Cache:7c828fa8de52df25a979f3b7.v3dp
+   141 glLinkProgram: OGLES2Cache:7c828fa8de52df25a979f3b7.v3dp (5 variants, 808 bytes of code)
+   142 glLinkProgram: OGLES2Cache:43e261360bc10117eafa1c3b.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   143 compiler: program compiled in 140 ms, OGLES2Cache:43e261360bc10117eafa1c3b.v3dp
+   144 glLinkProgram: OGLES2Cache:43e261360bc10117eafa1c3b.v3dp (5 variants, 728 bytes of code)
+   145 glLinkProgram: OGLES2Cache:4d11e4d246f2d0b66de9a529.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   146 compiler: program compiled in 140 ms, OGLES2Cache:4d11e4d246f2d0b66de9a529.v3dp
+   147 glLinkProgram: OGLES2Cache:4d11e4d246f2d0b66de9a529.v3dp (5 variants, 896 bytes of code)
+   148 glLinkProgram: OGLES2Cache:92a6f359e0841931ee1d8ccb.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   149 compiler: program compiled in 140 ms, OGLES2Cache:92a6f359e0841931ee1d8ccb.v3dp
+   150 glLinkProgram: OGLES2Cache:92a6f359e0841931ee1d8ccb.v3dp (5 variants, 1024 bytes of code)
+   151 glLinkProgram: OGLES2Cache:c16aadcc85ad7e6efacfab16.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   152 compiler: program compiled in 180 ms, OGLES2Cache:c16aadcc85ad7e6efacfab16.v3dp
+   153 glLinkProgram: OGLES2Cache:c16aadcc85ad7e6efacfab16.v3dp (5 variants, 1192 bytes of code)
+   154 glLinkProgram: OGLES2Cache:3126b18a91393ea6be6093cc.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   155 compiler: program compiled in 160 ms, OGLES2Cache:3126b18a91393ea6be6093cc.v3dp
+   156 glLinkProgram: OGLES2Cache:3126b18a91393ea6be6093cc.v3dp (5 variants, 896 bytes of code)
+   157 glLinkProgram: OGLES2Cache:254d4a85619959ce640a3b12.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   158 compiler: program compiled in 140 ms, OGLES2Cache:254d4a85619959ce640a3b12.v3dp
+   159 glLinkProgram: OGLES2Cache:254d4a85619959ce640a3b12.v3dp (5 variants, 1056 bytes of code)
+   160 glLinkProgram: OGLES2Cache:cf4898a2799b4361cc41dd2c.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   161 compiler: program compiled in 140 ms, OGLES2Cache:cf4898a2799b4361cc41dd2c.v3dp
+   162 glLinkProgram: OGLES2Cache:cf4898a2799b4361cc41dd2c.v3dp (5 variants, 1224 bytes of code)
+   163 glLinkProgram: OGLES2Cache:faa9e61e108e1a6bf98e6671.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   164 compiler: program compiled in 140 ms, OGLES2Cache:faa9e61e108e1a6bf98e6671.v3dp
+   165 glLinkProgram: OGLES2Cache:faa9e61e108e1a6bf98e6671.v3dp (5 variants, 1032 bytes of code)
+   166 glLinkProgram: OGLES2Cache:3bc6a643c5a6b81ad12a2cbc.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   167 compiler: program compiled in 180 ms, OGLES2Cache:3bc6a643c5a6b81ad12a2cbc.v3dp
+   168 glLinkProgram: OGLES2Cache:3bc6a643c5a6b81ad12a2cbc.v3dp (5 variants, 1280 bytes of code)
+   169 glLinkProgram: OGLES2Cache:ddb603568edfeafd9a7b31b4.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   170 compiler: program compiled in 180 ms, OGLES2Cache:ddb603568edfeafd9a7b31b4.v3dp
+   171 glLinkProgram: OGLES2Cache:ddb603568edfeafd9a7b31b4.v3dp (5 variants, 1504 bytes of code)
+   172 glLinkProgram: OGLES2Cache:8ee0f1e7950bdb19111e770d.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   173 compiler: program compiled in 200 ms, OGLES2Cache:8ee0f1e7950bdb19111e770d.v3dp
+   174 glLinkProgram: OGLES2Cache:8ee0f1e7950bdb19111e770d.v3dp (5 variants, 1208 bytes of code)
+   175 glLinkProgram: OGLES2Cache:16c31eee8797d0f7610bbb90.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   176 compiler: program compiled in 200 ms, OGLES2Cache:16c31eee8797d0f7610bbb90.v3dp
+   177 glLinkProgram: OGLES2Cache:16c31eee8797d0f7610bbb90.v3dp (5 variants, 1472 bytes of code)
+   178 glLinkProgram: OGLES2Cache:1d10d389f3ed93dbd69bc416.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   179 compiler: program compiled in 200 ms, OGLES2Cache:1d10d389f3ed93dbd69bc416.v3dp
+   180 glLinkProgram: OGLES2Cache:1d10d389f3ed93dbd69bc416.v3dp (5 variants, 1808 bytes of code)
+   181 glLinkProgram: OGLES2Cache:ed1e6a62eb5ac7c1e75d7f35.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   182 compiler: program compiled in 160 ms, OGLES2Cache:ed1e6a62eb5ac7c1e75d7f35.v3dp
+   183 glLinkProgram: OGLES2Cache:ed1e6a62eb5ac7c1e75d7f35.v3dp (5 variants, 712 bytes of code)
+   184 glLinkProgram: OGLES2Cache:4522d5fe3058dc03c727bb14.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   185 compiler: program compiled in 160 ms, OGLES2Cache:4522d5fe3058dc03c727bb14.v3dp
+   186 glLinkProgram: OGLES2Cache:4522d5fe3058dc03c727bb14.v3dp (5 variants, 760 bytes of code)
+   187 glLinkProgram: OGLES2Cache:17e89e8868899c9a0b2ad5a5.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   188 compiler: program compiled in 160 ms, OGLES2Cache:17e89e8868899c9a0b2ad5a5.v3dp
+   189 glLinkProgram: OGLES2Cache:17e89e8868899c9a0b2ad5a5.v3dp (5 variants, 776 bytes of code)
+   190 glLinkProgram: OGLES2Cache:345101b324221319530b6ffb.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   191 compiler: program compiled in 140 ms, OGLES2Cache:345101b324221319530b6ffb.v3dp
+   192 glLinkProgram: OGLES2Cache:345101b324221319530b6ffb.v3dp (5 variants, 808 bytes of code)
+   193 glLinkProgram: OGLES2Cache:44cddd4325bc3927ad45a885.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   194 compiler: program compiled in 160 ms, OGLES2Cache:44cddd4325bc3927ad45a885.v3dp
+   195 glLinkProgram: OGLES2Cache:44cddd4325bc3927ad45a885.v3dp (5 variants, 712 bytes of code)
+   196 glLinkProgram: OGLES2Cache:c09cb00f56f48a4e785ba160.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   197 compiler: program compiled in 160 ms, OGLES2Cache:c09cb00f56f48a4e785ba160.v3dp
+   198 glLinkProgram: OGLES2Cache:c09cb00f56f48a4e785ba160.v3dp (5 variants, 760 bytes of code)
+   199 glLinkProgram: OGLES2Cache:f912e153df663535584ee7da.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   200 compiler: program compiled in 120 ms, OGLES2Cache:f912e153df663535584ee7da.v3dp
+   201 glLinkProgram: OGLES2Cache:f912e153df663535584ee7da.v3dp (5 variants, 776 bytes of code)
+   202 glLinkProgram: OGLES2Cache:93a5c5608b6944a6e755f068.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   203 compiler: program compiled in 160 ms, OGLES2Cache:93a5c5608b6944a6e755f068.v3dp
+   204 glLinkProgram: OGLES2Cache:93a5c5608b6944a6e755f068.v3dp (5 variants, 808 bytes of code)
+   205 glLinkProgram: OGLES2Cache:ff92ae4799cda4c7d5baa7fa.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   206 compiler: program compiled in 160 ms, OGLES2Cache:ff92ae4799cda4c7d5baa7fa.v3dp
+   207 glLinkProgram: OGLES2Cache:ff92ae4799cda4c7d5baa7fa.v3dp (5 variants, 1152 bytes of code)
+   208 glLinkProgram: OGLES2Cache:63b34561cc1c93ba64912e41.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   209 compiler: program compiled in 200 ms, OGLES2Cache:63b34561cc1c93ba64912e41.v3dp
+   210 glLinkProgram: OGLES2Cache:63b34561cc1c93ba64912e41.v3dp (5 variants, 928 bytes of code)
+   211 glLinkProgram: OGLES2Cache:1608185457cc72147d34c40f.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   212 compiler: program compiled in 160 ms, OGLES2Cache:1608185457cc72147d34c40f.v3dp
+   213 glLinkProgram: OGLES2Cache:1608185457cc72147d34c40f.v3dp (5 variants, 1192 bytes of code)
+   214 glLinkProgram: OGLES2Cache:f8f68ceb895fcad2f627fa11.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   215 compiler: program compiled in 160 ms, OGLES2Cache:f8f68ceb895fcad2f627fa11.v3dp
+   216 glLinkProgram: OGLES2Cache:f8f68ceb895fcad2f627fa11.v3dp (5 variants, 1192 bytes of code)
+   217 glLinkProgram: OGLES2Cache:3e645cf7059bd0c946d811e8.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   218 compiler: program compiled in 140 ms, OGLES2Cache:3e645cf7059bd0c946d811e8.v3dp
+   219 glLinkProgram: OGLES2Cache:3e645cf7059bd0c946d811e8.v3dp (5 variants, 840 bytes of code)
+   220 glLinkProgram: OGLES2Cache:bef13c49c09e9293abb41ec0.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   221 compiler: program compiled in 160 ms, OGLES2Cache:bef13c49c09e9293abb41ec0.v3dp
+   222 glLinkProgram: OGLES2Cache:bef13c49c09e9293abb41ec0.v3dp (5 variants, 744 bytes of code)
+   223 compiler: shader failed in 40 ms
+   224 compiler: program failed in 40 ms, OGLES2Cache:92f81975f09a684b2172e0f2.v3dp
+   225 glLinkProgram: the compiler failed: link failed: error: declarations for uniform `u_val` have mismatching precision qualifiers
+
+
+   226 compiler: program failed in 40 ms, OGLES2Cache:fa62599c6e823bb853d94817.v3dp
+   227 glLinkProgram: the compiler failed: link failed: error: declarations for uniform `u_val` have mismatching precision qualifiers
+
+
+   228 compiler: program failed in 40 ms, OGLES2Cache:f89e884762b1785480e6a354.v3dp
+   229 glLinkProgram: the compiler failed: link failed: error: declarations for uniform `u_val` have mismatching precision qualifiers
+
+
+   230 compiler: program failed in 40 ms, OGLES2Cache:0bef4938ab00bd3ffe1436f8.v3dp
+   231 glLinkProgram: the compiler failed: link failed: error: declarations for uniform `u_val` have mismatching precision qualifiers
+
+
+   232 glLinkProgram: OGLES2Cache:7da275edd55a1e220b7d1b07.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   233 compiler: program compiled in 160 ms, OGLES2Cache:7da275edd55a1e220b7d1b07.v3dp
+   234 glLinkProgram: OGLES2Cache:7da275edd55a1e220b7d1b07.v3dp (5 variants, 736 bytes of code)
+   235 glLinkProgram: OGLES2Cache:defd5e37af3eb3b90d1a4a78.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   236 compiler: program compiled in 160 ms, OGLES2Cache:defd5e37af3eb3b90d1a4a78.v3dp
+   237 glLinkProgram: OGLES2Cache:defd5e37af3eb3b90d1a4a78.v3dp (5 variants, 752 bytes of code)
+   238 glLinkProgram: OGLES2Cache:deeb05fa7f75754937d013f1.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   239 compiler: program compiled in 120 ms, OGLES2Cache:deeb05fa7f75754937d013f1.v3dp
+   240 glLinkProgram: OGLES2Cache:deeb05fa7f75754937d013f1.v3dp (5 variants, 736 bytes of code)
+   241 glLinkProgram: OGLES2Cache:eadb3fc887a951a5f4150029.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   242 compiler: program compiled in 160 ms, OGLES2Cache:eadb3fc887a951a5f4150029.v3dp
+   243 glLinkProgram: OGLES2Cache:eadb3fc887a951a5f4150029.v3dp (5 variants, 760 bytes of code)
+   244 glLinkProgram: OGLES2Cache:66b906680fb558e9c714aed5.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   245 compiler: program compiled in 160 ms, OGLES2Cache:66b906680fb558e9c714aed5.v3dp
+   246 glLinkProgram: OGLES2Cache:66b906680fb558e9c714aed5.v3dp (5 variants, 736 bytes of code)
+   247 glLinkProgram: OGLES2Cache:3443b838a9a118dd3e84d6cc.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   248 compiler: program compiled in 160 ms, OGLES2Cache:3443b838a9a118dd3e84d6cc.v3dp
+   249 glLinkProgram: OGLES2Cache:3443b838a9a118dd3e84d6cc.v3dp (5 variants, 752 bytes of code)
+   250 glLinkProgram: OGLES2Cache:247d75729fd96a4dfc209397.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   251 compiler: program compiled in 160 ms, OGLES2Cache:247d75729fd96a4dfc209397.v3dp
+   252 glLinkProgram: OGLES2Cache:247d75729fd96a4dfc209397.v3dp (5 variants, 736 bytes of code)
+   253 glLinkProgram: OGLES2Cache:acb7763489d0e0f055a3d81b.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   254 compiler: program compiled in 160 ms, OGLES2Cache:acb7763489d0e0f055a3d81b.v3dp
+   255 glLinkProgram: OGLES2Cache:acb7763489d0e0f055a3d81b.v3dp (5 variants, 760 bytes of code)
+   256 glLinkProgram: OGLES2Cache:63f595c4e1ae25414404d64a.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   257 compiler: program compiled in 240 ms, OGLES2Cache:63f595c4e1ae25414404d64a.v3dp
+   258 glLinkProgram: OGLES2Cache:63f595c4e1ae25414404d64a.v3dp (5 variants, 736 bytes of code)
+   259 glLinkProgram: OGLES2Cache:b13b66933a5aca505ff13b28.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   260 compiler: program compiled in 140 ms, OGLES2Cache:b13b66933a5aca505ff13b28.v3dp
+   261 glLinkProgram: OGLES2Cache:b13b66933a5aca505ff13b28.v3dp (5 variants, 752 bytes of code)
+   262 glLinkProgram: OGLES2Cache:dc809ac6e8b49ceceacd4306.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   263 compiler: program compiled in 120 ms, OGLES2Cache:dc809ac6e8b49ceceacd4306.v3dp
+   264 glLinkProgram: OGLES2Cache:dc809ac6e8b49ceceacd4306.v3dp (5 variants, 736 bytes of code)
+   265 glLinkProgram: OGLES2Cache:f90d016c460248d1ff115383.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   266 compiler: program compiled in 160 ms, OGLES2Cache:f90d016c460248d1ff115383.v3dp
+   267 glLinkProgram: OGLES2Cache:f90d016c460248d1ff115383.v3dp (5 variants, 760 bytes of code)
+   268 glLinkProgram: OGLES2Cache:54168c26b4fc4e1780aa2065.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   269 compiler: program compiled in 120 ms, OGLES2Cache:54168c26b4fc4e1780aa2065.v3dp
+   270 glLinkProgram: OGLES2Cache:54168c26b4fc4e1780aa2065.v3dp (5 variants, 736 bytes of code)
+   271 glLinkProgram: OGLES2Cache:900d3e55cb51bde9e19a1385.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   272 compiler: program compiled in 160 ms, OGLES2Cache:900d3e55cb51bde9e19a1385.v3dp
+   273 glLinkProgram: OGLES2Cache:900d3e55cb51bde9e19a1385.v3dp (5 variants, 752 bytes of code)
+   274 glLinkProgram: OGLES2Cache:f00b94a4218954cd0c216e6a.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   275 compiler: program compiled in 120 ms, OGLES2Cache:f00b94a4218954cd0c216e6a.v3dp
+   276 glLinkProgram: OGLES2Cache:f00b94a4218954cd0c216e6a.v3dp (5 variants, 736 bytes of code)
+   277 glLinkProgram: OGLES2Cache:0dd14fc816e7c2a149e693d1.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   278 compiler: program compiled in 160 ms, OGLES2Cache:0dd14fc816e7c2a149e693d1.v3dp
+   279 glLinkProgram: OGLES2Cache:0dd14fc816e7c2a149e693d1.v3dp (5 variants, 760 bytes of code)
+   280 glLinkProgram: OGLES2Cache:d84e6dfcb97faa7c34e73b41.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   281 compiler: program compiled in 160 ms, OGLES2Cache:d84e6dfcb97faa7c34e73b41.v3dp
+   282 glLinkProgram: OGLES2Cache:d84e6dfcb97faa7c34e73b41.v3dp (5 variants, 760 bytes of code)
+   283 glLinkProgram: OGLES2Cache:876922e519b8609cf8e59487.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   284 compiler: program compiled in 160 ms, OGLES2Cache:876922e519b8609cf8e59487.v3dp
+   285 glLinkProgram: OGLES2Cache:876922e519b8609cf8e59487.v3dp (5 variants, 760 bytes of code)
+   286 glLinkProgram: OGLES2Cache:6def5c7ef5bd0ada31cc6e6c.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   287 compiler: program compiled in 160 ms, OGLES2Cache:6def5c7ef5bd0ada31cc6e6c.v3dp
+   288 glLinkProgram: OGLES2Cache:6def5c7ef5bd0ada31cc6e6c.v3dp (5 variants, 760 bytes of code)
+   289 glLinkProgram: OGLES2Cache:bd1c54630987fc408058e4a7.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   290 compiler: program compiled in 160 ms, OGLES2Cache:bd1c54630987fc408058e4a7.v3dp
+   291 glLinkProgram: OGLES2Cache:bd1c54630987fc408058e4a7.v3dp (5 variants, 760 bytes of code)
+   292 glLinkProgram: OGLES2Cache:c635ca49f4cc5e15683d6390.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   293 compiler: program compiled in 120 ms, OGLES2Cache:c635ca49f4cc5e15683d6390.v3dp
+   294 glLinkProgram: OGLES2Cache:c635ca49f4cc5e15683d6390.v3dp (5 variants, 760 bytes of code)
+   295 glLinkProgram: OGLES2Cache:38c7a189e5db74cebf7eaaeb.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   296 compiler: program compiled in 120 ms, OGLES2Cache:38c7a189e5db74cebf7eaaeb.v3dp
+   297 glLinkProgram: OGLES2Cache:38c7a189e5db74cebf7eaaeb.v3dp (5 variants, 784 bytes of code)
+   298 glLinkProgram: OGLES2Cache:10c830464b32900472af78db.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   299 compiler: program compiled in 120 ms, OGLES2Cache:10c830464b32900472af78db.v3dp
+   300 glLinkProgram: OGLES2Cache:10c830464b32900472af78db.v3dp (5 variants, 760 bytes of code)
+   301 glLinkProgram: OGLES2Cache:065d6f8c79484e7f0eb48f0c.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   302 compiler: program compiled in 160 ms, OGLES2Cache:065d6f8c79484e7f0eb48f0c.v3dp
+   303 glLinkProgram: OGLES2Cache:065d6f8c79484e7f0eb48f0c.v3dp (5 variants, 760 bytes of code)
+   304 compiler: program failed in 40 ms, OGLES2Cache:08992ba3439fbdf796dd9e44.v3dp
+   305 glLinkProgram: the compiler failed: link failed: error: uniform `val' declared as type `Struct' and type `Struct'
+
+
+   306 compiler: program failed in 20 ms, OGLES2Cache:dcb694787e3d4ab199025fe6.v3dp
+   307 glLinkProgram: the compiler failed: link failed: error: uniform `val' declared as type `Struct' and type `Struct'
+
+
+   308 compiler: program failed in 20 ms, OGLES2Cache:6bb6eb463556637c191fa396.v3dp
+   309 glLinkProgram: the compiler failed: link failed: error: uniform `val' declared as type `Struct' and type `Struct'
+
+
+   310 compiler: program failed in 20 ms, OGLES2Cache:50746b0a285dc78a60c66499.v3dp
+   311 glLinkProgram: the compiler failed: link failed: error: uniform `val' declared as type `Struct' and type `Struct'
+
+
+   312 compiler: program failed in 20 ms, OGLES2Cache:6dc77dbb4de88607eab58d3a.v3dp
+   313 glLinkProgram: the compiler failed: link failed: error: uniform `val' declared as type `Struct' and type `Struct'
+
+
+   314 compiler: program failed in 20 ms, OGLES2Cache:57a158ae97304735f006708e.v3dp
+   315 glLinkProgram: the compiler failed: link failed: error: uniform `val' declared as type `Struct' and type `Struct'
+
+
+   316 compiler: program failed in 20 ms, OGLES2Cache:a503cd1d983b2983a5567d96.v3dp
+   317 glLinkProgram: the compiler failed: link failed: error: uniform `val' declared as type `Struct' and type `Struct'
+
+
+   318 glLinkProgram: OGLES2Cache:dd966d95586381a967ce256e.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   319 compiler: program compiled in 140 ms, OGLES2Cache:dd966d95586381a967ce256e.v3dp
+   320 glLinkProgram: OGLES2Cache:dd966d95586381a967ce256e.v3dp (5 variants, 760 bytes of code)
+   321 glLinkProgram: OGLES2Cache:d6884b6ac6fa2560912a10ad.v3dp refused: a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)
+   322 compiler: program compiled in 160 ms, OGLES2Cache:d6884b6ac6fa2560912a10ad.v3dp
+   323 glLinkProgram: OGLES2Cache:d6884b6ac6fa2560912a10ad.v3dp (5 variants, 760 bytes of code)
+   324 compiler: program failed in 20 ms, OGLES2Cache:6f126cfdb6ecce4da2a4852f.v3dp
+   325 glLinkProgram: the compiler failed: link failed: error: uniform `val' declared as type `vec3' and type `vec4'
+
+
+   326 compiler: program failed in 20 ms, OGLES2Cache:f115d82dc1ac750a75ffe87c.v3dp
+   327 glLinkProgram: the compiler failed: link failed: error: definitions of uniform block `Block' do not match
+
+
+   328 compiler: program failed in 20 ms, OGLES2Cache:d934a1193190fd0438f76669.v3dp
+   329 glLinkProgram: the compiler failed: link failed: error: buffer block with binding `0' has mismatching definitions
+
+
+   330 compiler: program failed in 20 ms, OGLES2Cache:7042a5defe91f077a0a6f8a4.v3dp
+   331 glLinkProgram: the compiler failed: link failed: error: buffer block with binding `0' has mismatching definitions
+
+
+   332 compiler: program failed in 20 ms, OGLES2Cache:36ceb9a3e149805325381b70.v3dp
+   333 glLinkProgram: the compiler failed: link failed: error: buffer block with binding `0' has mismatching definitions
+
+
+   334 compiler: program failed in 20 ms, OGLES2Cache:a4982ce2198663f5948b6fe6.v3dp
+   335 glLinkProgram: the compiler failed: link failed: error: buffer block with binding `0' has mismatching definitions
+
+
+   336 aglDestroyContext: context 0x08433E8C: freeing
+   337 device: context freed, 0 bytes of GPU memory still in use
+   338 aglDestroyContext: context 0x08433E8C (286 frames, 0 dropped, 0 binning blocks added)
+   339 timing: 286 jobs, each on average: 59722 us of CPU work before its flush, 7 us waiting for binning, 168 us for the render
+   340 timing: and in each flush 68 us building the render list, 68 us for the CPU cache before the GPU, 51 us after
+   341 timing: 118 swaps, 143734 us from one to the next on average, 327 us of it presenting
+   342 timing: per frame 2 draws, 265 us in them; in all 0 ms in glBuffer(Sub)Data, 0 ms in glTex(Sub)Image2D

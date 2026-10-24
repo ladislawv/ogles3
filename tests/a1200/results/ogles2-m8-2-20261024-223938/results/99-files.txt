@@ -1,0 +1,8 @@
+Directory "M8R2:results" on Saturday 24-Oct-26
+00-progress.txt                 120 ----rwed Today     22:40:23
+shaders-switch.txt            19241 ----rwed Today     22:40:23
+shaders-switch.qpa           238643 ----rwed Today     22:40:23
+ogles2.log                    43892 ----rwed Today     22:40:23
+notes.txt                       228 ----rwed Today     22:40:23
+99-files.txt                    196 ----rwed Today     22:40:23
+6 files - 295K bytes - 600 blocks used

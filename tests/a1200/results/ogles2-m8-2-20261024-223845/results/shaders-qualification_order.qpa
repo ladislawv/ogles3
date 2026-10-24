@@ -1,0 +1,3976 @@
+#sessionInfo releaseName unknown
+#sessionInfo releaseId 0xcafebabe
+#sessionInfo targetName "AmigaOS3"
+#sessionInfo logFormatVersion "0.3.4"
+#sessionInfo vendor "ogles2.library"
+#sessionInfo renderer "V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM"
+#sessionInfo commandLineParameters "--deqp-caselist-file M8R2:caselists/shaders-qualification_order.txt --deqp-archive-dir=M8R2:bin --deqp-log-filename=M8R2:results/shaders-qualification_order.qpa --deqp-log-images=disable --deqp-log-shader-sources=disable --deqp-surface-width=256 --deqp-surface-height=256 --deqp-gl-config-name=rgba8888d24s8ms0"
+
+#beginSession
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.valid.invariant_interp_storage_precision
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.valid.invariant_interp_storage_precision" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">14.398000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.059000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">1456.600952</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1491998</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.valid.interp_storage_precision
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.valid.interp_storage_precision" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.147000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.073000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">113.611000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">124619</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.valid.invariant_interp_storage
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.valid.invariant_interp_storage" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.338000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.940000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">127.818001</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">136654</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.valid.invariant_storage_precision
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.valid.invariant_storage_precision" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.325000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.341000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">125.130997</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">134370</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.valid.storage_precision
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.valid.storage_precision" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.342000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.788000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">128.542007</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">138863</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.valid.interp_storage
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.valid.interp_storage" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.326000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.933000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">129.302002</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">138813</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.valid.invariant_storage
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.valid.invariant_storage" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.330000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.943000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">131.136002</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">144055</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_interp_precision_storage
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_interp_precision_storage" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+invariant smooth lowp centroid out float x0;
+
+ flat mediump out float x1;
+
+ highp uniform float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(18): error: precision qualifiers must come last
+0:7(7): error: precision qualifiers must come last
+0:9(2): error: precision qualifiers must come last
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+ smooth lowp centroid in float x0;
+
+ flat mediump in float x1;
+
+ highp uniform float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(9): error: precision qualifiers must come last
+0:7(7): error: precision qualifiers must come last
+0:9(2): error: precision qualifiers must come last
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">38.772999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">40.529999</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">84067</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_storage_interp_precision
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_storage_interp_precision" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+invariant centroid out smooth lowp float x0;
+
+ out flat mediump float x1;
+
+ uniform highp float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(20): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(11): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(2): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+ centroid in smooth lowp float x0;
+
+ in flat mediump float x1;
+
+ uniform highp float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(11): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(2): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(2): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">34.348000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">38.800999</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">80218</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_storage_precision_interp
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_storage_precision_interp" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+invariant centroid out lowp smooth float x0;
+
+ out mediump flat float x1;
+
+ uniform highp float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(24): error: precision qualifiers must come last
+0:5(20): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(11): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(6): error: precision qualifiers must come last
+0:7(2): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+ centroid in lowp smooth float x0;
+
+ in mediump flat float x1;
+
+ uniform highp float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(14): error: precision qualifiers must come last
+0:5(11): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(2): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(5): error: precision qualifiers must come last
+0:7(2): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">31.622999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">40.033001</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">78357</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_precision_interp_storage
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_precision_interp_storage" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+invariant lowp smooth centroid out float x0;
+
+ mediump flat out float x1;
+
+ highp uniform float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(11): error: precision qualifiers must come last
+0:7(2): error: precision qualifiers must come last
+0:9(2): error: precision qualifiers must come last
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+ lowp smooth centroid in float x0;
+
+ mediump flat in float x1;
+
+ highp uniform float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(2): error: precision qualifiers must come last
+0:7(2): error: precision qualifiers must come last
+0:9(2): error: precision qualifiers must come last
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">32.773998</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">39.955002</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">78352</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_precision_storage_interp
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_precision_storage_interp" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+invariant lowp centroid out smooth float x0;
+
+ mediump out flat float x1;
+
+ highp uniform float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(25): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(16): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:5(11): error: precision qualifiers must come last
+0:7(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:7(2): error: precision qualifiers must come last
+0:9(2): error: precision qualifiers must come last
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+ lowp centroid in smooth float x0;
+
+ mediump in flat float x1;
+
+ highp uniform float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(16): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(7): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:5(2): error: precision qualifiers must come last
+0:7(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:7(2): error: precision qualifiers must come last
+0:9(2): error: precision qualifiers must come last
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">30.957001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">39.765999</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">76856</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_invariant_storage_precision
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_invariant_storage_precision" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+smooth invariant centroid out lowp float x0;
+
+flat out mediump float x1;
+
+ uniform highp float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(1): error: interpolation qualifiers must come after &quot;precise&quot; or &quot;invariant&quot;
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">33.667000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.435000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">40161</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_invariant_precision_storage
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_invariant_precision_storage" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+smooth invariant lowp centroid out float x0;
+
+flat mediump out float x1;
+
+ highp uniform float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(18): error: precision qualifiers must come last
+0:5(1): error: interpolation qualifiers must come after &quot;precise&quot; or &quot;invariant&quot;
+0:7(6): error: precision qualifiers must come last
+0:9(2): error: precision qualifiers must come last
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+smooth  lowp centroid in float x0;
+
+flat mediump in float x1;
+
+ highp uniform float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(8): error: precision qualifiers must come last
+0:7(6): error: precision qualifiers must come last
+0:9(2): error: precision qualifiers must come last
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">30.112000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">41.132999</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">76529</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_storage_invariant_precision
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_storage_invariant_precision" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+smooth centroid out invariant lowp float x0;
+
+flat out mediump float x1;
+
+ uniform highp float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(17): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(8): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:5(1): error: interpolation qualifiers must come after &quot;precise&quot; or &quot;invariant&quot;
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">31.743999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.257000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">39387</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_storage_precision_invariant
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_storage_precision_invariant" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+smooth centroid out lowp invariant float x0;
+
+flat out mediump float x1;
+
+ uniform highp float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(21): error: precision qualifiers must come last
+0:5(17): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(8): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:5(1): error: interpolation qualifiers must come after &quot;precise&quot; or &quot;invariant&quot;
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">25.311001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.201000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">32377</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_precision_invariant_storage
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_precision_invariant_storage" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+smooth lowp invariant centroid out float x0;
+
+flat mediump out float x1;
+
+ highp uniform float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(8): error: precision qualifiers must come last
+0:5(1): error: interpolation qualifiers must come after &quot;precise&quot; or &quot;invariant&quot;
+0:7(6): error: precision qualifiers must come last
+0:9(2): error: precision qualifiers must come last
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+smooth lowp  centroid in float x0;
+
+flat mediump in float x1;
+
+ highp uniform float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(8): error: precision qualifiers must come last
+0:7(6): error: precision qualifiers must come last
+0:9(2): error: precision qualifiers must come last
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">32.144001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">40.806999</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">79224</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_precision_storage_invariant
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_precision_storage_invariant" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+smooth lowp centroid out invariant float x0;
+
+flat mediump out float x1;
+
+ highp uniform float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(22): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(13): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:5(8): error: precision qualifiers must come last
+0:5(1): error: interpolation qualifiers must come after &quot;precise&quot; or &quot;invariant&quot;
+0:7(6): error: precision qualifiers must come last
+0:9(2): error: precision qualifiers must come last
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+smooth lowp centroid in  float x0;
+
+flat mediump in float x1;
+
+ highp uniform float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(8): error: precision qualifiers must come last
+0:7(6): error: precision qualifiers must come last
+0:9(2): error: precision qualifiers must come last
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">31.908001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">39.750000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">76333</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_invariant_interp_precision
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_invariant_interp_precision" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+centroid out invariant smooth lowp float x0;
+
+out flat mediump float x1;
+
+uniform  highp float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(1): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(1): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+centroid in  smooth lowp float x0;
+
+in flat mediump float x1;
+
+uniform  highp float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(1): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(1): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">33.773998</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">39.819000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">81552</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_invariant_precision_interp
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_invariant_precision_interp" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+centroid out invariant lowp smooth float x0;
+
+out mediump flat float x1;
+
+uniform highp float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(24): error: precision qualifiers must come last
+0:5(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(1): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(5): error: precision qualifiers must come last
+0:7(1): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+centroid in  lowp smooth float x0;
+
+in mediump flat float x1;
+
+uniform highp float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(13): error: precision qualifiers must come last
+0:5(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(1): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(4): error: precision qualifiers must come last
+0:7(1): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">32.916000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">36.410999</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">81057</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_interp_invariant_precision
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_interp_invariant_precision" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+centroid out smooth invariant lowp float x0;
+
+out flat mediump float x1;
+
+uniform  highp float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(14): error: interpolation qualifiers must come after &quot;precise&quot; or &quot;invariant&quot;
+0:5(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(1): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(1): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+centroid in smooth  lowp float x0;
+
+in flat mediump float x1;
+
+uniform  highp float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(1): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(1): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">28.205000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">40.458000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">76236</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_interp_precision_invariant
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_interp_precision_invariant" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+centroid out smooth lowp invariant float x0;
+
+out flat mediump float x1;
+
+uniform highp float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(21): error: precision qualifiers must come last
+0:5(14): error: interpolation qualifiers must come after &quot;precise&quot; or &quot;invariant&quot;
+0:5(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(1): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(1): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+centroid in smooth lowp  float x0;
+
+in flat mediump float x1;
+
+uniform highp float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(1): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(1): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">96.556000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">33.971001</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">139159</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_precision_invariant_interp
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_precision_invariant_interp" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+centroid out lowp invariant smooth float x0;
+
+out mediump flat float x1;
+
+uniform highp  float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(14): error: precision qualifiers must come last
+0:5(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(1): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(5): error: precision qualifiers must come last
+0:7(1): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+centroid in lowp  smooth float x0;
+
+in mediump flat float x1;
+
+uniform highp  float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(13): error: precision qualifiers must come last
+0:5(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(1): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(4): error: precision qualifiers must come last
+0:7(1): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">30.905001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">38.997002</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">76296</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_precision_interp_invariant
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_precision_interp_invariant" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+centroid out lowp smooth invariant float x0;
+
+out mediump flat float x1;
+
+uniform highp  float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(19): error: interpolation qualifiers must come after &quot;precise&quot; or &quot;invariant&quot;
+0:5(14): error: precision qualifiers must come last
+0:5(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(1): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(5): error: precision qualifiers must come last
+0:7(1): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+centroid in lowp smooth  float x0;
+
+in mediump flat float x1;
+
+uniform highp  float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(13): error: precision qualifiers must come last
+0:5(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(1): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(4): error: precision qualifiers must come last
+0:7(1): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">32.386002</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">39.707001</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">77572</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_invariant_interp_storage
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_invariant_interp_storage" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+lowp invariant smooth centroid out float x0;
+
+mediump flat out float x1;
+
+highp  uniform float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(1): error: precision qualifiers must come last
+0:7(1): error: precision qualifiers must come last
+0:9(1): error: precision qualifiers must come last
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+lowp  smooth centroid in float x0;
+
+mediump flat in float x1;
+
+highp  uniform float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(1): error: precision qualifiers must come last
+0:7(1): error: precision qualifiers must come last
+0:9(1): error: precision qualifiers must come last
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">32.826000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">41.206001</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">79682</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_invariant_storage_interp
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_invariant_storage_interp" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+lowp invariant centroid out smooth float x0;
+
+mediump out flat float x1;
+
+highp uniform float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(25): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(16): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:5(1): error: precision qualifiers must come last
+0:7(9): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:7(1): error: precision qualifiers must come last
+0:9(1): error: precision qualifiers must come last
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+lowp  centroid in smooth float x0;
+
+mediump in flat float x1;
+
+highp uniform float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(15): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(6): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:5(1): error: precision qualifiers must come last
+0:7(9): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:7(1): error: precision qualifiers must come last
+0:9(1): error: precision qualifiers must come last
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">32.366001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">38.909000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">79695</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_interp_invariant_storage
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_interp_invariant_storage" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+lowp smooth invariant centroid out float x0;
+
+mediump flat out float x1;
+
+highp  uniform float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(6): error: interpolation qualifiers must come after &quot;precise&quot; or &quot;invariant&quot;
+0:5(1): error: precision qualifiers must come last
+0:7(1): error: precision qualifiers must come last
+0:9(1): error: precision qualifiers must come last
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+lowp smooth  centroid in float x0;
+
+mediump flat in float x1;
+
+highp  uniform float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(1): error: precision qualifiers must come last
+0:7(1): error: precision qualifiers must come last
+0:9(1): error: precision qualifiers must come last
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">31.599001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">39.606998</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">77919</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_interp_storage_invariant
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_interp_storage_invariant" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+lowp smooth centroid out invariant float x0;
+
+mediump flat out float x1;
+
+highp uniform float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(22): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(13): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:5(6): error: interpolation qualifiers must come after &quot;precise&quot; or &quot;invariant&quot;
+0:5(1): error: precision qualifiers must come last
+0:7(1): error: precision qualifiers must come last
+0:9(1): error: precision qualifiers must come last
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+lowp smooth centroid in  float x0;
+
+mediump flat in float x1;
+
+highp uniform float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(1): error: precision qualifiers must come last
+0:7(1): error: precision qualifiers must come last
+0:9(1): error: precision qualifiers must come last
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">29.125999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">40.131001</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">75573</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_storage_invariant_interp
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_storage_invariant_interp" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+lowp centroid out invariant smooth float x0;
+
+mediump out flat float x1;
+
+highp uniform  float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(15): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(6): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:5(1): error: precision qualifiers must come last
+0:7(9): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:7(1): error: precision qualifiers must come last
+0:9(1): error: precision qualifiers must come last
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+lowp centroid in  smooth float x0;
+
+mediump in flat float x1;
+
+highp uniform  float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(15): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(6): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:5(1): error: precision qualifiers must come last
+0:7(9): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:7(1): error: precision qualifiers must come last
+0:9(1): error: precision qualifiers must come last
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">31.993999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">40.261002</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">78724</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_storage_interp_invariant
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_storage_interp_invariant" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+lowp centroid out smooth invariant float x0;
+
+mediump out flat float x1;
+
+highp uniform  float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(19): error: interpolation qualifiers must come after &quot;precise&quot; or &quot;invariant&quot;
+0:5(15): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(6): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:5(1): error: precision qualifiers must come last
+0:7(9): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:7(1): error: precision qualifiers must come last
+0:9(1): error: precision qualifiers must come last
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+lowp centroid in smooth  float x0;
+
+mediump in flat float x1;
+
+highp uniform  float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(15): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(6): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:5(1): error: precision qualifiers must come last
+0:7(9): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:7(1): error: precision qualifiers must come last
+0:9(1): error: precision qualifiers must come last
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">31.889000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">40.209999</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">78670</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_precision_storage
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_precision_storage" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+smooth lowp centroid out float x0;
+
+flat mediump out float x1;
+
+ highp uniform float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(8): error: precision qualifiers must come last
+0:7(6): error: precision qualifiers must come last
+0:9(2): error: precision qualifiers must come last
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+smooth lowp centroid in float x0;
+
+flat mediump in float x1;
+
+ highp uniform float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(8): error: precision qualifiers must come last
+0:7(6): error: precision qualifiers must come last
+0:9(2): error: precision qualifiers must come last
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">31.865999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">39.319000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">76826</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_interp_precision
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_interp_precision" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+centroid out smooth lowp float x0;
+
+out flat mediump float x1;
+
+uniform highp float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(1): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(1): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+centroid in smooth lowp float x0;
+
+in flat mediump float x1;
+
+uniform highp float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(1): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(1): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">31.875999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">40.685001</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">79067</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_precision_interp
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_precision_interp" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+centroid out lowp smooth float x0;
+
+out mediump flat float x1;
+
+uniform highp float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(14): error: precision qualifiers must come last
+0:5(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(1): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(5): error: precision qualifiers must come last
+0:7(1): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+centroid in lowp smooth float x0;
+
+in mediump flat float x1;
+
+uniform highp float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(13): error: precision qualifiers must come last
+0:5(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(1): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(4): error: precision qualifiers must come last
+0:7(1): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">37.178001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">35.757999</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">82784</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_interp_storage
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_interp_storage" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+lowp smooth centroid out float x0;
+
+mediump flat out float x1;
+
+highp uniform float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(1): error: precision qualifiers must come last
+0:7(1): error: precision qualifiers must come last
+0:9(1): error: precision qualifiers must come last
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+lowp smooth centroid in float x0;
+
+mediump flat in float x1;
+
+highp uniform float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(1): error: precision qualifiers must come last
+0:7(1): error: precision qualifiers must come last
+0:9(1): error: precision qualifiers must come last
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">27.059000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">40.257000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">72608</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_storage_interp
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_storage_interp" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+lowp centroid out smooth float x0;
+
+mediump out flat float x1;
+
+highp uniform float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(15): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(6): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:5(1): error: precision qualifiers must come last
+0:7(9): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:7(1): error: precision qualifiers must come last
+0:9(1): error: precision qualifiers must come last
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+lowp centroid in smooth float x0;
+
+mediump in flat float x1;
+
+highp uniform float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(15): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(6): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:5(1): error: precision qualifiers must come last
+0:7(9): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:7(1): error: precision qualifiers must come last
+0:9(1): error: precision qualifiers must come last
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">31.733999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">40.520000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">78634</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_storage_interp
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_storage_interp" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+invariant centroid out smooth float x0;
+
+ out flat float x1;
+
+ uniform float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(20): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(11): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(2): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+ centroid in smooth float x0;
+
+ in flat float x1;
+
+ uniform float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(11): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(2): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(2): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">31.382999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">39.616001</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">76423</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_invariant_storage
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_invariant_storage" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+smooth invariant centroid out float x0;
+
+flat out float x1;
+
+ uniform float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(1): error: interpolation qualifiers must come after &quot;precise&quot; or &quot;invariant&quot;
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">32.481998</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.455000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">39229</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_storage_invariant
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_storage_invariant" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+smooth centroid out invariant float x0;
+
+flat out float x1;
+
+ uniform float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(17): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(8): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:5(1): error: interpolation qualifiers must come after &quot;precise&quot; or &quot;invariant&quot;
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">33.185001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.214000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">38565</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_invariant_interp
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_invariant_interp" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+centroid out invariant smooth float x0;
+
+out flat float x1;
+
+uniform  float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(1): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(1): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+centroid in  smooth float x0;
+
+in flat float x1;
+
+uniform  float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(1): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(1): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">31.320999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">38.959000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">78132</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_interp_invariant
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_interp_invariant" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+centroid out smooth invariant float x0;
+
+out flat float x1;
+
+uniform  float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(14): error: interpolation qualifiers must come after &quot;precise&quot; or &quot;invariant&quot;
+0:5(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(1): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(1): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+centroid in smooth  float x0;
+
+in flat float x1;
+
+uniform  float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(1): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(1): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">31.591999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">40.222000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">78128</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_precision_storage
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_precision_storage" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+invariant lowp centroid out float x0;
+
+ mediump out float x1;
+
+ highp uniform float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(11): error: precision qualifiers must come last
+0:7(2): error: precision qualifiers must come last
+0:9(2): error: precision qualifiers must come last
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+ lowp centroid in float x0;
+
+ mediump in float x1;
+
+ highp uniform float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(2): error: precision qualifiers must come last
+0:7(2): error: precision qualifiers must come last
+0:9(2): error: precision qualifiers must come last
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">31.569000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">40.193001</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">77284</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_invariant_precision
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_invariant_precision" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+centroid out invariant lowp float x0;
+
+out mediump float x1;
+
+uniform highp float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(1): error: auxiliary storage qualifiers must come just before storage qualifiers
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">31.575001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.312000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">38741</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_precision_invariant
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_precision_invariant" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+centroid out lowp invariant float x0;
+
+out mediump float x1;
+
+uniform highp float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(14): error: precision qualifiers must come last
+0:5(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(1): error: auxiliary storage qualifiers must come just before storage qualifiers
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">31.188000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.311000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">38814</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_invariant_storage
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_invariant_storage" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+lowp invariant centroid out float x0;
+
+mediump out float x1;
+
+highp uniform float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(1): error: precision qualifiers must come last
+0:7(1): error: precision qualifiers must come last
+0:9(1): error: precision qualifiers must come last
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+lowp  centroid in float x0;
+
+mediump in float x1;
+
+highp uniform float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(1): error: precision qualifiers must come last
+0:7(1): error: precision qualifiers must come last
+0:9(1): error: precision qualifiers must come last
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">31.669001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">40.547001</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">81150</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_storage_invariant
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_storage_invariant" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+lowp centroid out invariant float x0;
+
+mediump out float x1;
+
+highp uniform float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(15): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(6): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:5(1): error: precision qualifiers must come last
+0:7(1): error: precision qualifiers must come last
+0:9(1): error: precision qualifiers must come last
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+lowp centroid in  float x0;
+
+mediump in float x1;
+
+highp uniform float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(1): error: precision qualifiers must come last
+0:7(1): error: precision qualifiers must come last
+0:9(1): error: precision qualifiers must come last
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">28.257000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">40.237000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">73763</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_storage
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_storage" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+lowp centroid out float x0;
+
+mediump out float x1;
+
+highp uniform float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(1): error: precision qualifiers must come last
+0:7(1): error: precision qualifiers must come last
+0:9(1): error: precision qualifiers must come last
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+lowp centroid in float x0;
+
+mediump in float x1;
+
+highp uniform float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(1): error: precision qualifiers must come last
+0:7(1): error: precision qualifiers must come last
+0:9(1): error: precision qualifiers must come last
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">31.995001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">40.237000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">76614</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_interp
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_interp" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+centroid out smooth float x0;
+
+out flat float x1;
+
+uniform float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(1): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(1): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+centroid in smooth float x0;
+
+in flat float x1;
+
+uniform float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(1): error: auxiliary storage qualifiers must come just before storage qualifiers
+0:7(1): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">35.743999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">41.243999</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">85029</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_invariant
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_invariant" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+centroid out invariant float x0;
+
+out float x1;
+
+uniform float x2;
+
+void main()
+{
+    x0 = 1.0;
+    x1 = 2.0;
+    gl_Position = dEQP_Position;
+}
+</ShaderSource>
+   <InfoLog>0:5(10): error: storage qualifiers must come after precise, invariant, interpolation, layout and auxiliary storage qualifiers
+0:5(1): error: auxiliary storage qualifiers must come just before storage qualifiers
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">45.501999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.134000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">51996</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_interp_storage_precision_invariant_input
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_interp_storage_precision_invariant_input" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+invariant  smooth centroid in lowp float x0;
+
+ flat in mediump float x1;
+
+ uniform highp float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(1): error: invariant qualifiers cannot be used with shader inputs
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.516000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">29.179001</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">35338</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_storage_precision_invariant_input
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_storage_precision_invariant_input" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+invariant smooth centroid in lowp float x0;
+
+flat in mediump float x1;
+
+ uniform highp float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(1): error: invariant qualifiers cannot be used with shader inputs
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.103000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">31.722000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">38048</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_interp_storage_invariant_input
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_interp_storage_invariant_input" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+invariant  smooth centroid in float x0;
+
+ flat in float x1;
+
+ uniform float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(1): error: invariant qualifiers cannot be used with shader inputs
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.339000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">33.200001</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">38600</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_storage_precision_invariant_input
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_storage_precision_invariant_input" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+invariant  centroid in lowp float x0;
+
+ in mediump float x1;
+
+ uniform highp float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(1): error: invariant qualifiers cannot be used with shader inputs
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.320000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">33.081001</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">39106</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_precision_invariant_input
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_precision_invariant_input" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+invariant centroid in lowp float x0;
+
+in mediump float x1;
+
+uniform highp float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(1): error: invariant qualifiers cannot be used with shader inputs
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.109000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">31.610001</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">39136</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_storage_invariant_input
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_storage_invariant_input" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+invariant smooth centroid in float x0;
+
+flat in float x1;
+
+ uniform float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(1): error: invariant qualifiers cannot be used with shader inputs
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.917000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">30.747000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">36684</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_storage_invariant_input
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_storage_invariant_input" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+invariant  centroid in float x0;
+
+ in float x1;
+
+ uniform float x2;
+
+void main()
+{
+    float result = (x0 + x1 + x2) / 3.0;
+    dEQP_FragColor = vec4(result, result, result, 1.0);
+}
+</ShaderSource>
+   <InfoLog>0:5(1): error: invariant qualifiers cannot be used with shader inputs
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.533000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">31.212000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">38433</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.parameters.valid.storage_parameter_precision_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.parameters.valid.storage_parameter_precision_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.908000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.077000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">113.501999</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">122857</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.parameters.valid.storage_parameter_precision_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.parameters.valid.storage_parameter_precision_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.685000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.978000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">128.806000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">141060</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.parameters.valid.storage_parameter_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.parameters.valid.storage_parameter_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.288000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.734000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">126.878998</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">136458</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.parameters.valid.storage_parameter_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.parameters.valid.storage_parameter_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.932000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.258000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">128.962006</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">140293</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.parameters.valid.storage_precision_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.parameters.valid.storage_precision_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog>0:25(7): warning: `result&apos; used uninitialized
+0:27(7): warning: `result&apos; used uninitialized
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.499000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.761000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">123.205002</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">132251</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.parameters.valid.storage_precision_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.parameters.valid.storage_precision_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog>0:25(7): warning: `result&apos; used uninitialized
+0:27(7): warning: `result&apos; used uninitialized
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.938000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.713000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">128.753006</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">140306</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.parameters.valid.parameter_precision_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.parameters.valid.parameter_precision_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.340000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.148000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">126.154999</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">135460</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.parameters.valid.parameter_precision_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.parameters.valid.parameter_precision_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.877000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.067000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">128.903000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">139236</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.storage_precision_parameter_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.storage_precision_parameter_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+
+float foo0 (const lowp in float x)
+{
+    return x + 1.0;
+}
+
+void foo1 ( mediump out float x)
+{
+    x = 1.0;
+}
+
+float foo2 ( highp inout float x)
+{
+    return x + 1.0;
+}
+
+void main()
+{
+    
+    float result;
+    foo1(result);
+    float x0 = foo0(1.0);
+    foo2(result);
+    gl_Position = dEQP_Position;
+
+}
+</ShaderSource>
+   <InfoLog>0:6(19): error: precision qualifiers must come last
+0:11(13): error: precision qualifiers must come last
+0:16(14): error: precision qualifiers must come last
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">24.065001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.920000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">29436</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.storage_precision_parameter_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.storage_precision_parameter_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+
+float foo0 (const lowp in float x)
+{
+    return x + 1.0;
+}
+
+void foo1 ( mediump out float x)
+{
+    x = 1.0;
+}
+
+float foo2 ( highp inout float x)
+{
+    return x + 1.0;
+}
+
+void main()
+{
+    
+    float result;
+    foo1(result);
+    float x0 = foo0(1.0);
+    foo2(result);
+    dEQP_FragColor = vec4(1.0);
+
+}
+</ShaderSource>
+   <InfoLog>0:6(19): error: precision qualifiers must come last
+0:11(13): error: precision qualifiers must come last
+0:16(14): error: precision qualifiers must come last
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.935000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">30.701000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">38086</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.parameter_storage_precision_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.parameter_storage_precision_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+
+float foo0 (in const lowp float x)
+{
+    return x + 1.0;
+}
+
+void foo1 (out mediump float x)
+{
+    x = 1.0;
+}
+
+float foo2 (inout highp float x)
+{
+    return x + 1.0;
+}
+
+void main()
+{
+    
+    float result;
+    foo1(result);
+    float x0 = foo0(1.0);
+    foo2(result);
+    gl_Position = dEQP_Position;
+
+}
+</ShaderSource>
+   <InfoLog>0:6(13): error: in/out/inout must come after const or precise
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">32.139999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.819000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">37976</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.parameter_storage_precision_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.parameter_storage_precision_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+
+float foo0 (in const lowp float x)
+{
+    return x + 1.0;
+}
+
+void foo1 (out mediump float x)
+{
+    x = 1.0;
+}
+
+float foo2 (inout highp float x)
+{
+    return x + 1.0;
+}
+
+void main()
+{
+    
+    float result;
+    foo1(result);
+    float x0 = foo0(1.0);
+    foo2(result);
+    dEQP_FragColor = vec4(1.0);
+
+}
+</ShaderSource>
+   <InfoLog>0:6(13): error: in/out/inout must come after const or precise
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.908000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">31.806000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">37389</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.parameter_precision_storage_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.parameter_precision_storage_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+
+float foo0 (in lowp const float x)
+{
+    return x + 1.0;
+}
+
+void foo1 (out mediump float x)
+{
+    x = 1.0;
+}
+
+float foo2 (inout highp float x)
+{
+    return x + 1.0;
+}
+
+void main()
+{
+    
+    float result;
+    foo1(result);
+    float x0 = foo0(1.0);
+    foo2(result);
+    gl_Position = dEQP_Position;
+
+}
+</ShaderSource>
+   <InfoLog>0:6(16): error: precision qualifiers must come last
+0:6(13): error: in/out/inout must come after const or precise
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">33.972000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.675000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">40606</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.parameter_precision_storage_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.parameter_precision_storage_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+
+float foo0 (in lowp const float x)
+{
+    return x + 1.0;
+}
+
+void foo1 (out mediump float x)
+{
+    x = 1.0;
+}
+
+float foo2 (inout highp float x)
+{
+    return x + 1.0;
+}
+
+void main()
+{
+    
+    float result;
+    foo1(result);
+    float x0 = foo0(1.0);
+    foo2(result);
+    dEQP_FragColor = vec4(1.0);
+
+}
+</ShaderSource>
+   <InfoLog>0:6(16): error: precision qualifiers must come last
+0:6(13): error: in/out/inout must come after const or precise
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.370000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">30.483999</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">36561</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.precision_storage_parameter_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.precision_storage_parameter_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+
+float foo0 (lowp const in float x)
+{
+    return x + 1.0;
+}
+
+void foo1 (mediump out float x)
+{
+    x = 1.0;
+}
+
+float foo2 (highp inout float x)
+{
+    return x + 1.0;
+}
+
+void main()
+{
+    
+    float result;
+    foo1(result);
+    float x0 = foo0(1.0);
+    foo2(result);
+    gl_Position = dEQP_Position;
+
+}
+</ShaderSource>
+   <InfoLog>0:6(13): error: precision qualifiers must come last
+0:11(12): error: precision qualifiers must come last
+0:16(13): error: precision qualifiers must come last
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">31.914000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.802000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">37321</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.precision_storage_parameter_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.precision_storage_parameter_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+
+float foo0 (lowp const in float x)
+{
+    return x + 1.0;
+}
+
+void foo1 (mediump out float x)
+{
+    x = 1.0;
+}
+
+float foo2 (highp inout float x)
+{
+    return x + 1.0;
+}
+
+void main()
+{
+    
+    float result;
+    foo1(result);
+    float x0 = foo0(1.0);
+    foo2(result);
+    dEQP_FragColor = vec4(1.0);
+
+}
+</ShaderSource>
+   <InfoLog>0:6(13): error: precision qualifiers must come last
+0:11(12): error: precision qualifiers must come last
+0:16(13): error: precision qualifiers must come last
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.906000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">32.061001</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">39326</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.precision_parameter_storage_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.precision_parameter_storage_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+
+float foo0 (lowp in const float x)
+{
+    return x + 1.0;
+}
+
+void foo1 (mediump out float x)
+{
+    x = 1.0;
+}
+
+float foo2 (highp inout float x)
+{
+    return x + 1.0;
+}
+
+void main()
+{
+    
+    float result;
+    foo1(result);
+    float x0 = foo0(1.0);
+    foo2(result);
+    gl_Position = dEQP_Position;
+
+}
+</ShaderSource>
+   <InfoLog>0:6(18): error: in/out/inout must come after const or precise
+0:6(13): error: precision qualifiers must come last
+0:11(12): error: precision qualifiers must come last
+0:16(13): error: precision qualifiers must come last
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">32.641998</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.833000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">37615</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.precision_parameter_storage_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.precision_parameter_storage_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+
+float foo0 (lowp in const float x)
+{
+    return x + 1.0;
+}
+
+void foo1 (mediump out float x)
+{
+    x = 1.0;
+}
+
+float foo2 (highp inout float x)
+{
+    return x + 1.0;
+}
+
+void main()
+{
+    
+    float result;
+    foo1(result);
+    float x0 = foo0(1.0);
+    foo2(result);
+    dEQP_FragColor = vec4(1.0);
+
+}
+</ShaderSource>
+   <InfoLog>0:6(18): error: in/out/inout must come after const or precise
+0:6(13): error: precision qualifiers must come last
+0:11(12): error: precision qualifiers must come last
+0:16(13): error: precision qualifiers must come last
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.923000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">31.583000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">35951</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.parameter_storage_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.parameter_storage_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+
+float foo0 (in const float x)
+{
+    return x + 1.0;
+}
+
+void foo1 (out float x)
+{
+    x = 1.0;
+}
+
+float foo2 (inout float x)
+{
+    return x + 1.0;
+}
+
+void main()
+{
+    
+    float result;
+    foo1(result);
+    float x0 = foo0(1.0);
+    foo2(result);
+    gl_Position = dEQP_Position;
+
+}
+</ShaderSource>
+   <InfoLog>0:6(13): error: in/out/inout must come after const or precise
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">32.945000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.126000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">40302</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.parameter_storage_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.parameter_storage_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+
+float foo0 (in const float x)
+{
+    return x + 1.0;
+}
+
+void foo1 (out float x)
+{
+    x = 1.0;
+}
+
+float foo2 (inout float x)
+{
+    return x + 1.0;
+}
+
+void main()
+{
+    
+    float result;
+    foo1(result);
+    float x0 = foo0(1.0);
+    foo2(result);
+    dEQP_FragColor = vec4(1.0);
+
+}
+</ShaderSource>
+   <InfoLog>0:6(13): error: in/out/inout must come after const or precise
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.371000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">26.125999</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">33629</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.precision_storage_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.precision_storage_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+
+float foo0 (lowp const float x)
+{
+    return x + 1.0;
+}
+
+void foo1 (mediump float x)
+{
+    x = 1.0;
+}
+
+float foo2 (highp float x)
+{
+    return x + 1.0;
+}
+
+void main()
+{
+    
+    float result;
+    foo1(result);
+    float x0 = foo0(1.0);
+    foo2(result);
+    gl_Position = dEQP_Position;
+
+}
+</ShaderSource>
+   <InfoLog>0:6(13): error: precision qualifiers must come last
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">32.359001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.850000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">38180</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.precision_storage_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.precision_storage_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+
+float foo0 (lowp const float x)
+{
+    return x + 1.0;
+}
+
+void foo1 (mediump float x)
+{
+    x = 1.0;
+}
+
+float foo2 (highp float x)
+{
+    return x + 1.0;
+}
+
+void main()
+{
+    
+    float result;
+    foo1(result);
+    float x0 = foo0(1.0);
+    foo2(result);
+    dEQP_FragColor = vec4(1.0);
+
+}
+</ShaderSource>
+   <InfoLog>0:6(13): error: precision qualifiers must come last
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.904000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">30.507000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">37059</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.precision_parameter_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.precision_parameter_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+
+
+float foo0 (lowp in float x)
+{
+    return x + 1.0;
+}
+
+void foo1 (mediump out float x)
+{
+    x = 1.0;
+}
+
+float foo2 (highp inout float x)
+{
+    return x + 1.0;
+}
+
+void main()
+{
+    
+    float result;
+    foo1(result);
+    float x0 = foo0(1.0);
+    foo2(result);
+    gl_Position = dEQP_Position;
+
+}
+</ShaderSource>
+   <InfoLog>0:6(13): error: precision qualifiers must come last
+0:11(12): error: precision qualifiers must come last
+0:16(13): error: precision qualifiers must come last
+</InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">32.141998</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.803000</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">38535</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.precision_parameter_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.precision_parameter_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Expecting shader compilation to fail.</Text>
+ <ShaderProgram LinkStatus="Fail">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="Fail">
+   <ShaderSource>#version 300 es
+precision mediump float;
+layout(location = 0) out mediump vec4 dEQP_FragColor;
+
+
+float foo0 (lowp in float x)
+{
+    return x + 1.0;
+}
+
+void foo1 (mediump out float x)
+{
+    x = 1.0;
+}
+
+float foo2 (highp inout float x)
+{
+    return x + 1.0;
+}
+
+void main()
+{
+    
+    float result;
+    foo1(result);
+    float x0 = foo0(1.0);
+    foo2(result);
+    dEQP_FragColor = vec4(1.0);
+
+}
+</ShaderSource>
+   <InfoLog>0:6(13): error: precision qualifiers must come last
+0:11(12): error: precision qualifiers must come last
+0:16(13): error: precision qualifiers must come last
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.933000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">31.804001</Number>
+ <Text>ogles2: state reset incomplete: Vertex attrib array state reset failed: glGetError() returned GL_INVALID_ENUM at gluStateReset.cpp:93</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">37079</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+Run took 7.53 seconds
+
+#endSession

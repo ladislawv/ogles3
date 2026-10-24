@@ -130,13 +130,18 @@ Mesa's driver, so they could follow later as an extension
     ogles2.library` answers though `LIBS:` has none): reboot, with the
     developer's leave, before the next run.
   - **Where to go on, in order** (hand-off of 2026-10-23: stage A is done
-    but for dEQP-GLES2, §4 "Stage A's end"): (1) dEQP-GLES3's
-    `builtin_variable.fragcoord_xyz` and `fragcoord_w` (their qpa in
-    `ogles2-m8-2-20261023-151859`; run `Run-M1 CASES=... IMAGES=1` and
-    `ports/deqp/qpa_images.py` for the images); (2) the four groups not
-    run (`python ports/deqp/run_groups.py --package=m8-2 shaders-declarations
-    shaders-qualification_order shaders-linkage shaders-switch`, about 10
-    minutes); (3) stage B (§5), item 13's state first, which lets
+    but for dEQP-GLES2, §4 "Stage A's end"; 2026-10-24: dEQP-GLES3's
+    `builtin_variable.fragcoord_xyz` and `fragcoord_w` pass, 2 of 2,
+    `ogles2-m8-2-20261024-223221`, as do the four groups not run before,
+    `shaders-declarations`, `-qualification_order`, `-linkage` and
+    `-switch`, 425 of 425, `ogles2-m8-2-20261024-223828` to `-223938`.
+    **Trap:** the A1200 then had a 1.x release installed, `LIBS:ogles2.library`
+    and `LIBS:v3dglslc` (no `$VER:`); the library takes `LIBS:v3dglslc`
+    before a package's compiler, and the first runs failed 222 cases on
+    its format 1.0 files (refused, as they must be). Check
+    `List LIBS:ogles2#? LIBS:v3dglslc#?`, and with the owner's consent
+    rename both to `.saved` for the runs and back afterwards): (1) stage
+    B (§5), item 13's state first, which lets
     dEQP-GLES3 run without patch `gles3/0001` (drop it then); dEQP-GLES2's
     whole list when the ES3 library is finished. §4's items each have a "Done"
     paragraph that says what is in and where; the code of this work so far

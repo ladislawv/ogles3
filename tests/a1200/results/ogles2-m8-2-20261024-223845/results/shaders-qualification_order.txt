@@ -1,0 +1,252 @@
+Writing test log into M8R2:results/shaders-qualification_order.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles2.library: 88 functions of the ES 3.0 table not implemented yet: glBeginQuery glBeginTransformFeedback glBindBufferBase glBindBufferRange glBindSampler glBindTransformFeedback glBindVertexArray glBlitFramebuffer glClearBufferfi glClearBufferfv glClearBufferiv glClearBufferuiv glClientWaitSync glCompressedTexImage3D glCompressedTexSubImage3D glCopyBufferSubData glCopyTexSubImage3D glDeleteQueries glDeleteSamplers glDeleteSync glDeleteTransformFeedbacks glDeleteVertexArrays glDrawArraysInstanced glDrawBuffers glDrawElementsInstanced glEndQuery glEndTransformFeedback glFenceSync glFlushMappedBufferRange glFramebufferTextureLayer glGenQueries glGenSamplers glGenTransformFeedbacks glGenVertexArrays glGetActiveUniformBlockName glGetActiveUniformBlockiv glGetActiveUniformsiv glGetBufferParameteri64v glGetBufferPointerv glGetInteger64i_v glGetIntegeri_v glGetInternalformativ glGetProgramBinary glGetQueryObjectuiv glGetQueryiv glGetSamplerParameterfv glGetSamplerParameteriv glGetSynciv glGetTransformFeedbackVarying glGetUniformBlockIndex glGetUniformIndices glGetVertexAttribIiv glGetVertexAttribIuiv glInvalidateFramebuffer glInvalidateSubFramebuffer glIsQuery glIsSampler glIsSync glIsTransformFeedback glIsVertexArray glMapBufferRange glPauseTransformFeedback glProgramBinary glProgramParameteri glReadBuffer glRenderbufferStorageMultisample glResumeTransformFeedback glSamplerParameterf glSamplerParameterfv glSamplerParameteri glSamplerParameteriv glTexImage3D glTexStorage2D glTexStorage3D glTexSubImage3D glTransformFeedbackVaryings glUniformBlockBinding glUnmapBuffer glVertexAttribDivisor glVertexAttribI4i glVertexAttribI4iv glVertexAttribI4ui glVertexAttribI4uiv glVertexAttribIPointer glWaitSync glDrawElementsInstancedBaseVertexOES glDrawRangeElementsBaseVertexOES glMultiDrawElementsBaseVertexEXT
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.valid.invariant_interp_storage_precision'..
+ogles2.library: glBindVertexArray is not implemented yet (called as a no-op)
+ogles2.library: glVertexAttribDivisor is not implemented yet (called as a no-op)
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.valid.interp_storage_precision'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.valid.invariant_interp_storage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.valid.invariant_storage_precision'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.valid.storage_precision'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.valid.interp_storage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.valid.invariant_storage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_interp_precision_storage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_storage_interp_precision'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_storage_precision_interp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_precision_interp_storage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_precision_storage_interp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_invariant_storage_precision'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_invariant_precision_storage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_storage_invariant_precision'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_storage_precision_invariant'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_precision_invariant_storage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_precision_storage_invariant'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_invariant_interp_precision'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_invariant_precision_interp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_interp_invariant_precision'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_interp_precision_invariant'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_precision_invariant_interp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_precision_interp_invariant'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_invariant_interp_storage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_invariant_storage_interp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_interp_invariant_storage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_interp_storage_invariant'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_storage_invariant_interp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_storage_interp_invariant'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_precision_storage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_interp_precision'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_precision_interp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_interp_storage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_storage_interp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_storage_interp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_invariant_storage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_storage_invariant'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_invariant_interp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_interp_invariant'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_precision_storage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_invariant_precision'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_precision_invariant'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_invariant_storage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_storage_invariant'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.precision_storage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_interp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_invariant'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_interp_storage_precision_invariant_input'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_storage_precision_invariant_input'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_interp_storage_invariant_input'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_storage_precision_invariant_input'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.storage_precision_invariant_input'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.interp_storage_invariant_input'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.variables.invalid.invariant_storage_invariant_input'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.parameters.valid.storage_parameter_precision_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.parameters.valid.storage_parameter_precision_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.parameters.valid.storage_parameter_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.parameters.valid.storage_parameter_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.parameters.valid.storage_precision_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.parameters.valid.storage_precision_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.parameters.valid.parameter_precision_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.parameters.valid.parameter_precision_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.storage_precision_parameter_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.storage_precision_parameter_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.parameter_storage_precision_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.parameter_storage_precision_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.parameter_precision_storage_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.parameter_precision_storage_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.precision_storage_parameter_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.precision_storage_parameter_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.precision_parameter_storage_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.precision_parameter_storage_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.parameter_storage_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.parameter_storage_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.precision_storage_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.precision_storage_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.precision_parameter_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.qualification_order.parameters.invalid.precision_parameter_fragment'..
+  Pass (Pass)
+
+DONE!
+
+Test run totals:
+  Passed:        79/79 (100.0%)
+  Failed:        0/79 (0.0%)
+  Not supported: 0/79 (0.0%)
+  Warnings:      0/79 (0.0%)
+  Waived:        0/79 (0.0%)
