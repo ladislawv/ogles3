@@ -142,7 +142,17 @@ Mesa's driver, so they could follow later as an extension
     `List LIBS:ogles2#? LIBS:v3dglslc#?`, and with the owner's consent
     rename both to `.saved` for the runs and back afterwards): (1) stage
     B (§5), item 13's state first, which lets
-    dEQP-GLES3 run without patch `gles3/0001` (drop it then); dEQP-GLES2's
+    dEQP-GLES3 run without patch `gles3/0001` (drop it then). Its parts in
+    `glu::resetState`'s order (`framework/opengl/gluStateReset.cpp`; the
+    patch logs the first that fails as "state reset incomplete" in each
+    case's qpa): the vertex attribute arrays (done 2026-10-24: primitive
+    restart, §5 item 12), the rasterization state (`GL_RASTERIZER_DISCARD`
+    next), multisampling, the texture state of every unit (swizzle, LOD,
+    levels, compare mode, 2D array and 3D textures, sampler objects:
+    §5 items 7 and 8), then pixel operations and the rest. **Trap:**
+    `ports/deqp/build.sh` copies the CTS with `rsync -a`, which keeps the
+    sources' old dates, so a patch changed or removed rebuilds nothing:
+    delete the copy (`$B/deqp-gles3/src`) first. dEQP-GLES2's
     whole list when the ES3 library is finished. §4's items each have a "Done"
     paragraph that says what is in and where; the code of this work so far
     is in `context.c` (versions, extensions), `state.c` (limits),
@@ -1396,6 +1406,21 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
     `glGetBufferPointerv`, `glCopyBufferSubData`, `glGetBufferParameteri64v`;
     `EXT_frag_depth` in GLES2 contexts (the extension string and its test: the
     compiler and the draw already handle depth writes).
+    **Primitive restart done (2026-10-24, on the A1200):**
+    `GL_PRIMITIVE_RESTART_FIXED_INDEX` in ES3 contexts (`GL_INVALID_ENUM` in
+    GLES2 ones; `OGLES2_CAP_PRIMITIVE_RESTART`); an indexed draw with it
+    scans the indices in a loop of its own that skips the restart index
+    (the branchless loops of other draws unchanged), writes it as the
+    largest index of the type the GPU gets (also when `gl_VertexID` widens
+    the indices to 32 bits) and sets the packets' restart bit (bit 31 of
+    `INDEXED_PRIM_LIST`'s length). `m8_draw`'s strip ended by 0xFFFF and
+    `m8_es3`'s state checks (`ogles2-m8-1-20261024-224815`: 15, 45, 18 of
+    18 in each of the three drawing steps); the GLES2 drawing tests as
+    before (`ogles2-m7-4-20261024-224826`). With it the vertex attribute
+    part of `glu::resetState` passes; the next one, the rasterization
+    state, stops at `GL_RASTERIZER_DISCARD` (stage C's;
+    `ogles2-m8-2-20261024-224918`, 174 of 174 of `shaders-switch` with
+    the patch).
 13. **Tests:** `m8_es3` grows per feature (package `m8-1`); dEQP-GLES3
     runs past its first case only once `glu::resetState`
     (`framework/opengl/gluStateReset.cpp`, after every case) raises no GL

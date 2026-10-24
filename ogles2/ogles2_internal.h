@@ -98,6 +98,7 @@ struct OGLES2Share
 #define OGLES2_CAP_POLYGON_OFFSET_FILL      (1UL << 6)
 #define OGLES2_CAP_SAMPLE_ALPHA_TO_COVERAGE (1UL << 7)
 #define OGLES2_CAP_SAMPLE_COVERAGE          (1UL << 8)
+#define OGLES2_CAP_PRIMITIVE_RESTART       (1UL << 9) /* GL_PRIMITIVE_RESTART_FIXED_INDEX (ES 3.0) */
 
 /* Fixed-function state (state.c), GLES 2.0 defaults set by ogles2_state_init. */
 struct OGLES2State

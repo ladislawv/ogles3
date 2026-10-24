@@ -236,6 +236,18 @@ static void test_vertex_id(void)
     glDrawElementsBaseVertexOES(GL_TRIANGLES, 3, GL_UNSIGNED_BYTE, i8, 297);
     check(pixel_is(30, 30, 299 & 255, 299 >> 8, 0, 255, 0),
           "vertex id: 8-bit indices with base vertex 297 (299: past 8 bits)");
+    /* Primitive restart (ES 3.0's fixed index): the strip ends at 0xFFFF,
+     * the next one (vertices 0-2) lies off screen; without the restart it
+     * would go on from vertex 5 through 65535. */
+    {
+        static const GLushort strip[7] = { 3, 4, 5, 0xFFFF, 0, 1, 2 };
+        glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glDrawElements(GL_TRIANGLE_STRIP, 7, GL_UNSIGNED_SHORT, strip);
+        glDisable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
+        check(pixel_is(30, 30, 5, 0, 0, 255, 0) && glGetError() == GL_NO_ERROR,
+              "primitive restart: a strip ended by index 0xFFFF");
+    }
     glDisableVertexAttribArray((GLuint)pos);
     glDeleteProgram(p);
 }

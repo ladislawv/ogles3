@@ -1,0 +1,5 @@
+Directory "LIBS:" on Saturday 24-Oct-26
+ogles2.library.saved         229924 ----rwed Sunday    22:54:45
+1 file - 224K bytes - 451 blocks used
+LIST: Could not get information for "LIBS:v3dglslc".
+LIST: object not found

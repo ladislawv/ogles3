@@ -1,0 +1,5 @@
+ogles2 M8 run 2: --deqp-caselist-file M8R2:caselists/shaders-switch.txt
+Saturday 24-Oct-26 22:49:17
+shaders-switch done
+finished
+Saturday 24-Oct-26 22:49:38

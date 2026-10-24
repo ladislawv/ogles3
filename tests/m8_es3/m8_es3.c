@@ -352,6 +352,8 @@ int main(int argc, char **argv)
     glActiveTexture(GL_TEXTURE0 + 48);
     check(glGetError() == GL_INVALID_ENUM, "ES 2.0: glActiveTexture(GL_TEXTURE48) is GL_INVALID_ENUM");
     glActiveTexture(GL_TEXTURE0);
+    glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
+    check(glGetError() == GL_INVALID_ENUM, "ES 2.0: GL_PRIMITIVE_RESTART_FIXED_INDEX is GL_INVALID_ENUM");
     {
         int has = 0;
         check(!compiles(GL_VERTEX_SHADER, vs300, "needs an OpenGL ES 3 context", &has) && has,
@@ -389,6 +391,15 @@ int main(int argc, char **argv)
         check(get_int(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS) == 48 && get_int(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT) == 256 &&
                   glGetError() == GL_NO_ERROR,
               "ES 3.0: 48 combined texture units, uniform buffer offsets aligned to 256");
+        {
+            GLboolean on = GL_FALSE;
+            glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
+            glGetBooleanv(GL_PRIMITIVE_RESTART_FIXED_INDEX, &on);
+            check(on && glIsEnabled(GL_PRIMITIVE_RESTART_FIXED_INDEX) && glGetError() == GL_NO_ERROR,
+                  "ES 3.0: GL_PRIMITIVE_RESTART_FIXED_INDEX enabled");
+            glDisable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
+            check(!glIsEnabled(GL_PRIMITIVE_RESTART_FIXED_INDEX), "ES 3.0: and disabled again");
+        }
         {
             int has = 0;
             check(compiles(GL_VERTEX_SHADER, vs300, 0, 0), "ES 3.0: #version 300 es compiles");

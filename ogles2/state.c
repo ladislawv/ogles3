@@ -11,7 +11,7 @@
 #include "ogles2_internal.h"
 
 
-static ULONG cap_bit(GLenum cap)
+static ULONG cap_bit(const struct OGLES2Context *ctx, GLenum cap)
 {
     switch (cap) {
     case GL_CULL_FACE:                return OGLES2_CAP_CULL_FACE;
@@ -23,6 +23,8 @@ static ULONG cap_bit(GLenum cap)
     case GL_POLYGON_OFFSET_FILL:      return OGLES2_CAP_POLYGON_OFFSET_FILL;
     case GL_SAMPLE_ALPHA_TO_COVERAGE: return OGLES2_CAP_SAMPLE_ALPHA_TO_COVERAGE;
     case GL_SAMPLE_COVERAGE:          return OGLES2_CAP_SAMPLE_COVERAGE;
+    /* ES 3.0: an index of the type's largest value restarts the primitive */
+    case GL_PRIMITIVE_RESTART_FIXED_INDEX: return ogles2_es3(ctx) ? OGLES2_CAP_PRIMITIVE_RESTART : 0;
     default:                          return 0;
     }
 }
@@ -89,9 +91,10 @@ BOOL ogles2_state_dither(struct OGLES2Context *ctx)
 
 static void set_cap(struct OGLES2Context *ctx, GLenum cap, int on)
 {
-    ULONG bit = cap_bit(cap);
+    ULONG bit;
     if (!ogles2_context_valid(ctx))
         return;
+    bit = cap_bit(ctx, cap);
     if (!bit) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
@@ -117,9 +120,10 @@ void ogles2_glDisable(struct OGLES2Context *ctx, GLenum cap)
 
 GLboolean ogles2_glIsEnabled(struct OGLES2Context *ctx, GLenum cap)
 {
-    ULONG bit = cap_bit(cap);
+    ULONG bit;
     if (!ogles2_context_valid(ctx))
         return GL_FALSE;
+    bit = cap_bit(ctx, cap);
     if (!bit) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return GL_FALSE;
@@ -604,7 +608,7 @@ static int lookup(struct OGLES2Context *ctx, GLenum pname, struct value *v)
 {
     const struct OGLES2State *s = &ctx->state;
     int k;
-    ULONG bit = cap_bit(pname);
+    ULONG bit = cap_bit(ctx, pname);
 
     if (bit) {
         v->kind = K_BOOL;

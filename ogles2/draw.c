@@ -1455,7 +1455,7 @@ static ULONG draw_packets(UBYTE *b, UBYTE vcm_cs, UBYTE vcm_vs, ULONG rec, int n
         put_le32(b + 17, idx_size);
         b[21] = v3d_OP_INDEXED_PRIM_LIST;
         b[22] = (UBYTE)((itype << 6) | (mode & 63));
-        put_le32(b + 23, count & 0x7FFFFFFFUL); /* no primitive restart */
+        put_le32(b + 23, count); /* bits 0-30 the length, bit 31 primitive restart (the caller's) */
         put_le32(b + 27, 0);
         return 31;
     }
@@ -1538,6 +1538,7 @@ struct elements
     GLenum type;          /* GL_UNSIGNED_BYTE, _SHORT or _INT (OES_element_index_uint) */
     GLsizei count;
     ULONG min;            /* the smallest index: subtracted from each */
+    BOOL restart;         /* GL_PRIMITIVE_RESTART_FIXED_INDEX: the type's largest index restarts */
 };
 
 /* ---- draw-time variants (docs/GLES3_PLAN.md stage A item 5) ----
@@ -1925,7 +1926,26 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
         UBYTE *ib = claim(v, isize + 4, 4);
         if (!ib)
             goto nomem;
-        if (itype_gl != el->type) { /* widened: 8- or 16-bit indices to 32 */
+        if (el->restart) {
+            /* Primitive restart: the restart index stays the largest of the
+             * type the GPU gets (the packets' restart bit, below), the
+             * others are rebased. */
+            ULONG r = el->type == GL_UNSIGNED_INT ? 0xFFFFFFFFUL : el->type == GL_UNSIGNED_SHORT ? 0xFFFFUL : 0xFFUL;
+            ULONG ro = itype_gl == GL_UNSIGNED_INT ? 0xFFFFFFFFUL : itype_gl == GL_UNSIGNED_SHORT ? 0xFFFFUL : 0xFFUL;
+            for (k = 0; k < (ULONG)el->count; k++) {
+                ULONG x = el->type == GL_UNSIGNED_INT ? ((const ULONG *)el->indices)[k]
+                        : el->type == GL_UNSIGNED_SHORT ? ((const UWORD *)el->indices)[k]
+                                                        : ((const UBYTE *)el->indices)[k];
+                x = x == r ? ro : x - sub;
+                if (itype_gl == GL_UNSIGNED_INT)
+                    ((ULONG *)ib)[k] = le32(x);
+                else if (itype_gl == GL_UNSIGNED_SHORT) {
+                    ib[2 * k] = (UBYTE)x;
+                    ib[2 * k + 1] = (UBYTE)(x >> 8);
+                } else
+                    ib[k] = (UBYTE)x;
+            }
+        } else if (itype_gl != el->type) { /* widened: 8- or 16-bit indices to 32 */
             ULONG *out = (ULONG *)ib;
             for (k = 0; k < (ULONG)el->count; k++)
                 out[k] = le32((el->type == GL_UNSIGNED_SHORT ? (ULONG)((const UWORD *)el->indices)[k]
@@ -1960,7 +1980,8 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
         UBYTE *b = v3d_buffer_claim_memory(v->current_buf, el ? 31 : 22);
         if (b)
             draw_packets(b, cs->vcm_cache_size, vs->vcm_cache_size, rec, nslots ? nslots : 1, (UBYTE)mode,
-                         itype, idx_addr, idx_size, el ? (ULONG)el->count : (ULONG)count,
+                         itype, idx_addr, idx_size,
+                         el ? ((ULONG)el->count & 0x7FFFFFFFUL) | (el->restart ? 0x80000000UL : 0) : (ULONG)count,
                          vid ? (ULONG)first : 0);
         mark(ctx, 7);
         return;
@@ -1969,13 +1990,13 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
     VCMCacheSize(v, cs->vcm_cache_size, vs->vcm_cache_size); /* Mesa: before every shader state */
     glShaderState(v, rec, nslots ? nslots : 1);
     if (el) {
-        /* Mesa's order: INDEX_BUFFER_SETUP, then INDEXED_PRIM_LIST. No
-         * primitive restart in GLES2 (plan 7.5). */
+        /* Mesa's order: INDEX_BUFFER_SETUP, then INDEXED_PRIM_LIST.
+         * Primitive restart: ES 3.0's fixed index only (none in GLES2). */
         IndexBufferSetup(v, idx_addr, idx_size);
         IndexedPrimList(v, (UBYTE)mode, itype_gl == GL_UNSIGNED_INT     ? v3d_INDEX_TYPE_32_BIT
                                         : itype_gl == GL_UNSIGNED_SHORT ? v3d_INDEX_TYPE_16_BIT
                                                                         : v3d_INDEX_TYPE_8_BIT,
-                        (ULONG)el->count, FALSE, 0);
+                        (ULONG)el->count, el->restart, 0);
     } else {
         /* The copies start at `first`: vertex 0 is their first, except for
          * gl_VertexID (the addresses moved back, above). */
@@ -2074,10 +2095,12 @@ static void draw_elements(struct OGLES2Context *ctx, GLenum mode, GLsizei count,
     struct OGLES2Program *p;
     struct elements el;
     ULONG lo = ~0UL, hi = 0, k, t0 = ogles2_clock_us();
+    BOOL restart;
 
     if (!ogles2_context_valid(ctx))
         return;
     mark(ctx, -1);
+    restart = (ctx->state.caps & OGLES2_CAP_PRIMITIVE_RESTART) != 0;
     if (mode > GL_TRIANGLE_FAN ||
         (type != GL_UNSIGNED_BYTE && type != GL_UNSIGNED_SHORT && type != GL_UNSIGNED_INT)) {
         ogles2_error(ctx, GL_INVALID_ENUM);
@@ -2120,6 +2143,29 @@ static void draw_elements(struct OGLES2Context *ctx, GLenum mode, GLsizei count,
         }
         lo = range[0];
         hi = range[1];
+    } else if (restart) {
+        /* GL_PRIMITIVE_RESTART_FIXED_INDEX (ES 3.0 2.9.4): the type's
+         * largest index restarts the primitive and is no vertex; a loop of
+         * its own (rare), the fast ones below stay branchless. */
+        ULONG r = type == GL_UNSIGNED_INT ? 0xFFFFFFFFUL : type == GL_UNSIGNED_SHORT ? 0xFFFFUL : 0xFFUL, x;
+        lo = 0xFFFFFFFFUL;
+        hi = 0;
+        for (k = 0; k < (ULONG)count; k++) {
+            x = type == GL_UNSIGNED_INT ? ((const ULONG *)indices)[k]
+              : type == GL_UNSIGNED_SHORT ? ((const UWORD *)indices)[k] : ((const UBYTE *)indices)[k];
+            if (x == r)
+                continue;
+            if (x & 0x80000000UL) {
+                ogles2_log("%s: an index of 2^31 or more; nothing drawn", (ULONG)fn);
+                return;
+            }
+            if (x < lo)
+                lo = x;
+            if (x > hi)
+                hi = x;
+        }
+        if (lo > hi)
+            return; /* restarts only: nothing to draw */
     } else if (type == GL_UNSIGNED_INT) {
         const ULONG *in = indices;
         LONG l = 0x7FFFFFFF, h = 0, d;
@@ -2176,6 +2222,7 @@ static void draw_elements(struct OGLES2Context *ctx, GLenum mode, GLsizei count,
     el.type = type;
     el.count = count;
     el.min = lo - (ULONG)basevertex; /* the indices' own smallest */
+    el.restart = restart;
     draw_arrays(ctx, p, mode, (GLint)lo, (GLsizei)(hi - lo + 1), &el);
     ctx->n_draws++;
     ctx->sum_draw += (double)(ULONG)(ogles2_clock_us() - t0);
