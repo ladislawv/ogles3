@@ -603,6 +603,40 @@ int main(int argc, char **argv)
             glDeleteVertexArrays(1, va + 1);
             glDeleteBuffers(1, &bu);
         }
+        if (!nogpu) { /* glTex(Sub)Image2D time themselves too */
+            GLuint tx;
+            GLint im = 0, lv = 0;
+            static const GLubyte px[4] = { 1, 2, 3, 4 };
+            glGenTextures(1, &tx);
+            glBindTexture(GL_TEXTURE_2D, tx);
+            glTexStorage2D(GL_TEXTURE_2D, 3, GL_RGBA8, 4, 4);
+            glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_IMMUTABLE_FORMAT, &im);
+            glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_IMMUTABLE_LEVELS, &lv);
+            glTexSubImage2D(GL_TEXTURE_2D, 2, 0, 0, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, px);
+            check(im == 1 && lv == 3 && glGetError() == GL_NO_ERROR,
+                  "ES 3.0: glTexStorage2D, its immutable format and levels, a sub-image of level 2");
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 4, 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+            check(glGetError() == GL_INVALID_OPERATION, "ES 3.0: glTexImage2D of an immutable texture");
+            glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, 4, 4);
+            check(glGetError() == GL_INVALID_OPERATION, "ES 3.0: glTexStorage2D twice");
+            glDeleteTextures(1, &tx);
+            glGenTextures(1, &tx);
+            glBindTexture(GL_TEXTURE_2D, tx);
+            glTexStorage2D(GL_TEXTURE_2D, 4, GL_RGBA8, 4, 4);
+            check(glGetError() == GL_INVALID_OPERATION, "ES 3.0: more levels than a 4x4 chain");
+            glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA, 4, 4);
+            check(glGetError() == GL_INVALID_ENUM, "ES 3.0: glTexStorage2D of an unsized format");
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 1, 1, 0, GL_RGBA, GL_HALF_FLOAT, 0);
+            check(glGetError() == GL_NO_ERROR, "ES 3.0: glTexImage2D of GL_RGBA16F with GL_HALF_FLOAT");
+            glBindTexture(GL_TEXTURE_3D, tx + 1000);
+            glTexStorage3D(GL_TEXTURE_3D, 2, GL_RGBA8, 4, 4, 2);
+            glGetTexParameteriv(GL_TEXTURE_3D, GL_TEXTURE_IMMUTABLE_LEVELS, &lv);
+            check(lv == 2 && glGetError() == GL_NO_ERROR, "ES 3.0: glTexStorage3D");
+            glBindTexture(GL_TEXTURE_3D, 0);
+            glDeleteTextures(1, &tx);
+            tx += 1000;
+            glDeleteTextures(1, &tx);
+        }
         {
             static const GLenum back = GL_BACK, att1 = GL_COLOR_ATTACHMENT1;
             GLint rb = 0;

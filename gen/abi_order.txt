@@ -239,3 +239,5 @@ glEndQuery
 glGetQueryObjectuiv
 glDrawBuffers
 glReadBuffer
+glTexStorage2D
+glTexStorage3D

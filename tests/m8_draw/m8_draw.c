@@ -847,6 +847,43 @@ static void test_query(void)
     glDeleteProgram(p);
 }
 
+/* ES 3.0's immutable storage: two levels of a 2x2 GL_RGBA8 texture given
+ * by sub-images, sampled (es3wide) at base level 0, 1 and 5, which ES 3.0
+ * clamps to the last level. */
+static void test_storage(void)
+{
+    static const GLubyte red[16] = { 255, 0, 0, 255, 255, 0, 0, 255, 255, 0, 0, 255, 255, 0, 0, 255 };
+    static const GLubyte green[4] = { 0, 255, 0, 255 };
+    GLuint p = program("es3wide"), t;
+    if (!p) {
+        check(0, "immutable storage: es3wide links");
+        return;
+    }
+    glGenTextures(1, &t);
+    glBindTexture(GL_TEXTURE_2D, t);
+    glTexStorage2D(GL_TEXTURE_2D, 2, GL_RGBA8, 2, 2);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 2, 2, GL_RGBA, GL_UNSIGNED_BYTE, red);
+    glTexSubImage2D(GL_TEXTURE_2D, 1, 0, 0, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, green);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glUseProgram(p);
+    glUniform1i(glGetUniformLocation(p, "tex"), 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    check(pixel_is(32, 32, 255, 0, 0, 255, 0), "immutable storage: level 0 (red)");
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    check(pixel_is(32, 32, 0, 255, 0, 255, 0), "immutable storage: base level 1 (green)");
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 5);
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    check(pixel_is(32, 32, 0, 255, 0, 255, 0) && glGetError() == GL_NO_ERROR,
+          "immutable storage: base level 5 clamped to the last (green)");
+    glDeleteTextures(1, &t);
+    glDeleteProgram(p);
+}
+
 /* The keys' 32-bit samplers and alpha to coverage (stage A item 5), in a 4x
  * MSAA context: es3wide outputs one texel. A float texture needs the
  * sampler's 32-bit bit in the fragment key (a 16-bit return reads it
@@ -952,6 +989,7 @@ int main(void)
     test_formats();
     test_fence();
     test_query();
+    test_storage();
     check(glGetError() == GL_NO_ERROR, "no GL error left over");
     aglDestroyContext(ctx);
     if ((ctx = aglCreateContextTags2(&e, OGLES2_CCT_BITMAP, (ULONG)bm, OGLES2_CCT_PISTORM_ES_VERSION, 30,

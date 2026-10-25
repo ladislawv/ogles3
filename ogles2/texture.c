@@ -96,6 +96,8 @@ struct OGLES2Texture
     UWORD nf;                       /* faces f has room for */
     UWORD d[MAX_LEVELS];            /* a 2D array's layers, a 3D texture's depth, by level (ES 3.0;
                                      * a 3D level's slices are faces 0 to d - 1) */
+    UBYTE immutable_levels;         /* ES 3.0's glTexStorage*: its levels (0: mutable) */
+    BOOL es3_rules;                 /* its images were given in an ES3 context: ES 3.0's depth sampling */
 };
 
 /* Both records fit their halves of rec. */
@@ -776,6 +778,13 @@ static BOOL get_param(struct OGLES2Context *ctx, GLenum target, GLenum pname, GL
         return FALSE;
     switch (pname) {
     case GL_TEXTURE_LOD_BIAS:            *v = t->lod_bias; return TRUE;
+    case GL_TEXTURE_IMMUTABLE_FORMAT:
+    case GL_TEXTURE_IMMUTABLE_LEVELS:
+        if (!ogles2_es3(ctx))
+            break;
+        *v = pname == GL_TEXTURE_IMMUTABLE_LEVELS ? (GLfloat)t->immutable_levels
+                                                  : (t->immutable_levels ? 1.0f : 0.0f);
+        return TRUE;
     case GL_TEXTURE_BASE_LEVEL:          *v = (GLfloat)t->base_level; return TRUE;
     case GL_TEXTURE_MAX_LEVEL:           *v = (GLfloat)t->max_level; return TRUE;
     case GL_TEXTURE_SWIZZLE_R:
@@ -1345,6 +1354,13 @@ static ULONG unpack_bytes(struct OGLES2Context *ctx, GLenum format, GLenum type,
     return start + (ULONG)(d - 1) * image + (ULONG)(h - 1) * row + (ULONG)w * (ULONG)pixel_size(format, type, &err);
 }
 
+/* ES 3.0's GL_HALF_FLOAT (0x140B) as OES_texture_half_float's
+ * GL_HALF_FLOAT_OES (0x8D61), which the library keeps the levels in. */
+static GLenum half_type(struct OGLES2Context *ctx, GLenum type)
+{
+    return type == GL_HALF_FLOAT && ogles2_es3(ctx) ? GL_HALF_FLOAT_OES : type;
+}
+
 static int level_count(int w, int h)
 {
     int n = 1;
@@ -1443,9 +1459,17 @@ static BOOL complete(const struct OGLES2Texture *t, GLenum min_filter, int *firs
     if (!t->gpu || !base_ok(t))
         return FALSE;
     n = chain_levels(t);
+    /* ES 3.0 3.8.10: an immutable texture's levels, base and max clamped to them */
+    if (t->immutable_levels) {
+        n = t->immutable_levels;
+        if (b > n - 1)
+            b = n - 1;
+    }
     if (b >= n)
         return FALSE;
     e = !mipmapped(min_filter) ? b : t->max_level < n - 1 ? t->max_level : n - 1;
+    if (t->immutable_levels && e < b)
+        e = b; /* ES 3.0: max level clamped to [base, levels - 1] */
     if (e < b || e >= t->gpu->num_levels)
         return FALSE;
     for (l = b; l <= e; l++) {
@@ -1518,10 +1542,13 @@ static void storage_of(struct OGLES2Texture *t)
             cpp = h ? 8 : 16;
         }
     } else if (f == GL_DEPTH_COMPONENT || f == GL_DEPTH_STENCIL_OES) {
-        /* OES_depth_texture: sampled as luminance, (d, d, d, 1); 32-bit returns */
+        /* OES_depth_texture: sampled as luminance, (d, d, d, 1); ES 3.0 as
+         * (d, 0, 0, 1) (its table 3.24); 32-bit returns */
         type = ty == GL_UNSIGNED_SHORT ? V3D_TEXTURE_DATA_FORMAT_DEPTH_COMP16 : V3D_TEXTURE_DATA_FORMAT_DEPTH24X8;
         cpp = ty == GL_UNSIGNED_SHORT ? 2 : 4;
-        sw[0] = sw[1] = sw[2] = R; sw[3] = O;
+        sw[0] = R;
+        sw[1] = sw[2] = t->es3_rules ? Z : R;
+        sw[3] = O;
     } else if (f == GL_RGB && ty == GL_UNSIGNED_SHORT_5_6_5) {
         type = V3D_TEXTURE_DATA_FORMAT_RGB565; cpp = 2; sw[3] = O;
     } else if (f == GL_RGBA && ty == GL_UNSIGNED_SHORT_4_4_4_4) {
@@ -2395,6 +2422,16 @@ static GLenum sized_base(GLenum ifmt, GLenum format, GLenum type)
                    ? GL_DEPTH_COMPONENT : NOT_FILLED;
     case GL_DEPTH24_STENCIL8_OES:
         return format == GL_DEPTH_STENCIL_OES && type == GL_UNSIGNED_INT_24_8_OES ? GL_DEPTH_STENCIL_OES : NOT_FILLED;
+    /* ES 3.0's (table 3.2) of what the library stores (stage B item 8) */
+    case GL_DEPTH_COMPONENT24:
+        return format == GL_DEPTH_COMPONENT && type == GL_UNSIGNED_INT ? GL_DEPTH_COMPONENT : NOT_FILLED;
+    case GL_RGBA16F:
+    case GL_RGB16F:
+        return format == (ifmt == GL_RGBA16F ? GL_RGBA : GL_RGB) && (type == GL_HALF_FLOAT_OES || type == GL_FLOAT)
+                   ? format : NOT_FILLED;
+    case GL_RGBA32F:
+    case GL_RGB32F:
+        return format == (ifmt == GL_RGBA32F ? GL_RGBA : GL_RGB) && type == GL_FLOAT ? format : NOT_FILLED;
     default:
         if (!base)
             return ifmt;
@@ -2416,6 +2453,7 @@ static void tex_image(struct OGLES2Context *ctx, GLenum target, GLint level, GLi
     int k;
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
         return;
+    type = half_type(ctx, type);
     if (target != GL_TEXTURE_2D && target != GL_TEXTURE_RECTANGLE && !face_target(target)) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
@@ -2449,16 +2487,22 @@ static void tex_image(struct OGLES2Context *ctx, GLenum target, GLint level, GLi
         return;
     }
     /* OES_depth_texture: 2D textures only (cube maps would need
-     * OES_depth_texture_cube_map). */
-    if ((format == GL_DEPTH_COMPONENT || format == GL_DEPTH_STENCIL_OES) && target != GL_TEXTURE_2D) {
+     * OES_depth_texture_cube_map); ES 3.0 has cube maps too. */
+    if ((format == GL_DEPTH_COMPONENT || format == GL_DEPTH_STENCIL_OES) && target != GL_TEXTURE_2D &&
+        !(ogles2_es3(ctx) && face_target(target))) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
     if (!(t = image_texture(ctx, ts, target, level, &k)))
         return;
+    if (t->immutable_levels) { /* ES 3.0 3.8.4 */
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
     if (!unpack_source(ctx, &pixels, unpack_bytes(ctx, format, type, width, height, 1)))
         return;
     before_change(ctx, ts, t);
+    t->es3_rules = ogles2_es3(ctx);
     cb = copy_bytes(class_of(format, type));
     img = width && height ? AllocVec((ULONG)width * height * cb, MEMF_ANY | MEMF_CLEAR) : 0;
     if (width && height && !img) {
@@ -2552,6 +2596,7 @@ static void tex_sub_image(struct OGLES2Context *ctx, GLenum target, GLint level,
     int y, k;
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
         return;
+    type = half_type(ctx, type);
     if (target != GL_TEXTURE_2D && target != GL_TEXTURE_RECTANGLE && !face_target(target)) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
@@ -2661,6 +2706,7 @@ void ogles2_glTexImage3D(struct OGLES2Context *ctx, GLenum target, GLint level, 
     int k, max;
     if (!ogles2_es3_entry(ctx) || !(ts = ts_get(ctx)) || !(t = image_texture_3d(ctx, ts, target)))
         return;
+    type = half_type(ctx, type);
     if (!pixel_size(format, type, &err)) {
         ogles2_error(ctx, err);
         return;
@@ -2688,9 +2734,14 @@ void ogles2_glTexImage3D(struct OGLES2Context *ctx, GLenum target, GLint level, 
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
+    if (t->immutable_levels) { /* ES 3.0 3.8.4 */
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
     if (!unpack_source(ctx, &pixels, unpack_bytes(ctx, format, type, width, height, depth)))
         return;
     before_change(ctx, ts, t);
+    t->es3_rules = TRUE;
     if (!faces_room(t, depth)) {
         ogles2_error(ctx, GL_OUT_OF_MEMORY);
         return;
@@ -2742,6 +2793,7 @@ void ogles2_glTexSubImage3D(struct OGLES2Context *ctx, GLenum target, GLint leve
     BOOL stored;
     if (!ogles2_es3_entry(ctx) || !(ts = ts_get(ctx)) || !(t = image_texture_3d(ctx, ts, target)))
         return;
+    type = half_type(ctx, type);
     if (!pixel_size(format, type, &err)) {
         ogles2_error(ctx, err);
         return;
@@ -2785,6 +2837,136 @@ void ogles2_glTexSubImage3D(struct OGLES2Context *ctx, GLenum target, GLint leve
     FreeVec(sub);
     if (!stored && !t->gpu && ctx->v3d && !upload_all(t)) /* renamed: a new copy, whole */
         ogles2_error(ctx, GL_OUT_OF_MEMORY);
+}
+
+/* ---- immutable storage (ES 3.0 3.8.4; stage B item 8) ----
+ * glTexStorage2D and 3D for the sized formats the library stores: each
+ * level made, blank, as glTexImage* without pixels makes it, in the format
+ * and type a level of that sized format is kept in. */
+
+static BOOL sized_storage(GLenum ifmt, GLenum *format, GLenum *type)
+{
+    switch (ifmt) {
+    case GL_RGBA8:             *format = GL_RGBA; *type = GL_UNSIGNED_BYTE; return TRUE;
+    case GL_RGB8:              *format = GL_RGB; *type = GL_UNSIGNED_BYTE; return TRUE;
+    case GL_RGBA4:             *format = GL_RGBA; *type = GL_UNSIGNED_SHORT_4_4_4_4; return TRUE;
+    case GL_RGB5_A1:           *format = GL_RGBA; *type = GL_UNSIGNED_SHORT_5_5_5_1; return TRUE;
+    case GL_RGB565:            *format = GL_RGB; *type = GL_UNSIGNED_SHORT_5_6_5; return TRUE;
+    case GL_RGBA16F:           *format = GL_RGBA; *type = GL_HALF_FLOAT_OES; return TRUE;
+    case GL_RGB16F:            *format = GL_RGB; *type = GL_HALF_FLOAT_OES; return TRUE;
+    case GL_RGBA32F:           *format = GL_RGBA; *type = GL_FLOAT; return TRUE;
+    case GL_RGB32F:            *format = GL_RGB; *type = GL_FLOAT; return TRUE;
+    case GL_DEPTH_COMPONENT16: *format = GL_DEPTH_COMPONENT; *type = GL_UNSIGNED_SHORT; return TRUE;
+    case GL_DEPTH_COMPONENT24: *format = GL_DEPTH_COMPONENT; *type = GL_UNSIGNED_INT; return TRUE;
+    case GL_DEPTH24_STENCIL8:  *format = GL_DEPTH_STENCIL_OES; *type = GL_UNSIGNED_INT_24_8_OES; return TRUE;
+    default:                   return FALSE;
+    }
+}
+
+/* ES 3.0's sized formats the library does not store yet (the rest of
+ * item 8): GL_INVALID_ENUM would say they are none, so they are refused as
+ * unsupported values the program can test for. */
+static BOOL es3_sized(GLenum ifmt)
+{
+    return (ifmt >= GL_R8 && ifmt <= GL_RG32UI) || (ifmt >= GL_RGBA32UI && ifmt <= GL_RGB8I) ||
+           ifmt == GL_R8_SNORM || ifmt == GL_RG8_SNORM || ifmt == GL_RGB8_SNORM || ifmt == GL_RGBA8_SNORM ||
+           ifmt == GL_SRGB8 || ifmt == GL_SRGB8_ALPHA8 || ifmt == GL_RGB10_A2 || ifmt == GL_RGB10_A2UI ||
+           ifmt == GL_R11F_G11F_B10F || ifmt == GL_RGB9_E5 || ifmt == GL_DEPTH_COMPONENT32F ||
+           ifmt == GL_DEPTH32F_STENCIL8;
+}
+
+static void tex_storage(struct OGLES2Context *ctx, GLenum target, GLsizei levels, GLenum ifmt, GLsizei width,
+                        GLsizei height, GLsizei depth)
+{
+    struct OGLES2TexState *ts;
+    struct OGLES2Texture *t;
+    GLenum format, type;
+    BOOL layers = target == GL_TEXTURE_3D || target == GL_TEXTURE_2D_ARRAY;
+    int l, k, max, n = 1, big;
+    if (!ogles2_es3_entry(ctx) || !(ts = ts_get(ctx)))
+        return;
+    if (!(t = bound(ctx, ts, target)) || target == GL_TEXTURE_RECTANGLE) {
+        if (target == GL_TEXTURE_RECTANGLE)
+            ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    if (!sized_storage(ifmt, &format, &type)) {
+        ogles2_error(ctx, es3_sized(ifmt) ? GL_INVALID_OPERATION : GL_INVALID_ENUM);
+        return;
+    }
+    max = target == GL_TEXTURE_2D_ARRAY ? 2048 : MAX_SIZE;
+    if (levels < 1 || width < 1 || height < 1 || depth < 1 || width > MAX_SIZE || height > MAX_SIZE ||
+        depth > max) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    big = width > height ? width : height;
+    if (target == GL_TEXTURE_3D && depth > big)
+        big = depth;
+    while (big > 1) {
+        big >>= 1;
+        n++;
+    }
+    /* more levels than the chain, the default texture, already immutable,
+     * a cube map's square, depth in 3D textures */
+    if (levels > n || !t->name || t->immutable_levels ||
+        ((format == GL_DEPTH_COMPONENT || format == GL_DEPTH_STENCIL_OES) && target == GL_TEXTURE_3D)) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
+    if (target == GL_TEXTURE_CUBE_MAP && width != height) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    before_change(ctx, ts, t);
+    free_levels(t);
+    if (layers && !faces_room(t, depth)) {
+        ogles2_error(ctx, GL_OUT_OF_MEMORY);
+        return;
+    }
+    for (l = 0; l < levels; l++) {
+        int w = width >> l ? width >> l : 1, h = height >> l ? height >> l : 1;
+        int d = target == GL_TEXTURE_3D ? (depth >> l ? depth >> l : 1) : layers ? depth : 1;
+        int nf = target == GL_TEXTURE_CUBE_MAP ? 6 : d;
+        ULONG bytes = (ULONG)w * h * copy_bytes(class_of(format, type));
+        for (k = 0; k < nf; k++) {
+            UBYTE *img = AllocVec(bytes, MEMF_ANY | MEMF_CLEAR);
+            if (!img) {
+                ogles2_error(ctx, GL_OUT_OF_MEMORY);
+                return;
+            }
+            put_level(&t->f[k], l, img, w, h, format, type, FALSE);
+        }
+        if (layers)
+            t->d[l] = (UWORD)d;
+    }
+    if (class_of(format, type) != CLASS_RGBA8)
+        ogles2_wide_seen |= wide_class(format, type);
+    t->immutable_levels = (UBYTE)levels;
+    t->es3_rules = TRUE;
+    t->pver++; /* the levels the records name */
+}
+
+void ogles2_glTexStorage2D(struct OGLES2Context *ctx, GLenum target, GLsizei levels, GLenum internalformat,
+                           GLsizei width, GLsizei height)
+{
+    if (target != GL_TEXTURE_2D && target != GL_TEXTURE_CUBE_MAP) {
+        if (ogles2_es3_entry(ctx))
+            ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    tex_storage(ctx, target, levels, internalformat, width, height, 1);
+}
+
+void ogles2_glTexStorage3D(struct OGLES2Context *ctx, GLenum target, GLsizei levels, GLenum internalformat,
+                           GLsizei width, GLsizei height, GLsizei depth)
+{
+    if (target != GL_TEXTURE_3D && target != GL_TEXTURE_2D_ARRAY) {
+        if (ogles2_es3_entry(ctx))
+            ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    tex_storage(ctx, target, levels, internalformat, width, height, depth);
 }
 
 /* ---- copies from the framebuffer (glCopyTexImage2D, glCopyTexSubImage2D) ----
@@ -2973,6 +3155,10 @@ static void dxt_image(struct OGLES2Context *ctx, struct OGLES2TexState *ts, GLen
     }
     if (!(t = image_texture(ctx, ts, target, level, &k)))
         return;
+    if (t->immutable_levels) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
     before_change(ctx, ts, t);
     img = bytes ? AllocVec(bytes, MEMF_ANY | MEMF_CLEAR) : 0;
     if (bytes && !img) {

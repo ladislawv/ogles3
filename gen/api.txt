@@ -96,3 +96,5 @@ command glEndQuery
 command glGetQueryObjectuiv
 command glDrawBuffers
 command glReadBuffer
+command glTexStorage2D
+command glTexStorage3D

@@ -1489,6 +1489,30 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    GLES2 drawing tests as before, `ogles2-m7-4-20261024-235957`); the
    state reset's pixel transfer part then stops at the buffer targets
    (`ogles2-m8-2-20261025-000023`).
+   **Immutable storage for the stored formats done (2026-10-25, on the
+   A1200):** `glTexStorage2D` and `glTexStorage3D` (`tex_storage`) for the
+   sized formats the library stores (`sized_storage`: RGBA8, RGB8, RGBA4,
+   RGB5_A1, RGB565, RGBA/RGB16F and 32F, `DEPTH_COMPONENT16`/`24`,
+   `DEPTH24_STENCIL8`): every level of every face made blank, in the format
+   and type such a level is kept in; `immutable_levels`, with
+   `GL_TEXTURE_IMMUTABLE_FORMAT` and `_LEVELS`; ES 3.0's clamping of base
+   and max level to the levels (`complete`); glTexImage* of such a texture
+   is `GL_INVALID_OPERATION`. ES 3.0's other sized formats are refused
+   with `GL_INVALID_OPERATION` until they are stored (`es3_sized`), the
+   unsized with `GL_INVALID_ENUM`. glTexImage* take the float and
+   `DEPTH_COMPONENT24` sized formats too (`sized_base`), and ES 3.0's
+   `GL_HALF_FLOAT` as `GL_HALF_FLOAT_OES` (`half_type`). A texture given
+   its images in an ES3 context samples depth as ES 3.0's (d, 0, 0, 1)
+   (`es3_rules`; GLES2's `OES_depth_texture` keeps (d, d, d, 1)), and ES3
+   contexts take depth cube maps. `m8_es3`'s storage state and errors,
+   `m8_draw`'s two levels by sub-images at base levels 0, 1 and 5
+   (clamped) (`ogles2-m8-1-20261025-190352`: 25, 100, 61 of 61; the GLES2
+   drawing tests as before, `ogles2-m7-4-20261025-190402`); dEQP-GLES3's
+   `texture.specification.texstorage*` 74 of 240: every case of the stored
+   formats and every size case; the other 166 are formats not stored yet
+   (`ogles2-m8-2-20261025-190429`). Next in this item: those formats (R
+   and RG, integer, sRGB, the packed float and 10-bit ones, 32F depth),
+   which need new hardware types and RAM copy classes.
 9. **ETC2/EAC** (mandatory in ES 3.0): native in the TMU (texture types
    `RGB8_ETC2`, `RGB8_PUNCHTHROUGH_ALPHA1`, `RGBA8_ETC2_EAC`, `R11_EAC`,
    `SIGNED_R11_EAC`, `RG11_EAC`, `SIGNED_RG11_EAC`; sRGB by the texture
