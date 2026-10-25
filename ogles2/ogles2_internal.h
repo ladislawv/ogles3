@@ -773,17 +773,23 @@ BOOL ogles2_texture_zs_surface(struct OGLES2Context *ctx, struct OGLES2Texture *
 #define OGLES2_TEX_2D   0
 #define OGLES2_TEX_CUBE 1
 #define OGLES2_TEX_RECT 2 /* ARB_texture_rectangle */
-#define OGLES2_TEX_NONE 3 /* GLSL ES 3.00's integer samplers until stage B brings their
-                           * textures: they read the incomplete texture's (0, 0, 0, 1) */
+#define OGLES2_TEX_NONE 3 /* a sampler of no kind the library has: reads the incomplete texture's (0, 0, 0, 1) */
 #define OGLES2_TEX_3D    4 /* ES 3.0 */
 #define OGLES2_TEX_ARRAY 5 /* a 2D array */
+#define OGLES2_TEX_INT   0x10 /* ORed in: an integer sampler (isampler*, usampler*): its incomplete
+                               * texture's (0, 0, 0, 1) integers */
 static inline int ogles2_sampler_kind(GLenum type)
 {
     return type == GL_SAMPLER_2D || type == GL_SAMPLER_2D_SHADOW ? OGLES2_TEX_2D
          : type == GL_SAMPLER_CUBE || type == GL_SAMPLER_CUBE_SHADOW ? OGLES2_TEX_CUBE
          : type == GL_SAMPLER_2D_RECT ? OGLES2_TEX_RECT
          : type == GL_SAMPLER_3D ? OGLES2_TEX_3D
-         : type == GL_SAMPLER_2D_ARRAY || type == GL_SAMPLER_2D_ARRAY_SHADOW ? OGLES2_TEX_ARRAY : OGLES2_TEX_NONE;
+         : type == GL_SAMPLER_2D_ARRAY || type == GL_SAMPLER_2D_ARRAY_SHADOW ? OGLES2_TEX_ARRAY
+         : type == GL_INT_SAMPLER_2D || type == GL_UNSIGNED_INT_SAMPLER_2D ? OGLES2_TEX_2D | OGLES2_TEX_INT
+         : type == GL_INT_SAMPLER_CUBE || type == GL_UNSIGNED_INT_SAMPLER_CUBE ? OGLES2_TEX_CUBE | OGLES2_TEX_INT
+         : type == GL_INT_SAMPLER_3D || type == GL_UNSIGNED_INT_SAMPLER_3D ? OGLES2_TEX_3D | OGLES2_TEX_INT
+         : type == GL_INT_SAMPLER_2D_ARRAY || type == GL_UNSIGNED_INT_SAMPLER_2D_ARRAY ? OGLES2_TEX_ARRAY | OGLES2_TEX_INT
+                                                                                    : OGLES2_TEX_NONE;
 }
 /* textureSize's values for unit's texture of that kind: what 0 width, 1
  * height, 2 depth, 3 layers (texture.c). */

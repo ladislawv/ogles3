@@ -969,6 +969,47 @@ static void test_formats3(void)
     glDeleteProgram(p);
 }
 
+/* ES 3.0's integer textures through es3utex (usampler2D) and es3itex
+ * (isampler2D, magnitudes): 8-bit unsigned, 32-bit unsigned (32-bit
+ * returns), 16-bit signed; with a linear filter incomplete, the integer
+ * (0, 0, 0, 1). */
+static void test_int_textures(void)
+{
+    static const GLubyte u8[4] = { 10, 20, 30, 255 };
+    static const GLuint u32[4] = { 40, 50, 60, 255 };
+    static const GLshort s16[1] = { -20 };
+    GLuint pu = program("es3utex"), pi = program("es3itex");
+    if (!pu || !pi) {
+        check(0, "integer textures: es3utex and es3itex link");
+        return;
+    }
+    glUseProgram(pu);
+    glUniform1i(glGetUniformLocation(pu, "tex"), 0);
+    check(texel_is(pu, GL_RGBA8UI, GL_RGBA_INTEGER, GL_UNSIGNED_BYTE, u8, 10, 20, 30, 255, 0),
+          "integer textures: GL_RGBA8UI (10, 20, 30, 255)");
+    check(texel_is(pu, GL_RGBA32UI, GL_RGBA_INTEGER, GL_UNSIGNED_INT, u32, 40, 50, 60, 255, 0),
+          "integer textures: GL_RGBA32UI (40, 50, 60, 255)");
+    glUseProgram(pi);
+    glUniform1i(glGetUniformLocation(pi, "tex"), 0);
+    check(texel_is(pi, GL_R16I, GL_RED_INTEGER, GL_SHORT, s16, 20, 0, 0, 1, 0),
+          "integer textures: GL_R16I -20 (20, 0, 0, 1)");
+    {
+        GLuint t;
+        glGenTextures(1, &t);
+        glBindTexture(GL_TEXTURE_2D, t);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R16I, 1, 1, 0, GL_RED_INTEGER, GL_SHORT, s16);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glClear(GL_COLOR_BUFFER_BIT);
+        draw_cover(pi);
+        check(pixel_is(32, 32, 0, 0, 0, 1, 0) && glGetError() == GL_NO_ERROR,
+              "integer textures: a linear filter makes one incomplete (the integer (0, 0, 0, 1))");
+        glDeleteTextures(1, &t);
+    }
+    glDeleteProgram(pu);
+    glDeleteProgram(pi);
+}
+
 /* The keys' 32-bit samplers and alpha to coverage (stage A item 5), in a 4x
  * MSAA context: es3wide outputs one texel. A float texture needs the
  * sampler's 32-bit bit in the fragment key (a 16-bit return reads it
@@ -1077,6 +1118,7 @@ int main(void)
     test_storage();
     test_rg();
     test_formats3();
+    test_int_textures();
     check(glGetError() == GL_NO_ERROR, "no GL error left over");
     aglDestroyContext(ctx);
     if ((ctx = aglCreateContextTags2(&e, OGLES2_CCT_BITMAP, (ULONG)bm, OGLES2_CCT_PISTORM_ES_VERSION, 30,

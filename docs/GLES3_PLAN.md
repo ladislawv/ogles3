@@ -1545,10 +1545,27 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    texel of each (`ogles2-m8-1-20261025-192536`: 68 of 68; the GLES2
    drawing tests as before, `ogles2-m7-4-20261025-192608`); dEQP-GLES3's
    `texstorage*` 140 of 240 and `texture.format.*` 290 of 546, the rest
-   all integer formats (`ogles2-m8-2-20261025-192636`, `-192748`). Next
-   in this item: the integer formats, with the integer samplers (a kind
-   of their own, the TMU's integer returns in the keys) instead of
-   `OGLES2_TEX_NONE`.
+   all integer formats (`ogles2-m8-2-20261025-192636`, `-192748`).
+   **Integer formats (2026-10-25, on the A1200):** the `*_INTEGER` formats
+   with 8-, 16- and 32-bit types and `RGB10_A2UI`, sized only
+   (`int_sized`; an unsized one is `GL_INVALID_VALUE`): a RAM copy of four
+   32-bit words a texel (`convert_int`, signed types sign-extended), the
+   TMU's integer types (RGB as RGBA, alpha 1) narrowed into by
+   `pack_wide`; the 32-bit ones return 32 bits (`wide_class`, Mesa's
+   table), the others 16 as the plain variants read. The integer samplers
+   are their dimension's kind with `OGLES2_TEX_INT` (`ogles2_sampler_kind`;
+   `OGLES2_TEX_NONE` is left to samplers of no kind), and an incomplete
+   integer texture reads `fallback_int`, (0, 0, 0, 1) in RGBA8UI; ES 3.0
+   3.8.13's integer texture with a linear filter is incomplete; no mipmaps
+   of them (`GL_INVALID_OPERATION`). `m8_draw`'s `es3utex` and `es3itex`:
+   RGBA8UI, RGBA32UI, R16I, one filtered linearly
+   (`ogles2-m8-1-20261025-193512`: 72 of 72; the GLES2 drawing tests as
+   before, `ogles2-m7-4-20261025-193542`). dEQP-GLES3's
+   `texture.specification.texstorage*` 240 of 240, `texture.format.*` 490
+   of 546 and no failure (56 not supported), `ogles2-m8-2-20261025-193607`,
+   `-193718`. Left in this item: `glCopyTexSubImage3D`,
+   `glCompressedTexImage3D`, ES 3.0's completeness of base levels beyond
+   0 for mutable textures, the 3D textures' mipmaps from a base level.
 9. **ETC2/EAC** (mandatory in ES 3.0): native in the TMU (texture types
    `RGB8_ETC2`, `RGB8_PUNCHTHROUGH_ALPHA1`, `RGBA8_ETC2_EAC`, `R11_EAC`,
    `SIGNED_R11_EAC`, `RG11_EAC`, `SIGNED_RG11_EAC`; sRGB by the texture
