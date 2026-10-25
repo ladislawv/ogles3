@@ -35,7 +35,6 @@
 #include "v3d_texture.h"
 #include "v3d_tfu.h"
 #include "v3d_gpu_lock.h"
-#include "etc1.h"
 
 extern v3d_u32 g_v3d_cl_generation; /* v3d_frame.c: bumped whenever a control list restarts */
 
@@ -937,18 +936,46 @@ BOOL ogles2_texture_query(struct OGLES2Context *ctx, GLenum pname, GLint *v)
 
 /* EXT_texture_compression_dxt1, EXT_texture_compression_s3tc and ANGLE's
  * dxt3/dxt5 (the same enums): a block's bytes, 0 for another format. */
+/* The bytes of a 4x4 block of a format the TMU samples compressed: S3TC,
+ * ETC1 and ES 3.0's ETC2/EAC (docs/GLES3_PLAN.md §5 item 9); 0 for another. */
+#ifndef GL_ETC1_RGB8_OES
+#define GL_ETC1_RGB8_OES 0x8D64
+#endif
 static ULONG dxt_block_bytes(GLenum format)
 {
     switch (format) {
     case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
     case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
+    case GL_ETC1_RGB8_OES:
+    case GL_COMPRESSED_RGB8_ETC2:
+    case GL_COMPRESSED_SRGB8_ETC2:
+    case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+    case GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+    case GL_COMPRESSED_R11_EAC:
+    case GL_COMPRESSED_SIGNED_R11_EAC:
         return 8;
     case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
     case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+    case GL_COMPRESSED_RGBA8_ETC2_EAC:
+    case GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC:
+    case GL_COMPRESSED_RG11_EAC:
+    case GL_COMPRESSED_SIGNED_RG11_EAC:
         return 16;
     default:
         return 0;
     }
+}
+
+/* ES 3.0's ETC2/EAC formats (GLES2 contexts: GL_INVALID_ENUM). */
+static BOOL etc2_format(GLenum format)
+{
+    return format >= GL_COMPRESSED_R11_EAC && format <= GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC;
+}
+
+static BOOL srgb_etc2(GLenum format)
+{
+    return format == GL_COMPRESSED_SRGB8_ETC2 || format == GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2 ||
+           format == GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC;
 }
 
 /* Texels in blocks of 4, rounded up (a level smaller than 4x4 is one block). */
@@ -1843,10 +1870,31 @@ static void storage_of(struct OGLES2Texture *t)
         sw[1] = sw[2] = t->es3_rules ? Z : R;
         sw[3] = O;
     } else if (dxt_block_bytes(f)) {
-        /* S3TC: BC1-BC3, a block a "texel" (Mesa's table: DXT1 RGB is XYZ1) */
-        type = f == GL_COMPRESSED_RGBA_S3TC_DXT3_EXT   ? V3D_TEXTURE_DATA_FORMAT_BC2
-             : f == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT   ? V3D_TEXTURE_DATA_FORMAT_BC3
-                                                       : V3D_TEXTURE_DATA_FORMAT_BC1;
+        /* S3TC: BC1-BC3, a block a "texel" (Mesa's table: DXT1 RGB is XYZ1);
+         * ETC1 and ETC2/EAC the same way, ETC1 as RGB8_ETC2 (a subset), the
+         * sRGB ones by the texture state's bit */
+        switch (f) {
+        case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT: type = V3D_TEXTURE_DATA_FORMAT_BC2; break;
+        case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT: type = V3D_TEXTURE_DATA_FORMAT_BC3; break;
+        case GL_ETC1_RGB8_OES:
+        case GL_COMPRESSED_RGB8_ETC2:
+        case GL_COMPRESSED_SRGB8_ETC2:         type = V3D_TEXTURE_DATA_FORMAT_RGB8ETC2; sw[3] = O; break;
+        case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+        case GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+                                               type = V3D_TEXTURE_DATA_FORMAT_RGB8PUNCHTHROUGHALPHA1; break;
+        case GL_COMPRESSED_RGBA8_ETC2_EAC:
+        case GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC: type = V3D_TEXTURE_DATA_FORMAT_RGBA8ETC2EAC; break;
+        case GL_COMPRESSED_R11_EAC:            type = V3D_TEXTURE_DATA_FORMAT_R11EAC; break;
+        case GL_COMPRESSED_SIGNED_R11_EAC:     type = V3D_TEXTURE_DATA_FORMAT_SIGNEDR11EAC; break;
+        case GL_COMPRESSED_RG11_EAC:           type = V3D_TEXTURE_DATA_FORMAT_RG11EAC; break;
+        case GL_COMPRESSED_SIGNED_RG11_EAC:    type = V3D_TEXTURE_DATA_FORMAT_SIGNEDRG11EAC; break;
+        default:                               type = V3D_TEXTURE_DATA_FORMAT_BC1; break;
+        }
+        if (f == GL_COMPRESSED_R11_EAC || f == GL_COMPRESSED_SIGNED_R11_EAC) {
+            sw[1] = sw[2] = Z; sw[3] = O;
+        } else if (f == GL_COMPRESSED_RG11_EAC || f == GL_COMPRESSED_SIGNED_RG11_EAC) {
+            sw[2] = Z; sw[3] = O;
+        }
         cpp = (UBYTE)dxt_block_bytes(f);
         if (f == GL_COMPRESSED_RGB_S3TC_DXT1_EXT)
             sw[3] = O;
@@ -3453,6 +3501,126 @@ void ogles2_glTexStorage3D(struct OGLES2Context *ctx, GLenum target, GLsizei lev
     tex_storage(ctx, target, levels, internalformat, width, height, depth);
 }
 
+/* ES 3.0's compressed 2D arrays (3.8.6): ETC2/EAC (and S3TC) layers, each
+ * kept as its blocks; a 3D texture is GL_INVALID_OPERATION. */
+void ogles2_glCompressedTexImage3D(struct OGLES2Context *ctx, GLenum target, GLint level, GLenum internalformat,
+                                   GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize,
+                                   const void *data)
+{
+    struct OGLES2TexState *ts;
+    struct OGLES2Texture *t;
+    ULONG bs, layer;
+    int k;
+    if (!ogles2_es3_entry(ctx) || !(ts = ts_get(ctx)) || !(t = image_texture_3d(ctx, ts, target)))
+        return;
+    if (!(bs = dxt_block_bytes(internalformat)) || internalformat == GL_ETC1_RGB8_OES) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    if (target == GL_TEXTURE_3D) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
+    layer = blocks4((ULONG)width) * blocks4((ULONG)height) * bs;
+    if (width < 0 || height < 0 || depth < 0 || border || level < 0 || level >= MAX_LEVELS ||
+        width > (MAX_SIZE >> level) || height > (MAX_SIZE >> level) || depth > MAX_LAYERS ||
+        imageSize != (GLsizei)(layer * (ULONG)depth)) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    if (t->immutable_levels) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
+    if (!unpack_source(ctx, &data, (ULONG)imageSize))
+        return;
+    before_change(ctx, ts, t);
+    t->es3_rules = TRUE;
+    if (!faces_room(t, depth)) {
+        ogles2_error(ctx, GL_OUT_OF_MEMORY);
+        return;
+    }
+    for (k = 0; k < depth; k++) {
+        UBYTE *img = layer ? AllocVec(layer, MEMF_ANY | MEMF_CLEAR) : 0;
+        if (layer && !img) {
+            ogles2_error(ctx, GL_OUT_OF_MEMORY);
+            depth = k;
+            break;
+        }
+        if (img && data)
+            CopyMem((UBYTE *)data + (ULONG)k * layer, img, layer);
+        put_level(&t->f[k], level, img, width, height, internalformat, 0, data != 0, 0);
+    }
+    for (k = depth; k < t->nf; k++)
+        drop_level(&t->f[k], level);
+    t->d[level] = (UWORD)depth;
+    free_gpu(t); /* made again at the first use */
+}
+
+void ogles2_glCompressedTexSubImage3D(struct OGLES2Context *ctx, GLenum target, GLint level, GLint xoffset,
+                                      GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth,
+                                      GLenum format, GLsizei imageSize, const void *data)
+{
+    struct OGLES2TexState *ts;
+    struct OGLES2Texture *t;
+    struct OGLES2Face *f;
+    ULONG bs, bw, bh, row, j, layer;
+    int k;
+    BOOL stored;
+    if (!ogles2_es3_entry(ctx) || !(ts = ts_get(ctx)) || !(t = image_texture_3d(ctx, ts, target)))
+        return;
+    if (!(bs = dxt_block_bytes(format)) || format == GL_ETC1_RGB8_OES) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    if (target == GL_TEXTURE_3D) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
+    if (level < 0 || level >= MAX_LEVELS || xoffset < 0 || yoffset < 0 || zoffset < 0 || width < 0 || height < 0 ||
+        depth < 0) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    f = &t->f[0];
+    if (!(f->defined & (1UL << level))) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
+    bw = blocks4((ULONG)width);
+    bh = blocks4((ULONG)height);
+    layer = bw * bh * bs;
+    if (xoffset + width > f->w[level] || yoffset + height > f->h[level] || zoffset + depth > t->d[level] ||
+        imageSize != (GLsizei)(layer * (ULONG)depth)) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    if (format != f->format[level] || ((xoffset | yoffset) & 3) ||
+        ((width & 3) && xoffset + width != f->w[level]) || ((height & 3) && yoffset + height != f->h[level])) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
+    if (!unpack_source(ctx, &data, (ULONG)imageSize))
+        return;
+    if (!width || !height || !depth || !data)
+        return;
+    before_change(ctx, ts, t);
+    row = blocks4(f->w[level]) * bs;
+    stored = t->gpu && level < t->gpu->num_levels && consistent(f, level) && depth_ok(t, level);
+    for (k = zoffset; k < zoffset + depth; k++) {
+        struct OGLES2Face *fk = &t->f[k];
+        const UBYTE *src = (const UBYTE *)data + (ULONG)(k - zoffset) * layer;
+        for (j = 0; j < bh; j++)
+            CopyMem((APTR)(src + j * bw * bs),
+                    fk->shadow[level] + ((ULONG)yoffset / 4 + j) * row + (ULONG)xoffset / 4 * bs, bw * bs);
+        fk->blank &= ~(1UL << level);
+        if (stored)
+            store_box(t, k, level, src, xoffset, yoffset, width, height);
+    }
+    if (!stored && !t->gpu && ctx->v3d && !upload_all(t))
+        ogles2_error(ctx, GL_OUT_OF_MEMORY);
+}
+
 /* ---- copies from the framebuffer (glCopyTexImage2D, glCopyTexSubImage2D) ----
  * The region is read as glReadPixels reads it (the open job rendered first,
  * rows bottom-up, which is a texture's row order too), then given to
@@ -3614,17 +3782,14 @@ void ogles2_glCopyTexSubImage2D(struct OGLES2Context *ctx, GLenum target, GLint 
 }
 
 /* ---- compressed textures ----
- * OES_compressed_ETC1_RGB8_texture: decoded into the RGBA8 storage (etc1.c)
- * and stored as glTexImage2D does; the level then keeps the ETC1 format,
- * which no TexSubImage may change.
- * S3TC (DXT1, DXT3, DXT5; M7 step 3): kept as given, in RAM and on the GPU,
- * which samples BC1-BC3 itself. glCompressedTexSubImage2D replaces whole
+ * OES_compressed_ETC1_RGB8_texture, S3TC (DXT1, DXT3, DXT5; M7 step 3) and
+ * ES 3.0's ETC2/EAC (stage B item 9): kept as given, in RAM and on the GPU,
+ * which samples BC1-BC3 and ETC2/EAC itself (ETC1 as RGB8_ETC2, of which
+ * it is a subset); no TexSubImage may change an ETC1 level.
+ * glCompressedTexSubImage2D (and 3D, for arrays) replaces whole
  * blocks; glTexSubImage2D, glCopyTexSubImage2D (another format: refused by
  * glTexSubImage2D) and glGenerateMipmap give GL_INVALID_OPERATION, and a
  * framebuffer object cannot draw into one (not colour-renderable). */
-#ifndef GL_ETC1_RGB8_OES
-#define GL_ETC1_RGB8_OES 0x8D64
-#endif
 
 /* Level `level` of an S3TC texture: `bytes` of blocks (data 0: zeros). */
 static void dxt_image(struct OGLES2Context *ctx, struct OGLES2TexState *ts, GLenum target, GLint level,
@@ -3659,10 +3824,7 @@ void ogles2_glCompressedTexImage2D(struct OGLES2Context *ctx, GLenum target, GLi
                                    GLsizei imageSize, const void *data)
 {
     struct OGLES2TexState *ts;
-    struct OGLES2Texture *t;
     ULONG bw, bh, bs;
-    UBYTE *img;
-    struct OGLES2PixelStore unpack;
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
         return;
     if (target != GL_TEXTURE_2D && !face_target(target)) {
@@ -3670,40 +3832,21 @@ void ogles2_glCompressedTexImage2D(struct OGLES2Context *ctx, GLenum target, GLi
         return;
     }
     bs = dxt_block_bytes(internalformat);
-    if (internalformat != GL_ETC1_RGB8_OES && !bs) {
+    if (!bs || (etc2_format(internalformat) && !ogles2_es3(ctx))) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
     bw = blocks4((ULONG)width);
     bh = blocks4((ULONG)height);
     if (width < 0 || height < 0 || border != 0 || level < 0 || level >= MAX_LEVELS ||
-        imageSize != (GLsizei)(bw * bh * (bs ? bs : 8))) {
+        imageSize != (GLsizei)(bw * bh * bs)) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
     if (!unpack_source(ctx, &data, (ULONG)imageSize))
         return;
-    if (bs) {
-        dxt_image(ctx, ts, target, level, internalformat, width, height, (ULONG)imageSize, data);
-        return;
-    }
-    img = width && height ? AllocVec((ULONG)width * height * 4, MEMF_ANY | MEMF_CLEAR) : 0;
-    if (width && height && !img) {
-        ogles2_error(ctx, GL_OUT_OF_MEMORY);
-        return;
-    }
-    if (img && data)
-        ogles2_etc1_decode((const UBYTE *)data, (ULONG)width, (ULONG)height, img);
-    unpack_tight(ctx, &unpack);
-    ogles2_glTexImage2D(ctx, target, level, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
-    ctx->unpack = unpack;
-    if (img)
-        FreeVec(img);
-    /* The level is ETC1: glTexSubImage2D (and ETC1's CompressedTexSubImage2D)
-     * may not change it. */
-    t = face_target(target) ? ts->unitcube[ts->active] : ts->unit2d[ts->active];
-    t->f[face_target(target) ? (int)(target - GL_TEXTURE_CUBE_MAP_POSITIVE_X) : 0].format[level] =
-        GL_ETC1_RGB8_OES;
+    /* S3TC, ETC1 and ETC2/EAC are kept and sampled as their blocks */
+    dxt_image(ctx, ts, target, level, internalformat, width, height, (ULONG)imageSize, data);
 }
 
 void ogles2_glCompressedTexSubImage2D(struct OGLES2Context *ctx, GLenum target, GLint level,
@@ -3718,7 +3861,7 @@ void ogles2_glCompressedTexSubImage2D(struct OGLES2Context *ctx, GLenum target, 
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
         return;
     bs = dxt_block_bytes(format);
-    if ((target != GL_TEXTURE_2D && !face_target(target)) || (format != GL_ETC1_RGB8_OES && !bs)) {
+    if ((target != GL_TEXTURE_2D && !face_target(target)) || !bs || (etc2_format(format) && !ogles2_es3(ctx))) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
@@ -3744,9 +3887,9 @@ void ogles2_glCompressedTexSubImage2D(struct OGLES2Context *ctx, GLenum target, 
         return;
     }
     /* OES_compressed_ETC1_RGB8_texture: ETC1 images cannot be updated; S3TC
-     * (EXT_texture_compression_s3tc): the level's own format, whole blocks
-     * (a box may end at the level's edge). */
-    if (!bs || format != f->format[level] || ((xoffset | yoffset) & 3) ||
+     * (EXT_texture_compression_s3tc) and ETC2/EAC (ES 3.0): the level's own
+     * format, whole blocks (a box may end at the level's edge). */
+    if (format == GL_ETC1_RGB8_OES || format != f->format[level] || ((xoffset | yoffset) & 3) ||
         ((width & 3) && xoffset + width != f->w[level]) || ((height & 3) && yoffset + height != f->h[level])) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
@@ -4334,7 +4477,7 @@ BOOL ogles2_texture_state(struct OGLES2Context *ctx, int unit, int kind, ULONG *
     tsr->array_stride_64_byte_aligned = faces(t) > 1 ? t->face_stride / 64 : 0;
     tsr->texture_type = t->hw_type;
     /* ES 3.0's sRGB formats: RGBA8 the TMU decodes (Mesa: util_format_is_srgb) */
-    tsr->srgb = t->f[0].sized[0] == GL_SRGB8 || t->f[0].sized[0] == GL_SRGB8_ALPHA8;
+    tsr->srgb = t->f[0].sized[0] == GL_SRGB8 || t->f[0].sized[0] == GL_SRGB8_ALPHA8 || srgb_etc2(t->f[0].format[0]);
     /* The GL swizzle composed with the format's (Mesa's
      * util_format_compose_swizzles): component k reads the format's channel
      * the GL swizzle names, or zero or one. */

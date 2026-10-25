@@ -94,9 +94,9 @@ Mesa's driver, so they could follow later as an extension
     tree). GLES2 programs' files must stay byte for byte what the
     compiler wrote before (keep a compiler built before a change and
     compare its output on `tools/v3dglslc/test/shaders`). The smoke test
-    has two failures under vamos that predate this work ("stub sets
-    GL_INVALID_OPERATION", "call through the context-free thunk": no
-    entry is a stub any more), not regressions.
+    passes again: its two checks of an error set through the table used
+    a stub, which no entry is any more (now a bad target's
+    GL_INVALID_ENUM).
   - **On the A1200:** check `List LIBS:ogles2#? LIBS:v3dglslc` is empty
     first (`amictl.py run`), then package `m8-1` (`bash
     tests/a1200/build_package.sh m8-1` after `. ./local.env`, then
@@ -166,10 +166,14 @@ Mesa's driver, so they could follow later as an extension
     `vertex_array_objects` 10 of 10; since then instancing (item 4), the
     vertex formats (item 5), sync objects and occlusion queries (item 12),
     `glDrawBuffers` and `glReadBuffer` (item 11): `instanced` 45 of 45,
-    `vertex_arrays` 1005 of 1005, `fence_sync` 10, `occlusion_query` 62.
-    Next: item 8's rest (immutable storage, the sized formats, ES 3.0's
-    completeness), then items 9 to 11 (ETC2, render targets beyond 8 bits,
-    framebuffers), whose sized formats the shader groups' executor needs.
+    `vertex_arrays` 1005 of 1005, `fence_sync` 10, `occlusion_query` 62;
+    since then item 8's textures (immutable storage, every ES 3.0 sized
+    format, integer samplers: `texture` 4101 of 5895, no failure) and
+    item 9's ETC2/EAC (ETC1 sampled natively too): every ETC1, ETC2 and EAC
+    case of dEQP-GLES3 (492) and dEQP-GLES2's 97 ETC1 cases pass.
+    Next: items 10 and 11 (render targets beyond 8 bits, framebuffers),
+    whose sized formats the shader groups' executor needs, then item 8's
+    rest.
     **Trap:**
     `ports/deqp/build.sh` copies the CTS with `rsync -a`, which keeps the
     sources' old dates, so a patch changed or removed rebuilds nothing:
@@ -1573,8 +1577,8 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    script had ended: the compiler server (started by the library, ended
    by its expunge) was still running; `Avail FLUSH` ended it, but the PC's
    `runpkg` still waited, and the results came with `amictl get -r` (the
-   15 MB in 7 s). Left in this item: `glCopyTexSubImage3D`,
-   `glCompressedTexImage3D`, ES 3.0's completeness of base levels beyond
+   15 MB in 7 s). Left in this item: `glCopyTexSubImage3D`
+   (`glCompressedTexImage3D` came with item 9), ES 3.0's completeness of base levels beyond
    0 for mutable textures, the 3D textures' mipmaps from a base level.
 9. **ETC2/EAC** (mandatory in ES 3.0): native in the TMU (texture types
    `RGB8_ETC2`, `RGB8_PUNCHTHROUGH_ALPHA1`, `RGBA8_ETC2_EAC`, `R11_EAC`,
@@ -1583,6 +1587,26 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    to 15. ETC1, now decoded on the CPU, is sampled natively too, in both
    (`RGB8_ETC2` decodes ETC1): the main plan's 1.x item "native ETC1
    sampling", done here unless `main` does it first.
+   **Done (2026-10-25, on the A1200):** the ten ETC2/EAC formats in
+   `glCompressedTexImage2D` and `glCompressedTexSubImage2D` (ES3 contexts;
+   GLES2 ones `GL_INVALID_ENUM`), kept as their blocks like S3TC
+   (`dxt_block_bytes` knows them all, `storage_of` gives the TMU's types:
+   R11 (R, 0, 0, 1), RG11 (R, G, 0, 1), RGB8 alpha 1; the sRGB ones set the
+   texture state's sRGB bit); `glCompressedTexImage3D` and
+   `glCompressedTexSubImage3D` for 2D arrays (a 3D texture is
+   `GL_INVALID_OPERATION`, ES 3.0 3.8.6); `GL_COMPRESSED_TEXTURE_FORMATS`
+   15 in ES3 contexts (ETC1 first), 5 in GLES2 ones. ETC1 is no longer
+   decoded: kept and sampled as `RGB8_ETC2` in both kinds of context, and
+   `ogles2/etc1.c`, its host test and CI step are gone (still refused by
+   the sub-image entries, as the extension says). `m8_draw`'s solid block
+   of each format and a compressed array, a layer replaced
+   (`ogles2-m8-1-20261025-211103`: 25, 100, 81 of 81; the smoke test
+   passes again, §1); the GLES2 drawing tests as before
+   (`ogles2-m7-4-20261025-211548`); every ETC1, ETC2 and EAC case of
+   dEQP-GLES3 passes, 492 (`texture.format.compressed`, `texture.wrap`,
+   `texture.compressed`, `negative_api`'s; the 322 not supported are ASTC,
+   not ES 3.0's: `ogles2-m8-2-20261025-211131`), and dEQP-GLES2's 97 ETC1
+   cases with the native sampling (`ogles2-m7-1-20261025-211834`).
 10. **Render targets beyond 8 bits:** 16- and 32-bit float, integer, sRGB.
     - Per format the render target's internal type, bpp and clamp, the tile
       size from the largest bpp, the render-target count and MSAA

@@ -34,6 +34,3 @@ jobs:
 
       - name: BLAKE3 against Mesa's
         run: make blake3-test B=build MESA_SRC=$PWD/mesa/src
-
-      - name: ETC1 decoding against Mesa's
-        run: make etc1-test B=build MESA_SRC=$PWD/mesa/src

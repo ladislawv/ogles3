@@ -241,3 +241,5 @@ glDrawBuffers
 glReadBuffer
 glTexStorage2D
 glTexStorage3D
+glCompressedTexImage3D
+glCompressedTexSubImage3D

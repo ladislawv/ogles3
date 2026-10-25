@@ -98,3 +98,5 @@ command glDrawBuffers
 command glReadBuffer
 command glTexStorage2D
 command glTexStorage3D
+command glCompressedTexImage3D
+command glCompressedTexSubImage3D

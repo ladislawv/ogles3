@@ -791,17 +791,22 @@ static int lookup(struct OGLES2Context *ctx, GLenum pname, struct value *v)
     case GL_CLIP_DEPTH_MODE_EXT:
         v->kind = K_INT; v->n = 1; v->i[0] = (GLint)s->clip_depth;
         return 1;
-    case GL_NUM_COMPRESSED_TEXTURE_FORMATS: /* OES_compressed_ETC1_RGB8_texture, S3TC (M7) */
-        v->kind = K_INT; v->n = 1; v->i[0] = 5;
+    case GL_NUM_COMPRESSED_TEXTURE_FORMATS: /* OES_compressed_ETC1_RGB8_texture, S3TC (M7); ES 3.0's ETC2/EAC */
+        v->kind = K_INT; v->n = 1; v->i[0] = ogles2_es3(ctx) ? 15 : 5;
         return 1;
     case GL_COMPRESSED_TEXTURE_FORMATS:
         /* ETC1 first: dEQP's negative cases take the first format listed. */
-        v->kind = K_INT; v->n = 5;
+        v->kind = K_INT; v->n = ogles2_es3(ctx) ? 15 : 5;
         v->i[0] = 0x8D64; /* GL_ETC1_RGB8_OES */
         v->i[1] = 0x83F0; /* GL_COMPRESSED_RGB_S3TC_DXT1_EXT */
         v->i[2] = 0x83F1; /* GL_COMPRESSED_RGBA_S3TC_DXT1_EXT */
         v->i[3] = 0x83F2; /* GL_COMPRESSED_RGBA_S3TC_DXT3_EXT (ANGLE_texture_compression_dxt3) */
         v->i[4] = 0x83F3; /* GL_COMPRESSED_RGBA_S3TC_DXT5_EXT (ANGLE_texture_compression_dxt5) */
+        if (ogles2_es3(ctx)) { /* ES 3.0's ten ETC2/EAC formats, 0x9270 to 0x9279 */
+            int k;
+            for (k = 0; k < 10; k++)
+                v->i[5 + k] = 0x9270 + k;
+        }
         return 1;
     case GL_SHADER_COMPILER: /* TRUE with offline binaries too (plan 7.8) */
         v->kind = K_BOOL; v->n = 1; v->i[0] = 1;

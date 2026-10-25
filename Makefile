@@ -45,7 +45,7 @@ GEN_STAMP := $(B)/gen/.stamp
 LIB_SRC   := ogles2/library.c ogles2/log.c ogles2/context.c ogles2/device.c ogles2/runtime.c \
              ogles2/state.c ogles2/display.c ogles2/job.c ogles2/frame.c ogles2/program.c \
              ogles2/draw.c ogles2/v3dp.c ogles2/blake3.c ogles2/texture.c \
-             ogles2/buffer.c ogles2/compiler.c ogles2/etc1.c ogles2/fbo.c ogles2/copy.c ogles2/share.c \
+             ogles2/buffer.c ogles2/compiler.c ogles2/fbo.c ogles2/copy.c ogles2/share.c \
              ogles2/debug.c ogles2/variant_key.c ogles2/vao.c ogles2/sync.c ogles2/query.c
 # Library files that use v3dcore directly
 V3D_USERS := device job draw v3dp texture buffer fbo share sync query
@@ -360,15 +360,6 @@ $(B)/v3dp/.stamp: $(wildcard tests/common/*.h) tools/v3dp_tests/emit.c v3dp/v3dp
 	    $(V3DGLSLC) -o .. $$v $${v%.vert}.frag || exit 1; done
 	$(PYTHON) v3dp/v3dp_hashname.py $(B)/v3dp/*.v3dp $$(ls $(B)/v3dp/*.v3dw 2>/dev/null)
 	touch $@
-
-# ---- host check of ogles2/etc1.c against Mesa's ETC1 decoder
-.PHONY: etc1-test
-etc1-test:
-	@mkdir -p $(B)/host
-	gcc -O2 -DETC1_HOST_TEST -DUTIL_ARCH_LITTLE_ENDIAN=1 -DUTIL_ARCH_BIG_ENDIAN=0 -Iogles2 -I$(MESA_SRC) -I$(MESA_SRC)/../include \
-	    tools/etc1_test/etc1_test.c ogles2/etc1.c $(MESA_SRC)/util/format/u_format_etc.c \
-	    -o $(B)/host/etc1_test
-	$(B)/host/etc1_test
 
 # ---- host check of ogles2/variant_key.c (the draw-time variants' keys)
 # against the keys Mesa computed for the same states: the host compiler's

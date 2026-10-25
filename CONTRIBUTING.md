@@ -45,7 +45,6 @@ Windows drive, `/mnt/c/...`); the build output goes to `~/ogles2-build`.
 make -j8              # library, import library, tests, commands
 make amictl-test      # the test station's server and client, on the PC
 make blake3-test      # ogles2's BLAKE3 against Mesa's (needs the Mesa sources)
-make etc1-test        # ogles2's ETC1 decoder against Mesa's (the same)
 make test-v3dp        # compiles the test shaders to .v3dp (needs v3dglslc)
 make perf-mgl         # the MiniGL side of the speed comparison (needs MGL_SDK)
 make gl4es            # gl4es for AmigaOS 3 and gears_gl4es (ports/gl4es/README.md)

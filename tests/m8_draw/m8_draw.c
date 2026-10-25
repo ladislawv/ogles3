@@ -27,6 +27,10 @@
 #include <proto/ogles2.h>
 #include <GLES3/gl3.h>
 
+#ifndef GL_ETC1_RGB8_OES
+#define GL_ETC1_RGB8_OES 0x8D64 /* OES_compressed_ETC1_RGB8_texture */
+#endif
+
 struct GfxBase *GfxBase;
 static int failures, checks;
 
@@ -969,6 +973,87 @@ static void test_formats3(void)
     glDeleteProgram(p);
 }
 
+/* A 4x4 texture of one compressed block sampled (es3wide, bound): (r, g, b, a) within tol. */
+static int block_is(GLuint p, GLenum ifmt, const GLubyte *block, int bytes, int r, int g, int b, int a, int tol)
+{
+    GLuint t;
+    int ok;
+    glGenTextures(1, &t);
+    glBindTexture(GL_TEXTURE_2D, t);
+    glCompressedTexImage2D(GL_TEXTURE_2D, 0, ifmt, 4, 4, 0, bytes, block);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    ok = pixel_is(32, 32, r, g, b, a, tol) && glGetError() == GL_NO_ERROR;
+    glDeleteTextures(1, &t);
+    return ok;
+}
+
+/* ES 3.0's ETC2/EAC formats sampled by the TMU (stage B item 9), a solid
+ * block each: an individual-mode block (4-bit colours, table 0, every index
+ * +2) as ETC1, RGB8 and sRGB; punch-through opaque and transparent; R11 and
+ * RG11 (base*8+4 + 2), signed R11 (base*8 + 2 of 1023); RGBA8 with an EAC
+ * alpha (base 128 + 2). A 2D array of two ETC2 layers, one replaced. */
+static void test_etc2(void)
+{
+    static const GLubyte red[8] = { 0xFF, 0x00, 0x00, 0x00, 0, 0, 0, 0 };       /* (255, 2, 2) */
+    static const GLubyte grey[8] = { 0x88, 0x88, 0x88, 0x00, 0, 0, 0, 0 };      /* (138, 138, 138) */
+    static const GLubyte opaque[8] = { 0xF8, 0x00, 0x00, 0x02, 0, 0, 0, 0 };    /* differential, opaque bit */
+    static const GLubyte clear[8] = { 0xF8, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0, 0 }; /* index 2: transparent */
+    static const GLubyte r11[8] = { 0x80, 0x00, 0x92, 0x49, 0x24, 0x92, 0x49, 0x24 };   /* 1030 of 2047 */
+    static const GLubyte rg11[16] = { 0x80, 0x00, 0x92, 0x49, 0x24, 0x92, 0x49, 0x24,
+                                      0x40, 0x00, 0x92, 0x49, 0x24, 0x92, 0x49, 0x24 }; /* 1030, 518 */
+    static const GLubyte sr11[8] = { 0x40, 0x00, 0x92, 0x49, 0x24, 0x92, 0x49, 0x24 };  /* 514 of 1023 */
+    static const GLubyte rgba[16] = { 0x80, 0x10, 0x92, 0x49, 0x24, 0x92, 0x49, 0x24,
+                                      0xFF, 0x00, 0x00, 0x00, 0, 0, 0, 0 };             /* alpha 130 */
+    GLubyte layers[16];
+    GLuint p = program("es3wide"), pa = program("es3layer"), t;
+    GLint n = 0;
+    if (!p || !pa) {
+        check(0, "ETC2/EAC: es3wide and es3layer link");
+        return;
+    }
+    glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS, &n);
+    check(n == 15, "ETC2/EAC: 15 compressed formats listed");
+    glUseProgram(p);
+    glUniform1i(glGetUniformLocation(p, "tex"), 0);
+    check(block_is(p, GL_ETC1_RGB8_OES, red, 8, 255, 2, 2, 255, 1) &&
+              block_is(p, GL_COMPRESSED_RGB8_ETC2, red, 8, 255, 2, 2, 255, 1),
+          "ETC2/EAC: ETC1 and GL_COMPRESSED_RGB8_ETC2 (255, 2, 2)");
+    check(block_is(p, GL_COMPRESSED_SRGB8_ETC2, grey, 8, 65, 65, 65, 255, 2),
+          "ETC2/EAC: GL_COMPRESSED_SRGB8_ETC2 decoded (138 to 65)");
+    check(block_is(p, GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2, opaque, 8, 255, 2, 2, 255, 1) &&
+              block_is(p, GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2, clear, 8, 0, 0, 0, 0, 0),
+          "ETC2/EAC: punch-through opaque and transparent");
+    check(block_is(p, GL_COMPRESSED_R11_EAC, r11, 8, 128, 0, 0, 255, 1) &&
+              block_is(p, GL_COMPRESSED_RG11_EAC, rg11, 16, 128, 64, 0, 255, 1) &&
+              block_is(p, GL_COMPRESSED_SIGNED_R11_EAC, sr11, 8, 128, 0, 0, 255, 1),
+          "ETC2/EAC: R11, RG11 and signed R11");
+    check(block_is(p, GL_COMPRESSED_RGBA8_ETC2_EAC, rgba, 16, 255, 2, 2, 130, 1),
+          "ETC2/EAC: GL_COMPRESSED_RGBA8_ETC2_EAC (alpha 130)");
+
+    memcpy(layers, red, 8);
+    memcpy(layers + 8, grey, 8);
+    glGenTextures(1, &t);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, t);
+    glCompressedTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_COMPRESSED_RGB8_ETC2, 4, 4, 2, 0, 16, layers);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glUseProgram(pa);
+    glUniform1i(glGetUniformLocation(pa, "tex"), 0);
+    check(layer_is(pa, "layer", 0.0f, 255, 2, 2, 1) && layer_is(pa, "layer", 1.0f, 138, 138, 138, 1),
+          "ETC2/EAC: a compressed 2D array's layers 0 and 1");
+    glCompressedTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 1, 4, 4, 1, GL_COMPRESSED_RGB8_ETC2, 8, red);
+    check(layer_is(pa, "layer", 1.0f, 255, 2, 2, 1) && glGetError() == GL_NO_ERROR,
+          "ETC2/EAC: layer 1 replaced by glCompressedTexSubImage3D");
+    glCompressedTexImage3D(GL_TEXTURE_3D, 0, GL_COMPRESSED_RGB8_ETC2, 4, 4, 1, 0, 8, red);
+    check(glGetError() == GL_INVALID_OPERATION, "ETC2/EAC: a compressed 3D texture is GL_INVALID_OPERATION");
+    glDeleteTextures(1, &t);
+    glDeleteProgram(p);
+    glDeleteProgram(pa);
+}
+
 /* ES 3.0's integer textures through es3utex (usampler2D) and es3itex
  * (isampler2D, magnitudes): 8-bit unsigned, 32-bit unsigned (32-bit
  * returns), 16-bit signed; with a linear filter incomplete, the integer
@@ -1119,6 +1204,7 @@ int main(void)
     test_rg();
     test_formats3();
     test_int_textures();
+    test_etc2();
     check(glGetError() == GL_NO_ERROR, "no GL error left over");
     aglDestroyContext(ctx);
     if ((ctx = aglCreateContextTags2(&e, OGLES2_CCT_BITMAP, (ULONG)bm, OGLES2_CCT_PISTORM_ES_VERSION, 30,

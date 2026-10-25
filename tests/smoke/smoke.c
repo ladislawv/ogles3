@@ -79,8 +79,8 @@ static int session(int verbose)
 
         check(glGetString(0x1234) == 0 && glGetError() == GL_INVALID_ENUM,
               "bad glGetString name: NULL and GL_INVALID_ENUM");
-        glGenerateMipmap(GL_TEXTURE_2D); /* a stub until textures (M2) */
-        check(glGetError() == GL_INVALID_OPERATION, "stub sets GL_INVALID_OPERATION");
+        glGenerateMipmap(0x1234); /* no such target */
+        check(glGetError() == GL_INVALID_ENUM, "an entry sets GL_INVALID_ENUM");
         check(glGetError() == GL_NO_ERROR, "glGetError clears the error");
 
         get_error = (GLenum (*)(void))aglGetProcAddress("glGetError");
@@ -89,8 +89,8 @@ static int session(int verbose)
               "aglGetProcAddress first and last names");
         check(aglGetProcAddress("glNoSuchFunction") == 0, "aglGetProcAddress(unknown) = NULL");
         if (get_error) {
-            glGenerateMipmap(GL_TEXTURE_2D);
-            check(get_error() == GL_INVALID_OPERATION, "call through the context-free thunk");
+            glGenerateMipmap(0x1234);
+            check(get_error() == GL_INVALID_ENUM, "call through the context-free thunk");
         }
     }
 
