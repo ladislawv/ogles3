@@ -884,6 +884,44 @@ static void test_storage(void)
     glDeleteProgram(p);
 }
 
+/* ES 3.0's R and RG formats sampled (es3wide): (r, 0, 0, 1) and (r, g, 0, 1). */
+static int one_texel_is(GLuint p, GLenum ifmt, GLenum format, GLenum type, const void *texel, int r, int g)
+{
+    GLuint t;
+    int ok;
+    glGenTextures(1, &t);
+    glBindTexture(GL_TEXTURE_2D, t);
+    glTexImage2D(GL_TEXTURE_2D, 0, (GLint)ifmt, 1, 1, 0, format, type, texel);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    ok = pixel_is(32, 32, r, g, 0, 255, 1);
+    glDeleteTextures(1, &t);
+    return ok;
+}
+
+static void test_rg(void)
+{
+    static const GLubyte r8[1] = { 200 }, rg8[2] = { 10, 20 };
+    static const GLushort r16f[1] = { 0x3800 }; /* 0.5 */
+    static const GLfloat rg32f[2] = { 0.25f, 0.75f };
+    GLuint p = program("es3wide");
+    if (!p) {
+        check(0, "R and RG formats: es3wide links");
+        return;
+    }
+    glUseProgram(p);
+    glUniform1i(glGetUniformLocation(p, "tex"), 0);
+    check(one_texel_is(p, GL_R8, GL_RED, GL_UNSIGNED_BYTE, r8, 200, 0) &&
+              one_texel_is(p, GL_RG8, GL_RG, GL_UNSIGNED_BYTE, rg8, 10, 20),
+          "R and RG formats: GL_R8 (200, 0, 0, 1), GL_RG8 (10, 20, 0, 1)");
+    check(one_texel_is(p, GL_R16F, GL_RED, GL_HALF_FLOAT, r16f, 128, 0) &&
+              one_texel_is(p, GL_RG32F, GL_RG, GL_FLOAT, rg32f, 64, 191) && glGetError() == GL_NO_ERROR,
+          "R and RG formats: GL_R16F, GL_RG32F");
+    glDeleteProgram(p);
+}
+
 /* The keys' 32-bit samplers and alpha to coverage (stage A item 5), in a 4x
  * MSAA context: es3wide outputs one texel. A float texture needs the
  * sampler's 32-bit bit in the fragment key (a 16-bit return reads it
@@ -990,6 +1028,7 @@ int main(void)
     test_fence();
     test_query();
     test_storage();
+    test_rg();
     check(glGetError() == GL_NO_ERROR, "no GL error left over");
     aglDestroyContext(ctx);
     if ((ctx = aglCreateContextTags2(&e, OGLES2_CCT_BITMAP, (ULONG)bm, OGLES2_CCT_PISTORM_ES_VERSION, 30,

@@ -1510,9 +1510,24 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    drawing tests as before, `ogles2-m7-4-20261025-190402`); dEQP-GLES3's
    `texture.specification.texstorage*` 74 of 240: every case of the stored
    formats and every size case; the other 166 are formats not stored yet
-   (`ogles2-m8-2-20261025-190429`). Next in this item: those formats (R
-   and RG, integer, sRGB, the packed float and 10-bit ones, 32F depth),
-   which need new hardware types and RAM copy classes.
+   (`ogles2-m8-2-20261025-190429`).
+   **R and RG (2026-10-25, on the A1200):** `GL_RED` and `GL_RG` (ES3
+   contexts only, `rg_refused`: `EXT_texture_rg` is not offered in GLES2
+   ones) with unsigned bytes, half floats and floats, and the sized `R8`,
+   `RG8`, `R16F`, `RG16F`, `R32F`, `RG32F` (glTexImage*, glTexStorage*):
+   the RAM copy holds (r, 0, 0, 1) and (r, g, 0, 1); stored as the
+   luminance and alpha formats' hardware types (R8, RG8, R16F, RG16F,
+   R32F, RG32F), told apart by the swizzle, (R, 0, 0, 1) and (R, G, 0, 1),
+   which `pack`, `pack_wide` and `unpack` read (RG's second byte green,
+   not alpha). `m8_draw`'s `GL_R8`, `GL_RG8`, `GL_R16F`, `GL_RG32F` texels
+   (`ogles2-m8-1-20261025-191649`: 25, 100, 63 of 63; the GLES2 drawing
+   tests as before, `ogles2-m7-4-20261025-191659`); dEQP-GLES3's
+   `texture.specification.texstorage*` 98 of 240 and `texture.format.*` 206
+   of 546, every failure a format not taken yet, none an image
+   (`ogles2-m8-2-20261025-191749`, `-191827`). Rendering into them
+   is item 10's. Next in this item: the integer, sRGB, packed float,
+   10-bit and 32F depth formats, which need new hardware types and RAM
+   copy classes.
 9. **ETC2/EAC** (mandatory in ES 3.0): native in the TMU (texture types
    `RGB8_ETC2`, `RGB8_PUNCHTHROUGH_ALPHA1`, `RGBA8_ETC2_EAC`, `R11_EAC`,
    `SIGNED_R11_EAC`, `RG11_EAC`, `SIGNED_RG11_EAC`; sRGB by the texture

@@ -1002,8 +1002,20 @@ static int components(GLenum format)
     case GL_LUMINANCE_ALPHA: return 2;
     case GL_LUMINANCE:
     case GL_ALPHA:           return 1;
+    case GL_RG:              return 2; /* ES 3.0's (stage B item 8), in ES3 contexts only (rg_refused) */
+    case GL_RED:             return 1;
     default:                 return 0;
     }
+}
+
+/* GL_RED and GL_RG in a GLES2 context: EXT_texture_rg is not offered there. */
+static BOOL rg_refused(struct OGLES2Context *ctx, GLenum format)
+{
+    if ((format == GL_RED || format == GL_RG) && !ogles2_es3(ctx)) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return TRUE;
+    }
+    return FALSE;
 }
 
 static int pixel_size(GLenum format, GLenum type, GLenum *err)
@@ -1041,7 +1053,9 @@ static int pixel_size(GLenum format, GLenum type, GLenum *err)
         case GL_RGB:             return 3;
         case GL_LUMINANCE_ALPHA: return 2;
         case GL_LUMINANCE:
-        case GL_ALPHA:           return 1;
+        case GL_ALPHA:
+        case GL_RED:             return 1;
+        case GL_RG:              return 2;
         default:                 *err = GL_INVALID_ENUM; return 0;
         }
     case GL_UNSIGNED_SHORT_5_6_5:
@@ -1139,6 +1153,8 @@ static void convert_float(UBYTE *dst, ULONG dst_stride, const UBYTE *src, GLenum
             case GL_RGB:             d[0] = v[0]; d[1] = v[1]; d[2] = v[2]; d[3] = 1.0f; break;
             case GL_LUMINANCE_ALPHA: d[0] = d[1] = d[2] = v[0]; d[3] = v[1]; break;
             case GL_LUMINANCE:       d[0] = d[1] = d[2] = v[0]; d[3] = 1.0f; break;
+            case GL_RED:             d[0] = v[0]; d[1] = d[2] = 0.0f; d[3] = 1.0f; break;
+            case GL_RG:              d[0] = v[0]; d[1] = v[1]; d[2] = 0.0f; d[3] = 1.0f; break;
             default: /* GL_ALPHA */  d[0] = d[1] = d[2] = 0.0f; d[3] = v[0]; break;
             }
         }
@@ -1239,6 +1255,14 @@ static BOOL convert_row(ULONG *d, const UBYTE *s, GLenum format, GLenum type, in
         for (x = 0; x < w; x++)
             d[x] = s[x];
         return TRUE;
+    case GL_RED:
+        for (x = 0; x < w; x++)
+            d[x] = ((ULONG)s[x] << 24) | 0xFF;
+        return TRUE;
+    case GL_RG:
+        for (x = 0; x < w; x++, s += 2)
+            d[x] = ((ULONG)s[0] << 24) | ((ULONG)s[1] << 16) | 0xFF;
+        return TRUE;
     }
     return FALSE;
 }
@@ -1294,6 +1318,8 @@ static void convert(UBYTE *dst, ULONG dst_stride, const UBYTE *src, GLenum forma
             case GL_RGB:             d[0] = s[0]; d[1] = s[1]; d[2] = s[2]; d[3] = 255; s += 3; break;
             case GL_LUMINANCE_ALPHA: d[0] = d[1] = d[2] = s[0]; d[3] = s[1]; s += 2; break;
             case GL_LUMINANCE:       d[0] = d[1] = d[2] = s[0]; d[3] = 255; s += 1; break;
+            case GL_RED:             d[0] = s[0]; d[1] = d[2] = 0; d[3] = 255; s += 1; break;
+            case GL_RG:              d[0] = s[0]; d[1] = s[1]; d[2] = 0; d[3] = 255; s += 2; break;
             default: /* GL_ALPHA */  d[0] = d[1] = d[2] = 0; d[3] = s[0]; s += 1; break;
             }
         }
@@ -1525,18 +1551,24 @@ static void storage_of(struct OGLES2Texture *t)
         /* OES_texture_float (32-bit returns: the .v3dw variants) and
          * OES_texture_half_float (16-bit, filterable); RGB as RGBA. */
         BOOL h = ty == GL_HALF_FLOAT_OES;
-        if (f == GL_LUMINANCE || f == GL_ALPHA) {
+        if (f == GL_LUMINANCE || f == GL_ALPHA || f == GL_RED) {
             type = h ? V3D_TEXTURE_DATA_FORMAT_R16F : V3D_TEXTURE_DATA_FORMAT_R32F;
             cpp = h ? 2 : 4;
             if (f == GL_LUMINANCE) {
                 sw[0] = sw[1] = sw[2] = R; sw[3] = O;
+            } else if (f == GL_RED) {
+                sw[1] = sw[2] = Z; sw[3] = O;
             } else {
                 sw[0] = sw[1] = sw[2] = Z; sw[3] = R;
             }
-        } else if (f == GL_LUMINANCE_ALPHA) {
+        } else if (f == GL_LUMINANCE_ALPHA || f == GL_RG) {
             type = h ? V3D_TEXTURE_DATA_FORMAT_RG16F : V3D_TEXTURE_DATA_FORMAT_RG32F;
             cpp = h ? 4 : 8;
-            sw[0] = sw[1] = sw[2] = R; sw[3] = G;
+            if (f == GL_RG) {
+                sw[2] = Z; sw[3] = O;
+            } else {
+                sw[0] = sw[1] = sw[2] = R; sw[3] = G;
+            }
         } else {
             type = h ? V3D_TEXTURE_DATA_FORMAT_RGBA16F : V3D_TEXTURE_DATA_FORMAT_RGBA32F;
             cpp = h ? 8 : 16;
@@ -1561,6 +1593,10 @@ static void storage_of(struct OGLES2Texture *t)
         type = V3D_TEXTURE_DATA_FORMAT_R8; cpp = 1; sw[0] = sw[1] = sw[2] = Z; sw[3] = R;
     } else if (f == GL_LUMINANCE_ALPHA) {
         type = V3D_TEXTURE_DATA_FORMAT_RG8; cpp = 2; sw[0] = sw[1] = sw[2] = R; sw[3] = G;
+    } else if (f == GL_RED) { /* ES 3.0's: (r, 0, 0, 1) */
+        type = V3D_TEXTURE_DATA_FORMAT_R8; cpp = 1; sw[1] = sw[2] = Z; sw[3] = O;
+    } else if (f == GL_RG) { /* (r, g, 0, 1) */
+        type = V3D_TEXTURE_DATA_FORMAT_RG8; cpp = 2; sw[2] = Z; sw[3] = O;
     }
     t->hw_type = type;
     t->cpp = cpp;
@@ -1612,11 +1648,11 @@ static void pack(const struct OGLES2Texture *t, const UBYTE *s, UBYTE *d, ULONG 
             for (i = 0; i < n; i++)
                 d[i] = (UBYTE)(p[i] >> 24);
         return;
-    case V3D_TEXTURE_DATA_FORMAT_RG8: /* luminance, alpha */
+    case V3D_TEXTURE_DATA_FORMAT_RG8: /* luminance, alpha; red, green (GL_RG: green swizzled from green) */
         for (i = 0; i < n; i++, d += 2) {
             c = p[i];
             d[0] = (UBYTE)(c >> 24);
-            d[1] = (UBYTE)c;
+            d[1] = (UBYTE)(t->swizzle[1] == v3d_SWIZZLE_GREEN ? c >> 16 : c);
         }
         return;
     default:
@@ -1689,7 +1725,7 @@ static void pack_wide(const struct OGLES2Texture *t, const UBYTE *src, UBYTE *d,
         case V3D_TEXTURE_DATA_FORMAT_RG32F:
         case V3D_TEXTURE_DATA_FORMAT_RG16F:
             v[0] = s[0];
-            v[1] = s[3];
+            v[1] = t->swizzle[1] == v3d_SWIZZLE_GREEN ? s[1] : s[3]; /* GL_RG's green, else alpha */
             nc = 2;
             break;
         default:
@@ -1756,10 +1792,17 @@ static void unpack(const struct OGLES2Texture *t, const UBYTE *s, UBYTE *d, ULON
         case V3D_TEXTURE_DATA_FORMAT_R8:
             d[0] = d[1] = d[2] = t->swizzle[3] == v3d_SWIZZLE_RED ? 0 : s[0];
             d[3] = t->swizzle[3] == v3d_SWIZZLE_RED ? s[0] : 255;
+            if (t->swizzle[1] == v3d_SWIZZLE_ZERO && t->swizzle[3] == v3d_SWIZZLE_ONE)
+                d[1] = d[2] = 0; /* GL_RED */
             s++;
             break;
         case V3D_TEXTURE_DATA_FORMAT_RG8:
-            d[0] = d[1] = d[2] = s[0]; d[3] = s[1]; s += 2;
+            if (t->swizzle[1] == v3d_SWIZZLE_GREEN) { /* GL_RG */
+                d[0] = s[0]; d[1] = s[1]; d[2] = 0; d[3] = 255;
+            } else {
+                d[0] = d[1] = d[2] = s[0]; d[3] = s[1];
+            }
+            s += 2;
             break;
         default:
             d[0] = s[0]; d[1] = s[1]; d[2] = s[2];
@@ -2425,6 +2468,16 @@ static GLenum sized_base(GLenum ifmt, GLenum format, GLenum type)
     /* ES 3.0's (table 3.2) of what the library stores (stage B item 8) */
     case GL_DEPTH_COMPONENT24:
         return format == GL_DEPTH_COMPONENT && type == GL_UNSIGNED_INT ? GL_DEPTH_COMPONENT : NOT_FILLED;
+    case GL_R8:
+    case GL_RG8:
+        return format == (ifmt == GL_R8 ? GL_RED : GL_RG) && type == GL_UNSIGNED_BYTE ? format : NOT_FILLED;
+    case GL_R16F:
+    case GL_RG16F:
+        return format == (ifmt == GL_R16F ? GL_RED : GL_RG) && (type == GL_HALF_FLOAT_OES || type == GL_FLOAT)
+                   ? format : NOT_FILLED;
+    case GL_R32F:
+    case GL_RG32F:
+        return format == (ifmt == GL_R32F ? GL_RED : GL_RG) && type == GL_FLOAT ? format : NOT_FILLED;
     case GL_RGBA16F:
     case GL_RGB16F:
         return format == (ifmt == GL_RGBA16F ? GL_RGBA : GL_RGB) && (type == GL_HALF_FLOAT_OES || type == GL_FLOAT)
@@ -2454,6 +2507,8 @@ static void tex_image(struct OGLES2Context *ctx, GLenum target, GLint level, GLi
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
         return;
     type = half_type(ctx, type);
+    if (rg_refused(ctx, format))
+        return;
     if (target != GL_TEXTURE_2D && target != GL_TEXTURE_RECTANGLE && !face_target(target)) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
@@ -2483,7 +2538,8 @@ static void tex_image(struct OGLES2Context *ctx, GLenum target, GLint level, GLi
         ogles2_error(ctx, internalformat == GL_RGBA || internalformat == GL_RGB ||
                           internalformat == GL_LUMINANCE || internalformat == GL_ALPHA ||
                           internalformat == GL_LUMINANCE_ALPHA || internalformat == GL_DEPTH_COMPONENT ||
-                          internalformat == GL_DEPTH_STENCIL_OES ? GL_INVALID_OPERATION : GL_INVALID_VALUE);
+                          internalformat == GL_DEPTH_STENCIL_OES || internalformat == GL_RED ||
+                          internalformat == GL_RG ? GL_INVALID_OPERATION : GL_INVALID_VALUE);
         return;
     }
     /* OES_depth_texture: 2D textures only (cube maps would need
@@ -2597,6 +2653,8 @@ static void tex_sub_image(struct OGLES2Context *ctx, GLenum target, GLint level,
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
         return;
     type = half_type(ctx, type);
+    if (rg_refused(ctx, format))
+        return;
     if (target != GL_TEXTURE_2D && target != GL_TEXTURE_RECTANGLE && !face_target(target)) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
@@ -2856,6 +2914,12 @@ static BOOL sized_storage(GLenum ifmt, GLenum *format, GLenum *type)
     case GL_RGB16F:            *format = GL_RGB; *type = GL_HALF_FLOAT_OES; return TRUE;
     case GL_RGBA32F:           *format = GL_RGBA; *type = GL_FLOAT; return TRUE;
     case GL_RGB32F:            *format = GL_RGB; *type = GL_FLOAT; return TRUE;
+    case GL_R8:                *format = GL_RED; *type = GL_UNSIGNED_BYTE; return TRUE;
+    case GL_RG8:               *format = GL_RG; *type = GL_UNSIGNED_BYTE; return TRUE;
+    case GL_R16F:              *format = GL_RED; *type = GL_HALF_FLOAT_OES; return TRUE;
+    case GL_RG16F:             *format = GL_RG; *type = GL_HALF_FLOAT_OES; return TRUE;
+    case GL_R32F:              *format = GL_RED; *type = GL_FLOAT; return TRUE;
+    case GL_RG32F:             *format = GL_RG; *type = GL_FLOAT; return TRUE;
     case GL_DEPTH_COMPONENT16: *format = GL_DEPTH_COMPONENT; *type = GL_UNSIGNED_SHORT; return TRUE;
     case GL_DEPTH_COMPONENT24: *format = GL_DEPTH_COMPONENT; *type = GL_UNSIGNED_INT; return TRUE;
     case GL_DEPTH24_STENCIL8:  *format = GL_DEPTH_STENCIL_OES; *type = GL_UNSIGNED_INT_24_8_OES; return TRUE;
