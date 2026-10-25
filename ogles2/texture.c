@@ -53,6 +53,8 @@ struct OGLES2Face
     ULONG rendered;                 /* levels the GPU drew into since: the copy is stale */
     ULONG blank;                    /* levels never given texels (glTexImage2D without pixels):
                                      * the copy is zeros, as a new GPU copy is (MEMF_CLEAR) */
+    GLenum sized[MAX_LEVELS];       /* ES 3.0: the sized format where format and type do not say the
+                                     * storage (sRGB; R11F_G11F_B10F and RGB9_E5 given as floats); else 0 */
 };
 
 struct OGLES2Texture
@@ -138,7 +140,7 @@ static ULONG smp_serial; /* the sampler versions given out */
 static void sync(struct OGLES2Texture *t);
 static void rect_defaults(struct OGLES2Texture *t);
 static void put_level(struct OGLES2Face *f, int level, UBYTE *img, GLsizei width, GLsizei height, GLenum format,
-                      GLenum type, BOOL given);
+                      GLenum type, BOOL given, GLenum sized);
 static void drop_level(struct OGLES2Face *f, int level);
 
 /* A texture's and a new sampler object's sampling parameters. */
@@ -955,7 +957,11 @@ static int class_of(GLenum format, GLenum type)
 {
     if (dxt_block_bytes(format))
         return CLASS_BLOCKS;
-    if (type == GL_FLOAT || type == GL_HALF_FLOAT_OES)
+    if (format == GL_DEPTH_COMPONENT || format == GL_DEPTH_STENCIL_OES)
+        return type == GL_UNSIGNED_SHORT ? CLASS_DEPTH16 : CLASS_DEPTH24; /* 32F depth: its float's bits */
+    /* ES 3.0's signed bytes and packed words: floats, encoded when stored */
+    if (type == GL_FLOAT || type == GL_HALF_FLOAT_OES || type == GL_BYTE || type == GL_UNSIGNED_INT_2_10_10_10_REV ||
+        type == GL_UNSIGNED_INT_10F_11F_11F_REV || type == GL_UNSIGNED_INT_5_9_9_9_REV)
         return CLASS_FLOAT;
     if (format == GL_DEPTH_COMPONENT && type == GL_UNSIGNED_SHORT)
         return CLASS_DEPTH16;
@@ -986,6 +992,13 @@ static ULONG wide_class(GLenum format, GLenum type)
     return type == GL_FLOAT || format == GL_DEPTH_COMPONENT || format == GL_DEPTH_STENCIL_OES;
 }
 
+/* A level's texels return 32 bits (wide_class), but for the packed floats
+ * given as floats (16-bit returns, Mesa's table). */
+static BOOL level_wide(const struct OGLES2Face *f, int l)
+{
+    return wide_class(f->format[l], f->type[l]) && f->sized[l] != GL_R11F_G11F_B10F && f->sized[l] != GL_RGB9_E5;
+}
+
 /* Bytes per pixel of a valid format/type pair; 0 and the error to set if not. */
 #ifndef GL_BGRA_EXT
 #define GL_BGRA_EXT 0x80E1 /* EXT_texture_format_BGRA8888 */
@@ -1008,14 +1021,27 @@ static int components(GLenum format)
     }
 }
 
-/* GL_RED and GL_RG in a GLES2 context: EXT_texture_rg is not offered there. */
-static BOOL rg_refused(struct OGLES2Context *ctx, GLenum format)
+/* ES 3.0's formats and types in a GLES2 context: GL_RED and GL_RG
+ * (EXT_texture_rg is not offered there), signed bytes, the packed 32-bit
+ * types, float depth. */
+static BOOL rg_refused(struct OGLES2Context *ctx, GLenum format, GLenum type)
 {
-    if ((format == GL_RED || format == GL_RG) && !ogles2_es3(ctx)) {
+    if (!ogles2_es3(ctx) &&
+        (format == GL_RED || format == GL_RG || type == GL_BYTE || type == GL_UNSIGNED_INT_2_10_10_10_REV ||
+         type == GL_UNSIGNED_INT_10F_11F_11F_REV || type == GL_UNSIGNED_INT_5_9_9_9_REV ||
+         type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV || (format == GL_DEPTH_COMPONENT && type == GL_FLOAT))) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return TRUE;
     }
     return FALSE;
+}
+
+/* The sized formats whose storage format and type do not say: sRGB, and
+ * the packed floats given as floats. */
+static GLenum keep_sized(GLenum ifmt)
+{
+    return ifmt == GL_SRGB8 || ifmt == GL_SRGB8_ALPHA8 || ifmt == GL_R11F_G11F_B10F || ifmt == GL_RGB9_E5 ? ifmt
+                                                                                                          : 0;
 }
 
 static int pixel_size(GLenum format, GLenum type, GLenum *err)
@@ -1027,6 +1053,8 @@ static int pixel_size(GLenum format, GLenum type, GLenum *err)
         type == GL_UNSIGNED_SHORT || type == GL_UNSIGNED_INT || type == GL_UNSIGNED_INT_24_8_OES) {
         if (format == GL_DEPTH_COMPONENT && type == GL_UNSIGNED_SHORT) return 2;
         if (format == GL_DEPTH_COMPONENT && type == GL_UNSIGNED_INT) return 4;
+        if (format == GL_DEPTH_COMPONENT && type == GL_FLOAT) return 4; /* ES 3.0's */
+        if (format == GL_DEPTH_STENCIL_OES && type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV) return 8;
         if (format == GL_DEPTH_STENCIL_OES && type == GL_UNSIGNED_INT_24_8_OES) return 4;
         *err = (format == GL_DEPTH_COMPONENT || format == GL_DEPTH_STENCIL_OES || components(format) ||
                 format == GL_BGRA_EXT) &&
@@ -1043,6 +1071,23 @@ static int pixel_size(GLenum format, GLenum type, GLenum *err)
         if (components(format))
             return components(format) * (type == GL_FLOAT ? 4 : 2);
         *err = format == GL_BGRA_EXT ? GL_INVALID_OPERATION : GL_INVALID_ENUM;
+        return 0;
+    /* ES 3.0's: signed bytes of the RGBA formats, the packed words */
+    case GL_BYTE:
+        if (format == GL_RED || format == GL_RG || format == GL_RGB || format == GL_RGBA)
+            return components(format);
+        *err = components(format) ? GL_INVALID_OPERATION : GL_INVALID_ENUM;
+        return 0;
+    case GL_UNSIGNED_INT_2_10_10_10_REV:
+        if (format == GL_RGBA)
+            return 4;
+        *err = components(format) ? GL_INVALID_OPERATION : GL_INVALID_ENUM;
+        return 0;
+    case GL_UNSIGNED_INT_10F_11F_11F_REV:
+    case GL_UNSIGNED_INT_5_9_9_9_REV:
+        if (format == GL_RGB)
+            return 4;
+        *err = components(format) ? GL_INVALID_OPERATION : GL_INVALID_ENUM;
         return 0;
     }
     switch (type) {
@@ -1130,17 +1175,55 @@ UWORD ogles2_float_to_half(GLfloat f)
 
 /* Floats or half floats of the application's format into RGBA floats (the
  * conventions of the RGBA8 copy: LUMINANCE (L,L,L,1), ALPHA (0,0,0,A)). */
+static GLfloat pow2f(int e);
+
+/* ES 3.0's packed words (the 68k's order, as GL's types are) as floats. */
+static void unpack_word(GLenum type, ULONG w, GLfloat *v)
+{
+    if (type == GL_UNSIGNED_INT_2_10_10_10_REV) {
+        v[0] = (GLfloat)(w & 1023) / 1023.0f;
+        v[1] = (GLfloat)((w >> 10) & 1023) / 1023.0f;
+        v[2] = (GLfloat)((w >> 20) & 1023) / 1023.0f;
+        v[3] = (GLfloat)(w >> 30) / 3.0f;
+    } else if (type == GL_UNSIGNED_INT_10F_11F_11F_REV) {
+        /* 11- and 10-bit unsigned floats are a half float's top bits */
+        v[0] = half_to_float((UWORD)((w & 0x7ff) << 4));
+        v[1] = half_to_float((UWORD)(((w >> 11) & 0x7ff) << 4));
+        v[2] = half_to_float((UWORD)(((w >> 22) & 0x3ff) << 5));
+        v[3] = 1.0f;
+    } else { /* 5_9_9_9_REV: three 9-bit mantissas and a shared exponent (ES 3.0 3.7.3) */
+        GLfloat scale = pow2f((int)(w >> 27) - 15 - 9);
+        v[0] = (GLfloat)(w & 511) * scale;
+        v[1] = (GLfloat)((w >> 9) & 511) * scale;
+        v[2] = (GLfloat)((w >> 18) & 511) * scale;
+        v[3] = 1.0f;
+    }
+}
+
 static void convert_float(UBYTE *dst, ULONG dst_stride, const UBYTE *src, GLenum format, GLenum type,
                           int w, int h, ULONG src_stride)
 {
-    int n = components(format), bpc = type == GL_FLOAT ? 4 : 2, x, y, c;
+    int n = components(format), bpc = type == GL_FLOAT ? 4 : type == GL_BYTE ? 1 : 2, x, y, c;
+    BOOL packed = type == GL_UNSIGNED_INT_2_10_10_10_REV || type == GL_UNSIGNED_INT_10F_11F_11F_REV ||
+                  type == GL_UNSIGNED_INT_5_9_9_9_REV;
     for (y = 0; y < h; y++, src += src_stride, dst += dst_stride) {
         const UBYTE *s = src;
         GLfloat *d = (GLfloat *)dst;
         for (x = 0; x < w; x++, d += 4) {
             GLfloat v[4];
+            if (packed) {
+                ULONG wd;
+                memcpy(&wd, s, 4);
+                s += 4;
+                unpack_word(type, wd, v);
+                d[0] = v[0]; d[1] = v[1]; d[2] = v[2]; d[3] = v[3];
+                continue;
+            }
             for (c = 0; c < n; c++, s += bpc) {
-                if (bpc == 4) {
+                if (bpc == 1) { /* signed normalized (ES 3.0 2.1.6) */
+                    GLfloat f = (GLfloat)(BYTE)s[0] / 127.0f;
+                    v[c] = f < -1.0f ? -1.0f : f;
+                } else if (bpc == 4) {
                     memcpy(&v[c], s, 4); /* the 68k's own byte order, as GL's types are */
                 } else {
                     UWORD hv;
@@ -1165,7 +1248,7 @@ static void convert_float(UBYTE *dst, ULONG dst_stride, const UBYTE *src, GLenum
 static void convert_depth(UBYTE *dst, ULONG dst_stride, const UBYTE *src, GLenum type, int w, int h,
                           ULONG src_stride)
 {
-    int bpp = type == GL_UNSIGNED_SHORT ? 2 : 4, x, y;
+    int bpp = type == GL_UNSIGNED_SHORT ? 2 : type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV ? 8 : 4, x, y;
     for (y = 0; y < h; y++, src += src_stride, dst += dst_stride) {
         const UBYTE *s = src;
         ULONG *d = (ULONG *)dst;
@@ -1177,7 +1260,9 @@ static void convert_depth(UBYTE *dst, ULONG dst_stride, const UBYTE *src, GLenum
             } else {
                 ULONG v;
                 memcpy(&v, s, 4);
-                /* 24 bits kept; UNSIGNED_INT_24_8's low byte is the stencil */
+                /* 24 bits kept; UNSIGNED_INT_24_8's low byte is the stencil;
+                 * ES 3.0's floats kept as their bits (the stencil word after
+                 * FLOAT_32_UNSIGNED_INT_24_8_REV's depth dropped) */
                 d[x] = type == GL_UNSIGNED_INT ? v & 0xffffff00UL : v;
             }
         }
@@ -1387,6 +1472,59 @@ static GLenum half_type(struct OGLES2Context *ctx, GLenum type)
     return type == GL_HALF_FLOAT && ogles2_es3(ctx) ? GL_HALF_FLOAT_OES : type;
 }
 
+/* 2^e as a float (no libm: built from its bits; e from -126 to 127). */
+static GLfloat pow2f(int e)
+{
+    union { ULONG u; GLfloat f; } v;
+    if (e < -126)
+        return 0.0f;
+    v.u = (ULONG)(e + 127) << 23;
+    return v.f;
+}
+
+/* floor(log2(x)) of a positive normal float, from its exponent bits. */
+static int ilog2f(GLfloat x)
+{
+    union { ULONG u; GLfloat f; } v;
+    v.f = x;
+    return (int)((v.u >> 23) & 0xff) - 127;
+}
+
+/* RGB9_E5 of three floats (ES 3.0 3.7.3's equations 3.4 to 3.7). */
+static ULONG rgb9e5(const GLfloat *s)
+{
+    const GLfloat maxv = 65408.0f; /* (2^9 - 1) / 2^9 x 2^(31 - 15) */
+    GLfloat c[3], m = 0.0f, scale;
+    ULONG w = 0;
+    int k, e, ms;
+    for (k = 0; k < 3; k++) {
+        c[k] = s[k] > 0.0f ? (s[k] < maxv ? s[k] : maxv) : 0.0f;
+        if (c[k] > m)
+            m = c[k];
+    }
+    e = (m > 0.0f ? (ilog2f(m) > -16 ? ilog2f(m) : -16) : -16) + 1 + 15;
+    ms = (int)(m / pow2f(e - 15 - 9) + 0.5f);
+    if (ms == 512)
+        e++;
+    scale = pow2f(e - 15 - 9);
+    for (k = 0; k < 3; k++)
+        w |= (ULONG)(int)(c[k] / scale + 0.5f) << (9 * k);
+    return w | ((ULONG)e << 27);
+}
+
+/* An unsigned 11- (or `bits` 10-) bit float: a half float's top bits, rounded. */
+static ULONG small_float(GLfloat f, int bits)
+{
+    ULONG h;
+    if (!(f > 0.0f))
+        return 0;
+    h = ogles2_float_to_half(f) & 0x7fff;
+    if (h >= 0x7c00)
+        return bits == 11 ? 0x7c0 : 0x3e0; /* infinity */
+    h = (h + (bits == 11 ? 8 : 16)) >> (bits == 11 ? 4 : 5);
+    return h;
+}
+
 static int level_count(int w, int h)
 {
     int n = 1;
@@ -1406,7 +1544,7 @@ static BOOL consistent(const struct OGLES2Face *f, int l)
     /* The same format and type as level 0 (GLES 2.0 3.7.10), not just the
      * same storage: RGB and RGBA levels are both kept as RGBA8. */
     if (!(f->defined & (1UL << l)) || !(f->defined & 1) || level_class(f, l) != level_class(f, 0) ||
-        f->format[l] != f->format[0] || f->type[l] != f->type[0])
+        f->format[l] != f->format[0] || f->type[l] != f->type[0] || f->sized[l] != f->sized[0])
         return FALSE;
     return f->w[l] == (w ? w : 1) && f->h[l] == (h ? h : 1);
 }
@@ -1532,14 +1670,34 @@ static V3DTexture *face_gpu(struct OGLES2Texture *t, int k, int l, V3DTexture *t
  * v3dx_format_table.c, the formats GLES2's state tracker picks). */
 static void storage_of(struct OGLES2Texture *t)
 {
-    GLenum f = t->f[0].format[0], ty = t->f[0].type[0];
+    GLenum f = t->f[0].format[0], ty = t->f[0].type[0], sz = t->f[0].sized[0];
     UBYTE R = v3d_SWIZZLE_RED, G = v3d_SWIZZLE_GREEN, B = v3d_SWIZZLE_BLUE, A = v3d_SWIZZLE_ALPHA;
     UBYTE O = v3d_SWIZZLE_ONE, Z = v3d_SWIZZLE_ZERO;
     UBYTE type = V3D_TEXTURE_DATA_FORMAT_RGBA8, cpp = 4, sw[4];
     sw[0] = R; sw[1] = G; sw[2] = B; sw[3] = A;
     if (f == GL_RGB)
         sw[3] = O; /* rendered into, the stored alpha is the shader's */
-    if (dxt_block_bytes(f)) {
+    if (sz == GL_R11F_G11F_B10F || ty == GL_UNSIGNED_INT_10F_11F_11F_REV) { /* ES 3.0's packed floats */
+        type = V3D_TEXTURE_DATA_FORMAT_R11FG11FB10F; cpp = 4; sw[3] = O;
+    } else if (sz == GL_RGB9_E5 || ty == GL_UNSIGNED_INT_5_9_9_9_REV) {
+        type = V3D_TEXTURE_DATA_FORMAT_RGB9E5; cpp = 4; sw[3] = O;
+    } else if (ty == GL_UNSIGNED_INT_2_10_10_10_REV) {
+        type = V3D_TEXTURE_DATA_FORMAT_RGB10A2; cpp = 4;
+    } else if (ty == GL_BYTE) { /* signed normalized */
+        type = f == GL_RED ? V3D_TEXTURE_DATA_FORMAT_R8_SNORM
+             : f == GL_RG ? V3D_TEXTURE_DATA_FORMAT_RG8_SNORM : V3D_TEXTURE_DATA_FORMAT_RGBA8_SNORM;
+        cpp = f == GL_RED ? 1 : f == GL_RG ? 2 : 4;
+        if (f != GL_RGBA)
+            sw[3] = O;
+        if (f == GL_RED || f == GL_RG)
+            sw[2] = Z;
+        if (f == GL_RED)
+            sw[1] = Z;
+    } else if ((f == GL_DEPTH_COMPONENT && ty == GL_FLOAT) || ty == GL_FLOAT_32_UNSIGNED_INT_24_8_REV) {
+        type = V3D_TEXTURE_DATA_FORMAT_DEPTH_COMP32F; cpp = 4; /* the depth only, as sampled */
+        sw[1] = sw[2] = t->es3_rules ? Z : R;
+        sw[3] = O;
+    } else if (dxt_block_bytes(f)) {
         /* S3TC: BC1-BC3, a block a "texel" (Mesa's table: DXT1 RGB is XYZ1) */
         type = f == GL_COMPRESSED_RGBA_S3TC_DXT3_EXT   ? V3D_TEXTURE_DATA_FORMAT_BC2
              : f == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT   ? V3D_TEXTURE_DATA_FORMAT_BC3
@@ -1670,7 +1828,16 @@ static BOOL float_type(UBYTE hw)
 
 static BOOL depth_type(UBYTE hw)
 {
-    return hw == V3D_TEXTURE_DATA_FORMAT_DEPTH_COMP16 || hw == V3D_TEXTURE_DATA_FORMAT_DEPTH24X8;
+    return hw == V3D_TEXTURE_DATA_FORMAT_DEPTH_COMP16 || hw == V3D_TEXTURE_DATA_FORMAT_DEPTH24X8 ||
+           hw == V3D_TEXTURE_DATA_FORMAT_DEPTH_COMP32F;
+}
+
+/* ES 3.0's formats the CPU encodes from a float copy (pack_wide). */
+static BOOL encoded_type(UBYTE hw)
+{
+    return hw == V3D_TEXTURE_DATA_FORMAT_R11FG11FB10F || hw == V3D_TEXTURE_DATA_FORMAT_RGB9E5 ||
+           hw == V3D_TEXTURE_DATA_FORMAT_RGB10A2 || hw == V3D_TEXTURE_DATA_FORMAT_R8_SNORM ||
+           hw == V3D_TEXTURE_DATA_FORMAT_RG8_SNORM || hw == V3D_TEXTURE_DATA_FORMAT_RGBA8_SNORM;
 }
 
 /* Formats the TMU returns 32 bits a channel for (Mesa's v3dx_format_table.c):
@@ -1716,6 +1883,33 @@ static void pack_wide(const struct OGLES2Texture *t, const UBYTE *src, UBYTE *d,
         const GLfloat *s = (const GLfloat *)src;
         GLfloat v[4];
         int c, nc;
+        if (encoded_type(t->hw_type)) { /* ES 3.0's: one word or 1 to 4 signed bytes */
+            ULONG wd = 0;
+            switch (t->hw_type) {
+            case V3D_TEXTURE_DATA_FORMAT_R11FG11FB10F:
+                wd = small_float(s[0], 11) | (small_float(s[1], 11) << 11) | (small_float(s[2], 10) << 22);
+                break;
+            case V3D_TEXTURE_DATA_FORMAT_RGB9E5:
+                wd = rgb9e5(s);
+                break;
+            case V3D_TEXTURE_DATA_FORMAT_RGB10A2:
+                for (c = 0; c < 4; c++) {
+                    GLfloat f = s[c] < 0.0f ? 0.0f : s[c] > 1.0f ? 1.0f : s[c];
+                    wd |= (ULONG)(f * (c == 3 ? 3.0f : 1023.0f) + 0.5f) << (10 * c);
+                }
+                break;
+            default: /* signed normalized bytes */
+                nc = t->cpp;
+                for (c = 0; c < nc; c++) {
+                    GLfloat f = s[c] < -1.0f ? -1.0f : s[c] > 1.0f ? 1.0f : s[c];
+                    *d++ = (UBYTE)(BYTE)(f < 0.0f ? (int)(f * 127.0f - 0.5f) : (int)(f * 127.0f + 0.5f));
+                }
+                continue;
+            }
+            put_le32(d, wd);
+            d += 4;
+            continue;
+        }
         switch (t->hw_type) {
         case V3D_TEXTURE_DATA_FORMAT_R32F:
         case V3D_TEXTURE_DATA_FORMAT_R16F:
@@ -1935,7 +2129,7 @@ static void store_box(struct OGLES2Texture *t, int k, int l, const UBYTE *src, i
     if (!(packed = AllocVec(row * h + 4, MEMF_ANY)))
         return;
     for (j = 0; j < h; j++)
-        if (float_type(t->hw_type) || depth_type(t->hw_type))
+        if (float_type(t->hw_type) || depth_type(t->hw_type) || encoded_type(t->hw_type))
             pack_wide(t, src + (ULONG)j * in, packed + (ULONG)j * row, (ULONG)w);
         else
             pack(t, src + (ULONG)j * in, packed + (ULONG)j * row, (ULONG)w);
@@ -2230,7 +2424,7 @@ BOOL ogles2_texture_wide(struct OGLES2Context *ctx, int unit, int kind)
     /* A depth comparison returns 16 bits (Mesa's v3d_get_tex_return_size). */
     if ((ts->unitsmp[unit] ? &ts->unitsmp[unit]->s : &t->s)->compare_mode == GL_COMPARE_REF_TO_TEXTURE)
         return FALSE;
-    return (t->f[0].defined & 1) && wide_class(t->f[0].format[0], t->f[0].type[0]);
+    return (t->f[0].defined & 1) && level_wide(&t->f[0], 0);
 }
 
 void ogles2_texture_rendered(struct OGLES2Texture *t, int k, int l)
@@ -2429,7 +2623,7 @@ void ogles2_texture_params_restore(struct OGLES2Texture *t, const struct OGLES2T
 }
 
 static void set_level(struct OGLES2Context *ctx, struct OGLES2Texture *t, int k, GLint level, UBYTE *img,
-                      GLsizei width, GLsizei height, GLenum format, GLenum type, BOOL given);
+                      GLsizei width, GLsizei height, GLenum format, GLenum type, BOOL given, GLenum sized);
 
 /* OES_required_internalformat: a sized colour format's base format (0 for
  * any other value). */
@@ -2478,6 +2672,23 @@ static GLenum sized_base(GLenum ifmt, GLenum format, GLenum type)
     case GL_R32F:
     case GL_RG32F:
         return format == (ifmt == GL_R32F ? GL_RED : GL_RG) && type == GL_FLOAT ? format : NOT_FILLED;
+    case GL_R8_SNORM: return format == GL_RED && type == GL_BYTE ? format : NOT_FILLED;
+    case GL_RG8_SNORM: return format == GL_RG && type == GL_BYTE ? format : NOT_FILLED;
+    case GL_RGB8_SNORM: return format == GL_RGB && type == GL_BYTE ? format : NOT_FILLED;
+    case GL_RGBA8_SNORM: return format == GL_RGBA && type == GL_BYTE ? format : NOT_FILLED;
+    case GL_SRGB8: return format == GL_RGB && type == GL_UNSIGNED_BYTE ? format : NOT_FILLED;
+    case GL_SRGB8_ALPHA8: return format == GL_RGBA && type == GL_UNSIGNED_BYTE ? format : NOT_FILLED;
+    case GL_RGB10_A2: return format == GL_RGBA && type == GL_UNSIGNED_INT_2_10_10_10_REV ? format : NOT_FILLED;
+    case GL_R11F_G11F_B10F:
+        return format == GL_RGB && (type == GL_UNSIGNED_INT_10F_11F_11F_REV || type == GL_HALF_FLOAT_OES ||
+                                    type == GL_FLOAT) ? format : NOT_FILLED;
+    case GL_RGB9_E5:
+        return format == GL_RGB && (type == GL_UNSIGNED_INT_5_9_9_9_REV || type == GL_HALF_FLOAT_OES ||
+                                    type == GL_FLOAT) ? format : NOT_FILLED;
+    case GL_DEPTH_COMPONENT32F:
+        return format == GL_DEPTH_COMPONENT && type == GL_FLOAT ? format : NOT_FILLED;
+    case GL_DEPTH32F_STENCIL8:
+        return format == GL_DEPTH_STENCIL_OES && type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV ? format : NOT_FILLED;
     case GL_RGBA16F:
     case GL_RGB16F:
         return format == (ifmt == GL_RGBA16F ? GL_RGBA : GL_RGB) && (type == GL_HALF_FLOAT_OES || type == GL_FLOAT)
@@ -2500,14 +2711,14 @@ static void tex_image(struct OGLES2Context *ctx, GLenum target, GLint level, GLi
 {
     struct OGLES2TexState *ts;
     struct OGLES2Texture *t;
-    GLenum err;
+    GLenum err, keep;
     UBYTE *img;
     ULONG cb;
     int k;
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
         return;
     type = half_type(ctx, type);
-    if (rg_refused(ctx, format))
+    if (rg_refused(ctx, format, type))
         return;
     if (target != GL_TEXTURE_2D && target != GL_TEXTURE_RECTANGLE && !face_target(target)) {
         ogles2_error(ctx, GL_INVALID_ENUM);
@@ -2533,6 +2744,7 @@ static void tex_image(struct OGLES2Context *ctx, GLenum target, GLint level, GLi
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
+    keep = keep_sized((GLenum)internalformat);
     internalformat = (GLint)sized_base((GLenum)internalformat, format, type);
     if ((GLenum)internalformat != format) {
         ogles2_error(ctx, internalformat == GL_RGBA || internalformat == GL_RGB ||
@@ -2572,14 +2784,15 @@ static void tex_image(struct OGLES2Context *ctx, GLenum target, GLint level, GLi
         const UBYTE *src = unpack_image(ctx, pixels, format, type, width, height, &row, &image);
         convert(img, (ULONG)width * cb, src, format, type, width, height, row);
     }
-    set_level(ctx, t, k, level, img, width, height, format, type, pixels != 0);
+    set_level(ctx, t, k, level, img, width, height, format, type, pixels != 0, keep);
 }
 
 /* A face's level becomes `img`, its new RAM copy (0: empty); `given`: it
  * holds the image's texels, else zeros. */
 static void put_level(struct OGLES2Face *f, int level, UBYTE *img, GLsizei width, GLsizei height, GLenum format,
-                      GLenum type, BOOL given)
+                      GLenum type, BOOL given, GLenum sized)
 {
+    f->sized[level] = sized;
     if (f->shadow[level])
         FreeVec(f->shadow[level]);
     f->shadow[level] = img;
@@ -2609,10 +2822,10 @@ static void drop_level(struct OGLES2Face *f, int level)
  * `given`: it holds the image's texels, else zeros. The caller has dealt
  * with the jobs that use the texture (before_change). */
 static void set_level(struct OGLES2Context *ctx, struct OGLES2Texture *t, int k, GLint level, UBYTE *img,
-                      GLsizei width, GLsizei height, GLenum format, GLenum type, BOOL given)
+                      GLsizei width, GLsizei height, GLenum format, GLenum type, BOOL given, GLenum sized)
 {
     struct OGLES2Face *f = &t->f[k];
-    put_level(f, level, img, width, height, format, type, given);
+    put_level(f, level, img, width, height, format, type, given, sized);
     if (!ctx->v3d)
         return; /* a state-only context keeps the images only */
     /* No GPU texture yet, a new level 0, or a level the chain has no room
@@ -2653,7 +2866,7 @@ static void tex_sub_image(struct OGLES2Context *ctx, GLenum target, GLint level,
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
         return;
     type = half_type(ctx, type);
-    if (rg_refused(ctx, format))
+    if (rg_refused(ctx, format, type))
         return;
     if (target != GL_TEXTURE_2D && target != GL_TEXTURE_RECTANGLE && !face_target(target)) {
         ogles2_error(ctx, GL_INVALID_ENUM);
@@ -2758,7 +2971,7 @@ void ogles2_glTexImage3D(struct OGLES2Context *ctx, GLenum target, GLint level, 
 {
     struct OGLES2TexState *ts;
     struct OGLES2Texture *t;
-    GLenum err;
+    GLenum err, keep;
     ULONG cb, row, in;
     const UBYTE *src;
     int k, max;
@@ -2779,12 +2992,14 @@ void ogles2_glTexImage3D(struct OGLES2Context *ctx, GLenum target, GLint level, 
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
+    keep = keep_sized((GLenum)internalformat);
     internalformat = (GLint)sized_base((GLenum)internalformat, format, type);
     if ((GLenum)internalformat != format) {
         ogles2_error(ctx, internalformat == GL_RGBA || internalformat == GL_RGB ||
                           internalformat == GL_LUMINANCE || internalformat == GL_ALPHA ||
                           internalformat == GL_LUMINANCE_ALPHA || internalformat == GL_DEPTH_COMPONENT ||
-                          internalformat == GL_DEPTH_STENCIL_OES ? GL_INVALID_OPERATION : GL_INVALID_VALUE);
+                          internalformat == GL_DEPTH_STENCIL_OES || internalformat == GL_RED ||
+                          internalformat == GL_RG ? GL_INVALID_OPERATION : GL_INVALID_VALUE);
         return;
     }
     /* ES 3.0 3.8.3: no depth formats in 3D textures (arrays have them). */
@@ -2817,7 +3032,7 @@ void ogles2_glTexImage3D(struct OGLES2Context *ctx, GLenum target, GLint level, 
         }
         if (img && pixels)
             convert(img, (ULONG)width * cb, src + (ULONG)k * in, format, type, width, height, row);
-        put_level(&t->f[k], level, img, width, height, format, type, pixels != 0);
+        put_level(&t->f[k], level, img, width, height, format, type, pixels != 0, keep);
     }
     for (k = depth; k < t->nf; k++)
         drop_level(&t->f[k], level);
@@ -2920,6 +3135,17 @@ static BOOL sized_storage(GLenum ifmt, GLenum *format, GLenum *type)
     case GL_RG16F:             *format = GL_RG; *type = GL_HALF_FLOAT_OES; return TRUE;
     case GL_R32F:              *format = GL_RED; *type = GL_FLOAT; return TRUE;
     case GL_RG32F:             *format = GL_RG; *type = GL_FLOAT; return TRUE;
+    case GL_R8_SNORM:          *format = GL_RED; *type = GL_BYTE; return TRUE;
+    case GL_RG8_SNORM:         *format = GL_RG; *type = GL_BYTE; return TRUE;
+    case GL_RGB8_SNORM:        *format = GL_RGB; *type = GL_BYTE; return TRUE;
+    case GL_RGBA8_SNORM:       *format = GL_RGBA; *type = GL_BYTE; return TRUE;
+    case GL_SRGB8:             *format = GL_RGB; *type = GL_UNSIGNED_BYTE; return TRUE; /* keep_sized: sRGB */
+    case GL_SRGB8_ALPHA8:      *format = GL_RGBA; *type = GL_UNSIGNED_BYTE; return TRUE;
+    case GL_RGB10_A2:          *format = GL_RGBA; *type = GL_UNSIGNED_INT_2_10_10_10_REV; return TRUE;
+    case GL_R11F_G11F_B10F:    *format = GL_RGB; *type = GL_FLOAT; return TRUE;
+    case GL_RGB9_E5:           *format = GL_RGB; *type = GL_FLOAT; return TRUE;
+    case GL_DEPTH_COMPONENT32F: *format = GL_DEPTH_COMPONENT; *type = GL_FLOAT; return TRUE;
+    case GL_DEPTH32F_STENCIL8: *format = GL_DEPTH_STENCIL_OES; *type = GL_FLOAT_32_UNSIGNED_INT_24_8_REV; return TRUE;
     case GL_DEPTH_COMPONENT16: *format = GL_DEPTH_COMPONENT; *type = GL_UNSIGNED_SHORT; return TRUE;
     case GL_DEPTH_COMPONENT24: *format = GL_DEPTH_COMPONENT; *type = GL_UNSIGNED_INT; return TRUE;
     case GL_DEPTH24_STENCIL8:  *format = GL_DEPTH_STENCIL_OES; *type = GL_UNSIGNED_INT_24_8_OES; return TRUE;
@@ -2999,7 +3225,7 @@ static void tex_storage(struct OGLES2Context *ctx, GLenum target, GLsizei levels
                 ogles2_error(ctx, GL_OUT_OF_MEMORY);
                 return;
             }
-            put_level(&t->f[k], l, img, w, h, format, type, FALSE);
+            put_level(&t->f[k], l, img, w, h, format, type, FALSE, keep_sized(ifmt));
         }
         if (layers)
             t->d[l] = (UWORD)d;
@@ -3231,7 +3457,7 @@ static void dxt_image(struct OGLES2Context *ctx, struct OGLES2TexState *ts, GLen
     }
     if (img && data)
         CopyMem((APTR)data, img, bytes);
-    set_level(ctx, t, k, level, img, width, height, format, 0, data != 0);
+    set_level(ctx, t, k, level, img, width, height, format, 0, data != 0, 0);
 }
 
 void ogles2_glCompressedTexImage2D(struct OGLES2Context *ctx, GLenum target, GLint level,
@@ -3469,7 +3695,7 @@ static BOOL generate_volume(struct OGLES2Context *ctx, struct OGLES2Texture *t, 
                     img[i] = (UBYTE)((img[i] + two[i] + 1) >> 1);
             }
             FreeVec(two);
-            put_level(&t->f[z], l, img, w, h, a->format[l - 1], a->type[l - 1], TRUE);
+            put_level(&t->f[z], l, img, w, h, a->format[l - 1], a->type[l - 1], TRUE, a->sized[l - 1]);
         }
         for (z = d; z < t->nf; z++)
             drop_level(&t->f[z], l);
@@ -3543,6 +3769,7 @@ void ogles2_glGenerateMipmap(struct OGLES2Context *ctx, GLenum target)
             f->h[l] = (UWORD)h;
             f->format[l] = f->format[l - 1];
             f->type[l] = f->type[l - 1];
+            f->sized[l] = f->sized[l - 1];
             f->defined |= 1UL << l;
             f->blank &= ~(1UL << l);
         }
@@ -3887,6 +4114,8 @@ BOOL ogles2_texture_state(struct OGLES2Context *ctx, int unit, int kind, ULONG *
     tsr->image_depth_hi = (ULONG)faces(t) >> 10;
     tsr->array_stride_64_byte_aligned = faces(t) > 1 ? t->face_stride / 64 : 0;
     tsr->texture_type = t->hw_type;
+    /* ES 3.0's sRGB formats: RGBA8 the TMU decodes (Mesa: util_format_is_srgb) */
+    tsr->srgb = t->f[0].sized[0] == GL_SRGB8 || t->f[0].sized[0] == GL_SRGB8_ALPHA8;
     /* The GL swizzle composed with the format's (Mesa's
      * util_format_compose_swizzles): component k reads the format's channel
      * the GL swizzle names, or zero or one. */

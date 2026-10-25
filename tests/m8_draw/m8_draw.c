@@ -922,6 +922,53 @@ static void test_rg(void)
     glDeleteProgram(p);
 }
 
+/* A 1x1 texture of `ifmt` from (format, type, texel) sampled (es3wide, bound): (r, g, b, a) within tol. */
+static int texel_is(GLuint p, GLenum ifmt, GLenum format, GLenum type, const void *texel, int r, int g, int b, int a,
+                    int tol)
+{
+    GLuint t;
+    int ok;
+    glGenTextures(1, &t);
+    glBindTexture(GL_TEXTURE_2D, t);
+    glTexImage2D(GL_TEXTURE_2D, 0, (GLint)ifmt, 1, 1, 0, format, type, texel);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    ok = pixel_is(32, 32, r, g, b, a, tol) && glGetError() == GL_NO_ERROR;
+    glDeleteTextures(1, &t);
+    return ok;
+}
+
+/* ES 3.0's signed normalized, sRGB, packed and 32F depth formats. */
+static void test_formats3(void)
+{
+    static const GLbyte snorm[4] = { 127, 64, -127, 127 };
+    static const GLubyte srgb[4] = { 188, 188, 188, 255 };          /* about 0.5 linear */
+    static const GLuint rgb10a2[1] = { 1023UL | (512UL << 10) | (3UL << 30) };
+    static const GLfloat flt3[3] = { 0.5f, 0.25f, 0.75f };
+    static const GLfloat depth[1] = { 0.5f };
+    GLuint p = program("es3wide");
+    if (!p) {
+        check(0, "more formats: es3wide links");
+        return;
+    }
+    glUseProgram(p);
+    glUniform1i(glGetUniformLocation(p, "tex"), 0);
+    check(texel_is(p, GL_RGBA8_SNORM, GL_RGBA, GL_BYTE, snorm, 255, 129, 0, 255, 2),
+          "more formats: GL_RGBA8_SNORM (1, 0.5, -1 clamped by the target, 1)");
+    check(texel_is(p, GL_SRGB8_ALPHA8, GL_RGBA, GL_UNSIGNED_BYTE, srgb, 128, 128, 128, 255, 2),
+          "more formats: GL_SRGB8_ALPHA8 decoded (188 to 0.5)");
+    check(texel_is(p, GL_RGB10_A2, GL_RGBA, GL_UNSIGNED_INT_2_10_10_10_REV, rgb10a2, 255, 128, 0, 255, 1),
+          "more formats: GL_RGB10_A2");
+    check(texel_is(p, GL_R11F_G11F_B10F, GL_RGB, GL_FLOAT, flt3, 128, 64, 191, 255, 1) &&
+              texel_is(p, GL_RGB9_E5, GL_RGB, GL_FLOAT, flt3, 128, 64, 191, 255, 1),
+          "more formats: GL_R11F_G11F_B10F and GL_RGB9_E5 from floats");
+    check(texel_is(p, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT, depth, 128, 0, 0, 255, 1),
+          "more formats: GL_DEPTH_COMPONENT32F as (d, 0, 0, 1)");
+    glDeleteProgram(p);
+}
+
 /* The keys' 32-bit samplers and alpha to coverage (stage A item 5), in a 4x
  * MSAA context: es3wide outputs one texel. A float texture needs the
  * sampler's 32-bit bit in the fragment key (a 16-bit return reads it
@@ -1029,6 +1076,7 @@ int main(void)
     test_query();
     test_storage();
     test_rg();
+    test_formats3();
     check(glGetError() == GL_NO_ERROR, "no GL error left over");
     aglDestroyContext(ctx);
     if ((ctx = aglCreateContextTags2(&e, OGLES2_CCT_BITMAP, (ULONG)bm, OGLES2_CCT_PISTORM_ES_VERSION, 30,

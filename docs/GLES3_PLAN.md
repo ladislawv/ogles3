@@ -1525,9 +1525,30 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    `texture.specification.texstorage*` 98 of 240 and `texture.format.*` 206
    of 546, every failure a format not taken yet, none an image
    (`ogles2-m8-2-20261025-191749`, `-191827`). Rendering into them
-   is item 10's. Next in this item: the integer, sRGB, packed float,
-   10-bit and 32F depth formats, which need new hardware types and RAM
-   copy classes.
+   is item 10's.
+   **Signed normalized, sRGB, packed and 32F depth (2026-10-25, on the
+   A1200):** `R8_SNORM` to `RGBA8_SNORM` (`GL_BYTE`), `SRGB8` and
+   `SRGB8_ALPHA8`, `RGB10_A2` (`UNSIGNED_INT_2_10_10_10_REV`),
+   `R11F_G11F_B10F` and `RGB9_E5` (their packed types, half floats or
+   floats), `DEPTH_COMPONENT32F` and `DEPTH32F_STENCIL8` (`GL_FLOAT`,
+   `FLOAT_32_UNSIGNED_INT_24_8_REV`; the depth only, as sampling sees
+   it), in glTexImage* and glTexStorage* (ES3 contexts; `rg_refused` keeps
+   GLES2 contexts' errors). The signed and packed ones keep a float RAM
+   copy (`convert_float`, `unpack_word`) the store encodes per hardware
+   type (`pack_wide`, `encoded_type`: the 11- and 10-bit floats as a half
+   float's top bits, RGB9_E5 by ES 3.0's equations 3.4 to 3.7 without
+   libm, `rgb9e5`); sRGB keeps its bytes and the texture state's sRGB bit;
+   32F depth its float's bits (the TMU's `DEPTH_COMP32F`). A level keeps
+   the sized format where format and type do not say the storage
+   (`OGLES2Face.sized`: sRGB, the packed floats given as floats), which
+   also keeps those from the 32-bit variants (`level_wide`). `m8_draw`'s
+   texel of each (`ogles2-m8-1-20261025-192536`: 68 of 68; the GLES2
+   drawing tests as before, `ogles2-m7-4-20261025-192608`); dEQP-GLES3's
+   `texstorage*` 140 of 240 and `texture.format.*` 290 of 546, the rest
+   all integer formats (`ogles2-m8-2-20261025-192636`, `-192748`). Next
+   in this item: the integer formats, with the integer samplers (a kind
+   of their own, the TMU's integer returns in the keys) instead of
+   `OGLES2_TEX_NONE`.
 9. **ETC2/EAC** (mandatory in ES 3.0): native in the TMU (texture types
    `RGB8_ETC2`, `RGB8_PUNCHTHROUGH_ALPHA1`, `RGBA8_ETC2_EAC`, `R11_EAC`,
    `SIGNED_R11_EAC`, `RG11_EAC`, `SIGNED_RG11_EAC`; sRGB by the texture

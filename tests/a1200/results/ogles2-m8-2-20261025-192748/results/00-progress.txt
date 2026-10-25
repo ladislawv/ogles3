@@ -1,0 +1,5 @@
+ogles2 M8 run 2: --deqp-caselist-file M8R2:caselists/texture-format.txt
+Sunday 25-Oct-26 20:27:48
+texture-format done
+finished
+Sunday 25-Oct-26 20:28:26
