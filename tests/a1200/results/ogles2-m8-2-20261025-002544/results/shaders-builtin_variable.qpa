@@ -1,0 +1,416 @@
+#sessionInfo releaseName unknown
+#sessionInfo releaseId 0xcafebabe
+#sessionInfo targetName "AmigaOS3"
+#sessionInfo logFormatVersion "0.3.4"
+#sessionInfo vendor "ogles2.library"
+#sessionInfo renderer "V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM"
+#sessionInfo commandLineParameters "--deqp-caselist-file M8R2:caselists/shaders-builtin_variable.txt --deqp-archive-dir=M8R2:bin --deqp-log-filename=M8R2:results/shaders-builtin_variable.qpa --deqp-log-images=disable --deqp-log-shader-sources=disable --deqp-surface-width=256 --deqp-surface-height=256 --deqp-gl-config-name=rgba8888d24s8ms0"
+
+#beginSession
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_attribs_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_attribs_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">41862</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_attribs_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_attribs_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">11596</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_uniform_vectors_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_uniform_vectors_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">10799</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_uniform_vectors_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_uniform_vectors_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">13052</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_fragment_uniform_vectors_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_fragment_uniform_vectors_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">11876</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_fragment_uniform_vectors_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_fragment_uniform_vectors_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">10501</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_texture_image_units_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_texture_image_units_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">11507</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_texture_image_units_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_texture_image_units_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">10993</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_texture_image_units_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_texture_image_units_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">11576</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_texture_image_units_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_texture_image_units_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">11613</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_combined_texture_image_units_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_combined_texture_image_units_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">12117</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_combined_texture_image_units_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_combined_texture_image_units_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">12632</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_draw_buffers_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_draw_buffers_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">10658</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_draw_buffers_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_draw_buffers_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">11898</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_output_vectors_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_output_vectors_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">11148</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_output_vectors_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_output_vectors_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">11472</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_fragment_input_vectors_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_fragment_input_vectors_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">11031</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_fragment_input_vectors_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_fragment_input_vectors_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">13064</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.min_program_texel_offset_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.min_program_texel_offset_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">11638</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.min_program_texel_offset_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.min_program_texel_offset_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">11730</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_program_texel_offset_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_program_texel_offset_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">13273</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.max_program_texel_offset_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.max_program_texel_offset_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">10874</Number>
+ <Result StatusCode="Fail">Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.depth_range_vertex
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.depth_range_vertex" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.332000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.071000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">4.805000</Number>
+ <Text>glDepthRangef(0, 1)</Text>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>glDepthRangef(1.5, -1)</Text>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>glDepthRangef(0.7, 0.3)</Text>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">448239</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.depth_range_fragment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.depth_range_fragment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">5.823000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">3.408000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">6.659000</Number>
+ <Text>glDepthRangef(0, 1)</Text>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>glDepthRangef(1.5, -1)</Text>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Text>glDepthRangef(0.7, 0.3)</Text>
+ <ImageSet Name="ComparisonResult" Description="Image comparison result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">398910</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.vertex_id
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.vertex_id" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.195000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.945000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">5.071000</Number>
+ <Section Name="Iter0" Description="glDrawArrays()" />
+ <ImageSet Name="Result" Description="Image comparison result" />
+ <Section Name="Iter1" Description="glDrawElements(), indices in client-side array" />
+ <ImageSet Name="Result" Description="Image comparison result" />
+ <Section Name="Iter2" Description="glDrawElements(), indices in buffer" />
+ <ImageSet Name="Result" Description="Image comparison result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">93808</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.fragcoord_xyz
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.fragcoord_xyz" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.884000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.125000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">5.748000</Number>
+ <ImageSet Name="Result" Description="Image comparison result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">76401</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.fragcoord_w
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.fragcoord_w" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.901000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.143000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">4.910000</Number>
+ <ImageSet Name="Result" Description="Image comparison result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">77204</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.pointcoord
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.pointcoord" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.980000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.994000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">8.003000</Number>
+ <ImageSet Name="Result" Description="Image comparison result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">318357</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.shaders.builtin_variable.frontfacing
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.shaders.builtin_variable.frontfacing" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.008000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.332000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">7.950000</Number>
+ <ImageSet Name="Result" Description="Image comparison result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">23304</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+Run took 1.90 seconds
+
+#endSession

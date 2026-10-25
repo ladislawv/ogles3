@@ -1,0 +1,36 @@
+ogles2 M8: GLSL ES 3.00 programs drawn in an OpenGL ES 3.0 context
+PASS: flat: the last vertex's blue everywhere (not a blend of red, green and blue)
+PASS: rasterizer discard: a clear and a draw leave the picture as it was
+PASS: block: a uniform block member reads zero (0.25, 0.5, 0.75 + 0)
+PASS: size: textureSize of a 16x8 texture
+PASS: size: textureSize at base level 1 (8x4)
+PASS: vertex id: glDrawArrays from vertex 3 (the last is 5)
+PASS: vertex id: indices 6, 7, 8 as given
+PASS: vertex id: indices 0, 1, 2 with base vertex 6
+PASS: vertex id: 8-bit indices with base vertex 297 (299: past 8 bits)
+PASS: primitive restart: a strip ended by index 0xFFFF
+PASS: draw-time variant: two outputs into one RGBA8 target draw its green
+PASS: a 1.x compiler's file of es3old refused and replaced
+PASS: sampler objects: the texture alone is incomplete (black)
+PASS: sampler objects: a sampler without mipmaps completes it
+PASS: sampler objects: unbound, the texture's own filter
+PASS: sampler objects: a mipmapping sampler makes it incomplete again
+PASS: 2D array: GL_TEXTURE_BINDING_2D_ARRAY
+PASS: 2D array: layers 1 and 2 (green, blue)
+PASS: 2D array: layer 1 replaced (yellow), layer 3 as it was
+PASS: 3D: slices 1 and 3 (green, white)
+PASS: 3D: glGenerateMipmap's level 1 (1x1x2), each slice two of level 0
+PASS: 3D: a 64x64x8 texture's slice 5
+PASS: 3D: its level 1's slice 2 (32x32x4), slices 4 and 5 filtered
+PASS: pixel store: a texel at (2, 1) of a 4-texel row length
+PASS: pixel store: glReadPixels at (1, 2) of a 4-pixel row length, the rest untouched
+PASS: pixel store: layers from images 1 and 2 of 2-row images
+PASS: no GL error left over
+PASS: 32-bit samplers and alpha to coverage: a 4x MSAA context
+PASS: 32-bit samplers: a float texture read right
+PASS: alpha to coverage: alpha 0.5 covers half the samples
+PASS: both: a float texture with alpha to coverage
+PASS: neither: an RGBA8 texture covers every sample
+PASS: texture swizzle: (b, 0, 1, r)
+PASS: no GL error left over (4x MSAA)
+PASSED: 34 of 34

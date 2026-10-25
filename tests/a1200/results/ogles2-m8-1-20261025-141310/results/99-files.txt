@@ -1,0 +1,17 @@
+Directory "M8R1:results" on Sunday 25-Oct-26
+00-progress.txt                 146 ----rwed Today     15:13:14
+00-libs.txt                     216 ----rwed Today     15:13:10
+1-smoke.txt                    1119 ----rwed Today     15:13:10
+ogles2.log                    21583 ----rwed Today     15:13:14
+2-m8_es3-release.txt           1340 ----rwed Today     15:13:10
+3-m8_es3-es3.txt               4871 ----rwed Today     15:13:12
+4-limits.txt                   1399 ----rwed Today     15:13:12
+5-m8_draw.txt                  2683 ----rwed Today     15:13:13
+6-m8_draw-nocompiler.txt       2683 ----rwed Today     15:13:14
+6-cache.txt                    2081 ----rwed Today     15:13:14
+7-m8_draw-shipped.txt          2683 ----rwed Today     15:13:14
+7-cache.txt                    1943 ----rwed Today     15:13:14
+7-shipped.txt                   214 ----rwed Today     15:13:14
+notes.txt                       345 ----rwed Today     15:13:14
+99-files.txt                    784 ----rwed Today     15:13:14
+15 files - 43K bytes - 110 blocks used

@@ -1,0 +1,5 @@
+ogles2 M8 run 2: --deqp-caselist-file M8R2:caselists/vertex_array_objects.txt
+Sunday 25-Oct-26 15:14:11
+vertex_array_objects done
+finished
+Sunday 25-Oct-26 15:14:18

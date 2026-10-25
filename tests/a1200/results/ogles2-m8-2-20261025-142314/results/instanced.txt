@@ -1,0 +1,152 @@
+Writing test log into M8R2:results/instanced.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles2.library: 52 functions of the ES 3.0 table not implemented yet: glBeginQuery glBeginTransformFeedback glBindTransformFeedback glBlitFramebuffer glClearBufferfi glClearBufferfv glClearBufferiv glClearBufferuiv glClientWaitSync glCompressedTexImage3D glCompressedTexSubImage3D glCopyTexSubImage3D glDeleteQueries glDeleteSync glDeleteTransformFeedbacks glDrawBuffers glEndQuery glEndTransformFeedback glFenceSync glFramebufferTextureLayer glGenQueries glGenTransformFeedbacks glGetInternalformativ glGetProgramBinary glGetQueryObjectuiv glGetSynciv glGetTransformFeedbackVarying glGetVertexAttribIiv glGetVertexAttribIuiv glInvalidateFramebuffer glInvalidateSubFramebuffer glIsQuery glIsSync glIsTransformFeedback glPauseTransformFeedback glProgramBinary glProgramParameteri glReadBuffer glRenderbufferStorageMultisample glResumeTransformFeedback glTexStorage2D glTexStorage3D glTransformFeedbackVaryings glVertexAttribI4i glVertexAttribI4iv glVertexAttribI4ui glVertexAttribI4uiv glVertexAttribIPointer glWaitSync glDrawElementsInstancedBaseVertexOES glDrawRangeElementsBaseVertexOES glMultiDrawElementsBaseVertexEXT
+
+Test case 'dEQP-GLES3.functional.instanced.draw_arrays_instanced.instance_id.1_instances'..
+ogles2.library: glBindTransformFeedback is not implemented yet (called as a no-op)
+ogles2.library: glDrawBuffers is not implemented yet (called as a no-op)
+ogles2.library: glReadBuffer is not implemented yet (called as a no-op)
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.draw_arrays_instanced.instance_id.2_instances'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.draw_arrays_instanced.instance_id.4_instances'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.draw_arrays_instanced.instance_id.20_instances'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.draw_arrays_instanced.attribute_divisor.1_instances'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.draw_arrays_instanced.attribute_divisor.2_instances'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.draw_arrays_instanced.attribute_divisor.4_instances'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.draw_arrays_instanced.attribute_divisor.20_instances'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.draw_arrays_instanced.mixed.1_instances'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.draw_arrays_instanced.mixed.2_instances'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.draw_arrays_instanced.mixed.4_instances'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.draw_arrays_instanced.mixed.20_instances'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.draw_elements_instanced.instance_id.1_instances'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.draw_elements_instanced.instance_id.2_instances'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.draw_elements_instanced.instance_id.4_instances'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.draw_elements_instanced.instance_id.20_instances'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.draw_elements_instanced.attribute_divisor.1_instances'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.draw_elements_instanced.attribute_divisor.2_instances'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.draw_elements_instanced.attribute_divisor.4_instances'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.draw_elements_instanced.attribute_divisor.20_instances'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.draw_elements_instanced.mixed.1_instances'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.draw_elements_instanced.mixed.2_instances'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.draw_elements_instanced.mixed.4_instances'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.draw_elements_instanced.mixed.20_instances'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.types.float'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.types.vec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.types.vec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.types.vec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.types.mat2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.types.mat2x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.types.mat2x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.types.mat3x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.types.mat3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.types.mat3x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.types.mat4x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.types.mat4x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.types.mat4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.instanced.types.int'..
+ogles2.library: glVertexAttribIPointer is not implemented yet (called as a no-op)
+  Fail (Fail)
+
+Test case 'dEQP-GLES3.functional.instanced.types.ivec2'..
+  Fail (Fail)
+
+Test case 'dEQP-GLES3.functional.instanced.types.ivec3'..
+  Fail (Fail)
+
+Test case 'dEQP-GLES3.functional.instanced.types.ivec4'..
+  Fail (Fail)
+
+Test case 'dEQP-GLES3.functional.instanced.types.uint'..
+  Fail (Fail)
+
+Test case 'dEQP-GLES3.functional.instanced.types.uvec2'..
+  Fail (Fail)
+
+Test case 'dEQP-GLES3.functional.instanced.types.uvec3'..
+  Fail (Fail)
+
+Test case 'dEQP-GLES3.functional.instanced.types.uvec4'..
+  Fail (Fail)
+
+DONE!
+
+Test run totals:
+  Passed:        37/45 (82.2%)
+  Failed:        8/45 (17.8%)
+  Not supported: 0/45 (0.0%)
+  Warnings:      0/45 (0.0%)
+  Waived:        0/45 (0.0%)

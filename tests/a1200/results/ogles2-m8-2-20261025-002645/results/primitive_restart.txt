@@ -1,0 +1,1531 @@
+Writing test log into M8R2:results/primitive_restart.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles2.library: 70 functions of the ES 3.0 table not implemented yet: glBeginQuery glBeginTransformFeedback glBindTransformFeedback glBindVertexArray glBlitFramebuffer glClearBufferfi glClearBufferfv glClearBufferiv glClearBufferuiv glClientWaitSync glCompressedTexImage3D glCompressedTexSubImage3D glCopyTexSubImage3D glDeleteQueries glDeleteSync glDeleteTransformFeedbacks glDeleteVertexArrays glDrawArraysInstanced glDrawBuffers glDrawElementsInstanced glEndQuery glEndTransformFeedback glFenceSync glFlushMappedBufferRange glFramebufferTextureLayer glGenQueries glGenTransformFeedbacks glGenVertexArrays glGetActiveUniformBlockName glGetActiveUniformBlockiv glGetActiveUniformsiv glGetBufferParameteri64v glGetBufferPointerv glGetInternalformativ glGetProgramBinary glGetQueryObjectuiv glGetSynciv glGetTransformFeedbackVarying glGetUniformBlockIndex glGetUniformIndices glGetVertexAttribIiv glGetVertexAttribIuiv glInvalidateFramebuffer glInvalidateSubFramebuffer glIsQuery glIsSync glIsTransformFeedback glIsVertexArray glMapBufferRange glPauseTransformFeedback glProgramBinary glProgramParameteri glReadBuffer glRenderbufferStorageMultisample glResumeTransformFeedback glTexStorage2D glTexStorage3D glTransformFeedbackVaryings glUniformBlockBinding glUnmapBuffer glVertexAttribDivisor glVertexAttribI4i glVertexAttribI4iv glVertexAttribI4ui glVertexAttribI4uiv glVertexAttribIPointer glWaitSync glDrawElementsInstancedBaseVertexOES glDrawRangeElementsBaseVertexOES glMultiDrawElementsBaseVertexEXT
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.points.unsigned_byte.draw_elements'..
+ogles2.library: glBindVertexArray is not implemented yet (called as a no-op)
+ogles2.library: glVertexAttribDivisor is not implemented yet (called as a no-op)
+ogles2.library: glBindTransformFeedback is not implemented yet (called as a no-op)
+ogles2.library: glDrawBuffers is not implemented yet (called as a no-op)
+ogles2.library: glReadBuffer is not implemented yet (called as a no-op)
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.points.unsigned_byte.draw_elements_instanced'..
+ogles2.library: glDrawElementsInstanced is not implemented yet (called as a no-op)
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.points.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.points.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.points.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.points.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.points.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.points.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.points.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.line_strip.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.line_strip.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.line_strip.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.line_strip.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.line_strip.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.line_strip.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.line_strip.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.line_strip.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.line_strip.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.line_loop.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.line_loop.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.line_loop.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.line_loop.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.line_loop.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.line_loop.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.line_loop.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.line_loop.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.line_loop.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.lines.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.lines.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.lines.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.lines.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.lines.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.lines.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.lines.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.lines.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.lines.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangle_strip.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangle_strip.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangle_strip.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangle_strip.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangle_strip.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangle_strip.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangle_strip.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangle_strip.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangle_strip.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangle_fan.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangle_fan.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangle_fan.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangle_fan.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangle_fan.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangle_fan.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangle_fan.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangle_fan.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangle_fan.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangles.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangles.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangles.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangles.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangles.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangles.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangles.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangles.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.basic.triangles.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.points.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.points.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.points.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.points.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.points.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.points.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.points.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.points.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.points.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.line_strip.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.line_strip.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.line_strip.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.line_strip.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.line_strip.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.line_strip.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.line_strip.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.line_strip.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.line_strip.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.line_loop.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.line_loop.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.line_loop.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.line_loop.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.line_loop.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.line_loop.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.line_loop.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.line_loop.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.line_loop.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.lines.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.lines.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.lines.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.lines.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.lines.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.lines.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.lines.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.lines.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.lines.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangle_strip.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangle_strip.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangle_strip.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangle_strip.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangle_strip.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangle_strip.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangle_strip.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangle_strip.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangle_strip.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangle_fan.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangle_fan.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangle_fan.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangle_fan.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangle_fan.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangle_fan.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangle_fan.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangle_fan.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangle_fan.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangles.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangles.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangles.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangles.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangles.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangles.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangles.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangles.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.duplicate_restarts.triangles.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.points.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.points.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.points.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.points.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.points.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.points.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.points.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.points.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.points.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.line_strip.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.line_strip.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.line_strip.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.line_strip.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.line_strip.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.line_strip.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.line_strip.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.line_strip.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.line_strip.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.line_loop.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.line_loop.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.line_loop.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.line_loop.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.line_loop.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.line_loop.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.line_loop.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.line_loop.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.line_loop.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.lines.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.lines.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.lines.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.lines.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.lines.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.lines.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.lines.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.lines.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.lines.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangle_strip.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangle_strip.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangle_strip.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangle_strip.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangle_strip.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangle_strip.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangle_strip.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangle_strip.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangle_strip.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangle_fan.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangle_fan.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangle_fan.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangle_fan.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangle_fan.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangle_fan.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangle_fan.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangle_fan.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangle_fan.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangles.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangles.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangles.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangles.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangles.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangles.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangles.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangles.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart.triangles.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.points.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.points.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.points.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.points.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.points.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.points.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.points.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.points.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.points.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.line_strip.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.line_strip.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.line_strip.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.line_strip.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.line_strip.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.line_strip.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.line_strip.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.line_strip.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.line_strip.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.line_loop.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.line_loop.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.line_loop.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.line_loop.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.line_loop.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.line_loop.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.line_loop.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.line_loop.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.line_loop.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.lines.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.lines.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.lines.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.lines.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.lines.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.lines.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.lines.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.lines.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.lines.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangle_strip.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangle_strip.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangle_strip.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangle_strip.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangle_strip.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangle_strip.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangle_strip.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangle_strip.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangle_strip.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangle_fan.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangle_fan.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangle_fan.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangle_fan.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangle_fan.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangle_fan.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangle_fan.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangle_fan.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangle_fan.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangles.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangles.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangles.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangles.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangles.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangles.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangles.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangles.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.end_restart_duplicate_restarts.triangles.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.points.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.points.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.points.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.points.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.points.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.points.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.points.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.points.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.points.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.line_strip.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.line_strip.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.line_strip.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.line_strip.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.line_strip.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.line_strip.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.line_strip.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.line_strip.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.line_strip.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.line_loop.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.line_loop.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.line_loop.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.line_loop.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.line_loop.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.line_loop.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.line_loop.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.line_loop.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.line_loop.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.lines.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.lines.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.lines.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.lines.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.lines.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.lines.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.lines.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.lines.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.lines.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangle_strip.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangle_strip.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangle_strip.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangle_strip.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangle_strip.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangle_strip.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangle_strip.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangle_strip.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangle_strip.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangle_fan.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangle_fan.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangle_fan.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangle_fan.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangle_fan.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangle_fan.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangle_fan.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangle_fan.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangle_fan.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangles.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangles.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangles.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangles.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangles.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangles.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangles.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangles.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart.triangles.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.points.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.points.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.points.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.points.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.points.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.points.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.points.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.points.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.points.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.line_strip.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.line_strip.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.line_strip.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.line_strip.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.line_strip.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.line_strip.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.line_strip.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.line_strip.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.line_strip.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.line_loop.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.line_loop.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.line_loop.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.line_loop.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.line_loop.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.line_loop.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.line_loop.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.line_loop.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.line_loop.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.lines.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.lines.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.lines.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.lines.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.lines.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.lines.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.lines.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.lines.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.lines.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangle_strip.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangle_strip.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangle_strip.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangle_strip.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangle_strip.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangle_strip.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangle_strip.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangle_strip.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangle_strip.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangle_fan.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangle_fan.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangle_fan.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangle_fan.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangle_fan.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangle_fan.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangle_fan.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangle_fan.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangle_fan.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangles.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangles.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangles.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangles.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangles.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangles.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangles.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangles.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_duplicate_restarts.triangles.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.points.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.points.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.points.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.points.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.points.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.points.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.points.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.points.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.points.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.line_strip.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.line_strip.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.line_strip.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.line_strip.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.line_strip.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.line_strip.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.line_strip.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.line_strip.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.line_strip.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.line_loop.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.line_loop.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.line_loop.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.line_loop.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.line_loop.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.line_loop.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.line_loop.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.line_loop.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.line_loop.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.lines.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.lines.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.lines.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.lines.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.lines.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.lines.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.lines.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.lines.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.lines.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangle_strip.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangle_strip.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangle_strip.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangle_strip.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangle_strip.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangle_strip.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangle_strip.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangle_strip.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangle_strip.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangle_fan.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangle_fan.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangle_fan.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangle_fan.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangle_fan.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangle_fan.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangle_fan.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangle_fan.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangle_fan.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangles.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangles.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangles.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangles.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangles.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangles.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangles.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangles.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart.triangles.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.points.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.points.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.points.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.points.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.points.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.points.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.points.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.points.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.points.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.line_strip.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.line_strip.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.line_strip.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.line_strip.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.line_strip.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.line_strip.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.line_strip.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.line_strip.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.line_strip.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.line_loop.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.line_loop.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.line_loop.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.line_loop.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.line_loop.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.line_loop.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.line_loop.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.line_loop.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.line_loop.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.lines.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.lines.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.lines.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.lines.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.lines.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.lines.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.lines.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.lines.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.lines.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangle_strip.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangle_strip.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangle_strip.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangle_strip.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangle_strip.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangle_strip.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangle_strip.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangle_strip.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangle_strip.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangle_fan.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangle_fan.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangle_fan.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangle_fan.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangle_fan.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangle_fan.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangle_fan.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangle_fan.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangle_fan.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangles.unsigned_byte.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangles.unsigned_byte.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangles.unsigned_byte.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangles.unsigned_short.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangles.unsigned_short.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangles.unsigned_short.draw_range_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangles.unsigned_int.draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangles.unsigned_int.draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.primitive_restart.begin_restart_end_restart_duplicate_restarts.triangles.unsigned_int.draw_range_elements'..
+  Pass (Pass)
+
+DONE!
+
+Test run totals:
+  Passed:        504/504 (100.0%)
+  Failed:        0/504 (0.0%)
+  Not supported: 0/504 (0.0%)
+  Warnings:      0/504 (0.0%)
+  Waived:        0/504 (0.0%)

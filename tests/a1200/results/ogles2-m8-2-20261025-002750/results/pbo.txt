@@ -1,0 +1,182 @@
+Writing test log into M8R2:results/pbo.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles2.library: 70 functions of the ES 3.0 table not implemented yet: glBeginQuery glBeginTransformFeedback glBindTransformFeedback glBindVertexArray glBlitFramebuffer glClearBufferfi glClearBufferfv glClearBufferiv glClearBufferuiv glClientWaitSync glCompressedTexImage3D glCompressedTexSubImage3D glCopyTexSubImage3D glDeleteQueries glDeleteSync glDeleteTransformFeedbacks glDeleteVertexArrays glDrawArraysInstanced glDrawBuffers glDrawElementsInstanced glEndQuery glEndTransformFeedback glFenceSync glFlushMappedBufferRange glFramebufferTextureLayer glGenQueries glGenTransformFeedbacks glGenVertexArrays glGetActiveUniformBlockName glGetActiveUniformBlockiv glGetActiveUniformsiv glGetBufferParameteri64v glGetBufferPointerv glGetInternalformativ glGetProgramBinary glGetQueryObjectuiv glGetSynciv glGetTransformFeedbackVarying glGetUniformBlockIndex glGetUniformIndices glGetVertexAttribIiv glGetVertexAttribIuiv glInvalidateFramebuffer glInvalidateSubFramebuffer glIsQuery glIsSync glIsTransformFeedback glIsVertexArray glMapBufferRange glPauseTransformFeedback glProgramBinary glProgramParameteri glReadBuffer glRenderbufferStorageMultisample glResumeTransformFeedback glTexStorage2D glTexStorage3D glTransformFeedbackVaryings glUniformBlockBinding glUnmapBuffer glVertexAttribDivisor glVertexAttribI4i glVertexAttribI4iv glVertexAttribI4ui glVertexAttribI4uiv glVertexAttribIPointer glWaitSync glDrawElementsInstancedBaseVertexOES glDrawRangeElementsBaseVertexOES glMultiDrawElementsBaseVertexEXT
+
+Test case 'dEQP-GLES3.functional.pbo.native.clears'..
+ogles2.library: glMapBufferRange is not implemented yet (called as a no-op)
+ogles2.library: glBindVertexArray is not implemented yet (called as a no-op)
+ogles2.library: glVertexAttribDivisor is not implemented yet (called as a no-op)
+ogles2.library: glBindTransformFeedback is not implemented yet (called as a no-op)
+ogles2.library: glDrawBuffers is not implemented yet (called as a no-op)
+ogles2.library: glReadBuffer is not implemented yet (called as a no-op)
+  Fail (glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584)
+
+Test case 'dEQP-GLES3.functional.pbo.native.triangles'..
+  Fail (glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgba8_triangles'..
+  Fail (glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgba8_clears'..
+  Fail (glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgba8i_triangles'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgba8i_clears'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgba8ui_triangles'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgba8ui_clears'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgba16f_triangles'..
+ogles2.library: glClearBufferfv is not implemented yet (called as a no-op)
+  Fail (glReadPixels(0, 0, width, height, readPixelsFormat, readPixelsType, 0): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:536)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgba16f_clears'..
+  Fail (glReadPixels(0, 0, width, height, readPixelsFormat, readPixelsType, 0): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:536)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgba16i_triangles'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgba16i_clears'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgba16ui_triangles'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgba16ui_clears'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgba32f_triangles'..
+  NotSupported (Renderbuffer format not supported: '' at es3fPixelBufferObjectTests.cpp:200)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgba32f_clears'..
+  NotSupported (Renderbuffer format not supported: '' at es3fPixelBufferObjectTests.cpp:200)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgba32i_triangles'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgba32i_clears'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgba32ui_triangles'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgba32ui_clears'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.srgb8_alpha8_triangles'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.srgb8_alpha8_clears'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgb10_a2_triangles'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgb10_a2_clears'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgb10_a2ui_triangles'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgb10_a2ui_clears'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgba4_triangles'..
+  Fail (glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgba4_clears'..
+  Fail (glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgb5_a1_triangles'..
+  Fail (glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgb5_a1_clears'..
+  Fail (glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgb8_triangles'..
+  Fail (glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgb8_clears'..
+  Fail (glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgb565_triangles'..
+  Fail (glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rgb565_clears'..
+  Fail (glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.r11f_g11f_b10f_triangles'..
+  NotSupported (Renderbuffer format not supported: '' at es3fPixelBufferObjectTests.cpp:200)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.r11f_g11f_b10f_clears'..
+  NotSupported (Renderbuffer format not supported: '' at es3fPixelBufferObjectTests.cpp:200)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rg8_triangles'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rg8_clears'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rg8i_triangles'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rg8i_clears'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rg8ui_triangles'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rg8ui_clears'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rg16f_triangles'..
+  Fail (glReadPixels(0, 0, width, height, readPixelsFormat, readPixelsType, 0): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:536)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rg16f_clears'..
+  Fail (glReadPixels(0, 0, width, height, readPixelsFormat, readPixelsType, 0): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:536)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rg16i_triangles'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rg16i_clears'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rg16ui_triangles'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rg16ui_clears'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rg32f_triangles'..
+  NotSupported (Renderbuffer format not supported: '' at es3fPixelBufferObjectTests.cpp:200)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rg32f_clears'..
+  NotSupported (Renderbuffer format not supported: '' at es3fPixelBufferObjectTests.cpp:200)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rg32i_triangles'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rg32i_clears'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rg32ui_triangles'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+Test case 'dEQP-GLES3.functional.pbo.renderbuffer.rg32ui_clears'..
+  Fail (glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393)
+
+DONE!
+
+Test run totals:
+  Passed:        0/54 (0.0%)
+  Failed:        48/54 (88.9%)
+  Not supported: 6/54 (11.1%)
+  Warnings:      0/54 (0.0%)
+  Waived:        0/54 (0.0%)

@@ -1,0 +1,48 @@
+     1 ogles2.library 1.3 init
+     2 open (count 1)
+     3 GPU submission lock "V3D 4.2 submit" at 0x083D6238
+     4 device: V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM, clipper granularity 256
+     5 device: GPU-visible RAM (device tree memory): 0x01000000-0x2E9FFFFF
+     6 device: GPU-visible RAM (device tree memory): 0x40000000-0x79DFFFFF
+     7 device: memory region "expansion memory" 0x08000020-0x2E9FFFFF fast: the GPU reaches it
+     8 device: memory region "expansion memory" 0x01000020-0x07FFFFFF fast: the GPU reaches it
+     9 device: memory region "expansion memory" 0x41000020-0x79DFFFFF fast: the GPU reaches it
+    10 device: memory region "memory" 0x00C00020-0x00C7FFFF fast: OUTSIDE the GPU-visible RAM
+    11 device: memory region "chip memory" 0x00001020-0x001FFFFF chip: OUTSIDE the GPU-visible RAM
+    12 display: own window, 256x256, BGRA
+    13 device: context pools for 256x256, D32F, 17783168 bytes of GPU memory in use
+    14 aglCreateContext2: context 0x08F78D9C, OpenGL ES 3.0, 256x256
+    15 compiler: Stuff:amictld/work/ogles2-m8-2/libs/v3dglslc, 19025780 bytes, id B972F903
+    16 glLinkProgram: OGLES2Cache:bca80c2ffc46afca373c9f6e.v3dp (5 variants, 608 bytes of code)
+    17 job: depth and stencil kept across a mid-frame flush (logged once)
+    18 glLinkProgram: OGLES2Cache:fd8ef76933c4ecbde374433e.v3dp (5 variants, 608 bytes of code)
+    19 glLinkProgram: OGLES2Cache:97170b3c8822db3978fde9bf.v3dp (5 variants, 728 bytes of code)
+    20 glLinkProgram: OGLES2Cache:1172a3155f0405814d6d4d53.v3dp (5 variants, 680 bytes of code)
+    21 glLinkProgram: OGLES2Cache:30dd229f92ce89b52b91e2be.v3dp (5 variants, 824 bytes of code)
+    22 glLinkProgram: OGLES2Cache:1e5cfd7952d1912af4ec0e8e.v3dp (5 variants, 608 bytes of code)
+    23 glLinkProgram: OGLES2Cache:253e669303ecdf73323f8bff.v3dp (5 variants, 608 bytes of code)
+    24 glLinkProgram: OGLES2Cache:b4baa00fc835b4e724d33709.v3dp (5 variants, 728 bytes of code)
+    25 glLinkProgram: OGLES2Cache:d535acad320f875f6d51985f.v3dp (5 variants, 680 bytes of code)
+    26 glLinkProgram: OGLES2Cache:0b5a896c888b79eec5391277.v3dp (5 variants, 824 bytes of code)
+    27 glLinkProgram: OGLES2Cache:7908919e64872de8a468ceab.v3dp (5 variants, 608 bytes of code)
+    28 glLinkProgram: OGLES2Cache:ae0b320d8658d3c31a84b6d5.v3dp (5 variants, 608 bytes of code)
+    29 glLinkProgram: OGLES2Cache:ee7712ff38a35bc433c05739.v3dp (5 variants, 728 bytes of code)
+    30 glLinkProgram: OGLES2Cache:21fe0f311e32341fed907aba.v3dp (5 variants, 680 bytes of code)
+    31 glLinkProgram: OGLES2Cache:dd3e8fa6467878b49f41798d.v3dp (5 variants, 824 bytes of code)
+    32 glLinkProgram: OGLES2Cache:0b0e573a500301a45fdf33eb.v3dp (5 variants, 824 bytes of code)
+    33 glLinkProgram: OGLES2Cache:d342b47e185f9b72647ad451.v3dp (5 variants, 608 bytes of code)
+    34 glLinkProgram: OGLES2Cache:64d1e0e8f2dabdf888e88feb.v3dp (5 variants, 1112 bytes of code)
+    35 glLinkProgram: OGLES2Cache:36866f409dbe167a0d74e69d.v3dp (5 variants, 1712 bytes of code)
+    36 glLinkProgram: OGLES2Cache:a0f6c1c1a6761941f1ff1749.v3dp (5 variants, 1808 bytes of code)
+    37 glLinkProgram: OGLES2Cache:9d965bfaeb6a0f5974c1be2e.v3dp (5 variants, 608 bytes of code)
+    38 glLinkProgram: OGLES2Cache:e46775b72e427eb38308000c.v3dp (5 variants, 608 bytes of code)
+    39 glLinkProgram: OGLES2Cache:9cc687483350d919c823ea09.v3dp (5 variants, 728 bytes of code)
+    40 glLinkProgram: OGLES2Cache:a239dacdb4e06b8186702fa6.v3dp (5 variants, 680 bytes of code)
+    41 glLinkProgram: OGLES2Cache:f21892b5424e9b1c6e8f9aef.v3dp (5 variants, 824 bytes of code)
+    42 aglDestroyContext: context 0x08F78D9C: freeing
+    43 device: context freed, 0 bytes of GPU memory still in use
+    44 aglDestroyContext: context 0x08F78D9C (25 frames, 0 dropped, 0 binning blocks added)
+    45 timing: 25 jobs, each on average: 1065 us of CPU work before its flush, 12 us waiting for binning, 160 us for the render
+    46 timing: and in each flush 162 us building the render list, 101 us for the CPU cache before the GPU, 52 us after
+    47 timing: 25 swaps, 164893 us from one to the next on average, 406 us of it presenting
+    48 timing: per frame 1 draws, 709 us in them; in all 0 ms in glBuffer(Sub)Data, 16 ms in glTex(Sub)Image2D

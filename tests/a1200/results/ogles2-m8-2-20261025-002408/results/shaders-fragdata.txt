@@ -1,0 +1,43 @@
+Writing test log into M8R2:results/shaders-fragdata.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles2.library: 70 functions of the ES 3.0 table not implemented yet: glBeginQuery glBeginTransformFeedback glBindTransformFeedback glBindVertexArray glBlitFramebuffer glClearBufferfi glClearBufferfv glClearBufferiv glClearBufferuiv glClientWaitSync glCompressedTexImage3D glCompressedTexSubImage3D glCopyTexSubImage3D glDeleteQueries glDeleteSync glDeleteTransformFeedbacks glDeleteVertexArrays glDrawArraysInstanced glDrawBuffers glDrawElementsInstanced glEndQuery glEndTransformFeedback glFenceSync glFlushMappedBufferRange glFramebufferTextureLayer glGenQueries glGenTransformFeedbacks glGenVertexArrays glGetActiveUniformBlockName glGetActiveUniformBlockiv glGetActiveUniformsiv glGetBufferParameteri64v glGetBufferPointerv glGetInternalformativ glGetProgramBinary glGetQueryObjectuiv glGetSynciv glGetTransformFeedbackVarying glGetUniformBlockIndex glGetUniformIndices glGetVertexAttribIiv glGetVertexAttribIuiv glInvalidateFramebuffer glInvalidateSubFramebuffer glIsQuery glIsSync glIsTransformFeedback glIsVertexArray glMapBufferRange glPauseTransformFeedback glProgramBinary glProgramParameteri glReadBuffer glRenderbufferStorageMultisample glResumeTransformFeedback glTexStorage2D glTexStorage3D glTransformFeedbackVaryings glUniformBlockBinding glUnmapBuffer glVertexAttribDivisor glVertexAttribI4i glVertexAttribI4iv glVertexAttribI4ui glVertexAttribI4uiv glVertexAttribIPointer glWaitSync glDrawElementsInstancedBaseVertexOES glDrawRangeElementsBaseVertexOES glMultiDrawElementsBaseVertexEXT
+
+Test case 'dEQP-GLES3.functional.shaders.fragdata.valid_static_index'..
+ogles2.library: glBindVertexArray is not implemented yet (called as a no-op)
+ogles2.library: glVertexAttribDivisor is not implemented yet (called as a no-op)
+ogles2.library: glBindTransformFeedback is not implemented yet (called as a no-op)
+ogles2.library: glDrawBuffers is not implemented yet (called as a no-op)
+ogles2.library: glReadBuffer is not implemented yet (called as a no-op)
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.fragdata.valid_uniform_index'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.fragdata.valid_dynamic_index'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.fragdata.draw_buffers'..
+ogles2.library: glClearBufferfv is not implemented yet (called as a no-op)
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.fragdata.invalid_assign_to_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.fragdata.write_fragcolor_and_fragdata_simple'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.fragdata.write_fragcolor_and_fragdata_static_if'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.fragdata.write_fragcolor_and_fragdata_unused_func'..
+  Pass (Pass)
+
+DONE!
+
+Test run totals:
+  Passed:        8/8 (100.0%)
+  Failed:        0/8 (0.0%)
+  Not supported: 0/8 (0.0%)
+  Warnings:      0/8 (0.0%)
+  Waived:        0/8 (0.0%)

@@ -1,0 +1,50 @@
+Writing test log into M8R2:results/vertex_array_objects.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles2.library: 55 functions of the ES 3.0 table not implemented yet: glBeginQuery glBeginTransformFeedback glBindTransformFeedback glBlitFramebuffer glClearBufferfi glClearBufferfv glClearBufferiv glClearBufferuiv glClientWaitSync glCompressedTexImage3D glCompressedTexSubImage3D glCopyTexSubImage3D glDeleteQueries glDeleteSync glDeleteTransformFeedbacks glDrawArraysInstanced glDrawBuffers glDrawElementsInstanced glEndQuery glEndTransformFeedback glFenceSync glFramebufferTextureLayer glGenQueries glGenTransformFeedbacks glGetInternalformativ glGetProgramBinary glGetQueryObjectuiv glGetSynciv glGetTransformFeedbackVarying glGetVertexAttribIiv glGetVertexAttribIuiv glInvalidateFramebuffer glInvalidateSubFramebuffer glIsQuery glIsSync glIsTransformFeedback glPauseTransformFeedback glProgramBinary glProgramParameteri glReadBuffer glRenderbufferStorageMultisample glResumeTransformFeedback glTexStorage2D glTexStorage3D glTransformFeedbackVaryings glVertexAttribDivisor glVertexAttribI4i glVertexAttribI4iv glVertexAttribI4ui glVertexAttribI4uiv glVertexAttribIPointer glWaitSync glDrawElementsInstancedBaseVertexOES glDrawRangeElementsBaseVertexOES glMultiDrawElementsBaseVertexEXT
+
+Test case 'dEQP-GLES3.functional.vertex_array_objects.diff_buffer'..
+ogles2.library: glVertexAttribDivisor is not implemented yet (called as a no-op)
+ogles2.library: glBindTransformFeedback is not implemented yet (called as a no-op)
+ogles2.library: glDrawBuffers is not implemented yet (called as a no-op)
+ogles2.library: glReadBuffer is not implemented yet (called as a no-op)
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.vertex_array_objects.diff_size'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.vertex_array_objects.diff_stride'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.vertex_array_objects.diff_type'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.vertex_array_objects.diff_integer'..
+ogles2.library: glVertexAttribIPointer is not implemented yet (called as a no-op)
+ogles2.library: glVertexAttribI4i is not implemented yet (called as a no-op)
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.vertex_array_objects.diff_divisor'..
+ogles2.library: glDrawArraysInstanced is not implemented yet (called as a no-op)
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.vertex_array_objects.diff_offset'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.vertex_array_objects.diff_normalize'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.vertex_array_objects.diff_indices'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.vertex_array_objects.all_attributes'..
+  Pass (Pass)
+
+DONE!
+
+Test run totals:
+  Passed:        10/10 (100.0%)
+  Failed:        0/10 (0.0%)
+  Not supported: 0/10 (0.0%)
+  Warnings:      0/10 (0.0%)
+  Waived:        0/10 (0.0%)

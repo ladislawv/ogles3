@@ -144,6 +144,17 @@ static void test_flat(void)
     check(pixel_is(2, 2, 0, 0, 255, 255, 0) && pixel_is(32, 32, 0, 0, 255, 255, 0) &&
               pixel_is(61, 3, 0, 0, 255, 255, 0) && pixel_is(3, 61, 0, 0, 255, 255, 0),
           "flat: the last vertex's blue everywhere (not a blend of red, green and blue)");
+    /* GL_RASTERIZER_DISCARD: neither a clear nor a draw changes a pixel. */
+    glEnable(GL_RASTERIZER_DISCARD);
+    glClearColor(1, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glEnableVertexAttribArray((GLuint)c);
+    draw_cover(p);
+    glDisableVertexAttribArray((GLuint)c);
+    glDisable(GL_RASTERIZER_DISCARD);
+    glClearColor(0, 0, 0, 0);
+    check(pixel_is(32, 32, 0, 0, 255, 255, 0) && glGetError() == GL_NO_ERROR,
+          "rasterizer discard: a clear and a draw leave the picture as it was");
     glDeleteProgram(p);
 }
 
@@ -157,7 +168,65 @@ static void test_block(void)
     glClear(GL_COLOR_BUFFER_BIT);
     draw_cover(p);
     check(pixel_is(10, 10, 64, 128, 191, 255, 1) && pixel_is(50, 40, 64, 128, 191, 255, 1),
-          "block: a uniform block member reads zero (0.25, 0.5, 0.75 + 0)");
+          "block: a uniform block member without a buffer reads zero (0.25, 0.5, 0.75 + 0)");
+    {
+        static const GLchar *names[1] = { "Extra.add" };
+        static GLfloat data[64 + 4]; /* the range at 256 bytes */
+        GLuint idx = glGetUniformBlockIndex(p, "Extra"), ui = 0, buf;
+        GLint size = 0, nu = 0, member = -1, offset = -1, bidx = -2, fs = 0;
+        glGetActiveUniformBlockiv(p, idx, GL_UNIFORM_BLOCK_DATA_SIZE, &size);
+        glGetActiveUniformBlockiv(p, idx, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &nu);
+        glGetActiveUniformBlockiv(p, idx, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, &member);
+        glGetActiveUniformBlockiv(p, idx, GL_UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER, &fs);
+        glGetUniformIndices(p, 1, names, &ui);
+        glGetActiveUniformsiv(p, 1, &ui, GL_UNIFORM_OFFSET, &offset);
+        glGetActiveUniformsiv(p, 1, &ui, GL_UNIFORM_BLOCK_INDEX, &bidx);
+        check(idx == 0 && size == 16 && nu == 1 && member == (GLint)ui && fs && offset == 0 && bidx == 0 &&
+                  glGetError() == GL_NO_ERROR,
+              "block: Extra's index, size, member, offset (glGetActiveUniformBlockiv, glGetActiveUniformsiv)");
+        data[64] = 0.25f;
+        data[65] = 0.25f;
+        glGenBuffers(1, &buf);
+        glBindBuffer(GL_UNIFORM_BUFFER, buf);
+        glBufferData(GL_UNIFORM_BUFFER, sizeof(data), data, GL_DYNAMIC_DRAW);
+        glUniformBlockBinding(p, idx, 3);
+        glBindBufferRange(GL_UNIFORM_BUFFER, 3, buf, 256, 16);
+        glClear(GL_COLOR_BUFFER_BIT);
+        draw_cover(p);
+        check(pixel_is(32, 32, 128, 191, 191, 255, 1), "block: Extra at binding 3 from a buffer range (+ 0.25, 0.25, 0, 0)");
+        /* Two draws of one frame, the data changed between them: each its own. */
+        data[64] = 0.0f;
+        data[65] = 0.0f;
+        data[66] = 0.25f;
+        glEnable(GL_SCISSOR_TEST);
+        glScissor(0, 0, 32, 64);
+        glClear(GL_COLOR_BUFFER_BIT);
+        draw_cover(p);
+        glBufferSubData(GL_UNIFORM_BUFFER, 256, 16, data + 64);
+        glScissor(32, 0, 32, 64);
+        draw_cover(p);
+        glDisable(GL_SCISSOR_TEST);
+        check(pixel_is(16, 32, 128, 191, 191, 255, 1) && pixel_is(48, 32, 64, 128, 255, 255, 1) &&
+                  glGetError() == GL_NO_ERROR,
+              "block: a draw before and one after glBufferSubData in one frame");
+        {
+            GLfloat *m = glMapBufferRange(GL_UNIFORM_BUFFER, 256, 16, GL_MAP_WRITE_BIT | GL_MAP_FLUSH_EXPLICIT_BIT);
+            if (m) {
+                m[0] = 0.25f;
+                m[1] = m[2] = m[3] = 0.0f;
+            }
+            glFlushMappedBufferRange(GL_UNIFORM_BUFFER, 0, 16);
+            glUnmapBuffer(GL_UNIFORM_BUFFER);
+            glClear(GL_COLOR_BUFFER_BIT);
+            draw_cover(p);
+            check(m && pixel_is(32, 32, 128, 128, 191, 255, 1) && glGetError() == GL_NO_ERROR,
+                  "block: Extra written through glMapBufferRange, flushed (+ 0.25, 0, 0, 0)");
+        }
+        glDeleteBuffers(1, &buf);
+        glClear(GL_COLOR_BUFFER_BIT);
+        draw_cover(p);
+        check(pixel_is(32, 32, 64, 128, 191, 255, 1), "block: its buffer deleted, zero again");
+    }
     glDeleteProgram(p);
 }
 
@@ -287,6 +356,364 @@ static void test_old(void)
     glDeleteProgram(p);
 }
 
+/* ES 3.0's sampler objects: a sampler bound to unit 0 is sampled with
+ * instead of the texture's parameters, completeness too, and unbound the
+ * texture's own count again (dEQP-GLES3's samplers do the same). es3wide
+ * outputs one texel. */
+static void test_sampler(void)
+{
+    static const GLubyte by[16] = { 64, 128, 192, 255, 64, 128, 192, 255, 64, 128, 192, 255, 64, 128, 192, 255 };
+    GLuint p = program("es3wide"), t, s;
+    if (!p) {
+        check(0, "sampler objects: es3wide links");
+        return;
+    }
+    glGenTextures(1, &t);
+    glBindTexture(GL_TEXTURE_2D, t);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, by);
+    glUseProgram(p);
+    glUniform1i(glGetUniformLocation(p, "tex"), 0);
+    glGenSamplers(1, &s);
+    /* The texture's default minification filter mipmaps: one level is incomplete. */
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    check(pixel_is(20, 20, 0, 0, 0, 255, 0), "sampler objects: the texture alone is incomplete (black)");
+    glSamplerParameteri(s, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glBindSampler(0, s);
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    check(pixel_is(20, 20, 64, 128, 192, 255, 1), "sampler objects: a sampler without mipmaps completes it");
+    glBindSampler(0, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    check(pixel_is(20, 20, 64, 128, 192, 255, 1), "sampler objects: unbound, the texture's own filter");
+    glSamplerParameteri(s, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glBindSampler(0, s);
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    check(pixel_is(20, 20, 0, 0, 0, 255, 0) && glGetError() == GL_NO_ERROR,
+          "sampler objects: a mipmapping sampler makes it incomplete again");
+    glBindSampler(0, 0);
+    glDeleteSamplers(1, &s);
+    glDeleteTextures(1, &t);
+    glDeleteProgram(p);
+}
+
+/* A w x h x d image of RGBA8 texels, slice (layer) z in the colour col(z). */
+static GLubyte *slices(int w, int h, int d, void (*col)(int z, GLubyte *c))
+{
+    GLubyte *img = malloc((size_t)w * h * d * 4), c[4];
+    int z, i;
+    for (z = 0; img && z < d; z++) {
+        col(z, c);
+        for (i = 0; i < w * h; i++)
+            memcpy(img + ((size_t)z * w * h + i) * 4, c, 4);
+    }
+    return img;
+}
+
+static void rgbw(int z, GLubyte *c) /* red, green, blue, white */
+{
+    c[0] = z == 0 || z == 3 ? 255 : 0;
+    c[1] = z == 1 || z == 3 ? 255 : 0;
+    c[2] = z >= 2 ? 255 : 0;
+    c[3] = 255;
+}
+
+static void ramp(int z, GLubyte *c) /* red up, green down */
+{
+    c[0] = (GLubyte)(z * 32);
+    c[1] = (GLubyte)(255 - z * 32);
+    c[2] = 0;
+    c[3] = 255;
+}
+
+/* Draws program p with its float uniform `u` at v; the middle pixel is (r, g, b). */
+static int layer_is(GLuint p, const char *u, GLfloat v, int r, int g, int b, int tol)
+{
+    glUseProgram(p);
+    glUniform1f(glGetUniformLocation(p, u), v);
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    return pixel_is(32, 32, r, g, b, 255, tol);
+}
+
+/* ES 3.0's 2D array and 3D textures (stage B item 8): es3layer reads a
+ * layer of an array, es3vol a 3D texture at a depth, at the middle of their
+ * texels. A small 3D texture's level 1 (1x1x2) and a 64x64x8 one's (UIF
+ * levels) made by glGenerateMipmap, which filters the slices in depth. */
+static void test_layers(void)
+{
+    static const GLubyte yellow[2 * 2 * 4] = { 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255, 255, 255, 0, 255 };
+    GLuint pa = program("es3layer"), pv = program("es3vol"), t[3];
+    GLubyte *img;
+    GLint b = 0;
+    if (!pa || !pv) {
+        check(0, "2D array and 3D textures: es3layer and es3vol link");
+        return;
+    }
+    glGenTextures(3, t);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, t[0]);
+    img = slices(2, 2, 4, rgbw);
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, 2, 2, 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
+    free(img);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glGetIntegerv(GL_TEXTURE_BINDING_2D_ARRAY, &b);
+    check(b == (GLint)t[0] && glGetError() == GL_NO_ERROR, "2D array: GL_TEXTURE_BINDING_2D_ARRAY");
+    glUseProgram(pa);
+    glUniform1i(glGetUniformLocation(pa, "tex"), 0);
+    check(layer_is(pa, "layer", 1.0f, 0, 255, 0, 1) && layer_is(pa, "layer", 2.0f, 0, 0, 255, 1),
+          "2D array: layers 1 and 2 (green, blue)");
+    glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 1, 2, 2, 1, GL_RGBA, GL_UNSIGNED_BYTE, yellow);
+    check(layer_is(pa, "layer", 1.0f, 255, 255, 0, 1) && layer_is(pa, "layer", 3.0f, 255, 255, 255, 1),
+          "2D array: layer 1 replaced (yellow), layer 3 as it was");
+
+    glBindTexture(GL_TEXTURE_3D, t[1]);
+    img = slices(2, 2, 4, rgbw);
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, 2, 2, 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
+    free(img);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glUseProgram(pv);
+    glUniform1i(glGetUniformLocation(pv, "tex"), 0);
+    check(layer_is(pv, "z", 0.375f, 0, 255, 0, 1) && layer_is(pv, "z", 0.875f, 255, 255, 255, 1),
+          "3D: slices 1 and 3 (green, white)");
+    glGenerateMipmap(GL_TEXTURE_3D);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_BASE_LEVEL, 1);
+    check(layer_is(pv, "z", 0.25f, 128, 128, 0, 1) && layer_is(pv, "z", 0.75f, 128, 128, 255, 1) &&
+              glGetError() == GL_NO_ERROR,
+          "3D: glGenerateMipmap's level 1 (1x1x2), each slice two of level 0");
+
+    glBindTexture(GL_TEXTURE_3D, t[2]);
+    img = slices(64, 64, 8, ramp);
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, 64, 64, 8, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
+    free(img);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    check(layer_is(pv, "z", 5.5f / 8.0f, 160, 95, 0, 1), "3D: a 64x64x8 texture's slice 5");
+    glGenerateMipmap(GL_TEXTURE_3D);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_BASE_LEVEL, 1);
+    check(layer_is(pv, "z", 2.5f / 4.0f, 144, 111, 0, 1) && glGetError() == GL_NO_ERROR,
+          "3D: its level 1's slice 2 (32x32x4), slices 4 and 5 filtered");
+    glDeleteTextures(3, t);
+    glDeleteProgram(pa);
+    glDeleteProgram(pv);
+}
+
+/* ES 3.0's pixel store: a texel from inside a larger image (row length,
+ * skipped rows and pixels), a 2D array's layers from images with a gap
+ * (image height, skipped images), and glReadPixels into the middle of a
+ * larger buffer. */
+static void test_pixel_store(void)
+{
+    static GLubyte img[3 * 4 * 4], imgs[3 * 2 * 4];
+    GLubyte out[3 * 4 * 4];
+    GLuint p = program("es3wide"), pa = program("es3layer"), t[2];
+    if (!p || !pa) {
+        check(0, "pixel store: es3wide and es3layer link");
+        return;
+    }
+    memset(img, 0, sizeof(img));
+    img[(1 * 4 + 2) * 4 + 0] = 10; /* (2, 1) of a 4x3 image */
+    img[(1 * 4 + 2) * 4 + 1] = 200;
+    img[(1 * 4 + 2) * 4 + 2] = 30;
+    img[(1 * 4 + 2) * 4 + 3] = 255;
+    glGenTextures(2, t);
+    glBindTexture(GL_TEXTURE_2D, t[0]);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 4);
+    glPixelStorei(GL_UNPACK_SKIP_PIXELS, 2);
+    glPixelStorei(GL_UNPACK_SKIP_ROWS, 1);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+    glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+    glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glUseProgram(p);
+    glUniform1i(glGetUniformLocation(p, "tex"), 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    check(pixel_is(32, 32, 10, 200, 30, 255, 1), "pixel store: a texel at (2, 1) of a 4-texel row length");
+    memset(out, 7, sizeof(out));
+    glPixelStorei(GL_PACK_ROW_LENGTH, 4);
+    glPixelStorei(GL_PACK_SKIP_PIXELS, 1);
+    glPixelStorei(GL_PACK_SKIP_ROWS, 2);
+    glReadPixels(32, 32, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, out);
+    glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+    glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
+    glPixelStorei(GL_PACK_SKIP_ROWS, 0);
+    check(out[(2 * 4 + 1) * 4] >= 9 && out[(2 * 4 + 1) * 4] <= 11 && out[(2 * 4 + 1) * 4 + 1] >= 199 &&
+              out[(2 * 4 + 1) * 4 + 1] <= 201 && out[0] == 7 && out[(2 * 4 + 2) * 4] == 7,
+          "pixel store: glReadPixels at (1, 2) of a 4-pixel row length, the rest untouched");
+    /* Three 1x2 images, the first row of each in a colour: layers from images 1 and 2. */
+    memset(imgs, 0, sizeof(imgs));
+    imgs[(1 * 2) * 4 + 0] = 255; /* image 1: red */
+    imgs[(1 * 2) * 4 + 3] = 255;
+    imgs[(2 * 2) * 4 + 2] = 255; /* image 2: blue */
+    imgs[(2 * 2) * 4 + 3] = 255;
+    glBindTexture(GL_TEXTURE_2D_ARRAY, t[1]);
+    glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 2);
+    glPixelStorei(GL_UNPACK_SKIP_IMAGES, 1);
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, 1, 1, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgs);
+    glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
+    glPixelStorei(GL_UNPACK_SKIP_IMAGES, 0);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glUseProgram(pa);
+    glUniform1i(glGetUniformLocation(pa, "tex"), 0);
+    check(layer_is(pa, "layer", 0.0f, 255, 0, 0, 1) && layer_is(pa, "layer", 1.0f, 0, 0, 255, 1) &&
+              glGetError() == GL_NO_ERROR,
+          "pixel store: layers from images 1 and 2 of 2-row images");
+    glDeleteTextures(2, t);
+    glDeleteProgram(p);
+    glDeleteProgram(pa);
+}
+
+/* Draws es3wide (bound, its texture unit 0) over a 1x1 texture made from
+ * the unpack buffer's bytes at `offset`; the middle pixel is (r, g, b). */
+static int unpacked_is(GLuint p, GLuint t, GLuint buf, ULONG offset, int r, int g, int b)
+{
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buf);
+    glBindTexture(GL_TEXTURE_2D, t);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, (const void *)offset);
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    return pixel_is(32, 32, r, g, b, 255, 1);
+}
+
+/* ES 3.0's buffer targets: a texel from a pixel unpack buffer, the drawn
+ * pixel read into a pack buffer and back as a texel, and a texel copied
+ * from one buffer into another (glCopyBufferSubData). */
+static void test_pixel_buffer(void)
+{
+    static const GLubyte data[16] = { 0, 0, 0, 255, 0, 0, 0, 0, 10, 200, 30, 255, 0, 0, 0, 0 };
+    GLuint p = program("es3wide"), t, b[2];
+    if (!p) {
+        check(0, "pixel buffers: es3wide links");
+        return;
+    }
+    glGenTextures(1, &t);
+    glGenBuffers(2, b);
+    glUseProgram(p);
+    glUniform1i(glGetUniformLocation(p, "tex"), 0);
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, b[0]);
+    glBufferData(GL_PIXEL_UNPACK_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
+    check(unpacked_is(p, t, b[0], 8, 10, 200, 30), "pixel buffers: a texel from an unpack buffer");
+    glBindBuffer(GL_PIXEL_PACK_BUFFER, b[1]);
+    glBufferData(GL_PIXEL_PACK_BUFFER, 16, 0, GL_STREAM_READ);
+    glReadPixels(32, 32, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, (void *)4);
+    glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    check(unpacked_is(p, t, b[1], 4, 10, 200, 30), "pixel buffers: the pixel read into a pack buffer");
+    glBindBuffer(GL_COPY_READ_BUFFER, b[0]);
+    glBindBuffer(GL_COPY_WRITE_BUFFER, b[1]);
+    glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 4, 4);
+    glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 8, 12, 4);
+    check(unpacked_is(p, t, b[1], 4, 0, 0, 0) && unpacked_is(p, t, b[1], 12, 10, 200, 30) &&
+              glGetError() == GL_NO_ERROR,
+          "pixel buffers: texels copied between buffers");
+    glDeleteBuffers(2, b);
+    glDeleteTextures(1, &t);
+    glDeleteProgram(p);
+}
+
+/* ES 3.0's vertex array objects: two, each with its position and colour
+ * buffers (es3flat: the last vertex's colour), the second also with an
+ * element buffer; drawing with each draws its own. */
+static void test_vao(void)
+{
+    static const GLfloat red[12] = { 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1 };
+    static const GLfloat green[12] = { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 };
+    static const GLushort idx[3] = { 0, 1, 2 };
+    GLuint p = program("es3flat"), va[2], bu[4];
+    GLint pos, col, k;
+    if (!p) {
+        check(0, "vertex array objects: es3flat links");
+        return;
+    }
+    pos = glGetAttribLocation(p, "pos");
+    col = glGetAttribLocation(p, "col");
+    glGenVertexArrays(2, va);
+    glGenBuffers(4, bu);
+    for (k = 0; k < 2; k++) {
+        glBindVertexArray(va[k]);
+        glBindBuffer(GL_ARRAY_BUFFER, bu[0]);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(cover), cover, GL_STATIC_DRAW);
+        glVertexAttribPointer((GLuint)pos, 2, GL_FLOAT, GL_FALSE, 0, 0);
+        glEnableVertexAttribArray((GLuint)pos);
+        glBindBuffer(GL_ARRAY_BUFFER, bu[1 + k]);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(red), k ? green : red, GL_STATIC_DRAW);
+        glVertexAttribPointer((GLuint)col, 4, GL_FLOAT, GL_FALSE, 0, 0);
+        glEnableVertexAttribArray((GLuint)col);
+    }
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bu[3]); /* the second object's */
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(idx), idx, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glUseProgram(p);
+    glBindVertexArray(va[0]);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    check(pixel_is(32, 32, 255, 0, 0, 255, 0), "vertex array objects: the first's arrays (red)");
+    glBindVertexArray(va[1]);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
+    check(pixel_is(32, 32, 0, 255, 0, 255, 0) && glGetError() == GL_NO_ERROR,
+          "vertex array objects: the second's arrays and element buffer (green)");
+    glBindVertexArray(0);
+    glDeleteVertexArrays(2, va);
+    glDeleteBuffers(4, bu);
+    glDeleteProgram(p);
+}
+
+/* ES 3.0's instanced draws: es3inst moves instance i right by i; a quad
+ * over the left half drawn twice is the whole picture, each half in its
+ * instanced colour; a divisor of 2 gives both instances the first. */
+static void test_instanced(void)
+{
+    static const GLfloat quad[8] = { -1, -1, 0, -1, -1, 1, 0, 1 };
+    static const GLfloat cols[8] = { 1, 0, 0, 1, 0, 1, 0, 1 }; /* red, green */
+    static const GLfloat greens[16] = { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 };
+    static const GLubyte idx[4] = { 0, 1, 2, 3 };
+    GLuint p = program("es3inst");
+    GLint pos, col, dv = -1;
+    if (!p) {
+        check(0, "instanced draws: es3inst links");
+        return;
+    }
+    pos = glGetAttribLocation(p, "pos");
+    col = glGetAttribLocation(p, "col");
+    glUseProgram(p);
+    glVertexAttribPointer((GLuint)pos, 2, GL_FLOAT, GL_FALSE, 0, quad);
+    glVertexAttribPointer((GLuint)col, 4, GL_FLOAT, GL_FALSE, 0, cols);
+    glEnableVertexAttribArray((GLuint)pos);
+    glEnableVertexAttribArray((GLuint)col);
+    glVertexAttribDivisor((GLuint)col, 1);
+    glGetVertexAttribiv((GLuint)col, GL_VERTEX_ATTRIB_ARRAY_DIVISOR, &dv);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 2);
+    check(dv == 1 && pixel_is(16, 32, 255, 0, 0, 255, 0) && pixel_is(48, 32, 0, 255, 0, 255, 0),
+          "instanced draws: glDrawArraysInstanced, two instances (red, green)");
+    glVertexAttribDivisor((GLuint)col, 2);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawElementsInstanced(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_BYTE, idx, 2);
+    check(pixel_is(16, 32, 255, 0, 0, 255, 0) && pixel_is(48, 32, 255, 0, 0, 255, 0) && glGetError() == GL_NO_ERROR,
+          "instanced draws: glDrawElementsInstanced with a divisor of 2 (both red)");
+    glVertexAttribDivisor((GLuint)col, 0);
+    glVertexAttribPointer((GLuint)col, 4, GL_FLOAT, GL_FALSE, 0, greens);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    check(pixel_is(16, 32, 0, 255, 0, 255, 0) && pixel_is(48, 32, 0, 0, 0, 0, 0),
+          "instanced draws: divisor 0 again, one instance (the left half, the last vertex's green)");
+    glDisableVertexAttribArray((GLuint)pos);
+    glDisableVertexAttribArray((GLuint)col);
+    glDeleteProgram(p);
+}
+
 /* The keys' 32-bit samplers and alpha to coverage (stage A item 5), in a 4x
  * MSAA context: es3wide outputs one texel. A float texture needs the
  * sampler's 32-bit bit in the fragment key (a 16-bit return reads it
@@ -340,6 +767,14 @@ static void test_wide_a2c(void)
     glClear(GL_COLOR_BUFFER_BIT);
     draw_cover(p);
     check(pixel_is(20, 20, 64, 128, 192, 128, 2), "neither: an RGBA8 texture covers every sample");
+    /* ES 3.0's texture swizzle: (b, 0, 1, r) of the texel. */
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_BLUE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_ZERO);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_ONE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_RED);
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    check(pixel_is(20, 20, 192, 0, 255, 64, 2), "texture swizzle: (b, 0, 1, r)");
     glDeleteTextures(2, t);
     glDeleteProgram(p);
 }
@@ -375,6 +810,12 @@ int main(void)
     test_vertex_id();
     test_variant();
     test_old();
+    test_sampler();
+    test_layers();
+    test_pixel_store();
+    test_pixel_buffer();
+    test_vao();
+    test_instanced();
     check(glGetError() == GL_NO_ERROR, "no GL error left over");
     aglDestroyContext(ctx);
     if ((ctx = aglCreateContextTags2(&e, OGLES2_CCT_BITMAP, (ULONG)bm, OGLES2_CCT_PISTORM_ES_VERSION, 30,

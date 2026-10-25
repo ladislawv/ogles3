@@ -1,0 +1,540 @@
+Writing test log into M8R2:results/shaders-switch.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles2.library: 70 functions of the ES 3.0 table not implemented yet: glBeginQuery glBeginTransformFeedback glBindTransformFeedback glBindVertexArray glBlitFramebuffer glClearBufferfi glClearBufferfv glClearBufferiv glClearBufferuiv glClientWaitSync glCompressedTexImage3D glCompressedTexSubImage3D glCopyTexSubImage3D glDeleteQueries glDeleteSync glDeleteTransformFeedbacks glDeleteVertexArrays glDrawArraysInstanced glDrawBuffers glDrawElementsInstanced glEndQuery glEndTransformFeedback glFenceSync glFlushMappedBufferRange glFramebufferTextureLayer glGenQueries glGenTransformFeedbacks glGenVertexArrays glGetActiveUniformBlockName glGetActiveUniformBlockiv glGetActiveUniformsiv glGetBufferParameteri64v glGetBufferPointerv glGetInternalformativ glGetProgramBinary glGetQueryObjectuiv glGetSynciv glGetTransformFeedbackVarying glGetUniformBlockIndex glGetUniformIndices glGetVertexAttribIiv glGetVertexAttribIuiv glInvalidateFramebuffer glInvalidateSubFramebuffer glIsQuery glIsSync glIsTransformFeedback glIsVertexArray glMapBufferRange glPauseTransformFeedback glProgramBinary glProgramParameteri glReadBuffer glRenderbufferStorageMultisample glResumeTransformFeedback glTexStorage2D glTexStorage3D glTransformFeedbackVaryings glUniformBlockBinding glUnmapBuffer glVertexAttribDivisor glVertexAttribI4i glVertexAttribI4iv glVertexAttribI4ui glVertexAttribI4uiv glVertexAttribIPointer glWaitSync glDrawElementsInstancedBaseVertexOES glDrawRangeElementsBaseVertexOES glMultiDrawElementsBaseVertexEXT
+
+Test case 'dEQP-GLES3.functional.shaders.switch.basic_static_vertex'..
+ogles2.library: glBindVertexArray is not implemented yet (called as a no-op)
+ogles2.library: glVertexAttribDivisor is not implemented yet (called as a no-op)
+ogles2.library: glBindTransformFeedback is not implemented yet (called as a no-op)
+ogles2.library: glDrawBuffers is not implemented yet (called as a no-op)
+ogles2.library: glReadBuffer is not implemented yet (called as a no-op)
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.basic_static_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.basic_uniform_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.basic_uniform_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.basic_dynamic_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.basic_dynamic_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.const_expr_in_label_static_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.const_expr_in_label_static_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.const_expr_in_label_uniform_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.const_expr_in_label_uniform_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.const_expr_in_label_dynamic_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.const_expr_in_label_dynamic_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.default_label_static_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.default_label_static_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.default_label_uniform_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.default_label_uniform_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.default_label_dynamic_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.default_label_dynamic_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.default_not_last_static_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.default_not_last_static_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.default_not_last_uniform_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.default_not_last_uniform_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.default_not_last_dynamic_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.default_not_last_dynamic_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.no_default_label_static_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.no_default_label_static_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.no_default_label_uniform_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.no_default_label_uniform_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.no_default_label_dynamic_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.no_default_label_dynamic_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.default_only_static_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.default_only_static_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.default_only_uniform_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.default_only_uniform_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.empty_case_default_static_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.empty_case_default_static_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.empty_case_default_uniform_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.empty_case_default_uniform_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.fall_through_static_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.fall_through_static_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.fall_through_uniform_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.fall_through_uniform_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.fall_through_dynamic_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.fall_through_dynamic_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.fall_through_default_static_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.fall_through_default_static_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.fall_through_default_uniform_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.fall_through_default_uniform_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.fall_through_default_dynamic_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.fall_through_default_dynamic_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.conditional_fall_through_static_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.conditional_fall_through_static_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.conditional_fall_through_uniform_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.conditional_fall_through_uniform_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.conditional_fall_through_dynamic_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.conditional_fall_through_dynamic_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.conditional_fall_through_2_static_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.conditional_fall_through_2_static_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.conditional_fall_through_2_uniform_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.conditional_fall_through_2_uniform_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.conditional_fall_through_2_dynamic_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.conditional_fall_through_2_dynamic_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.scope_static_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.scope_static_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.scope_uniform_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.scope_uniform_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.scope_dynamic_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.scope_dynamic_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_if_static_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_if_static_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_if_uniform_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_if_uniform_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_if_dynamic_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_if_dynamic_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_for_loop_static_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_for_loop_static_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_for_loop_uniform_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_for_loop_uniform_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_for_loop_dynamic_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_for_loop_dynamic_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_while_loop_static_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_while_loop_static_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_while_loop_uniform_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_while_loop_uniform_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_while_loop_dynamic_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_while_loop_dynamic_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_do_while_loop_static_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_do_while_loop_static_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_do_while_loop_uniform_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_do_while_loop_uniform_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_do_while_loop_dynamic_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_do_while_loop_dynamic_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.if_in_switch_static_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.if_in_switch_static_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.if_in_switch_uniform_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.if_in_switch_uniform_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.if_in_switch_dynamic_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.if_in_switch_dynamic_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.for_loop_in_switch_static_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.for_loop_in_switch_static_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.for_loop_in_switch_uniform_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.for_loop_in_switch_uniform_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.for_loop_in_switch_dynamic_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.for_loop_in_switch_dynamic_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.while_loop_in_switch_static_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.while_loop_in_switch_static_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.while_loop_in_switch_uniform_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.while_loop_in_switch_uniform_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.while_loop_in_switch_dynamic_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.while_loop_in_switch_dynamic_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.do_while_loop_in_switch_static_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.do_while_loop_in_switch_static_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.do_while_loop_in_switch_uniform_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.do_while_loop_in_switch_uniform_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.do_while_loop_in_switch_dynamic_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.do_while_loop_in_switch_dynamic_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_switch_static_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_switch_static_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_switch_uniform_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_switch_uniform_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_switch_dynamic_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.switch_in_switch_dynamic_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.empty_condition_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.empty_condition_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.condition_float_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.condition_float_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.condition_bool_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.condition_bool_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.condition_ivec2_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.condition_ivec2_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.condition_struct_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.condition_struct_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.duplicate_label_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.duplicate_label_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.float_label_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.float_label_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.non_const_int_label_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.non_const_int_label_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.statement_before_label_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.statement_before_label_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.statement_before_default_label_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.statement_before_default_label_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.no_statement_after_label_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.no_statement_after_label_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.no_statement_after_default_label_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.no_statement_after_default_label_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.case_in_if_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.case_in_if_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.default_in_if_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.default_in_if_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.case_in_for_loop_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.case_in_for_loop_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.default_in_for_loop_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.default_in_for_loop_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.case_in_while_loop_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.case_in_while_loop_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.default_in_while_loop_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.default_in_while_loop_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.case_in_do_while_loop_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.case_in_do_while_loop_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.default_in_do_while_loop_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.default_in_do_while_loop_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.missing_colon_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.missing_colon_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.missing_opening_brace_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.missing_opening_brace_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.missing_closing_brace_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.missing_closing_brace_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.double_case_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.double_case_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.double_default_1_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.double_default_1_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.double_default_2_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.switch.double_default_2_fragment'..
+  Pass (Pass)
+
+DONE!
+
+Test run totals:
+  Passed:        174/174 (100.0%)
+  Failed:        0/174 (0.0%)
+  Not supported: 0/174 (0.0%)
+  Warnings:      0/174 (0.0%)
+  Waived:        0/174 (0.0%)

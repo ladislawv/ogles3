@@ -115,6 +115,11 @@ void ogles2_glVertexAttribPointer(struct OGLES2Context *ctx, GLuint index, GLint
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
+    /* ES 3.0 2.8: no client arrays in a vertex array object but 0 */
+    if (ogles2_vao_bound(ctx) && !ogles2_buffer_array(ctx) && pointer) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
     a = &ctx->array[index];
     a->size = size;
     a->type = type;
@@ -122,6 +127,17 @@ void ogles2_glVertexAttribPointer(struct OGLES2Context *ctx, GLuint index, GLint
     a->stride = stride;
     a->pointer = pointer;
     a->buffer = ogles2_buffer_array(ctx); /* GLES 2.0 2.9: captured now */
+}
+
+void ogles2_glVertexAttribDivisor(struct OGLES2Context *ctx, GLuint index, GLuint divisor)
+{
+    if (!ogles2_es3_entry(ctx))
+        return;
+    if (index >= OGLES2_MAX_VERTEX_ATTRIBS) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    ctx->array[index].divisor = divisor;
 }
 
 static void enable_array(struct OGLES2Context *ctx, GLuint index, GLboolean on)
@@ -164,6 +180,13 @@ void ogles2_glGetVertexAttribiv(struct OGLES2Context *ctx, GLuint index, GLenum 
     case GL_VERTEX_ATTRIB_ARRAY_TYPE:           *params = (GLint)a->type; break;
     case GL_VERTEX_ATTRIB_ARRAY_NORMALIZED:     *params = a->normalized; break;
     case GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING: *params = (GLint)ogles2_buffer_name(a->buffer); break;
+    case GL_VERTEX_ATTRIB_ARRAY_DIVISOR:
+        if (!ogles2_es3(ctx)) {
+            ogles2_error(ctx, GL_INVALID_ENUM);
+            break;
+        }
+        *params = (GLint)a->divisor;
+        break;
     case GL_CURRENT_VERTEX_ATTRIB:
         for (k = 0; k < 4; k++)
             params[k] = (GLint)ctx->state.attrib[index][k];
@@ -364,7 +387,7 @@ struct tex_states
     ULONG tex[2][OGLES2_MAX_STAGE_SAMPLERS], smp[2][OGLES2_MAX_STAGE_SAMPLERS];
     UBYTE unit[2][OGLES2_MAX_STAGE_SAMPLERS], kind[2][OGLES2_MAX_STAGE_SAMPLERS]; /* textureSize's */
     ULONG ubo[2];   /* little-endian copy of each stage's constant buffer, if read */
-    ULONG zero_ubo; /* what the uniform blocks read until buffers can be bound (stage B) */
+    ULONG zero_ubo; /* what a uniform block without a buffer reads */
 };
 
 /* The largest uniform block (GL_MAX_UNIFORM_BLOCK_SIZE). */
@@ -390,10 +413,10 @@ static BOOL ubo_copies(struct OGLES2Context *ctx, const struct OGLES2Program *p,
             memcpy(c, p->cbuf_le[si], n * 4UL);
             ts->ubo[si] = (ULONG)c;
         }
-        /* A uniform block (GLSL ES 3.00) reads zeros until stage B binds
-         * buffers to them: one block of the context's, made once. Only the
-         * GPU reads it; the cache clean before every submission covers the
-         * zeros written here. */
+        /* A uniform block (GLSL ES 3.00) with no buffer bound reads zeros:
+         * one block of the context's, made once. Only the GPU reads it; the
+         * cache clean before every submission covers the zeros written
+         * here. */
         if (v[k]->uses_blocks && !ts->zero_ubo) {
             struct OGLES2Draw *d = ctx->draw;
             if (!d->zero_ubo.hostptr) {
@@ -402,12 +425,37 @@ static BOOL ubo_copies(struct OGLES2Context *ctx, const struct OGLES2Program *p,
                     return FALSE;
                 }
                 memset(d->zero_ubo.hostptr, 0, ZERO_UBO_BYTES + 256);
-                ogles2_log("draw: uniform blocks read zeros (no uniform buffers yet)");
+                ogles2_log("draw: a uniform block without a buffer bound reads zeros (logged once)");
             }
             ts->zero_ubo = (ULONG)V3D_ALIGN_UP((v3d_uintptr)d->zero_ubo.hostptr, 256);
         }
     }
     return TRUE;
+}
+
+/* The buffer a stage's uniform block k (its block map's: Mesa's UBO k + 1)
+ * reads: the range bound at the block's binding (§5 item 6), else the
+ * zeroed block (ubo_copies). *size (if asked): the range's bytes, or the
+ * block's own size without one. */
+static ULONG block_buffer(struct OGLES2Context *ctx, const struct OGLES2Program *p, int si, ULONG k,
+                          const struct tex_states *tst, ULONG *size)
+{
+    const struct OGLES2Image *im = p->image;
+    ULONG a, n = 0;
+    UWORD b;
+    if (size)
+        *size = 0;
+    if (k >= im->stage_nblocks[si])
+        return tst->zero_ubo;
+    b = im->stage_block[si][k];
+    if (p->block_binding && (a = ogles2_buffer_uniform(ctx, p->block_binding[b], &n)) != 0) {
+        if (size)
+            *size = n;
+        return a;
+    }
+    if (size)
+        *size = im->ublocks[b].size;
+    return tst->zero_ubo;
 }
 
 /* Register spilling (Mesa's QUNIFORM_SPILL_*): a shader that ran out of
@@ -585,10 +633,12 @@ static ULONG write_uniforms(struct OGLES2Context *ctx, const struct OGLES2Progra
             w = tst->smp[si][(d >> 24) & (OGLES2_MAX_STAGE_SAMPLERS - 1)] | (d & 0xffffff);
             break;
         case OGLES2_U_UBO_ADDR: /* unit 0 the constant buffer, the others uniform blocks */
-            w = ((d >> 24) ? tst->zero_ubo : tst->ubo[si]) + (d & 0xffffff);
+            w = ((d >> 24) ? block_buffer(ctx, p, si, (d >> 24) - 1, tst, 0) : tst->ubo[si]) + (d & 0xffffff);
             break;
-        case OGLES2_U_GET_UBO_SIZE:
-            w = p->image->ublocks[p->image->stage_block[si][d]].size;
+        case OGLES2_U_GET_UBO_SIZE: /* Mesa's cb[data].buffer_size, cb[0] the constant buffer */
+            w = p->image->cbuf_words[si] * 4UL;
+            if (d)
+                block_buffer(ctx, p, si, d - 1, tst, &w);
             break;
         case OGLES2_U_TEXTURE_WIDTH:
         case OGLES2_U_TEXTURE_HEIGHT:
@@ -672,6 +722,7 @@ struct attr_src
 {
     ULONG address, stride;
     UBYTE vsize, vtype, normalized, is_signed;
+    UWORD divisor;       /* the record's instance divisor (0: per vertex) */
 };
 
 /* Emu68 runs a memory access as dearly as several register operations:
@@ -795,6 +846,7 @@ static BOOL copy_array(struct OGLES2Context *ctx, const struct OGLES2Array *a, G
     const UBYTE *src = (const UBYTE *)a->pointer;
     UBYTE *dst;
 
+    out->divisor = 0;
     out->vsize = n == 4 ? v3d_VEC_4 : (UBYTE)n;
     out->normalized = a->normalized && a->type != GL_FLOAT && a->type != GL_FIXED;
     out->is_signed = a->type == GL_BYTE || a->type == GL_SHORT;
@@ -849,6 +901,7 @@ static BOOL constant_attrib(struct OGLES2Context *ctx, GLuint index, struct attr
     out->vsize = v3d_VEC_4;
     out->vtype = v3d_ATTRIBUTE_FLOAT;
     out->normalized = out->is_signed = 0;
+    out->divisor = 0;
     return TRUE;
 }
 
@@ -860,12 +913,13 @@ static BOOL packets_ok(V3DContext *v);
 static int column_slot(const struct OGLES2ImageAttrib *at, int k);
 
 static void attr_record(UBYTE *b, ULONG address, UBYTE normalized, UBYTE is_signed, UBYTE vsize,
-                        UBYTE vtype, UBYTE vs_reads, UBYTE cs_reads, ULONG stride, ULONG maxindex)
+                        UBYTE vtype, UBYTE vs_reads, UBYTE cs_reads, UWORD divisor, ULONG stride, ULONG maxindex)
 {
     put_le32(b, address);
     b[4] = (UBYTE)((normalized ? 0x40 : 0) | (is_signed ? 0x20 : 0) | ((vtype & 7) << 2) | (vsize & 3));
     b[5] = (UBYTE)((vs_reads << 4) | (cs_reads & 15));
-    b[6] = b[7] = 0; /* instance divisor */
+    b[6] = (UBYTE)divisor; /* instance divisor, 16 bits */
+    b[7] = (UBYTE)(divisor >> 8);
     put_le32(b + 8, stride);
     put_le32(b + 12, maxindex);
 }
@@ -994,11 +1048,11 @@ addresses:
         if (direct)
             attr_record((UBYTE *)(r + 1) + i * sizeof(v3d_gl_shader_state_attribute_record), src[i].address,
                         src[i].normalized, src[i].is_signed, src[i].vsize, src[i].vtype, vs->vattr_sizes[i],
-                        cs_n, src[i].stride, 0xFFFFFF);
+                        cs_n, src[i].divisor, src[i].stride, 0xFFFFFF);
         else
             glShaderStateAttributeRecord(v, (APTR)src[i].address, FALSE, src[i].normalized,
                                          src[i].is_signed, src[i].vsize, src[i].vtype,
-                                         vs->vattr_sizes[i], cs_n, 0, src[i].stride, 0xFFFFFF);
+                                         vs->vattr_sizes[i], cs_n, src[i].divisor, src[i].stride, 0xFFFFFF);
     }
     v->current_buf = saved;
     return (ULONG)r;
@@ -1441,7 +1495,7 @@ static void put_le32(UBYTE *b, ULONG x)
  * about a microsecond a draw on Emu68. 31 or 22 bytes; checked against
  * theirs once (packets_ok). */
 static ULONG draw_packets(UBYTE *b, UBYTE vcm_cs, UBYTE vcm_vs, ULONG rec, int nrec, UBYTE mode,
-                          int itype, ULONG idx_addr, ULONG idx_size, ULONG count, ULONG first)
+                          int itype, ULONG idx_addr, ULONG idx_size, ULONG count, ULONG first, ULONG instances)
 {
     b[0] = v3d_OP_POINT_SIZE;
     put_le32(b + 1, 0x3F800000UL); /* 1.0f */
@@ -1453,11 +1507,24 @@ static ULONG draw_packets(UBYTE *b, UBYTE vcm_cs, UBYTE vcm_vs, ULONG rec, int n
         b[12] = v3d_OP_INDEX_BUFFER_SETUP;
         put_le32(b + 13, idx_addr);
         put_le32(b + 17, idx_size);
-        b[21] = v3d_OP_INDEXED_PRIM_LIST;
+        b[21] = instances > 1 ? v3d_OP_INDEXED_INSTANCED_PRIM_LIST : v3d_OP_INDEXED_PRIM_LIST;
         b[22] = (UBYTE)((itype << 6) | (mode & 63));
         put_le32(b + 23, count); /* bits 0-30 the length, bit 31 primitive restart (the caller's) */
+        if (instances > 1) { /* ES 3.0's instances (Mesa's packet 34): then the index offset */
+            put_le32(b + 27, instances);
+            put_le32(b + 31, 0);
+            return 35;
+        }
         put_le32(b + 27, 0);
         return 31;
+    }
+    if (instances > 1) { /* packet 38: the mode a byte, length, instances, first vertex */
+        b[12] = v3d_OP_VERTEX_ARRAY_INSTANCED_PRIMS;
+        b[13] = mode;
+        put_le32(b + 14, count);
+        put_le32(b + 18, instances);
+        put_le32(b + 22, first);
+        return 26;
     }
     b[12] = v3d_OP_VERTEX_ARRAY_PRIMS;
     b[13] = mode;
@@ -1496,13 +1563,13 @@ static BOOL packets_ok(V3DContext *v)
     glShaderStateAttributeRecord(v, (APTR)0x08123456UL, FALSE, TRUE, TRUE, v3d_VEC_3, v3d_ATTRIBUTE_SHORT,
                                  3, 2, 0, 0x0C, 0xFFFFFF);
     glShaderStateAttributeRecord(v, (APTR)0x08654320UL, FALSE, FALSE, FALSE, v3d_VEC_4, v3d_ATTRIBUTE_FLOAT,
-                                 4, 1, 0, 0x10, 0xFFFFFF);
+                                 4, 1, 0x0203, 0x10, 0xFFFFFF); /* an instance divisor's bytes too */
     v->current_buf = saved;
-    n = draw_packets(mine, 3, 5, 0x12345660UL, 3, 4, v3d_INDEX_TYPE_16_BIT, 0x0ABCDEF4UL, 0x1236, 0x10203, 0);
-    n += draw_packets(mine + n, 2, 1, 0x0FEDCBA0UL, 1, 5, -1, 0, 0, 0x30201, 0x4321);
-    attr_record(mine + n, 0x08123456UL, TRUE, TRUE, v3d_VEC_3, v3d_ATTRIBUTE_SHORT, 3, 2, 0x0C, 0xFFFFFF);
+    n = draw_packets(mine, 3, 5, 0x12345660UL, 3, 4, v3d_INDEX_TYPE_16_BIT, 0x0ABCDEF4UL, 0x1236, 0x10203, 0, 1);
+    n += draw_packets(mine + n, 2, 1, 0x0FEDCBA0UL, 1, 5, -1, 0, 0, 0x30201, 0x4321, 1);
+    attr_record(mine + n, 0x08123456UL, TRUE, TRUE, v3d_VEC_3, v3d_ATTRIBUTE_SHORT, 3, 2, 0, 0x0C, 0xFFFFFF);
     n += 16;
-    attr_record(mine + n, 0x08654320UL, FALSE, FALSE, v3d_VEC_4, v3d_ATTRIBUTE_FLOAT, 4, 1, 0x10, 0xFFFFFF);
+    attr_record(mine + n, 0x08654320UL, FALSE, FALSE, v3d_VEC_4, v3d_ATTRIBUTE_FLOAT, 4, 1, 0x0203, 0x10, 0xFFFFFF);
     n += 16;
     packets_state = (ULONG)sb.used == n && !sb.overflowed && !memcmp(ref, mine, n) ? 1 : 2;
     if (packets_state == 2)
@@ -1710,7 +1777,7 @@ static BOOL es3_variants(struct OGLES2Context *ctx, struct OGLES2Program *p, GLe
  * vertices [first, first+count) are copied; without `el` they are drawn in
  * order, with it through its indices. */
 static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLenum mode,
-                        GLint first, GLsizei count, const struct elements *el)
+                        GLint first, GLsizei count, const struct elements *el, GLsizei instances)
 {
     const struct OGLES2Image *im = p->image;
     const struct OGLES2Variant *cs, *vs, *fs;
@@ -1727,6 +1794,10 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
     ULONG unif[3], code[3], defattr, rec, idx_addr = 0, idx_size = 0;
     int a, nslots = 0, i;
 
+    /* GL_RASTERIZER_DISCARD: no fragments, and without transform feedback
+     * (stage C) a draw then has no effect at all: nothing is drawn. */
+    if (ctx->state.caps & OGLES2_CAP_RASTERIZER_DISCARD)
+        return;
     if (!(d = draw_state(ctx))) {
         ogles2_error(ctx, GL_OUT_OF_MEMORY);
         return;
@@ -1883,6 +1954,15 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
         BOOL ok;
         if (g >= OGLES2_MAX_VERTEX_ATTRIBS) {
             ok = constant_attrib(ctx, 0, &src[i]); /* a slot no attribute claims */
+        } else if (ctx->array[g].enabled && ctx->array[g].divisor) {
+            /* ES 3.0's instanced arrays: an element per `divisor` instances,
+             * from element 0, whatever the vertices (the record's divisor,
+             * 16 bits: Mesa clamps, v3dx_state.c; a divisor at or above the
+             * instance count reads element 0 as the clamped one does but
+             * past 65535 instances, a deviation). */
+            GLuint dv = ctx->array[g].divisor;
+            ok = copy_array(ctx, &ctx->array[g], 0, (GLsizei)(((ULONG)instances + dv - 1) / dv), &src[i], FALSE);
+            src[i].divisor = (UWORD)(dv > 0xffff ? 0xffff : dv);
         } else {
             ok = ctx->array[g].enabled
                      ? copy_array(ctx, &ctx->array[g], first, count, &src[i],
@@ -1902,8 +1982,8 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
     if (vid && first > 0)
         for (i = 0; i < nslots; i++) {
             ULONG back = (ULONG)first * src[i].stride;
-            if (!src[i].stride)
-                continue; /* a current value: every vertex reads the same */
+            if (!src[i].stride || src[i].divisor)
+                continue; /* a current value (every vertex reads the same), an instanced array */
             if (src[i].address >= back && ogles2_device_gpu_reachable(src[i].address - back, 4)) {
                 src[i].address -= back;
                 continue;
@@ -1977,12 +2057,24 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
         int itype = !el ? -1
                   : itype_gl == GL_UNSIGNED_INT ? v3d_INDEX_TYPE_32_BIT
                   : itype_gl == GL_UNSIGNED_SHORT ? v3d_INDEX_TYPE_16_BIT : v3d_INDEX_TYPE_8_BIT;
-        UBYTE *b = v3d_buffer_claim_memory(v->current_buf, el ? 31 : 22);
+        UBYTE *b = v3d_buffer_claim_memory(v->current_buf, (el ? 31 : 22) + (instances > 1 ? 4 : 0));
         if (b)
             draw_packets(b, cs->vcm_cache_size, vs->vcm_cache_size, rec, nslots ? nslots : 1, (UBYTE)mode,
                          itype, idx_addr, idx_size,
                          el ? ((ULONG)el->count & 0x7FFFFFFFUL) | (el->restart ? 0x80000000UL : 0) : (ULONG)count,
-                         vid ? (ULONG)first : 0);
+                         vid ? (ULONG)first : 0, (ULONG)instances);
+        mark(ctx, 7);
+        return;
+    }
+    if (instances > 1) { /* v3dcore has no writers for the instanced packets: ours */
+        UBYTE *b = v3d_buffer_claim_memory(v->current_buf, el ? 35 : 26);
+        if (b)
+            draw_packets(b, cs->vcm_cache_size, vs->vcm_cache_size, rec, nslots ? nslots : 1, (UBYTE)mode,
+                         el ? (itype_gl == GL_UNSIGNED_INT ? v3d_INDEX_TYPE_32_BIT
+                               : itype_gl == GL_UNSIGNED_SHORT ? v3d_INDEX_TYPE_16_BIT : v3d_INDEX_TYPE_8_BIT) : -1,
+                         idx_addr, idx_size,
+                         el ? ((ULONG)el->count & 0x7FFFFFFFUL) | (el->restart ? 0x80000000UL : 0) : (ULONG)count,
+                         vid ? (ULONG)first : 0, (ULONG)instances);
         mark(ctx, 7);
         return;
     }
@@ -2031,18 +2123,21 @@ static int column_slot(const struct OGLES2ImageAttrib *at, int k)
 /* Every enabled array the program reads has data, and a buffer's holds
  * vertices [0, end) (GLES2 leaves reading past it undefined: not drawn). */
 static BOOL arrays_ok(struct OGLES2Context *ctx, const struct OGLES2Program *p, ULONG end,
-                      const char *fn)
+                      GLsizei instances, const char *fn)
 {
     int a;
     for (a = 0; a < p->image->nattribs; a++) {
         const struct OGLES2Array *arr = &ctx->array[p->attrib_index[a]];
+        ULONG end_a = end;
         if (p->image->attribs[a].slot == 0xff || !arr->enabled)
             continue;
+        if (arr->divisor) /* an instanced array's elements */
+            end_a = ((ULONG)instances + arr->divisor - 1) / arr->divisor;
         if (arr->buffer) {
             ULONG es = (ULONG)(type_size(arr->type) * arr->size);
             ULONG st = arr->stride ? (ULONG)arr->stride : es;
             ULONG off = (ULONG)arr->pointer, size = ogles2_buffer_size(arr->buffer);
-            if (off + es > size || (size - off - es) / st + 1 < end) {
+            if (off + es > size || (size - off - es) / st + 1 < end_a) {
                 ogles2_log("%s: attribute %ld reads past the end of buffer %ld; nothing drawn",
                            (ULONG)fn, (ULONG)p->attrib_index[a], (ULONG)ogles2_buffer_name(arr->buffer));
                 return FALSE;
@@ -2056,7 +2151,7 @@ static BOOL arrays_ok(struct OGLES2Context *ctx, const struct OGLES2Program *p, 
     return TRUE;
 }
 
-void ogles2_glDrawArrays(struct OGLES2Context *ctx, GLenum mode, GLint first, GLsizei count)
+static void draw_instances(struct OGLES2Context *ctx, GLenum mode, GLint first, GLsizei count, GLsizei instances)
 {
     ULONG t0 = ogles2_clock_us();
     struct OGLES2Program *p;
@@ -2068,20 +2163,32 @@ void ogles2_glDrawArrays(struct OGLES2Context *ctx, GLenum mode, GLint first, GL
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
-    if (first < 0 || count < 0) {
+    if (first < 0 || count < 0 || instances < 0) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
     if (!ogles2_fb_ready(ctx)) /* GL_INVALID_FRAMEBUFFER_OPERATION */
         return;
     p = ctx->program;
-    if (!p || !ctx->v3d || count == 0) /* no program: undefined; nothing is drawn */
+    if (!p || !ctx->v3d || count == 0 || instances == 0) /* no program: undefined; nothing is drawn */
         return;
-    if (!arrays_ok(ctx, p, (ULONG)first + (ULONG)count, "glDrawArrays"))
+    if (!arrays_ok(ctx, p, (ULONG)first + (ULONG)count, instances, "glDrawArrays"))
         return;
-    draw_arrays(ctx, p, mode, first, count, 0);
+    draw_arrays(ctx, p, mode, first, count, 0, instances);
     ctx->n_draws++;
     ctx->sum_draw += (double)(ULONG)(ogles2_clock_us() - t0);
+}
+
+void ogles2_glDrawArrays(struct OGLES2Context *ctx, GLenum mode, GLint first, GLsizei count)
+{
+    draw_instances(ctx, mode, first, count, 1);
+}
+
+void ogles2_glDrawArraysInstanced(struct OGLES2Context *ctx, GLenum mode, GLint first, GLsizei count,
+                                  GLsizei instancecount)
+{
+    if (ogles2_es3_entry(ctx))
+        draw_instances(ctx, mode, first, count, instancecount);
 }
 
 /* glDrawElements, and with a base vertex added to every index
@@ -2090,7 +2197,8 @@ void ogles2_glDrawArrays(struct OGLES2Context *ctx, GLenum mode, GLint first, GL
  * the program has said which indices it uses, range[0] to range[1]: they
  * are not scanned. */
 static void draw_elements(struct OGLES2Context *ctx, GLenum mode, GLsizei count, GLenum type,
-                          const void *indices, GLint basevertex, const ULONG *range, const char *fn)
+                          const void *indices, GLint basevertex, const ULONG *range, GLsizei instances,
+                          const char *fn)
 {
     struct OGLES2Program *p;
     struct elements el;
@@ -2216,14 +2324,14 @@ static void draw_elements(struct OGLES2Context *ctx, GLenum mode, GLsizei count,
     }
     lo += (ULONG)basevertex;
     hi += (ULONG)basevertex;
-    if (!arrays_ok(ctx, p, hi + 1, fn))
+    if (!arrays_ok(ctx, p, hi + 1, instances, fn))
         return;
     el.indices = indices;
     el.type = type;
     el.count = count;
     el.min = lo - (ULONG)basevertex; /* the indices' own smallest */
     el.restart = restart;
-    draw_arrays(ctx, p, mode, (GLint)lo, (GLsizei)(hi - lo + 1), &el);
+    draw_arrays(ctx, p, mode, (GLint)lo, (GLsizei)(hi - lo + 1), &el, instances);
     ctx->n_draws++;
     ctx->sum_draw += (double)(ULONG)(ogles2_clock_us() - t0);
 }
@@ -2231,13 +2339,26 @@ static void draw_elements(struct OGLES2Context *ctx, GLenum mode, GLsizei count,
 void ogles2_glDrawElements(struct OGLES2Context *ctx, GLenum mode, GLsizei count, GLenum type,
                            const void *indices)
 {
-    draw_elements(ctx, mode, count, type, indices, 0, 0, "glDrawElements");
+    draw_elements(ctx, mode, count, type, indices, 0, 0, 1, "glDrawElements");
+}
+
+void ogles2_glDrawElementsInstanced(struct OGLES2Context *ctx, GLenum mode, GLsizei count, GLenum type,
+                                    const void *indices, GLsizei instancecount)
+{
+    if (!ogles2_es3_entry(ctx))
+        return;
+    if (instancecount < 0) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    if (instancecount)
+        draw_elements(ctx, mode, count, type, indices, 0, 0, instancecount, "glDrawElementsInstanced");
 }
 
 void ogles2_glDrawElementsBaseVertexOES(struct OGLES2Context *ctx, GLenum mode, GLsizei count,
                                         GLenum type, const void *indices, GLint basevertex)
 {
-    draw_elements(ctx, mode, count, type, indices, basevertex, 0, "glDrawElementsBaseVertexOES");
+    draw_elements(ctx, mode, count, type, indices, basevertex, 0, 1, "glDrawElementsBaseVertexOES");
 }
 
 /* GLES 3.0's glDrawRangeElements, offered to GLES2 programs through
@@ -2255,7 +2376,7 @@ void ogles2_glDrawRangeElements(struct OGLES2Context *ctx, GLenum mode, GLuint s
     }
     range[0] = start;
     range[1] = end;
-    draw_elements(ctx, mode, count, type, indices, 0, range, "glDrawRangeElements");
+    draw_elements(ctx, mode, count, type, indices, 0, range, 1, "glDrawRangeElements");
 }
 
 #include "clear_mrt_v3dp.h"
@@ -2352,6 +2473,7 @@ BOOL ogles2_draw_copy(struct OGLES2Context *ctx, struct OGLES2Texture *src, cons
         a->stride = 0;
         a->pointer = k ? (const void *)uv : (const void *)pos;
         a->buffer = 0;
+        a->divisor = 0; /* the application's, set aside with the rest */
     }
     s->caps = 0;
     s->polygon_mode = GL_FILL;
@@ -2369,7 +2491,7 @@ BOOL ogles2_draw_copy(struct OGLES2Context *ctx, struct OGLES2Texture *src, cons
     ogles2_job_begin(ctx);
     ctx->state_ver++; /* the override above */
     mark(ctx, -1);
-    draw_arrays(ctx, p, GL_TRIANGLE_STRIP, 0, 4, 0);
+    draw_arrays(ctx, p, GL_TRIANGLE_STRIP, 0, 4, 0, 1);
 
     ogles2_texture_unit0(ctx, saved_tex);
     ctx->state = saved;
@@ -2441,6 +2563,7 @@ void ogles2_draw_clear(struct OGLES2Context *ctx, GLbitfield mask)
     ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2].stride = 0;
     ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2].pointer = pos;
     ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2].buffer = 0;
+    ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2].divisor = 0;
     ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 1].enabled = GL_FALSE;
     for (k = 0; k < 4; k++)
         s->attrib[OGLES2_MAX_VERTEX_ATTRIBS - 1][k] = s->clear_color[k];
@@ -2475,7 +2598,7 @@ void ogles2_draw_clear(struct OGLES2Context *ctx, GLbitfield mask)
     ogles2_job_begin(ctx);
     ctx->state_ver++; /* the override above */
     mark(ctx, -1); /* probe P: the time before is not the draw's */
-    draw_arrays(ctx, quad, GL_TRIANGLE_STRIP, 0, 4, 0);
+    draw_arrays(ctx, quad, GL_TRIANGLE_STRIP, 0, 4, 0, 1);
 
     ctx->state = saved;
     ctx->state_ver++;

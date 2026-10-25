@@ -1,0 +1,432 @@
+Writing test log into M8R2:results/shaders-uniform_block.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles2.library: 64 functions of the ES 3.0 table not implemented yet: glBeginQuery glBeginTransformFeedback glBindTransformFeedback glBindVertexArray glBlitFramebuffer glClearBufferfi glClearBufferfv glClearBufferiv glClearBufferuiv glClientWaitSync glCompressedTexImage3D glCompressedTexSubImage3D glCopyTexSubImage3D glDeleteQueries glDeleteSync glDeleteTransformFeedbacks glDeleteVertexArrays glDrawArraysInstanced glDrawBuffers glDrawElementsInstanced glEndQuery glEndTransformFeedback glFenceSync glFlushMappedBufferRange glFramebufferTextureLayer glGenQueries glGenTransformFeedbacks glGenVertexArrays glGetBufferParameteri64v glGetBufferPointerv glGetInternalformativ glGetProgramBinary glGetQueryObjectuiv glGetSynciv glGetTransformFeedbackVarying glGetVertexAttribIiv glGetVertexAttribIuiv glInvalidateFramebuffer glInvalidateSubFramebuffer glIsQuery glIsSync glIsTransformFeedback glIsVertexArray glMapBufferRange glPauseTransformFeedback glProgramBinary glProgramParameteri glReadBuffer glRenderbufferStorageMultisample glResumeTransformFeedback glTexStorage2D glTexStorage3D glTransformFeedbackVaryings glUnmapBuffer glVertexAttribDivisor glVertexAttribI4i glVertexAttribI4iv glVertexAttribI4ui glVertexAttribI4uiv glVertexAttribIPointer glWaitSync glDrawElementsInstancedBaseVertexOES glDrawRangeElementsBaseVertexOES glMultiDrawElementsBaseVertexEXT
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.repeat_interface_qualifier_vertex'..
+ogles2.library: glBindVertexArray is not implemented yet (called as a no-op)
+ogles2.library: glVertexAttribDivisor is not implemented yet (called as a no-op)
+ogles2.library: glBindTransformFeedback is not implemented yet (called as a no-op)
+ogles2.library: glDrawBuffers is not implemented yet (called as a no-op)
+ogles2.library: glReadBuffer is not implemented yet (called as a no-op)
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.repeat_interface_qualifier_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.layout_shared_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.layout_shared_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.layout_packed_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.layout_packed_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.layout_std140_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.layout_std140_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.layout_row_major_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.layout_row_major_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.layout_column_major_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.layout_column_major_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.layout_all_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.layout_all_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.layout_all_8_times_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.layout_all_8_times_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.global_layout_shared_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.global_layout_shared_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.global_layout_packed_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.global_layout_packed_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.global_layout_std140_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.global_layout_std140_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.global_layout_row_major_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.global_layout_row_major_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.global_layout_column_major_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.global_layout_column_major_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.global_layout_all_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.global_layout_all_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.global_layout_all_8_times_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.global_layout_all_8_times_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.member_layout_row_major_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.member_layout_row_major_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.member_layout_column_major_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.member_layout_column_major_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.member_layout_row_major_vec4_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.member_layout_row_major_vec4_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.member_layout_column_major_vec4_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.member_layout_column_major_vec4_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.member_layout_all_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.member_layout_all_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.member_layout_all_8_times_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.member_layout_all_8_times_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.no_instance_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.no_instance_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.same_variable_and_block_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.same_variable_and_block_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.same_variable_and_instance_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.same_variable_and_instance_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.struct_member_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.struct_member_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.struct_member_layout_row_major_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.struct_member_layout_row_major_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.struct_member_layout_column_major_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.struct_member_layout_column_major_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.struct_member_layout_all_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.struct_member_layout_all_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.struct_member_layout_all_8_times_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.struct_member_layout_all_8_times_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.long_block_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.long_block_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.long_instance_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.long_instance_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.underscore_block_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.underscore_block_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.underscore_instance_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.valid.underscore_instance_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.member_in_interface_qualifier_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.member_in_interface_qualifier_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.member_out_interface_qualifier_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.member_out_interface_qualifier_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.member_buffer_interface_qualifier_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.member_buffer_interface_qualifier_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.member_attribute_interface_qualifier_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.member_attribute_interface_qualifier_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.member_varying_interface_qualifier_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.member_varying_interface_qualifier_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.conflicting_instance_names_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.conflicting_instance_names_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.conflicting_function_and_instance_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.conflicting_function_and_instance_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.conflicting_function_and_block_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.conflicting_function_and_block_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.conflicting_uniform_and_instance_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.conflicting_uniform_and_instance_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.conflicting_in_and_instance_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.conflicting_in_and_instance_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.conflicting_out_and_instance_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.conflicting_out_and_instance_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.conflicting_uniform_and_block_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.conflicting_uniform_and_block_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.conflicting_in_and_block_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.conflicting_in_and_block_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.conflicting_out_and_block_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.conflicting_out_and_block_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.matching_instance_and_block_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.matching_instance_and_block_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.reference_using_block_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.reference_using_block_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.empty_block_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.empty_block_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.empty_layout_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.empty_layout_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.empty_member_layout_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.empty_member_layout_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.empty_global_layout_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.empty_global_layout_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.structure_definition_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.structure_definition_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.member_layout_shared_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.member_layout_shared_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.member_layout_packed_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.member_layout_packed_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.member_layout_std140_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.member_layout_std140_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.missing_block_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.missing_block_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.invalid_number_block_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.invalid_number_block_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.invalid_hash_block_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.invalid_hash_block_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.invalid_dollar_block_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.invalid_dollar_block_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.invalid_identifier_block_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.invalid_identifier_block_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.too_long_block_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.too_long_block_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.invalid_number_instance_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.invalid_number_instance_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.invalid_hash_instance_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.invalid_hash_instance_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.invalid_dollar_instance_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.invalid_dollar_instance_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.invalid_identifier_instance_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.invalid_identifier_instance_name_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.repeated_block_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.repeated_block_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.repeated_block_no_instance_name_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.uniform_block.invalid.repeated_block_no_instance_name_fragment'..
+  Pass (Pass)
+
+DONE!
+
+Test run totals:
+  Passed:        138/138 (100.0%)
+  Failed:        0/138 (0.0%)
+  Not supported: 0/138 (0.0%)
+  Warnings:      0/138 (0.0%)
+  Waived:        0/138 (0.0%)

@@ -35,7 +35,7 @@ see "dEQP-GLES3" below.
     desktop GL package `tgl45es3*`).
 - **`patches/`** are applied to a copy of the sources in `$B/deqp/src`, then
   those of the module's own directory (`patches/gles2/`: 0003 and 0004;
-  `patches/gles3/`: 0001, see "dEQP-GLES3"):
+  `patches/gles3/`: none since 2026-10-25, see "dEQP-GLES3"):
   - `0001-amiga-m68k.patch`: delibs gains a 68k CPU (32-bit, big-endian).
     An assertion prints on stdout, then aborts. Aligned allocation uses
     delibs' own header, since libnix has no `posix_memalign`. There is no
@@ -129,12 +129,17 @@ stages B and C). Two things follow:
   ES 2.0 contexts keep the null pointers, which `0004` tests for.
 - **The state reset after each case:** `glu::resetState` checks
   `glGetError` after each part of the state it resets, and an error in a
-  case's deinit ends the run. Until the library takes ES 3.0's state
-  (`GL_PRIMITIVE_RESTART_FIXED_INDEX` was the first refused, 2026-10-23),
-  `patches/gles3/0001-reset-state-errors-not-fatal.patch` logs that error
-  ("ogles2: state reset incomplete") and the run goes on; the part of the
-  state it failed on may stay as the case left it. Drop the patch once the
-  library takes all of ES 3.0's state (`docs/GLES3_PLAN.md` stage B item 13).
+  case's deinit ends the run. Until the library took all of the ES 3.0
+  state it sets (2026-10-25, `docs/GLES3_PLAN.md` §5 items 2, 7, 8 and 12),
+  `patches/gles3/0001-reset-state-errors-not-fatal.patch` logged that error
+  ("ogles2: state reset incomplete") and let the run go on; it is gone.
+- **Rebuilding after a patch changes or goes:** the copy of the sources
+  (`$B/deqp-gles3/src`) is made with `rsync -a`, which keeps the CTS's old
+  dates, and an object is rebuilt only when older than its source. Delete
+  the copy, and for a patch removed also the objects of the files it
+  touched (`$B/deqp-gles3/obj/<path with _ for />.o`, e.g.
+  `modules_gles3_tes3TestPackage.cpp.o`): the restored sources are older
+  than them.
 
 ## Known deviation
 

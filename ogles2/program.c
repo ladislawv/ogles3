@@ -217,6 +217,9 @@ static void unlink_program(struct OGLES2Context *ctx, struct OGLES2Program *p)
     if (p->uniform_loc)
         FreeVec(p->uniform_loc);
     p->uniform_loc = 0;
+    if (p->block_binding)
+        FreeVec(p->block_binding);
+    p->block_binding = 0;
     p->loc_uniform = p->loc_element = 0;
     p->sampler_unit = 0;
     p->nlocations = 0;
@@ -1304,12 +1307,13 @@ static BOOL bind_image(struct OGLES2Program *p, const struct OGLES2Image *im)
      * texture indices, as Mesa lowers them): a unit per location. */
     p->sampler_unit = AllocVec(nloc + 1, MEMF_ANY | MEMF_CLEAR);
     p->uniform_loc = AllocVec((im->nuniforms + 1) * sizeof(UWORD), MEMF_ANY);
+    p->block_binding = AllocVec((im->nublocks + 1) * sizeof(ULONG), MEMF_ANY);
     for (k = 0; k < 2; k++) {
         p->cbuf[k] = AllocVec(im->cbuf_words[k] * 4 + 4, MEMF_ANY | MEMF_CLEAR);
         p->cbuf_le[k] = AllocVec(im->cbuf_words[k] * 4 + 4, MEMF_ANY | MEMF_CLEAR);
     }
-    if (!p->loc_uniform || !p->sampler_unit || !p->uniform_loc || !p->cbuf[0] || !p->cbuf[1] || !p->cbuf_le[0] ||
-        !p->cbuf_le[1]) {
+    if (!p->loc_uniform || !p->sampler_unit || !p->uniform_loc || !p->block_binding || !p->cbuf[0] || !p->cbuf[1] ||
+        !p->cbuf_le[0] || !p->cbuf_le[1]) {
         set_log(p, "out of memory", 0);
         return FALSE;
     }
@@ -1329,6 +1333,8 @@ static BOOL bind_image(struct OGLES2Program *p, const struct OGLES2Image *im)
         }
     }
     p->nlocations = nloc;
+    for (u = 0; u < im->nublocks; u++)
+        p->block_binding[u] = im->ublocks[u].binding;
     for (k = 0; k < 2; k++)
         if (im->cbuf_template[k]) {
             UWORD w;
@@ -1562,9 +1568,194 @@ void ogles2_glGetProgramiv(struct OGLES2Context *ctx, GLuint program, GLenum pna
     case GL_PROGRAM_BINARY_LENGTH_OES:
         *params = p->linked && im ? (GLint)im->binary_len : 0;
         break;
+    case GL_ACTIVE_UNIFORM_BLOCKS: /* ES 3.0 */
+    case GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH:
+        if (!ogles2_es3(ctx)) {
+            ogles2_error(ctx, GL_INVALID_ENUM);
+            break;
+        }
+        n = 0;
+        for (i = 0; im && i < (GLint)im->nublocks; i++)
+            if (pname == GL_ACTIVE_UNIFORM_BLOCKS)
+                n++;
+            else if ((GLint)str_len(im->ublocks[i].name) + 1 > n)
+                n = (GLint)str_len(im->ublocks[i].name) + 1;
+        *params = n;
+        break;
     default:
         ogles2_error(ctx, GL_INVALID_ENUM);
         break;
+    }
+}
+
+/* ---- ES 3.0's uniform blocks (docs/GLES3_PLAN.md §5 item 6) ---- */
+
+/* A linked program's image for an ES3 entry, or NULL (the error set:
+ * GL_INVALID_VALUE or _OPERATION for the name, as lookup's). */
+static const struct OGLES2Image *es3_image(struct OGLES2Context *ctx, GLuint program, struct OGLES2Program **pp)
+{
+    struct OGLES2Program *p;
+    if (!ogles2_es3_entry(ctx) || !(p = lookup(ctx, program, OGLES2_OBJ_PROGRAM)))
+        return 0;
+    if (pp)
+        *pp = p;
+    return p->image;
+}
+
+/* Image uniform u's index among the active ones (glGetActiveUniform's). */
+static GLint active_index(const struct OGLES2Image *im, UWORD u)
+{
+    UWORD k;
+    GLint n = 0;
+    for (k = 0; k < u; k++)
+        if (visible(&im->uniforms[k]))
+            n++;
+    return n;
+}
+
+GLuint ogles2_glGetUniformBlockIndex(struct OGLES2Context *ctx, GLuint program, const GLchar *uniformBlockName)
+{
+    const struct OGLES2Image *im = es3_image(ctx, program, 0);
+    UWORD k;
+    for (k = 0; im && uniformBlockName && k < im->nublocks; k++)
+        if (str_eq(im->ublocks[k].name, uniformBlockName))
+            return k;
+    return GL_INVALID_INDEX;
+}
+
+void ogles2_glGetActiveUniformBlockName(struct OGLES2Context *ctx, GLuint program, GLuint uniformBlockIndex,
+                                        GLsizei bufSize, GLsizei *length, GLchar *uniformBlockName)
+{
+    struct OGLES2Program *p = 0;
+    const struct OGLES2Image *im = es3_image(ctx, program, &p);
+    GLsizei n;
+    if (!p)
+        return;
+    if (!im || uniformBlockIndex >= im->nublocks || bufSize < 0) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    n = copy_out(uniformBlockName, bufSize, im->ublocks[uniformBlockIndex].name);
+    if (length)
+        *length = n;
+}
+
+void ogles2_glGetActiveUniformBlockiv(struct OGLES2Context *ctx, GLuint program, GLuint uniformBlockIndex,
+                                      GLenum pname, GLint *params)
+{
+    struct OGLES2Program *p = 0;
+    const struct OGLES2Image *im = es3_image(ctx, program, &p);
+    const struct OGLES2ImageBlock *bl;
+    UWORD k;
+    if (!p)
+        return;
+    if (!im || uniformBlockIndex >= im->nublocks) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    bl = &im->ublocks[uniformBlockIndex];
+    switch (pname) {
+    case GL_UNIFORM_BLOCK_BINDING:       *params = (GLint)p->block_binding[uniformBlockIndex]; return;
+    case GL_UNIFORM_BLOCK_DATA_SIZE:     *params = (GLint)bl->size; return;
+    case GL_UNIFORM_BLOCK_NAME_LENGTH:   *params = (GLint)str_len(bl->name) + 1; return;
+    case GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS: *params = bl->nmembers; return;
+    case GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES:
+        for (k = 0; k < bl->nmembers; k++)
+            params[k] = active_index(im, bl->members[k]);
+        return;
+    /* Mesa's stage bits: 0 the vertex shader, 4 the fragment shader */
+    case GL_UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER:   *params = (bl->stages & 0x01) ? GL_TRUE : GL_FALSE; return;
+    case GL_UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER: *params = (bl->stages & 0x10) ? GL_TRUE : GL_FALSE; return;
+    default:
+        ogles2_error(ctx, GL_INVALID_ENUM);
+    }
+}
+
+void ogles2_glUniformBlockBinding(struct OGLES2Context *ctx, GLuint program, GLuint uniformBlockIndex,
+                                  GLuint uniformBlockBinding)
+{
+    struct OGLES2Program *p = 0;
+    const struct OGLES2Image *im = es3_image(ctx, program, &p);
+    if (!p)
+        return;
+    /* 108: GL_MAX_UNIFORM_BUFFER_BINDINGS (state.c) */
+    if (!im || uniformBlockIndex >= im->nublocks || uniformBlockBinding >= 108) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    p->block_binding[uniformBlockIndex] = uniformBlockBinding;
+}
+
+/* An active uniform's name as glGetUniformIndices takes it: as
+ * glGetActiveUniform reports it, or an array's without its "[0]". */
+static BOOL uniform_named(const struct OGLES2ImageUniform *u, const char *name)
+{
+    ULONG n = str_len(u->name);
+    if (strncmp(u->name, name, n))
+        return FALSE;
+    return !name[n] || (u->array && str_eq(name + n, "[0]"));
+}
+
+void ogles2_glGetUniformIndices(struct OGLES2Context *ctx, GLuint program, GLsizei uniformCount,
+                                const GLchar *const *uniformNames, GLuint *uniformIndices)
+{
+    struct OGLES2Program *p = 0;
+    const struct OGLES2Image *im = es3_image(ctx, program, &p);
+    GLsizei k;
+    UWORD u;
+    if (!p)
+        return;
+    if (uniformCount < 0) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    for (k = 0; uniformIndices && uniformNames && k < uniformCount; k++) {
+        uniformIndices[k] = GL_INVALID_INDEX;
+        for (u = 0; im && uniformNames[k] && u < im->nuniforms; u++)
+            if (visible(&im->uniforms[u]) && uniform_named(&im->uniforms[u], uniformNames[k])) {
+                uniformIndices[k] = (GLuint)active_index(im, u);
+                break;
+            }
+    }
+}
+
+void ogles2_glGetActiveUniformsiv(struct OGLES2Context *ctx, GLuint program, GLsizei uniformCount,
+                                  const GLuint *uniformIndices, GLenum pname, GLint *params)
+{
+    struct OGLES2Program *p = 0;
+    const struct OGLES2Image *im = es3_image(ctx, program, &p);
+    const struct OGLES2ImageUniform *u;
+    GLsizei k;
+    if (!p)
+        return;
+    if (uniformCount < 0) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    for (k = 0; uniformIndices && k < uniformCount; k++)
+        if (!im || !active_uniform(im, uniformIndices[k])) {
+            ogles2_error(ctx, GL_INVALID_VALUE);
+            return;
+        }
+    if (pname != GL_UNIFORM_TYPE && pname != GL_UNIFORM_SIZE && pname != GL_UNIFORM_NAME_LENGTH &&
+        pname != GL_UNIFORM_BLOCK_INDEX && pname != GL_UNIFORM_OFFSET && pname != GL_UNIFORM_ARRAY_STRIDE &&
+        pname != GL_UNIFORM_MATRIX_STRIDE && pname != GL_UNIFORM_IS_ROW_MAJOR) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    for (k = 0; uniformIndices && params && k < uniformCount; k++) {
+        BOOL in_block;
+        u = active_uniform(im, uniformIndices[k]);
+        in_block = u->block >= 0;
+        /* the default block's: -1 offsets and strides, as Mesa's */
+        params[k] = pname == GL_UNIFORM_TYPE          ? (GLint)u->type
+                  : pname == GL_UNIFORM_SIZE          ? (u->array ? u->array : 1)
+                  : pname == GL_UNIFORM_NAME_LENGTH   ? (GLint)active_name_len(u) + 1
+                  : pname == GL_UNIFORM_BLOCK_INDEX   ? u->block
+                  : pname == GL_UNIFORM_OFFSET        ? (in_block ? u->offset : -1)
+                  : pname == GL_UNIFORM_ARRAY_STRIDE  ? (in_block ? u->array_stride : -1)
+                  : pname == GL_UNIFORM_MATRIX_STRIDE ? (in_block ? u->matrix_stride : -1)
+                                                      : (in_block && u->row_major ? GL_TRUE : GL_FALSE);
     }
 }
 

@@ -1,0 +1,475 @@
+#sessionInfo releaseName unknown
+#sessionInfo releaseId 0xcafebabe
+#sessionInfo targetName "AmigaOS3"
+#sessionInfo logFormatVersion "0.3.4"
+#sessionInfo vendor "ogles2.library"
+#sessionInfo renderer "V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM"
+#sessionInfo commandLineParameters "--deqp-caselist-file M8R2:caselists/samplers.txt --deqp-archive-dir=M8R2:bin --deqp-log-filename=M8R2:results/samplers.qpa --deqp-log-images=disable --deqp-log-shader-sources=disable --deqp-surface-width=256 --deqp-surface-height=256 --deqp-gl-config-name=rgba8888d24s8ms0"
+
+#beginSession
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.single_tex_2d.diff_wrap_t
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.single_tex_2d.diff_wrap_t" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1534269</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.single_tex_2d.diff_wrap_s
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.single_tex_2d.diff_wrap_s" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">36772</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.single_tex_2d.diff_wrap_r
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.single_tex_2d.diff_wrap_r" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">35553</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.single_tex_2d.diff_min_filter
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.single_tex_2d.diff_min_filter" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">35567</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.single_tex_2d.diff_mag_filter
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.single_tex_2d.diff_mag_filter" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">35571</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.single_tex_2d.diff_max_lod
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.single_tex_2d.diff_max_lod" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">37739</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.single_tex_2d.diff_min_lod
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.single_tex_2d.diff_min_lod" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">36420</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.multi_tex_2d.diff_wrap_t
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.multi_tex_2d.diff_wrap_t" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">225875</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.multi_tex_2d.diff_wrap_s
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.multi_tex_2d.diff_wrap_s" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">35854</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.multi_tex_2d.diff_wrap_r
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.multi_tex_2d.diff_wrap_r" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">36253</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.multi_tex_2d.diff_min_filter
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.multi_tex_2d.diff_min_filter" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">37021</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.multi_tex_2d.diff_mag_filter
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.multi_tex_2d.diff_mag_filter" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">35930</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.multi_tex_2d.diff_max_lod
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.multi_tex_2d.diff_max_lod" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">36542</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.multi_tex_2d.diff_min_lod
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.multi_tex_2d.diff_min_lod" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">37378</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.single_tex_3d.diff_wrap_t
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.single_tex_3d.diff_wrap_t" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">282671</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.single_tex_3d.diff_wrap_s
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.single_tex_3d.diff_wrap_s" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">57136</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.single_tex_3d.diff_wrap_r
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.single_tex_3d.diff_wrap_r" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">53135</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.single_tex_3d.diff_min_filter
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.single_tex_3d.diff_min_filter" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">53645</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.single_tex_3d.diff_mag_filter
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.single_tex_3d.diff_mag_filter" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">55821</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.single_tex_3d.diff_max_lod
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.single_tex_3d.diff_max_lod" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">54886</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.single_tex_3d.diff_min_lod
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.single_tex_3d.diff_min_lod" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">55268</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.multi_tex_3d.diff_wrap_t
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.multi_tex_3d.diff_wrap_t" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">270757</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.multi_tex_3d.diff_wrap_s
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.multi_tex_3d.diff_wrap_s" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">72005</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.multi_tex_3d.diff_wrap_r
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.multi_tex_3d.diff_wrap_r" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">71223</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.multi_tex_3d.diff_min_filter
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.multi_tex_3d.diff_min_filter" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">70270</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.multi_tex_3d.diff_mag_filter
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.multi_tex_3d.diff_mag_filter" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">72585</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.multi_tex_3d.diff_max_lod
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.multi_tex_3d.diff_max_lod" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">72753</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.multi_tex_3d.diff_min_lod
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.multi_tex_3d.diff_min_lod" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">69878</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.single_cubemap.diff_wrap_t
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.single_cubemap.diff_wrap_t" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">286450</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.single_cubemap.diff_wrap_s
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.single_cubemap.diff_wrap_s" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">42283</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.single_cubemap.diff_wrap_r
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.single_cubemap.diff_wrap_r" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">41208</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.single_cubemap.diff_min_filter
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.single_cubemap.diff_min_filter" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">39951</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.single_cubemap.diff_mag_filter
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.single_cubemap.diff_mag_filter" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">40658</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.single_cubemap.diff_max_lod
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.single_cubemap.diff_max_lod" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">39223</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.single_cubemap.diff_min_lod
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.single_cubemap.diff_min_lod" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">38745</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.multi_cubemap.diff_wrap_t
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.multi_cubemap.diff_wrap_t" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">281562</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.multi_cubemap.diff_wrap_s
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.multi_cubemap.diff_wrap_s" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">43363</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.multi_cubemap.diff_wrap_r
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.multi_cubemap.diff_wrap_r" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">44525</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.multi_cubemap.diff_min_filter
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.multi_cubemap.diff_min_filter" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">42194</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.multi_cubemap.diff_mag_filter
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.multi_cubemap.diff_mag_filter" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">41981</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.multi_cubemap.diff_max_lod
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.multi_cubemap.diff_max_lod" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">42581</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.samplers.multi_cubemap.diff_min_lod
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.samplers.multi_cubemap.diff_min_lod" Version="0.3.4" CaseType="SelfValidate">
+ <ImageSet Name="Sampler render result" Description="Result from rendering with sampler" />
+ <ImageSet Name="Texture render result" Description="Result from rendering with texture state" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">44405</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+Run took 4.78 seconds
+
+#endSession

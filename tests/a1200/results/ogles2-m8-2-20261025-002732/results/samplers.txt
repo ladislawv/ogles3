@@ -1,0 +1,144 @@
+Writing test log into M8R2:results/samplers.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles2.library: 70 functions of the ES 3.0 table not implemented yet: glBeginQuery glBeginTransformFeedback glBindTransformFeedback glBindVertexArray glBlitFramebuffer glClearBufferfi glClearBufferfv glClearBufferiv glClearBufferuiv glClientWaitSync glCompressedTexImage3D glCompressedTexSubImage3D glCopyTexSubImage3D glDeleteQueries glDeleteSync glDeleteTransformFeedbacks glDeleteVertexArrays glDrawArraysInstanced glDrawBuffers glDrawElementsInstanced glEndQuery glEndTransformFeedback glFenceSync glFlushMappedBufferRange glFramebufferTextureLayer glGenQueries glGenTransformFeedbacks glGenVertexArrays glGetActiveUniformBlockName glGetActiveUniformBlockiv glGetActiveUniformsiv glGetBufferParameteri64v glGetBufferPointerv glGetInternalformativ glGetProgramBinary glGetQueryObjectuiv glGetSynciv glGetTransformFeedbackVarying glGetUniformBlockIndex glGetUniformIndices glGetVertexAttribIiv glGetVertexAttribIuiv glInvalidateFramebuffer glInvalidateSubFramebuffer glIsQuery glIsSync glIsTransformFeedback glIsVertexArray glMapBufferRange glPauseTransformFeedback glProgramBinary glProgramParameteri glReadBuffer glRenderbufferStorageMultisample glResumeTransformFeedback glTexStorage2D glTexStorage3D glTransformFeedbackVaryings glUniformBlockBinding glUnmapBuffer glVertexAttribDivisor glVertexAttribI4i glVertexAttribI4iv glVertexAttribI4ui glVertexAttribI4uiv glVertexAttribIPointer glWaitSync glDrawElementsInstancedBaseVertexOES glDrawRangeElementsBaseVertexOES glMultiDrawElementsBaseVertexEXT
+
+Test case 'dEQP-GLES3.functional.samplers.single_tex_2d.diff_wrap_t'..
+ogles2.library: glBindVertexArray is not implemented yet (called as a no-op)
+ogles2.library: glVertexAttribDivisor is not implemented yet (called as a no-op)
+ogles2.library: glBindTransformFeedback is not implemented yet (called as a no-op)
+ogles2.library: glDrawBuffers is not implemented yet (called as a no-op)
+ogles2.library: glReadBuffer is not implemented yet (called as a no-op)
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.single_tex_2d.diff_wrap_s'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.single_tex_2d.diff_wrap_r'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.single_tex_2d.diff_min_filter'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.single_tex_2d.diff_mag_filter'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.single_tex_2d.diff_max_lod'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.single_tex_2d.diff_min_lod'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.multi_tex_2d.diff_wrap_t'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.multi_tex_2d.diff_wrap_s'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.multi_tex_2d.diff_wrap_r'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.multi_tex_2d.diff_min_filter'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.multi_tex_2d.diff_mag_filter'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.multi_tex_2d.diff_max_lod'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.multi_tex_2d.diff_min_lod'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.single_tex_3d.diff_wrap_t'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.single_tex_3d.diff_wrap_s'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.single_tex_3d.diff_wrap_r'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.single_tex_3d.diff_min_filter'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.single_tex_3d.diff_mag_filter'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.single_tex_3d.diff_max_lod'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.single_tex_3d.diff_min_lod'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.multi_tex_3d.diff_wrap_t'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.multi_tex_3d.diff_wrap_s'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.multi_tex_3d.diff_wrap_r'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.multi_tex_3d.diff_min_filter'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.multi_tex_3d.diff_mag_filter'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.multi_tex_3d.diff_max_lod'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.multi_tex_3d.diff_min_lod'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.single_cubemap.diff_wrap_t'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.single_cubemap.diff_wrap_s'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.single_cubemap.diff_wrap_r'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.single_cubemap.diff_min_filter'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.single_cubemap.diff_mag_filter'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.single_cubemap.diff_max_lod'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.single_cubemap.diff_min_lod'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.multi_cubemap.diff_wrap_t'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.multi_cubemap.diff_wrap_s'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.multi_cubemap.diff_wrap_r'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.multi_cubemap.diff_min_filter'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.multi_cubemap.diff_mag_filter'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.multi_cubemap.diff_max_lod'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.samplers.multi_cubemap.diff_min_lod'..
+  Pass (Pass)
+
+DONE!
+
+Test run totals:
+  Passed:        42/42 (100.0%)
+  Failed:        0/42 (0.0%)
+  Not supported: 0/42 (0.0%)
+  Warnings:      0/42 (0.0%)
+  Waived:        0/42 (0.0%)

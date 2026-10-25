@@ -1,0 +1,105 @@
+Writing test log into M8R2:results/shaders-builtin_variable.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles2.library: 70 functions of the ES 3.0 table not implemented yet: glBeginQuery glBeginTransformFeedback glBindTransformFeedback glBindVertexArray glBlitFramebuffer glClearBufferfi glClearBufferfv glClearBufferiv glClearBufferuiv glClientWaitSync glCompressedTexImage3D glCompressedTexSubImage3D glCopyTexSubImage3D glDeleteQueries glDeleteSync glDeleteTransformFeedbacks glDeleteVertexArrays glDrawArraysInstanced glDrawBuffers glDrawElementsInstanced glEndQuery glEndTransformFeedback glFenceSync glFlushMappedBufferRange glFramebufferTextureLayer glGenQueries glGenTransformFeedbacks glGenVertexArrays glGetActiveUniformBlockName glGetActiveUniformBlockiv glGetActiveUniformsiv glGetBufferParameteri64v glGetBufferPointerv glGetInternalformativ glGetProgramBinary glGetQueryObjectuiv glGetSynciv glGetTransformFeedbackVarying glGetUniformBlockIndex glGetUniformIndices glGetVertexAttribIiv glGetVertexAttribIuiv glInvalidateFramebuffer glInvalidateSubFramebuffer glIsQuery glIsSync glIsTransformFeedback glIsVertexArray glMapBufferRange glPauseTransformFeedback glProgramBinary glProgramParameteri glReadBuffer glRenderbufferStorageMultisample glResumeTransformFeedback glTexStorage2D glTexStorage3D glTransformFeedbackVaryings glUniformBlockBinding glUnmapBuffer glVertexAttribDivisor glVertexAttribI4i glVertexAttribI4iv glVertexAttribI4ui glVertexAttribI4uiv glVertexAttribIPointer glWaitSync glDrawElementsInstancedBaseVertexOES glDrawRangeElementsBaseVertexOES glMultiDrawElementsBaseVertexEXT
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_attribs_vertex'..
+ogles2.library: glBindVertexArray is not implemented yet (called as a no-op)
+ogles2.library: glVertexAttribDivisor is not implemented yet (called as a no-op)
+ogles2.library: glBindTransformFeedback is not implemented yet (called as a no-op)
+ogles2.library: glDrawBuffers is not implemented yet (called as a no-op)
+ogles2.library: glReadBuffer is not implemented yet (called as a no-op)
+  Fail (Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_attribs_fragment'..
+  Fail (Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_uniform_vectors_vertex'..
+  Fail (Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_uniform_vectors_fragment'..
+  Fail (Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.max_fragment_uniform_vectors_vertex'..
+  Fail (Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.max_fragment_uniform_vectors_fragment'..
+  Fail (Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.max_texture_image_units_vertex'..
+  Fail (Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.max_texture_image_units_fragment'..
+  Fail (Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_texture_image_units_vertex'..
+  Fail (Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_texture_image_units_fragment'..
+  Fail (Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.max_combined_texture_image_units_vertex'..
+  Fail (Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.max_combined_texture_image_units_fragment'..
+  Fail (Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.max_draw_buffers_vertex'..
+  Fail (Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.max_draw_buffers_fragment'..
+  Fail (Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_output_vectors_vertex'..
+  Fail (Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.max_vertex_output_vectors_fragment'..
+  Fail (Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.max_fragment_input_vectors_vertex'..
+  Fail (Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.max_fragment_input_vectors_fragment'..
+  Fail (Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.min_program_texel_offset_vertex'..
+  Fail (Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.min_program_texel_offset_fragment'..
+  Fail (Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.max_program_texel_offset_vertex'..
+  Fail (Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.max_program_texel_offset_fragment'..
+  Fail (Failed to set up framebuffer object: glGetError() returned GL_INVALID_ENUM at glsShaderExecUtil.cpp:670)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.depth_range_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.depth_range_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.vertex_id'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.fragcoord_xyz'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.fragcoord_w'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.pointcoord'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.builtin_variable.frontfacing'..
+  Pass (Pass)
+
+DONE!
+
+Test run totals:
+  Passed:        7/29 (24.1%)
+  Failed:        22/29 (75.9%)
+  Not supported: 0/29 (0.0%)
+  Warnings:      0/29 (0.0%)
+  Waived:        0/29 (0.0%)

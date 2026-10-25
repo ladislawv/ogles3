@@ -52,6 +52,8 @@ struct OGLES2Texture;
 struct OGLES2Buffer;
 struct OGLES2Renderbuffer;
 struct OGLES2Image;
+struct OGLES2Sampler;
+struct OGLES2VaoState;
 /* A name past OGLES2_NEAR_NAMES and its table slot (share.c). */
 struct OGLES2FarName
 {
@@ -74,6 +76,17 @@ struct OGLES2Share
     GLuint nrbs;
     struct OGLES2FarName *far_tex, *far_buf, *far_rb; /* their tables' names past OGLES2_NEAR_NAMES */
     struct SignalSemaphore lock;      /* every call into a member, while there are two or more */
+    struct OGLES2Sampler **smp;       /* texture.c: ES 3.0's sampler objects, by name (glGenSamplers') */
+    GLuint nsmp;
+};
+
+/* glPixelStorei's state for one direction (ES 3.0 3.7.1 and 4.3.1; the
+ * row length, skips and image height are ES 3.0's: packing has no image
+ * height or skipped images). */
+struct OGLES2PixelStore
+{
+    GLint alignment, row_length, image_height, skip_pixels, skip_rows, skip_images;
+    BOOL own;                       /* the library's own images: no pixel buffer (buffer.c) */
 };
 
 /* A GL context. Opaque to clients (struct OGLES2Context in the headers). */
@@ -99,6 +112,7 @@ struct OGLES2Share
 #define OGLES2_CAP_SAMPLE_ALPHA_TO_COVERAGE (1UL << 7)
 #define OGLES2_CAP_SAMPLE_COVERAGE          (1UL << 8)
 #define OGLES2_CAP_PRIMITIVE_RESTART       (1UL << 9) /* GL_PRIMITIVE_RESTART_FIXED_INDEX (ES 3.0) */
+#define OGLES2_CAP_RASTERIZER_DISCARD      (1UL << 10) /* GL_RASTERIZER_DISCARD (ES 3.0) */
 
 /* Fixed-function state (state.c), GLES 2.0 defaults set by ogles2_state_init. */
 struct OGLES2State
@@ -141,6 +155,7 @@ struct OGLES2Array
     GLsizei stride;      /* as given; 0 = tightly packed */
     const void *pointer; /* with a buffer: the offset into it */
     struct OGLES2Buffer *buffer; /* the GL_ARRAY_BUFFER binding when it was set; NULL: client memory */
+    GLuint divisor;      /* ES 3.0's glVertexAttribDivisor: 0 per vertex, n an element per n instances */
 };
 
 /* ---- program images (program.c, v3dp.c) ----
@@ -437,6 +452,9 @@ struct OGLES2Program
      * es3_variants): each stage's 32-bit samplers, alpha to coverage. */
     ULONG var_bits[2];
     BOOL var_a2c;
+    /* ES 3.0: each uniform block's buffer binding (glUniformBlockBinding;
+     * from the image's at link), one per image block. */
+    ULONG *block_binding;
 };
 
 struct OGLES2Context;
@@ -576,7 +594,7 @@ struct OGLES2Context
     struct OGLES2Program *program;  /* glUseProgram */
     struct OGLES2Draw *draw;        /* draw.c's per-context state, NULL until the first draw */
     struct OGLES2TexState *tex;     /* texture.c's, NULL until first used */
-    UBYTE unpack_alignment, pack_alignment; /* glPixelStorei */
+    struct OGLES2PixelStore unpack, pack; /* glPixelStorei */
     ULONG job_serial;               /* the open job's, unique across contexts (job.c); objects note the
                                      * last job that used them */
     struct OGLES2BufState *buf;     /* buffer.c's, NULL until first used */
@@ -611,6 +629,7 @@ struct OGLES2Context
     UBYTE marker_depth;             /* EXT_debug_marker: groups pushed (debug.c) */
     UBYTE job_discard;              /* EXT_discard_framebuffer: OGLES2_DISCARD_* the open job does not store */
     UBYTE job_noload;               /* and those it does not load (discarded before it began) */
+    struct OGLES2VaoState *vao;     /* vao.c's (ES 3.0's vertex array objects), NULL until first used */
 };
 
 #define OGLES2_DISCARD_COLOR   1
@@ -703,11 +722,22 @@ UWORD ogles2_float_to_half(GLfloat f); /* IEEE half precision, by the bits (text
 struct OGLES2Texture *ogles2_texture_scratch(struct OGLES2Context *ctx, UWORD w, UWORD h, ULONG src, ULONG stride,
                                              BOOL bgra);
 struct OGLES2Texture *ogles2_texture_unit0(struct OGLES2Context *ctx, struct OGLES2Texture *t);
+/* The parameters a sampler object holds (ES 3.0 3.8.2), a texture's own
+ * too: a sampler object bound to a unit is sampled with instead of its
+ * texture's (texture.c). */
+struct OGLES2SamplerParams
+{
+    GLenum min_filter, mag_filter, wrap_s, wrap_t, wrap_r;
+    GLfloat max_aniso;              /* EXT_texture_filter_anisotropic: 1 = off */
+    GLfloat min_lod, max_lod;       /* SGIS_texture_lod */
+    GLenum compare_mode, compare_func; /* ES 3.0: GL_TEXTURE_COMPARE_MODE and _FUNC */
+};
 struct OGLES2TexParams
 {
-    GLenum min_filter, mag_filter, wrap_s, wrap_t;
+    struct OGLES2SamplerParams s;
     GLint base_level, max_level;
-    GLfloat max_aniso, lod_bias;
+    GLfloat lod_bias;
+    GLenum gl_swizzle[4];
 };
 void ogles2_texture_params_copy(struct OGLES2Texture *t, struct OGLES2TexParams *saved);
 void ogles2_texture_params_restore(struct OGLES2Texture *t, const struct OGLES2TexParams *saved);
@@ -732,12 +762,17 @@ BOOL ogles2_texture_zs_surface(struct OGLES2Context *ctx, struct OGLES2Texture *
 #define OGLES2_TEX_2D   0
 #define OGLES2_TEX_CUBE 1
 #define OGLES2_TEX_RECT 2 /* ARB_texture_rectangle */
-#define OGLES2_TEX_NONE 3 /* GLSL ES 3.00's other samplers (3D, array, shadow, integer) until stage B
-                           * brings their textures: they read the incomplete texture's (0, 0, 0, 1) */
+#define OGLES2_TEX_NONE 3 /* GLSL ES 3.00's integer samplers until stage B brings their
+                           * textures: they read the incomplete texture's (0, 0, 0, 1) */
+#define OGLES2_TEX_3D    4 /* ES 3.0 */
+#define OGLES2_TEX_ARRAY 5 /* a 2D array */
 static inline int ogles2_sampler_kind(GLenum type)
 {
-    return type == GL_SAMPLER_2D ? OGLES2_TEX_2D : type == GL_SAMPLER_CUBE ? OGLES2_TEX_CUBE
-         : type == GL_SAMPLER_2D_RECT ? OGLES2_TEX_RECT : OGLES2_TEX_NONE;
+    return type == GL_SAMPLER_2D || type == GL_SAMPLER_2D_SHADOW ? OGLES2_TEX_2D
+         : type == GL_SAMPLER_CUBE || type == GL_SAMPLER_CUBE_SHADOW ? OGLES2_TEX_CUBE
+         : type == GL_SAMPLER_2D_RECT ? OGLES2_TEX_RECT
+         : type == GL_SAMPLER_3D ? OGLES2_TEX_3D
+         : type == GL_SAMPLER_2D_ARRAY || type == GL_SAMPLER_2D_ARRAY_SHADOW ? OGLES2_TEX_ARRAY : OGLES2_TEX_NONE;
 }
 /* textureSize's values for unit's texture of that kind: what 0 width, 1
  * height, 2 depth, 3 layers (texture.c). */
@@ -804,7 +839,22 @@ void ogles2_compiler_stop(void);
 /* buffer.c */
 void ogles2_buffers_free(struct OGLES2Context *ctx);
 BOOL ogles2_buffer_query(struct OGLES2Context *ctx, GLenum pname, GLint *v);
+/* ES 3.0's pixel pack (`pack`) or unpack buffer's bytes at an application's
+ * pixel offset; NULL: none bound; *bad: GL_INVALID_OPERATION. */
+UBYTE *ogles2_buffer_pixels(struct OGLES2Context *ctx, BOOL pack, ULONG offset, ULONG bytes, BOOL *bad);
+/* The GPU's copy of a buffer (32-bit words in its byte order), and uniform
+ * buffer binding `index`'s address and bytes (0: none bound). */
+ULONG ogles2_buffer_words(struct OGLES2Context *ctx, struct OGLES2Buffer *b);
+ULONG ogles2_buffer_uniform(struct OGLES2Context *ctx, ULONG index, ULONG *size);
 struct OGLES2Buffer *ogles2_buffer_array(struct OGLES2Context *ctx);
+/* The GL_ELEMENT_ARRAY_BUFFER binding, which a vertex array object holds (vao.c). */
+struct OGLES2Buffer *ogles2_buffer_element(struct OGLES2Context *ctx);
+void ogles2_buffer_set_element(struct OGLES2Context *ctx, struct OGLES2Buffer *b);
+/* vao.c: the bound vertex array object's name (0: object 0); a deleted
+ * buffer unbound from the objects not bound; freed with the context. */
+GLuint ogles2_vao_bound(const struct OGLES2Context *ctx);
+void ogles2_vao_buffer_deleted(struct OGLES2Context *ctx, const struct OGLES2Buffer *b);
+void ogles2_vaos_free(struct OGLES2Context *ctx);
 GLuint ogles2_buffer_name(const struct OGLES2Buffer *b);
 ULONG ogles2_buffer_size(const struct OGLES2Buffer *b);
 const void *ogles2_buffer_indices(struct OGLES2Context *ctx, ULONG offset, ULONG bytes, BOOL *bad);

@@ -8,6 +8,7 @@
  * arguments and returns, and float arguments, which tests/abi_probe checks
  * from both GCC and vbcc programs (plan section 6.3).
  */
+#include <string.h>
 #include "ogles2_internal.h"
 
 
@@ -25,6 +26,8 @@ static ULONG cap_bit(const struct OGLES2Context *ctx, GLenum cap)
     case GL_SAMPLE_COVERAGE:          return OGLES2_CAP_SAMPLE_COVERAGE;
     /* ES 3.0: an index of the type's largest value restarts the primitive */
     case GL_PRIMITIVE_RESTART_FIXED_INDEX: return ogles2_es3(ctx) ? OGLES2_CAP_PRIMITIVE_RESTART : 0;
+    /* ES 3.0: no fragments (draws and clears produce nothing; draw.c, frame.c) */
+    case GL_RASTERIZER_DISCARD: return ogles2_es3(ctx) ? OGLES2_CAP_RASTERIZER_DISCARD : 0;
     default:                          return 0;
     }
 }
@@ -79,7 +82,9 @@ void ogles2_state_init(struct OGLES2Context *ctx)
         s->stencil_value_mask[i] = s->stencil_write_mask[i] = ~0U;
     }
     s->clear_stencil = 0;
-    ctx->unpack_alignment = ctx->pack_alignment = 4;
+    memset(&ctx->unpack, 0, sizeof(ctx->unpack));
+    memset(&ctx->pack, 0, sizeof(ctx->pack));
+    ctx->unpack.alignment = ctx->pack.alignment = 4;
 }
 
 BOOL ogles2_state_dither(struct OGLES2Context *ctx)
@@ -595,6 +600,15 @@ static int lookup_es3(struct OGLES2Context *ctx, GLenum pname, struct value *v)
     case GL_NUM_EXTENSIONS:
         v->i[0] = (GLint)ogles2_num_extensions(ctx);
         return 1;
+    case GL_VERTEX_ARRAY_BINDING:
+        v->i[0] = (GLint)ogles2_vao_bound(ctx);
+        return 1;
+    /* Transform feedback (stage C) is never active yet. */
+    case GL_TRANSFORM_FEEDBACK_ACTIVE:
+    case GL_TRANSFORM_FEEDBACK_PAUSED:
+        v->kind = K_BOOL;
+        v->i[0] = 0;
+        return 1;
     }
     for (k = 0; k < sizeof(es3_limits) / sizeof(es3_limits[0]); k++)
         if (es3_limits[k].pname == pname) {
@@ -848,6 +862,23 @@ static int lookup(struct OGLES2Context *ctx, GLenum pname, struct value *v)
         }
         return ogles2_es3(ctx) && lookup_es3(ctx, pname, v);
     }
+}
+
+/* ES 3.0's query objects come with occlusion queries (docs/GLES3_PLAN.md
+ * §5 item 12) and transform feedback's count (stage C): until then no
+ * query is ever active. */
+void ogles2_glGetQueryiv(struct OGLES2Context *ctx, GLenum target, GLenum pname, GLint *params)
+{
+    if (!ogles2_es3_entry(ctx))
+        return;
+    if ((target != GL_ANY_SAMPLES_PASSED && target != GL_ANY_SAMPLES_PASSED_CONSERVATIVE &&
+         target != GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN) ||
+        pname != GL_CURRENT_QUERY) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    if (params)
+        *params = 0;
 }
 
 static int query(struct OGLES2Context *ctx, GLenum pname, struct value *v, const char *fn)

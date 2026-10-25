@@ -1,0 +1,8 @@
+Directory "M8R2:results" on Sunday 25-Oct-26
+00-progress.txt                 130 ----rwed Today     00:25:33
+shaders-conditionals.txt       6536 ----rwed Today     00:25:33
+shaders-conditionals.qpa      49291 ----rwed Today     00:25:33
+ogles2.log                     4687 ----rwed Today     00:25:33
+notes.txt                       228 ----rwed Today     00:25:33
+99-files.txt                    196 ----rwed Today     00:25:33
+6 files - 59K bytes - 129 blocks used

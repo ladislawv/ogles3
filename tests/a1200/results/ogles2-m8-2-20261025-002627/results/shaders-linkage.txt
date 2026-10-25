@@ -1,0 +1,372 @@
+Writing test log into M8R2:results/shaders-linkage.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles2.library: 70 functions of the ES 3.0 table not implemented yet: glBeginQuery glBeginTransformFeedback glBindTransformFeedback glBindVertexArray glBlitFramebuffer glClearBufferfi glClearBufferfv glClearBufferiv glClearBufferuiv glClientWaitSync glCompressedTexImage3D glCompressedTexSubImage3D glCopyTexSubImage3D glDeleteQueries glDeleteSync glDeleteTransformFeedbacks glDeleteVertexArrays glDrawArraysInstanced glDrawBuffers glDrawElementsInstanced glEndQuery glEndTransformFeedback glFenceSync glFlushMappedBufferRange glFramebufferTextureLayer glGenQueries glGenTransformFeedbacks glGenVertexArrays glGetActiveUniformBlockName glGetActiveUniformBlockiv glGetActiveUniformsiv glGetBufferParameteri64v glGetBufferPointerv glGetInternalformativ glGetProgramBinary glGetQueryObjectuiv glGetSynciv glGetTransformFeedbackVarying glGetUniformBlockIndex glGetUniformIndices glGetVertexAttribIiv glGetVertexAttribIuiv glInvalidateFramebuffer glInvalidateSubFramebuffer glIsQuery glIsSync glIsTransformFeedback glIsVertexArray glMapBufferRange glPauseTransformFeedback glProgramBinary glProgramParameteri glReadBuffer glRenderbufferStorageMultisample glResumeTransformFeedback glTexStorage2D glTexStorage3D glTransformFeedbackVaryings glUniformBlockBinding glUnmapBuffer glVertexAttribDivisor glVertexAttribI4i glVertexAttribI4iv glVertexAttribI4ui glVertexAttribI4uiv glVertexAttribIPointer glWaitSync glDrawElementsInstancedBaseVertexOES glDrawRangeElementsBaseVertexOES glMultiDrawElementsBaseVertexEXT
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.fragment_declare'..
+ogles2.library: glBindVertexArray is not implemented yet (called as a no-op)
+ogles2.library: glVertexAttribDivisor is not implemented yet (called as a no-op)
+ogles2.library: glBindTransformFeedback is not implemented yet (called as a no-op)
+ogles2.library: glDrawBuffers is not implemented yet (called as a no-op)
+ogles2.library: glReadBuffer is not implemented yet (called as a no-op)
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.vertex_declare'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.both_declare'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.vertex_declare_fragment_use'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.vertex_use_fragment_declare'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.vertex_use_declare_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.vertex_use_fragment_use'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.differing_precision_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.differing_precision_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.differing_precision_3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.type_mismatch_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.type_mismatch_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.type_mismatch_3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.struct_type_mismatch_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.struct_type_mismatch_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.struct_type_mismatch_3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.interpolation_mismatch_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.differing_interpolation_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.illegal_usage_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.invalid_type_int'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.invalid_type_uint'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.invalid_type_bool'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.invalid_type_struct_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.invalid_type_struct_struct'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.invalid_type_array_struct'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.rules.invalid_type_array_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.basic_types.float'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.basic_types.vec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.basic_types.vec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.basic_types.vec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.basic_types.mat2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.basic_types.mat2x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.basic_types.mat2x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.basic_types.mat3x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.basic_types.mat3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.basic_types.mat3x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.basic_types.mat4x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.basic_types.mat4x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.basic_types.mat4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.basic_types.int'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.basic_types.ivec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.basic_types.ivec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.basic_types.ivec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.basic_types.uint'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.basic_types.uvec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.basic_types.uvec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.basic_types.uvec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.struct.float'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.struct.vec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.struct.vec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.struct.vec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.struct.mat2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.struct.mat2x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.struct.mat2x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.struct.mat3x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.struct.mat3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.struct.mat3x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.struct.mat4x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.struct.mat4x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.struct.mat4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.struct.int'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.struct.ivec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.struct.ivec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.struct.ivec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.struct.uint'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.struct.uvec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.struct.uvec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.struct.uvec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.struct.float_vec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.struct.float_uvec2_vec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.interpolation.smooth'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.interpolation.centroid'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.interpolation.flat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.usage.readback_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.varying.usage.writeback_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.basic.precision_conflict_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.basic.precision_conflict_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.basic.precision_conflict_3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.basic.precision_conflict_4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.basic'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.vertex_only'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.fragment_only'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.partial'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.vec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.vertex_only_vec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.fragment_only_vec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.partial_vec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.vec4_vec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.vertex_only_vec4_vec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.fragment_only_vec4_vec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.partial_vec4_vec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.vec4_float'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.vertex_only_vec4_float'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.fragment_only_vec4_float'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.partial_vec4_float'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.partial_vec4_struct'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.partial_vec4_vec3_struct'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.partial_vec2_vec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.partial_vec2_int'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.partial_int_float'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.partial_bvec2_vec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.partial_ivec2_vec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.partial_ivec2_ivec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.type_conflict_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.type_conflict_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.type_conflict_3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.precision_conflict_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.precision_conflict_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.precision_conflict_3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.precision_conflict_4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.light_struct_highp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.struct.light_struct_mediump'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.block.type_mismatch'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.block.members_mismatch'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.block.layout_qualifier_mismatch_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.block.layout_qualifier_mismatch_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.block.layout_qualifier_mismatch_4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.shaders.linkage.uniform.block.layout_qualifier_mismatch_5'..
+  Pass (Pass)
+
+DONE!
+
+Test run totals:
+  Passed:        118/118 (100.0%)
+  Failed:        0/118 (0.0%)
+  Not supported: 0/118 (0.0%)
+  Warnings:      0/118 (0.0%)
+  Waived:        0/118 (0.0%)

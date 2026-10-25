@@ -1,0 +1,577 @@
+#sessionInfo releaseName unknown
+#sessionInfo releaseId 0xcafebabe
+#sessionInfo targetName "AmigaOS3"
+#sessionInfo logFormatVersion "0.3.4"
+#sessionInfo vendor "ogles2.library"
+#sessionInfo renderer "V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM"
+#sessionInfo commandLineParameters "--deqp-caselist-file M8R2:caselists/pbo.txt --deqp-archive-dir=M8R2:bin --deqp-log-filename=M8R2:results/pbo.qpa --deqp-log-images=disable --deqp-log-shader-sources=disable --deqp-surface-width=256 --deqp-surface-height=256 --deqp-gl-config-name=rgba8888d24s8ms0"
+
+#beginSession
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.native.clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.native.clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Image comparison failed: max difference = (241, 255, 234, 255), threshold = (0, 0, 0, 0)</Text>
+ <ImageSet Name="Result comparision" Description="Result of read pixels to memory compared with result of read pixels to buffer" />
+ <Text>glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1805204</Number>
+ <Result StatusCode="Fail">glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.native.triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.native.triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Image comparison failed: max difference = (255, 255, 255, 255), threshold = (0, 0, 0, 0)</Text>
+ <ImageSet Name="Result comparision" Description="Result of read pixels to memory compared with result of read pixels to buffer" />
+ <Text>glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">366550</Number>
+ <Result StatusCode="Fail">glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgba8_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgba8_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Image comparison failed: max difference = (1, 1, 1, 1), threshold = (0.0078125, 0.0078125, 0.0078125, 0.0078125)</Text>
+ <ImageSet Name="Result comparision" Description="Result of read pixels to memory compared with result of read pixels to buffer" />
+ <Text>glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">392474</Number>
+ <Result StatusCode="Fail">glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgba8_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgba8_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Image comparison failed: max difference = (0.964706, 1, 0.996078, 1), threshold = (0.0078125, 0.0078125, 0.0078125, 0.0078125)</Text>
+ <ImageSet Name="Result comparision" Description="Result of read pixels to memory compared with result of read pixels to buffer" />
+ <Text>glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">387970</Number>
+ <Result StatusCode="Fail">glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgba8i_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgba8i_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">203961</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgba8i_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgba8i_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">4782</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgba8ui_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgba8ui_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">191427</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgba8ui_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgba8ui_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">4866</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgba16f_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgba16f_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glReadPixels(0, 0, width, height, readPixelsFormat, readPixelsType, 0): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:536</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">11408</Number>
+ <Result StatusCode="Fail">glReadPixels(0, 0, width, height, readPixelsFormat, readPixelsType, 0): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:536</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgba16f_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgba16f_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glReadPixels(0, 0, width, height, readPixelsFormat, readPixelsType, 0): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:536</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">8850</Number>
+ <Result StatusCode="Fail">glReadPixels(0, 0, width, height, readPixelsFormat, readPixelsType, 0): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:536</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgba16i_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgba16i_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">4758</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgba16i_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgba16i_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">5412</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgba16ui_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgba16ui_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">5135</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgba16ui_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgba16ui_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">6009</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgba32f_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgba32f_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Renderbuffer format not supported: &apos;&apos; at es3fPixelBufferObjectTests.cpp:200</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">3729</Number>
+ <Result StatusCode="NotSupported">Renderbuffer format not supported: &apos;&apos; at es3fPixelBufferObjectTests.cpp:200</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgba32f_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgba32f_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Renderbuffer format not supported: &apos;&apos; at es3fPixelBufferObjectTests.cpp:200</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">3035</Number>
+ <Result StatusCode="NotSupported">Renderbuffer format not supported: &apos;&apos; at es3fPixelBufferObjectTests.cpp:200</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgba32i_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgba32i_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">4743</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgba32i_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgba32i_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">5363</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgba32ui_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgba32ui_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">4736</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgba32ui_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgba32ui_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">4777</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.srgb8_alpha8_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.srgb8_alpha8_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">9669</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.srgb8_alpha8_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.srgb8_alpha8_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">4793</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgb10_a2_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgb10_a2_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">4889</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgb10_a2_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgb10_a2_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">4769</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgb10_a2ui_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgb10_a2ui_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">5141</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgb10_a2ui_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgb10_a2ui_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">4858</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgba4_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgba4_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Image comparison failed: max difference = (1, 1, 1, 1), threshold = (0.0078125, 0.0078125, 0.0078125, 0.0078125)</Text>
+ <ImageSet Name="Result comparision" Description="Result of read pixels to memory compared with result of read pixels to buffer" />
+ <Text>glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">383119</Number>
+ <Result StatusCode="Fail">glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgba4_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgba4_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Image comparison failed: max difference = (0.933333, 1, 0.933333, 1), threshold = (0.0078125, 0.0078125, 0.0078125, 0.0078125)</Text>
+ <ImageSet Name="Result comparision" Description="Result of read pixels to memory compared with result of read pixels to buffer" />
+ <Text>glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">380999</Number>
+ <Result StatusCode="Fail">glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgb5_a1_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgb5_a1_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Image comparison failed: max difference = (1, 1, 1, 1), threshold = (0.0078125, 0.0078125, 0.0078125, 0.0078125)</Text>
+ <ImageSet Name="Result comparision" Description="Result of read pixels to memory compared with result of read pixels to buffer" />
+ <Text>glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">388315</Number>
+ <Result StatusCode="Fail">glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgb5_a1_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgb5_a1_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Image comparison failed: max difference = (0.901961, 1, 1, 1), threshold = (0.0078125, 0.0078125, 0.0078125, 0.0078125)</Text>
+ <ImageSet Name="Result comparision" Description="Result of read pixels to memory compared with result of read pixels to buffer" />
+ <Text>glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">385509</Number>
+ <Result StatusCode="Fail">glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgb8_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgb8_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Image comparison failed: max difference = (1, 1, 1, 1), threshold = (0.0078125, 0.0078125, 0.0078125, 0.0078125)</Text>
+ <ImageSet Name="Result comparision" Description="Result of read pixels to memory compared with result of read pixels to buffer" />
+ <Text>glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">395163</Number>
+ <Result StatusCode="Fail">glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgb8_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgb8_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Image comparison failed: max difference = (0.996078, 1, 0.960784, 1), threshold = (0.0078125, 0.0078125, 0.0078125, 0.0078125)</Text>
+ <ImageSet Name="Result comparision" Description="Result of read pixels to memory compared with result of read pixels to buffer" />
+ <Text>glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">390089</Number>
+ <Result StatusCode="Fail">glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgb565_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgb565_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Image comparison failed: max difference = (1, 1, 1, 1), threshold = (0.0078125, 0.0078125, 0.0078125, 0.0078125)</Text>
+ <ImageSet Name="Result comparision" Description="Result of read pixels to memory compared with result of read pixels to buffer" />
+ <Text>glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">386751</Number>
+ <Result StatusCode="Fail">glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rgb565_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rgb565_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Image comparison failed: max difference = (0.964706, 1, 0.968627, 1), threshold = (0.0078125, 0.0078125, 0.0078125, 0.0078125)</Text>
+ <ImageSet Name="Result comparision" Description="Result of read pixels to memory compared with result of read pixels to buffer" />
+ <Text>glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">388008</Number>
+ <Result StatusCode="Fail">glUnmapBuffer(GL_PIXEL_PACK_BUFFER): glGetError() returned GL_INVALID_OPERATION at es3fPixelBufferObjectTests.cpp:584</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.r11f_g11f_b10f_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.r11f_g11f_b10f_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Renderbuffer format not supported: &apos;&apos; at es3fPixelBufferObjectTests.cpp:200</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">3072</Number>
+ <Result StatusCode="NotSupported">Renderbuffer format not supported: &apos;&apos; at es3fPixelBufferObjectTests.cpp:200</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.r11f_g11f_b10f_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.r11f_g11f_b10f_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Renderbuffer format not supported: &apos;&apos; at es3fPixelBufferObjectTests.cpp:200</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">3054</Number>
+ <Result StatusCode="NotSupported">Renderbuffer format not supported: &apos;&apos; at es3fPixelBufferObjectTests.cpp:200</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rg8_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rg8_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">5266</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rg8_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rg8_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">6559</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rg8i_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rg8i_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">5268</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rg8i_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rg8i_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">6215</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rg8ui_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rg8ui_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">5228</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rg8ui_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rg8ui_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">6698</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rg16f_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rg16f_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glReadPixels(0, 0, width, height, readPixelsFormat, readPixelsType, 0): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:536</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">10870</Number>
+ <Result StatusCode="Fail">glReadPixels(0, 0, width, height, readPixelsFormat, readPixelsType, 0): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:536</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rg16f_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rg16f_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glReadPixels(0, 0, width, height, readPixelsFormat, readPixelsType, 0): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:536</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">8709</Number>
+ <Result StatusCode="Fail">glReadPixels(0, 0, width, height, readPixelsFormat, readPixelsType, 0): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:536</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rg16i_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rg16i_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">4751</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rg16i_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rg16i_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">4791</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rg16ui_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rg16ui_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">6198</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rg16ui_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rg16ui_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">4757</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rg32f_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rg32f_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Renderbuffer format not supported: &apos;&apos; at es3fPixelBufferObjectTests.cpp:200</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">3072</Number>
+ <Result StatusCode="NotSupported">Renderbuffer format not supported: &apos;&apos; at es3fPixelBufferObjectTests.cpp:200</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rg32f_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rg32f_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Renderbuffer format not supported: &apos;&apos; at es3fPixelBufferObjectTests.cpp:200</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">3073</Number>
+ <Result StatusCode="NotSupported">Renderbuffer format not supported: &apos;&apos; at es3fPixelBufferObjectTests.cpp:200</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rg32i_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rg32i_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">4810</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rg32i_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rg32i_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">4780</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rg32ui_triangles
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rg32ui_triangles" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">5011</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.pbo.renderbuffer.rg32ui_clears
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.pbo.renderbuffer.rg32ui_clears" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">4768</Number>
+ <Result StatusCode="Fail">glRenderbufferStorage(GL_RENDERBUFFER, m_renderbufferFormat, width, height): glGetError() returned GL_INVALID_ENUM at es3fPixelBufferObjectTests.cpp:393</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+Run took 6.90 seconds
+
+#endSession

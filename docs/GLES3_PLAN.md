@@ -117,8 +117,9 @@ Mesa's driver, so they could follow later as an extension
   - **dEQP-GLES3** (item 6): `MODULE=gles3 B=~/ogles3-build/m68k-es3 bash
     ports/deqp/build.sh`, package `m8-2` (`bash tests/a1200/build_package.sh
     m8-2` after `. ./local.env`), groups with `python ports/deqp/run_groups.py
-    --package=m8-2 <group>...`; patch `gles3/0001` lets a run go on past
-    the state reset stage A's library refuses (§4, "Stage A's end").
+    --package=m8-2 <group>...` (patch `gles3/0001`, which let a run go on
+    past the state reset stage A's library refused, is gone since
+    2026-10-25: §5 item 13).
   - **The GLES2 regression set** (§3): the packages take `B`, `BS`, `V`
     from `local.env`, except `m5-1`, `m6-6`, `m6-8`, `m6-10`, `m7-2` and
     `m7-3`, whose `B` is the sync build (`B=$BS V=$V bash
@@ -141,18 +142,32 @@ Mesa's driver, so they could follow later as an extension
     its format 1.0 files (refused, as they must be). Check
     `List LIBS:ogles2#? LIBS:v3dglslc#?`, and with the owner's consent
     rename both to `.saved` for the runs and back afterwards): (1) stage
-    B (§5), item 13's state first, which lets
-    dEQP-GLES3 run without patch `gles3/0001` (drop it then). Its parts in
-    `glu::resetState`'s order (`framework/opengl/gluStateReset.cpp`; the
-    patch logs the first that fails as "state reset incomplete" in each
-    case's qpa): the vertex attribute arrays (done 2026-10-24: primitive
-    restart, §5 item 12), the rasterization state (`GL_RASTERIZER_DISCARD`
-    next), multisampling, the texture state of every unit (swizzle, LOD,
-    levels, compare mode, 2D array and 3D textures, sampler objects:
-    §5 items 7 and 8), then pixel operations and the rest. **Trap:**
+    B (§5). Item 13's state is done (2026-10-25): `glu::resetState` raises
+    no error in an ES 3.0 context, and patch `gles3/0001` is gone (its
+    parts, in `framework/opengl/gluStateReset.cpp`'s order: primitive
+    restart and rasterizer discard, §5 item 12; swizzle, compare mode,
+    sampler objects, 2D array and 3D textures and the pixel store, items 7
+    and 8; the buffer targets and indexed bindings, item 2; the transform
+    feedback and query state, item 12). Without it the stage A groups pass
+    as with it (`info` 6, `shaders-fragdata` 8, `-function` 4,
+    `-negative` 12, `-discard` 25, `-return` 38, `-conditionals` 41,
+    `-declarations` 54, `-qualification_order` 79, `-linkage` 118, and
+    `shaders-builtin_variable` 7 of 29: the 22 of the shader executor's
+    sized formats, item 10), `switch` 174, and dEQP confirms the new
+    features: `primitive_restart` 504 of 504, `samplers` 42 of 42
+    (`ogles2-m8-2-20261025-002234` to `-002732`); `pbo` 0 of 54 waits for
+    sized renderbuffers (item 10), `glMapBufferRange` (item 12, done since)
+    and ES 3.0's read formats. A run's `.txt` lists the ES 3.0 entries the
+    library lacks (the platform's no-op stubs): a work list. Then the
+    rest of stage B: done since are uniform buffers (items 1 and 6:
+    `shaders-uniform_block` 138 of 138; `ubo` stopped the A1200 in its
+    1388th case, item 6's open point), buffer mapping (item 12) and
+    vertex array objects in ES3 contexts (item 3): `buffer` 695 of 695,
+    `vertex_array_objects` 10 of 10; next instancing (item 4). **Trap:**
     `ports/deqp/build.sh` copies the CTS with `rsync -a`, which keeps the
     sources' old dates, so a patch changed or removed rebuilds nothing:
-    delete the copy (`$B/deqp-gles3/src`) first. dEQP-GLES2's
+    delete the copy (`$B/deqp-gles3/src`), and for a removed patch the
+    objects of the files it touched (`ports/deqp/README.md`). dEQP-GLES2's
     whole list when the ES3 library is finished. §4's items each have a "Done"
     paragraph that says what is in and where; the code of this work so far
     is in `context.c` (versions, extensions), `state.c` (limits),
@@ -1210,6 +1225,28 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    `glDeleteBuffers` unbinds it from the current context (ES 3.0 appendix
    D; `lifetime.attach.deleted_input.buffer_vertex_array`), as textures'
    orphans do now, in both context versions. 1.3 frees it at once (§2).
+   **Targets done (2026-10-25, on the A1200):** the six ES 3.0 targets and
+   their binding queries, the nine usages (the static ones keep GPU
+   copies, the others are read from the shadow as `GL_DYNAMIC_DRAW` is),
+   every data call on any target (`slot` in `buffer.c`); the indexed
+   bindings (`glBindBufferBase`, `glBindBufferRange` with Mesa's checks,
+   `glGetIntegeri_v`, `glGetInteger64i_v`; 108 uniform and 4 transform
+   feedback ones, which also set the target's binding), held for item 6
+   and stage C; `glCopyBufferSubData` (of item 12) on the shadows, its
+   copies patched. The pixel buffers work now rather than in stage C item
+   3, since a bound one makes an application's pointer an offset: the
+   uploads (`glTexImage2D`/`3D`, the sub-images, the compressed ones)
+   read from the unpack buffer, `glReadPixels` writes into the pack buffer
+   (`ogles2_buffer_pixels`; past the end or mapped, `GL_INVALID_OPERATION`),
+   and the library's own images and reads set it aside
+   (`OGLES2PixelStore.own`). Deleting unbinds a buffer from all of them in
+   every member. Not yet: the references that keep a deleted buffer alive.
+   `m8_es3`'s targets, bindings, ranges and errors (under vamos without
+   `glBufferData`: it times itself on the Pi's system timer, which vamos
+   lacks); `m8_draw`'s texel from an unpack buffer, the pixel read into a
+   pack buffer and back, texels copied between buffers
+   (`ogles2-m8-1-20261025-001318`: 24, 82, 37 of 37; the GLES2 drawing
+   tests as before, `ogles2-m7-4-20261025-001342`).
 3. **Vertex array objects** (`glBindVertexArray` and friends;
    `OES_vertex_array_object`): `ctx->array[16]` and the element buffer binding
    move into the object, kept in ES 3.1's form from the start: 16 attribute
@@ -1224,6 +1261,25 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    `OES_vertex_array_object`'s issue "Should a vertex array object be allowed
    to encapsulate client vertex arrays? RESOLVED: No."); object 0 keeps them,
    so GLES2 programs are unchanged. The dEQP port's patch 0004 can then go.
+   **Done in ES3 contexts (2026-10-25, on the A1200), not yet in ES 3.1's
+   form:** `glGenVertexArrays`, `glDeleteVertexArrays`, `glIsVertexArray`
+   (once bound), `glBindVertexArray` (names `glGenVertexArrays` gave),
+   `GL_VERTEX_ARRAY_BINDING`, in `vao.c`. An object holds the 16 arrays as
+   the context does (`struct OGLES2Array`) and the element buffer; the bound
+   one's state is the context's own, so binding saves the old one's and
+   loads the new one's and the draw path is unchanged (object 0's waits
+   meanwhile). Stage D's attribute bindings will split the arrays into
+   formats and bindings then. Client arrays are refused in an object but
+   0. A deleted buffer is unbound from the context's other objects too
+   (ES 3.0 keeps it alive there: item 2's references). Not yet:
+   `OES_vertex_array_object` in GLES2 contexts (and with it dropping patch
+   0004). `m8_es3`'s state and errors, `m8_draw`'s two objects with their
+   own buffers, one with an element buffer (`ogles2-m8-1-20261025-141310`:
+   25, 89, 44 of 44; the GLES2 drawing tests as before,
+   `ogles2-m7-4-20261025-141334`). dEQP-GLES3's `vertex_array_objects`
+   10 of 10 (`ogles2-m8-2-20261025-141411`), and with items 2 and 12's
+   targets, usages, mappings and copies `buffer` 695 of 695
+   (`-141428`).
 4. **Instancing:** `glDrawArraysInstanced`, `glDrawElementsInstanced`,
    `glVertexAttribDivisor` (the `VERTEX_ARRAY_INSTANCED_PRIMS` and
    `INDEXED_INSTANCED_PRIM_LIST` packets, the attribute record's divisor;
@@ -1234,6 +1290,19 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    the instance count is the same as one equal to it, so only a draw of more
    than 65535 instances with a larger divisor differs, a deviation
    `ogles2.doc` lists.
+   **Done in ES3 contexts (2026-10-25, on the A1200):** the three entries
+   and `GL_VERTEX_ATTRIB_ARRAY_DIVISOR`, as above (`draw.c`: an array's
+   `divisor`, the source's and the record's, `draw_packets`' instanced
+   forms, packets 34 and 38, which v3dcore has no writers for; the packet
+   check compares a record with a divisor too). An instanced array is not
+   moved back for `gl_VertexID`; the library's own draws clear the
+   divisor of the arrays they borrow. Not yet: `EXT_instanced_arrays` in
+   GLES2 contexts. `m8_draw`'s `es3inst` (`gl_InstanceID` moves instance i
+   right by i): two instances, a divisor of 2, then none
+   (`ogles2-m8-1-20261025-142206`: 25, 89, 47 of 47; the GLES2 drawing
+   tests as before, `ogles2-m7-4-20261025-142237`). dEQP-GLES3's
+   `instanced` 37 of 45: the 8 others are integer attributes, item 5
+   (`ogles2-m8-2-20261025-142314`).
 5. **Vertex formats:** integer attributes (`glVertexAttribIPointer`,
    `glVertexAttribI4*`: the attribute record's "read as int/uint"), and ES
    3.0's `GL_HALF_FLOAT`, `GL_INT`, `GL_UNSIGNED_INT` and
@@ -1256,6 +1325,38 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    `glGetActiveUniformsiv`, `glGetIntegeri_v`; `QUNIFORM_UBO_ADDR` points into
    the GPU copy (item 1) of the buffer bound to the block that the stage's
    block map names (§3).
+   **Items 1 and 6 done (2026-10-25, on the A1200):** a buffer's GPU copy
+   (`ogles2_buffer_words`): every 32-bit word swapped into the GPU's order,
+   padded to whole cache lines, made at the first use, kept with the data
+   serial; a `glBufferSubData` swaps the words it touches again unless a
+   job not yet rendered reads the copy, which then goes with that job and
+   is made anew at the next use (as the draws' copies are renamed). Not
+   yet: the GPU-written side (the CPU waits and `CachePostDMA`), with
+   stage C's transform feedback. A program keeps each block's binding
+   (`block_binding`, from the image's at link; `glUniformBlockBinding`);
+   `glGetUniformBlockIndex`, `glGetActiveUniformBlockiv` and `_Name`,
+   `glGetUniformIndices`, `glGetActiveUniformsiv` (the default block's
+   offsets and strides -1, as Mesa's), `GL_ACTIVE_UNIFORM_BLOCKS` and its
+   name length. A draw's `QUNIFORM_UBO_ADDR` of block k of a stage (Mesa's
+   UBO k + 1) reads the range bound at that block's binding, or the zeroed
+   block without one (`block_buffer`); `QUNIFORM_GET_UBO_SIZE` is the
+   range's bytes (Mesa's `buffer_size`; data 0 the constant buffer: it
+   took the block's size by the wrong index before). `m8_draw`'s `Extra`
+   block: its queries, a range at binding 3, two draws of one frame either
+   side of a `glBufferSubData`, zeros again once the buffer is deleted
+   (`ogles2-m8-1-20261025-003343`: 24, 84, 41 of 41 in each drawing step;
+   the GLES2 drawing tests as before, `ogles2-m7-4-20261025-003422`).
+   dEQP-GLES3: `shaders-uniform_block` 138 of 138
+   (`ogles2-m8-2-20261025-003501`); `ubo` passed its first 1387 cases,
+   then the A1200 stopped in the 1388th,
+   `ubo.single_nested_struct_mixed_matrix_packing.per_block_buffer.
+   shared_block_row_major_matrix_row_major_matrixarray_row_major_instance_array_vertex`,
+   after one shader compiled and before its program did (the on-target
+   compiler, it seems; the case's shaders are not in the log, so not
+   reproduced on the PC yet) and needed a restart
+   (`ogles2-m8-2-20261025-003529`, the files fetched from the A1200).
+   **Open:** that case's program through the host compiler, then the rest
+   of `ubo` (from case 1389: `--deqp-caselist` of the remainder).
 7. **Sampler objects** (`glGenSamplers`, ...): the sampler state record per
    unit from the sampler object when one is bound (`ogles2_texture_state`).
    The texture's cached records (`texture.c:2765-2771`) are keyed on the
@@ -1263,6 +1364,24 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    forced-nearest rule read the sampler's parameters, not the texture's
    (dEQP-GLES3's `samplers` draws with a sampler, unbinds it and draws
    again with the texture unchanged, `glsSamplerObjectTest.cpp:520-541`).
+   **Done (2026-10-24, on the A1200):** `glGenSamplers`, `glDeleteSamplers`,
+   `glIsSampler`, `glBindSampler`, `glSamplerParameter*`,
+   `glGetSamplerParameter*` and `GL_SAMPLER_BINDING` (ES3 contexts; in
+   `texture.c`). A texture's sampling parameters are a `struct
+   OGLES2SamplerParams` (filters, the three wraps, LODs, anisotropy, compare
+   mode and function), a sampler object's too; `smp_param` and `smp_get`
+   serve both (`GL_TEXTURE_LOD_BIAS`, the levels and the swizzle are the
+   texture's only). `ogles2_texture_state` reads the unit's sampler
+   object's, for completeness too, and the records are checked against its
+   version (`st_sver`; versions unique across samplers). The names are
+   the share group's, from `glGenSamplers` only (a plain table); deleting
+   one unbinds it in every member of the group (ES 3.0 keeps it alive in
+   another context while bound there: a deviation). A copy's draw sets
+   unit 0's sampler object aside (`ogles2_texture_unit0`). `m8_es3`'s
+   state and error checks, `m8_draw`'s sampler that completes a texture
+   and one that makes it incomplete (`ogles2-m8-1-20261024-233802`: 20,
+   62, 24 of 24 in each drawing step); the GLES2 drawing tests as before
+   (`ogles2-m7-4-20261024-233832`).
 8. **Textures:** immutable storage (`glTexStorage2D/3D`;
    `EXT_texture_storage`), 3D and 2D array textures (`glTexImage3D`,
    `glTexSubImage3D`, `glCopyTexSubImage3D`, `glCompressedTexImage3D`;
@@ -1293,6 +1412,53 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    (the TFU makes 2D levels). Cube maps: ES 3.0 requires the seamless
    filtering V3D always does, so 1.3's deviation is correct behaviour in
    ES3 contexts.
+   **Swizzle and compare done (2026-10-24, on the A1200):**
+   `GL_TEXTURE_SWIZZLE_R/G/B/A`, `GL_TEXTURE_COMPARE_MODE` and `_FUNC`, and
+   `GL_TEXTURE_WRAP_R` (ES3 contexts; `GL_INVALID_ENUM` in GLES2 ones). The
+   swizzle composes with the stored format's (Mesa's
+   `util_format_compose_swizzles`); with the compare mode on, the sampler
+   record has the compare function and a depth texture filters as set
+   (not forced nearest). A copy's draw (`ogles2_texture_params_copy`) uses
+   the identity swizzle and no comparison. `m8_draw`'s (b, 0, 1, r)
+   swizzle; the shadow samplers' drawing waits for the depth formats of
+   this item.
+   **2D array and 3D textures done (2026-10-25, on the A1200):**
+   `GL_TEXTURE_2D_ARRAY` and `GL_TEXTURE_3D` bindings (and their queries),
+   parameters, `glTexImage3D`, `glTexSubImage3D`, `glGenerateMipmap`, and
+   `sampler2DArray`, `sampler3D` and the shadow samplers in programs
+   (`OGLES2_TEX_ARRAY`, `OGLES2_TEX_3D`; `OGLES2_TEX_NONE` is left to the
+   integer samplers), in ES3 contexts. A texture's faces are a pointer
+   (`f6`, or allocated past six): an array's layers and a 3D texture's
+   slices are faces, `d[l]` their number at level l (a 3D level has
+   `d[l]` slices); completeness checks each level's depth (`depth_ok`) and
+   a 3D chain's length by its depth too (`chain_levels`). The GPU copy as
+   Mesa lays it out: an array as a cube map with N layers (`cube_memory`),
+   a 3D texture each level's slices together, smallest level first, from
+   level 1 on the depth of the power-of-two chain (`volume_memory`, Mesa's
+   `v3d_setup_slices`; the texture state's array stride is level 0's
+   slice size); `face_gpu` gives a slice of a level. 3D mipmaps are made
+   on the CPU, each slice two of the level above. A depth comparison makes
+   a sampler's return 16 bits (`ogles2_texture_wide`, as Mesa's
+   `v3d_get_tex_return_size`). Not yet: `glCopyTexSubImage3D`,
+   `glCompressedTexImage3D`, layers as framebuffer attachments (item 11),
+   immutable storage. `m8_draw`'s layers of a 2x2x4 array (and one
+   replaced), slices of a 2x2x4 and a 64x64x8 3D texture (UIF levels) and
+   their `glGenerateMipmap` levels, through `es3layer` and `es3vol`;
+   `m8_es3`'s errors (`ogles2-m8-1-20261024-235209`: 22, 71, 31 of 31).
+   **The pixel store done (2026-10-25, on the A1200):** `GL_UNPACK_ROW_LENGTH`,
+   `_IMAGE_HEIGHT`, `_SKIP_PIXELS`, `_SKIP_ROWS`, `_SKIP_IMAGES`,
+   `GL_PACK_ROW_LENGTH`, `_SKIP_PIXELS`, `_SKIP_ROWS` (ES3 contexts, with
+   their queries; `struct OGLES2PixelStore`, `ctx->unpack` and
+   `ctx->pack`): the uploads read the application's image through
+   `unpack_image` (the converters take a row stride), `glReadPixels`
+   packs so (`frame.c`), and the library's own tight images go through
+   `unpack_tight`. `glPixelStorei` checks the name before the value (a
+   new name with 0 was `GL_INVALID_VALUE`). `m8_draw`'s texel from inside
+   a 4x3 image, layers from images with a gap, a read into the middle of a
+   larger buffer (`ogles2-m8-1-20261024-235930`: 23, 75, 34 of 34; the
+   GLES2 drawing tests as before, `ogles2-m7-4-20261024-235957`); the
+   state reset's pixel transfer part then stops at the buffer targets
+   (`ogles2-m8-2-20261025-000023`).
 9. **ETC2/EAC** (mandatory in ES 3.0): native in the TMU (texture types
    `RGB8_ETC2`, `RGB8_PUNCHTHROUGH_ALPHA1`, `RGBA8_ETC2_EAC`, `R11_EAC`,
    `SIGNED_R11_EAC`, `RG11_EAC`, `SIGNED_RG11_EAC`; sRGB by the texture
@@ -1405,7 +1571,20 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
     `glFlushMappedBufferRange` (`EXT_map_buffer_range`), `glUnmapBuffer`,
     `glGetBufferPointerv`, `glCopyBufferSubData`, `glGetBufferParameteri64v`;
     `EXT_frag_depth` in GLES2 contexts (the extension string and its test: the
-    compiler and the draw already handle depth writes).
+    compiler and the draw already handle depth writes). Until the query
+    objects come, `glGetQueryiv(target, GL_CURRENT_QUERY)` answers 0 (no
+    query can be active; `state.c`), and `GL_TRANSFORM_FEEDBACK_ACTIVE`
+    and `_PAUSED` read false until stage C: the state reset asks for both.
+    **Mapping done (2026-10-25, on the A1200):** `glMapBufferRange` (Mesa's
+    checks and their order), `glFlushMappedBufferRange`, `glUnmapBuffer`,
+    `glGetBufferPointerv`, `glGetBufferParameteri64v` and the mapping's
+    `GL_BUFFER_ACCESS_FLAGS`, `_MAP_OFFSET`, `_MAP_LENGTH` (ES3 contexts).
+    The mapping is the shadow, as `OES_mapbuffer`'s: what was written goes
+    into the copies at the unmap, or at each flush with
+    `GL_MAP_FLUSH_EXPLICIT_BIT`; `glBufferSubData` of a mapped buffer is
+    `GL_INVALID_OPERATION` in ES3 contexts. `m8_es3`'s reads, writes, state
+    and errors (on the A1200: they need `glBufferData`), `m8_draw`'s block
+    written through a flushed mapping (`ogles2-m8-1-20261025-141310`).
     **Primitive restart done (2026-10-24, on the A1200):**
     `GL_PRIMITIVE_RESTART_FIXED_INDEX` in ES3 contexts (`GL_INVALID_ENUM` in
     GLES2 ones; `OGLES2_CAP_PRIMITIVE_RESTART`); an indexed draw with it
@@ -1421,6 +1600,14 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
     state, stops at `GL_RASTERIZER_DISCARD` (stage C's;
     `ogles2-m8-2-20261024-224918`, 174 of 174 of `shaders-switch` with
     the patch).
+    **Rasterizer discard done (2026-10-24, on the A1200):**
+    `GL_RASTERIZER_DISCARD` in ES3 contexts (`OGLES2_CAP_RASTERIZER_DISCARD`):
+    `glClear` and the draws do nothing while it is on (without transform
+    feedback, stage C, a draw then has no effect; `draw_arrays` returns
+    first; the copies' draws clear the caps). `m8_draw`'s clear and draw
+    under it; with it the rasterization and multisampling parts of
+    `glu::resetState` pass, and the texture part stops at the 2D array and
+    3D textures (`ogles2-m8-2-20261024-232639`).
 13. **Tests:** `m8_es3` grows per feature (package `m8-1`); dEQP-GLES3
     runs past its first case only once `glu::resetState`
     (`framework/opengl/gluStateReset.cpp`, after every case) raises no GL
@@ -1436,7 +1623,9 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
     `COMPARE_MODE`, `COMPARE_FUNC`, the four swizzles, `WRAP_R`);
     `FRAGMENT_SHADER_DERIVATIVE_HINT`; `GL_CURRENT_QUERY` and
     `TRANSFORM_FEEDBACK_ACTIVE` queries. The state alone, before each
-    feature works, is the first step that lets the groups below run;
+    feature works, is the first step that lets the groups below run
+    (**done 2026-10-25**: no error in the reset, patch `gles3/0001` gone;
+    §1's hand-off lists the parts and the groups run without it);
     then dEQP-GLES3
     groups as their features land (`functional.vertex_array_objects`,
     `vertex_arrays`, `default_vertex_attrib`, `attribute_location`,

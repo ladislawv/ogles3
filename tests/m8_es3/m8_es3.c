@@ -281,6 +281,8 @@ static int extensions_agree(void)
     return *p == 0 && glGetError() == GL_NO_ERROR;
 }
 
+static int nogpu; /* NOGPU: under vamos (no system timer: glBufferData times itself on it) */
+
 int main(int argc, char **argv)
 {
     int es3 = 0, limits = 0, k;
@@ -292,6 +294,8 @@ int main(int argc, char **argv)
             es3 = 1;
         else if (!strcmp(argv[k], "LIMITS"))
             limits = 1;
+        else if (!strcmp(argv[k], "NOGPU"))
+            nogpu = 1;
     }
     if (!OGLES2Open()) {
         printf("FAIL: OGLES2Open\n");
@@ -354,6 +358,33 @@ int main(int argc, char **argv)
     glActiveTexture(GL_TEXTURE0);
     glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
     check(glGetError() == GL_INVALID_ENUM, "ES 2.0: GL_PRIMITIVE_RESTART_FIXED_INDEX is GL_INVALID_ENUM");
+    glEnable(GL_RASTERIZER_DISCARD);
+    check(glGetError() == GL_INVALID_ENUM, "ES 2.0: GL_RASTERIZER_DISCARD is GL_INVALID_ENUM");
+    {
+        GLuint t;
+        GLint v = -5;
+        glGenTextures(1, &t);
+        glBindTexture(GL_TEXTURE_2D, t);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_GREEN);
+        check(glGetError() == GL_INVALID_ENUM, "ES 2.0: GL_TEXTURE_SWIZZLE_R is GL_INVALID_ENUM");
+        glGenSamplers(1, &t);
+        check(glGetError() == GL_INVALID_OPERATION, "ES 2.0: glGenSamplers is GL_INVALID_OPERATION");
+        glGetIntegerv(GL_SAMPLER_BINDING, &v);
+        check(v == -5 && glGetError() == GL_INVALID_ENUM, "ES 2.0: GL_SAMPLER_BINDING is GL_INVALID_ENUM");
+        glBindTexture(GL_TEXTURE_3D, t);
+        check(glGetError() == GL_INVALID_ENUM, "ES 2.0: GL_TEXTURE_3D is GL_INVALID_ENUM");
+        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, 1, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+        check(glGetError() == GL_INVALID_OPERATION, "ES 2.0: glTexImage3D is GL_INVALID_OPERATION");
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        check(glGetError() == GL_INVALID_ENUM, "ES 2.0: GL_UNPACK_ROW_LENGTH is GL_INVALID_ENUM");
+        glBindBuffer(GL_COPY_READ_BUFFER, 0);
+        check(glGetError() == GL_INVALID_ENUM, "ES 2.0: GL_COPY_READ_BUFFER is GL_INVALID_ENUM");
+        glBindVertexArray(0);
+        check(glGetError() == GL_INVALID_OPERATION, "ES 2.0: glBindVertexArray is GL_INVALID_OPERATION");
+        glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, &v);
+        check(v == -5 && glGetError() == GL_INVALID_ENUM, "ES 2.0: GL_TEXTURE_COMPARE_MODE is GL_INVALID_ENUM");
+        glDeleteTextures(1, &t);
+    }
     {
         int has = 0;
         check(!compiles(GL_VERTEX_SHADER, vs300, "needs an OpenGL ES 3 context", &has) && has,
@@ -399,6 +430,223 @@ int main(int argc, char **argv)
                   "ES 3.0: GL_PRIMITIVE_RESTART_FIXED_INDEX enabled");
             glDisable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
             check(!glIsEnabled(GL_PRIMITIVE_RESTART_FIXED_INDEX), "ES 3.0: and disabled again");
+        }
+        {
+            GLuint t;
+            GLint r = 0, g = 0, b = 0, a = 0, m = -1, f = 0;
+            glGenTextures(1, &t);
+            glBindTexture(GL_TEXTURE_2D, t);
+            glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, &r);
+            glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, &g);
+            glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, &b);
+            glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, &a);
+            glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, &m);
+            glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, &f);
+            check(r == GL_RED && g == GL_GREEN && b == GL_BLUE && a == GL_ALPHA && m == GL_NONE && f == GL_LEQUAL &&
+                      glGetError() == GL_NO_ERROR,
+                  "ES 3.0: texture swizzle and compare defaults");
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_ONE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_GEQUAL);
+            glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, &g);
+            glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, &m);
+            glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, &f);
+            check(g == GL_ONE && m == GL_COMPARE_REF_TO_TEXTURE && f == GL_GEQUAL && glGetError() == GL_NO_ERROR,
+                  "ES 3.0: texture swizzle and compare set");
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_RGBA);
+            check(glGetError() == GL_INVALID_ENUM, "ES 3.0: a swizzle of GL_RGBA is GL_INVALID_ENUM");
+            glDeleteTextures(1, &t);
+        }
+        {
+            GLuint t[2];
+            GLint b = 0, w = 0;
+            static const GLubyte px[8] = { 0 };
+            glGenTextures(2, t);
+            glBindTexture(GL_TEXTURE_3D, t[0]);
+            glBindTexture(GL_TEXTURE_2D_ARRAY, t[1]);
+            glGetIntegerv(GL_TEXTURE_BINDING_3D, &b);
+            glGetTexParameteriv(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, &w);
+            check(b == (GLint)t[0] && w == GL_REPEAT && glGetError() == GL_NO_ERROR,
+                  "ES 3.0: GL_TEXTURE_BINDING_3D, its GL_TEXTURE_WRAP_R");
+            glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, 1, 1, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, px);
+            glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, 1, 1, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, px);
+            check(glGetError() == GL_NO_ERROR, "ES 3.0: glTexImage3D of a 3D texture and a 2D array");
+            glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, 1, 1, -1, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+            check(glGetError() == GL_INVALID_VALUE, "ES 3.0: a depth of -1 is GL_INVALID_VALUE");
+            glTexImage3D(GL_TEXTURE_3D, 0, GL_DEPTH_COMPONENT, 1, 1, 1, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT, 0);
+            check(glGetError() == GL_INVALID_OPERATION, "ES 3.0: a 3D depth texture is GL_INVALID_OPERATION");
+            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 1, 1, 1, 2, GL_RGBA, GL_UNSIGNED_BYTE, px);
+            check(glGetError() == GL_INVALID_VALUE, "ES 3.0: glTexSubImage3D past the last layer is GL_INVALID_VALUE");
+            glTexImage3D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, px);
+            check(glGetError() == GL_INVALID_ENUM, "ES 3.0: glTexImage3D of GL_TEXTURE_2D is GL_INVALID_ENUM");
+            glDeleteTextures(2, t);
+            glGetIntegerv(GL_TEXTURE_BINDING_2D_ARRAY, &b);
+            check(b == 0 && glGetError() == GL_NO_ERROR, "ES 3.0: a deleted 2D array is unbound");
+            glPixelStorei(GL_UNPACK_SKIP_IMAGES, 3);
+            glPixelStorei(GL_PACK_ROW_LENGTH, 17);
+            glGetIntegerv(GL_UNPACK_SKIP_IMAGES, &b);
+            glGetIntegerv(GL_PACK_ROW_LENGTH, &w);
+            check(b == 3 && w == 17 && glGetError() == GL_NO_ERROR, "ES 3.0: GL_UNPACK_SKIP_IMAGES and GL_PACK_ROW_LENGTH");
+            glPixelStorei(GL_UNPACK_SKIP_IMAGES, 0);
+            glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+            glPixelStorei(GL_UNPACK_ROW_LENGTH, -1);
+            check(glGetError() == GL_INVALID_VALUE, "ES 3.0: a row length of -1 is GL_INVALID_VALUE");
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 3);
+            check(glGetError() == GL_INVALID_VALUE, "ES 3.0: an alignment of 3 is GL_INVALID_VALUE");
+        }
+        {
+            static const GLenum targets[6] = { GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, GL_PIXEL_PACK_BUFFER,
+                                               GL_PIXEL_UNPACK_BUFFER, GL_TRANSFORM_FEEDBACK_BUFFER,
+                                               GL_UNIFORM_BUFFER };
+            static const GLenum bindings[6] = { GL_COPY_READ_BUFFER_BINDING, GL_COPY_WRITE_BUFFER_BINDING,
+                                                GL_PIXEL_PACK_BUFFER_BINDING, GL_PIXEL_UNPACK_BUFFER_BINDING,
+                                                GL_TRANSFORM_FEEDBACK_BUFFER_BINDING, GL_UNIFORM_BUFFER_BINDING };
+            GLuint bu[2];
+            GLint v, u = 0, all = 1, k;
+            GLint64 v64 = 0;
+            glGenBuffers(2, bu);
+            for (k = 0; k < 6; k++) {
+                glBindBuffer(targets[k], bu[0]);
+                v = 0;
+                glGetIntegerv(bindings[k], &v);
+                all = all && v == (GLint)bu[0];
+            }
+            if (!nogpu)
+                glBufferData(GL_UNIFORM_BUFFER, 1024, 0, GL_DYNAMIC_COPY);
+            glGetBufferParameteriv(GL_COPY_READ_BUFFER, GL_BUFFER_USAGE, &u);
+            check(all && (nogpu || u == GL_DYNAMIC_COPY) && glGetError() == GL_NO_ERROR,
+                  "ES 3.0: the six buffer targets, their bindings, GL_DYNAMIC_COPY");
+            glBindBufferRange(GL_UNIFORM_BUFFER, 5, bu[1], 256, 64);
+            glGetIntegeri_v(GL_UNIFORM_BUFFER_BINDING, 5, &v);
+            glGetInteger64i_v(GL_UNIFORM_BUFFER_START, 5, &v64);
+            glGetIntegerv(GL_UNIFORM_BUFFER_BINDING, &u);
+            check(v == (GLint)bu[1] && v64 == 256 && u == (GLint)bu[1] && glGetError() == GL_NO_ERROR,
+                  "ES 3.0: glBindBufferRange, glGetIntegeri_v and the target's binding");
+            glBindBufferRange(GL_UNIFORM_BUFFER, 5, bu[1], 4, 64);
+            check(glGetError() == GL_INVALID_VALUE, "ES 3.0: a uniform range off its alignment is GL_INVALID_VALUE");
+            glBindBufferBase(GL_UNIFORM_BUFFER, 108, bu[1]);
+            check(glGetError() == GL_INVALID_VALUE, "ES 3.0: uniform binding 108 is GL_INVALID_VALUE");
+            glCopyBufferSubData(GL_UNIFORM_BUFFER, GL_COPY_READ_BUFFER, 0, 8, 16);
+            check(glGetError() == GL_INVALID_VALUE, "ES 3.0: an overlapping copy in one buffer is GL_INVALID_VALUE");
+            glDeleteBuffers(2, bu);
+            glGetIntegeri_v(GL_UNIFORM_BUFFER_BINDING, 5, &v);
+            glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING, &u);
+            check(v == 0 && u == 0 && glGetError() == GL_NO_ERROR, "ES 3.0: deleted buffers are unbound");
+        }
+        if (!nogpu) { /* glBufferData times itself (vamos has no system timer) */
+            static const GLubyte bytes[16] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+            GLuint bu;
+            GLubyte *m;
+            GLint off = -1, len = -1, acc = -1;
+            int ok;
+            glGenBuffers(1, &bu);
+            glBindBuffer(GL_COPY_WRITE_BUFFER, bu);
+            glBufferData(GL_COPY_WRITE_BUFFER, 16, bytes, GL_STATIC_DRAW);
+            m = glMapBufferRange(GL_COPY_WRITE_BUFFER, 4, 8, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT);
+            glGetBufferParameteriv(GL_COPY_WRITE_BUFFER, GL_BUFFER_MAP_OFFSET, &off);
+            glGetBufferParameteriv(GL_COPY_WRITE_BUFFER, GL_BUFFER_MAP_LENGTH, &len);
+            glGetBufferParameteriv(GL_COPY_WRITE_BUFFER, GL_BUFFER_ACCESS_FLAGS, &acc);
+            ok = m && m[0] == 5 && m[7] == 12 && off == 4 && len == 8 && acc == (GL_MAP_READ_BIT | GL_MAP_WRITE_BIT);
+            if (m)
+                m[1] = 66;
+            glBufferSubData(GL_COPY_WRITE_BUFFER, 0, 4, bytes);
+            ok = ok && glGetError() == GL_INVALID_OPERATION; /* not while mapped */
+            glFlushMappedBufferRange(GL_COPY_WRITE_BUFFER, 0, 4);
+            ok = ok && glGetError() == GL_INVALID_OPERATION; /* not GL_MAP_FLUSH_EXPLICIT_BIT */
+            ok = ok && glUnmapBuffer(GL_COPY_WRITE_BUFFER);
+            m = glMapBufferRange(GL_COPY_WRITE_BUFFER, 0, 16, GL_MAP_READ_BIT);
+            ok = ok && m && m[5] == 66 && m[4] == 5 && glUnmapBuffer(GL_COPY_WRITE_BUFFER) && glGetError() == GL_NO_ERROR;
+            check(ok, "ES 3.0: glMapBufferRange reads and writes the data, its state while mapped");
+            glMapBufferRange(GL_COPY_WRITE_BUFFER, 0, 4, GL_MAP_READ_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
+            ok = glGetError() == GL_INVALID_OPERATION;
+            glMapBufferRange(GL_COPY_WRITE_BUFFER, 0, 0, GL_MAP_WRITE_BIT);
+            ok = ok && glGetError() == GL_INVALID_OPERATION;
+            glMapBufferRange(GL_COPY_WRITE_BUFFER, 8, 9, GL_MAP_WRITE_BIT);
+            ok = ok && glGetError() == GL_INVALID_VALUE;
+            glUnmapBuffer(GL_COPY_WRITE_BUFFER);
+            ok = ok && glGetError() == GL_INVALID_OPERATION;
+            check(ok, "ES 3.0: glMapBufferRange's errors (read with invalidate, no length, past the end, not mapped)");
+            glDeleteBuffers(1, &bu);
+        }
+        {
+            static const GLfloat v[4] = { 0 };
+            GLuint va[2], bu;
+            GLint b = -1, e3 = -1, el = -1;
+            int ok;
+            glGenVertexArrays(2, va);
+            glGenBuffers(1, &bu);
+            ok = !glIsVertexArray(va[0]); /* exists once bound */
+            glBindVertexArray(va[0]);
+            glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &b);
+            ok = ok && glIsVertexArray(va[0]) && b == (GLint)va[0];
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, v);
+            ok = ok && glGetError() == GL_INVALID_OPERATION; /* no client arrays in it */
+            glEnableVertexAttribArray(3);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bu);
+            glBindVertexArray(0);
+            glGetVertexAttribiv(3, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &e3);
+            glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &el);
+            ok = ok && e3 == 0 && el == 0;
+            glBindVertexArray(va[0]);
+            glGetVertexAttribiv(3, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &e3);
+            glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &el);
+            ok = ok && e3 == 1 && el == (GLint)bu && glGetError() == GL_NO_ERROR;
+            check(ok, "ES 3.0: a vertex array object keeps its arrays and element buffer");
+            glDeleteVertexArrays(1, va);
+            glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &b);
+            glGetVertexAttribiv(3, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &e3);
+            ok = b == 0 && e3 == 0 && !glIsVertexArray(va[0]);
+            glBindVertexArray(va[0]);
+            ok = ok && glGetError() == GL_INVALID_OPERATION;
+            check(ok, "ES 3.0: deleting the bound object binds object 0; its name is gone");
+            glDeleteVertexArrays(1, va + 1);
+            glDeleteBuffers(1, &bu);
+        }
+        {
+            GLboolean on = GL_TRUE;
+            GLint q = -1;
+            glGetBooleanv(GL_TRANSFORM_FEEDBACK_ACTIVE, &on);
+            glGetQueryiv(GL_ANY_SAMPLES_PASSED, GL_CURRENT_QUERY, &q);
+            check(!on && q == 0 && glGetError() == GL_NO_ERROR,
+                  "ES 3.0: no transform feedback or query active");
+            glGetQueryiv(GL_ANY_SAMPLES_PASSED, GL_QUERY_RESULT, &q);
+            check(glGetError() == GL_INVALID_ENUM, "ES 3.0: glGetQueryiv(GL_QUERY_RESULT) is GL_INVALID_ENUM");
+        }
+        {
+            GLuint s = 0;
+            GLint mn = 0, wr = 0, f = 0, b = -1;
+            GLfloat lod = 0;
+            glGenSamplers(1, &s);
+            glGetSamplerParameteriv(s, GL_TEXTURE_MIN_FILTER, &mn);
+            glGetSamplerParameteriv(s, GL_TEXTURE_WRAP_R, &wr);
+            glGetSamplerParameteriv(s, GL_TEXTURE_COMPARE_FUNC, &f);
+            check(s && glIsSampler(s) && mn == GL_NEAREST_MIPMAP_LINEAR && wr == GL_REPEAT && f == GL_LEQUAL &&
+                      glGetError() == GL_NO_ERROR,
+                  "ES 3.0: a sampler object and its defaults");
+            glSamplerParameterf(s, GL_TEXTURE_MIN_LOD, -2.5f);
+            glGetSamplerParameterfv(s, GL_TEXTURE_MIN_LOD, &lod);
+            check(lod == -2.5f && glGetError() == GL_NO_ERROR, "ES 3.0: a sampler's GL_TEXTURE_MIN_LOD set");
+            glSamplerParameteri(s, GL_TEXTURE_BASE_LEVEL, 0);
+            check(glGetError() == GL_INVALID_ENUM, "ES 3.0: a sampler has no GL_TEXTURE_BASE_LEVEL");
+            glActiveTexture(GL_TEXTURE3);
+            glBindSampler(3, s);
+            glGetIntegerv(GL_SAMPLER_BINDING, &b);
+            check(b == (GLint)s && glGetError() == GL_NO_ERROR, "ES 3.0: GL_SAMPLER_BINDING of the active unit");
+            glBindSampler(3, s + 1000);
+            check(glGetError() == GL_INVALID_OPERATION, "ES 3.0: binding a name glGenSamplers did not give");
+            glBindSampler(48, s);
+            check(glGetError() == GL_INVALID_VALUE, "ES 3.0: binding to unit 48 is GL_INVALID_VALUE");
+            glDeleteSamplers(1, &s);
+            glGetIntegerv(GL_SAMPLER_BINDING, &b);
+            check(b == 0 && !glIsSampler(s) && glGetError() == GL_NO_ERROR, "ES 3.0: a deleted sampler is unbound");
+            glSamplerParameteri(s, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            check(glGetError() == GL_INVALID_OPERATION, "ES 3.0: a deleted sampler's parameter is GL_INVALID_OPERATION");
+            glActiveTexture(GL_TEXTURE0);
+            glEnable(GL_RASTERIZER_DISCARD);
+            check(glIsEnabled(GL_RASTERIZER_DISCARD) && glGetError() == GL_NO_ERROR,
+                  "ES 3.0: GL_RASTERIZER_DISCARD enabled");
+            glDisable(GL_RASTERIZER_DISCARD);
         }
         {
             int has = 0;

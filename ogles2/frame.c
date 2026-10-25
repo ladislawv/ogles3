@@ -122,6 +122,23 @@ void ogles2_glReadPixels(struct OGLES2Context *ctx, GLint x, GLint y, GLsizei wi
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
+    bpp = type == GL_UNSIGNED_BYTE ? 4 : 2;
+    /* ES 3.0's GL_PACK_ROW_LENGTH and _SKIP_ROWS, _SKIP_PIXELS (4.3.1) */
+    stride = ((ULONG)(ctx->pack.row_length ? ctx->pack.row_length : width) * bpp + ctx->pack.alignment - 1) &
+             ~(ULONG)(ctx->pack.alignment - 1);
+    /* ES 3.0's pixel pack buffer: `pixels` is an offset into it. */
+    if (width && height) {
+        BOOL bad;
+        UBYTE *dst = ogles2_buffer_pixels(ctx, TRUE, (ULONG)pixels,
+                                          (ULONG)(ctx->pack.skip_rows + height - 1) * stride +
+                                              (ULONG)(ctx->pack.skip_pixels + width) * bpp, &bad);
+        if (bad) {
+            ogles2_error(ctx, GL_INVALID_OPERATION);
+            return;
+        }
+        if (dst)
+            pixels = dst;
+    }
     if (!has_surface(ctx) || !ogles2_fb_ready(ctx) || !pixels || !ctx->display.bitmap)
         return;
     x0 = x < 0 ? 0 : x;
@@ -132,9 +149,8 @@ void ogles2_glReadPixels(struct OGLES2Context *ctx, GLint x, GLint y, GLsizei wi
         return;
     ogles2_job_flush(ctx, FALSE);
     ogles2_job_finish(ctx);
-    bpp = type == GL_UNSIGNED_BYTE ? 4 : 2;
-    stride = ((ULONG)width * bpp + ctx->pack_alignment - 1) & ~(ULONG)(ctx->pack_alignment - 1);
-    first = (UBYTE *)pixels + (ULONG)(y0 - y) * stride + (ULONG)(x0 - x) * bpp;
+    first = (UBYTE *)pixels + (ULONG)(y0 - y + ctx->pack.skip_rows) * stride +
+            (ULONG)(x0 - x + ctx->pack.skip_pixels) * bpp;
     /* RGBA bytes: straight into the application's memory; the 16-bit
      * packings through a copy of the region. */
     if (bpp == 4) {
@@ -209,6 +225,10 @@ void ogles2_glClear(struct OGLES2Context *ctx, GLbitfield mask)
         return;
     }
     if (!ctx->v3d || !mask || !ogles2_fb_ready(ctx))
+        return;
+    /* GL_RASTERIZER_DISCARD (ES 3.0 4.2.3) discards clears too, as Mesa does
+     * (main/clear.c). */
+    if (ctx->state.caps & OGLES2_CAP_RASTERIZER_DISCARD)
         return;
     /* EXT_draw_buffers: colour clears the draw buffers, none with GL_NONE. */
     if (!ctx->fb_draw_mask)

@@ -1,0 +1,1003 @@
+#sessionInfo releaseName unknown
+#sessionInfo releaseId 0xcafebabe
+#sessionInfo targetName "AmigaOS3"
+#sessionInfo logFormatVersion "0.3.4"
+#sessionInfo vendor "ogles2.library"
+#sessionInfo renderer "V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM"
+#sessionInfo commandLineParameters "--deqp-caselist-file M8R2:caselists/vertex_array_objects.txt --deqp-archive-dir=M8R2:bin --deqp-log-filename=M8R2:results/vertex_array_objects.qpa --deqp-log-images=disable --deqp-log-shader-sources=disable --deqp-surface-width=256 --deqp-surface-height=256 --deqp-gl-config-name=rgba8888d24s8ms0"
+
+#beginSession
+
+#beginTestCaseResult dEQP-GLES3.functional.vertex_array_objects.diff_buffer
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.vertex_array_objects.diff_buffer" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Program used with Vertex Array Object</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1335.859009</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">39.433998</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">245.067001</Number>
+ <Text>Program used with Vertex Array State</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.787000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.549000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.119000</Number>
+ <Text>Vertex Array Object State
+GL_ELEMENT_ARRAY_BUFFER : 0
+attribute : 0
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 0
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5126
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 2
+</Text>
+ <Text>OpenGL Vertex Array State
+GL_ELEMENT_ARRAY_BUFFER : 0
+attribute : 0
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 0
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5126
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 1
+</Text>
+ <ImageSet Name="Results" Description="Comparison result from rendering with Vertex Array State" />
+ <ImageSet Name="Results" Description="Comparison result from rendering with Vertex Array Object" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1759374</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.vertex_array_objects.diff_size
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.vertex_array_objects.diff_size" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Program used with Vertex Array Object</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.785000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.554000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.090000</Number>
+ <Text>Program used with Vertex Array State</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.722000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.547000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.087000</Number>
+ <Text>Vertex Array Object State
+GL_ELEMENT_ARRAY_BUFFER : 0
+attribute : 0
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 3
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 0
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5126
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 1
+</Text>
+ <Text>OpenGL Vertex Array State
+GL_ELEMENT_ARRAY_BUFFER : 0
+attribute : 0
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 0
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5126
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 1
+</Text>
+ <ImageSet Name="Results" Description="Comparison result from rendering with Vertex Array State" />
+ <ImageSet Name="Results" Description="Comparison result from rendering with Vertex Array Object" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">125052</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.vertex_array_objects.diff_stride
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.vertex_array_objects.diff_stride" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Program used with Vertex Array Object</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.774000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.555000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.090000</Number>
+ <Text>Program used with Vertex Array State</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.695000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.542000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.086000</Number>
+ <Text>Vertex Array Object State
+GL_ELEMENT_ARRAY_BUFFER : 0
+attribute : 0
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 2
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 1
+</Text>
+ <Text>OpenGL Vertex Array State
+GL_ELEMENT_ARRAY_BUFFER : 0
+attribute : 0
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 4
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 1
+</Text>
+ <ImageSet Name="Results" Description="Comparison result from rendering with Vertex Array State" />
+ <ImageSet Name="Results" Description="Comparison result from rendering with Vertex Array Object" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">126688</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.vertex_array_objects.diff_type
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.vertex_array_objects.diff_type" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Program used with Vertex Array Object</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.759000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.556000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.089000</Number>
+ <Text>Program used with Vertex Array State</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.699000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.550000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.088000</Number>
+ <Text>Vertex Array Object State
+GL_ELEMENT_ARRAY_BUFFER : 0
+attribute : 0
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 0
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 1
+</Text>
+ <Text>OpenGL Vertex Array State
+GL_ELEMENT_ARRAY_BUFFER : 0
+attribute : 0
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 0
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5120
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 1
+</Text>
+ <ImageSet Name="Results" Description="Comparison result from rendering with Vertex Array State" />
+ <ImageSet Name="Results" Description="Comparison result from rendering with Vertex Array Object" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">124633</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.vertex_array_objects.diff_integer
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.vertex_array_objects.diff_integer" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Program used with Vertex Array Object</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">43.389999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.671000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">164.279999</Number>
+ <Text>Program used with Vertex Array State</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">34.153999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.690000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">161.639999</Number>
+ <Text>Vertex Array Object State
+GL_ELEMENT_ARRAY_BUFFER : 0
+attribute : 0
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 0
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5120
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 1
+</Text>
+ <Text>OpenGL Vertex Array State
+GL_ELEMENT_ARRAY_BUFFER : 0
+attribute : 0
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 0
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5120
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 1
+</Text>
+ <ImageSet Name="Results" Description="Comparison result from rendering with Vertex Array State" />
+ <ImageSet Name="Results" Description="Comparison result from rendering with Vertex Array Object" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">533251</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.vertex_array_objects.diff_divisor
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.vertex_array_objects.diff_divisor" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Program used with Vertex Array Object</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">27.455000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.436000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">161.164993</Number>
+ <Text>Program used with Vertex Array State</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.734000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.557000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.095000</Number>
+ <Text>Vertex Array Object State
+GL_ELEMENT_ARRAY_BUFFER : 0
+attribute : 0
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 0
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 1
+attribute : 1
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 4
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 0
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5126
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 3
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 2
+</Text>
+ <Text>OpenGL Vertex Array State
+GL_ELEMENT_ARRAY_BUFFER : 0
+attribute : 0
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 0
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 1
+attribute : 1
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 4
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 0
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5126
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 2
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 2
+</Text>
+ <ImageSet Name="Results" Description="Comparison result from rendering with Vertex Array State" />
+ <ImageSet Name="Results" Description="Comparison result from rendering with Vertex Array Object" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">310952</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.vertex_array_objects.diff_offset
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.vertex_array_objects.diff_offset" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Program used with Vertex Array Object</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.193000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.583000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.092000</Number>
+ <Text>Program used with Vertex Array State</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.733000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.552000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.090000</Number>
+ <Text>Vertex Array Object State
+GL_ELEMENT_ARRAY_BUFFER : 0
+attribute : 0
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 0
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 2
+	GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 1
+</Text>
+ <Text>OpenGL Vertex Array State
+GL_ELEMENT_ARRAY_BUFFER : 0
+attribute : 0
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 0
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 4
+	GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 1
+</Text>
+ <ImageSet Name="Results" Description="Comparison result from rendering with Vertex Array State" />
+ <ImageSet Name="Results" Description="Comparison result from rendering with Vertex Array Object" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">124297</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.vertex_array_objects.diff_normalize
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.vertex_array_objects.diff_normalize" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Program used with Vertex Array Object</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.301000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.129000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.092000</Number>
+ <Text>Program used with Vertex Array State</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">29.091000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.384000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">160.373993</Number>
+ <Text>Vertex Array Object State
+GL_ELEMENT_ARRAY_BUFFER : 0
+attribute : 0
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 0
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 1
+</Text>
+ <Text>OpenGL Vertex Array State
+GL_ELEMENT_ARRAY_BUFFER : 0
+attribute : 0
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 0
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 1
+</Text>
+ <ImageSet Name="Results" Description="Comparison result from rendering with Vertex Array State" />
+ <ImageSet Name="Results" Description="Comparison result from rendering with Vertex Array Object" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">323481</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.vertex_array_objects.diff_indices
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.vertex_array_objects.diff_indices" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Program used with Vertex Array Object</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.768000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.561000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.090000</Number>
+ <Text>Program used with Vertex Array State</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.707000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.555000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.087000</Number>
+ <Text>Vertex Array Object State
+GL_ELEMENT_ARRAY_BUFFER : 2
+attribute : 0
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 0
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5126
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 1
+</Text>
+ <Text>OpenGL Vertex Array State
+GL_ELEMENT_ARRAY_BUFFER : 0
+attribute : 0
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 0
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5126
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 1
+</Text>
+ <ImageSet Name="Results" Description="Comparison result from rendering with Vertex Array State" />
+ <ImageSet Name="Results" Description="Comparison result from rendering with Vertex Array Object" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">124637</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.vertex_array_objects.all_attributes
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.vertex_array_objects.all_attributes" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Program used with Vertex Array Object</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">44.372002</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.684000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">282.757996</Number>
+ <Text>Program used with Vertex Array State</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">31.320000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.995000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">250.595001</Number>
+ <Text>Vertex Array Object State
+GL_ELEMENT_ARRAY_BUFFER : 0
+attribute : 0
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 6
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 4
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 16
+attribute : 1
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 3
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 2
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 15
+attribute : 2
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 3
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 6
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 1
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 2
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 14
+attribute : 3
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 3
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 6
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 4
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 13
+attribute : 4
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 4
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 12
+attribute : 5
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 3
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 4
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 1
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 11
+attribute : 6
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 6
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 2
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 10
+attribute : 7
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 4
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 4
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 4
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 9
+attribute : 8
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 2
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 1
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 2
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 8
+attribute : 9
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 3
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 6
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 7
+attribute : 10
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 3
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 2
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 2
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 6
+attribute : 11
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 4
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 4
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 1
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 4
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 5
+attribute : 12
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 4
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 4
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 1
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 4
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 4
+attribute : 13
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 4
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 2
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 3
+attribute : 14
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 4
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 4
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 1
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 2
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 2
+attribute : 15
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 4
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 6
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 1
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 1
+</Text>
+ <Text>OpenGL Vertex Array State
+GL_ELEMENT_ARRAY_BUFFER : 0
+attribute : 0
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 6
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 4
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 1
+attribute : 1
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 4
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 1
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 4
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 2
+attribute : 2
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 4
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 6
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 4
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 3
+attribute : 3
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 3
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 6
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 4
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 4
+attribute : 4
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 4
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 4
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 2
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 5
+attribute : 5
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 2
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 4
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 6
+attribute : 6
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 4
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 4
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 7
+attribute : 7
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 3
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 2
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 2
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 8
+attribute : 8
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 3
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 4
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 4
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 9
+attribute : 9
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 4
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 10
+attribute : 10
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 2
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 0
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 11
+attribute : 11
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 4
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 4
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 2
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 12
+attribute : 12
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 2
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 6
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 1
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 2
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 13
+attribute : 13
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 3
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 2
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 4
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 14
+attribute : 14
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 3
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 4
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 1
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 4
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 15
+attribute : 15
+	GL_VERTEX_ATTRIB_ARRAY_ENABLED : GL_FALSE
+	GL_VERTEX_ATTRIB_ARRAY_SIZE : 3
+	GL_VERTEX_ATTRIB_ARRAY_STRIDE : 6
+	GL_VERTEX_ATTRIB_ARRAY_TYPE : 5122
+	GL_VERTEX_ATTRIB_ARRAY_NORMALIZED : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_INTEGER : GL_TRUE
+	GL_VERTEX_ATTRIB_ARRAY_DIVISOR : 0
+	GL_VERTEX_ATTRIB_ARRAY_POINTER : 2
+	 GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING : 16
+</Text>
+ <ImageSet Name="Results" Description="Comparison result from rendering with Vertex Array State" />
+ <ImageSet Name="Results" Description="Comparison result from rendering with Vertex Array Object" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">748606</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+Run took 4.44 seconds
+
+#endSession

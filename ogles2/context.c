@@ -250,6 +250,7 @@ void ogles2_aglDestroyContext(struct OGLES2Context *ctx)
     ogles2_fbo_free(ctx); /* before the textures: renderbuffers' colour storage is theirs */
     ogles2_textures_free(ctx);
     ogles2_trace(ctx, "aglDestroyContext: framebuffers and textures freed", -1, 0);
+    ogles2_vaos_free(ctx);
     ogles2_buffers_free(ctx);
     ogles2_trace(ctx, "aglDestroyContext: buffers freed", -1, 0);
     /* The modules freed the shared objects if it was the group's last
