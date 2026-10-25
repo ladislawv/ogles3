@@ -1,0 +1,86 @@
+Writing test log into M8R2:results/texture-fails.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles2.library: 29 functions of the ES 3.0 table not implemented yet: glBeginTransformFeedback glBindTransformFeedback glBlitFramebuffer glClearBufferfi glClearBufferfv glClearBufferiv glClearBufferuiv glCompressedTexImage3D glCompressedTexSubImage3D glCopyTexSubImage3D glDeleteTransformFeedbacks glEndTransformFeedback glFramebufferTextureLayer glGenTransformFeedbacks glGetInternalformativ glGetProgramBinary glGetTransformFeedbackVarying glInvalidateFramebuffer glInvalidateSubFramebuffer glIsTransformFeedback glPauseTransformFeedback glProgramBinary glProgramParameteri glRenderbufferStorageMultisample glResumeTransformFeedback glTransformFeedbackVaryings glDrawElementsInstancedBaseVertexOES glDrawRangeElementsBaseVertexOES glMultiDrawElementsBaseVertexEXT
+
+Test case 'dEQP-GLES3.functional.texture.filtering.2d_array.formats.bgra8_nearest'..
+ogles2.library: glBindTransformFeedback is not implemented yet (called as a no-op)
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.texture.filtering.2d_array.formats.bgra8_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.texture.filtering.2d_array.formats.bgra8_nearest_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.texture.filtering.2d_array.formats.bgra8_linear_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.texture.filtering.2d_array.formats.bgra8_nearest_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.texture.filtering.2d_array.formats.bgra8_linear_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.texture.filtering.3d.formats.bgra8_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.texture.filtering.3d.formats.bgra8_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.texture.filtering.3d.formats.bgra8_nearest_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.texture.filtering.3d.formats.bgra8_linear_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.texture.filtering.3d.formats.bgra8_nearest_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.texture.filtering.3d.formats.bgra8_linear_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.texture.specification.teximage2d_depth.depth_component32f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.texture.specification.teximage2d_depth.depth32f_stencil8'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.texture.specification.teximage2d_depth_pbo.depth_component32f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.texture.specification.teximage2d_depth_pbo.depth32f_stencil8'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.texture.specification.texsubimage2d_depth.depth_component32f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.texture.specification.texsubimage2d_depth.depth32f_stencil8'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.texture.specification.teximage3d_depth.depth_component32f_2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.texture.specification.teximage3d_depth.depth32f_stencil8_2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.texture.specification.teximage3d_depth_pbo.depth_component32f_2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.texture.specification.teximage3d_depth_pbo.depth32f_stencil8_2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.texture.specification.texsubimage3d_depth.depth_component32f_2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.texture.specification.texsubimage3d_depth.depth32f_stencil8_2d_array'..
+  Pass (Pass)
+
+DONE!
+
+Test run totals:
+  Passed:        24/24 (100.0%)
+  Failed:        0/24 (0.0%)
+  Not supported: 0/24 (0.0%)
+  Warnings:      0/24 (0.0%)
+  Waived:        0/24 (0.0%)

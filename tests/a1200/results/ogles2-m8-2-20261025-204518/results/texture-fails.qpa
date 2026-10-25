@@ -1,0 +1,667 @@
+#sessionInfo releaseName unknown
+#sessionInfo releaseId 0xcafebabe
+#sessionInfo targetName "AmigaOS3"
+#sessionInfo logFormatVersion "0.3.4"
+#sessionInfo vendor "ogles2.library"
+#sessionInfo renderer "V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM"
+#sessionInfo commandLineParameters "--deqp-caselist-file M8R2:caselists/texture-fails.txt --deqp-archive-dir=M8R2:bin --deqp-log-filename=M8R2:results/texture-fails.qpa --deqp-log-images=disable --deqp-log-shader-sources=disable --deqp-surface-width=256 --deqp-surface-height=256 --deqp-gl-config-name=rgba8888d24s8ms0"
+
+#beginSession
+
+#beginTestCaseResult dEQP-GLES3.functional.texture.filtering.2d_array.formats.bgra8_nearest
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.texture.filtering.2d_array.formats.bgra8_nearest" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Test0" Description="Test 0">
+  <Text>Approximate lod per axis = (1.5, 2.8), offset = (-1, -2.7)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test1" Description="Test 1">
+  <Text>Approximate lod per axis = (0.2, 0.175), offset = (-2, -3.7)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test2" Description="Test 2">
+  <Text>Approximate lod per axis = (-0.8, -2.3), offset = (0.2, -0.1)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test3" Description="Test 3">
+  <Text>Approximate lod per axis = (-2, -1.5), offset = (-0.1, 0.9)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">689236</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.texture.filtering.2d_array.formats.bgra8_linear
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.texture.filtering.2d_array.formats.bgra8_linear" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Test0" Description="Test 0">
+  <Text>Approximate lod per axis = (1.5, 2.8), offset = (-1, -2.7)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test1" Description="Test 1">
+  <Text>Approximate lod per axis = (0.2, 0.175), offset = (-2, -3.7)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test2" Description="Test 2">
+  <Text>Approximate lod per axis = (-0.8, -2.3), offset = (0.2, -0.1)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test3" Description="Test 3">
+  <Text>Approximate lod per axis = (-2, -1.5), offset = (-0.1, 0.9)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">672563</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.texture.filtering.2d_array.formats.bgra8_nearest_mipmap_nearest
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.texture.filtering.2d_array.formats.bgra8_nearest_mipmap_nearest" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Test0" Description="Test 0">
+  <Text>Approximate lod per axis = (1.5, 2.8), offset = (-1, -2.7)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test1" Description="Test 1">
+  <Text>Approximate lod per axis = (0.2, 0.175), offset = (-2, -3.7)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test2" Description="Test 2">
+  <Text>Approximate lod per axis = (-0.8, -2.3), offset = (0.2, -0.1)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test3" Description="Test 3">
+  <Text>Approximate lod per axis = (-2, -1.5), offset = (-0.1, 0.9)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">678297</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.texture.filtering.2d_array.formats.bgra8_linear_mipmap_nearest
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.texture.filtering.2d_array.formats.bgra8_linear_mipmap_nearest" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Test0" Description="Test 0">
+  <Text>Approximate lod per axis = (1.5, 2.8), offset = (-1, -2.7)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test1" Description="Test 1">
+  <Text>Approximate lod per axis = (0.2, 0.175), offset = (-2, -3.7)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test2" Description="Test 2">
+  <Text>Approximate lod per axis = (-0.8, -2.3), offset = (0.2, -0.1)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test3" Description="Test 3">
+  <Text>Approximate lod per axis = (-2, -1.5), offset = (-0.1, 0.9)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">679297</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.texture.filtering.2d_array.formats.bgra8_nearest_mipmap_linear
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.texture.filtering.2d_array.formats.bgra8_nearest_mipmap_linear" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Test0" Description="Test 0">
+  <Text>Approximate lod per axis = (1.5, 2.8), offset = (-1, -2.7)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test1" Description="Test 1">
+  <Text>Approximate lod per axis = (0.2, 0.175), offset = (-2, -3.7)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test2" Description="Test 2">
+  <Text>Approximate lod per axis = (-0.8, -2.3), offset = (0.2, -0.1)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test3" Description="Test 3">
+  <Text>Approximate lod per axis = (-2, -1.5), offset = (-0.1, 0.9)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">694079</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.texture.filtering.2d_array.formats.bgra8_linear_mipmap_linear
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.texture.filtering.2d_array.formats.bgra8_linear_mipmap_linear" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Test0" Description="Test 0">
+  <Text>Approximate lod per axis = (1.5, 2.8), offset = (-1, -2.7)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test1" Description="Test 1">
+  <Text>Approximate lod per axis = (0.2, 0.175), offset = (-2, -3.7)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test2" Description="Test 2">
+  <Text>Approximate lod per axis = (-0.8, -2.3), offset = (0.2, -0.1)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test3" Description="Test 3">
+  <Text>Approximate lod per axis = (-2, -1.5), offset = (-0.1, 0.9)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">727021</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.texture.filtering.3d.formats.bgra8_nearest
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.texture.filtering.3d.formats.bgra8_nearest" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Test0" Description="Test 0">
+  <Text>Approximate lod per axis = (1.5, 2.8, 1), offset = (-1, -2.7, -2.275)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test1" Description="Test 1">
+  <Text>Approximate lod per axis = (-2, -1.5, -1.8), offset = (-0.1, 0.9, -0.25)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test2" Description="Test 2">
+  <Text>Approximate lod per axis = (0.2, 0.175, 0.3), offset = (-2, -3.7, -1.825)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test3" Description="Test 3">
+  <Text>Approximate lod per axis = (-0.8, -2.3, -2.5), offset = (0.2, -0.1, 1.325)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1068319</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.texture.filtering.3d.formats.bgra8_linear
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.texture.filtering.3d.formats.bgra8_linear" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Test0" Description="Test 0">
+  <Text>Approximate lod per axis = (1.5, 2.8, 1), offset = (-1, -2.7, -2.275)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test1" Description="Test 1">
+  <Text>Approximate lod per axis = (-2, -1.5, -1.8), offset = (-0.1, 0.9, -0.25)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test2" Description="Test 2">
+  <Text>Approximate lod per axis = (0.2, 0.175, 0.3), offset = (-2, -3.7, -1.825)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test3" Description="Test 3">
+  <Text>Approximate lod per axis = (-0.8, -2.3, -2.5), offset = (0.2, -0.1, 1.325)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1151815</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.texture.filtering.3d.formats.bgra8_nearest_mipmap_nearest
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.texture.filtering.3d.formats.bgra8_nearest_mipmap_nearest" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Test0" Description="Test 0">
+  <Text>Approximate lod per axis = (1.5, 2.8, 1), offset = (-1, -2.7, -2.275)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test1" Description="Test 1">
+  <Text>Approximate lod per axis = (-2, -1.5, -1.8), offset = (-0.1, 0.9, -0.25)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test2" Description="Test 2">
+  <Text>Approximate lod per axis = (0.2, 0.175, 0.3), offset = (-2, -3.7, -1.825)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test3" Description="Test 3">
+  <Text>Approximate lod per axis = (-0.8, -2.3, -2.5), offset = (0.2, -0.1, 1.325)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1120797</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.texture.filtering.3d.formats.bgra8_linear_mipmap_nearest
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.texture.filtering.3d.formats.bgra8_linear_mipmap_nearest" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Test0" Description="Test 0">
+  <Text>Approximate lod per axis = (1.5, 2.8, 1), offset = (-1, -2.7, -2.275)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test1" Description="Test 1">
+  <Text>Approximate lod per axis = (-2, -1.5, -1.8), offset = (-0.1, 0.9, -0.25)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test2" Description="Test 2">
+  <Text>Approximate lod per axis = (0.2, 0.175, 0.3), offset = (-2, -3.7, -1.825)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test3" Description="Test 3">
+  <Text>Approximate lod per axis = (-0.8, -2.3, -2.5), offset = (0.2, -0.1, 1.325)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1168570</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.texture.filtering.3d.formats.bgra8_nearest_mipmap_linear
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.texture.filtering.3d.formats.bgra8_nearest_mipmap_linear" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Test0" Description="Test 0">
+  <Text>Approximate lod per axis = (1.5, 2.8, 1), offset = (-1, -2.7, -2.275)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test1" Description="Test 1">
+  <Text>Approximate lod per axis = (-2, -1.5, -1.8), offset = (-0.1, 0.9, -0.25)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test2" Description="Test 2">
+  <Text>Approximate lod per axis = (0.2, 0.175, 0.3), offset = (-2, -3.7, -1.825)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test3" Description="Test 3">
+  <Text>Approximate lod per axis = (-0.8, -2.3, -2.5), offset = (0.2, -0.1, 1.325)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1228414</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.texture.filtering.3d.formats.bgra8_linear_mipmap_linear
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.texture.filtering.3d.formats.bgra8_linear_mipmap_linear" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Test0" Description="Test 0">
+  <Text>Approximate lod per axis = (1.5, 2.8, 1), offset = (-1, -2.7, -2.275)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test1" Description="Test 1">
+  <Text>Approximate lod per axis = (-2, -1.5, -1.8), offset = (-0.1, 0.9, -0.25)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test2" Description="Test 2">
+  <Text>Approximate lod per axis = (0.2, 0.175, 0.3), offset = (-2, -3.7, -1.825)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Section Name="Test3" Description="Test 3">
+  <Text>Approximate lod per axis = (-0.8, -2.3, -2.5), offset = (0.2, -0.1, 1.325)</Text>
+  <ImageSet Name="VerifyResult" Description="Verification result" />
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1462255</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.texture.specification.teximage2d_depth.depth_component32f
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.texture.specification.teximage2d_depth.depth_component32f" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glClearColor(0.125, 0.25, 0.5, 1);</Text>
+ <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+ <Text>glGenTextures(1, 0x0afce684);</Text>
+ <Text>// textures = { 1 }</Text>
+ <Text>glBindTexture(GL_TEXTURE_2D, 1);</Text>
+ <Text>glPixelStorei(GL_UNPACK_ALIGNMENT, 1);</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, 64, 128, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb2901fc);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT32F, 32, 64, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb29820c);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 2, GL_DEPTH_COMPONENT32F, 16, 32, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb2901fc);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 3, GL_DEPTH_COMPONENT32F, 8, 16, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb290a0c);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 4, GL_DEPTH_COMPONENT32F, 4, 8, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb24ebfc);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 5, GL_DEPTH_COMPONENT32F, 2, 4, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb24ec8c);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 6, GL_DEPTH_COMPONENT32F, 1, 2, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb1d714c);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 7, GL_DEPTH_COMPONENT32F, 1, 1, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb20dbfc);</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <ImageSet Name="Level0" Description="Level 0" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">124122</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.texture.specification.teximage2d_depth.depth32f_stencil8
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.texture.specification.teximage2d_depth.depth32f_stencil8" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glClearColor(0.125, 0.25, 0.5, 1);</Text>
+ <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+ <Text>glGenTextures(1, 0x0afce684);</Text>
+ <Text>// textures = { 1 }</Text>
+ <Text>glBindTexture(GL_TEXTURE_2D, 1);</Text>
+ <Text>glPixelStorei(GL_UNPACK_ALIGNMENT, 1);</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH32F_STENCIL8, 64, 128, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb2901ec);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 1, GL_DEPTH32F_STENCIL8, 32, 64, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb2a01fc);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 2, GL_DEPTH32F_STENCIL8, 16, 32, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb2901ec);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 3, GL_DEPTH32F_STENCIL8, 8, 16, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb2911fc);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 4, GL_DEPTH32F_STENCIL8, 4, 8, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb2901ec);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 5, GL_DEPTH32F_STENCIL8, 2, 4, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb24ec44);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 6, GL_DEPTH32F_STENCIL8, 1, 2, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb1d714c);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 7, GL_DEPTH32F_STENCIL8, 1, 1, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb20dbfc);</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <ImageSet Name="Level0" Description="Level 0" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">107656</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.texture.specification.teximage2d_depth_pbo.depth_component32f
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.texture.specification.teximage2d_depth_pbo.depth_component32f" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glClearColor(0.125, 0.25, 0.5, 1);</Text>
+ <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+ <Text>glGenBuffers(1, 0x0afce69c);</Text>
+ <Text>// buffers = { 1 }</Text>
+ <Text>glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 1);</Text>
+ <Text>glBufferData(GL_PIXEL_UNPACK_BUFFER, 32768, 0xb28ff0c, GL_STATIC_DRAW);</Text>
+ <Text>glPixelStorei(GL_UNPACK_ROW_LENGTH, 64);</Text>
+ <Text>glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);</Text>
+ <Text>glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);</Text>
+ <Text>glPixelStorei(GL_UNPACK_ALIGNMENT, 4);</Text>
+ <Text>glGenTextures(1, 0x0afce6a0);</Text>
+ <Text>// textures = { 1 }</Text>
+ <Text>glBindTexture(GL_TEXTURE_2D, 1);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, 64, 128, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);</Text>
+ <Text>glDeleteBuffers(1, { 1 });</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <ImageSet Name="Level0" Description="Level 0" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">72859</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.texture.specification.teximage2d_depth_pbo.depth32f_stencil8
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.texture.specification.teximage2d_depth_pbo.depth32f_stencil8" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glClearColor(0.125, 0.25, 0.5, 1);</Text>
+ <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+ <Text>glGenBuffers(1, 0x0afce69c);</Text>
+ <Text>// buffers = { 1 }</Text>
+ <Text>glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 1);</Text>
+ <Text>glBufferData(GL_PIXEL_UNPACK_BUFFER, 65536, 0xb28fef4, GL_STATIC_DRAW);</Text>
+ <Text>glPixelStorei(GL_UNPACK_ROW_LENGTH, 64);</Text>
+ <Text>glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);</Text>
+ <Text>glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);</Text>
+ <Text>glPixelStorei(GL_UNPACK_ALIGNMENT, 4);</Text>
+ <Text>glGenTextures(1, 0x0afce6a0);</Text>
+ <Text>// textures = { 1 }</Text>
+ <Text>glBindTexture(GL_TEXTURE_2D, 1);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH32F_STENCIL8, 64, 128, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0);</Text>
+ <Text>glDeleteBuffers(1, { 1 });</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <ImageSet Name="Level0" Description="Level 0" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">78051</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.texture.specification.texsubimage2d_depth.depth_component32f
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.texture.specification.texsubimage2d_depth.depth_component32f" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glClearColor(0.125, 0.25, 0.5, 1);</Text>
+ <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+ <Text>glGenTextures(1, 0x0afce674);</Text>
+ <Text>// textures = { 1 }</Text>
+ <Text>glBindTexture(GL_TEXTURE_2D, 1);</Text>
+ <Text>glPixelStorei(GL_UNPACK_ALIGNMENT, 1);</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, 64, 32, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb28fd24);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT32F, 32, 16, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb291d34);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 2, GL_DEPTH_COMPONENT32F, 16, 8, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb28fd24);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 3, GL_DEPTH_COMPONENT32F, 8, 4, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb1e2e5c);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 4, GL_DEPTH_COMPONENT32F, 4, 2, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb1e2cec);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 5, GL_DEPTH_COMPONENT32F, 2, 1, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb1e2dcc);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 6, GL_DEPTH_COMPONENT32F, 1, 1, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb1e2cec);</Text>
+ <Text>glTexSubImage2D(GL_TEXTURE_2D, 0, 39, 0, 24, 1, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb1e2e5c);</Text>
+ <Text>glTexSubImage2D(GL_TEXTURE_2D, 1, 9, 3, 7, 13, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb28fd24);</Text>
+ <Text>glTexSubImage2D(GL_TEXTURE_2D, 2, 5, 0, 11, 2, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb1e2e5c);</Text>
+ <Text>glTexSubImage2D(GL_TEXTURE_2D, 3, 6, 1, 1, 2, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb1e2cec);</Text>
+ <Text>glTexSubImage2D(GL_TEXTURE_2D, 4, 0, 0, 1, 2, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb1e2d04);</Text>
+ <Text>glTexSubImage2D(GL_TEXTURE_2D, 5, 0, 0, 2, 1, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb1e2cec);</Text>
+ <Text>glTexSubImage2D(GL_TEXTURE_2D, 6, 0, 0, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb1e2d04);</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <ImageSet Name="Level0" Description="Level 0" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">47415</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.texture.specification.texsubimage2d_depth.depth32f_stencil8
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.texture.specification.texsubimage2d_depth.depth32f_stencil8" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glClearColor(0.125, 0.25, 0.5, 1);</Text>
+ <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+ <Text>glGenTextures(1, 0x0afce674);</Text>
+ <Text>// textures = { 1 }</Text>
+ <Text>glBindTexture(GL_TEXTURE_2D, 1);</Text>
+ <Text>glPixelStorei(GL_UNPACK_ALIGNMENT, 1);</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH32F_STENCIL8, 64, 32, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb28fd24);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 1, GL_DEPTH32F_STENCIL8, 32, 16, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb293d34);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 2, GL_DEPTH32F_STENCIL8, 16, 8, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb28fd24);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 3, GL_DEPTH32F_STENCIL8, 8, 4, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb290134);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 4, GL_DEPTH32F_STENCIL8, 4, 2, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb1e2e8c);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 5, GL_DEPTH32F_STENCIL8, 2, 1, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb1e2cec);</Text>
+ <Text>glTexImage2D(GL_TEXTURE_2D, 6, GL_DEPTH32F_STENCIL8, 1, 1, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb1e2d0c);</Text>
+ <Text>glTexSubImage2D(GL_TEXTURE_2D, 0, 28, 2, 2, 9, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb1e3284);</Text>
+ <Text>glTexSubImage2D(GL_TEXTURE_2D, 1, 2, 2, 25, 14, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb28fd24);</Text>
+ <Text>glTexSubImage2D(GL_TEXTURE_2D, 2, 2, 0, 12, 8, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb290824);</Text>
+ <Text>glTexSubImage2D(GL_TEXTURE_2D, 3, 4, 0, 1, 3, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb1e2cec);</Text>
+ <Text>glTexSubImage2D(GL_TEXTURE_2D, 4, 1, 1, 3, 1, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb1e2e8c);</Text>
+ <Text>glTexSubImage2D(GL_TEXTURE_2D, 5, 0, 0, 2, 1, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb1e2cec);</Text>
+ <Text>glTexSubImage2D(GL_TEXTURE_2D, 6, 0, 0, 1, 1, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb1e2d0c);</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <ImageSet Name="Level0" Description="Level 0" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">56273</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.texture.specification.teximage3d_depth.depth_component32f_2d_array
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.texture.specification.teximage3d_depth.depth_component32f_2d_array" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glClearColor(0.125, 0.25, 0.5, 1);</Text>
+ <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+ <Text>glGenTextures(1, 0x0afce684);</Text>
+ <Text>// textures = { 1 }</Text>
+ <Text>glBindTexture(GL_TEXTURE_2D_ARRAY, 1);</Text>
+ <Text>glPixelStorei(GL_UNPACK_ALIGNMENT, 1);</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT32F, 32, 64, 8, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb28fb3c);</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 1, GL_DEPTH_COMPONENT32F, 16, 32, 8, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb29fb4c);</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 2, GL_DEPTH_COMPONENT32F, 8, 16, 8, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb28fb3c);</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 3, GL_DEPTH_COMPONENT32F, 4, 8, 8, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb290b4c);</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 4, GL_DEPTH_COMPONENT32F, 2, 4, 8, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb1efe54);</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 5, GL_DEPTH_COMPONENT32F, 1, 2, 8, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb1e2fd4);</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 6, GL_DEPTH_COMPONENT32F, 1, 1, 8, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb1e2cac);</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <ImageSet Name="Layer0Level0" Description="Layer 0, Level 0" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">233630</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.texture.specification.teximage3d_depth.depth32f_stencil8_2d_array
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.texture.specification.teximage3d_depth.depth32f_stencil8_2d_array" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glClearColor(0.125, 0.25, 0.5, 1);</Text>
+ <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+ <Text>glGenTextures(1, 0x0afce684);</Text>
+ <Text>// textures = { 1 }</Text>
+ <Text>glBindTexture(GL_TEXTURE_2D_ARRAY, 1);</Text>
+ <Text>glPixelStorei(GL_UNPACK_ALIGNMENT, 1);</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH32F_STENCIL8, 32, 64, 8, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb28fb3c);</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 1, GL_DEPTH32F_STENCIL8, 16, 32, 8, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb2afb4c);</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 2, GL_DEPTH32F_STENCIL8, 8, 16, 8, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb28fb3c);</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 3, GL_DEPTH32F_STENCIL8, 4, 8, 8, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb291b4c);</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 4, GL_DEPTH32F_STENCIL8, 2, 4, 8, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb28fb3c);</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 5, GL_DEPTH32F_STENCIL8, 1, 2, 8, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb1e2fd4);</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 6, GL_DEPTH32F_STENCIL8, 1, 1, 8, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb1e3064);</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <ImageSet Name="Layer0Level0" Description="Layer 0, Level 0" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">248929</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.texture.specification.teximage3d_depth_pbo.depth_component32f_2d_array
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.texture.specification.teximage3d_depth_pbo.depth_component32f_2d_array" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glClearColor(0.125, 0.25, 0.5, 1);</Text>
+ <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+ <Text>glGenBuffers(1, 0x0afce6a0);</Text>
+ <Text>// buffers = { 1 }</Text>
+ <Text>glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 1);</Text>
+ <Text>glBufferData(GL_PIXEL_UNPACK_BUFFER, 65536, 0xb28fb34, GL_STATIC_DRAW);</Text>
+ <Text>glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 64);</Text>
+ <Text>glPixelStorei(GL_UNPACK_ROW_LENGTH, 32);</Text>
+ <Text>glPixelStorei(GL_UNPACK_SKIP_IMAGES, 0);</Text>
+ <Text>glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);</Text>
+ <Text>glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);</Text>
+ <Text>glPixelStorei(GL_UNPACK_ALIGNMENT, 4);</Text>
+ <Text>glGenTextures(1, 0x0afce69c);</Text>
+ <Text>// textures = { 1 }</Text>
+ <Text>glBindTexture(GL_TEXTURE_2D_ARRAY, 1);</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT32F, 32, 64, 8, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);</Text>
+ <Text>glDeleteBuffers(1, { 1 });</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <ImageSet Name="Layer0Level0" Description="Layer 0, Level 0" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">132987</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.texture.specification.teximage3d_depth_pbo.depth32f_stencil8_2d_array
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.texture.specification.teximage3d_depth_pbo.depth32f_stencil8_2d_array" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glClearColor(0.125, 0.25, 0.5, 1);</Text>
+ <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+ <Text>glGenBuffers(1, 0x0afce6a0);</Text>
+ <Text>// buffers = { 1 }</Text>
+ <Text>glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 1);</Text>
+ <Text>glBufferData(GL_PIXEL_UNPACK_BUFFER, 131072, 0xb28fb34, GL_STATIC_DRAW);</Text>
+ <Text>glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 64);</Text>
+ <Text>glPixelStorei(GL_UNPACK_ROW_LENGTH, 32);</Text>
+ <Text>glPixelStorei(GL_UNPACK_SKIP_IMAGES, 0);</Text>
+ <Text>glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);</Text>
+ <Text>glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);</Text>
+ <Text>glPixelStorei(GL_UNPACK_ALIGNMENT, 4);</Text>
+ <Text>glGenTextures(1, 0x0afce69c);</Text>
+ <Text>// textures = { 1 }</Text>
+ <Text>glBindTexture(GL_TEXTURE_2D_ARRAY, 1);</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH32F_STENCIL8, 32, 64, 8, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0);</Text>
+ <Text>glDeleteBuffers(1, { 1 });</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <ImageSet Name="Layer0Level0" Description="Layer 0, Level 0" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">146435</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.texture.specification.texsubimage3d_depth.depth_component32f_2d_array
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.texture.specification.texsubimage3d_depth.depth_component32f_2d_array" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glClearColor(0.125, 0.25, 0.5, 1);</Text>
+ <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+ <Text>glGenTextures(1, 0x0afce674);</Text>
+ <Text>// textures = { 1 }</Text>
+ <Text>glBindTexture(GL_TEXTURE_2D_ARRAY, 1);</Text>
+ <Text>glPixelStorei(GL_UNPACK_ALIGNMENT, 1);</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT32F, 57, 44, 5, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb28fb3c);</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 1, GL_DEPTH_COMPONENT32F, 28, 22, 5, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb29bf3c);</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 2, GL_DEPTH_COMPONENT32F, 14, 11, 5, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb28fb3c);</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 3, GL_DEPTH_COMPONENT32F, 7, 5, 5, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb1fb1f4);</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 4, GL_DEPTH_COMPONENT32F, 3, 2, 5, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb1e3094);</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 5, GL_DEPTH_COMPONENT32F, 1, 1, 5, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb1e2e6c);</Text>
+ <Text>glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 12, 0, 0, 43, 26, 5, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb28fb3c);</Text>
+ <Text>glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 1, 11, 8, 1, 3, 2, 3, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb1e3094);</Text>
+ <Text>glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 2, 1, 5, 1, 10, 4, 3, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb1fb1f4);</Text>
+ <Text>glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 3, 0, 0, 0, 7, 5, 5, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb1fb5ac);</Text>
+ <Text>glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 4, 0, 1, 1, 1, 1, 4, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb1e2e6c);</Text>
+ <Text>glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 5, 0, 0, 0, 1, 1, 5, GL_DEPTH_COMPONENT, GL_FLOAT, 0xb1e3094);</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <ImageSet Name="Layer0Level0" Description="Layer 0, Level 0" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">166677</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.texture.specification.texsubimage3d_depth.depth32f_stencil8_2d_array
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.texture.specification.texsubimage3d_depth.depth32f_stencil8_2d_array" Version="0.3.4" CaseType="SelfValidate">
+ <Text>glClearColor(0.125, 0.25, 0.5, 1);</Text>
+ <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+ <Text>glGenTextures(1, 0x0afce674);</Text>
+ <Text>// textures = { 1 }</Text>
+ <Text>glBindTexture(GL_TEXTURE_2D_ARRAY, 1);</Text>
+ <Text>glPixelStorei(GL_UNPACK_ALIGNMENT, 1);</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH32F_STENCIL8, 57, 44, 5, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb28fb3c);</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 1, GL_DEPTH32F_STENCIL8, 28, 22, 5, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb2a832c);</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 2, GL_DEPTH32F_STENCIL8, 14, 11, 5, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb28fb3c);</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 3, GL_DEPTH32F_STENCIL8, 7, 5, 5, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb29135c);</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 4, GL_DEPTH32F_STENCIL8, 3, 2, 5, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb1fb1f4);</Text>
+ <Text>glTexImage3D(GL_TEXTURE_2D_ARRAY, 5, GL_DEPTH32F_STENCIL8, 1, 1, 5, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb1e2e6c);</Text>
+ <Text>glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 21, 35, 1, 22, 6, 2, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb28fb3c);</Text>
+ <Text>glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 1, 0, 0, 0, 25, 21, 5, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb29038c);</Text>
+ <Text>glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 2, 2, 2, 1, 9, 9, 4, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb2955a4);</Text>
+ <Text>glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 3, 5, 0, 0, 2, 5, 2, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb1e306c);</Text>
+ <Text>glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 4, 0, 0, 2, 1, 2, 3, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb1e311c);</Text>
+ <Text>glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 5, 0, 0, 0, 1, 1, 1, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, 0xb1e2e6c);</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <ImageSet Name="Layer0Level0" Description="Layer 0, Level 0" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">184781</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+Run took 13.16 seconds
+
+#endSession

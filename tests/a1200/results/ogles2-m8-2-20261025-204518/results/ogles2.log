@@ -1,0 +1,29 @@
+     1 ogles2.library 1.3 init
+     2 open (count 1)
+     3 GPU submission lock "V3D 4.2 submit" at 0x082684F8
+     4 device: V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM, clipper granularity 256
+     5 device: GPU-visible RAM (device tree memory): 0x01000000-0x2E9FFFFF
+     6 device: GPU-visible RAM (device tree memory): 0x40000000-0x79DFFFFF
+     7 device: memory region "expansion memory" 0x08000020-0x2E9FFFFF fast: the GPU reaches it
+     8 device: memory region "expansion memory" 0x01000020-0x07FFFFFF fast: the GPU reaches it
+     9 device: memory region "expansion memory" 0x41000020-0x79DFFFFF fast: the GPU reaches it
+    10 device: memory region "memory" 0x00C00020-0x00C7FFFF fast: OUTSIDE the GPU-visible RAM
+    11 device: memory region "chip memory" 0x00001020-0x001FFFFF chip: OUTSIDE the GPU-visible RAM
+    12 display: own window, 256x256, BGRA
+    13 device: context pools for 256x256, D32F, 17783168 bytes of GPU memory in use
+    14 aglCreateContext2: context 0x091039F4, OpenGL ES 3.0, 256x256
+    15 compiler: Stuff:amictld/work/ogles2-m8-2/libs/v3dglslc, 19025780 bytes, id B972F903
+    16 glLinkProgram: OGLES2Cache:c53850ba34749029567c6fd2.v3dp (5 variants, 896 bytes of code)
+    17 job: depth and stencil kept across a mid-frame flush (logged once)
+    18 glLinkProgram: OGLES2Cache:e6cfd7bc03229e80ccfc66f9.v3dp (5 variants, 896 bytes of code)
+    19 glLinkProgram: OGLES2Cache:a5d9a9e7be79414369e3e48e.v3dp (5 variants, 1048 bytes of code)
+    20 draw: OGLES2Cache:a5d9a9e7be79414369e3e48e.v3dx (2 variants)
+    21 glLinkProgram: OGLES2Cache:f43e126d76c7d2be3eef19a3.v3dp (5 variants, 880 bytes of code)
+    22 draw: OGLES2Cache:f43e126d76c7d2be3eef19a3.v3dx (2 variants)
+    23 aglDestroyContext: context 0x091039F4: freeing
+    24 device: context freed, 0 bytes of GPU memory still in use
+    25 aglDestroyContext: context 0x091039F4 (268 frames, 0 dropped, 0 binning blocks added)
+    26 timing: 268 jobs, each on average: 2963 us of CPU work before its flush, 8 us waiting for binning, 181 us for the render
+    27 timing: and in each flush 72 us building the render list, 82 us for the CPU cache before the GPU, 47 us after
+    28 timing: 60 swaps, 210269 us from one to the next on average, 368 us of it presenting
+    29 timing: per frame 4 draws, 2291 us in them; in all 0 ms in glBuffer(Sub)Data, 22 ms in glTex(Sub)Image2D

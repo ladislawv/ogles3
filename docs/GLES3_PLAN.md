@@ -1563,7 +1563,17 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    before, `ogles2-m7-4-20261025-193542`). dEQP-GLES3's
    `texture.specification.texstorage*` 240 of 240, `texture.format.*` 490
    of 546 and no failure (56 not supported), `ogles2-m8-2-20261025-193607`,
-   `-193718`. Left in this item: `glCopyTexSubImage3D`,
+   `-193718`. The whole `texture` group then: 4077 of 5895, 24 failing
+   (`ogles2-m8-2-20261025-193925`): glTexImage3D lacked glTexImage2D's
+   `GL_BGRA8_EXT` name, and ES 3.0 clamps depth components to [0, 1] when
+   given (3.7.2), floats too; both fixed, the 24 pass
+   (`ogles2-m8-2-20261025-204518`): 4101 of 5895 and no failure, the 1794
+   not supported compressed (ETC2/EAC, item 9; ASTC, not ES 3.0's).
+   **Trap:** that run's `Execute Run-M1` did not return although the
+   script had ended: the compiler server (started by the library, ended
+   by its expunge) was still running; `Avail FLUSH` ended it, but the PC's
+   `runpkg` still waited, and the results came with `amictl get -r` (the
+   15 MB in 7 s). Left in this item: `glCopyTexSubImage3D`,
    `glCompressedTexImage3D`, ES 3.0's completeness of base levels beyond
    0 for mutable textures, the 3D textures' mipmaps from a base level.
 9. **ETC2/EAC** (mandatory in ES 3.0): native in the TMU (texture types

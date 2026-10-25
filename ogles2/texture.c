@@ -1330,8 +1330,16 @@ static void convert_depth(UBYTE *dst, ULONG dst_stride, const UBYTE *src, GLenum
                 ULONG v;
                 memcpy(&v, s, 4);
                 /* 24 bits kept; UNSIGNED_INT_24_8's low byte is the stencil;
-                 * ES 3.0's floats kept as their bits (the stencil word after
-                 * FLOAT_32_UNSIGNED_INT_24_8_REV's depth dropped) */
+                 * ES 3.0's floats kept as their bits, clamped to [0, 1] as
+                 * every depth component is when given (ES 3.0 3.7.2; the
+                 * stencil word after FLOAT_32_UNSIGNED_INT_24_8_REV's depth
+                 * dropped) */
+                if (type == GL_FLOAT || type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV) {
+                    GLfloat f;
+                    memcpy(&f, &v, 4);
+                    f = f > 0.0f ? (f < 1.0f ? f : 1.0f) : 0.0f; /* NaN to 0 too */
+                    memcpy(&v, &f, 4);
+                }
                 d[x] = type == GL_UNSIGNED_INT ? v & 0xffffff00UL : v;
             }
         }
@@ -3166,6 +3174,8 @@ void ogles2_glTexImage3D(struct OGLES2Context *ctx, GLenum target, GLint level, 
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
+    if ((GLenum)internalformat == GL_BGRA8_EXT && format == GL_BGRA_EXT) /* as glTexImage2D takes it */
+        internalformat = GL_BGRA_EXT;
     if (sized_base((GLenum)internalformat, format, type) == NOT_FILLED) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
