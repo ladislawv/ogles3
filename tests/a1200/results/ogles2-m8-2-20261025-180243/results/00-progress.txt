@@ -1,0 +1,5 @@
+ogles2 M8 run 2: --deqp-caselist-file M8R2:caselists/attribute_location.txt
+Sunday 25-Oct-26 19:02:44
+attribute_location done
+finished
+Sunday 25-Oct-26 19:03:57

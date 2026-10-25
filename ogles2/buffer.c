@@ -1037,7 +1037,7 @@ const UBYTE *ogles2_buffer_stream(const struct OGLES2Buffer *b)
  * Returns its GPU address of vertex 0 and its stride; 0 if out of memory or
  * the buffer holds no complete element at `offset`. *vertices: how many. */
 ULONG ogles2_buffer_copy(struct OGLES2Context *ctx, struct OGLES2Buffer *b, ULONG offset, GLint size,
-                         GLenum type, GLboolean normalized, GLsizei stride, ULONG elem_bytes,
+                         GLenum type, GLboolean normalized, GLsizei stride, ULONG elem_bytes, ULONG out_stride,
                          ULONG *dst_stride, ULONG *vertices,
                          void (*convert)(UBYTE *dst, ULONG dst_stride, const UBYTE *src,
                                          ULONG src_stride, ULONG count, GLint size, GLenum type))
@@ -1073,7 +1073,7 @@ ULONG ogles2_buffer_copy(struct OGLES2Context *ctx, struct OGLES2Buffer *b, ULON
         return 0;
     n = (b->size - phase - elem_bytes) / src_stride + 1;
     c = victim;
-    c->dst_stride = (elem_bytes + 3) & ~3UL;
+    c->dst_stride = out_stride; /* the converted element's, a whole number of words */
     if (v3d_mem_alloc(ogles2_device(), &c->mem, c->dst_stride * n) < 0) {
         memset(c, 0, sizeof(*c));
         return 0;

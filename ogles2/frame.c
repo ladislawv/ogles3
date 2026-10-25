@@ -141,6 +141,10 @@ void ogles2_glReadPixels(struct OGLES2Context *ctx, GLint x, GLint y, GLsizei wi
     }
     if (!has_surface(ctx) || !ogles2_fb_ready(ctx) || !pixels || !ctx->display.bitmap)
         return;
+    if (ogles2_es3(ctx) && !ctx->draw_fb && ogles2_fbo_default_read_none(ctx)) {
+        ogles2_error(ctx, GL_INVALID_OPERATION); /* ES 3.0 4.3.1: GL_READ_BUFFER is GL_NONE */
+        return;
+    }
     x0 = x < 0 ? 0 : x;
     y0 = y < 0 ? 0 : y;
     x1 = x + width > (LONG)ctx->fb_w ? (LONG)ctx->fb_w : x + width;

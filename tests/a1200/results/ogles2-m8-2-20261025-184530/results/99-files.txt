@@ -1,0 +1,8 @@
+Directory "M8R2:results" on Sunday 25-Oct-26
+00-progress.txt                 120 ----rwed Today     19:45:38
+occlusion_query.txt            7571 ----rwed Today     19:45:38
+occlusion_query.qpa          545418 ----rwed Today     19:45:38
+ogles2.log                     1934 ----rwed Today     19:45:38
+notes.txt                       228 ----rwed Today     19:45:38
+99-files.txt                    196 ----rwed Today     19:45:38
+6 files - 542K bytes - 1094 blocks used

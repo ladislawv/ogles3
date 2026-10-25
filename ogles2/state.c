@@ -248,6 +248,50 @@ static void set_attrib(struct OGLES2Context *ctx, GLuint index, GLfloat x, GLflo
     a[1] = y;
     a[2] = z;
     a[3] = w;
+    ctx->state.attrib_kind[index] = 0;
+}
+
+/* ES 3.0's glVertexAttribI4*: an integer current value (kind 1 int, 2 unsigned). */
+static void set_attrib_int(struct OGLES2Context *ctx, GLuint index, UBYTE kind, const ULONG *v)
+{
+    int k;
+    if (!ogles2_es3_entry(ctx))
+        return;
+    if (index >= OGLES2_MAX_VERTEX_ATTRIBS) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    for (k = 0; k < 4; k++) {
+        ctx->state.attrib_word[index][k] = v[k];
+        ctx->state.attrib[index][k] = kind == 1 ? (GLfloat)(LONG)v[k] : (GLfloat)v[k];
+    }
+    ctx->state.attrib_kind[index] = kind;
+}
+
+void ogles2_glVertexAttribI4i(struct OGLES2Context *ctx, GLuint index, GLint x, GLint y, GLint z, GLint w)
+{
+    ULONG v[4];
+    v[0] = (ULONG)x; v[1] = (ULONG)y; v[2] = (ULONG)z; v[3] = (ULONG)w;
+    set_attrib_int(ctx, index, 1, v);
+}
+
+void ogles2_glVertexAttribI4ui(struct OGLES2Context *ctx, GLuint index, GLuint x, GLuint y, GLuint z, GLuint w)
+{
+    ULONG v[4];
+    v[0] = x; v[1] = y; v[2] = z; v[3] = w;
+    set_attrib_int(ctx, index, 2, v);
+}
+
+void ogles2_glVertexAttribI4iv(struct OGLES2Context *ctx, GLuint index, const GLint *v)
+{
+    if (v)
+        ogles2_glVertexAttribI4i(ctx, index, v[0], v[1], v[2], v[3]);
+}
+
+void ogles2_glVertexAttribI4uiv(struct OGLES2Context *ctx, GLuint index, const GLuint *v)
+{
+    if (v)
+        ogles2_glVertexAttribI4ui(ctx, index, v[0], v[1], v[2], v[3]);
 }
 
 void ogles2_glVertexAttrib1f(struct OGLES2Context *ctx, GLuint index, GLfloat x)
@@ -862,23 +906,6 @@ static int lookup(struct OGLES2Context *ctx, GLenum pname, struct value *v)
         }
         return ogles2_es3(ctx) && lookup_es3(ctx, pname, v);
     }
-}
-
-/* ES 3.0's query objects come with occlusion queries (docs/GLES3_PLAN.md
- * §5 item 12) and transform feedback's count (stage C): until then no
- * query is ever active. */
-void ogles2_glGetQueryiv(struct OGLES2Context *ctx, GLenum target, GLenum pname, GLint *params)
-{
-    if (!ogles2_es3_entry(ctx))
-        return;
-    if ((target != GL_ANY_SAMPLES_PASSED && target != GL_ANY_SAMPLES_PASSED_CONSERVATIVE &&
-         target != GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN) ||
-        pname != GL_CURRENT_QUERY) {
-        ogles2_error(ctx, GL_INVALID_ENUM);
-        return;
-    }
-    if (params)
-        *params = 0;
 }
 
 static int query(struct OGLES2Context *ctx, GLenum pname, struct value *v, const char *fn)

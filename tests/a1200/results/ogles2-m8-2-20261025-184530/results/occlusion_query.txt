@@ -1,0 +1,200 @@
+Writing test log into M8R2:results/occlusion_query.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles2.library: 31 functions of the ES 3.0 table not implemented yet: glBeginTransformFeedback glBindTransformFeedback glBlitFramebuffer glClearBufferfi glClearBufferfv glClearBufferiv glClearBufferuiv glCompressedTexImage3D glCompressedTexSubImage3D glCopyTexSubImage3D glDeleteTransformFeedbacks glEndTransformFeedback glFramebufferTextureLayer glGenTransformFeedbacks glGetInternalformativ glGetProgramBinary glGetTransformFeedbackVarying glInvalidateFramebuffer glInvalidateSubFramebuffer glIsTransformFeedback glPauseTransformFeedback glProgramBinary glProgramParameteri glRenderbufferStorageMultisample glResumeTransformFeedback glTexStorage2D glTexStorage3D glTransformFeedbackVaryings glDrawElementsInstancedBaseVertexOES glDrawRangeElementsBaseVertexOES glMultiDrawElementsBaseVertexEXT
+
+Test case 'dEQP-GLES3.functional.occlusion_query.scissor'..
+ogles2.library: glBindTransformFeedback is not implemented yet (called as a no-op)
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.depth_write'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.depth_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.stencil_write'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.scissor_depth_write'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.scissor_depth_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.scissor_stencil_write'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.scissor_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.depth_write_depth_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.depth_write_stencil_write'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.depth_write_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.depth_clear_stencil_write'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.depth_clear_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.stencil_write_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.scissor_depth_write_depth_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.scissor_depth_write_stencil_write'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.scissor_depth_write_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.scissor_depth_clear_stencil_write'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.scissor_depth_clear_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.scissor_stencil_write_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.depth_write_depth_clear_stencil_write'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.depth_write_depth_clear_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.depth_write_stencil_write_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.depth_clear_stencil_write_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.scissor_depth_write_depth_clear_stencil_write'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.scissor_depth_write_depth_clear_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.scissor_depth_write_stencil_write_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.scissor_depth_clear_stencil_write_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.depth_write_depth_clear_stencil_write_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.all_occluders'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_scissor'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_depth_write'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_depth_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_stencil_write'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_scissor_depth_write'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_scissor_depth_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_scissor_stencil_write'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_scissor_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_depth_write_depth_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_depth_write_stencil_write'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_depth_write_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_depth_clear_stencil_write'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_depth_clear_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_stencil_write_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_scissor_depth_write_depth_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_scissor_depth_write_stencil_write'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_scissor_depth_write_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_scissor_depth_clear_stencil_write'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_scissor_depth_clear_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_scissor_stencil_write_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_depth_write_depth_clear_stencil_write'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_depth_write_depth_clear_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_depth_write_stencil_write_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_depth_clear_stencil_write_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_scissor_depth_write_depth_clear_stencil_write'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_scissor_depth_write_depth_clear_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_scissor_depth_write_stencil_write_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_scissor_depth_clear_stencil_write_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_depth_write_depth_clear_stencil_write_stencil_clear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.occlusion_query.conservative_all_occluders'..
+  Pass (Pass)
+
+DONE!
+
+Test run totals:
+  Passed:        62/62 (100.0%)
+  Failed:        0/62 (0.0%)
+  Not supported: 0/62 (0.0%)
+  Warnings:      0/62 (0.0%)
+  Waived:        0/62 (0.0%)

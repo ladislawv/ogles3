@@ -54,6 +54,8 @@ struct OGLES2Renderbuffer;
 struct OGLES2Image;
 struct OGLES2Sampler;
 struct OGLES2VaoState;
+struct OGLES2Sync;
+struct OGLES2QueryState;
 /* A name past OGLES2_NEAR_NAMES and its table slot (share.c). */
 struct OGLES2FarName
 {
@@ -78,6 +80,7 @@ struct OGLES2Share
     struct SignalSemaphore lock;      /* every call into a member, while there are two or more */
     struct OGLES2Sampler **smp;       /* texture.c: ES 3.0's sampler objects, by name (glGenSamplers') */
     GLuint nsmp;
+    struct OGLES2Sync *syncs;         /* sync.c: ES 3.0's sync objects */
 };
 
 /* glPixelStorei's state for one direction (ES 3.0 3.7.1 and 4.3.1; the
@@ -142,6 +145,10 @@ struct OGLES2State
     GLint stencil_ref[2];
     GLuint stencil_value_mask[2], stencil_write_mask[2];
     GLint clear_stencil;
+    /* ES 3.0's typed current values (glVertexAttribI4*): the kind of each
+     * (0 float in attrib, 1 int, 2 unsigned in attrib_word) */
+    UBYTE attrib_kind[OGLES2_MAX_VERTEX_ATTRIBS];
+    ULONG attrib_word[OGLES2_MAX_VERTEX_ATTRIBS][4];
 };
 
 struct OGLES2Buffer; /* buffer.c */
@@ -156,6 +163,7 @@ struct OGLES2Array
     const void *pointer; /* with a buffer: the offset into it */
     struct OGLES2Buffer *buffer; /* the GL_ARRAY_BUFFER binding when it was set; NULL: client memory */
     GLuint divisor;      /* ES 3.0's glVertexAttribDivisor: 0 per vertex, n an element per n instances */
+    GLboolean integer;   /* ES 3.0's glVertexAttribIPointer: read as integers */
 };
 
 /* ---- program images (program.c, v3dp.c) ----
@@ -630,6 +638,8 @@ struct OGLES2Context
     UBYTE job_discard;              /* EXT_discard_framebuffer: OGLES2_DISCARD_* the open job does not store */
     UBYTE job_noload;               /* and those it does not load (discarded before it began) */
     struct OGLES2VaoState *vao;     /* vao.c's (ES 3.0's vertex array objects), NULL until first used */
+    struct OGLES2QueryState *query; /* query.c's (ES 3.0's query objects), NULL until first used */
+    ULONG oq_addr;                  /* the active occlusion query's counter (0: none): job.c points new jobs at it */
 };
 
 #define OGLES2_DISCARD_COLOR   1
@@ -749,6 +759,7 @@ struct OGLES2Framebuffer;
 struct OGLES2Framebuffer *ogles2_fbo_copy_target(struct OGLES2Context *ctx, struct OGLES2Texture *t, int face,
                                                  int level);
 BOOL ogles2_fbo_color_image(struct OGLES2Context *ctx, struct OGLES2Texture **t, int *face, int *level);
+BOOL ogles2_fbo_default_read_none(struct OGLES2Context *ctx);
 /* The image as a render target, its GPU storage made first; FALSE: none. */
 BOOL ogles2_texture_surface(struct OGLES2Context *ctx, struct OGLES2Texture *t, int k, int l,
                             struct OGLES2Surface *s);
@@ -855,12 +866,16 @@ void ogles2_buffer_set_element(struct OGLES2Context *ctx, struct OGLES2Buffer *b
 GLuint ogles2_vao_bound(const struct OGLES2Context *ctx);
 void ogles2_vao_buffer_deleted(struct OGLES2Context *ctx, const struct OGLES2Buffer *b);
 void ogles2_vaos_free(struct OGLES2Context *ctx);
+void ogles2_syncs_free(struct OGLES2Context *ctx); /* sync.c, with the group's last member */
+/* query.c: the occlusion counter off around the library's own draws; freed with the context */
+void ogles2_query_pause(struct OGLES2Context *ctx, BOOL pause);
+void ogles2_queries_free(struct OGLES2Context *ctx);
 GLuint ogles2_buffer_name(const struct OGLES2Buffer *b);
 ULONG ogles2_buffer_size(const struct OGLES2Buffer *b);
 const void *ogles2_buffer_indices(struct OGLES2Context *ctx, ULONG offset, ULONG bytes, BOOL *bad);
 const UBYTE *ogles2_buffer_stream(const struct OGLES2Buffer *b);
 ULONG ogles2_buffer_copy(struct OGLES2Context *ctx, struct OGLES2Buffer *b, ULONG offset, GLint size,
-                         GLenum type, GLboolean normalized, GLsizei stride, ULONG elem_bytes,
+                         GLenum type, GLboolean normalized, GLsizei stride, ULONG elem_bytes, ULONG out_stride,
                          ULONG *dst_stride, ULONG *vertices,
                          void (*convert)(UBYTE *dst, ULONG dst_stride, const UBYTE *src,
                                          ULONG src_stride, ULONG count, GLint size, GLenum type));

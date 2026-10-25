@@ -97,6 +97,7 @@ struct OGLES2Framebuffer
     GLenum draw_buf[OGLES2_MAX_DRAW_BUFFERS]; /* glDrawBuffersEXT: COLOR_ATTACHMENTi or NONE */
     v3d_mem pool_alloc, pool_state; /* tile pools of its own when bigger than the context's */
     ULONG pool_tiles;
+    GLenum read_buf;            /* ES 3.0's glReadBuffer: COLOR_ATTACHMENTi or NONE */
 };
 
 struct OGLES2FboState
@@ -108,6 +109,7 @@ struct OGLES2FboState
     BOOL warned_incomplete;
     struct OGLES2FarName *far_fb;    /* fbs' names past OGLES2_NEAR_NAMES (share.c) */
     struct OGLES2Framebuffer *copy_fb; /* glCopyTex*'s target on the GPU (copy.c): never named */
+    BOOL default_read_none;          /* the default framebuffer's glReadBuffer is GL_NONE (else GL_BACK) */
 };
 
 static struct OGLES2FboState *fs_get(struct OGLES2Context *ctx)
@@ -321,6 +323,7 @@ struct OGLES2Framebuffer *ogles2_fbo_copy_target(struct OGLES2Context *ctx, stru
         if (!(fb = AllocVec(sizeof(*fb), MEMF_ANY | MEMF_CLEAR)))
             return 0;
         fb->draw_buf[0] = GL_COLOR_ATTACHMENT0;
+        fb->read_buf = GL_COLOR_ATTACHMENT0;
         fs->copy_fb = fb;
     }
     at = &fb->att[ATT_COLOR];
@@ -338,12 +341,19 @@ struct OGLES2Framebuffer *ogles2_fbo_copy_target(struct OGLES2Context *ctx, stru
 
 /* The bound framebuffer's colour image for glCopyTex* on the GPU (copy.c):
  * a texture level or a colour renderbuffer's own texture; FALSE without. */
+/* The colour attachment reads come from (ES 3.0's glReadBuffer; GLES2: 0); NULL for GL_NONE. */
+static const struct OGLES2Attachment *read_attachment(const struct OGLES2Framebuffer *fb)
+{
+    if (fb->read_buf < GL_COLOR_ATTACHMENT0 || fb->read_buf >= GL_COLOR_ATTACHMENT0 + OGLES2_MAX_DRAW_BUFFERS)
+        return 0;
+    return &fb->att[ATT_COLOR + (fb->read_buf - GL_COLOR_ATTACHMENT0)];
+}
+
 BOOL ogles2_fbo_color_image(struct OGLES2Context *ctx, struct OGLES2Texture **t, int *face, int *level)
 {
     const struct OGLES2Attachment *c;
-    if (!ctx->draw_fb)
+    if (!ctx->draw_fb || !(c = read_attachment(ctx->draw_fb)))
         return FALSE;
-    c = &ctx->draw_fb->att[ATT_COLOR];
     if (c->type == GL_TEXTURE) {
         *t = c->tex;
         *face = c->face;
@@ -386,6 +396,7 @@ void ogles2_glGenFramebuffers(struct OGLES2Context *ctx, GLsizei n, GLuint *fram
         }
         fb->name = i;
         fb->draw_buf[0] = GL_COLOR_ATTACHMENT0;
+        fb->read_buf = GL_COLOR_ATTACHMENT0;
         fs->fbs[i] = fb;
         if (framebuffers)
             framebuffers[k] = i;
@@ -459,6 +470,7 @@ void ogles2_glBindFramebuffer(struct OGLES2Context *ctx, GLenum target, GLuint f
             }
             fb->name = framebuffer;
             fb->draw_buf[0] = GL_COLOR_ATTACHMENT0;
+            fb->read_buf = GL_COLOR_ATTACHMENT0;
             fs->fbs[slot] = fb;
         }
         fb->bound_once = TRUE;
@@ -826,6 +838,44 @@ void ogles2_glDrawBuffersEXT(struct OGLES2Context *ctx, GLsizei n, const GLenum 
     ogles2_fb_update(ctx);
 }
 
+/* ES 3.0's name, EXT_draw_buffers' rules. */
+void ogles2_glDrawBuffers(struct OGLES2Context *ctx, GLsizei n, const GLenum *bufs)
+{
+    if (ogles2_es3_entry(ctx))
+        ogles2_glDrawBuffersEXT(ctx, n, bufs);
+}
+
+/* ES 3.0 4.3.1: the colour buffer glReadPixels and the copies read, the
+ * framebuffer's own: GL_BACK or GL_NONE for the default one, a colour
+ * attachment or GL_NONE for an object. */
+void ogles2_glReadBuffer(struct OGLES2Context *ctx, GLenum src)
+{
+    struct OGLES2FboState *fs;
+    struct OGLES2Framebuffer *fb;
+    if (!ogles2_es3_entry(ctx))
+        return;
+    if (src != GL_NONE && src != GL_BACK && !(src >= GL_COLOR_ATTACHMENT0 && src < GL_COLOR_ATTACHMENT0 + 32)) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    fb = ctx->draw_fb;
+    if (fb ? src == GL_BACK || (src != GL_NONE && src >= GL_COLOR_ATTACHMENT0 + OGLES2_MAX_DRAW_BUFFERS)
+           : src != GL_NONE && src != GL_BACK) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
+    if (fb)
+        fb->read_buf = src;
+    else if ((fs = fs_get(ctx)))
+        fs->default_read_none = src == GL_NONE;
+}
+
+/* The default framebuffer's read buffer is GL_NONE (frame.c). */
+BOOL ogles2_fbo_default_read_none(struct OGLES2Context *ctx)
+{
+    return ctx->fbo && ctx->fbo->default_read_none;
+}
+
 /* GL_DRAW_BUFFERi_EXT of the bound framebuffer (state.c). */
 GLenum ogles2_fbo_draw_buffer(struct OGLES2Context *ctx, int i)
 {
@@ -1181,7 +1231,9 @@ void ogles2_fbo_rendered(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb
 
 BOOL ogles2_fbo_read(struct OGLES2Context *ctx, int x, int y, int w, int h, UBYTE *rgba, ULONG stride)
 {
-    const struct OGLES2Attachment *c = &ctx->draw_fb->att[ATT_COLOR];
+    const struct OGLES2Attachment *c = read_attachment(ctx->draw_fb);
+    if (!c)
+        return FALSE;
     if (c->type == GL_TEXTURE)
         return ogles2_texture_read(c->tex, c->face, c->level, x, y, w, h, rgba, stride);
     if (c->type == GL_RENDERBUFFER && c->rb->color) {
@@ -1344,6 +1396,11 @@ BOOL ogles2_fbo_query(struct OGLES2Context *ctx, GLenum pname, GLint *v)
     case GL_MAX_RENDERBUFFER_SIZE: *v = OGLES2_MAX_VIEWPORT; return TRUE;
     case GL_MAX_DRAW_BUFFERS_EXT:
     case GL_MAX_COLOR_ATTACHMENTS_EXT: *v = OGLES2_MAX_DRAW_BUFFERS; return TRUE;
+    case GL_READ_BUFFER: /* ES 3.0 */
+        if (!ogles2_es3(ctx))
+            return FALSE;
+        *v = fb ? (GLint)fb->read_buf : ctx->fbo && ctx->fbo->default_read_none ? GL_NONE : GL_BACK;
+        return TRUE;
     case GL_RED_BITS: case GL_GREEN_BITS: case GL_BLUE_BITS: case GL_ALPHA_BITS:
         if (fb) {
             const struct OGLES2Attachment *c = &fb->att[ATT_COLOR];

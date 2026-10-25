@@ -97,28 +97,56 @@ static int type_size(GLenum type)
     case GL_BYTE: case GL_UNSIGNED_BYTE:   return 1;
     case GL_SHORT: case GL_UNSIGNED_SHORT: return 2;
     case GL_FLOAT: case GL_FIXED:          return 4;
+    /* ES 3.0's (docs/GLES3_PLAN.md §5 item 5) */
+    case GL_HALF_FLOAT:                    return 2;
+    case GL_INT: case GL_UNSIGNED_INT:     return 4;
+    case GL_INT_2_10_10_10_REV:
+    case GL_UNSIGNED_INT_2_10_10_10_REV:   return 4; /* the four components' one word */
     default:                               return 0;
     }
 }
 
-void ogles2_glVertexAttribPointer(struct OGLES2Context *ctx, GLuint index, GLint size, GLenum type,
-                                  GLboolean normalized, GLsizei stride, const void *pointer)
+static BOOL packed_type(GLenum type)
+{
+    return type == GL_INT_2_10_10_10_REV || type == GL_UNSIGNED_INT_2_10_10_10_REV;
+}
+
+/* An element's bytes as the application stores it. */
+static ULONG elem_bytes(const struct OGLES2Array *a)
+{
+    return packed_type(a->type) ? 4 : (ULONG)(type_size(a->type) * a->size);
+}
+
+/* The types the CPU turns into 32-bit floats first (the hardware reads no
+ * 32-bit integer as a float, and Mesa never gives it three half floats:
+ * u_vbuf converts them), as convert_elems' `type`. */
+#define CONV_INT_FLOAT   0x10000UL /* GL_INT, + 1: normalized; + 2, + 3: GL_UNSIGNED_INT */
+#define CONV_HALF3_FLOAT 0x10004UL
+
+/* glVertexAttribPointer and glVertexAttribIPointer (`integer`); FALSE: an error. */
+static BOOL set_pointer(struct OGLES2Context *ctx, GLuint index, GLint size, GLenum type, GLboolean normalized,
+                        GLsizei stride, const void *pointer, GLboolean integer)
 {
     struct OGLES2Array *a;
     if (!ogles2_context_valid(ctx))
-        return;
+        return FALSE;
     if (index >= OGLES2_MAX_VERTEX_ATTRIBS || size < 1 || size > 4 || stride < 0) {
         ogles2_error(ctx, GL_INVALID_VALUE);
-        return;
+        return FALSE;
     }
-    if (!type_size(type)) {
+    if (!type_size(type) ||
+        (!ogles2_es3(ctx) && (type == GL_HALF_FLOAT || type == GL_INT || type == GL_UNSIGNED_INT || packed_type(type)))) {
         ogles2_error(ctx, GL_INVALID_ENUM);
-        return;
+        return FALSE;
+    }
+    if (packed_type(type) && size != 4) { /* ES 3.0 2.8 */
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return FALSE;
     }
     /* ES 3.0 2.8: no client arrays in a vertex array object but 0 */
     if (ogles2_vao_bound(ctx) && !ogles2_buffer_array(ctx) && pointer) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
-        return;
+        return FALSE;
     }
     a = &ctx->array[index];
     a->size = size;
@@ -127,6 +155,28 @@ void ogles2_glVertexAttribPointer(struct OGLES2Context *ctx, GLuint index, GLint
     a->stride = stride;
     a->pointer = pointer;
     a->buffer = ogles2_buffer_array(ctx); /* GLES 2.0 2.9: captured now */
+    a->integer = integer;
+    return TRUE;
+}
+
+void ogles2_glVertexAttribPointer(struct OGLES2Context *ctx, GLuint index, GLint size, GLenum type,
+                                  GLboolean normalized, GLsizei stride, const void *pointer)
+{
+    set_pointer(ctx, index, size, type, normalized, stride, pointer, GL_FALSE);
+}
+
+/* ES 3.0's integer arrays: read as integers by an integer input. */
+void ogles2_glVertexAttribIPointer(struct OGLES2Context *ctx, GLuint index, GLint size, GLenum type, GLsizei stride,
+                                   const void *pointer)
+{
+    if (!ogles2_es3_entry(ctx))
+        return;
+    if (type != GL_BYTE && type != GL_UNSIGNED_BYTE && type != GL_SHORT && type != GL_UNSIGNED_SHORT &&
+        type != GL_INT && type != GL_UNSIGNED_INT) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    set_pointer(ctx, index, size, type, GL_FALSE, stride, pointer, GL_TRUE);
 }
 
 void ogles2_glVertexAttribDivisor(struct OGLES2Context *ctx, GLuint index, GLuint divisor)
@@ -181,20 +231,35 @@ void ogles2_glGetVertexAttribiv(struct OGLES2Context *ctx, GLuint index, GLenum 
     case GL_VERTEX_ATTRIB_ARRAY_NORMALIZED:     *params = a->normalized; break;
     case GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING: *params = (GLint)ogles2_buffer_name(a->buffer); break;
     case GL_VERTEX_ATTRIB_ARRAY_DIVISOR:
+    case GL_VERTEX_ATTRIB_ARRAY_INTEGER:
         if (!ogles2_es3(ctx)) {
             ogles2_error(ctx, GL_INVALID_ENUM);
             break;
         }
-        *params = (GLint)a->divisor;
+        *params = pname == GL_VERTEX_ATTRIB_ARRAY_DIVISOR ? (GLint)a->divisor : a->integer;
         break;
     case GL_CURRENT_VERTEX_ATTRIB:
         for (k = 0; k < 4; k++)
-            params[k] = (GLint)ctx->state.attrib[index][k];
+            params[k] = ctx->state.attrib_kind[index] ? (GLint)ctx->state.attrib_word[index][k]
+                                                      : (GLint)ctx->state.attrib[index][k];
         break;
     default:
         ogles2_error(ctx, GL_INVALID_ENUM);
         break;
     }
+}
+
+/* ES 3.0: the same, a current value as the integers it was given. */
+void ogles2_glGetVertexAttribIiv(struct OGLES2Context *ctx, GLuint index, GLenum pname, GLint *params)
+{
+    if (ogles2_es3_entry(ctx))
+        ogles2_glGetVertexAttribiv(ctx, index, pname, params);
+}
+
+void ogles2_glGetVertexAttribIuiv(struct OGLES2Context *ctx, GLuint index, GLenum pname, GLuint *params)
+{
+    if (ogles2_es3_entry(ctx))
+        ogles2_glGetVertexAttribiv(ctx, index, pname, (GLint *)params);
 }
 
 void ogles2_glGetVertexAttribPointerv(struct OGLES2Context *ctx, GLuint index, GLenum pname,
@@ -723,6 +788,7 @@ struct attr_src
     ULONG address, stride;
     UBYTE vsize, vtype, normalized, is_signed;
     UWORD divisor;       /* the record's instance divisor (0: per vertex) */
+    UBYTE read_int;      /* "read as int/uint" (an integer array or current value) */
 };
 
 /* Emu68 runs a memory access as dearly as several register operations:
@@ -762,12 +828,49 @@ static void swap_indices(ULONG *d, const ULONG *s, ULONG n, ULONG base)
 }
 
 /* `count` elements of `n` components of `type` into the GPU's byte order. */
+/* An IEEE half float (the 68k's order) as a float. */
+static GLfloat half_float(UWORD h)
+{
+    ULONG s = (ULONG)(h & 0x8000) << 16, e = (h >> 10) & 31, m = h & 1023;
+    union { ULONG u; GLfloat f; } v;
+    if (!e) { /* zero, denormals: m / 2^24 */
+        v.f = (GLfloat)m * (1.0f / 16777216.0f);
+        v.u |= s;
+        return v.f;
+    }
+    v.u = s | (e == 31 ? (0xffUL << 23) : ((e + 112) << 23)) | (m << 13);
+    return v.f;
+}
+
 static void convert_elems(UBYTE *dst, ULONG dst_stride, const UBYTE *src, ULONG src_stride,
                           ULONG count, GLint n, GLenum type)
 {
     ULONG i;
     int k;
+    if (type >= CONV_INT_FLOAT) { /* to 32-bit floats (ES 3.0 2.1.6's conversions) */
+        for (i = 0; i < count; i++, src += src_stride, dst += dst_stride)
+            for (k = 0; k < n; k++) {
+                GLfloat f;
+                if (type == CONV_HALF3_FLOAT)
+                    f = half_float(*(const UWORD *)(src + k * 2));
+                else {
+                    ULONG w = *(const ULONG *)(src + k * 4);
+                    switch (type - CONV_INT_FLOAT) {
+                    case 0:  f = (GLfloat)(LONG)w; break;
+                    case 1:  f = (GLfloat)((double)(LONG)w / 2147483647.0); f = f < -1.0f ? -1.0f : f; break;
+                    case 2:  f = (GLfloat)w; break;
+                    default: f = (GLfloat)((double)w / 4294967295.0); break;
+                    }
+                }
+                ((ULONG *)dst)[k] = le32(float_bits(f));
+            }
+        return;
+    }
     switch (type) {
+    case GL_INT: /* ES 3.0's 32-bit words: integers read as such, the packed 2_10_10_10 */
+    case GL_UNSIGNED_INT:
+    case GL_INT_2_10_10_10_REV:
+    case GL_UNSIGNED_INT_2_10_10_10_REV:
     case GL_FLOAT:
     case GL_FIXED:
         /* Word loads straight from the array (the 68020 reads any address;
@@ -812,6 +915,7 @@ static void convert_elems(UBYTE *dst, ULONG dst_stride, const UBYTE *src, ULONG 
         break;
     case GL_SHORT:
     case GL_UNSIGNED_SHORT:
+    case GL_HALF_FLOAT:
         for (i = 0; i < count; i++, src += src_stride, dst += dst_stride)
             for (k = 0; k < n; k++) {
                 dst[k * 2] = src[k * 2 + 1];
@@ -841,28 +945,46 @@ static BOOL copy_array(struct OGLES2Context *ctx, const struct OGLES2Array *a, G
                        GLsizei count, struct attr_src *out, BOOL probe_addr)
 {
     int es = type_size(a->type), n = a->size;
-    ULONG src_stride = a->stride ? (ULONG)a->stride : (ULONG)(n * es);
-    ULONG dst_stride = ((ULONG)(n * es) + 3) & ~3UL;
+    ULONG in_bytes = elem_bytes(a);
+    ULONG src_stride = a->stride ? (ULONG)a->stride : in_bytes;
+    /* What convert_elems makes of an element: its type (one of the CPU's
+     * conversions to float), its components (a packed one: one word), bytes */
+    ULONG ctype = a->type;
+    int nconv = packed_type(a->type) ? 1 : n;
+    ULONG dst_stride;
     const UBYTE *src = (const UBYTE *)a->pointer;
     UBYTE *dst;
 
+    if (!a->integer && (a->type == GL_INT || a->type == GL_UNSIGNED_INT))
+        ctype = CONV_INT_FLOAT + (a->type == GL_UNSIGNED_INT ? 2 : 0) + (a->normalized ? 1 : 0);
+    else if (a->type == GL_HALF_FLOAT && n == 3)
+        ctype = CONV_HALF3_FLOAT;
+    dst_stride = ((ctype >= CONV_INT_FLOAT ? (ULONG)n * 4 : in_bytes) + 3) & ~3UL;
     out->divisor = 0;
+    out->read_int = a->integer;
     out->vsize = n == 4 ? v3d_VEC_4 : (UBYTE)n;
-    out->normalized = a->normalized && a->type != GL_FLOAT && a->type != GL_FIXED;
-    out->is_signed = a->type == GL_BYTE || a->type == GL_SHORT;
+    out->normalized = a->normalized && !a->integer && ctype < CONV_INT_FLOAT && a->type != GL_FLOAT &&
+                      a->type != GL_FIXED && a->type != GL_HALF_FLOAT;
+    out->is_signed = a->type == GL_BYTE || a->type == GL_SHORT || a->type == GL_INT || a->type == GL_INT_2_10_10_10_REV;
     /* GL_FIXED is read by the attribute record's fixed type, which is GL's
      * 16.16 (M1 probe F on the A1200, plan 7.5): a byte swap only. */
-    out->vtype = a->type == GL_FIXED ? v3d_ATTRIBUTE_FIXED
+    out->vtype = ctype >= CONV_INT_FLOAT ? v3d_ATTRIBUTE_FLOAT
+               : a->type == GL_FIXED ? v3d_ATTRIBUTE_FIXED
                : a->type == GL_FLOAT ? v3d_ATTRIBUTE_FLOAT
+               : a->type == GL_HALF_FLOAT ? v3d_ATTRIBUTE_HALF_FLOAT
+               : packed_type(a->type) ? v3d_ATTRIBUTE_INT2101010
+               : es == 4 ? v3d_ATTRIBUTE_INT
                : es == 2 ? v3d_ATTRIBUTE_SHORT : v3d_ATTRIBUTE_BYTE;
+    if (ctype >= CONV_INT_FLOAT)
+        out->is_signed = 0;
     /* A buffer the program changes as it draws: the vertices this draw reads,
      * from its shadow (the draw checked the range against the buffer). */
     if (a->buffer && (src = ogles2_buffer_stream(a->buffer)) != 0)
         src += (ULONG)a->pointer;
     else if (a->buffer) {
-        ULONG vertices, base = ogles2_buffer_copy(ctx, a->buffer, (ULONG)a->pointer, n, a->type,
-                                                  out->normalized, a->stride, (ULONG)(n * es),
-                                                  &out->stride, &vertices, convert_elems);
+        ULONG vertices, base = ogles2_buffer_copy(ctx, a->buffer, (ULONG)a->pointer, nconv, (GLenum)ctype,
+                                                  (GLboolean)(out->normalized | (out->read_int ? 2 : 0)), a->stride,
+                                                  in_bytes, dst_stride, &out->stride, &vertices, convert_elems);
         /* The draw checked the range against the buffer (arrays_ok). */
         if (!base || (ULONG)first + (ULONG)count > vertices)
             return FALSE;
@@ -879,7 +1001,7 @@ static BOOL copy_array(struct OGLES2Context *ctx, const struct OGLES2Array *a, G
     out->address = (ULONG)dst;
     out->stride = dst_stride;
     ctx->n_vbytes += dst_stride * (ULONG)count;
-    convert_elems(dst, dst_stride, src + (ULONG)first * src_stride, src_stride, (ULONG)count, n, a->type);
+    convert_elems(dst, dst_stride, src + (ULONG)first * src_stride, src_stride, (ULONG)count, nconv, (GLenum)ctype);
     if (probe_addr) {
         ULONG len = dst_stride * (ULONG)count;
         CachePreDMA((APTR)out->address, &len, 0);
@@ -895,13 +1017,17 @@ static BOOL constant_attrib(struct OGLES2Context *ctx, GLuint index, struct attr
     if (!(p = claim(ctx->v3d, 16, 16)))
         return FALSE;
     for (k = 0; k < 4; k++)
-        p[k] = le32(float_bits(ctx->state.attrib[index][k]));
+        p[k] = le32(ctx->state.attrib_kind[index] ? ctx->state.attrib_word[index][k]
+                                                  : float_bits(ctx->state.attrib[index][k]));
     out->address = (ULONG)p;
     out->stride = 0;
     out->vsize = v3d_VEC_4;
-    out->vtype = v3d_ATTRIBUTE_FLOAT;
-    out->normalized = out->is_signed = 0;
+    out->normalized = 0;
     out->divisor = 0;
+    /* ES 3.0's integer current values: their words, read as integers */
+    out->read_int = ctx->state.attrib_kind[index] != 0;
+    out->vtype = out->read_int ? v3d_ATTRIBUTE_INT : v3d_ATTRIBUTE_FLOAT;
+    out->is_signed = ctx->state.attrib_kind[index] == 1;
     return TRUE;
 }
 
@@ -916,7 +1042,8 @@ static void attr_record(UBYTE *b, ULONG address, UBYTE normalized, UBYTE is_sign
                         UBYTE vtype, UBYTE vs_reads, UBYTE cs_reads, UWORD divisor, ULONG stride, ULONG maxindex)
 {
     put_le32(b, address);
-    b[4] = (UBYTE)((normalized ? 0x40 : 0) | (is_signed ? 0x20 : 0) | ((vtype & 7) << 2) | (vsize & 3));
+    b[4] = (UBYTE)((normalized & 0x80) | (normalized & 1 ? 0x40 : 0) | (is_signed ? 0x20 : 0) | ((vtype & 7) << 2) |
+                   (vsize & 3)); /* normalized's bit 7: read as int/uint */
     b[5] = (UBYTE)((vs_reads << 4) | (cs_reads & 15));
     b[6] = (UBYTE)divisor; /* instance divisor, 16 bits */
     b[7] = (UBYTE)(divisor >> 8);
@@ -1047,10 +1174,10 @@ addresses:
         }
         if (direct)
             attr_record((UBYTE *)(r + 1) + i * sizeof(v3d_gl_shader_state_attribute_record), src[i].address,
-                        src[i].normalized, src[i].is_signed, src[i].vsize, src[i].vtype, vs->vattr_sizes[i],
-                        cs_n, src[i].divisor, src[i].stride, 0xFFFFFF);
+                        (UBYTE)(src[i].normalized | (src[i].read_int ? 0x80 : 0)), src[i].is_signed, src[i].vsize,
+                        src[i].vtype, vs->vattr_sizes[i], cs_n, src[i].divisor, src[i].stride, 0xFFFFFF);
         else
-            glShaderStateAttributeRecord(v, (APTR)src[i].address, FALSE, src[i].normalized,
+            glShaderStateAttributeRecord(v, (APTR)src[i].address, src[i].read_int, src[i].normalized,
                                          src[i].is_signed, src[i].vsize, src[i].vtype,
                                          vs->vattr_sizes[i], cs_n, src[i].divisor, src[i].stride, 0xFFFFFF);
     }
@@ -1436,7 +1563,7 @@ static void emit_state(struct OGLES2Context *ctx, struct dedup *dd, int prim,
         DoCommand(v, v3d_OP_ZERO_ALL_NON_PERSPECTIVE_FLAGS);
         DoCommand(v, v3d_OP_ZERO_ALL_CENTROID_FLAGS);
         TransformFeedbackSpecs(v, FALSE, 0);
-        OcclusionQueryCounter(v, 0);
+        OcclusionQueryCounter(v, ctx->oq_addr); /* the active occlusion query (query.c), or off */
         SampleState(v, 1, smask); /* coverage 1.0 (the emitter converts it to a float) */
         dd->smask = smask;
         v->draw_state_configured = TRUE;
@@ -1562,14 +1689,14 @@ static BOOL packets_ok(V3DContext *v)
     VertexArrayPrims(v, 5, 0x30201, 0x4321);
     glShaderStateAttributeRecord(v, (APTR)0x08123456UL, FALSE, TRUE, TRUE, v3d_VEC_3, v3d_ATTRIBUTE_SHORT,
                                  3, 2, 0, 0x0C, 0xFFFFFF);
-    glShaderStateAttributeRecord(v, (APTR)0x08654320UL, FALSE, FALSE, FALSE, v3d_VEC_4, v3d_ATTRIBUTE_FLOAT,
-                                 4, 1, 0x0203, 0x10, 0xFFFFFF); /* an instance divisor's bytes too */
+    glShaderStateAttributeRecord(v, (APTR)0x08654320UL, TRUE, FALSE, FALSE, v3d_VEC_4, v3d_ATTRIBUTE_FLOAT,
+                                 4, 1, 0x0203, 0x10, 0xFFFFFF); /* a divisor's bytes and read as int too */
     v->current_buf = saved;
     n = draw_packets(mine, 3, 5, 0x12345660UL, 3, 4, v3d_INDEX_TYPE_16_BIT, 0x0ABCDEF4UL, 0x1236, 0x10203, 0, 1);
     n += draw_packets(mine + n, 2, 1, 0x0FEDCBA0UL, 1, 5, -1, 0, 0, 0x30201, 0x4321, 1);
     attr_record(mine + n, 0x08123456UL, TRUE, TRUE, v3d_VEC_3, v3d_ATTRIBUTE_SHORT, 3, 2, 0, 0x0C, 0xFFFFFF);
     n += 16;
-    attr_record(mine + n, 0x08654320UL, FALSE, FALSE, v3d_VEC_4, v3d_ATTRIBUTE_FLOAT, 4, 1, 0x0203, 0x10, 0xFFFFFF);
+    attr_record(mine + n, 0x08654320UL, 0x80, FALSE, v3d_VEC_4, v3d_ATTRIBUTE_FLOAT, 4, 1, 0x0203, 0x10, 0xFFFFFF);
     n += 16;
     packets_state = (ULONG)sb.used == n && !sb.overflowed && !memcmp(ref, mine, n) ? 1 : 2;
     if (packets_state == 2)
@@ -1972,6 +2099,22 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
         if (!ok)
             goto nomem;
     }
+    /* An integer array's missing components read the defaults: its w an
+     * integer 1 (Mesa's v3d_vertex_state_create), not the shared block's
+     * 1.0, in a block of the draw's own. */
+    for (i = 0; i < nslots; i++)
+        if (src[i].read_int && src[i].stride) {
+            ULONG *dv = claim(v, 16 * 16, 16);
+            int k;
+            if (!dv)
+                goto nomem;
+            memcpy(dv, (const void *)defattr, 16 * 16);
+            for (k = 0; k < nslots; k++)
+                if (src[k].read_int && src[k].stride)
+                    dv[k * 4 + 3] = le32(1);
+            defattr = (ULONG)dv;
+            break;
+        }
     /* gl_VertexID (GLSL ES 3.00, docs/GLES3_PLAN.md stage A item 4): a
      * shader that reads it sees the real vertex numbers, so the draw numbers
      * from `first` (the indices as given, plus the base vertex) and each
@@ -2134,7 +2277,7 @@ static BOOL arrays_ok(struct OGLES2Context *ctx, const struct OGLES2Program *p, 
         if (arr->divisor) /* an instanced array's elements */
             end_a = ((ULONG)instances + arr->divisor - 1) / arr->divisor;
         if (arr->buffer) {
-            ULONG es = (ULONG)(type_size(arr->type) * arr->size);
+            ULONG es = elem_bytes(arr);
             ULONG st = arr->stride ? (ULONG)arr->stride : es;
             ULONG off = (ULONG)arr->pointer, size = ogles2_buffer_size(arr->buffer);
             if (off + es > size || (size - off - es) / st + 1 < end_a) {
@@ -2491,7 +2634,9 @@ BOOL ogles2_draw_copy(struct OGLES2Context *ctx, struct OGLES2Texture *src, cons
     ogles2_job_begin(ctx);
     ctx->state_ver++; /* the override above */
     mark(ctx, -1);
+    ogles2_query_pause(ctx, TRUE); /* a copy counts no samples */
     draw_arrays(ctx, p, GL_TRIANGLE_STRIP, 0, 4, 0, 1);
+    ogles2_query_pause(ctx, FALSE);
 
     ogles2_texture_unit0(ctx, saved_tex);
     ctx->state = saved;
@@ -2598,7 +2743,9 @@ void ogles2_draw_clear(struct OGLES2Context *ctx, GLbitfield mask)
     ogles2_job_begin(ctx);
     ctx->state_ver++; /* the override above */
     mark(ctx, -1); /* probe P: the time before is not the draw's */
+    ogles2_query_pause(ctx, TRUE); /* nor a clear */
     draw_arrays(ctx, quad, GL_TRIANGLE_STRIP, 0, 4, 0, 1);
+    ogles2_query_pause(ctx, FALSE);
 
     ctx->state = saved;
     ctx->state_ver++;

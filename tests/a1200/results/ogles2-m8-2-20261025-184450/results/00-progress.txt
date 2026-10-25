@@ -1,0 +1,5 @@
+ogles2 M8 run 2: --deqp-caselist-file M8R2:caselists/fence_sync.txt
+Sunday 25-Oct-26 19:44:51
+fence_sync done
+finished
+Sunday 25-Oct-26 19:44:55

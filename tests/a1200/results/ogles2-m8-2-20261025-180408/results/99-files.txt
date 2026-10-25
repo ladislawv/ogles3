@@ -1,0 +1,8 @@
+Directory "M8R2:results" on Sunday 25-Oct-26
+00-progress.txt                 116 ----rwed Today     19:11:30
+vertex_arrays.txt            130993 ----rwed Today     19:11:30
+vertex_arrays.qpa           3199640 ----rwed Today     19:11:30
+ogles2.log                     5528 ----rwed Today     19:11:30
+notes.txt                       228 ----rwed Today     19:11:30
+99-files.txt                    196 ----rwed Today     19:11:30
+6 files - 3258K bytes - 6526 blocks used

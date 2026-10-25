@@ -240,6 +240,11 @@ void ogles2_job_begin(struct OGLES2Context *ctx)
     DoCommand(v, v3d_OP_FLUSH_VCD_CACHE);
     OcclusionQueryCounter(v, 0);
     DoCommand(v, v3d_OP_START_TILE_BINNING);
+    /* An occlusion query goes on across jobs (query.c): its counter after
+     * the prefix, as Mesa's state emission puts it (in the prefix it
+     * counts nothing). */
+    if (ctx->oq_addr)
+        OcclusionQueryCounter(v, ctx->oq_addr);
 
     v->frame_active = TRUE;
     /* Unique across contexts: a shared object's "last used by job N" names

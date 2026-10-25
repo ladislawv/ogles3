@@ -1,0 +1,44 @@
+Writing test log into M8R2:results/fence_sync.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles2.library: 31 functions of the ES 3.0 table not implemented yet: glBeginTransformFeedback glBindTransformFeedback glBlitFramebuffer glClearBufferfi glClearBufferfv glClearBufferiv glClearBufferuiv glCompressedTexImage3D glCompressedTexSubImage3D glCopyTexSubImage3D glDeleteTransformFeedbacks glEndTransformFeedback glFramebufferTextureLayer glGenTransformFeedbacks glGetInternalformativ glGetProgramBinary glGetTransformFeedbackVarying glInvalidateFramebuffer glInvalidateSubFramebuffer glIsTransformFeedback glPauseTransformFeedback glProgramBinary glProgramParameteri glRenderbufferStorageMultisample glResumeTransformFeedback glTexStorage2D glTexStorage3D glTransformFeedbackVaryings glDrawElementsInstancedBaseVertexOES glDrawRangeElementsBaseVertexOES glMultiDrawElementsBaseVertexEXT
+
+Test case 'dEQP-GLES3.functional.fence_sync.wait_sync_smalldraw'..
+ogles2.library: glBindTransformFeedback is not implemented yet (called as a no-op)
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.fence_sync.wait_sync_largedraw'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.fence_sync.client_wait_sync_smalldraw'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.fence_sync.client_wait_sync_largedraw'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.fence_sync.client_wait_sync_timeout_smalldraw'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.fence_sync.client_wait_sync_timeout_largedraw'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.fence_sync.client_wait_sync_flush_auto'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.fence_sync.client_wait_sync_flush_manual'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.fence_sync.client_wait_sync_noflush'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.fence_sync.client_wait_sync_finish'..
+  Pass (Pass)
+
+DONE!
+
+Test run totals:
+  Passed:        10/10 (100.0%)
+  Failed:        0/10 (0.0%)
+  Not supported: 0/10 (0.0%)
+  Warnings:      0/10 (0.0%)
+  Waived:        0/10 (0.0%)

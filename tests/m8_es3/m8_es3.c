@@ -604,6 +604,21 @@ int main(int argc, char **argv)
             glDeleteBuffers(1, &bu);
         }
         {
+            static const GLenum back = GL_BACK, att1 = GL_COLOR_ATTACHMENT1;
+            GLint rb = 0;
+            glGetIntegerv(GL_READ_BUFFER, &rb);
+            glDrawBuffers(1, &back);
+            check(rb == GL_BACK && glGetError() == GL_NO_ERROR, "ES 3.0: GL_READ_BUFFER GL_BACK, glDrawBuffers(GL_BACK)");
+            glReadBuffer(GL_COLOR_ATTACHMENT0);
+            check(glGetError() == GL_INVALID_OPERATION, "ES 3.0: glReadBuffer of an attachment in the default framebuffer");
+            glDrawBuffers(1, &att1);
+            check(glGetError() == GL_INVALID_OPERATION, "ES 3.0: glDrawBuffers of an attachment in the default framebuffer");
+            glReadBuffer(GL_NONE);
+            glGetIntegerv(GL_READ_BUFFER, &rb);
+            glReadBuffer(GL_BACK);
+            check(rb == GL_NONE && glGetError() == GL_NO_ERROR, "ES 3.0: glReadBuffer(GL_NONE) and back");
+        }
+        {
             GLboolean on = GL_TRUE;
             GLint q = -1;
             glGetBooleanv(GL_TRANSFORM_FEEDBACK_ACTIVE, &on);

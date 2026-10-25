@@ -1,0 +1,910 @@
+Writing test log into M8R2:results/attribute_location.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles2.library: 45 functions of the ES 3.0 table not implemented yet: glBeginQuery glBeginTransformFeedback glBindTransformFeedback glBlitFramebuffer glClearBufferfi glClearBufferfv glClearBufferiv glClearBufferuiv glClientWaitSync glCompressedTexImage3D glCompressedTexSubImage3D glCopyTexSubImage3D glDeleteQueries glDeleteSync glDeleteTransformFeedbacks glDrawBuffers glEndQuery glEndTransformFeedback glFenceSync glFramebufferTextureLayer glGenQueries glGenTransformFeedbacks glGetInternalformativ glGetProgramBinary glGetQueryObjectuiv glGetSynciv glGetTransformFeedbackVarying glInvalidateFramebuffer glInvalidateSubFramebuffer glIsQuery glIsSync glIsTransformFeedback glPauseTransformFeedback glProgramBinary glProgramParameteri glReadBuffer glRenderbufferStorageMultisample glResumeTransformFeedback glTexStorage2D glTexStorage3D glTransformFeedbackVaryings glWaitSync glDrawElementsInstancedBaseVertexOES glDrawRangeElementsBaseVertexOES glMultiDrawElementsBaseVertexEXT
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind.float'..
+ogles2.library: glBindTransformFeedback is not implemented yet (called as a no-op)
+ogles2.library: glDrawBuffers is not implemented yet (called as a no-op)
+ogles2.library: glReadBuffer is not implemented yet (called as a no-op)
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind.vec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind.vec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind.vec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind.mat2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind.mat3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind.mat4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind.int'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind.ivec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind.ivec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind.ivec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind.uint'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind.uvec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind.uvec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind.uvec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind.mat2x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind.mat2x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind.mat2x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind.mat3x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind.mat3x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind.mat3x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind.mat4x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind.mat4x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind.mat4x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_max_attributes.float'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_max_attributes.vec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_max_attributes.vec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_max_attributes.vec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_max_attributes.mat2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_max_attributes.mat3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_max_attributes.mat4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_max_attributes.int'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_max_attributes.ivec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_max_attributes.ivec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_max_attributes.ivec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_max_attributes.uint'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_max_attributes.uvec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_max_attributes.uvec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_max_attributes.uvec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_max_attributes.mat2x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_max_attributes.mat2x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_max_attributes.mat2x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_max_attributes.mat3x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_max_attributes.mat3x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_max_attributes.mat3x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_max_attributes.mat4x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_max_attributes.mat4x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_max_attributes.mat4x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_aliasing.cond_float'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_aliasing.max_cond_float'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_aliasing.max_inactive_float'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_aliasing.cond_vec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_aliasing.max_cond_vec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_aliasing.max_inactive_vec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_aliasing.cond_vec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_aliasing.max_cond_vec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_aliasing.max_inactive_vec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_aliasing.cond_vec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_aliasing.max_cond_vec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_aliasing.max_inactive_vec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_aliasing.cond_mat2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_aliasing.cond_mat2_offset_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_aliasing.max_cond_mat2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_aliasing.max_inactive_mat2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_aliasing.cond_mat3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_aliasing.cond_mat3_offset_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_aliasing.max_cond_mat3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_aliasing.max_inactive_mat3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_aliasing.cond_mat4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_aliasing.cond_mat4_offset_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_aliasing.max_cond_mat4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_aliasing.max_inactive_mat4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_hole.float'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_hole.vec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_hole.vec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_hole.vec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_hole.mat2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_hole.mat3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_hole.mat4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_hole.int'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_hole.ivec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_hole.ivec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_hole.ivec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_hole.uint'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_hole.uvec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_hole.uvec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_hole.uvec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_hole.mat2x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_hole.mat2x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_hole.mat2x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_hole.mat3x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_hole.mat3x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_hole.mat3x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_hole.mat4x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_hole.mat4x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_hole.mat4x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_time.pre_attach'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_time.pre_link'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_time.post_link'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_time.relink'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_time.reattach'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout.float'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout.vec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout.vec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout.vec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout.mat2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout.mat3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout.mat4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout.int'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout.ivec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout.ivec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout.ivec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout.uint'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout.uvec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout.uvec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout.uvec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout.mat2x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout.mat2x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout.mat2x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout.mat3x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout.mat3x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout.mat3x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout.mat4x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout.mat4x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout.mat4x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_max_attributes.float'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_max_attributes.vec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_max_attributes.vec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_max_attributes.vec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_max_attributes.mat2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_max_attributes.mat3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_max_attributes.mat4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_max_attributes.int'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_max_attributes.ivec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_max_attributes.ivec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_max_attributes.ivec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_max_attributes.uint'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_max_attributes.uvec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_max_attributes.uvec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_max_attributes.uvec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_max_attributes.mat2x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_max_attributes.mat2x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_max_attributes.mat2x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_max_attributes.mat3x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_max_attributes.mat3x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_max_attributes.mat3x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_max_attributes.mat4x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_max_attributes.mat4x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_max_attributes.mat4x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_hole.float'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_hole.vec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_hole.vec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_hole.vec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_hole.mat2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_hole.mat3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_hole.mat4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_hole.int'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_hole.ivec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_hole.ivec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_hole.ivec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_hole.uint'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_hole.uvec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_hole.uvec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_hole.uvec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_hole.mat2x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_hole.mat2x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_hole.mat2x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_hole.mat3x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_hole.mat3x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_hole.mat3x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_hole.mat4x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_hole.mat4x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.layout_hole.mat4x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed.float'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed.vec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed.vec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed.vec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed.mat2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed.mat3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed.mat4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed.int'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed.ivec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed.ivec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed.ivec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed.uint'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed.uvec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed.uvec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed.uvec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed.mat2x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed.mat2x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed.mat2x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed.mat3x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed.mat3x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed.mat3x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed.mat4x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed.mat4x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed.mat4x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_max_attributes.float'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_max_attributes.vec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_max_attributes.vec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_max_attributes.vec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_max_attributes.mat2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_max_attributes.mat3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_max_attributes.mat4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_max_attributes.int'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_max_attributes.ivec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_max_attributes.ivec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_max_attributes.ivec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_max_attributes.uint'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_max_attributes.uvec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_max_attributes.uvec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_max_attributes.uvec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_max_attributes.mat2x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_max_attributes.mat2x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_max_attributes.mat2x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_max_attributes.mat3x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_max_attributes.mat3x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_max_attributes.mat3x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_max_attributes.mat4x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_max_attributes.mat4x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_max_attributes.mat4x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_time.pre_attach'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_time.pre_link'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_time.post_link'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_time.relink'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_time.reattach'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_hole.float'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_hole.vec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_hole.vec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_hole.vec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_hole.mat2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_hole.mat3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_hole.mat4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_hole.int'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_hole.ivec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_hole.ivec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_hole.ivec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_hole.uint'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_hole.uvec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_hole.uvec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_hole.uvec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_hole.mat2x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_hole.mat2x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_hole.mat2x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_hole.mat3x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_hole.mat3x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_hole.mat3x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_hole.mat4x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_hole.mat4x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_hole.mat4x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_relink_hole.float'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_relink_hole.vec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_relink_hole.vec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_relink_hole.vec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_relink_hole.mat2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_relink_hole.mat3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_relink_hole.mat4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_relink_hole.int'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_relink_hole.ivec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_relink_hole.ivec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_relink_hole.ivec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_relink_hole.uint'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_relink_hole.uvec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_relink_hole.uvec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_relink_hole.uvec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_relink_hole.mat2x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_relink_hole.mat2x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_relink_hole.mat2x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_relink_hole.mat3x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_relink_hole.mat3x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_relink_hole.mat3x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_relink_hole.mat4x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_relink_hole.mat4x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.bind_relink_hole.mat4x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_relink_hole.float'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_relink_hole.vec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_relink_hole.vec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_relink_hole.vec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_relink_hole.mat2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_relink_hole.mat3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_relink_hole.mat4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_relink_hole.int'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_relink_hole.ivec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_relink_hole.ivec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_relink_hole.ivec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_relink_hole.uint'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_relink_hole.uvec2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_relink_hole.uvec3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_relink_hole.uvec4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_relink_hole.mat2x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_relink_hole.mat2x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_relink_hole.mat2x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_relink_hole.mat3x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_relink_hole.mat3x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_relink_hole.mat3x4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_relink_hole.mat4x2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_relink_hole.mat4x3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.attribute_location.mixed_relink_hole.mat4x4'..
+  Pass (Pass)
+
+DONE!
+
+Test run totals:
+  Passed:        298/298 (100.0%)
+  Failed:        0/298 (0.0%)
+  Not supported: 0/298 (0.0%)
+  Warnings:      0/298 (0.0%)
+  Waived:        0/298 (0.0%)

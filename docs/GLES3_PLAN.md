@@ -163,7 +163,14 @@ Mesa's driver, so they could follow later as an extension
     `shaders-uniform_block` 138 of 138; `ubo` stopped the A1200 in its
     1388th case, item 6's open point), buffer mapping (item 12) and
     vertex array objects in ES3 contexts (item 3): `buffer` 695 of 695,
-    `vertex_array_objects` 10 of 10; next instancing (item 4). **Trap:**
+    `vertex_array_objects` 10 of 10; since then instancing (item 4), the
+    vertex formats (item 5), sync objects and occlusion queries (item 12),
+    `glDrawBuffers` and `glReadBuffer` (item 11): `instanced` 45 of 45,
+    `vertex_arrays` 1005 of 1005, `fence_sync` 10, `occlusion_query` 62.
+    Next: item 8's rest (immutable storage, the sized formats, ES 3.0's
+    completeness), then items 9 to 11 (ETC2, render targets beyond 8 bits,
+    framebuffers), whose sized formats the shader groups' executor needs.
+    **Trap:**
     `ports/deqp/build.sh` copies the CTS with `rsync -a`, which keeps the
     sources' old dates, so a patch changed or removed rebuilds nothing:
     delete the copy (`$B/deqp-gles3/src`), and for a removed patch the
@@ -1320,6 +1327,29 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    array lacks, gives an integer input slot the integer 1 in w (Mesa does
    the same, `v3dx_state.c:440-456`), which makes that block per program
    rather than per control list.
+   **Done in ES3 contexts (2026-10-25, on the A1200):**
+   `glVertexAttribIPointer` (an array's `integer`, the record's bit 39),
+   `glVertexAttribI4i`/`ui`/`iv`/`uiv` (the state's `attrib_kind` and
+   `attrib_word`; `constant_attrib` writes the words with type INT, read
+   as integers), `glGetVertexAttribIiv`/`Iuiv`,
+   `GL_VERTEX_ATTRIB_ARRAY_INTEGER`; the five types in
+   `glVertexAttribPointer` (2_10_10_10 of 4 components only). Half floats
+   and 32-bit integers read as integers are swapped for the hardware's
+   types; signed as well as unsigned 32-bit integers read as floats are
+   converted on the CPU (simplest, and the hardware's conversion of the
+   signed ones is unverified too), and so are three half floats
+   (`CONV_*`, as `convert_elems`' type, which keeps a buffer's copies of
+   each apart; `ogles2_buffer_copy` takes the converted stride). The
+   default values: a block of the draw's own with the integer 1 in each
+   integer array's w, when there is one, rather than per program.
+   `m8_draw`'s `es3int`: two-component `GL_INT` and `GL_SHORT` integer
+   arrays (w the integer 1), an unsigned current value, three half floats,
+   normalized unsigned ints, a 2_10_10_10 word
+   (`ogles2-m8-1-20261025-180052`: 25, 89, 51 of 51; the GLES2 drawing
+   tests as before, `ogles2-m7-4-20261025-180123`). dEQP-GLES3 with items
+   3 to 5: `instanced` 45 of 45, `default_vertex_attrib` 80 of 80,
+   `attribute_location` 298 of 298, `vertex_arrays` 1005 of 1005
+   (`ogles2-m8-2-20261025-1802xx` to `-180408`).
 6. **Uniform buffers:** `glBindBufferBase/Range`, `glUniformBlockBinding`,
    `glGetUniformBlockIndex`, `glGetActiveUniformBlock*`, `glGetUniformIndices`,
    `glGetActiveUniformsiv`, `glGetIntegeri_v`; `QUNIFORM_UBO_ADDR` points into
@@ -1585,6 +1615,44 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
     `GL_INVALID_OPERATION` in ES3 contexts. `m8_es3`'s reads, writes, state
     and errors (on the A1200: they need `glBufferData`), `m8_draw`'s block
     written through a flushed mapping (`ogles2-m8-1-20261025-141310`).
+    **Sync objects and occlusion queries (2026-10-25):** `sync.c`: a fence
+    is the open job's serial, else the running render's, else signalled
+    at once; signalled when no member has that job open or running;
+    `glClientWaitSync` flushes the context's own job (with or without the
+    flush bit: else it would wait forever) and waits any timeout out in
+    full (another member's open job: `GL_TIMEOUT_EXPIRED`); `glWaitSync`
+    validates only (the GPU runs jobs in order); the objects are the share
+    group's, a list that checks a name before use. `query.c`: per context;
+    the active occlusion query's counter address is in each job's binning
+    list from its start (`ctx->oq_addr`, `job.c`) and at
+    `glBeginQuery`/`glEndQuery` in the open one, off around the library's
+    own copies and quad clears (`ogles2_query_pause`); the word zeroed at
+    begin (a counter a job still writes is left to it), read after
+    `CachePostDMA` once the query's last job has rendered;
+    `GL_QUERY_RESULT_AVAILABLE` submits the context's open job first, as
+    Mesa does. `GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN` begins and ends
+    and answers 0 until stage C. `m8_draw`'s fences (unsignalled after a
+    draw, flushed and waited for, signalled at once with nothing
+    outstanding) and queries (a draw passes samples, a triangle off the
+    picture none, an empty scissor box nothing drawn and none)
+    (`ogles2-m8-1-20261025-184649`: 25, 93, 58 of 58; the GLES2 drawing
+    tests as before, `ogles2-m7-4-20261025-184711`); dEQP-GLES3's
+    `fence_sync` 10 of 10 and `occlusion_query` 62 of 62
+    (`ogles2-m8-2-20261025-184450`, `-184530`). **Two traps:** a counter
+    must be a group's first words: the hardware's groups are 16
+    consecutive words on a 1024-byte boundary (Mesa's `V3D_OQ_GROUP_SIZE`),
+    and an address past a group's 64 bytes is written elsewhere (each
+    query's counter is the first word on the first 1 KB boundary of a 2 KB
+    block); and the first draw of each pass sets the counter with its
+    per-pass state (`draw.c`, `draw_state_configured`), which turned it off
+    (now the active query's, `ctx->oq_addr`).
+    **`glDrawBuffers` and `glReadBuffer` (item 11's, 2026-10-25):** ES
+    3.0's `glDrawBuffers` is `EXT_draw_buffers`' entry; `glReadBuffer` sets
+    a framebuffer object's read attachment (`read_buf`, which
+    `glReadPixels` and the copies read: `read_attachment`) or the default
+    framebuffer's `GL_BACK` or `GL_NONE` (`default_read_none`: reading
+    then is `GL_INVALID_OPERATION`), with `GL_READ_BUFFER`. `m8_es3`'s
+    errors and queries.
     **Primitive restart done (2026-10-24, on the A1200):**
     `GL_PRIMITIVE_RESTART_FIXED_INDEX` in ES3 contexts (`GL_INVALID_ENUM` in
     GLES2 ones; `OGLES2_CAP_PRIMITIVE_RESTART`); an indexed draw with it

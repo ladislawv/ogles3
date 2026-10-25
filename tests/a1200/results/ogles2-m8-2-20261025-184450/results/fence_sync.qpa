@@ -1,0 +1,1543 @@
+#sessionInfo releaseName unknown
+#sessionInfo releaseId 0xcafebabe
+#sessionInfo targetName "AmigaOS3"
+#sessionInfo logFormatVersion "0.3.4"
+#sessionInfo vendor "ogles2.library"
+#sessionInfo renderer "V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM"
+#sessionInfo commandLineParameters "--deqp-caselist-file M8R2:caselists/fence_sync.txt --deqp-archive-dir=M8R2:bin --deqp-log-filename=M8R2:results/fence_sync.qpa --deqp-log-images=disable --deqp-log-shader-sources=disable --deqp-surface-width=256 --deqp-surface-height=256 --deqp-gl-config-name=rgba8888d24s8ms0"
+
+#beginSession
+
+#beginTestCaseResult dEQP-GLES3.functional.fence_sync.wait_sync_smalldraw
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.fence_sync.wait_sync_smalldraw" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Case iteration 1 / 5" Description="Case iteration 1 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9b6f26c);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glWaitSync(0x8269aac, 0x00000000, ffffffffffffffff);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Wait command glWaitSync called with GL_TIMEOUT_IGNORED.</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 2 / 5" Description="Case iteration 2 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9b6f26c);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glWaitSync(0x8269aac, 0x00000000, ffffffffffffffff);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Wait command glWaitSync called with GL_TIMEOUT_IGNORED.</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 3 / 5" Description="Case iteration 3 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9b6f26c);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glWaitSync(0x8269aac, 0x00000000, ffffffffffffffff);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Wait command glWaitSync called with GL_TIMEOUT_IGNORED.</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 4 / 5" Description="Case iteration 4 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9b6f26c);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glWaitSync(0x8269aac, 0x00000000, ffffffffffffffff);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Wait command glWaitSync called with GL_TIMEOUT_IGNORED.</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 5 / 5" Description="Case iteration 5 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9b6f26c);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glWaitSync(0x8269aac, 0x00000000, ffffffffffffffff);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Wait command glWaitSync called with GL_TIMEOUT_IGNORED.</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">66031</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.fence_sync.wait_sync_largedraw
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.fence_sync.wait_sync_largedraw" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Case iteration 1 / 5" Description="Case iteration 1 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glWaitSync(0x8269aac, 0x00000000, ffffffffffffffff);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Wait command glWaitSync called with GL_TIMEOUT_IGNORED.</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 2 / 5" Description="Case iteration 2 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glWaitSync(0x8269aac, 0x00000000, ffffffffffffffff);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Wait command glWaitSync called with GL_TIMEOUT_IGNORED.</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 3 / 5" Description="Case iteration 3 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glWaitSync(0x8269aac, 0x00000000, ffffffffffffffff);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Wait command glWaitSync called with GL_TIMEOUT_IGNORED.</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 4 / 5" Description="Case iteration 4 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glWaitSync(0x8269aac, 0x00000000, ffffffffffffffff);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Wait command glWaitSync called with GL_TIMEOUT_IGNORED.</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 5 / 5" Description="Case iteration 5 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glWaitSync(0x8269aac, 0x00000000, ffffffffffffffff);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Wait command glWaitSync called with GL_TIMEOUT_IGNORED.</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">95549</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.fence_sync.client_wait_sync_smalldraw
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.fence_sync.client_wait_sync_smalldraw" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Case iteration 1 / 5" Description="Case iteration 1 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9b6f26c);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, 0);</Text>
+  <Text>// 0x0000911b returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_TIMEOUT_EXPIRED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 2 / 5" Description="Case iteration 2 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9b6f26c);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, 0);</Text>
+  <Text>// 0x0000911b returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_TIMEOUT_EXPIRED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 3 / 5" Description="Case iteration 3 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9b6f26c);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, 0);</Text>
+  <Text>// 0x0000911b returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_TIMEOUT_EXPIRED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 4 / 5" Description="Case iteration 4 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9b6f26c);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, 0);</Text>
+  <Text>// 0x0000911b returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_TIMEOUT_EXPIRED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 5 / 5" Description="Case iteration 5 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9b6f26c);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, 0);</Text>
+  <Text>// 0x0000911b returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_TIMEOUT_EXPIRED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">28792</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.fence_sync.client_wait_sync_largedraw
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.fence_sync.client_wait_sync_largedraw" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Case iteration 1 / 5" Description="Case iteration 1 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, 0);</Text>
+  <Text>// 0x0000911b returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_TIMEOUT_EXPIRED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 2 / 5" Description="Case iteration 2 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, 0);</Text>
+  <Text>// 0x0000911b returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_TIMEOUT_EXPIRED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 3 / 5" Description="Case iteration 3 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, 0);</Text>
+  <Text>// 0x0000911b returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_TIMEOUT_EXPIRED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 4 / 5" Description="Case iteration 4 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, 0);</Text>
+  <Text>// 0x0000911b returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_TIMEOUT_EXPIRED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 5 / 5" Description="Case iteration 5 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, 0);</Text>
+  <Text>// 0x0000911b returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_TIMEOUT_EXPIRED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">105324</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.fence_sync.client_wait_sync_timeout_smalldraw
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.fence_sync.client_wait_sync_timeout_smalldraw" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Case iteration 1 / 5" Description="Case iteration 1 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9b6f6d4);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, a);</Text>
+  <Text>// 0x0000911c returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_CONDITION_SATISFIED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 2 / 5" Description="Case iteration 2 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9b6f6d4);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, a);</Text>
+  <Text>// 0x0000911c returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_CONDITION_SATISFIED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 3 / 5" Description="Case iteration 3 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9b6f6d4);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, a);</Text>
+  <Text>// 0x0000911c returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_CONDITION_SATISFIED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 4 / 5" Description="Case iteration 4 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9b6f6d4);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, a);</Text>
+  <Text>// 0x0000911c returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_CONDITION_SATISFIED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 5 / 5" Description="Case iteration 5 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9b6f6d4);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, a);</Text>
+  <Text>// 0x0000911c returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_CONDITION_SATISFIED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">30764</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.fence_sync.client_wait_sync_timeout_largedraw
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.fence_sync.client_wait_sync_timeout_largedraw" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Case iteration 1 / 5" Description="Case iteration 1 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, a);</Text>
+  <Text>// 0x0000911c returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_CONDITION_SATISFIED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 2 / 5" Description="Case iteration 2 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, a);</Text>
+  <Text>// 0x0000911c returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_CONDITION_SATISFIED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 3 / 5" Description="Case iteration 3 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, a);</Text>
+  <Text>// 0x0000911c returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_CONDITION_SATISFIED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 4 / 5" Description="Case iteration 4 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, a);</Text>
+  <Text>// 0x0000911c returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_CONDITION_SATISFIED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 5 / 5" Description="Case iteration 5 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, a);</Text>
+  <Text>// 0x0000911c returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_CONDITION_SATISFIED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">95850</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.fence_sync.client_wait_sync_flush_auto
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.fence_sync.client_wait_sync_flush_auto" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Case iteration 1 / 5" Description="Case iteration 1 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000001, 0);</Text>
+  <Text>// 0x0000911b returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_TIMEOUT_EXPIRED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 2 / 5" Description="Case iteration 2 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000001, 0);</Text>
+  <Text>// 0x0000911b returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_TIMEOUT_EXPIRED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 3 / 5" Description="Case iteration 3 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000001, 0);</Text>
+  <Text>// 0x0000911b returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_TIMEOUT_EXPIRED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 4 / 5" Description="Case iteration 4 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000001, 0);</Text>
+  <Text>// 0x0000911b returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_TIMEOUT_EXPIRED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 5 / 5" Description="Case iteration 5 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000001, 0);</Text>
+  <Text>// 0x0000911b returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_TIMEOUT_EXPIRED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">100893</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.fence_sync.client_wait_sync_flush_manual
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.fence_sync.client_wait_sync_flush_manual" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Case iteration 1 / 5" Description="Case iteration 1 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glFlush();</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, 0);</Text>
+  <Text>// 0x0000911a returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_ALREADY_SIGNALED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 2 / 5" Description="Case iteration 2 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glFlush();</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, 0);</Text>
+  <Text>// 0x0000911a returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_ALREADY_SIGNALED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 3 / 5" Description="Case iteration 3 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glFlush();</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, 0);</Text>
+  <Text>// 0x0000911a returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_ALREADY_SIGNALED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 4 / 5" Description="Case iteration 4 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glFlush();</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, 0);</Text>
+  <Text>// 0x0000911a returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_ALREADY_SIGNALED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 5 / 5" Description="Case iteration 5 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glFlush();</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, 0);</Text>
+  <Text>// 0x0000911a returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_ALREADY_SIGNALED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">101239</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.fence_sync.client_wait_sync_noflush
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.fence_sync.client_wait_sync_noflush" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Case iteration 1 / 5" Description="Case iteration 1 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, 0);</Text>
+  <Text>// 0x0000911b returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_TIMEOUT_EXPIRED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 2 / 5" Description="Case iteration 2 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, 0);</Text>
+  <Text>// 0x0000911b returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_TIMEOUT_EXPIRED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 3 / 5" Description="Case iteration 3 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, 0);</Text>
+  <Text>// 0x0000911b returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_TIMEOUT_EXPIRED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 4 / 5" Description="Case iteration 4 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, 0);</Text>
+  <Text>// 0x0000911b returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_TIMEOUT_EXPIRED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 5 / 5" Description="Case iteration 5 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, 0);</Text>
+  <Text>// 0x0000911b returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_TIMEOUT_EXPIRED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">100102</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES3.functional.fence_sync.client_wait_sync_finish
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES3.functional.fence_sync.client_wait_sync_finish" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Case iteration 1 / 5" Description="Case iteration 1 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glFinish();</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, 0);</Text>
+  <Text>// 0x0000911a returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_ALREADY_SIGNALED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 2 / 5" Description="Case iteration 2 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glFinish();</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, 0);</Text>
+  <Text>// 0x0000911a returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_ALREADY_SIGNALED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 3 / 5" Description="Case iteration 3 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glFinish();</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, 0);</Text>
+  <Text>// 0x0000911a returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_ALREADY_SIGNALED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 4 / 5" Description="Case iteration 4 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glFinish();</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, 0);</Text>
+  <Text>// 0x0000911a returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_ALREADY_SIGNALED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Section Name="Case iteration 5 / 5" Description="Case iteration 5 / 5">
+  <Text>glUseProgram(1);</Text>
+  <Text>glEnable(GL_DEPTH_TEST);</Text>
+  <Text>glClearColor(0.3, 0.3, 0.3, 1);</Text>
+  <Text>glClearDepthf(1);</Text>
+  <Text>glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);</Text>
+  <Text>glEnableVertexAttribArray(0);</Text>
+  <Text>glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0x9d42404);</Text>
+  <Text>glDrawArrays(GL_TRIANGLES, 0, 30000);</Text>
+  <Text>// Primitives drawn.</Text>
+  <Text>glFenceSync(0x00009117, 0x00000000);</Text>
+  <Text>// 0x8269aac returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object created.</Text>
+  <Text>glFinish();</Text>
+  <Text>glClientWaitSync(0x8269aac, 0x00000000, 0);</Text>
+  <Text>// 0x0000911a returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// glClientWaitSync return value:</Text>
+  <Text>// GL_ALREADY_SIGNALED</Text>
+  <Text>glFinish();</Text>
+  <Text>glDeleteSync(0x8269aac);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>// Sync object deleted.</Text>
+  <Text>// Test result: Passed!</Text>
+  <Text>// Sync objects created and deleted successfully.</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">101414</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+Run took 0.95 seconds
+
+#endSession

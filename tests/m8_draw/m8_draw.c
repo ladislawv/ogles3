@@ -714,6 +714,139 @@ static void test_instanced(void)
     glDeleteProgram(p);
 }
 
+/* ES 3.0's vertex formats through es3int: an integer array of two
+ * components (r its x / 255, alpha its w, the integer 1 the defaults give),
+ * an unsigned current value (g), and the float input hf (b) from three
+ * half floats, normalized unsigned ints and a packed 2_10_10_10 word. */
+static void test_formats(void)
+{
+    static const GLint ints[6] = { 100, 7, 100, 7, 100, 7 };
+    static const GLshort shorts[6] = { 50, 0, 50, 0, 50, 0 };
+    static const GLushort halves[9] = { 0x3800, 0, 0, 0x3800, 0, 0, 0x3800, 0, 0 }; /* 0.5 */
+    static const GLuint uints[3] = { 0x40000000UL, 0x40000000UL, 0x40000000UL };   /* 0.25 */
+    static const GLuint packed[3] = { 1023, 1023, 1023 };                           /* x 1.0 */
+    GLuint p = program("es3int");
+    GLint ia, ub, hf, integer = -1;
+    if (!p) {
+        check(0, "vertex formats: es3int links");
+        return;
+    }
+    ia = glGetAttribLocation(p, "ia");
+    ub = glGetAttribLocation(p, "ub");
+    hf = glGetAttribLocation(p, "hf");
+    glVertexAttribIPointer((GLuint)ia, 2, GL_INT, 0, ints);
+    glEnableVertexAttribArray((GLuint)ia);
+    glVertexAttribI4ui((GLuint)ub, 0, 200, 0, 0);
+    glVertexAttribPointer((GLuint)hf, 3, GL_HALF_FLOAT, GL_FALSE, 0, halves);
+    glEnableVertexAttribArray((GLuint)hf);
+    glGetVertexAttribiv((GLuint)ia, GL_VERTEX_ATTRIB_ARRAY_INTEGER, &integer);
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    check(integer == 1 && pixel_is(32, 32, 100, 200, 128, 255, 1),
+          "vertex formats: GL_INT integers (w the integer 1), an unsigned current value, three half floats");
+    glVertexAttribIPointer((GLuint)ia, 2, GL_SHORT, 0, shorts);
+    glVertexAttribPointer((GLuint)hf, 1, GL_UNSIGNED_INT, GL_TRUE, 0, uints);
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    check(pixel_is(32, 32, 50, 200, 64, 255, 1), "vertex formats: GL_SHORT integers, normalized unsigned ints");
+    glVertexAttribPointer((GLuint)hf, 4, GL_UNSIGNED_INT_2_10_10_10_REV, GL_TRUE, 0, packed);
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    check(pixel_is(32, 32, 50, 200, 255, 255, 1) && glGetError() == GL_NO_ERROR,
+          "vertex formats: a normalized GL_UNSIGNED_INT_2_10_10_10_REV word");
+    glVertexAttribPointer((GLuint)hf, 3, GL_INT_2_10_10_10_REV, GL_TRUE, 0, packed);
+    check(glGetError() == GL_INVALID_OPERATION, "vertex formats: a packed type of 3 components is GL_INVALID_OPERATION");
+    glDisableVertexAttribArray((GLuint)ia);
+    glDisableVertexAttribArray((GLuint)hf);
+    glVertexAttrib4f((GLuint)ub, 0, 0, 0, 1);
+    glDeleteProgram(p);
+}
+
+/* ES 3.0's fences: one after a draw is unsignalled until the job has
+ * rendered (glClientWaitSync flushes it and waits); one with nothing
+ * outstanding is signalled at once. */
+static void test_fence(void)
+{
+    GLuint p = program("es3block");
+    GLsync f;
+    GLint st = -1, n = -1;
+    GLenum r;
+    if (!p) {
+        check(0, "fences: es3block links");
+        return;
+    }
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    f = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+    glGetSynciv(f, GL_SYNC_STATUS, 1, &n, &st);
+    check(f && glIsSync(f) && st == GL_UNSIGNALED && n == 1 &&
+              glClientWaitSync(f, 0, 0) == GL_TIMEOUT_EXPIRED,
+          "fences: unsignalled after a draw, no wait without a timeout");
+    r = glClientWaitSync(f, GL_SYNC_FLUSH_COMMANDS_BIT, 1000000000ULL);
+    glGetSynciv(f, GL_SYNC_STATUS, 1, &n, &st);
+    check(r == GL_CONDITION_SATISFIED && st == GL_SIGNALED && glClientWaitSync(f, 0, 0) == GL_ALREADY_SIGNALED &&
+              pixel_is(32, 32, 64, 128, 191, 255, 1),
+          "fences: glClientWaitSync flushes and waits; signalled after");
+    glDeleteSync(f);
+    f = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+    check(!glIsSync((GLsync)&st) && glClientWaitSync(f, 0, 0) == GL_ALREADY_SIGNALED && glGetError() == GL_NO_ERROR,
+          "fences: nothing outstanding, signalled at once");
+    glDeleteSync(f);
+    glDeleteSync((GLsync)&st);
+    check(glGetError() == GL_INVALID_VALUE, "fences: deleting a sync that is none is GL_INVALID_VALUE");
+    glDeleteProgram(p);
+}
+
+/* ES 3.0's occlusion queries: a draw over the picture passes samples, one
+ * of a triangle off the picture none; GL_CURRENT_QUERY while active. */
+static void test_query(void)
+{
+    static const GLfloat off[6] = { 2, 2, 3, 2, 2, 3 };
+    GLuint p = program("es3block"), q[2], r0 = 7, r1 = 7, av = 0;
+    GLint cur = -1, pos;
+    if (!p) {
+        check(0, "occlusion queries: es3block links");
+        return;
+    }
+    glGenQueries(2, q);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glBeginQuery(GL_ANY_SAMPLES_PASSED, q[0]);
+    glGetQueryiv(GL_ANY_SAMPLES_PASSED, GL_CURRENT_QUERY, &cur);
+    draw_cover(p);
+    glEndQuery(GL_ANY_SAMPLES_PASSED);
+    glBeginQuery(GL_ANY_SAMPLES_PASSED_CONSERVATIVE, q[1]);
+    pos = glGetAttribLocation(p, "pos");
+    glVertexAttribPointer((GLuint)pos, 2, GL_FLOAT, GL_FALSE, 0, off);
+    glEnableVertexAttribArray((GLuint)pos);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDisableVertexAttribArray((GLuint)pos);
+    glEndQuery(GL_ANY_SAMPLES_PASSED_CONSERVATIVE);
+    glGetQueryObjectuiv(q[0], GL_QUERY_RESULT, &r0);
+    glGetQueryObjectuiv(q[1], GL_QUERY_RESULT, &r1);
+    glGetQueryObjectuiv(q[1], GL_QUERY_RESULT_AVAILABLE, &av);
+    check(cur == (GLint)q[0] && r0 == GL_TRUE && r1 == GL_FALSE && av == GL_TRUE && glIsQuery(q[0]) &&
+              glGetError() == GL_NO_ERROR,
+          "occlusion queries: a draw passes samples, a triangle off the picture none");
+    glBeginQuery(GL_ANY_SAMPLES_PASSED, q[0]);
+    glBeginQuery(GL_ANY_SAMPLES_PASSED_CONSERVATIVE, q[1]);
+    check(glGetError() == GL_INVALID_OPERATION, "occlusion queries: one active at a time");
+    glEndQuery(GL_ANY_SAMPLES_PASSED);
+    /* An empty scissor box draws nothing (nor counts). */
+    glClear(GL_COLOR_BUFFER_BIT);
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(0, 0, 0, 0);
+    glBeginQuery(GL_ANY_SAMPLES_PASSED, q[0]);
+    draw_cover(p);
+    glEndQuery(GL_ANY_SAMPLES_PASSED);
+    glDisable(GL_SCISSOR_TEST);
+    r1 = 7;
+    glGetQueryObjectuiv(q[0], GL_QUERY_RESULT, &r1);
+    check(pixel_is(32, 32, 0, 0, 0, 0, 0) && pixel_is(0, 0, 0, 0, 0, 0, 0) && r1 == GL_FALSE,
+          "an empty scissor box: nothing drawn, no samples");
+    glDeleteQueries(2, q);
+    glDeleteProgram(p);
+}
+
 /* The keys' 32-bit samplers and alpha to coverage (stage A item 5), in a 4x
  * MSAA context: es3wide outputs one texel. A float texture needs the
  * sampler's 32-bit bit in the fragment key (a 16-bit return reads it
@@ -816,6 +949,9 @@ int main(void)
     test_pixel_buffer();
     test_vao();
     test_instanced();
+    test_formats();
+    test_fence();
+    test_query();
     check(glGetError() == GL_NO_ERROR, "no GL error left over");
     aglDestroyContext(ctx);
     if ((ctx = aglCreateContextTags2(&e, OGLES2_CCT_BITMAP, (ULONG)bm, OGLES2_CCT_PISTORM_ES_VERSION, 30,

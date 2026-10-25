@@ -1,0 +1,256 @@
+Writing test log into M8R2:results/default_vertex_attrib.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles2.library: 45 functions of the ES 3.0 table not implemented yet: glBeginQuery glBeginTransformFeedback glBindTransformFeedback glBlitFramebuffer glClearBufferfi glClearBufferfv glClearBufferiv glClearBufferuiv glClientWaitSync glCompressedTexImage3D glCompressedTexSubImage3D glCopyTexSubImage3D glDeleteQueries glDeleteSync glDeleteTransformFeedbacks glDrawBuffers glEndQuery glEndTransformFeedback glFenceSync glFramebufferTextureLayer glGenQueries glGenTransformFeedbacks glGetInternalformativ glGetProgramBinary glGetQueryObjectuiv glGetSynciv glGetTransformFeedbackVarying glInvalidateFramebuffer glInvalidateSubFramebuffer glIsQuery glIsSync glIsTransformFeedback glPauseTransformFeedback glProgramBinary glProgramParameteri glReadBuffer glRenderbufferStorageMultisample glResumeTransformFeedback glTexStorage2D glTexStorage3D glTransformFeedbackVaryings glWaitSync glDrawElementsInstancedBaseVertexOES glDrawRangeElementsBaseVertexOES glMultiDrawElementsBaseVertexEXT
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.float.vertex_attrib_1f'..
+ogles2.library: glBindTransformFeedback is not implemented yet (called as a no-op)
+ogles2.library: glDrawBuffers is not implemented yet (called as a no-op)
+ogles2.library: glReadBuffer is not implemented yet (called as a no-op)
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.float.vertex_attrib_2f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.float.vertex_attrib_3f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.float.vertex_attrib_4f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.float.vertex_attrib_1fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.float.vertex_attrib_2fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.float.vertex_attrib_3fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.float.vertex_attrib_4fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.vec2.vertex_attrib_1f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.vec2.vertex_attrib_4f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.vec2.vertex_attrib_1fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.vec2.vertex_attrib_4fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.vec3.vertex_attrib_1f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.vec3.vertex_attrib_4f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.vec3.vertex_attrib_1fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.vec3.vertex_attrib_4fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.vec4.vertex_attrib_1f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.vec4.vertex_attrib_2f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.vec4.vertex_attrib_3f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.vec4.vertex_attrib_4f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.vec4.vertex_attrib_1fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.vec4.vertex_attrib_2fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.vec4.vertex_attrib_3fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.vec4.vertex_attrib_4fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat2.vertex_attrib_1f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat2.vertex_attrib_4f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat2.vertex_attrib_1fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat2.vertex_attrib_4fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat2x3.vertex_attrib_1f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat2x3.vertex_attrib_4f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat2x3.vertex_attrib_1fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat2x3.vertex_attrib_4fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat2x4.vertex_attrib_1f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat2x4.vertex_attrib_4f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat2x4.vertex_attrib_1fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat2x4.vertex_attrib_4fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat3.vertex_attrib_1f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat3.vertex_attrib_4f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat3.vertex_attrib_1fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat3.vertex_attrib_4fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat3x2.vertex_attrib_1f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat3x2.vertex_attrib_4f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat3x2.vertex_attrib_1fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat3x2.vertex_attrib_4fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat3x4.vertex_attrib_1f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat3x4.vertex_attrib_4f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat3x4.vertex_attrib_1fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat3x4.vertex_attrib_4fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat4.vertex_attrib_1f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat4.vertex_attrib_2f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat4.vertex_attrib_3f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat4.vertex_attrib_4f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat4.vertex_attrib_1fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat4.vertex_attrib_2fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat4.vertex_attrib_3fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat4.vertex_attrib_4fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat4x2.vertex_attrib_1f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat4x2.vertex_attrib_4f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat4x2.vertex_attrib_1fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat4x2.vertex_attrib_4fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat4x3.vertex_attrib_1f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat4x3.vertex_attrib_4f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat4x3.vertex_attrib_1fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.mat4x3.vertex_attrib_4fv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.int.vertex_attribi_4i'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.int.vertex_attribi_4iv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.ivec2.vertex_attribi_4i'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.ivec2.vertex_attribi_4iv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.ivec3.vertex_attribi_4i'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.ivec3.vertex_attribi_4iv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.ivec4.vertex_attribi_4i'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.ivec4.vertex_attribi_4iv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.uint.vertex_attribi_4ui'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.uint.vertex_attribi_4uiv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.uvec2.vertex_attribi_4ui'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.uvec2.vertex_attribi_4uiv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.uvec3.vertex_attribi_4ui'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.uvec3.vertex_attribi_4uiv'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.uvec4.vertex_attribi_4ui'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES3.functional.default_vertex_attrib.uvec4.vertex_attribi_4uiv'..
+  Pass (Pass)
+
+DONE!
+
+Test run totals:
+  Passed:        80/80 (100.0%)
+  Failed:        0/80 (0.0%)
+  Not supported: 0/80 (0.0%)
+  Warnings:      0/80 (0.0%)
+  Waived:        0/80 (0.0%)

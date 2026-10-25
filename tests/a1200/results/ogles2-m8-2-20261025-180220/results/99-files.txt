@@ -1,0 +1,8 @@
+Directory "M8R2:results" on Sunday 25-Oct-26
+00-progress.txt                 132 ----rwed Today     19:02:33
+default_vertex_attrib.txt       9251 ----rwed Today     19:02:33
+default_vertex_attrib.qpa     712680 ----rwed Today     19:02:33
+ogles2.log                     6640 ----rwed Today     19:02:33
+notes.txt                       228 ----rwed Today     19:02:33
+99-files.txt                    196 ----rwed Today     19:02:33
+6 files - 712K bytes - 1433 blocks used

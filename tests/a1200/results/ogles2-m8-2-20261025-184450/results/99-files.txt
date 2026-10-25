@@ -1,0 +1,8 @@
+Directory "M8R2:results" on Sunday 25-Oct-26
+00-progress.txt                 110 ----rwed Today     19:44:55
+fence_sync.txt                 2072 ----rwed Today     19:44:55
+fence_sync.qpa                66843 ----rwed Today     19:44:55
+ogles2.log                     1936 ----rwed Today     19:44:55
+notes.txt                       228 ----rwed Today     19:44:55
+99-files.txt                    196 ----rwed Today     19:44:55
+6 files - 69K bytes - 149 blocks used
