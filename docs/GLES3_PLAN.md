@@ -185,7 +185,7 @@ Mesa's driver, so they could follow later as an extension
     `fbo` 2032 of 2075 and none failing, `fragment_ops` 3174 of 3174.
     Since then glCopyTexSubImage3D and ES 3.0's texture errors (item 8):
     `negative_api` 287 of 314, the rest stage C's; and `EXT_frag_depth`
-    (item 12, now done). Next: item 6's open `ubo` case, item 8's base
+    (item 12, now done); every `ubo` case passes. Next: item 8's base
     levels beyond 0 (no dEQP case fails on them), then stage B's whole
     dEQP-GLES3 run.
     **Trap:**
@@ -1409,8 +1409,11 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    (two block instances, every used member compared in the vertex shader;
    1 and 3 instances too) compile on the host in under 0.2 s, 8516 bytes
    for two (the case before it: 8712), so the host compiler does not
-   reproduce it. **Open:** the case alone on the A1200 (it may stop it
-   again: the on-target compiler's memory or stack, or chance).
+   reproduce it; alone on the A1200 it passes (16 s,
+   `ogles2-m8-2-20261026-190534`): every `ubo` case passes. What stopped
+   the machine came of the long run before it (1387 cases in one dEQP
+   process), not of the case; if a whole run stops there again, that is
+   the place to look (the compiler server's memory after many programs).
 7. **Sampler objects** (`glGenSamplers`, ...): the sampler state record per
    unit from the sampler object when one is bound (`ogles2_texture_state`).
    The texture's cached records (`texture.c:2765-2771`) are keyed on the
