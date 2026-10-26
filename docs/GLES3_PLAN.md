@@ -1403,8 +1403,14 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    compiler, it seems; the case's shaders are not in the log, so not
    reproduced on the PC yet) and needed a restart
    (`ogles2-m8-2-20261025-003529`, the files fetched from the A1200).
-   **Open:** that case's program through the host compiler, then the rest
-   of `ubo` (from case 1389: `--deqp-caselist` of the remainder).
+   **Since (2026-10-26):** the rest of `ubo`, cases 1389 to 2357, 969 of 969
+   (`ogles2-m8-2-20261026-183605`; `m7-4` after it): `ubo` 2356 of 2357.
+   The case's shaders rebuilt after `glsUniformBlockCase.cpp`'s generator
+   (two block instances, every used member compared in the vertex shader;
+   1 and 3 instances too) compile on the host in under 0.2 s, 8516 bytes
+   for two (the case before it: 8712), so the host compiler does not
+   reproduce it. **Open:** the case alone on the A1200 (it may stop it
+   again: the on-target compiler's memory or stack, or chance).
 7. **Sampler objects** (`glGenSamplers`, ...): the sampler state record per
    unit from the sampler object when one is bound (`ogles2_texture_state`).
    The texture's cached records (`texture.c:2765-2771`) are keyed on the
