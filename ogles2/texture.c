@@ -1598,14 +1598,29 @@ static void unpack_tight(struct OGLES2Context *ctx, struct OGLES2PixelStore *s)
     ctx->unpack.own = TRUE;
 }
 
+/* The bytes of one datum of `type` (unpack_source's alignment). */
+static ULONG datum_bytes(GLenum type)
+{
+    switch (type) {
+    case GL_UNSIGNED_BYTE: case GL_BYTE:
+        return 1;
+    case GL_UNSIGNED_SHORT: case GL_SHORT: case GL_HALF_FLOAT: case GL_HALF_FLOAT_OES:
+    case GL_UNSIGNED_SHORT_5_6_5: case GL_UNSIGNED_SHORT_4_4_4_4: case GL_UNSIGNED_SHORT_5_5_5_1:
+        return 2;
+    default:
+        return 4;
+    }
+}
+
 /* ES 3.0's pixel unpack buffer: with one bound, *pixels is an offset into
- * it, the image `bytes` long from there. FALSE: GL_INVALID_OPERATION set
- * (past its end, or mapped). */
-static BOOL unpack_source(struct OGLES2Context *ctx, const void **pixels, ULONG bytes)
+ * it, the image `bytes` long from there, a multiple of `align` (ES 3.0
+ * 3.7.1: the type's datum). FALSE: GL_INVALID_OPERATION set (past its end,
+ * mapped, or not aligned). */
+static BOOL unpack_source(struct OGLES2Context *ctx, const void **pixels, ULONG bytes, ULONG align)
 {
     BOOL bad;
     const UBYTE *p = ogles2_buffer_pixels(ctx, FALSE, (ULONG)*pixels, bytes, &bad);
-    if (bad) {
+    if (bad || (p && (ULONG)*pixels % align)) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return FALSE;
     }
@@ -3528,7 +3543,8 @@ static void tex_image(struct OGLES2Context *ctx, GLenum target, GLint level, GLi
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
-    if (!unpack_source(ctx, &pixels, unpack_bytes(ctx, format, type, width, height, 1)))
+    if (!unpack_source(ctx, &pixels, unpack_bytes(ctx, format, type, width, height, 1),
+                       datum_bytes(type)))
         return;
     before_change(ctx, ts, t);
     t->es3_rules = ogles2_es3(ctx);
@@ -3660,7 +3676,8 @@ static void tex_sub_image(struct OGLES2Context *ctx, GLenum target, GLint level,
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
-    if (!unpack_source(ctx, &pixels, unpack_bytes(ctx, format, type, width, height, 1)))
+    if (!unpack_source(ctx, &pixels, unpack_bytes(ctx, format, type, width, height, 1),
+                       datum_bytes(type)))
         return;
     if (!width || !height || !pixels)
         return;
@@ -3785,7 +3802,8 @@ void ogles2_glTexImage3D(struct OGLES2Context *ctx, GLenum target, GLint level, 
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
-    if (!unpack_source(ctx, &pixels, unpack_bytes(ctx, format, type, width, height, depth)))
+    if (!unpack_source(ctx, &pixels, unpack_bytes(ctx, format, type, width, height, depth),
+                       datum_bytes(type)))
         return;
     before_change(ctx, ts, t);
     t->es3_rules = TRUE;
@@ -3846,6 +3864,10 @@ void ogles2_glTexSubImage3D(struct OGLES2Context *ctx, GLenum target, GLint leve
         return;
     }
     f = &t->f[0];
+    if (width < 0 || height < 0 || depth < 0) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
     if (level < 0 || level >= MAX_LEVELS || !(f->defined & (1UL << level)) || !t->d[level]) {
         ogles2_error(ctx, level < 0 || level >= MAX_LEVELS ? GL_INVALID_VALUE : GL_INVALID_OPERATION);
         return;
@@ -3859,7 +3881,8 @@ void ogles2_glTexSubImage3D(struct OGLES2Context *ctx, GLenum target, GLint leve
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
-    if (!unpack_source(ctx, &pixels, unpack_bytes(ctx, format, type, width, height, depth)))
+    if (!unpack_source(ctx, &pixels, unpack_bytes(ctx, format, type, width, height, depth),
+                       datum_bytes(type)))
         return;
     if (!width || !height || !depth || !pixels)
         return;
@@ -4066,7 +4089,7 @@ void ogles2_glCompressedTexImage3D(struct OGLES2Context *ctx, GLenum target, GLi
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
-    if (!unpack_source(ctx, &data, (ULONG)imageSize))
+    if (!unpack_source(ctx, &data, (ULONG)imageSize, 1))
         return;
     before_change(ctx, ts, t);
     t->es3_rules = TRUE;
@@ -4134,7 +4157,7 @@ void ogles2_glCompressedTexSubImage3D(struct OGLES2Context *ctx, GLenum target, 
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
-    if (!unpack_source(ctx, &data, (ULONG)imageSize))
+    if (!unpack_source(ctx, &data, (ULONG)imageSize, 1))
         return;
     if (!width || !height || !depth || !data)
         return;
@@ -4343,6 +4366,44 @@ static void copy_tex_sub_image(struct OGLES2Context *ctx, GLenum target, GLint l
     FreeVec(img);
 }
 
+/* ES 3.0: a layer of a 2D array, a slice of a 3D texture, from the read
+ * framebuffer as glCopyTexSubImage2D copies on the CPU: in the level's
+ * format, through glTexSubImage3D (its errors; so only levels that take
+ * bytes: not float, integer or packed ones). */
+void ogles2_glCopyTexSubImage3D(struct OGLES2Context *ctx, GLenum target, GLint level, GLint xoffset,
+                                GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height)
+{
+    struct OGLES2Framebuffer *saved;
+    struct OGLES2TexState *ts;
+    struct OGLES2Texture *t;
+    struct OGLES2PixelStore unpack;
+    GLenum fmt = GL_RGBA;
+    UBYTE *img = 0;
+    if (!ogles2_es3_entry(ctx) || !(ts = ts_get(ctx)) || !(t = image_texture_3d(ctx, ts, target)))
+        return;
+    if (level < 0 || level >= MAX_LEVELS || width < 0 || height < 0) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    if ((t->f[0].defined & (1UL << level)) && base_components(t->f[0].format[level]))
+        fmt = t->f[0].format[level];
+    saved = ogles2_fbo_read_begin(ctx);
+    if (ogles2_fb_ready(ctx)) {
+        if (width && height && !(img = read_region(ctx, x, y, width, height, fmt))) {
+            ogles2_fbo_read_end(ctx, saved);
+            ogles2_error(ctx, GL_OUT_OF_MEMORY);
+            return;
+        }
+        unpack_tight(ctx, &unpack);
+        ogles2_glTexSubImage3D(ctx, target, level, xoffset, yoffset, zoffset, width, height, 1, fmt,
+                               GL_UNSIGNED_BYTE, img);
+        ctx->unpack = unpack;
+    }
+    ogles2_fbo_read_end(ctx, saved);
+    if (img)
+        FreeVec(img);
+}
+
 /* ---- compressed textures ----
  * OES_compressed_ETC1_RGB8_texture, S3TC (DXT1, DXT3, DXT5; M7 step 3) and
  * ES 3.0's ETC2/EAC (stage B item 9): kept as given, in RAM and on the GPU,
@@ -4405,7 +4466,7 @@ void ogles2_glCompressedTexImage2D(struct OGLES2Context *ctx, GLenum target, GLi
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
-    if (!unpack_source(ctx, &data, (ULONG)imageSize))
+    if (!unpack_source(ctx, &data, (ULONG)imageSize, 1))
         return;
     /* S3TC, ETC1 and ETC2/EAC are kept and sampled as their blocks */
     dxt_image(ctx, ts, target, level, internalformat, width, height, (ULONG)imageSize, data);
@@ -4456,7 +4517,7 @@ void ogles2_glCompressedTexSubImage2D(struct OGLES2Context *ctx, GLenum target, 
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
-    if (!unpack_source(ctx, &data, (ULONG)imageSize))
+    if (!unpack_source(ctx, &data, (ULONG)imageSize, 1))
         return;
     if (!width || !height || !data)
         return;
@@ -4605,6 +4666,20 @@ static BOOL generate_volume(struct OGLES2Context *ctx, struct OGLES2Texture *t, 
     return TRUE;
 }
 
+/* ES 3.0 3.8.10: a base level given a sized format is colour-renderable
+ * and filterable: not a signed normalized, 32-bit float, RGB16F, RGB9_E5 or
+ * SRGB8 one (integer, depth and compressed ones refused before). */
+static BOOL mip_sized_ok(const struct OGLES2Face *f)
+{
+    GLenum s = f->sized[0], ty = f->type[0];
+    if (!(f->defined & f->sized_given & 1) || s == GL_R11F_G11F_B10F || s == GL_SRGB8_ALPHA8)
+        return TRUE;
+    if (s == GL_RGB9_E5 || s == GL_SRGB8 || ty == GL_UNSIGNED_INT_5_9_9_9_REV)
+        return FALSE;
+    return ty != GL_FLOAT && ty != GL_BYTE &&
+           !((ty == GL_HALF_FLOAT || ty == GL_HALF_FLOAT_OES) && f->format[0] == GL_RGB);
+}
+
 void ogles2_glGenerateMipmap(struct OGLES2Context *ctx, GLenum target)
 {
     struct OGLES2TexState *ts;
@@ -4622,6 +4697,10 @@ void ogles2_glGenerateMipmap(struct OGLES2Context *ctx, GLenum target)
      * 3.0's integer ones */
     if ((t->f[0].defined & 1) && (t->f[0].format[0] == GL_ETC1_RGB8_OES || dxt_block_bytes(t->f[0].format[0]) ||
                                   int_components(t->f[0].format[0]))) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
+    if (ogles2_es3(ctx) && !mip_sized_ok(&t->f[0])) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }

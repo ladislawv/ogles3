@@ -1368,6 +1368,42 @@ static void test_depth32f_texture(void)
     glDeleteProgram(p);
 }
 
+/* glCopyTexSubImage3D: the default framebuffer's colour into a layer of a
+ * 2D array and a slice of a 3D texture, read back through
+ * glFramebufferTextureLayer; the others untouched. */
+static void test_copy3d(void)
+{
+    static const GLenum targets[2] = { GL_TEXTURE_2D_ARRAY, GL_TEXTURE_3D };
+    GLuint t[2], fb;
+    int k, ok = 1;
+    glGenTextures(2, t);
+    glGenFramebuffers(1, &fb);
+    glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    for (k = 0; k < 2; k++) {
+        glBindTexture(targets[k], t[k]);
+        glTexImage3D(targets[k], 0, GL_RGBA8, 8, 8, 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+        glCopyTexSubImage3D(targets[k], 0, 2, 2, k + 1, 0, 0, 4, 4);
+        ok = ok && glGetError() == GL_NO_ERROR;
+    }
+    glCopyTexSubImage3D(GL_TEXTURE_3D, 0, 6, 0, 0, 0, 0, 4, 4);
+    ok = ok && glGetError() == GL_INVALID_VALUE;
+    glCopyTexSubImage3D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, 0, 4, 4);
+    ok = ok && glGetError() == GL_INVALID_ENUM;
+    glBindFramebuffer(GL_FRAMEBUFFER, fb);
+    for (k = 0; k < 2; k++) {
+        glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, t[k], 0, k + 1);
+        ok = ok && pixel_is(3, 3, 0, 0, 255, 255, 0) && pixel_is(1, 1, 0, 0, 0, 0, 0);
+        glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, t[k], 0, 0);
+        ok = ok && pixel_is(3, 3, 0, 0, 0, 0, 0);
+    }
+    check(ok && glGetError() == GL_NO_ERROR, "glCopyTexSubImage3D: into a layer and a slice, errors");
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glDeleteFramebuffers(1, &fb);
+    glDeleteTextures(2, t);
+}
+
 /* dEQP-GLES3 fbo.msaa.renderbuffer_resize: a renderbuffer cleared, given
  * new storage while attached, cleared again, blitted into another one a
  * clear made red: the latter is the second clear's green. */
@@ -1899,6 +1935,7 @@ int main(void)
     test_blit();
     test_depth32f_texture();
     test_rb_resize();
+    test_copy3d();
     check(glGetError() == GL_NO_ERROR, "no GL error left over");
     aglDestroyContext(ctx);
     if ((ctx = aglCreateContextTags2(&e, OGLES2_CCT_BITMAP, (ULONG)bm, OGLES2_CCT_PISTORM_ES_VERSION, 30,

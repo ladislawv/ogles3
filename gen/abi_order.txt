@@ -253,3 +253,4 @@ glFramebufferTextureLayer
 glInvalidateFramebuffer
 glInvalidateSubFramebuffer
 glBlitFramebuffer
+glCopyTexSubImage3D

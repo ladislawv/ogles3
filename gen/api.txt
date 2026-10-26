@@ -110,3 +110,4 @@ command glFramebufferTextureLayer
 command glInvalidateFramebuffer
 command glInvalidateSubFramebuffer
 command glBlitFramebuffer
+command glCopyTexSubImage3D

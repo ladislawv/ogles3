@@ -259,6 +259,15 @@ void ogles2_glBlitFramebuffer(struct OGLES2Context *ctx, GLint srcX0, GLint srcY
     ogles2_fbo_read_end(ctx, saved);
     if (!ogles2_fb_ready(ctx))
         return;
+    /* multisampled renderbuffers: never drawn into; read into the same
+     * format and rectangle only (a resolve) */
+    if (ogles2_fbo_samples(ctx->draw_fb) ||
+        (ogles2_fbo_samples(ctx->read_fb) &&
+         (srcX0 != dstX0 || srcY0 != dstY0 || srcX1 != dstX1 || srcY1 != dstY1 ||
+          ((mask & GL_COLOR_BUFFER_BIT) && !ogles2_fbo_blit_same_format(ctx, ctx->fb_draw_mask))))) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
     /* colour: integers to integers only, and never filtered */
     if (mask & GL_COLOR_BUFFER_BIT) {
         rk = kind_of(ctx, -1);

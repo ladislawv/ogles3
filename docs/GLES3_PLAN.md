@@ -183,7 +183,9 @@ Mesa's driver, so they could follow later as an extension
     invalidation, ES 3.0's completeness and queries, colour blits), then
     its depth and stencil blits and `DEPTH32F_STENCIL8` textures' stencil:
     `fbo` 2032 of 2075 and none failing, `fragment_ops` 3174 of 3174.
-    Next: item 8's rest (glCopyTexSubImage3D), then item 12's.
+    Since then glCopyTexSubImage3D and ES 3.0's texture errors (item 8):
+    `negative_api` 287 of 314, the rest stage C's. Next: item 8's base
+    levels beyond 0, then item 12's rest.
     **Trap:**
     `ports/deqp/build.sh` copies the CTS with `rsync -a`, which keeps the
     sources' old dates, so a patch changed or removed rebuilds nothing:
@@ -1587,9 +1589,25 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    script had ended: the compiler server (started by the library, ended
    by its expunge) was still running; `Avail FLUSH` ended it, but the PC's
    `runpkg` still waited, and the results came with `amictl get -r` (the
-   15 MB in 7 s). Left in this item: `glCopyTexSubImage3D`
-   (`glCompressedTexImage3D` came with item 9), ES 3.0's completeness of base levels beyond
-   0 for mutable textures, the 3D textures' mipmaps from a base level.
+   15 MB in 7 s). **`glCopyTexSubImage3D` (2026-10-26, on the A1200):**
+   a layer of a 2D array or a slice of a 3D texture from the read
+   framebuffer, read as glCopyTexSubImage2D's CPU path reads (`read_region`)
+   and given to glTexSubImage3D in the level's format, so levels that take
+   bytes only (not float, integer or packed ones). With it ES 3.0's
+   remaining texture errors: glTexSubImage3D checks negative sizes first;
+   an offset into a bound unpack buffer must be a multiple of the type's
+   datum (`unpack_source`); glGenerateMipmap refuses a base level given a
+   sized format that is not colour-renderable and filterable (signed
+   normalized, 32-bit float, RGB16F, RGB9_E5, SRGB8: `mip_sized_ok`).
+   `m8_draw`'s copy into a layer and a slice, the others untouched (121 of
+   121 three ways, `ogles2-m8-1-20261026-175952`); dEQP-GLES3 `texture`
+   4501 of 5895 and no failure (`ogles2-m8-2-20261026-180106`), `pbo` 54 of
+   54, `negative_api` 287 of 314 (`-180025`: the 23 left are transform
+   feedback and program binaries, stage C; a multisampled read
+   framebuffer's `glReadPixels`, stage C; `redeclaring_gl_frag_depth`, the
+   compiler's). Left in this item: ES 3.0's completeness of base levels
+   beyond 0 for mutable textures, the 3D textures' mipmaps from a base
+   level.
 9. **ETC2/EAC** (mandatory in ES 3.0): native in the TMU (texture types
    `RGB8_ETC2`, `RGB8_PUNCHTHROUGH_ALPHA1`, `RGBA8_ETC2_EAC`, `R11_EAC`,
    `SIGNED_R11_EAC`, `RG11_EAC`, `SIGNED_RG11_EAC`; sRGB by the texture
@@ -1846,9 +1864,10 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
     of 2075 and none failing (41 not supported: formats ES 3.0 does not make
     renderable, multisampled textures; 2 quality warnings in
     `completeness.samples`; `ogles2-m8-2-20261026-173058`), `fragment_ops`
-    3174 of 3174 (`-173806`), `negative_api` 273 of 314 (`-173748`: the
-    rest are transform feedback, program binaries, glCopyTexSubImage3D,
-    and buffer targets of glTexImage*); dEQP-GLES2's `fbo` 709 of 709 and
+    3174 of 3174 (`-173806`), `negative_api` 273 of 314 (`-173748`; 287
+    with item 8's rest and the blit's multisample errors: a multisampled
+    renderbuffer is never drawn into by a blit, and read into the same
+    format and rectangle only); dEQP-GLES2's `fbo` 709 of 709 and
     `negative_api` 246 of 246 (`ogles2-m7-1-20261026-175040`, `-175305`);
     `m7-4` after the runs. Left: multisampling (stage C), and
     the GPU paths for blits (Mesa's order above) where the CPU is slow.

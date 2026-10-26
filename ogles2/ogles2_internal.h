@@ -851,6 +851,8 @@ void ogles2_texture_hidden_free(struct OGLES2Context *ctx, struct OGLES2Texture 
 void ogles2_read_format(struct OGLES2Context *ctx, GLenum *format, GLenum *type);
 /* glBlitFramebuffer's depth and stencil (fbo.c): the renderbuffer formats
  * compared, and the blit of one part on the CPU. */
+UBYTE ogles2_fbo_samples(const struct OGLES2Framebuffer *fb);
+BOOL ogles2_fbo_blit_same_format(struct OGLES2Context *ctx, UBYTE draw);
 GLenum ogles2_fbo_zs_format(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb, BOOL stencil);
 void ogles2_fbo_blit_zs(struct OGLES2Context *ctx, BOOL stencil, GLint sx0, GLint sy0, GLint sx1, GLint sy1,
                         GLint dx0, GLint dy0, GLint dx1, GLint dy1, LONG ox0, LONG oy0, LONG ox1, LONG oy1);

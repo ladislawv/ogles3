@@ -1826,6 +1826,42 @@ void ogles2_fbo_blit_zs(struct OGLES2Context *ctx, BOOL stencil, GLint sx0, GLin
     FreeVec(src);
 }
 
+/* glBlitFramebuffer (ES 3.0 4.3.3): the samples of fb's renderbuffers (an
+ * object's; the default framebuffer resolves its own: 0). */
+UBYTE ogles2_fbo_samples(const struct OGLES2Framebuffer *fb)
+{
+    UBYTE n = 0;
+    int a;
+    for (a = 0; fb && a < NATT; a++)
+        if (fb->att[a].type == GL_RENDERBUFFER && fb->att[a].rb->samples > n)
+            n = fb->att[a].rb->samples;
+    return n;
+}
+
+/* glBlitFramebuffer from a multisampled read buffer: its format is each
+ * draw buffer's (`draw`: their mask; the default framebuffer's RGBA8). */
+BOOL ogles2_fbo_blit_same_format(struct OGLES2Context *ctx, UBYTE draw)
+{
+    const struct OGLES2Attachment *c;
+    struct OGLES2RtFormat r, d;
+    int k;
+    if (!ctx->read_fb || !(c = read_attachment(ctx->read_fb)) || !att_rt(c, &r))
+        return TRUE; /* no read buffer: nothing blitted */
+    for (k = 0; k < OGLES2_MAX_DRAW_BUFFERS; k++) {
+        if (!(draw & (1 << k)))
+            continue;
+        if (!ctx->draw_fb) {
+            if (r.pipe != 84) /* PIPE_FORMAT_R8G8B8A8_UNORM */
+                return FALSE;
+            continue;
+        }
+        c = &ctx->draw_fb->att[ATT_COLOR + k];
+        if (c->type != GL_NONE && (!att_rt(c, &d) || d.pipe != r.pipe))
+            return FALSE;
+    }
+    return TRUE;
+}
+
 /* ES 3.0 4.3.1: the read buffer's format as a render target (its kind
  * says glReadPixels' format and type); FALSE: no colour image. */
 BOOL ogles2_fbo_read_format(struct OGLES2Context *ctx, struct OGLES2RtFormat *rf)
