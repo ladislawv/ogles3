@@ -180,9 +180,10 @@ Mesa's driver, so they could follow later as an extension
     10; CONTRIBUTING.md, "Traps"): after a GPU-heavy run, `m7-4` passing is
     the check that the machine is sound. Since then most of item 11
     (the draw and read bindings, `GL_DEPTH_STENCIL_ATTACHMENT`, layers,
-    invalidation, ES 3.0's completeness and queries, colour blits):
-    `fbo` 1963 of 2075. Next: item 11's depth and stencil blits, then
-    item 8's rest and item 12's.
+    invalidation, ES 3.0's completeness and queries, colour blits), then
+    its depth and stencil blits and `DEPTH32F_STENCIL8` textures' stencil:
+    `fbo` 2032 of 2075 and none failing, `fragment_ops` 3174 of 3174.
+    Next: item 8's rest (glCopyTexSubImage3D), then item 12's.
     **Trap:**
     `ports/deqp/build.sh` copies the CTS with `rsync -a`, which keeps the
     sources' old dates, so a patch changed or removed rebuilds nothing:
@@ -1820,12 +1821,37 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
     `fragment_ops.scissor` 26 of 26 (`ogles2-m8-2-20261026-121255`),
     `negative_api` 272 of 314; dEQP-GLES2's `fbo` 709 of 709 and
     `negative_api` 246 of 246 (`ogles2-m7-1-20261026-121331`, `-121532`).
-    Left: depth and stencil blits (the 14 `fbo.blit.depth_stencil` cases and
-    most of the `invalidate` and `msaa` ones that blit them; renderbuffer
-    depth and stencil are GPU-only images: Mesa's GPU paths), the six 32-bit
-    float `render.shared_colorbuffer_clear` cases, a
-    `DEPTH32F_STENCIL8` texture's stencil, multisampling (stage C), and the
-    GPU paths for colour blits (Mesa's order above) where the CPU is slow.
+    **Then (2026-10-26, on the A1200):** depth and stencil blits on the CPU
+    (`fbo.c`'s `ogles2_fbo_blit_zs`): the renderbuffers' UIF images read
+    and written through a texture view (`v3d_texture_load`, `_store`), byte
+    by byte (D24S8's depth its upper three bytes, its stencil the low one;
+    `DEPTH32F_STENCIL8`'s stencil its own S8 image), nearest texel with
+    flips; the default framebuffer's through the depth and stencil it keeps
+    across a mid-frame flush (`job.c`'s `ogles2_job_zs_view`; its rows top
+    down), so only once something was drawn or cleared that frame, and not
+    with 4x MSAA (logged). A `DEPTH32F_STENCIL8` texture has its stencil
+    too: an S8 image per level beside the depth (`texture.c`'s
+    `ogles2_texture_s8_surface`, made at the first use as a job's stencil;
+    texels given with `glTexImage2D` keep their depth only). Invalidation
+    as ES 3.0 programs use it: a draw or clear after it in the same job is
+    stored again (`ogles2_job_begin` clears the job's discard mask), and the
+    default framebuffer's depth or stencil alone keeps both (one D24S8
+    image). A CPU clear of a 32-bit float target renders every open job
+    first (a texture attached to two framebuffers). dEQP's
+    `fbo.msaa.renderbuffer_resize` read RGBA8 pixels as `uint32_t`, wrong on
+    a big-endian machine: `ports/deqp/patches/gles3/0001`. `m8_draw` 120 of
+    120 three ways (`ogles2-m8-1-20261026-172503`: a `DEPTH32F_STENCIL8`
+    texture's stencil across a read-back and as the stencil only, a
+    renderbuffer given new storage while attached); dEQP-GLES3 `fbo` 2032
+    of 2075 and none failing (41 not supported: formats ES 3.0 does not make
+    renderable, multisampled textures; 2 quality warnings in
+    `completeness.samples`; `ogles2-m8-2-20261026-173058`), `fragment_ops`
+    3174 of 3174 (`-173806`), `negative_api` 273 of 314 (`-173748`: the
+    rest are transform feedback, program binaries, glCopyTexSubImage3D,
+    and buffer targets of glTexImage*); dEQP-GLES2's `fbo` 709 of 709 and
+    `negative_api` 246 of 246 (`ogles2-m7-1-20261026-175040`, `-175305`);
+    `m7-4` after the runs. Left: multisampling (stage C), and
+    the GPU paths for blits (Mesa's order above) where the CPU is slow.
 12. **Smaller ones:** sync objects (`glFenceSync`, `glClientWaitSync`,
     `glWaitSync`: a fence is the library's job serial, `ctx->job_serial`, done
     when that job has rendered, not the GPU's 8-bit counters;

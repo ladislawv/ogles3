@@ -12,8 +12,10 @@
  * outside the read framebuffer are left as they are. The jobs that draw
  * into either framebuffer render first.
  *
- * Mesa's GPU paths (TLB and TFU blits, a textured quad) come later; depth
- * and stencil blits are not done yet (logged once).
+ * Depth and stencil between renderbuffers of the same format, nearest, on
+ * the CPU through their images (fbo.c, ogles2_fbo_blit_zs); the default
+ * framebuffer's and depth textures are not blitted (logged once). Mesa's
+ * GPU paths (TLB and TFU blits, a textured quad) come later.
  */
 #include <exec/memory.h>
 #include <proto/exec.h>
@@ -193,6 +195,27 @@ static void blit_color(struct OGLES2Context *ctx, GLint sx0, GLint sy0, GLint sx
     FreeVec(dst);
 }
 
+/* The destination box: the rectangle within the draw framebuffer and the
+ * scissor box; FALSE: empty. */
+static BOOL dst_box(struct OGLES2Context *ctx, GLint dx0, GLint dy0, GLint dx1, GLint dy1, LONG *b)
+{
+    b[0] = dx0 < dx1 ? dx0 : dx1;
+    b[2] = dx0 < dx1 ? dx1 : dx0;
+    b[1] = dy0 < dy1 ? dy0 : dy1;
+    b[3] = dy0 < dy1 ? dy1 : dy0;
+    if (b[0] < 0) b[0] = 0;
+    if (b[1] < 0) b[1] = 0;
+    if (b[2] > (LONG)ctx->fb_w) b[2] = ctx->fb_w;
+    if (b[3] > (LONG)ctx->fb_h) b[3] = ctx->fb_h;
+    if (ctx->state.caps & OGLES2_CAP_SCISSOR_TEST) {
+        if (ctx->scissor[0] > b[0]) b[0] = ctx->scissor[0];
+        if (ctx->scissor[1] > b[1]) b[1] = ctx->scissor[1];
+        if (ctx->scissor[0] + ctx->scissor[2] < b[2]) b[2] = ctx->scissor[0] + ctx->scissor[2];
+        if (ctx->scissor[1] + ctx->scissor[3] < b[3]) b[3] = ctx->scissor[1] + ctx->scissor[3];
+    }
+    return b[0] < b[2] && b[1] < b[3];
+}
+
 /* A colour image's kind for the format checks (integers against the
  * rest): the read buffer's, or draw buffer rt's. */
 static UBYTE kind_of(struct OGLES2Context *ctx, int rt)
@@ -210,7 +233,6 @@ static UBYTE kind_of(struct OGLES2Context *ctx, int rt)
 void ogles2_glBlitFramebuffer(struct OGLES2Context *ctx, GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1,
                               GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter)
 {
-    static BOOL zs_logged;
     struct OGLES2Framebuffer *saved;
     UBYTE rk;
     int rt;
@@ -255,6 +277,22 @@ void ogles2_glBlitFramebuffer(struct OGLES2Context *ctx, GLint srcX0, GLint srcY
         if (rk == OGLES2_RT_NONE)
             mask &= ~(GLbitfield)GL_COLOR_BUFFER_BIT; /* no read buffer: nothing */
     }
+    /* depth and stencil: the same format both sides (ES 3.0 4.3.3); a
+     * side without one blits nothing */
+    for (rt = 0; rt < 2; rt++) {
+        GLbitfield bit = rt ? GL_STENCIL_BUFFER_BIT : GL_DEPTH_BUFFER_BIT;
+        GLenum rf, df;
+        if (!(mask & bit))
+            continue;
+        rf = ogles2_fbo_zs_format(ctx, ctx->read_fb, rt);
+        df = ogles2_fbo_zs_format(ctx, ctx->draw_fb, rt);
+        if (rf && df && rf != df) {
+            ogles2_error(ctx, GL_INVALID_OPERATION);
+            return;
+        }
+        if (!rf || !df)
+            mask &= ~bit;
+    }
     if (srcX0 == srcX1 || srcY0 == srcY1 || dstX0 == dstX1 || dstY0 == dstY1)
         return;
     /* the jobs that draw into either framebuffer render first */
@@ -262,8 +300,12 @@ void ogles2_glBlitFramebuffer(struct OGLES2Context *ctx, GLint srcX0, GLint srcY
     ogles2_job_finish(ctx);
     if (mask & GL_COLOR_BUFFER_BIT)
         blit_color(ctx, srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, filter == GL_LINEAR);
-    if ((mask & (GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT)) && !zs_logged) {
-        zs_logged = TRUE;
-        ogles2_log("glBlitFramebuffer: depth and stencil are not blitted yet (logged once)");
+    if (mask & (GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT)) {
+        LONG b[4];
+        if (dst_box(ctx, dstX0, dstY0, dstX1, dstY1, b))
+            for (rt = 0; rt < 2; rt++)
+                if (mask & (rt ? GL_STENCIL_BUFFER_BIT : GL_DEPTH_BUFFER_BIT))
+                    ogles2_fbo_blit_zs(ctx, rt, srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, b[0], b[1],
+                                       b[2], b[3]);
     }
 }

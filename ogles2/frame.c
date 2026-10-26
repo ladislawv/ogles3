@@ -386,8 +386,9 @@ static void clear(struct OGLES2Context *ctx, GLbitfield mask, UBYTE rts, const U
             if (ctx->scissor[0] + ctx->scissor[2] < x1) x1 = ctx->scissor[0] + ctx->scissor[2];
             if (ctx->scissor[1] + ctx->scissor[3] < y1) y1 = ctx->scissor[1] + ctx->scissor[3];
         }
-        if (ctx->job_fb == ctx->draw_fb)
-            ogles2_job_flush(ctx, FALSE); /* none open: nothing */
+        /* any open job: another framebuffer's may draw into the same image
+         * (a texture attached to several; none open: nothing) */
+        ogles2_job_flush(ctx, FALSE);
         ogles2_job_finish(ctx);
         for (k = 0; k < 4 && x0 < x1 && y0 < y1; k++)
             if (cpu & (1 << k))

@@ -41,6 +41,15 @@ extern v3d_u32 g_v3d_cl_generation; /* v3d_frame.c: bumped whenever a control li
 #define MAX_LEVELS 13 /* 4096 = 2^12 */
 #define MAX_SIZE   4096
 
+/* DEPTH32F_STENCIL8's stencil: an S8 image per level beside the depth
+ * (Mesa's separate stencil), as the renderbuffer's (fbo.c). */
+struct OGLES2S8
+{
+    v3d_mem mem[MAX_LEVELS];
+    ULONG base[MAX_LEVELS], ub[MAX_LEVELS], bytes[MAX_LEVELS];
+    UWORD w[MAX_LEVELS], h[MAX_LEVELS];
+};
+
 /* The images of one face (a 2D texture has one). */
 struct OGLES2Face
 {
@@ -101,6 +110,8 @@ struct OGLES2Texture
                                      * a 3D level's slices are faces 0 to d - 1) */
     UBYTE immutable_levels;         /* ES 3.0's glTexStorage*: its levels (0: mutable) */
     BOOL es3_rules;                 /* its images were given in an ES3 context: ES 3.0's depth sampling */
+    struct OGLES2S8 *s8;            /* DEPTH32F_STENCIL8: the stencil, made at its first use as a
+                                     * job's (ogles2_texture_s8_surface); NULL: none */
 };
 
 /* Both records fit their halves of rec. */
@@ -248,6 +259,13 @@ static void free_levels(struct OGLES2Texture *t)
     t->nf = 6;
     memset(t->d, 0, sizeof(t->d));
     free_gpu(t);
+    if (t->s8) {
+        for (l = 0; l < MAX_LEVELS; l++)
+            if (t->s8->mem[l].hostptr)
+                v3d_mem_free(ogles2_device(), &t->s8->mem[l]);
+        FreeVec(t->s8);
+        t->s8 = 0;
+    }
 }
 
 /* aglDestroyContext (its jobs finished): the context's own textures; the
@@ -2862,7 +2880,8 @@ BOOL ogles2_texture_surface(struct OGLES2Context *ctx, struct OGLES2Texture *t, 
 
 /* OES_depth_texture: level l of a 2D texture is a depth image; its depth
  * bits (16, 24, or ES 3.0's 32 of a float) and whether it holds stencil
- * too (DEPTH_STENCIL_OES; DEPTH32F_STENCIL8 is kept as its depth only). */
+ * too (DEPTH_STENCIL_OES; DEPTH32F_STENCIL8's in an image of its own,
+ * ogles2_texture_s8_surface). */
 BOOL ogles2_texture_depth(const struct OGLES2Texture *t, int l, UBYTE *bits, BOOL *stencil)
 {
     const struct OGLES2Face *f = &t->f[0];
@@ -2873,7 +2892,7 @@ BOOL ogles2_texture_depth(const struct OGLES2Texture *t, int l, UBYTE *bits, BOO
     if (c != CLASS_DEPTH16 && c != CLASS_DEPTH24)
         return FALSE;
     *bits = c == CLASS_DEPTH16 ? 16 : f->type[l] == GL_FLOAT || f->type[l] == GL_FLOAT_32_UNSIGNED_INT_24_8_REV ? 32 : 24;
-    *stencil = f->format[l] == GL_DEPTH_STENCIL_OES && *bits == 24;
+    *stencil = f->format[l] == GL_DEPTH_STENCIL_OES;
     return TRUE;
 }
 
@@ -2904,6 +2923,42 @@ BOOL ogles2_texture_zs_surface(struct OGLES2Context *ctx, struct OGLES2Texture *
     s->ub = s->mem_format == V3D_MEMORY_FORMAT_UIF_NO_XOR || s->mem_format == V3D_MEMORY_FORMAT_UIF_XOR
                 ? g->levels[l].padded_h / (2 * v3d_utile_height((int)t->cpp))
                 : 0;
+    return TRUE;
+}
+
+/* DEPTH32F_STENCIL8's level l: its stencil as a job's S8 image, made
+ * (zeros: glTexImage2D's stencil indices are not kept) at the first use
+ * and again when the level's size changed. FALSE: none, or no memory. */
+BOOL ogles2_texture_s8_surface(struct OGLES2Context *ctx, struct OGLES2Texture *t, int l,
+                               struct OGLES2Surface *s)
+{
+    const struct OGLES2Face *f = &t->f[0];
+    struct OGLES2S8 *p;
+    UBYTE bits;
+    BOOL st;
+    if (!ogles2_texture_depth(t, l, &bits, &st) || !st || bits != 32)
+        return FALSE;
+    if (!t->s8 && !(t->s8 = AllocVec(sizeof(*t->s8), MEMF_ANY | MEMF_CLEAR)))
+        return FALSE;
+    p = t->s8;
+    if (p->mem[l].hostptr && (p->w[l] != f->w[l] || p->h[l] != f->h[l])) {
+        ogles2_job_finish(ctx); /* a running render may still use it */
+        v3d_mem_free(ogles2_device(), &p->mem[l]);
+        memset(&p->mem[l], 0, sizeof(p->mem[l]));
+    }
+    if (!p->mem[l].hostptr) {
+        if (!ogles2_fbo_zs_alloc(f->w[l], f->h[l], 1, &p->mem[l], &p->base[l], &p->ub[l], &p->bytes[l]))
+            return FALSE;
+        p->w[l] = f->w[l];
+        p->h[l] = f->h[l];
+    }
+    s->addr = p->base[l];
+    s->ub = p->ub[l];
+    s->bytes = p->bytes[l];
+    s->cpp = 1;
+    s->mem_format = V3D_MEMORY_FORMAT_UIF_NO_XOR;
+    s->format = V3D_OUTPUT_IMAGE_FORMAT_S8;
+    s->force_alpha1 = FALSE;
     return TRUE;
 }
 

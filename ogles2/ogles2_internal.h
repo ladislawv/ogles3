@@ -801,6 +801,9 @@ void ogles2_texture_rendered(struct OGLES2Texture *t, int k, int l); /* the GPU'
 /* OES_depth_texture: level l is a depth image (bits 16 or 24; stencil: DEPTH_STENCIL_OES). */
 BOOL ogles2_texture_depth(const struct OGLES2Texture *t, int l, UBYTE *bits, BOOL *stencil);
 /* That image as a job's depth/stencil surface, its GPU storage made first; FALSE: none. */
+BOOL ogles2_texture_s8_surface(struct OGLES2Context *ctx, struct OGLES2Texture *t, int l,
+                               struct OGLES2Surface *s);
+BOOL ogles2_fbo_zs_alloc(UWORD w, UWORD h, ULONG cpp, struct v3d_mem *mem, ULONG *base, ULONG *ub, ULONG *bytes);
 BOOL ogles2_texture_zs_surface(struct OGLES2Context *ctx, struct OGLES2Texture *t, int l,
                                struct OGLES2Surface *s);
 /* The texture kinds a sampler reads (its uniform's type). */
@@ -846,6 +849,11 @@ struct OGLES2Texture *ogles2_texture_hidden_sized(struct OGLES2Context *ctx, UWO
 void ogles2_texture_hidden_free(struct OGLES2Context *ctx, struct OGLES2Texture *t);
 /* frame.c: GL_IMPLEMENTATION_COLOR_READ_FORMAT and _TYPE of the read buffer */
 void ogles2_read_format(struct OGLES2Context *ctx, GLenum *format, GLenum *type);
+/* glBlitFramebuffer's depth and stencil (fbo.c): the renderbuffer formats
+ * compared, and the blit of one part on the CPU. */
+GLenum ogles2_fbo_zs_format(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb, BOOL stencil);
+void ogles2_fbo_blit_zs(struct OGLES2Context *ctx, BOOL stencil, GLint sx0, GLint sy0, GLint sx1, GLint sy1,
+                        GLint dx0, GLint dy0, GLint dx1, GLint dy1, LONG ox0, LONG oy0, LONG ox1, LONG oy1);
 /* glBlitFramebuffer's writes (blit.c): a box of a draw buffer, of a texture
  * level, of the default framebuffer's bitmap. */
 BOOL ogles2_fbo_write(struct OGLES2Context *ctx, int rt, int x, int y, int w, int h, const UBYTE *src, ULONG stride,
@@ -964,6 +972,8 @@ void ogles2_job_clear(struct OGLES2Context *ctx, GLbitfield mask, UBYTE rts, con
                       GLfloat depth, GLint stencil);
 BOOL ogles2_job_flush(struct OGLES2Context *ctx, BOOL frame_end); /* FALSE: dropped. Mid-frame (frame_end FALSE): depth and stencil are kept for the next job */
 void ogles2_job_free(struct OGLES2Context *ctx); /* aglDestroyContext: job.c's memory */
+struct V3DTexture;
+BOOL ogles2_job_zs_view(struct OGLES2Context *ctx, struct V3DTexture *t);
 void ogles2_job_discard(struct OGLES2Context *ctx);
 /* The submitted render waited for (M6 overlap): before the CPU reads what it
  * writes or changes what it reads. */

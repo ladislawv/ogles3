@@ -1308,6 +1308,113 @@ static void test_rt_depth32f(void)
     glDeleteProgram(p);
 }
 
+/* A DEPTH32F_STENCIL8 texture as depth and stencil: its stencil (an image
+ * of its own) is kept across a read-back, and as the stencil only. */
+static void test_depth32f_texture(void)
+{
+    static const GLfloat black[4] = { 0, 0, 0, 1 };
+    static const GLfloat green[4] = { 0, 1, 0, 1 }, red[4] = { 1, 0, 0, 1 };
+    static const GLint iv[4] = { 0, 0, 0, 0 };
+    static const GLuint uv[4] = { 0, 0, 0, 0 };
+    GLuint p = program("es3rt"), fb, t[2];
+    int ok;
+    if (!p) {
+        check(0, "32F depth texture: es3rt links");
+        return;
+    }
+    glGenFramebuffers(1, &fb);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb);
+    glGenTextures(2, t);
+    glBindTexture(GL_TEXTURE_2D, t[0]);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, 16, 16);
+    glBindTexture(GL_TEXTURE_2D, t[1]);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH32F_STENCIL8, 16, 16);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, t[0], 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, t[1], 0);
+    check(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE && glGetError() == GL_NO_ERROR,
+          "32F depth texture: DEPTH32F_STENCIL8 as depth and stencil is complete");
+    glViewport(0, 0, 16, 16);
+    glClearBufferfv(GL_COLOR, 0, black);
+    glClearBufferfi(GL_DEPTH_STENCIL, 0, 0.5f, 3);
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_EQUAL, 3, 0xff);
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(0, 0, 8, 16); /* left: stencil 3 becomes 4 */
+    glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+    rt_uniforms(p, red, iv, uv, 0.0f);
+    draw_cover(p);
+    glDisable(GL_SCISSOR_TEST);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+    ok = pixel_is(4, 8, 255, 0, 0, 255, 0) && pixel_is(12, 8, 0, 0, 0, 255, 0);
+    glStencilFunc(GL_EQUAL, 4, 0xff); /* after the read-back: only the left passes */
+    rt_uniforms(p, green, iv, uv, 0.0f);
+    draw_cover(p);
+    ok = ok && pixel_is(4, 8, 0, 255, 0, 255, 0) && pixel_is(12, 8, 0, 0, 0, 255, 0);
+    check(ok && glGetError() == GL_NO_ERROR, "32F depth texture: its stencil kept across a read-back");
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, 0, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, t[1], 0);
+    glStencilFunc(GL_EQUAL, 3, 0xff); /* the stencil only: the right side's 3 */
+    rt_uniforms(p, red, iv, uv, 0.0f);
+    draw_cover(p);
+    check(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE && pixel_is(4, 8, 0, 255, 0, 255, 0) &&
+              pixel_is(12, 8, 255, 0, 0, 255, 0) && glGetError() == GL_NO_ERROR,
+          "32F depth texture: as the stencil attachment only");
+    glDisable(GL_STENCIL_TEST);
+    glStencilFunc(GL_ALWAYS, 0, 0xff);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, 64, 64);
+    glDeleteFramebuffers(1, &fb);
+    glDeleteTextures(2, t);
+    glDeleteProgram(p);
+}
+
+/* dEQP-GLES3 fbo.msaa.renderbuffer_resize: a renderbuffer cleared, given
+ * new storage while attached, cleared again, blitted into another one a
+ * clear made red: the latter is the second clear's green. */
+static void test_rb_resize(void)
+{
+    static const GLfloat red[4] = { 1, 0, 0, 1 }, green[4] = { 0, 1, 0, 1 }, blue[4] = { 0, 0, 1, 1 };
+    static GLubyte px[40 * 40 * 4];
+    GLuint fb[2], rb[2];
+    GLenum st[3];
+    int ok = 1, k;
+    glGenFramebuffers(2, fb);
+    glGenRenderbuffers(2, rb);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb[0]);
+    glBindRenderbuffer(GL_RENDERBUFFER, rb[0]);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA8, 40, 40);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, rb[0]);
+    st[0] = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    glClearBufferfv(GL_COLOR, 0, red);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb[1]);
+    glBindRenderbuffer(GL_RENDERBUFFER, rb[1]);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 0, GL_RGBA8, 10, 10);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, rb[1]);
+    st[1] = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    glClearBufferfv(GL_COLOR, 0, blue);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 0, GL_RGBA8, 40, 40);
+    st[2] = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    glClearBufferfv(GL_COLOR, 0, green);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fb[1]); /* as dEQP: no read-back before the blit */
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb[0]);
+    glBlitFramebuffer(0, 0, 40, 40, 0, 0, 40, 40, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fb[0]);
+    glReadPixels(0, 0, 40, 40, GL_RGBA, GL_UNSIGNED_BYTE, px);
+    for (k = 0; k < 40 * 40 && ok; k++)
+        if (px[4 * k] != 0 || px[4 * k + 1] != 255 || px[4 * k + 2] != 0 || px[4 * k + 3] != 255) {
+            printf("     pixel (%d, %d) is %d %d %d %d\n", k % 40, k / 40, px[4 * k], px[4 * k + 1], px[4 * k + 2],
+                   px[4 * k + 3]);
+            ok = 0;
+        }
+    check(ok && st[0] == GL_FRAMEBUFFER_COMPLETE && st[1] == GL_FRAMEBUFFER_COMPLETE &&
+              st[2] == GL_FRAMEBUFFER_COMPLETE && glGetError() == GL_NO_ERROR,
+          "renderbuffer resize: cleared again and blitted");
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDeleteFramebuffers(2, fb);
+    glDeleteRenderbuffers(2, rb);
+}
+
 /* An RGBA8 and an R32I target with depth and stencil: partial clears where
  * a 16-bit colour write must not reach the integer target (it upsets the
  * GPU until a power cycle): the stencil through the program that writes no
@@ -1790,6 +1897,8 @@ int main(void)
     test_rt_mixed_clears();
     test_framebuffers();
     test_blit();
+    test_depth32f_texture();
+    test_rb_resize();
     check(glGetError() == GL_NO_ERROR, "no GL error left over");
     aglDestroyContext(ctx);
     if ((ctx = aglCreateContextTags2(&e, OGLES2_CCT_BITMAP, (ULONG)bm, OGLES2_CCT_PISTORM_ES_VERSION, 30,

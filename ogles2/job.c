@@ -160,6 +160,35 @@ static struct zs_save *zs_get(struct OGLES2Context *ctx)
     return z;
 }
 
+/* glBlitFramebuffer (fbo.c): the default framebuffer's depth and stencil
+ * as a texture view of their saved image, its size the framebuffer's;
+ * FALSE: none saved (nothing drawn or cleared since the frame began), or
+ * all four samples of 4x MSAA. */
+BOOL ogles2_job_zs_view(struct OGLES2Context *ctx, V3DTexture *t)
+{
+    struct zs_save *z = ctx->zs_save;
+    ULONG cpp, ub_w, ub_h, pw, ph;
+    if (!ctx->zs_saved || !z || z->msaa)
+        return FALSE;
+    cpp = z->format == V3D_OUTPUT_IMAGE_FORMAT_D16 ? 2 : 4;
+    ub_w = 2 * v3d_utile_width((int)cpp);
+    ub_h = 2 * v3d_utile_height((int)cpp);
+    pw = (z->w + 4 * ub_w - 1) / (4 * ub_w) * (4 * ub_w);
+    ph = (z->h + ub_h - 1) / ub_h * ub_h;
+    memset(t, 0, sizeof(*t));
+    t->texture_mem.hostptr = (void *)z->base;
+    t->width = (v3d_u16)z->w;
+    t->height = (v3d_u16)z->h;
+    t->cpp = (v3d_u8)cpp;
+    t->num_levels = 1;
+    t->levels[0].stride = pw * cpp;
+    t->levels[0].padded_w = (v3d_u16)pw;
+    t->levels[0].padded_h = (v3d_u16)ph;
+    t->levels[0].tiling_format = V3D_MEMORY_FORMAT_UIF_NO_XOR;
+    t->tiling_format = V3D_MEMORY_FORMAT_UIF_NO_XOR;
+    return TRUE;
+}
+
 void ogles2_job_free(struct OGLES2Context *ctx)
 {
     struct zs_save *z = ctx->zs_save;
@@ -182,8 +211,12 @@ void ogles2_job_begin(struct OGLES2Context *ctx)
     v3d_u8 s;
 
     if (v->frame_active) {
-        if (ctx->job_fb == ctx->draw_fb)
+        if (ctx->job_fb == ctx->draw_fb) {
+            /* Drawing after an invalidation (fbo.c discard): what is drawn
+             * is kept. */
+            ctx->job_discard = 0;
             return;
+        }
         /* Drawing into another framebuffer: the open job is rendered first
          * (jobs v1). The default framebuffer's depth and stencil are kept
          * for its next job, as at any mid-frame flush. */

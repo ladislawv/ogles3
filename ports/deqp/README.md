@@ -35,7 +35,7 @@ see "dEQP-GLES3" below.
     desktop GL package `tgl45es3*`).
 - **`patches/`** are applied to a copy of the sources in `$B/deqp/src`, then
   those of the module's own directory (`patches/gles2/`: 0003 and 0004;
-  `patches/gles3/`: none since 2026-10-25, see "dEQP-GLES3"):
+  `patches/gles3/`: 0001):
   - `0001-amiga-m68k.patch`: delibs gains a 68k CPU (32-bit, big-endian).
     An assertion prints on stdout, then aborts. Aligned allocation uses
     delibs' own header, since libnix has no `posix_memalign`. There is no
@@ -50,6 +50,10 @@ see "dEQP-GLES3" below.
     array object without checking for `OES_vertex_array_object`, which
     ogles2's GLES2 contexts do not offer; it now draws with the default
     vertex array state there.
+  - `gles3/0001-big-endian-resize-check.patch`: as 0003, for dEQP-GLES3's
+    `fbo.msaa.renderbuffer_resize`, whose four cases failed on the green
+    they read. (The earlier `gles3/0001`, the state reset one, is gone:
+    "The state reset after each case" below.)
 - **`src/`**:
   - `tcuAmigaPlatform.cpp`: the platform. A render context is an ogles2
     context with a window on the Workbench screen, OpenGL ES 2.0 or 3.0 as

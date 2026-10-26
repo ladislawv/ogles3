@@ -256,8 +256,9 @@ static BOOL gles2_format(GLenum f)
     return gles2_color(f) || f == GL_DEPTH_COMPONENT16 || f == GL_STENCIL_INDEX8 || f == GL_DEPTH24_STENCIL8_OES;
 }
 
-/* Depth and stencil: UIF without XOR, Mesa's padding for a UIF level. */
-static BOOL zs_alloc(UWORD w, UWORD h, ULONG cpp, v3d_mem *mem, ULONG *base, ULONG *ub, ULONG *bytes)
+/* Depth and stencil: UIF without XOR, Mesa's padding for a UIF level
+ * (also DEPTH32F_STENCIL8 textures' stencil, texture.c). */
+BOOL ogles2_fbo_zs_alloc(UWORD w, UWORD h, ULONG cpp, v3d_mem *mem, ULONG *base, ULONG *ub, ULONG *bytes)
 {
     ULONG ub_w = 2 * v3d_utile_width((int)cpp), ub_h = 2 * v3d_utile_height((int)cpp);
     ULONG pw = (w + 4 * ub_w - 1) / (4 * ub_w) * (4 * ub_w);
@@ -273,10 +274,10 @@ static BOOL zs_alloc(UWORD w, UWORD h, ULONG cpp, v3d_mem *mem, ULONG *base, ULO
 static BOOL rb_zs_storage(struct OGLES2Renderbuffer *rb)
 {
     ULONG cpp = rb->format == GL_DEPTH_COMPONENT16 ? 2 : rb->format == GL_STENCIL_INDEX8 ? 1 : 4;
-    if (!zs_alloc(rb->w, rb->h, cpp, &rb->mem, &rb->base, &rb->ub, &rb->bytes))
+    if (!ogles2_fbo_zs_alloc(rb->w, rb->h, cpp, &rb->mem, &rb->base, &rb->ub, &rb->bytes))
         return FALSE;
     rb->cpp = (UBYTE)cpp;
-    if (rb->format == GL_DEPTH32F_STENCIL8 && !zs_alloc(rb->w, rb->h, 1, &rb->smem, &rb->sbase, &rb->sub, &rb->sbytes))
+    if (rb->format == GL_DEPTH32F_STENCIL8 && !ogles2_fbo_zs_alloc(rb->w, rb->h, 1, &rb->smem, &rb->sbase, &rb->sub, &rb->sbytes))
         return FALSE; /* rb_free_storage frees the depth */
     return TRUE;
 }
@@ -1003,13 +1004,16 @@ static BOOL discard_bits(struct OGLES2Context *ctx, const struct OGLES2Framebuff
 }
 
 /* The images' contents become undefined: the open job of that framebuffer
- * does not store them, and its next job does not load them (Mesa: the
- * job's store and load masks). The default framebuffer: depth and stencil
- * are then not kept across a mid-frame flush; its colour is always kept. */
+ * does not store them unless it draws or clears again (draw.c, job.c: ES
+ * 3.0 programs go on drawing after an invalidation), and with no job open
+ * the next one does not load them (Mesa: the job's store and load masks).
+ * The default framebuffer: depth and stencil are then not kept across a
+ * mid-frame flush; its colour is always kept. */
 static void discard(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb, UBYTE bits)
 {
-    if (!fb) {
-        if (bits & (OGLES2_DISCARD_DEPTH | OGLES2_DISCARD_STENCIL)) {
+    if (!fb) { /* one D24S8 image: kept unless both go */
+        if ((bits & (OGLES2_DISCARD_DEPTH | OGLES2_DISCARD_STENCIL)) ==
+            (OGLES2_DISCARD_DEPTH | OGLES2_DISCARD_STENCIL)) {
             if (ctx->v3d && ctx->v3d->frame_active && !ctx->job_fb)
                 ctx->job_discard |= OGLES2_DISCARD_DEPTH | OGLES2_DISCARD_STENCIL;
             else
@@ -1019,7 +1023,8 @@ static void discard(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb, UBY
     }
     if (ctx->v3d && ctx->v3d->frame_active && ctx->job_fb == fb)
         ctx->job_discard |= bits;
-    fb->discarded |= bits;
+    else
+        fb->discarded |= bits;
 }
 
 void ogles2_glDiscardFramebufferEXT(struct OGLES2Context *ctx, GLenum target, GLsizei numAttachments,
@@ -1383,7 +1388,7 @@ void ogles2_fb_update(struct OGLES2Context *ctx)
         }
         if (s->type == GL_TEXTURE && ogles2_texture_depth(s->tex, s->level, &bits, &st) && st) {
             ctx->fb_stencil_bits = 8;
-            ctx->fb_depth_format = OGLES2_DEPTH_24;
+            ctx->fb_depth_format = bits == 32 ? OGLES2_DEPTH_32F : OGLES2_DEPTH_24;
         }
     }
 }
@@ -1544,18 +1549,25 @@ BOOL ogles2_fbo_target(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb, 
         }
     }
     /* OES_depth_texture: the depth texture's level itself; a depth-stencil
-     * texture for both is one packed image, as a D24S8 renderbuffer. */
+     * texture for both is one packed image, as a D24S8 renderbuffer; a
+     * DEPTH32F_STENCIL8 one has its stencil apart, as the renderbuffer. */
     if (d->type == GL_TEXTURE) {
         if (!ogles2_texture_zs_surface(ctx, d->tex, d->level, &t->z))
             return FALSE;
         t->has_z = TRUE;
-        t->packed_zs = same_image(d, s);
+        t->packed_zs = same_image(d, s) && t->z.format == V3D_OUTPUT_IMAGE_FORMAT_D24S8;
     }
-    if (s->type == GL_TEXTURE && !t->packed_zs) { /* a depth-stencil texture as the stencil only */
+    if (s->type == GL_TEXTURE && !t->packed_zs) {
+        if (ogles2_texture_s8_surface(ctx, s->tex, s->level, &t->s)) {
+            t->has_s = TRUE;
+            if (same_image(d, s))
+                return TRUE;
+        }
+        /* a depth-stencil texture as the stencil only: its depth in the tile buffer */
         if (!ogles2_texture_zs_surface(ctx, s->tex, s->level, &t->z))
             return FALSE;
         t->has_z = TRUE;
-        t->packed_zs = TRUE;
+        t->packed_zs = !t->has_s;
     }
     return TRUE;
 }
@@ -1670,6 +1682,148 @@ BOOL ogles2_fbo_write(struct OGLES2Context *ctx, int rt, int x, int y, int w, in
         return ogles2_texture_write(c->tex, c->face, c->level, x, y, w, h, src, stride, mask);
     return c->type == GL_RENDERBUFFER && c->rb->color &&
            ogles2_texture_write(c->rb->color, 0, 0, x, y, w, h, src, stride, mask);
+}
+
+/* ---- glBlitFramebuffer's depth and stencil (blit.c) ----
+ * Renderbuffers only: their images are UIF without XOR, padded as
+ * rb_zs_storage pads them, which v3dcore's CPU tiling reads and writes
+ * through a one-level texture view; a D24S8 texel's stencil is its low
+ * byte (little-endian), its depth the other three; DEPTH32F_STENCIL8's
+ * stencil an S8 image of its own. */
+
+/* The depth (stencil FALSE) or stencil renderbuffer format of fb's
+ * attachment, as blit.c compares them (the default framebuffer's as the
+ * renderbuffer it would be); 0: none blittable (no attachment, a texture). */
+GLenum ogles2_fbo_zs_format(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb, BOOL stencil)
+{
+    const struct OGLES2Attachment *at;
+    if (!fb) {
+        if (stencil ? !ctx->stencil_bits : !ctx->depth_bits)
+            return 0;
+        return ctx->depth_format == OGLES2_DEPTH_24    ? GL_DEPTH24_STENCIL8_OES
+             : ctx->depth_format == OGLES2_DEPTH_32F ? GL_DEPTH_COMPONENT32F
+                                                     : GL_DEPTH_COMPONENT16;
+    }
+    at = &fb->att[stencil ? ATT_STENCIL : ATT_DEPTH];
+    return at->type == GL_RENDERBUFFER && at->rb->base ? at->rb->format : 0;
+}
+
+/* A texture view of renderbuffer rb's depth image (sep: DEPTH32F_STENCIL8's
+ * separate stencil). */
+static void zs_view(const struct OGLES2Renderbuffer *rb, BOOL sep, V3DTexture *v)
+{
+    ULONG cpp = sep ? 1 : rb->cpp;
+    ULONG ub_w = 2 * v3d_utile_width((int)cpp), ub_h = 2 * v3d_utile_height((int)cpp);
+    ULONG pw = (rb->w + 4 * ub_w - 1) / (4 * ub_w) * (4 * ub_w), ph = (rb->h + ub_h - 1) / ub_h * ub_h;
+    memset(v, 0, sizeof(*v));
+    v->texture_mem.hostptr = (void *)(sep ? rb->sbase : rb->base);
+    v->width = rb->w;
+    v->height = rb->h;
+    v->cpp = (v3d_u8)cpp;
+    v->num_levels = 1;
+    v->levels[0].offset = 0;
+    v->levels[0].stride = pw * cpp;
+    v->levels[0].padded_w = (v3d_u16)pw;
+    v->levels[0].padded_h = (v3d_u16)ph;
+    v->levels[0].tiling_format = V3D_MEMORY_FORMAT_UIF_NO_XOR;
+    v->tiling_format = V3D_MEMORY_FORMAT_UIF_NO_XOR;
+}
+
+/* One side of a depth or stencil blit: its image as a texture view, the
+ * bytes of a texel the part is (a mask: bit i byte i), and the rows the
+ * framebuffer has (the default one's are stored top down: flip). */
+struct zs_side
+{
+    V3DTexture v;
+    ULONG w, h;
+    UBYTE bytes;
+    BOOL flip;
+};
+
+static BOOL zs_side(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb, BOOL stencil, struct zs_side *z)
+{
+    if (!fb) {
+        if (!ogles2_job_zs_view(ctx, &z->v))
+            return FALSE;
+        z->w = ctx->width < z->v.width ? ctx->width : z->v.width;
+        z->h = ctx->height < z->v.height ? ctx->height : z->v.height;
+        z->flip = TRUE;
+        z->bytes = stencil ? 1 : ctx->depth_format == OGLES2_DEPTH_24 ? 0x0e : z->v.cpp == 2 ? 0x03 : 0x0f;
+    } else {
+        const struct OGLES2Renderbuffer *rb = fb->att[stencil ? ATT_STENCIL : ATT_DEPTH].rb;
+        zs_view(rb, stencil && rb->format == GL_DEPTH32F_STENCIL8, &z->v);
+        z->w = rb->w;
+        z->h = rb->h;
+        z->flip = FALSE;
+        if (stencil)
+            z->bytes = 1; /* S8, the separate S8, or D24S8's low byte */
+        else
+            z->bytes = rb->format == GL_DEPTH24_STENCIL8_OES || rb->format == GL_DEPTH_COMPONENT24 ? 0x0e
+                     : rb->cpp == 2 ? 0x03 : 0x0f;
+    }
+    return TRUE;
+}
+
+/* The depth or stencil blit: the destination box ox0..ox1, oy0..oy1 (in
+ * the draw framebuffer, clipped) takes, byte by byte, the nearest texel
+ * of the source rectangle mapped as glBlitFramebuffer maps it; texels
+ * whose sample is outside the read framebuffer's image are left. The
+ * default framebuffer's are those it keeps across a mid-frame flush (job.c):
+ * none before anything was drawn or cleared, and none with 4x MSAA. */
+void ogles2_fbo_blit_zs(struct OGLES2Context *ctx, BOOL stencil, GLint sx0, GLint sy0, GLint sx1, GLint sy1,
+                        GLint dx0, GLint dy0, GLint dx1, GLint dy1, LONG ox0, LONG oy0, LONG ox1, LONG oy1)
+{
+    static BOOL logged;
+    struct zs_side sz, dz;
+    ULONG cpp, sw, sh, dw, dh;
+    UBYTE *src, *dst;
+    GLfloat scx = (GLfloat)(sx1 - sx0) / (GLfloat)(dx1 - dx0), scy = (GLfloat)(sy1 - sy0) / (GLfloat)(dy1 - dy0);
+    LONG x, y;
+    int b;
+    if (!zs_side(ctx, ctx->read_fb, stencil, &sz) || !zs_side(ctx, ctx->draw_fb, stencil, &dz)) {
+        if (!logged) {
+            logged = TRUE;
+            ogles2_log("glBlitFramebuffer: the default framebuffer's depth and stencil are blitted only once "
+                       "something was drawn or cleared, and not with 4x MSAA (logged once)");
+        }
+        return;
+    }
+    cpp = dz.v.cpp;
+    sw = sz.v.width;
+    sh = sz.v.height;
+    dw = dz.v.width;
+    dh = dz.v.height;
+    if (sz.v.cpp != cpp || sz.bytes != dz.bytes || ox0 >= ox1 || oy0 >= oy1)
+        return;
+    if (!(src = AllocVec(sw * sh * cpp, MEMF_ANY)) || !(dst = AllocVec(dw * dh * cpp, MEMF_ANY))) {
+        if (src)
+            FreeVec(src);
+        ogles2_error(ctx, GL_OUT_OF_MEMORY);
+        return;
+    }
+    v3d_texture_load(ogles2_device(), &sz.v, 0, src, sw * cpp, 0, 0, (int)sw, (int)sh);
+    v3d_texture_load(ogles2_device(), &dz.v, 0, dst, dw * cpp, 0, 0, (int)dw, (int)dh);
+    for (y = oy0; y < oy1 && y < (LONG)dz.h; y++)
+        for (x = ox0; x < ox1 && x < (LONG)dz.w; x++) {
+            GLfloat u = (GLfloat)sx0 + ((GLfloat)x + 0.5f - (GLfloat)dx0) * scx;
+            GLfloat v = (GLfloat)sy0 + ((GLfloat)y + 0.5f - (GLfloat)dy0) * scy;
+            LONG iu = (LONG)(u < 0.0f ? u - 1.0f : u), iv = (LONG)(v < 0.0f ? v - 1.0f : v);
+            ULONG sr, dr;
+            const UBYTE *s;
+            UBYTE *d;
+            if (iu < 0 || iv < 0 || iu >= (LONG)sz.w || iv >= (LONG)sz.h)
+                continue;
+            sr = sz.flip ? sz.h - 1 - (ULONG)iv : (ULONG)iv;
+            dr = dz.flip ? dz.h - 1 - (ULONG)y : (ULONG)y;
+            s = src + (sr * sw + (ULONG)iu) * cpp;
+            d = dst + (dr * dw + (ULONG)x) * cpp;
+            for (b = 0; b < (int)cpp; b++)
+                if (dz.bytes & (1 << b))
+                    d[b] = s[b];
+        }
+    v3d_texture_store(ogles2_device(), &dz.v, 0, dst, dw * cpp, 0, 0, (int)dw, (int)dh);
+    FreeVec(dst);
+    FreeVec(src);
 }
 
 /* ES 3.0 4.3.1: the read buffer's format as a render target (its kind
