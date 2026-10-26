@@ -1376,6 +1376,193 @@ static void test_rt_mixed_clears(void)
     glDeleteProgram(p);
 }
 
+/* ES 3.0's framebuffers (GLES3 plan stage B item 11): a separate read
+ * binding (glReadPixels from an object while the default framebuffer is
+ * drawn into), GL_DEPTH_STENCIL_ATTACHMENT, a 2D array's layer and a 3D
+ * texture's slice drawn into and sampled, glInvalidateFramebuffer's checks. */
+static void test_framebuffers(void)
+{
+    static const GLfloat red[4] = { 1, 0, 0, 1 }, green[4] = { 0, 1, 0, 1 }, blue[4] = { 0, 0, 1, 1 };
+    static const GLint iv[4] = { 0, 0, 0, 0 };
+    static const GLuint uv[4] = { 0, 0, 0, 0 };
+    static const GLenum inv[2] = { GL_COLOR_ATTACHMENT0, GL_DEPTH_STENCIL_ATTACHMENT };
+    GLuint pr = program("es3rt"), pa = program("es3layer"), pv = program("es3vol"), fb, rb, t[3];
+    GLint rd = -1, dr = -1, type = 0;
+    if (!pr || !pa || !pv) {
+        check(0, "framebuffers: es3rt, es3layer and es3vol link");
+        return;
+    }
+    glGenFramebuffers(1, &fb);
+    glGenTextures(3, t);
+    glGenRenderbuffers(1, &rb);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb);
+    glBindTexture(GL_TEXTURE_2D, t[0]);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, 16, 16);
+    glBindRenderbuffer(GL_RENDERBUFFER, rb);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 16, 16);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, t[0], 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rb);
+    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
+                                          GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
+    check(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE && type == GL_RENDERBUFFER &&
+              glGetError() == GL_NO_ERROR,
+          "framebuffers: GL_DEPTH_STENCIL_ATTACHMENT sets depth and stencil");
+    glViewport(0, 0, 16, 16);
+    rt_uniforms(pr, red, iv, uv, 0.0f);
+    draw_cover(pr);
+    /* the object for reading, the default framebuffer for drawing */
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glViewport(0, 0, 64, 64);
+    rt_uniforms(pr, green, iv, uv, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(pr);
+    glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &rd);
+    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &dr);
+    check(rd == (GLint)fb && dr == 0 && pixel_is(8, 8, 255, 0, 0, 255, 0),
+          "framebuffers: glReadPixels from the read binding (red) while drawing into the default one");
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    check(pixel_is(8, 8, 0, 255, 0, 255, 0), "framebuffers: the default framebuffer drawn green");
+    glBindFramebuffer(GL_FRAMEBUFFER, fb);
+    glInvalidateFramebuffer(GL_FRAMEBUFFER, 2, inv);
+    check(glGetError() == GL_NO_ERROR, "framebuffers: glInvalidateFramebuffer of colour and depth-stencil");
+    {
+        static const GLenum bad[1] = { GL_COLOR_ATTACHMENT0 + 7 };
+        glInvalidateFramebuffer(GL_FRAMEBUFFER, 1, bad);
+        check(glGetError() == GL_INVALID_OPERATION, "framebuffers: an attachment past the last: GL_INVALID_OPERATION");
+    }
+
+    /* layer 1 of a 2D array, slice 2 of a 3D texture */
+    glBindTexture(GL_TEXTURE_2D_ARRAY, t[1]);
+    glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, 16, 16, 3);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glBindTexture(GL_TEXTURE_3D, t[2]);
+    glTexStorage3D(GL_TEXTURE_3D, 1, GL_RGBA8, 16, 16, 4);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0);
+    glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, t[1], 0, 1);
+    glViewport(0, 0, 16, 16);
+    rt_uniforms(pr, blue, iv, uv, 0.0f);
+    draw_cover(pr);
+    check(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE && pixel_is(4, 4, 0, 0, 255, 255, 0),
+          "framebuffers: a 2D array's layer 1 drawn blue");
+    glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, t[2], 0, 2);
+    rt_uniforms(pr, green, iv, uv, 0.0f);
+    draw_cover(pr);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, 64, 64);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, t[1]);
+    glUseProgram(pa);
+    glUniform1i(glGetUniformLocation(pa, "tex"), 0);
+    check(layer_is(pa, "layer", 1.0f, 0, 0, 255, 1),
+          "framebuffers: the array sampled: layer 1 blue");
+    glBindTexture(GL_TEXTURE_3D, t[2]);
+    glUseProgram(pv);
+    glUniform1i(glGetUniformLocation(pv, "tex"), 0);
+    check(layer_is(pv, "z", 2.5f / 4.0f, 0, 255, 0, 1) &&
+              glGetError() == GL_NO_ERROR,
+          "framebuffers: the 3D texture sampled: slice 2 green");
+    glDeleteFramebuffers(1, &fb);
+    glDeleteTextures(3, t);
+    glDeleteRenderbuffers(1, &rb);
+    glDeleteProgram(pr);
+    glDeleteProgram(pa);
+    glDeleteProgram(pv);
+}
+
+/* glBlitFramebuffer (item 11, colour on the CPU): a 16x16 RGBA8 object,
+ * red left and green right, scaled twice into the default framebuffer;
+ * mirrored; RGBA32F into RGBA32F with the scissor test; and the default
+ * framebuffer back into an object. */
+static void test_blit(void)
+{
+    static const GLfloat red[4] = { 1, 0, 0, 1 }, green[4] = { 0, 1, 0, 1 }, f[4] = { 0.25f, -2.0f, 100.5f, 0.5f };
+    static const GLfloat zero[4] = { 0, 0, 0, 0 };
+    static const GLint iv[4] = { 0, 0, 0, 0 };
+    static const GLuint uv[4] = { 0, 0, 0, 0 };
+    GLuint p = program("es3rt"), fb[3], t[3];
+    int k;
+    if (!p) {
+        check(0, "blit: es3rt links");
+        return;
+    }
+    glGenFramebuffers(3, fb);
+    glGenTextures(3, t);
+    for (k = 0; k < 3; k++) {
+        glBindTexture(GL_TEXTURE_2D, t[k]);
+        glTexStorage2D(GL_TEXTURE_2D, 1, k == 2 ? GL_RGBA8 : k ? GL_RGBA32F : GL_RGBA8, 16, 16);
+        glBindFramebuffer(GL_FRAMEBUFFER, fb[k]);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, t[k], 0);
+    }
+    /* object 0: red left, green right */
+    glBindFramebuffer(GL_FRAMEBUFFER, fb[0]);
+    glViewport(0, 0, 16, 16);
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(0, 0, 8, 16);
+    rt_uniforms(p, red, iv, uv, 0.0f);
+    draw_cover(p);
+    glScissor(8, 0, 8, 16);
+    rt_uniforms(p, green, iv, uv, 0.0f);
+    draw_cover(p);
+    glDisable(GL_SCISSOR_TEST);
+    /* scaled twice into the default framebuffer, then mirrored */
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fb[0]);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glViewport(0, 0, 64, 64);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glBlitFramebuffer(0, 0, 16, 16, 0, 0, 32, 32, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    check(pixel_is(4, 4, 255, 0, 0, 255, 0) && pixel_is(28, 28, 0, 255, 0, 255, 0) && glGetError() == GL_NO_ERROR,
+          "blit: an RGBA8 object scaled twice into the default framebuffer");
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fb[0]);
+    glBlitFramebuffer(0, 0, 16, 16, 48, 0, 32, 16, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    check(pixel_is(46, 4, 255, 0, 0, 255, 0) && pixel_is(34, 4, 0, 255, 0, 255, 0) && glGetError() == GL_NO_ERROR,
+          "blit: mirrored (green left, red right)");
+
+    /* RGBA32F into RGBA32F, the scissor box confining it */
+    glBindFramebuffer(GL_FRAMEBUFFER, fb[1]);
+    glViewport(0, 0, 16, 16);
+    rt_uniforms(p, f, iv, uv, 0.0f);
+    draw_cover(p);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb[2]); /* an RGBA8 one, to have a second float target: t[1] again */
+    glBindTexture(GL_TEXTURE_2D, t[2]);
+    {
+        GLuint t4;
+        glGenTextures(1, &t4);
+        glBindTexture(GL_TEXTURE_2D, t4);
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, 16, 16);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, t4, 0);
+        glClearBufferfv(GL_COLOR, 0, zero);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, fb[1]);
+        glEnable(GL_SCISSOR_TEST);
+        glScissor(0, 0, 8, 16);
+        glBlitFramebuffer(0, 0, 16, 16, 0, 0, 16, 16, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        glDisable(GL_SCISSOR_TEST);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, fb[2]);
+        check(floats_are(4, 4, f, 0.0f) && floats_are(12, 4, zero, 0.0f) && glGetError() == GL_NO_ERROR,
+              "blit: RGBA32F into RGBA32F within the scissor box");
+        glBindFramebuffer(GL_FRAMEBUFFER, fb[2]);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, t[2], 0);
+        glDeleteTextures(1, &t4);
+    }
+    /* the default framebuffer (red at 4,4) back into object 2 */
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb[2]);
+    glBlitFramebuffer(0, 0, 16, 16, 0, 0, 16, 16, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fb[2]);
+    check(pixel_is(4, 4, 255, 0, 0, 255, 0) && glGetError() == GL_NO_ERROR,
+          "blit: the default framebuffer into an object");
+    glBlitFramebuffer(0, 0, 16, 16, 0, 0, 16, 16, GL_DEPTH_BUFFER_BIT, GL_LINEAR);
+    check(glGetError() == GL_INVALID_OPERATION, "blit: depth with GL_LINEAR is GL_INVALID_OPERATION");
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, 64, 64);
+    glDeleteFramebuffers(3, fb);
+    glDeleteTextures(3, t);
+    glDeleteProgram(p);
+}
+
 /* Texel (x, y) of t sampled (es3tc, nearest) is (r, g, b). */
 static int texel_at(GLuint p, GLuint t, int w, int h, int x, int y, int r, int g, int b)
 {
@@ -1601,6 +1788,8 @@ int main(void)
     test_rt_depth32f();
     test_rendered_textures();
     test_rt_mixed_clears();
+    test_framebuffers();
+    test_blit();
     check(glGetError() == GL_NO_ERROR, "no GL error left over");
     aglDestroyContext(ctx);
     if ((ctx = aglCreateContextTags2(&e, OGLES2_CCT_BITMAP, (ULONG)bm, OGLES2_CCT_PISTORM_ES_VERSION, 30,

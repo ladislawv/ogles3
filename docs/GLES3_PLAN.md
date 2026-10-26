@@ -178,10 +178,11 @@ Mesa's driver, so they could follow later as an extension
     colour write of the wrong width into a 32-bit float or integer target
     leaves the A1200 drawing wrong pixels until it is switched off (§5 item
     10; CONTRIBUTING.md, "Traps"): after a GPU-heavy run, `m7-4` passing is
-    the check that the machine is sound. Next: item 11 (framebuffers: the
-    draw and read bindings, `GL_DEPTH_STENCIL_ATTACHMENT`, layers,
-    `glBlitFramebuffer`, invalidation; most of `fbo`'s 877 failures), then
-    item 8's rest.
+    the check that the machine is sound. Since then most of item 11
+    (the draw and read bindings, `GL_DEPTH_STENCIL_ATTACHMENT`, layers,
+    invalidation, ES 3.0's completeness and queries, colour blits):
+    `fbo` 1963 of 2075. Next: item 11's depth and stencil blits, then
+    item 8's rest and item 12's.
     **Trap:**
     `ports/deqp/build.sh` copies the CTS with `rsync -a`, which keeps the
     sources' old dates, so a patch changed or removed rebuilds nothing:
@@ -1783,6 +1784,48 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
     attachments, if both present, must be the same image, else
     `FRAMEBUFFER_UNSUPPORTED` (1.3 allows a `DEPTH_COMPONENT16` and a
     separate `STENCIL_INDEX8`). GLES2 contexts keep GLES 2.0's rules.
+
+    **Done in part (2026-10-26, on the A1200).** The draw and read
+    bindings (`ctx->read_fb`; `GL_FRAMEBUFFER` both, `GL_DRAW_FRAMEBUFFER`
+    and `GL_READ_FRAMEBUFFER` one each, in ES3 contexts; names
+    glGenFramebuffers did not return are bound as GLES2 allows, as Mesa
+    does for ES), each entry on its target's framebuffer; reads
+    (glReadPixels, glCopyTex*, the implementation read format) put the read
+    binding in the draw binding's place while they run
+    (`ogles2_fbo_read_begin`, `_end`), so their code is unchanged;
+    `GL_DEPTH_STENCIL_ATTACHMENT` (both points); glFramebufferTextureLayer
+    (a 2D array's layer, a 3D texture's slice: `face_gpu`'s address, the
+    attachment's `face` 16 bits); glInvalidateFramebuffer as
+    EXT_discard_framebuffer for either binding, glInvalidateSubFramebuffer
+    checked and kept (as the specification allows); ES 3.0's completeness
+    (attachments of different sizes complete, drawing their common area;
+    `INCOMPLETE_MULTISAMPLE` from renderbuffers' sample counts; depth and
+    stencil one image or `UNSUPPORTED`) and attachment queries (the
+    default framebuffer's `GL_BACK`, `GL_DEPTH`, `GL_STENCIL`, the
+    depth-stencil point, an empty one's `GL_NONE` and 0, sizes, component
+    type, colour encoding, layer); deleting an object detaches it from both
+    bindings. glBlitFramebuffer (`blit.c`) does colour on the CPU for every
+    format: the source rectangle read back as floats or integers (sRGB
+    decoded; the default framebuffer's bitmap too), nearest or bilinear
+    per destination pixel with flips, the scissor box, pixels whose sample
+    is outside the read framebuffer left alone, each draw buffer written
+    (`ogles2_texture_write`: the RAM copy, sRGB encoded, and the GPU copy;
+    `ogles2_display_write` for the bitmap), with ES 3.0's errors (integer
+    against float, integers or depth with `GL_LINEAR`). `m8_draw`'s read
+    and draw bindings, the depth-stencil point, a layer and a slice drawn
+    and sampled, invalidation errors, blits scaled, mirrored, RGBA32F
+    within the scissor box and from the default framebuffer
+    (`ogles2-m8-1-20261026-122633`: 116 of 116 three ways); dEQP-GLES3 `fbo`
+    1963 of 2075 (was 1157; `ogles2-m8-2-20261026-122716`),
+    `fragment_ops.scissor` 26 of 26 (`ogles2-m8-2-20261026-121255`),
+    `negative_api` 272 of 314; dEQP-GLES2's `fbo` 709 of 709 and
+    `negative_api` 246 of 246 (`ogles2-m7-1-20261026-121331`, `-121532`).
+    Left: depth and stencil blits (the 14 `fbo.blit.depth_stencil` cases and
+    most of the `invalidate` and `msaa` ones that blit them; renderbuffer
+    depth and stencil are GPU-only images: Mesa's GPU paths), the six 32-bit
+    float `render.shared_colorbuffer_clear` cases, a
+    `DEPTH32F_STENCIL8` texture's stencil, multisampling (stage C), and the
+    GPU paths for colour blits (Mesa's order above) where the CPU is slow.
 12. **Smaller ones:** sync objects (`glFenceSync`, `glClientWaitSync`,
     `glWaitSync`: a fence is the library's job serial, `ctx->job_serial`, done
     when that job has rendered, not the GPU's 8-bit counters;

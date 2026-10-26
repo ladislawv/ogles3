@@ -2647,9 +2647,10 @@ GLenum ogles2_texture_target(const struct OGLES2Texture *t)
 BOOL ogles2_texture_image(const struct OGLES2Texture *t, int k, int l, UWORD *w, UWORD *h,
                           GLenum *format, GLenum *type)
 {
-    const struct OGLES2Face *f = &t->f[k];
-    if (k < 0 || k > 5 || l < 0 || l >= MAX_LEVELS || !(f->defined & (1UL << l)))
-        return FALSE;
+    const struct OGLES2Face *f;
+    if (k < 0 || k >= t->nf || l < 0 || l >= MAX_LEVELS || !(t->f[k].defined & (1UL << l)))
+        return FALSE; /* faces: a cube map's, a 2D array's layers, a 3D texture's slices */
+    f = &t->f[k];
     *w = f->w[l];
     *h = f->h[l];
     *format = f->format[l];
@@ -2782,9 +2783,12 @@ static int rt_out(const struct OGLES2Texture *t, const struct OGLES2Face *f, int
 BOOL ogles2_texture_rt(struct OGLES2Texture *t, int k, int l, struct OGLES2RtFormat *rf)
 {
     static const UBYTE swz[4][4] = { { 0, 1, 2, 3 }, { 0, 1, 2, 5 }, { 0, 1, 4, 5 }, { 0, 4, 4, 5 } };
-    const struct OGLES2Face *f = &t->f[k], *f0 = &t->f[0];
+    const struct OGLES2Face *f, *f0 = &t->f[0];
     const struct rt_desc *e;
     int out;
+    if (k < 0 || k >= t->nf)
+        return FALSE;
+    f = &t->f[k];
     if (l < 0 || l >= MAX_LEVELS || !(f->defined & (1UL << l)) || !(f0->defined & 1) ||
         f->format[l] != f0->format[0] || f->type[l] != f0->type[0] || f->sized[l] != f0->sized[0])
         return FALSE;
@@ -2837,8 +2841,13 @@ BOOL ogles2_texture_surface(struct OGLES2Context *ctx, struct OGLES2Texture *t, 
     if (!(g = t->gpu) || l >= g->num_levels)
         return FALSE; /* not in the chain (a level of another size), or a cube map not complete */
     cpp = t->cpp;
-    s->addr = V3D_ALIGN_UP((v3d_uintptr)g->texture_mem.hostptr, 256) + (ULONG)k * t->face_stride +
-              g->levels[l].offset;
+    {
+        /* face k: a cube map's face or a 2D array's layer a face stride on,
+         * a 3D texture's slice within its level (face_gpu) */
+        V3DTexture tmp;
+        const V3DTexture *gk = face_gpu(t, k, l, &tmp);
+        s->addr = V3D_ALIGN_UP((v3d_uintptr)gk->texture_mem.hostptr, 256) + gk->levels[l].offset;
+    }
     s->bytes = g->levels[l].stride * g->levels[l].padded_h;
     s->mem_format = g->levels[l].tiling_format;
     s->format = rf.out;
@@ -2916,6 +2925,8 @@ BOOL ogles2_texture_wide(struct OGLES2Context *ctx, int unit, int kind)
 
 void ogles2_texture_rendered(struct OGLES2Texture *t, int k, int l)
 {
+    if (k >= t->nf)
+        return;
     t->f[k].rendered |= 1UL << l;
     t->f[k].blank &= ~(1UL << l);
 }
@@ -3051,6 +3062,55 @@ static BOOL fill_bytes(struct OGLES2Texture *t, int k, int l, int x, int y, int 
                     d[c] = b[c];
         memcpy(box + (ULONG)j * row, f->shadow[l] + ((ULONG)(y + j) * f->w[l] + x) * 4, row);
     }
+    f->blank &= ~(1UL << l);
+    if (t->gpu && l < t->gpu->num_levels && consistent(f, l))
+        store_box(t, k, l, box, x, y, w, h);
+    else
+        upload_all(t);
+    FreeVec(box);
+    return TRUE;
+}
+
+/* glBlitFramebuffer's write (blit.c): a box of level l of face k from
+ * 16-byte texels `stride` bytes a row (RGBA floats, or 32-bit integers for
+ * an integer level), those `mask` marks (0: all), into the RAM copy (an
+ * 8-bit one clamped and rounded, sRGB encoded), stored again. */
+BOOL ogles2_texture_write(struct OGLES2Texture *t, int k, int l, int x, int y, int w, int h, const UBYTE *src,
+                          ULONG stride, const UBYTE *mask)
+{
+    struct OGLES2Face *f;
+    BOOL srgb;
+    ULONG cb;
+    UBYTE *box;
+    int cls, i, j, c;
+    if (k < 0 || k >= t->nf || w <= 0 || h <= 0)
+        return FALSE;
+    f = &t->f[k];
+    cls = level_class(f, l);
+    if (!f->shadow[l] || (cls != CLASS_FLOAT && cls != CLASS_RGBA8))
+        return FALSE;
+    srgb = f->sized[l] == GL_SRGB8_ALPHA8;
+    cb = copy_bytes(cls);
+    sync(t);
+    if (!(box = AllocVec((ULONG)w * h * cb, MEMF_ANY)))
+        return FALSE;
+    for (j = 0; j < h; j++)
+        for (i = 0; i < w; i++) {
+            const UBYTE *s = src + (ULONG)j * stride + (ULONG)i * 16;
+            UBYTE *d = f->shadow[l] + ((ULONG)(y + j) * f->w[l] + x + i) * cb;
+            if (!mask || mask[(ULONG)j * w + i]) {
+                if (cls == CLASS_FLOAT) {
+                    memcpy(d, s, 16);
+                } else {
+                    for (c = 0; c < 4; c++) {
+                        GLfloat fv = ((const GLfloat *)s)[c];
+                        fv = fv < 0.0f ? 0.0f : fv > 1.0f ? 1.0f : fv;
+                        d[c] = srgb && c < 3 ? srgb_byte(fv) : (UBYTE)(fv * 255.0f + 0.5f);
+                    }
+                }
+            }
+            memcpy(box + ((ULONG)j * w + i) * cb, d, cb);
+        }
     f->blank &= ~(1UL << l);
     if (t->gpu && l < t->gpu->num_levels && consistent(f, l))
         store_box(t, k, l, box, x, y, w, h);
@@ -4091,9 +4151,37 @@ static UBYTE *read_region(struct OGLES2Context *ctx, GLint x, GLint y, GLsizei w
     return out;
 }
 
+static void copy_tex_image(struct OGLES2Context *ctx, GLenum target, GLint level, GLenum internalformat, GLint x,
+                           GLint y, GLsizei width, GLsizei height, GLint border);
+static void copy_tex_sub_image(struct OGLES2Context *ctx, GLenum target, GLint level, GLint xoffset, GLint yoffset,
+                               GLint x, GLint y, GLsizei width, GLsizei height);
+
+/* ES 3.0: from the read framebuffer (fbo.c, ogles2_fbo_read_begin). */
 void ogles2_glCopyTexImage2D(struct OGLES2Context *ctx, GLenum target, GLint level,
                              GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height,
                              GLint border)
+{
+    struct OGLES2Framebuffer *saved;
+    if (!ogles2_context_valid(ctx))
+        return;
+    saved = ogles2_fbo_read_begin(ctx);
+    copy_tex_image(ctx, target, level, internalformat, x, y, width, height, border);
+    ogles2_fbo_read_end(ctx, saved);
+}
+
+void ogles2_glCopyTexSubImage2D(struct OGLES2Context *ctx, GLenum target, GLint level, GLint xoffset,
+                                GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height)
+{
+    struct OGLES2Framebuffer *saved;
+    if (!ogles2_context_valid(ctx))
+        return;
+    saved = ogles2_fbo_read_begin(ctx);
+    copy_tex_sub_image(ctx, target, level, xoffset, yoffset, x, y, width, height);
+    ogles2_fbo_read_end(ctx, saved);
+}
+
+static void copy_tex_image(struct OGLES2Context *ctx, GLenum target, GLint level, GLenum internalformat, GLint x,
+                           GLint y, GLsizei width, GLsizei height, GLint border)
 {
     UBYTE *img;
     struct OGLES2PixelStore unpack;
@@ -4142,8 +4230,8 @@ void ogles2_glCopyTexImage2D(struct OGLES2Context *ctx, GLenum target, GLint lev
     FreeVec(img);
 }
 
-void ogles2_glCopyTexSubImage2D(struct OGLES2Context *ctx, GLenum target, GLint level, GLint xoffset,
-                                GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height)
+static void copy_tex_sub_image(struct OGLES2Context *ctx, GLenum target, GLint level, GLint xoffset, GLint yoffset,
+                               GLint x, GLint y, GLsizei width, GLsizei height)
 {
     UBYTE *img;
     struct OGLES2PixelStore unpack;

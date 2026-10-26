@@ -646,7 +646,8 @@ struct OGLES2Context
      * stencil_bits/depth_format above are the default framebuffer's; the
      * fb_* fields describe the framebuffer drawn into now (ogles2_fb_update). */
     struct OGLES2FboState *fbo;     /* fbo.c's, NULL until first used */
-    struct OGLES2Framebuffer *draw_fb; /* GL_FRAMEBUFFER binding; NULL: the default */
+    struct OGLES2Framebuffer *draw_fb; /* GL_FRAMEBUFFER (ES 3.0: GL_DRAW_FRAMEBUFFER) binding; NULL: the default */
+    struct OGLES2Framebuffer *read_fb; /* ES 3.0's GL_READ_FRAMEBUFFER binding (GLES2: draw_fb's) */
     struct OGLES2Framebuffer *job_fb;  /* what the open job renders into */
     BOOL job_msaa;                  /* the open job is 4x MSAA (the default framebuffer's, job.c) */
     UWORD fb_w, fb_h;
@@ -845,7 +846,19 @@ struct OGLES2Texture *ogles2_texture_hidden_sized(struct OGLES2Context *ctx, UWO
 void ogles2_texture_hidden_free(struct OGLES2Context *ctx, struct OGLES2Texture *t);
 /* frame.c: GL_IMPLEMENTATION_COLOR_READ_FORMAT and _TYPE of the read buffer */
 void ogles2_read_format(struct OGLES2Context *ctx, GLenum *format, GLenum *type);
-/* fbo.c */
+/* glBlitFramebuffer's writes (blit.c): a box of a draw buffer, of a texture
+ * level, of the default framebuffer's bitmap. */
+BOOL ogles2_fbo_write(struct OGLES2Context *ctx, int rt, int x, int y, int w, int h, const UBYTE *src, ULONG stride,
+                      const UBYTE *mask);
+BOOL ogles2_texture_write(struct OGLES2Texture *t, int k, int l, int x, int y, int w, int h, const UBYTE *src,
+                          ULONG stride, const UBYTE *mask);
+void ogles2_display_write(struct OGLES2Display *d, UWORD x, UWORD y, UWORD w, UWORD h, const UBYTE *src,
+                          ULONG stride);
+/* fbo.c: reads (glReadPixels, glCopyTex*) work on the draw binding's
+ * framebuffer: the read binding's stands in for it meanwhile (begin returns
+ * what end puts back). */
+struct OGLES2Framebuffer *ogles2_fbo_read_begin(struct OGLES2Context *ctx);
+void ogles2_fbo_read_end(struct OGLES2Context *ctx, struct OGLES2Framebuffer *saved);
 BOOL ogles2_fbo_read_format(struct OGLES2Context *ctx, struct OGLES2RtFormat *rf); /* the read buffer's */
 BOOL ogles2_fbo_read_wide(struct OGLES2Context *ctx, int x, int y, int w, int h, UBYTE *out, ULONG stride);
 void ogles2_fb_update(struct OGLES2Context *ctx);       /* the fb_* fields from the binding */

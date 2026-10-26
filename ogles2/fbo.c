@@ -90,7 +90,8 @@ struct OGLES2Attachment
 {
     GLenum type;                /* GL_NONE, GL_TEXTURE, GL_RENDERBUFFER */
     struct OGLES2Texture *tex;
-    UBYTE face, level;
+    UWORD face;                 /* a cube map's face, a 2D array's layer, a 3D texture's slice */
+    UBYTE level;
     struct OGLES2Renderbuffer *rb;
 };
 
@@ -123,6 +124,28 @@ static struct OGLES2FboState *fs_get(struct OGLES2Context *ctx)
     if (!ctx->fbo && (ctx->fbo = AllocVec(sizeof(struct OGLES2FboState), MEMF_ANY | MEMF_CLEAR)))
         ctx->fbo->sh = ctx->share;
     return ctx->fbo;
+}
+
+/* A framebuffer target's bindings: GL_FRAMEBUFFER both, ES 3.0's
+ * GL_DRAW_FRAMEBUFFER and GL_READ_FRAMEBUFFER one each; 0: not a target. */
+#define FB_DRAW 1
+#define FB_READ 2
+static int fb_target(struct OGLES2Context *ctx, GLenum target)
+{
+    if (target == GL_FRAMEBUFFER)
+        return FB_DRAW | FB_READ;
+    if (ogles2_es3(ctx) && target == GL_DRAW_FRAMEBUFFER)
+        return FB_DRAW;
+    if (ogles2_es3(ctx) && target == GL_READ_FRAMEBUFFER)
+        return FB_READ;
+    return 0;
+}
+
+/* The framebuffer a target's attachments are changed or asked in (the
+ * draw framebuffer for GL_FRAMEBUFFER); NULL: the default one. */
+static struct OGLES2Framebuffer *target_fb(struct OGLES2Context *ctx, int which)
+{
+    return which == FB_READ ? ctx->read_fb : ctx->draw_fb;
 }
 
 /* Makes `name` an index of a name table of `*n` pointers. */
@@ -339,22 +362,24 @@ static void att_clear(struct OGLES2Context *ctx, struct OGLES2Attachment *at, BO
 /* glDeleteTextures: detached from the bound framebuffer, which renders first. */
 void ogles2_fbo_texture_deleted(struct OGLES2Context *ctx, struct OGLES2Texture *t)
 {
-    struct OGLES2Framebuffer *fb = ctx->draw_fb;
-    int a;
+    struct OGLES2Framebuffer *fbs[2];
+    int a, k;
     if (!ctx->fbo)
         return;
     ogles2_fbo_texture_changing(ctx, t);
-    if (!fb)
-        return;
-    for (a = 0; a < NATT; a++)
-        if (fb->att[a].type == GL_TEXTURE && fb->att[a].tex == t) {
-            before_fb_change(ctx, fb);
-            att_clear(ctx, &fb->att[a], FALSE);
-        }
+    fbs[0] = ctx->draw_fb;
+    fbs[1] = ctx->read_fb != ctx->draw_fb ? ctx->read_fb : 0; /* ES 3.0: both bindings */
+    for (k = 0; k < 2; k++)
+        if (fbs[k])
+            for (a = 0; a < NATT; a++)
+                if (fbs[k]->att[a].type == GL_TEXTURE && fbs[k]->att[a].tex == t) {
+                    before_fb_change(ctx, fbs[k]);
+                    att_clear(ctx, &fbs[k]->att[a], FALSE);
+                }
     ogles2_fb_update(ctx);
 }
 
-static GLenum status_of(struct OGLES2Framebuffer *fb);
+static GLenum status_of(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb);
 
 /* glCopyTexImage2D and glCopyTexSubImage2D on the GPU (copy.c): an object
  * of the context's own, never named or bound by the application, its colour
@@ -379,7 +404,7 @@ struct OGLES2Framebuffer *ogles2_fbo_copy_target(struct OGLES2Context *ctx, stru
     }
     at = &fb->att[ATT_COLOR];
     if (at->type == GL_TEXTURE && at->tex == t && at->face == face && at->level == level)
-        return status_of(fb) == GL_FRAMEBUFFER_COMPLETE ? fb : 0;
+        return status_of(ctx, fb) == GL_FRAMEBUFFER_COMPLETE ? fb : 0;
     before_fb_change(ctx, fb);
     ogles2_texture_attach(t); /* first: the same texture again must not free an orphan */
     att_clear(ctx, at, FALSE);
@@ -387,7 +412,7 @@ struct OGLES2Framebuffer *ogles2_fbo_copy_target(struct OGLES2Context *ctx, stru
     at->tex = t;
     at->face = (UBYTE)face;
     at->level = (UBYTE)level;
-    return status_of(fb) == GL_FRAMEBUFFER_COMPLETE ? fb : 0; /* no GL error: the CPU copies then */
+    return status_of(ctx, fb) == GL_FRAMEBUFFER_COMPLETE ? fb : 0; /* no GL error: the CPU copies then */
 }
 
 /* The bound framebuffer's colour image for glCopyTex* on the GPU (copy.c):
@@ -499,9 +524,10 @@ void ogles2_glBindFramebuffer(struct OGLES2Context *ctx, GLenum target, GLuint f
 {
     struct OGLES2FboState *fs;
     struct OGLES2Framebuffer *fb = 0;
+    int which;
     if (!ogles2_context_valid(ctx))
         return;
-    if (target != GL_FRAMEBUFFER) {
+    if (!(which = fb_target(ctx, target))) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
@@ -510,7 +536,8 @@ void ogles2_glBindFramebuffer(struct OGLES2Context *ctx, GLenum target, GLuint f
         return;
     }
     if (framebuffer) {
-        /* GLES2 lets a program bind a name glGenFramebuffers did not return. */
+        /* GLES2 lets a program bind a name glGenFramebuffers did not return
+         * (and ES 3.0: Mesa's allow_user_names for ES contexts). */
         if (!(fb = fb_by_name(fs, framebuffer))) {
             GLuint slot = ogles2_name_slot(&fs->far_fb, framebuffer, TRUE);
             if (slot == OGLES2_NO_SLOT || !table_room((void ***)&fs->fbs, &fs->nfbs, slot) ||
@@ -529,7 +556,10 @@ void ogles2_glBindFramebuffer(struct OGLES2Context *ctx, GLenum target, GLuint f
     /* The open job is rendered when something is drawn into the other
      * framebuffer (ogles2_job_begin), not here: binding back and forth
      * without drawing costs nothing. */
-    ctx->draw_fb = fb;
+    if (which & FB_DRAW)
+        ctx->draw_fb = fb;
+    if (which & FB_READ)
+        ctx->read_fb = fb;
     ogles2_fb_update(ctx);
 }
 
@@ -588,6 +618,8 @@ void ogles2_glDeleteFramebuffers(struct OGLES2Context *ctx, GLsizei n, const GLu
             ctx->draw_fb = 0;
             ogles2_fb_update(ctx);
         }
+        if (ctx->read_fb == fb)
+            ctx->read_fb = 0;
         for (a = 0; a < NATT; a++)
             att_clear(ctx, &fb->att[a], FALSE);
         fs->fbs[ogles2_name_slot(&fs->far_fb, fb->name, FALSE)] = 0;
@@ -602,7 +634,7 @@ void ogles2_glDeleteRenderbuffers(struct OGLES2Context *ctx, GLsizei n, const GL
     struct OGLES2Context *m;
     struct OGLES2Framebuffer *fb;
     GLsizei k;
-    int a;
+    int a, j;
     if (!ogles2_context_valid(ctx))
         return;
     if (n < 0) {
@@ -621,12 +653,13 @@ void ogles2_glDeleteRenderbuffers(struct OGLES2Context *ctx, GLsizei n, const GL
         for (m = ctx->share->first; m; m = m->share_next)
             if (m->fbo && m->fbo->rb_bound == rb)
                 m->fbo->rb_bound = 0;
-        if ((fb = ctx->draw_fb))
-            for (a = 0; a < NATT; a++)
-                if (fb->att[a].type == GL_RENDERBUFFER && fb->att[a].rb == rb) {
-                    before_fb_change(ctx, fb);
-                    att_clear(ctx, &fb->att[a], FALSE);
-                }
+        for (j = 0; j < 2; j++) /* the draw and (ES 3.0) the read binding */
+            if ((fb = j ? (ctx->read_fb != ctx->draw_fb ? ctx->read_fb : 0) : ctx->draw_fb))
+                for (a = 0; a < NATT; a++)
+                    if (fb->att[a].type == GL_RENDERBUFFER && fb->att[a].rb == rb) {
+                        before_fb_change(ctx, fb);
+                        att_clear(ctx, &fb->att[a], FALSE);
+                    }
         fs->sh->rbs[ogles2_name_slot(&fs->sh->far_rb, rb->name, FALSE)] = 0;
         ogles2_name_forget(&fs->sh->far_rb, rb->name);
         if (rb->refs)
@@ -778,12 +811,55 @@ void ogles2_glRenderbufferStorageMultisample(struct OGLES2Context *ctx, GLenum t
 
 /* ---- attachments ---- */
 
-static int attachment_index(GLenum attachment)
+/* An attachment point's index; ES 3.0's GL_DEPTH_STENCIL_ATTACHMENT is
+ * ATT_BOTH (depth and stencil); -1: none. */
+#define ATT_BOTH NATT
+static int attachment_index(struct OGLES2Context *ctx, GLenum attachment)
 {
     if (attachment >= GL_COLOR_ATTACHMENT0 && attachment < GL_COLOR_ATTACHMENT0 + OGLES2_MAX_DRAW_BUFFERS)
         return ATT_COLOR + (int)(attachment - GL_COLOR_ATTACHMENT0);
+    if (ogles2_es3(ctx) && attachment == GL_DEPTH_STENCIL_ATTACHMENT)
+        return ATT_BOTH;
     return attachment == GL_DEPTH_ATTACHMENT  ? ATT_DEPTH
          : attachment == GL_STENCIL_ATTACHMENT ? ATT_STENCIL : -1;
+}
+
+/* A colour attachment past the ones there are: ES 3.0's
+ * GL_INVALID_OPERATION (GL_MAX_COLOR_ATTACHMENTS), GLES2's
+ * GL_INVALID_ENUM. */
+static GLenum bad_attachment(struct OGLES2Context *ctx, GLenum attachment)
+{
+    return ogles2_es3(ctx) && attachment >= GL_COLOR_ATTACHMENT0 + OGLES2_MAX_DRAW_BUFFERS &&
+                   attachment < GL_COLOR_ATTACHMENT0 + 32
+               ? GL_INVALID_OPERATION : GL_INVALID_ENUM;
+}
+
+/* Attachment point a of fb gets renderbuffer rb, or texture t's face or
+ * layer and level, or (both 0) nothing; ATT_BOTH sets depth and stencil. */
+static void attach(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb, int a, struct OGLES2Renderbuffer *rb,
+                   struct OGLES2Texture *t, int face, int level)
+{
+    int k, n = a == ATT_BOTH ? 2 : 1;
+    before_fb_change(ctx, fb);
+    for (k = 0; k < n; k++) {
+        struct OGLES2Attachment *at = &fb->att[a == ATT_BOTH ? ATT_DEPTH + k : a];
+        /* first: re-attaching the same one must not free an orphan */
+        if (rb)
+            rb->refs++;
+        if (t)
+            ogles2_texture_attach(t);
+        att_clear(ctx, at, FALSE);
+        if (rb) {
+            at->type = GL_RENDERBUFFER;
+            at->rb = rb;
+        } else if (t) {
+            at->type = GL_TEXTURE;
+            at->tex = t;
+            at->face = (UWORD)face;
+            at->level = (UBYTE)level;
+        }
+    }
+    ogles2_fb_update(ctx);
 }
 
 void ogles2_glFramebufferRenderbuffer(struct OGLES2Context *ctx, GLenum target, GLenum attachment,
@@ -791,53 +867,55 @@ void ogles2_glFramebufferRenderbuffer(struct OGLES2Context *ctx, GLenum target, 
 {
     struct OGLES2FboState *fs;
     struct OGLES2Renderbuffer *rb = 0;
-    struct OGLES2Attachment *at;
-    int a = attachment_index(attachment);
+    struct OGLES2Framebuffer *fb;
+    int a, which;
     if (!ogles2_context_valid(ctx) || !(fs = fs_get(ctx)))
         return;
-    if (target != GL_FRAMEBUFFER || a < 0 || (renderbuffer && renderbuffertarget != GL_RENDERBUFFER)) {
+    a = attachment_index(ctx, attachment);
+    if (!(which = fb_target(ctx, target)) || (renderbuffer && renderbuffertarget != GL_RENDERBUFFER)) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
+    if (a < 0) {
+        ogles2_error(ctx, bad_attachment(ctx, attachment));
+        return;
+    }
     /* A name is an object once bound (GLES 2.0 4.4.3). */
-    if (!ctx->draw_fb || (renderbuffer && (!(rb = rb_by_name(fs, renderbuffer)) || !rb->bound_once))) {
+    if (!(fb = target_fb(ctx, which)) ||
+        (renderbuffer && (!(rb = rb_by_name(fs, renderbuffer)) || !rb->bound_once))) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
-    before_fb_change(ctx, ctx->draw_fb);
-    at = &ctx->draw_fb->att[a];
-    if (rb)
-        rb->refs++; /* first: re-attaching the same one must not free an orphan */
-    att_clear(ctx, at, FALSE);
-    if (rb) {
-        at->type = GL_RENDERBUFFER;
-        at->rb = rb;
-    }
-    ogles2_fb_update(ctx);
+    attach(ctx, fb, a, rb, 0, 0, 0);
 }
 
 void ogles2_glFramebufferTexture2D(struct OGLES2Context *ctx, GLenum target, GLenum attachment,
                                    GLenum textarget, GLuint texture, GLint level)
 {
     struct OGLES2Texture *t = 0;
-    struct OGLES2Attachment *at;
-    int a = attachment_index(attachment);
+    struct OGLES2Framebuffer *fb;
     BOOL cube_face = textarget >= GL_TEXTURE_CUBE_MAP_POSITIVE_X && textarget <= GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
+    int a, which;
     if (!ogles2_context_valid(ctx) || !fs_get(ctx))
         return;
-    if (target != GL_FRAMEBUFFER || a < 0 ||
+    a = attachment_index(ctx, attachment);
+    if (!(which = fb_target(ctx, target)) ||
         (texture && textarget != GL_TEXTURE_2D && textarget != GL_TEXTURE_RECTANGLE && !cube_face)) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
-    if (!ctx->draw_fb) {
+    if (a < 0) {
+        ogles2_error(ctx, bad_attachment(ctx, attachment));
+        return;
+    }
+    if (!(fb = target_fb(ctx, which))) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
     if (texture) {
         GLenum tt;
         /* GLES 2.0 4.4.3 takes level 0 only; OES_fbo_render_mipmap (offered,
-         * as Mesa does) any level. */
+         * as Mesa does) and ES 3.0 any level. */
         if (level < 0 || level > 12 || (textarget == GL_TEXTURE_RECTANGLE && level != 0)) {
             ogles2_error(ctx, GL_INVALID_VALUE);
             return;
@@ -850,55 +928,87 @@ void ogles2_glFramebufferTexture2D(struct OGLES2Context *ctx, GLenum target, GLe
             return;
         }
     }
-    before_fb_change(ctx, ctx->draw_fb);
-    at = &ctx->draw_fb->att[a];
-    if (t)
-        ogles2_texture_attach(t); /* first: re-attaching the same one must not free an orphan */
-    att_clear(ctx, at, FALSE);
-    if (t) {
-        at->type = GL_TEXTURE;
-        at->tex = t;
-        at->face = cube_face ? (UBYTE)(textarget - GL_TEXTURE_CUBE_MAP_POSITIVE_X) : 0;
-        at->level = (UBYTE)level;
-    }
-    ogles2_fb_update(ctx);
+    attach(ctx, fb, a, 0, t, cube_face ? (int)(textarget - GL_TEXTURE_CUBE_MAP_POSITIVE_X) : 0, level);
 }
 
-/* ---- EXT_discard_framebuffer ----
- * The images' contents become undefined: the open job of that framebuffer
- * does not store them, and its next job does not load them (Mesa: the
- * job's store and load masks). The default framebuffer: depth and stencil
- * are then not kept across a mid-frame flush; its colour is always kept. */
-void ogles2_glDiscardFramebufferEXT(struct OGLES2Context *ctx, GLenum target, GLsizei numAttachments,
-                                    const GLenum *attachments)
+/* ES 3.0 4.4.2.4: a layer of a 2D array or a slice of a 3D texture. */
+void ogles2_glFramebufferTextureLayer(struct OGLES2Context *ctx, GLenum target, GLenum attachment, GLuint texture,
+                                      GLint level, GLint layer)
 {
-    UBYTE bits = 0;
-    GLsizei k;
-    if (!ogles2_context_valid(ctx))
+    struct OGLES2Texture *t = 0;
+    struct OGLES2Framebuffer *fb;
+    int a, which;
+    if (!ogles2_es3_entry(ctx) || !fs_get(ctx))
         return;
-    if (target != GL_FRAMEBUFFER) {
+    a = attachment_index(ctx, attachment);
+    if (!(which = fb_target(ctx, target))) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
-    if (numAttachments < 0) {
-        ogles2_error(ctx, GL_INVALID_VALUE);
+    if (a < 0) {
+        ogles2_error(ctx, bad_attachment(ctx, attachment));
         return;
     }
-    for (k = 0; k < numAttachments && attachments; k++) {
-        GLenum a = attachments[k];
-        if (ctx->draw_fb ? a >= GL_COLOR_ATTACHMENT0 && a < GL_COLOR_ATTACHMENT0 + OGLES2_MAX_DRAW_BUFFERS
-                         : a == 0x1800 /* GL_COLOR_EXT */)
-            bits |= OGLES2_DISCARD_COLOR;
-        else if (ctx->draw_fb ? a == GL_DEPTH_ATTACHMENT : a == 0x1801 /* GL_DEPTH_EXT */)
-            bits |= OGLES2_DISCARD_DEPTH;
-        else if (ctx->draw_fb ? a == GL_STENCIL_ATTACHMENT : a == 0x1802 /* GL_STENCIL_EXT */)
-            bits |= OGLES2_DISCARD_STENCIL;
-        else {
-            ogles2_error(ctx, GL_INVALID_ENUM);
+    if (!(fb = target_fb(ctx, which))) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
+    if (texture) {
+        GLenum tt;
+        if (!(t = ogles2_texture_get(ctx, texture)) || !(tt = ogles2_texture_target(t)) ||
+            (tt != GL_TEXTURE_3D && tt != GL_TEXTURE_2D_ARRAY)) {
+            ogles2_error(ctx, GL_INVALID_OPERATION);
+            return;
+        }
+        /* GL_MAX_3D_TEXTURE_SIZE 2048 (log2: 11 levels), GL_MAX_ARRAY_TEXTURE_LAYERS 2048, 13 levels */
+        if (layer < 0 || layer >= 2048 || level < 0 || level > (tt == GL_TEXTURE_3D ? 11 : 12)) {
+            ogles2_error(ctx, GL_INVALID_VALUE);
             return;
         }
     }
-    if (!ctx->draw_fb) {
+    attach(ctx, fb, a, 0, t, layer, level);
+}
+
+/* ---- EXT_discard_framebuffer, ES 3.0's invalidation ---- */
+
+/* The attachments' bits (OGLES2_DISCARD_*) of an invalidation of fb; FALSE
+ * with the error set. */
+static BOOL discard_bits(struct OGLES2Context *ctx, const struct OGLES2Framebuffer *fb, GLsizei n,
+                         const GLenum *attachments, UBYTE *bits)
+{
+    GLsizei k;
+    *bits = 0;
+    if (n < 0) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return FALSE;
+    }
+    for (k = 0; k < n && attachments; k++) {
+        GLenum a = attachments[k];
+        if (fb ? a >= GL_COLOR_ATTACHMENT0 && a < GL_COLOR_ATTACHMENT0 + OGLES2_MAX_DRAW_BUFFERS
+               : a == 0x1800 /* GL_COLOR(_EXT) */)
+            *bits |= OGLES2_DISCARD_COLOR;
+        else if (fb ? a == GL_DEPTH_ATTACHMENT : a == 0x1801 /* GL_DEPTH(_EXT) */)
+            *bits |= OGLES2_DISCARD_DEPTH;
+        else if (fb ? a == GL_STENCIL_ATTACHMENT : a == 0x1802 /* GL_STENCIL(_EXT) */)
+            *bits |= OGLES2_DISCARD_STENCIL;
+        else if (fb && ogles2_es3(ctx) && a == GL_DEPTH_STENCIL_ATTACHMENT)
+            *bits |= OGLES2_DISCARD_DEPTH | OGLES2_DISCARD_STENCIL;
+        else {
+            ogles2_error(ctx, fb && ogles2_es3(ctx) && a >= GL_COLOR_ATTACHMENT0 + OGLES2_MAX_DRAW_BUFFERS &&
+                                      a < GL_COLOR_ATTACHMENT0 + 32 ? GL_INVALID_OPERATION : GL_INVALID_ENUM);
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
+/* The images' contents become undefined: the open job of that framebuffer
+ * does not store them, and its next job does not load them (Mesa: the
+ * job's store and load masks). The default framebuffer: depth and stencil
+ * are then not kept across a mid-frame flush; its colour is always kept. */
+static void discard(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb, UBYTE bits)
+{
+    if (!fb) {
         if (bits & (OGLES2_DISCARD_DEPTH | OGLES2_DISCARD_STENCIL)) {
             if (ctx->v3d && ctx->v3d->frame_active && !ctx->job_fb)
                 ctx->job_discard |= OGLES2_DISCARD_DEPTH | OGLES2_DISCARD_STENCIL;
@@ -907,9 +1017,62 @@ void ogles2_glDiscardFramebufferEXT(struct OGLES2Context *ctx, GLenum target, GL
         }
         return;
     }
-    if (ctx->v3d && ctx->v3d->frame_active && ctx->job_fb == ctx->draw_fb)
+    if (ctx->v3d && ctx->v3d->frame_active && ctx->job_fb == fb)
         ctx->job_discard |= bits;
-    ctx->draw_fb->discarded |= bits;
+    fb->discarded |= bits;
+}
+
+void ogles2_glDiscardFramebufferEXT(struct OGLES2Context *ctx, GLenum target, GLsizei numAttachments,
+                                    const GLenum *attachments)
+{
+    UBYTE bits;
+    if (!ogles2_context_valid(ctx))
+        return;
+    if (target != GL_FRAMEBUFFER) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    if (discard_bits(ctx, ctx->draw_fb, numAttachments, attachments, &bits))
+        discard(ctx, ctx->draw_fb, bits);
+}
+
+/* ES 3.0 4.5: EXT_discard_framebuffer's, for either binding; a region
+ * (glInvalidateSubFramebuffer) is checked and kept, as the specification
+ * allows. */
+void ogles2_glInvalidateFramebuffer(struct OGLES2Context *ctx, GLenum target, GLsizei numAttachments,
+                                    const GLenum *attachments)
+{
+    struct OGLES2Framebuffer *fb;
+    UBYTE bits;
+    int which;
+    if (!ogles2_es3_entry(ctx))
+        return;
+    if (!(which = fb_target(ctx, target))) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    fb = target_fb(ctx, which);
+    if (discard_bits(ctx, fb, numAttachments, attachments, &bits))
+        discard(ctx, fb, bits);
+}
+
+void ogles2_glInvalidateSubFramebuffer(struct OGLES2Context *ctx, GLenum target, GLsizei numAttachments,
+                                       const GLenum *attachments, GLint x, GLint y, GLsizei width, GLsizei height)
+{
+    UBYTE bits;
+    int which;
+    (void)x;
+    (void)y;
+    if (!ogles2_es3_entry(ctx))
+        return;
+    if (!(which = fb_target(ctx, target))) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    if (!discard_bits(ctx, target_fb(ctx, which), numAttachments, attachments, &bits))
+        return;
+    if (width < 0 || height < 0)
+        ogles2_error(ctx, GL_INVALID_VALUE);
 }
 
 /* ---- EXT_draw_buffers ----
@@ -979,7 +1142,7 @@ void ogles2_glReadBuffer(struct OGLES2Context *ctx, GLenum src)
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
-    fb = ctx->draw_fb;
+    fb = ctx->read_fb;
     if (fb ? src == GL_BACK || (src != GL_NONE && src >= GL_COLOR_ATTACHMENT0 + OGLES2_MAX_DRAW_BUFFERS)
            : src != GL_NONE && src != GL_BACK) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
@@ -1062,13 +1225,19 @@ static BOOL att_rt(const struct OGLES2Attachment *at, struct OGLES2RtFormat *rf)
     return TRUE;
 }
 
-static GLenum status_of(struct OGLES2Framebuffer *fb)
+/* GLES 2.0 4.4.5; ES 3.0 4.4.4 in ES3 contexts: attachments of different
+ * sizes are complete (drawing covers their common area), single- and
+ * multisampled ones are not mixed (renderbuffers' sample counts), and
+ * depth and stencil, both attached, are one image. */
+static GLenum status_of(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb)
 {
     const struct OGLES2Attachment *d = &fb->att[ATT_DEPTH], *s = &fb->att[ATT_STENCIL];
+    BOOL es3 = ogles2_es3(ctx);
     UWORD w0 = 0, h0 = 0, w, h;
-    int a, n = 0;
+    int a, n = 0, samples = -1;
     for (a = 0; a < NATT; a++) {
         const struct OGLES2Attachment *at = &fb->att[a];
+        int ns;
         if (at->type == GL_NONE)
             continue;
         if (!att_size(at, &w, &h) || !w || !h)
@@ -1086,39 +1255,46 @@ static GLenum status_of(struct OGLES2Framebuffer *fb)
              * OES_packed_depth_stencil, a depth-stencil one for the stencil. */
             UBYTE bits;
             BOOL st;
-            if (!ogles2_texture_depth(at->tex, at->level, &bits, &st) || (a == ATT_STENCIL && !st))
+            if (at->face || !ogles2_texture_depth(at->tex, at->level, &bits, &st) || (a == ATT_STENCIL && !st))
                 return GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT;
         }
+        ns = at->type == GL_RENDERBUFFER ? at->rb->samples : 0;
+        if (samples >= 0 && ns != samples)
+            return GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE;
+        samples = ns;
         if (n++ == 0) {
             w0 = w;
             h0 = h;
-        } else if (w != w0 || h != h0) {
+        } else if (!es3 && (w != w0 || h != h0)) {
             return GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS;
         }
     }
     if (!n)
         return GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT;
     /* Depth and stencil: one packed image for both, or apart without a
-     * packed one (D16 or a depth texture, and S8). */
-    if (d->type != GL_NONE && s->type != GL_NONE && (packed(d) || packed(s)) && !same_image(d, s))
+     * packed one (D16 or a depth texture, and S8); ES 3.0: one image. */
+    if (d->type != GL_NONE && s->type != GL_NONE && (es3 || packed(d) || packed(s)) && !same_image(d, s))
         return GL_FRAMEBUFFER_UNSUPPORTED;
     return GL_FRAMEBUFFER_COMPLETE;
 }
 
 GLenum ogles2_glCheckFramebufferStatus(struct OGLES2Context *ctx, GLenum target)
 {
+    struct OGLES2Framebuffer *fb;
+    int which;
     if (!ogles2_context_valid(ctx))
         return 0;
-    if (target != GL_FRAMEBUFFER) {
+    if (!(which = fb_target(ctx, target))) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return 0;
     }
-    return ogles2_fb_status(ctx);
+    fb = target_fb(ctx, which);
+    return fb ? status_of(ctx, fb) : GL_FRAMEBUFFER_COMPLETE;
 }
 
 GLenum ogles2_fb_status(struct OGLES2Context *ctx)
 {
-    return ctx->draw_fb ? status_of(ctx->draw_fb) : GL_FRAMEBUFFER_COMPLETE;
+    return ctx->draw_fb ? status_of(ctx, ctx->draw_fb) : GL_FRAMEBUFFER_COMPLETE;
 }
 
 /* The fb_* fields: the default framebuffer's, or the bound object's. */
@@ -1164,11 +1340,13 @@ void ogles2_fb_update(struct OGLES2Context *ctx)
     ctx->fb_flip = FALSE;
     ctx->fb_depth_bits = ctx->fb_stencil_bits = 0;
     ctx->fb_depth_format = OGLES2_DEPTH_16;
-    for (a = 0; a < NATT; a++) {
+    for (a = 0; a < NATT; a++) { /* ES 3.0: the attachments' common area (GLES2: one size) */
         UWORD w, h;
-        if (fb->att[a].type != GL_NONE && !ctx->fb_w && att_size(&fb->att[a], &w, &h)) {
-            ctx->fb_w = w;
-            ctx->fb_h = h;
+        if (fb->att[a].type != GL_NONE && att_size(&fb->att[a], &w, &h) && w && h) {
+            if (!ctx->fb_w || w < ctx->fb_w)
+                ctx->fb_w = w;
+            if (!ctx->fb_h || h < ctx->fb_h)
+                ctx->fb_h = h;
         }
     }
     if (fb->att[ATT_DEPTH].type == GL_RENDERBUFFER) {
@@ -1214,7 +1392,7 @@ BOOL ogles2_fb_ready(struct OGLES2Context *ctx)
 {
     GLenum st;
     ogles2_fb_update(ctx);
-    if (!ctx->draw_fb || (st = status_of(ctx->draw_fb)) == GL_FRAMEBUFFER_COMPLETE)
+    if (!ctx->draw_fb || (st = status_of(ctx, ctx->draw_fb)) == GL_FRAMEBUFFER_COMPLETE)
         return TRUE;
     ogles2_error(ctx, GL_INVALID_FRAMEBUFFER_OPERATION);
     if (ctx->fbo && !ctx->fbo->warned_incomplete) {
@@ -1440,6 +1618,60 @@ BOOL ogles2_fbo_fill(struct OGLES2Context *ctx, int rt, int x, int y, int w, int
            ogles2_texture_fill(c->rb->color, 0, 0, x, y, w, h, v, is_int, mask);
 }
 
+struct OGLES2Framebuffer *ogles2_fbo_read_begin(struct OGLES2Context *ctx)
+{
+    struct OGLES2Framebuffer *saved = ctx->draw_fb;
+    if (ctx->read_fb != saved) {
+        ctx->draw_fb = ctx->read_fb;
+        ogles2_fb_update(ctx);
+    }
+    return saved;
+}
+
+void ogles2_fbo_read_end(struct OGLES2Context *ctx, struct OGLES2Framebuffer *saved)
+{
+    if (ctx->draw_fb != saved) {
+        ctx->draw_fb = saved;
+        ogles2_fb_update(ctx);
+    }
+}
+
+/* glBlitFramebuffer's write (blit.c): a box of draw buffer rt from
+ * 16-byte texels (floats or integers), those `mask` marks; the default
+ * framebuffer's bitmap as RGBA bytes (the box read first where the mask
+ * leaves pixels). The jobs drawing into it have rendered. */
+BOOL ogles2_fbo_write(struct OGLES2Context *ctx, int rt, int x, int y, int w, int h, const UBYTE *src, ULONG stride,
+                      const UBYTE *mask)
+{
+    const struct OGLES2Attachment *c;
+    if (!ctx->draw_fb) {
+        ULONG row = (ULONG)w * 4;
+        UBYTE *rgba;
+        int i, j, k;
+        if (rt || !(rgba = AllocVec(row * (ULONG)h, MEMF_ANY)))
+            return FALSE;
+        ogles2_display_read(&ctx->display, (UWORD)x, (UWORD)y, (UWORD)w, (UWORD)h, rgba, row);
+        for (j = 0; j < h; j++)
+            for (i = 0; i < w; i++)
+                if (!mask || mask[(ULONG)j * w + i])
+                    for (k = 0; k < 4; k++) {
+                        GLfloat v = ((const GLfloat *)(src + (ULONG)j * stride + (ULONG)i * 16))[k];
+                        rgba[(ULONG)j * row + (ULONG)i * 4 + k] =
+                            v <= 0.0f ? 0 : v >= 1.0f ? 255 : (UBYTE)(v * 255.0f + 0.5f);
+                    }
+        ogles2_display_write(&ctx->display, (UWORD)x, (UWORD)y, (UWORD)w, (UWORD)h, rgba, row);
+        FreeVec(rgba);
+        return TRUE;
+    }
+    if (rt < 0 || rt >= OGLES2_MAX_DRAW_BUFFERS)
+        return FALSE;
+    c = &ctx->draw_fb->att[ATT_COLOR + rt];
+    if (c->type == GL_TEXTURE)
+        return ogles2_texture_write(c->tex, c->face, c->level, x, y, w, h, src, stride, mask);
+    return c->type == GL_RENDERBUFFER && c->rb->color &&
+           ogles2_texture_write(c->rb->color, 0, 0, x, y, w, h, src, stride, mask);
+}
+
 /* ES 3.0 4.3.1: the read buffer's format as a render target (its kind
  * says glReadPixels' format and type); FALSE: no colour image. */
 BOOL ogles2_fbo_read_format(struct OGLES2Context *ctx, struct OGLES2RtFormat *rf)
@@ -1609,28 +1841,90 @@ void ogles2_glGetRenderbufferParameteriv(struct OGLES2Context *ctx, GLenum targe
     }
 }
 
+/* GLES 2.0 6.1.13; ES 3.0 6.1.13 in ES3 contexts: either binding, the
+ * default framebuffer's GL_BACK, GL_DEPTH and GL_STENCIL, the
+ * GL_DEPTH_STENCIL_ATTACHMENT point (one image for both), an empty
+ * attachment's type GL_NONE and name 0 (the rest GL_INVALID_OPERATION),
+ * and the sizes, component type, colour encoding and layer. */
 void ogles2_glGetFramebufferAttachmentParameteriv(struct OGLES2Context *ctx, GLenum target,
                                                   GLenum attachment, GLenum pname, GLint *params)
 {
     const struct OGLES2Attachment *at;
-    int a = attachment_index(attachment);
+    struct OGLES2Framebuffer *fb;
+    BOOL es3;
+    GLint bits[6];
+    int a, which;
     if (!ogles2_context_valid(ctx) || !params)
         return;
-    if (target != GL_FRAMEBUFFER || a < 0) {
+    es3 = ogles2_es3(ctx);
+    if (!(which = fb_target(ctx, target))) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
-    if (!ctx->draw_fb) { /* GLES 2.0 6.1.13: the default framebuffer has no attachments to ask */
-        ogles2_error(ctx, GL_INVALID_OPERATION);
+    fb = target_fb(ctx, which);
+    if (!fb) {
+        /* GLES 2.0: the default framebuffer has no attachments to ask */
+        GLint *dflt;
+        if (!es3) {
+            ogles2_error(ctx, GL_INVALID_OPERATION);
+            return;
+        }
+        if (attachment != GL_BACK && attachment != 0x1801 /* GL_DEPTH */ && attachment != 0x1802 /* GL_STENCIL */) {
+            ogles2_error(ctx, GL_INVALID_ENUM);
+            return;
+        }
+        bits[0] = bits[1] = bits[2] = bits[3] = attachment == GL_BACK ? 8 : 0;
+        bits[4] = attachment == 0x1801 ? ctx->depth_bits : 0;
+        bits[5] = attachment == 0x1802 ? ctx->stencil_bits : 0;
+        dflt = attachment == GL_BACK ? &bits[0] : attachment == 0x1801 ? &bits[4] : &bits[5];
+        switch (pname) {
+        case GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE:
+            *params = *dflt ? GL_FRAMEBUFFER_DEFAULT : GL_NONE;
+            return;
+        case GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE:     *params = bits[0]; return;
+        case GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE:   *params = bits[1]; return;
+        case GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE:    *params = bits[2]; return;
+        case GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE:   *params = bits[3]; return;
+        case GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE:   *params = bits[4]; return;
+        case GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE: *params = bits[5]; return;
+        case GL_FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE:
+            *params = attachment == 0x1802 ? GL_UNSIGNED_INT : GL_UNSIGNED_NORMALIZED;
+            return;
+        case GL_FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING:
+            *params = GL_LINEAR;
+            return;
+        default:
+            ogles2_error(ctx, *dflt ? GL_INVALID_ENUM : GL_INVALID_OPERATION);
+            return;
+        }
+    }
+    a = attachment_index(ctx, attachment);
+    if (a < 0) {
+        ogles2_error(ctx, bad_attachment(ctx, attachment));
         return;
     }
-    at = &ctx->draw_fb->att[a];
+    if (a == ATT_BOTH) { /* one image for both, or GL_INVALID_OPERATION */
+        if (!same_image(&fb->att[ATT_DEPTH], &fb->att[ATT_STENCIL])) {
+            ogles2_error(ctx, GL_INVALID_OPERATION);
+            return;
+        }
+        if (pname == GL_FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE) {
+            ogles2_error(ctx, GL_INVALID_OPERATION);
+            return;
+        }
+        a = ATT_DEPTH;
+    }
+    at = &fb->att[a];
     if (pname == GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE) {
         *params = (GLint)at->type;
         return;
     }
     if (at->type == GL_NONE) {
-        ogles2_error(ctx, GL_INVALID_ENUM);
+        if (es3 && pname == GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME) {
+            *params = 0;
+            return;
+        }
+        ogles2_error(ctx, es3 ? GL_INVALID_OPERATION : GL_INVALID_ENUM);
         return;
     }
     switch (pname) {
@@ -1650,11 +1944,60 @@ void ogles2_glGetFramebufferAttachmentParameteriv(struct OGLES2Context *ctx, GLe
             return;
         }
         break;
+    case GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LAYER:
+        if (es3 && at->type == GL_TEXTURE) {
+            GLenum tt = ogles2_texture_target(at->tex);
+            *params = tt == GL_TEXTURE_3D || tt == GL_TEXTURE_2D_ARRAY ? at->face : 0;
+            return;
+        }
+        break;
     case GL_FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE_EXT:
         *params = component_type(at, a);
         return;
+    case GL_FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING:
+        if (es3) {
+            struct OGLES2RtFormat rf;
+            *params = a < ATT_DEPTH && att_rt(at, &rf) && rf.out == 0 /* SRGB8ALPHA8 */ ? GL_SRGB : GL_LINEAR;
+            return;
+        }
+        break;
+    case GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE:
+    case GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE:
+    case GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE:
+    case GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE:
+    case GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE:
+    case GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE:
+        if (!es3)
+            break;
+        bits[0] = bits[1] = bits[2] = bits[3] = bits[4] = bits[5] = 0;
+        if (a < ATT_DEPTH) {
+            if (at->type == GL_TEXTURE)
+                tex_bits(at, &bits[0], &bits[1], &bits[2], &bits[3]);
+            else {
+                struct OGLES2RtFormat rf;
+                rb_bits(at->rb->format, &bits[0], &bits[1], &bits[2], &bits[3], &bits[4], &bits[5]);
+                if (att_rt(at, &rf))
+                    rt_bits(&rf, &bits[0], &bits[1], &bits[2], &bits[3]);
+            }
+        } else if (at->type == GL_RENDERBUFFER) {
+            GLint r, g, b, al;
+            rb_bits(at->rb->format, &r, &g, &b, &al, &bits[4], &bits[5]);
+            if (a == ATT_DEPTH)
+                bits[5] = 0;
+            else
+                bits[4] = 0;
+        } else {
+            UBYTE db;
+            BOOL st;
+            if (ogles2_texture_depth(at->tex, at->level, &db, &st)) {
+                bits[4] = a == ATT_DEPTH ? db : 0;
+                bits[5] = a == ATT_STENCIL && st ? 8 : 0;
+            }
+        }
+        *params = bits[pname - GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE];
+        return;
     }
-    ogles2_error(ctx, GL_INVALID_ENUM);
+    ogles2_error(ctx, es3 ? GL_INVALID_ENUM : GL_INVALID_ENUM);
 }
 
 /* glGet* (state.c asks): the bindings, the limit, the draw framebuffer's bits. */
@@ -1663,7 +2006,12 @@ BOOL ogles2_fbo_query(struct OGLES2Context *ctx, GLenum pname, GLint *v)
     struct OGLES2Framebuffer *fb = ctx->draw_fb;
     GLint r = 8, g = 8, b = 8, a = 8, d, s;
     switch (pname) {
-    case GL_FRAMEBUFFER_BINDING:  *v = fb ? (GLint)fb->name : 0; return TRUE;
+    case GL_FRAMEBUFFER_BINDING:  *v = fb ? (GLint)fb->name : 0; return TRUE; /* = GL_DRAW_FRAMEBUFFER_BINDING */
+    case GL_READ_FRAMEBUFFER_BINDING: /* ES 3.0 */
+        if (!ogles2_es3(ctx))
+            return FALSE;
+        *v = ctx->read_fb ? (GLint)ctx->read_fb->name : 0;
+        return TRUE;
     case GL_RENDERBUFFER_BINDING: *v = ctx->fbo && ctx->fbo->rb_bound ? (GLint)ctx->fbo->rb_bound->name : 0; return TRUE;
     case GL_MAX_RENDERBUFFER_SIZE: *v = OGLES2_MAX_VIEWPORT; return TRUE;
     case GL_MAX_DRAW_BUFFERS_EXT:
@@ -1671,7 +2019,8 @@ BOOL ogles2_fbo_query(struct OGLES2Context *ctx, GLenum pname, GLint *v)
     case GL_READ_BUFFER: /* ES 3.0 */
         if (!ogles2_es3(ctx))
             return FALSE;
-        *v = fb ? (GLint)fb->read_buf : ctx->fbo && ctx->fbo->default_read_none ? GL_NONE : GL_BACK;
+        *v = ctx->read_fb ? (GLint)ctx->read_fb->read_buf
+                          : ctx->fbo && ctx->fbo->default_read_none ? GL_NONE : GL_BACK;
         return TRUE;
     case GL_RED_BITS: case GL_GREEN_BITS: case GL_BLUE_BITS: case GL_ALPHA_BITS:
         if (fb) {
@@ -1737,5 +2086,5 @@ void ogles2_fbo_free(struct OGLES2Context *ctx)
     ogles2_names_free(&fs->far_fb);
     FreeVec(fs);
     ctx->fbo = 0;
-    ctx->draw_fb = ctx->job_fb = 0;
+    ctx->draw_fb = ctx->read_fb = ctx->job_fb = 0;
 }

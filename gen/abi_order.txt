@@ -249,3 +249,7 @@ glClearBufferfv
 glClearBufferfi
 glRenderbufferStorageMultisample
 glGetInternalformativ
+glFramebufferTextureLayer
+glInvalidateFramebuffer
+glInvalidateSubFramebuffer
+glBlitFramebuffer

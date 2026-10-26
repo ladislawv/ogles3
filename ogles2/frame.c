@@ -123,9 +123,17 @@ static BOOL read_type(BOOL es3, GLenum t)
 void ogles2_read_format(struct OGLES2Context *ctx, GLenum *format, GLenum *type)
 {
     struct OGLES2RtFormat rf;
+    BOOL ok;
     *format = GL_RGBA;
     *type = GL_UNSIGNED_BYTE;
-    if (!ogles2_es3(ctx) || !ctx->draw_fb || !ogles2_fbo_read_format(ctx, &rf))
+    if (!ogles2_es3(ctx) || !ctx->read_fb)
+        return;
+    {
+        struct OGLES2Framebuffer *saved = ogles2_fbo_read_begin(ctx);
+        ok = ogles2_fbo_read_format(ctx, &rf);
+        ogles2_fbo_read_end(ctx, saved);
+    }
+    if (!ok)
         return;
     if (rf.kind == OGLES2_RT_F16 || rf.kind == OGLES2_RT_F32) {
         *type = GL_FLOAT;
@@ -137,8 +145,23 @@ void ogles2_read_format(struct OGLES2Context *ctx, GLenum *format, GLenum *type)
     }
 }
 
+static void read_pixels(struct OGLES2Context *ctx, GLint x, GLint y, GLsizei width, GLsizei height,
+                        GLenum format, GLenum type, void *pixels);
+
+/* ES 3.0: from the read framebuffer (fbo.c, ogles2_fbo_read_begin). */
 void ogles2_glReadPixels(struct OGLES2Context *ctx, GLint x, GLint y, GLsizei width, GLsizei height,
                          GLenum format, GLenum type, void *pixels)
+{
+    struct OGLES2Framebuffer *saved;
+    if (!ogles2_context_valid(ctx))
+        return;
+    saved = ogles2_fbo_read_begin(ctx);
+    read_pixels(ctx, x, y, width, height, format, type, pixels);
+    ogles2_fbo_read_end(ctx, saved);
+}
+
+static void read_pixels(struct OGLES2Context *ctx, GLint x, GLint y, GLsizei width, GLsizei height,
+                        GLenum format, GLenum type, void *pixels)
 {
     LONG x0, y0, x1, y1;
     ULONG stride, bpp, rgba_stride;

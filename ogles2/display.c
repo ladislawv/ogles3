@@ -531,6 +531,22 @@ void ogles2_display_read(struct OGLES2Display *d, UWORD x, UWORD y, UWORD w, UWO
                        RECTFMT_RGBA);
 }
 
+/* The rows y .. y+h-1 (GL's, bottom-up) of x .. x+w-1 from RGBA bytes
+ * (glBlitFramebuffer into the default framebuffer, blit.c): the frame's
+ * render has finished; the next job loads them (the data cache is cleaned
+ * before every render, job.c). */
+void ogles2_display_write(struct OGLES2Display *d, UWORD x, UWORD y, UWORD w, UWORD h, const UBYTE *src,
+                          ULONG stride)
+{
+    struct RastPort rp;
+    UWORD r;
+    InitRastPort(&rp);
+    rp.BitMap = d->bitmap;
+    for (r = 0; r < h; r++)
+        WritePixelArray((APTR)(src + r * stride), 0, 0, stride, &rp, x, (UWORD)(d->height - 1 - (y + r)), w, 1,
+                        RECTFMT_RGBA);
+}
+
 /* After the frame's render has finished and the bitmap is unlocked. */
 void ogles2_display_present(struct OGLES2Display *d)
 {

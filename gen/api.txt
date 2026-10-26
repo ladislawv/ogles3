@@ -106,3 +106,7 @@ command glClearBufferfv
 command glClearBufferfi
 command glRenderbufferStorageMultisample
 command glGetInternalformativ
+command glFramebufferTextureLayer
+command glInvalidateFramebuffer
+command glInvalidateSubFramebuffer
+command glBlitFramebuffer
