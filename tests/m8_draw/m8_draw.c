@@ -1404,6 +1404,49 @@ static void test_copy3d(void)
     glDeleteTextures(2, t);
 }
 
+/* EXT_frag_depth: a GLSL ES 1.00 program's gl_FragDepthEXT is tested
+ * against the cleared 0.5 (its triangle's own depth is 0.5 too), in an
+ * object with a depth renderbuffer (the context has none). */
+static void test_frag_depth(void)
+{
+    GLuint p = program("fragdepth"), fb, rb[2];
+    const char *ext = (const char *)glGetString(GL_EXTENSIONS);
+    int ok;
+    if (!p) {
+        check(0, "EXT_frag_depth: fragdepth links");
+        return;
+    }
+    glGenFramebuffers(1, &fb);
+    glGenRenderbuffers(2, rb);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb);
+    glBindRenderbuffer(GL_RENDERBUFFER, rb[0]);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA8, 64, 64);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, rb[0]);
+    glBindRenderbuffer(GL_RENDERBUFFER, rb[1]);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, 64, 64);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rb[1]);
+    glClearDepthf(0.5f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glUseProgram(p);
+    glUniform4f(glGetUniformLocation(p, "c"), 0.0f, 1.0f, 0.0f, 1.0f);
+    glUniform1f(glGetUniformLocation(p, "z"), 0.25f);
+    draw_cover(p);
+    glUniform4f(glGetUniformLocation(p, "c"), 1.0f, 0.0f, 0.0f, 1.0f);
+    glUniform1f(glGetUniformLocation(p, "z"), 0.75f);
+    draw_cover(p);
+    ok = pixel_is(30, 30, 0, 255, 0, 255, 0);
+    glDisable(GL_DEPTH_TEST);
+    glClearDepthf(1.0f);
+    check(ok && ext && strstr(ext, "GL_EXT_frag_depth") && glGetError() == GL_NO_ERROR,
+          "EXT_frag_depth: gl_FragDepthEXT tested (0.25 passes 0.5, 0.75 does not)");
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDeleteFramebuffers(1, &fb);
+    glDeleteRenderbuffers(2, rb);
+    glDeleteProgram(p);
+}
+
 /* dEQP-GLES3 fbo.msaa.renderbuffer_resize: a renderbuffer cleared, given
  * new storage while attached, cleared again, blitted into another one a
  * clear made red: the latter is the second clear's green. */
@@ -1936,6 +1979,7 @@ int main(void)
     test_depth32f_texture();
     test_rb_resize();
     test_copy3d();
+    test_frag_depth();
     check(glGetError() == GL_NO_ERROR, "no GL error left over");
     aglDestroyContext(ctx);
     if ((ctx = aglCreateContextTags2(&e, OGLES2_CCT_BITMAP, (ULONG)bm, OGLES2_CCT_PISTORM_ES_VERSION, 30,

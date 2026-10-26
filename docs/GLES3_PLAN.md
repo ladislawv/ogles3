@@ -184,8 +184,10 @@ Mesa's driver, so they could follow later as an extension
     its depth and stencil blits and `DEPTH32F_STENCIL8` textures' stencil:
     `fbo` 2032 of 2075 and none failing, `fragment_ops` 3174 of 3174.
     Since then glCopyTexSubImage3D and ES 3.0's texture errors (item 8):
-    `negative_api` 287 of 314, the rest stage C's. Next: item 8's base
-    levels beyond 0, then item 12's rest.
+    `negative_api` 287 of 314, the rest stage C's; and `EXT_frag_depth`
+    (item 12, now done). Next: item 6's open `ubo` case, item 8's base
+    levels beyond 0 (no dEQP case fails on them), then stage B's whole
+    dEQP-GLES3 run.
     **Trap:**
     `ports/deqp/build.sh` copies the CTS with `rsync -a`, which keeps the
     sources' old dates, so a patch changed or removed rebuilds nothing:
@@ -1961,6 +1963,13 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
     under it; with it the rasterization and multisampling parts of
     `glu::resetState` pass, and the texture part stops at the 2D array and
     3D textures (`ogles2-m8-2-20261024-232639`).
+    **`EXT_frag_depth` done (2026-10-26, on the A1200):** listed in both
+    kinds of context; the compiler already took `gl_FragDepthEXT` and the
+    draw its depth write. `m8_draw`'s GLSL ES 1.00 program (`fragdepth`)
+    writes 0.25 and 0.75 against a cleared 0.5 in an object with a depth
+    renderbuffer (`ogles2-m8-1-20261026-183449`: 122 of 122 three ways);
+    dEQP-GLES3 `shaders-fragdepth` 18 of 18 (`ogles2-m8-2-20261026-183332`).
+    With it item 12 is done.
 13. **Tests:** `m8_es3` grows per feature (package `m8-1`); dEQP-GLES3
     runs past its first case only once `glu::resetState`
     (`framework/opengl/gluStateReset.cpp`, after every case) raises no GL
