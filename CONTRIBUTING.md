@@ -205,6 +205,12 @@ Each of these cost real time once.
   later program, across reboots. The library now resets the GPU after such a job and when it
   finds it stopped at device open (`device: GPU reset ...` in the log); if a GPU problem
   survives that, only switching the machine off clears it.
+- **A colour write of the wrong width corrupts the machine until it is switched off.** A
+  fragment shader that writes 16-bit floats to a 32-bit float or integer render target (or
+  the reverse) left every later program drawing wrong pixels, across reboots (2026-10-26,
+  dEQP-GLES3's `fbo.render.recreate_color.tex2d_rgba32f_*`, the GLES2 clear quad). The
+  library never sends such a draw (draw.c logs "at the wrong width"); after a GPU-heavy run,
+  `m7-4` passing is the check that the machine is still sound.
 - **vamos has no FPU:** test FPU code (maths, float conversions) on the Amiga. State-only
   tests (those taking `NOGPU`) run under it with `B=<build> bash tests/vamos.sh <test> NOGPU`;
   vamos prints a traceback when it expunges the library at the end, which is harmless.

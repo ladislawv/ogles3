@@ -163,6 +163,15 @@ void ogles2_glClearColor(struct OGLES2Context *ctx, GLfloat red, GLfloat green, 
 {
     if (!ogles2_context_valid(ctx))
         return;
+    /* ES 3.0 keeps it unclamped (float targets), clamped for fixed-point
+     * ones when a clear packs it (job.c), as Mesa does */
+    if (ogles2_es3(ctx)) {
+        ctx->state.clear_color[0] = red;
+        ctx->state.clear_color[1] = green;
+        ctx->state.clear_color[2] = blue;
+        ctx->state.clear_color[3] = alpha;
+        return;
+    }
     ctx->state.clear_color[0] = clamp01(red);
     ctx->state.clear_color[1] = clamp01(green);
     ctx->state.clear_color[2] = clamp01(blue);
@@ -414,7 +423,7 @@ void ogles2_glDepthFunc(struct OGLES2Context *ctx, GLenum func)
     ctx->state_ver++;
 }
 
-static int blend_factor_ok(GLenum f, int is_dst)
+static int blend_factor_ok(GLenum f, int is_dst, BOOL es3)
 {
     switch (f) {
     case GL_ZERO: case GL_ONE:
@@ -423,8 +432,8 @@ static int blend_factor_ok(GLenum f, int is_dst)
     case GL_CONSTANT_COLOR: case GL_ONE_MINUS_CONSTANT_COLOR:
     case GL_CONSTANT_ALPHA: case GL_ONE_MINUS_CONSTANT_ALPHA:
         return 1;
-    case GL_SRC_ALPHA_SATURATE: /* source only in GLES 2.0 */
-        return !is_dst;
+    case GL_SRC_ALPHA_SATURATE: /* source only in GLES 2.0; either in ES 3.0 (table 4.2) */
+        return !is_dst || es3;
     default:
         return 0;
     }
@@ -436,8 +445,8 @@ void ogles2_glBlendFuncSeparate(struct OGLES2Context *ctx, GLenum srcRGB, GLenum
     struct OGLES2State *s;
     if (!ogles2_context_valid(ctx))
         return;
-    if (!blend_factor_ok(srcRGB, 0) || !blend_factor_ok(dstRGB, 1) ||
-        !blend_factor_ok(srcAlpha, 0) || !blend_factor_ok(dstAlpha, 1)) {
+    if (!blend_factor_ok(srcRGB, 0, FALSE) || !blend_factor_ok(dstRGB, 1, ogles2_es3(ctx)) ||
+        !blend_factor_ok(srcAlpha, 0, FALSE) || !blend_factor_ok(dstAlpha, 1, ogles2_es3(ctx))) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
@@ -773,12 +782,13 @@ static int lookup(struct OGLES2Context *ctx, GLenum pname, struct value *v)
     case GL_PROGRAM_BINARY_FORMATS_OES:
         v->kind = K_INT; v->n = 1; v->i[0] = (GLint)GL_PROGRAM_BINARY_V3DP_PISTORM;
         return 1;
-    case GL_IMPLEMENTATION_COLOR_READ_FORMAT:
-        v->kind = K_INT; v->n = 1; v->i[0] = GL_RGBA;
+    case GL_IMPLEMENTATION_COLOR_READ_FORMAT: /* the read buffer's (frame.c) */
+    case GL_IMPLEMENTATION_COLOR_READ_TYPE: {
+        GLenum f, t;
+        ogles2_read_format(ctx, &f, &t);
+        v->kind = K_INT; v->n = 1; v->i[0] = (GLint)(pname == GL_IMPLEMENTATION_COLOR_READ_FORMAT ? f : t);
         return 1;
-    case GL_IMPLEMENTATION_COLOR_READ_TYPE:
-        v->kind = K_INT; v->n = 1; v->i[0] = GL_UNSIGNED_BYTE;
-        return 1;
+    }
     case GL_DRAW_BUFFER0_EXT: /* EXT_draw_buffers */
     case GL_DRAW_BUFFER1_EXT:
     case GL_DRAW_BUFFER2_EXT:

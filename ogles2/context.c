@@ -198,6 +198,7 @@ struct OGLES2Context *ogles2_aglCreateContext2(ULONG *errcode, struct TagItem *t
         ReleaseSemaphore(&OGLES2LibBase->lock);
     }
     ctx->default_draw_buffer = GL_BACK; /* EXT_draw_buffers */
+    ctx->draw_rts = 0xFF;               /* draws write every draw buffer (draw.c) */
     ogles2_fb_update(ctx); /* the default framebuffer is drawn into */
     ctx->viewport[2] = ctx->scissor[2] = (GLint)ctx->width;
     ctx->viewport[3] = ctx->scissor[3] = (GLint)ctx->height;
@@ -350,6 +351,7 @@ static const struct { const char *name; UBYTE in; } extensions[] = {
     {"GL_EXT_clip_control", EXT_ALL}, {"GL_EXT_draw_buffers", EXT_ALL},
     {"GL_NV_fbo_color_attachments", EXT_ALL}, {"GL_OES_required_internalformat", EXT_ALL},
     {"GL_EXT_color_buffer_half_float", EXT_ALL},
+    {"GL_EXT_color_buffer_float", EXT_ES3}, /* stage B item 10: the float targets */
 };
 #define NUM_EXTENSIONS (sizeof(extensions) / sizeof(extensions[0]))
 

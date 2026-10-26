@@ -35,6 +35,25 @@ ULONG ogles2_vk_bits(const UBYTE *key);
  * or 16F (stage A): no software blending, formats, blend state, f32_color_rb,
  * norm_16 or snorm, the logic op COPY. */
 void ogles2_vk_fs_want(UBYTE *want, const UBYTE *base, int prim, UBYTE cbufs, ULONG bits, BOOL a2c);
+/* The render targets' fields of the fragment key (GLES3 plan stage B item
+ * 10, Mesa's v3d_update_compiled_fs): the 32-bit float and integer
+ * targets the shader writes 32 bits a channel to (f32_color_rb), and with a
+ * target the tile buffer cannot blend software blending, each drawn
+ * target's format, swizzle and blend state (Mesa's enums, as its key
+ * holds them). */
+struct OGLES2VkTargets
+{
+    UBYTE f32;           /* f32_color_rb */
+    UBYTE soft;          /* software_blend */
+    UBYTE cbufs;         /* the targets with a format and blend state (soft only) */
+    UBYTE pad;
+    ULONG fmt[4];        /* enum pipe_format */
+    UBYTE swz[4][4];     /* PIPE_SWIZZLE_* */
+    ULONG blend[4][6];   /* rgb func, src and dst factors; alpha's (pipe enums) */
+};
+void ogles2_vk_fs_targets(UBYTE *want, const struct OGLES2VkTargets *t);
+/* A fragment key's f32_color_rb: the targets it writes 32 bits a channel. */
+UBYTE ogles2_vk_fs_f32(const UBYTE *key);
 /* A fragment variant serves the draw: its key has the computed fields, its
  * 32-bit samplers at least the draw's. */
 BOOL ogles2_vk_fs_fits(const UBYTE *key, const UBYTE *want);

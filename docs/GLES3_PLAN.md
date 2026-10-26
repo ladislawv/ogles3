@@ -170,10 +170,18 @@ Mesa's driver, so they could follow later as an extension
     since then item 8's textures (immutable storage, every ES 3.0 sized
     format, integer samplers: `texture` 4101 of 5895, no failure) and
     item 9's ETC2/EAC (ETC1 sampled natively too): every ETC1, ETC2 and EAC
-    case of dEQP-GLES3 (492) and dEQP-GLES2's 97 ETC1 cases pass.
-    Next: items 10 and 11 (render targets beyond 8 bits, framebuffers),
-    whose sized formats the shader groups' executor needs, then item 8's
-    rest.
+    case of dEQP-GLES3 (492) and dEQP-GLES2's 97 ETC1 cases pass; since
+    then item 10's render targets beyond 8 bits (`fragment_out` 940 of
+    940, `read_pixels` 48, `pbo` 54, `color_clear` 19,
+    `shaders-builtin_variable` 29 of 29, `fragment_ops` 3165 of 3174,
+    `texture` 4501 of 5895 and no failure). **Trap found with it:** a
+    colour write of the wrong width into a 32-bit float or integer target
+    leaves the A1200 drawing wrong pixels until it is switched off (§5 item
+    10; CONTRIBUTING.md, "Traps"): after a GPU-heavy run, `m7-4` passing is
+    the check that the machine is sound. Next: item 11 (framebuffers: the
+    draw and read bindings, `GL_DEPTH_STENCIL_ATTACHMENT`, layers,
+    `glBlitFramebuffer`, invalidation; most of `fbo`'s 877 failures), then
+    item 8's rest.
     **Trap:**
     `ports/deqp/build.sh` copies the CTS with `rsync -a`, which keeps the
     sources' old dates, so a patch changed or removed rebuilds nothing:
@@ -1660,6 +1668,84 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
       only in 1.3, `read_half`); the pack parameters ES 3.0 adds
       (`PACK_ROW_LENGTH`, `_SKIP_ROWS`, `_SKIP_PIXELS`; dEQP-GLES3's
       `read_pixels` sets them, `es3fReadPixelsTests.cpp:341-348`).
+
+    **Done (2026-10-26, on the A1200).** A colour target's format comes
+    from one table (`texture.c`, `rt_table`, Mesa's
+    `v3dX(get_internal_type_bpp_for_output_format)` and format table):
+    output format, internal type and bpp (sRGB, RGB10_A2 and the small
+    floats 16F at 64 bits, R16F and RG16F 64 too), clamp (integers to
+    their range, sRGB to [0, 1]), kind, channels and bits, and the pipe
+    format and swizzle Mesa's fragment key names it by
+    (`ogles2_texture_rt`, `struct OGLES2RtFormat`). Colour-renderable:
+    GLES2's as before; in ES3 contexts, given a sized internal format
+    (ES 3.0 4.4.4; `OGLES2Face.sized_given`), R8, RG8, RGB10_A2,
+    SRGB8_ALPHA8, the integer formats but RGB, and
+    `EXT_color_buffer_float`'s floats with R11F_G11F_B10F (offered in ES3
+    contexts); RGB16F too (`EXT_color_buffer_half_float`). Renderbuffers
+    take ES 3.0's sized formats (`ogles2_texture_hidden_sized`, stored as
+    glTexStorage2D stores them), `DEPTH_COMPONENT24`,
+    `DEPTH_COMPONENT32F` and `DEPTH32F_STENCIL8` (D32F in the tile buffer,
+    its stencil an S8 image of its own, as Mesa's separate stencil);
+    `glRenderbufferStorageMultisample` (stored single-sampled until stage
+    C, `GL_RENDERBUFFER_SAMPLES` what was asked, logged once) and
+    `glGetInternalformativ` (4 samples, none for integer formats); a
+    32-bit float depth texture as a D32F target. The job: each target's
+    internal type, bpp and clamp, the widest target's bpp (128 for RGBA32F
+    and the RGBA 32-bit integers) in Mesa's tile sizes down to 16x16, pools
+    for them, and each target's clear value packed in its internal type
+    (`pack_clear`, the three clear-colour packets; Mesa's
+    `v3d_tlb_clear`), a target cleared by the tile buffer not loaded. Draws:
+    the fragment key's `f32_color_rb` for 32-bit float and integer targets,
+    and with such a target Mesa's software blending (`software_blend`, each
+    drawn target's pipe format, swizzle and blend state in the key,
+    `vk_targets`), the tile buffer then not blending; a target without
+    alpha blends with a destination alpha of 1 (a `BLEND_CFG` of its own,
+    Mesa's `blend_dst_alpha_one`). Clears: ES3 contexts keep the clear
+    colour unclamped; `glClearBufferiv`, `uiv`, `fv`, `fi` through the tile
+    buffer per target; a partial one draws the clear quad confined to its
+    draw buffer, but in a framebuffer with a 32-bit float or integer target
+    (below) every target's box is filled by the CPU (`ogles2_texture_fill`,
+    sRGB encoded) and depth and stencil are drawn by a program that writes
+    no colour (`tools/clear_zs`). Reads: the RAM copy of every renderable
+    kind is read back from the GPU (`unpack_wide`); `glReadPixels` takes
+    ES 3.0's pairs (RGBA/FLOAT, RGBA_INTEGER with INT or UNSIGNED_INT,
+    RGB10_A2's packed type), each the buffer's implementation read format.
+    Also: `GL_SRC_ALPHA_SATURATE` as a destination factor in ES3 contexts;
+    GLES2 contexts refuse ES 3.0's sized formats in glTexImage2D again (as
+    1.3; item 8 had let them through). Tests: `m8_draw`'s RGBA32F, RGBA8I
+    and R32UI at once (drawn, read, cleared whole and in the scissor box,
+    blended in the shader), R8, RG8, SRGB8_ALPHA8, RGB10_A2,
+    R11F_G11F_B10F, R16F, RG8 blended with GL_DST_ALPHA, DEPTH32F_STENCIL8
+    with glClearBufferfi, rendered 128x128, 129x117 and 99x128 textures
+    sampled, an RGBA8 and an R32I target's partial clears beside each
+    other (`ogles2-m8-1-20261026-103218`: 25, 100, 103 of 103 three ways);
+    the GLES2 drawing tests as before; dEQP-GLES3 (`ogles2-m8-2-20261026-
+    103256` to `-104859`): `read_pixels` 48 of 48, `pbo` 54 of 54,
+    `color_clear` 19, `fragment_out` 940 of 940, `shaders-builtin_variable`
+    29 of 29, `fragment_ops` 3165 of 3174 (the 9 left need item 11's
+    framebuffer targets), `texture` 4501 of 5895 and no failure, `fbo` 1157
+    of 2075 (blits, layers, invalidation, the draw and read bindings,
+    `GL_DEPTH_STENCIL_ATTACHMENT`: item 11; multisampling: stage C),
+    `negative_api` 268 of 314 (item 11, transform feedback, program binary
+    and `glCopyTexSubImage3D` left); dEQP-GLES2 as before
+    (`ogles2-m7-1-20261026-112045` to `-112703`: `fbo` 709 of 709 again,
+    `texture` 783 of 807 with the 24 cube map cases of the documented
+    deviation, `negative_api` 246, `read_pixels` 8, `fragment_ops` 1923 of
+    1923). **A trap that cost a day:** a fragment shader
+    writing 16-bit floats into a 32-bit float or integer target (here the
+    GLES2 clear quad, in dEQP-GLES3's
+    `fbo.render.recreate_color.tex2d_rgba32f_*`) leaves the A1200 drawing
+    wrong pixels in every later program until it is switched off; a reboot
+    does not help (bisected by groups with `m7-4` after each). The draw
+    path now refuses any draw whose fragment variant does not write each
+    drawn target at its width (logged once), so neither a GLES2 program nor
+    the closest variant of an ES3 one without a compiler can do it. Left:
+    GLES2 (format 1) programs cannot draw into 32-bit float or integer
+    targets (they get no variant of the width: stage C's request codes);
+    textures in `DEPTH32F_STENCIL8` hold the depth only (their stencil is
+    not attachable); the blend colour is still clamped when set; the
+    built-ins for 32-bit targets are the CPU's fill and the no-colour
+    program rather than precompiled variants.
 11. **Framebuffers:** separate draw and read framebuffer bindings
     (`GL_DRAW_FRAMEBUFFER`, `GL_READ_FRAMEBUFFER`), `glBlitFramebuffer` in
     Mesa's `v3d_blit` order (`v3d_tlb_blit_fast`, `v3d_tfu_blit`,

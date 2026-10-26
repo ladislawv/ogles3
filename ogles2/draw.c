@@ -51,7 +51,7 @@ struct dedup
     UBYTE stencil[2][5];  /* the STENCIL_CFG bytes last sent, front and back */
     UWORD cw_l, cw_t, cw_w, cw_h;
     UWORD vp_w, vp_h, vp_cx2, vp_cy2;
-    UBYTE b_src, b_dst, b_eq, b_asrc, b_adst, b_aeq;
+    UBYTE b_src, b_dst, b_eq, b_asrc, b_adst, b_aeq, b_one;
     UWORD b_color[4];
     ULONG cwm_mask;
     float lw_value, do_factor, do_units;
@@ -75,6 +75,11 @@ struct OGLES2Draw
     struct OGLES2Program mrt_quad;
     struct OGLES2Image *mrt_image;
     BOOL mrt_ready, mrt_failed;
+    /* and depth and stencil where a target is 32-bit float or integer: clear_zs_v3dp.h */
+    struct OGLES2Program zs_quad;
+    struct OGLES2Image *zs_image;
+    BOOL zs_ready, zs_failed;
+    BOOL wrong_width_logged;       /* a draw skipped for its colour writes' width (draw_arrays) */
     /* and glCopyTex* on the GPU (copy.c): copy_tex_v3dp.h */
     struct OGLES2Program copy_prog;
     struct OGLES2Image *copy_image;
@@ -334,6 +339,10 @@ void ogles2_draw_free(struct OGLES2Context *ctx)
         ogles2_program_builtin_free(&d->mrt_quad);
     if (d->mrt_image)
         ogles2_image_free(d->mrt_image, ctx);
+    if (d->zs_ready)
+        ogles2_program_builtin_free(&d->zs_quad);
+    if (d->zs_image)
+        ogles2_image_free(d->zs_image, ctx);
     if (d->copy_ready)
         ogles2_program_builtin_free(&d->copy_prog);
     if (d->copy_image)
@@ -1223,6 +1232,15 @@ static UBYTE blend_factor_for(GLenum f, GLenum e)
     return e == GL_MIN_EXT || e == GL_MAX_EXT ? V3D_BLEND_FACTOR_ONE : blend_factor(f);
 }
 
+/* A blend factor for a target whose destination alpha is 1 (Mesa's
+ * v3d_factor with dst_alpha_one). */
+static UBYTE alpha_one(UBYTE f)
+{
+    return f == V3D_BLEND_FACTOR_DSTALPHA                                         ? V3D_BLEND_FACTOR_ONE
+         : f == V3D_BLEND_FACTOR_INVDSTALPHA || f == V3D_BLEND_FACTOR_SRCALPHASATURATE ? V3D_BLEND_FACTOR_ZERO
+                                                                                   : f;
+}
+
 /* IEEE half from a float in [0, 1] (blend constant colour). */
 static UWORD half(GLfloat f)
 {
@@ -1430,7 +1448,9 @@ static void emit_state(struct OGLES2Context *ctx, struct dedup *dd, int prim,
     ezue = eze;
     if (!depth_on && !zue) /* Mesa: updates follow the frame's EZ state outside the depth gate */
         ezue = v->ez_state != V3D_EZ_DISABLED;
-    be = (s->caps & OGLES2_CAP_BLEND) ? TRUE : FALSE;
+    /* Mesa's v3dx_emit.c: the tile buffer does not blend while the shader
+     * does (a 32-bit float or integer target in the framebuffer) */
+    be = (s->caps & OGLES2_CAP_BLEND) && !ctx->fb_soft_blend ? TRUE : FALSE;
     se = stencil_on ? TRUE : FALSE;
     /* glPolygonMode and glProvokingVertex (AmigaOS 4), as Mesa's v3dx_emit.c:
      * the hardware applies the fill modes to triangles only. */
@@ -1511,25 +1531,35 @@ static void emit_state(struct OGLES2Context *ctx, struct dedup *dd, int prim,
     }
 
     /* Blending: BLEND_ENABLES, BLEND_CFG (all four render targets, as Mesa
-     * and PiStorm3D), BLEND_CONSTANT_COLOR. */
+     * and PiStorm3D), BLEND_CONSTANT_COLOR. Targets whose format has no
+     * alpha (R8, RG8, RGB8, RGB565, R16F, ...) read a destination alpha of
+     * 1: a BLEND_CFG of their own where the others have alpha (Mesa's
+     * blend_dst_alpha_one). */
     if (be) {
         UBYTE src = blend_factor_for(s->blend_src_rgb, s->blend_eq_rgb);
         UBYTE dst = blend_factor_for(s->blend_dst_rgb, s->blend_eq_rgb);
         UBYTE asrc = blend_factor_for(s->blend_src_alpha, s->blend_eq_alpha);
         UBYTE adst = blend_factor_for(s->blend_dst_alpha, s->blend_eq_alpha);
         UBYTE eq = blend_mode(s->blend_eq_rgb), aeq = blend_mode(s->blend_eq_alpha);
+        UBYTE one = 0;
         UWORD c[4];
         for (k = 0; k < 4; k++)
             c[k] = half(s->blend_color[k]);
+        for (k = 0; k < ctx->fb_nrt; k++)
+            if ((ctx->fb_draw_mask & (1 << k)) && ctx->fb_rt[k].no_alpha)
+                one |= (UBYTE)(1 << k);
         if (!dd->blend || !dd->be || dd->b_src != src || dd->b_dst != dst || dd->b_eq != eq ||
-            dd->b_asrc != asrc || dd->b_adst != adst || dd->b_aeq != aeq ||
+            dd->b_asrc != asrc || dd->b_adst != adst || dd->b_aeq != aeq || dd->b_one != one ||
             dd->b_color[0] != c[0] || dd->b_color[1] != c[1] || dd->b_color[2] != c[2] ||
             dd->b_color[3] != c[3]) {
             BlendEnables(v, 0x0F);
-            BlendCfg(v, 0x0F, dst, src, eq, adst, asrc, aeq);
+            if (one != 0x0F)
+                BlendCfg(v, (UBYTE)(0x0F & ~one), dst, src, eq, adst, asrc, aeq);
+            if (one)
+                BlendCfg(v, one, alpha_one(dst), alpha_one(src), eq, alpha_one(adst), alpha_one(asrc), aeq);
             BlendConstantColor(v, c[3], c[2], c[1], c[0]);
             dd->b_src = src; dd->b_dst = dst; dd->b_eq = eq;
-            dd->b_asrc = asrc; dd->b_adst = adst; dd->b_aeq = aeq;
+            dd->b_asrc = asrc; dd->b_adst = adst; dd->b_aeq = aeq; dd->b_one = one;
             for (k = 0; k < 4; k++)
                 dd->b_color[k] = c[k];
         }
@@ -1548,7 +1578,7 @@ static void emit_state(struct OGLES2Context *ctx, struct dedup *dd, int prim,
                   (s->color_mask[2] ? 0 : 4) | (s->color_mask[3] ? 0 : 8);
         cwm = 0;
         for (k = 0; k < OGLES2_MAX_DRAW_BUFFERS; k++)
-            cwm |= ((ctx->fb_draw_mask & (1 << k)) ? m : 0xF) << (4 * k);
+            cwm |= ((ctx->fb_draw_mask & ctx->draw_rts & (1 << k)) ? m : 0xF) << (4 * k);
     }
     if (!dd->cwm || dd->cwm_mask != cwm) {
         ColorWriteMasks(v, cwm);
@@ -1781,6 +1811,76 @@ static ULONG sampler_bits(struct OGLES2Context *ctx, struct OGLES2Program *p, in
     return bits;
 }
 
+/* GL's blend equation and factors as Mesa's pipe enums (its state
+ * tracker's translation; MIN and MAX take factors ONE). */
+static ULONG pipe_func(GLenum e)
+{
+    return e == GL_FUNC_SUBTRACT ? 1 : e == GL_FUNC_REVERSE_SUBTRACT ? 2 : e == GL_MIN_EXT ? 3
+         : e == GL_MAX_EXT ? 4 : 0;
+}
+
+static ULONG pipe_factor(GLenum f, GLenum e)
+{
+    if (e == GL_MIN_EXT || e == GL_MAX_EXT)
+        return 1;
+    switch (f) {
+    case GL_ZERO:                     return 17;
+    case GL_ONE:                      return 1;
+    case GL_SRC_COLOR:                return 2;
+    case GL_ONE_MINUS_SRC_COLOR:      return 18;
+    case GL_SRC_ALPHA:                return 3;
+    case GL_ONE_MINUS_SRC_ALPHA:      return 19;
+    case GL_DST_ALPHA:                return 4;
+    case GL_ONE_MINUS_DST_ALPHA:      return 20;
+    case GL_DST_COLOR:                return 5;
+    case GL_ONE_MINUS_DST_COLOR:      return 21;
+    case GL_SRC_ALPHA_SATURATE:       return 6;
+    case GL_CONSTANT_COLOR:           return 7;
+    case GL_ONE_MINUS_CONSTANT_COLOR: return 23;
+    case GL_CONSTANT_ALPHA:           return 8;
+    case GL_ONE_MINUS_CONSTANT_ALPHA: return 24;
+    default:                          return 1;
+    }
+}
+
+/* The render targets' key fields for this draw (variant_key.h): the
+ * framebuffer's drawn targets (fbo.c, ogles2_fb_update), and with software
+ * blending each one's format and the blend state, which integer targets
+ * never use (ES 3.0 4.1.7; Mesa's state tracker disables it for them):
+ * ADD of ONE and ZERO when off. */
+static void vk_targets(struct OGLES2Context *ctx, struct OGLES2VkTargets *t)
+{
+    const struct OGLES2State *s = &ctx->state;
+    int i;
+    memset(t, 0, sizeof(*t));
+    t->soft = ctx->fb_soft_blend;
+    for (i = 0; i < ctx->fb_nrt; i++) {
+        const struct OGLES2RtFormat *rf = &ctx->fb_rt[i];
+        BOOL integer = rf->kind == OGLES2_RT_INT || rf->kind == OGLES2_RT_UINT;
+        if (!(ctx->fb_draw_mask & (1 << i)) || rf->kind == OGLES2_RT_NONE)
+            continue;
+        if (rf->kind == OGLES2_RT_F32 || integer)
+            t->f32 |= (UBYTE)(1 << i);
+        if (!t->soft)
+            continue;
+        t->cbufs |= (UBYTE)(1 << i);
+        t->fmt[i] = rf->pipe;
+        memcpy(t->swz[i], rf->swz, 4);
+        if ((s->caps & OGLES2_CAP_BLEND) && !integer) {
+            t->blend[i][0] = pipe_func(s->blend_eq_rgb);
+            t->blend[i][1] = pipe_factor(s->blend_src_rgb, s->blend_eq_rgb);
+            t->blend[i][2] = pipe_factor(s->blend_dst_rgb, s->blend_eq_rgb);
+            t->blend[i][3] = pipe_func(s->blend_eq_alpha);
+            t->blend[i][4] = pipe_factor(s->blend_src_alpha, s->blend_eq_alpha);
+            t->blend[i][5] = pipe_factor(s->blend_dst_alpha, s->blend_eq_alpha);
+        } else {
+            t->blend[i][0] = t->blend[i][3] = 0;  /* PIPE_BLEND_ADD */
+            t->blend[i][1] = t->blend[i][4] = 1;  /* PIPE_BLENDFACTOR_ONE */
+            t->blend[i][2] = t->blend[i][5] = 17; /* PIPE_BLENDFACTOR_ZERO */
+        }
+    }
+}
+
 /* A variant of `stage` fitting `want` in one image, or 0. */
 static const struct OGLES2Variant *find_in(const struct OGLES2Image *im, UBYTE stage, const UBYTE *want)
 {
@@ -1848,7 +1948,7 @@ static ULONG key_entry(UBYTE *e, UBYTE stage, UBYTE flags, const UBYTE *key)
  * outputs (V3DGLSL_KEY_OUTPUTS_FROM_FS), as Mesa's v3d_update_compiled_vs
  * does. A vertex variant alone is asked for when only it is missing. */
 static BOOL es3_variants(struct OGLES2Context *ctx, struct OGLES2Program *p, GLenum fsmode, UBYTE cbufs,
-                         const ULONG *bits, BOOL a2c, const struct OGLES2Variant **vs,
+                         const ULONG *bits, BOOL a2c, const struct OGLES2VkTargets *tg, const struct OGLES2Variant **vs,
                          const struct OGLES2Variant **fs, const struct OGLES2Image **vown,
                          const struct OGLES2Image **fown)
 {
@@ -1863,6 +1963,7 @@ static BOOL es3_variants(struct OGLES2Context *ctx, struct OGLES2Program *p, GLe
          : fsmode == GL_LINES || fsmode == GL_LINE_LOOP || fsmode == GL_LINE_STRIP ? OGLES2_VK_LINES
                                                                                    : OGLES2_VK_TRIANGLES;
     ogles2_vk_fs_want(want, (*fs)->key, prim, cbufs, bits[1], a2c);
+    ogles2_vk_fs_targets(want, tg);
     f = find_x(im, OGLES2_VARIANT_FS, want, fown);
     if (!f) {
         ULONG n = key_entry(req, OGLES2_VARIANT_FS, 0, want);
@@ -1917,6 +2018,7 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
     BOOL vid;        /* a shader reads gl_VertexID: the real vertex numbers (below) */
     BOOL a2c;        /* alpha to coverage in an ES3 program's key */
     ULONG bits[2];   /* an ES3 program's 32-bit samplers, vertex and fragment */
+    struct OGLES2VkTargets tg; /* and its render targets' key fields */
     GLenum itype_gl; /* the indices' type as the GPU gets them */
     ULONG unif[3], code[3], defattr, rec, idx_addr = 0, idx_size = 0;
     int a, nslots = 0, i;
@@ -1942,10 +2044,13 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
     a2c = ctx->msaa && !ctx->draw_fb && (ctx->state.caps & OGLES2_CAP_SAMPLE_ALPHA_TO_COVERAGE) != 0;
     fim = im;
     bits[0] = bits[1] = 0;
+    memset(&tg, 0, sizeof(tg));
     if (im->format2) {
-        /* An OpenGL ES 3 program: both in the variants' keys (es3_variants). */
+        /* An OpenGL ES 3 program: both in the variants' keys (es3_variants),
+         * and the render targets'. */
         bits[0] = sampler_bits(ctx, p, 0);
         bits[1] = sampler_bits(ctx, p, 1);
+        vk_targets(ctx, &tg);
     } else {
         /* A GLES2 one: from the program's 32-bit-sampler variants while a
          * float or depth texture is bound to one of its samplers (program.c,
@@ -1965,7 +2070,8 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
     }
     if (p->var_ok && p->var_mode == mode && p->var_fsmode == fsmode && p->var_fim == fim &&
         p->var_nrt == ctx->fb_nrt && p->var_cbufs == (ctx->draw_fb ? ctx->fb_draw_mask : 1) &&
-        p->var_bits[0] == bits[0] && p->var_bits[1] == bits[1] && p->var_a2c == a2c) {
+        p->var_bits[0] == bits[0] && p->var_bits[1] == bits[1] && p->var_a2c == a2c &&
+        !memcmp(&p->var_tg, &tg, sizeof(tg))) {
         cs = p->var[0];
         vs = p->var[1];
         fs = p->var[2];
@@ -1998,8 +2104,8 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
              * (above); a GLES2 one keeps 1.x's. */
             const struct OGLES2Image *vown = im, *fown = fim;
             if (im->format2)
-                es3_variants(ctx, p, fsmode, ctx->draw_fb ? ctx->fb_draw_mask : 1, bits, a2c, &vs, &fs, &vown,
-                             &fown);
+                es3_variants(ctx, p, fsmode, ctx->draw_fb ? ctx->fb_draw_mask : 1, bits, a2c, &tg, &vs, &fs,
+                             &vown, &fown);
             code[0] = code_address(d, im, cs);
             code[1] = code_address(d, vown, vs);
             code[2] = code_address(d, fown, fs);
@@ -2022,9 +2128,34 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
         p->var_bits[0] = bits[0];
         p->var_bits[1] = bits[1];
         p->var_a2c = a2c;
+        p->var_tg = tg;
         p->var_ok = TRUE;
     }
 
+    /* A colour write of the wrong width (16-bit floats into a 32-bit float
+     * or integer target, or the reverse) upsets the GPU until a power cycle
+     * (the A1200, 2026-10-26: wrong pixels everywhere after, a reboot did not
+     * help): a draw whose fragment variant does not write each drawn target
+     * at its width (a GLES2 program's, or the closest of an ES3 program's
+     * without a compiler) is dropped, logged once. draw_clear's depth and
+     * stencil program writes no colour. */
+    if (p != &d->zs_quad) {
+        UBYTE need = 0, has = fs->key ? ogles2_vk_fs_f32(fs->key) : 0, cb = fs->cbufs ? fs->cbufs : 1;
+        for (i = 0; i < ctx->fb_nrt; i++)
+            if ((ctx->fb_draw_mask & (1 << i)) &&
+                (ctx->fb_rt[i].kind == OGLES2_RT_F32 || ctx->fb_rt[i].kind == OGLES2_RT_INT ||
+                 ctx->fb_rt[i].kind == OGLES2_RT_UINT))
+                need |= (UBYTE)(1 << i);
+        if ((need & cb) != (has & cb)) { /* a target the variant does not write gets no write at all */
+            if (!d->wrong_width_logged) {
+                d->wrong_width_logged = TRUE;
+                ogles2_log("draw: the fragment shader would write a 32-bit float or integer target at the wrong "
+                           "width (targets 0x%lx, the variant 0x%lx): not drawn (logged once)",
+                           (ULONG)need, (ULONG)has);
+            }
+            return;
+        }
+    }
     ogles2_job_begin(ctx);
     vid = cs->uses_vid || vs->uses_vid;
     itype_gl = !el ? 0
@@ -2551,6 +2682,31 @@ static struct OGLES2Program *mrt_program(struct OGLES2Draw *d)
     return p;
 }
 
+#include "clear_zs_v3dp.h"
+
+/* The program draw_clear clears depth and stencil with where a target is
+ * 32-bit float or integer: position from the last but one generic
+ * attribute, no colour output; tools/clear_zs. 0: none (logged once). */
+static struct OGLES2Program *zs_program(struct OGLES2Draw *d)
+{
+    struct OGLES2Program *p = &d->zs_quad;
+    if (!d->zs_ready && !d->zs_failed) {
+        char why[96];
+        if (!(d->zs_image = ogles2_v3dp_load(clear_zs_v3dp, sizeof(clear_zs_v3dp), why, sizeof(why))) ||
+            !ogles2_program_image(p, d->zs_image)) {
+            d->zs_failed = TRUE;
+            ogles2_log("glClear: no program for depth and stencil beside a 32-bit target (%s): not cleared",
+                       (ULONG)(d->zs_image ? "out of memory" : why));
+            return 0;
+        }
+        d->zs_ready = TRUE;
+    }
+    if (!d->zs_ready)
+        return 0;
+    p->attrib_index[0] = OGLES2_MAX_VERTEX_ATTRIBS - 2;
+    return p;
+}
+
 #include "copy_tex_v3dp.h"
 
 /* The program glCopyTex* draws with on the GPU: unit 0's 2D texture over a
@@ -2656,7 +2812,8 @@ BOOL ogles2_draw_copy(struct OGLES2Context *ctx, struct OGLES2Texture *src, cons
  * the built-in program, an identity matrix, the clear colour as a constant
  * attribute, z at the clear depth, and a state that writes exactly what
  * glClear writes. The application's state is restored afterwards. */
-void ogles2_draw_clear(struct OGLES2Context *ctx, GLbitfield mask)
+void ogles2_draw_clear(struct OGLES2Context *ctx, GLbitfield mask, UBYTE rts, const GLfloat *color, GLfloat depth,
+                       GLint stencil)
 {
     static const GLfloat identity[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
     struct OGLES2State saved = ctx->state, *s = &ctx->state;
@@ -2696,8 +2853,15 @@ void ogles2_draw_clear(struct OGLES2Context *ctx, GLbitfield mask)
         if (m)
             quad = m;
     }
+    /* A 32-bit float or integer target: no 16-bit colour write may reach
+     * it (frame.c clears their colour on the CPU): depth and stencil with
+     * the program that writes no colour. */
+    if (ctx->fb_soft_blend && !(mask & GL_COLOR_BUFFER_BIT)) {
+        if (!(quad = zs_program(d)))
+            return;
+    }
 
-    z = s->clear_depth * 2.0f - 1.0f; /* lands on clear_depth with the range [0, 1] */
+    z = depth * 2.0f - 1.0f; /* lands on the depth with the range [0, 1] */
     pos[0] = -1; pos[1] = -1;  pos[3] = 1; pos[4] = -1;
     pos[6] = -1; pos[7] = 1;   pos[9] = 1; pos[10] = 1;
     pos[2] = pos[5] = pos[8] = pos[11] = z;
@@ -2711,7 +2875,7 @@ void ogles2_draw_clear(struct OGLES2Context *ctx, GLbitfield mask)
     ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2].divisor = 0;
     ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 1].enabled = GL_FALSE;
     for (k = 0; k < 4; k++)
-        s->attrib[OGLES2_MAX_VERTEX_ATTRIBS - 1][k] = s->clear_color[k];
+        s->attrib[OGLES2_MAX_VERTEX_ATTRIBS - 1][k] = color[k];
 
     /* The state: only the scissor test stays the application's (the
      * rectangle is filled whatever glPolygonMode says). */
@@ -2727,7 +2891,7 @@ void ogles2_draw_clear(struct OGLES2Context *ctx, GLbitfield mask)
         s->caps |= OGLES2_CAP_STENCIL_TEST;
         for (k = 0; k < 2; k++) {
             s->stencil_func[k] = GL_ALWAYS;
-            s->stencil_ref[k] = s->clear_stencil & 0xff;
+            s->stencil_ref[k] = stencil & 0xff;
             s->stencil_fail[k] = s->stencil_zfail[k] = s->stencil_zpass[k] = GL_REPLACE;
             s->stencil_write_mask[k] = saved.stencil_write_mask[0]; /* glClear uses the front mask */
         }
@@ -2744,7 +2908,9 @@ void ogles2_draw_clear(struct OGLES2Context *ctx, GLbitfield mask)
     ctx->state_ver++; /* the override above */
     mark(ctx, -1); /* probe P: the time before is not the draw's */
     ogles2_query_pause(ctx, TRUE); /* nor a clear */
+    ctx->draw_rts = rts; /* glClearBuffer*: one draw buffer */
     draw_arrays(ctx, quad, GL_TRIANGLE_STRIP, 0, 4, 0, 1);
+    ctx->draw_rts = 0xFF;
     ogles2_query_pause(ctx, FALSE);
 
     ctx->state = saved;

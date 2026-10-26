@@ -56,6 +56,36 @@ void ogles2_vk_fs_want(UBYTE *want, const UBYTE *base, int prim, UBYTE cbufs, UL
     want[FK_LOGICOP + 1] = want[FK_LOGICOP + 2] = want[FK_LOGICOP + 3] = 0;
 }
 
+static void put_u32(UBYTE *k, ULONG v)
+{
+    k[0] = (UBYTE)v;
+    k[1] = (UBYTE)(v >> 8);
+    k[2] = (UBYTE)(v >> 16);
+    k[3] = (UBYTE)(v >> 24);
+}
+
+void ogles2_vk_fs_targets(UBYTE *want, const struct OGLES2VkTargets *t)
+{
+    int i, j;
+    want[FK_SOFTWARE_BLEND] = t->soft;
+    want[FK_F32] = t->f32;
+    if (!t->soft)
+        return;
+    for (i = 0; i < 4; i++) {
+        if (!(t->cbufs & (1 << i)))
+            continue;
+        put_u32(want + FK_FMT + 8 * i, t->fmt[i]);
+        memcpy(want + FK_FMT + 8 * i + 4, t->swz[i], 4);
+        for (j = 0; j < 6; j++)
+            put_u32(want + FK_FMT + 64 + 24 * i + 4 * j, t->blend[i][j]);
+    }
+}
+
+UBYTE ogles2_vk_fs_f32(const UBYTE *key)
+{
+    return key[FK_F32];
+}
+
 BOOL ogles2_vk_fs_fits(const UBYTE *k, const UBYTE *want)
 {
     ULONG w = ogles2_vk_bits(want);

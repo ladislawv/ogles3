@@ -100,3 +100,9 @@ command glTexStorage2D
 command glTexStorage3D
 command glCompressedTexImage3D
 command glCompressedTexSubImage3D
+command glClearBufferiv
+command glClearBufferuiv
+command glClearBufferfv
+command glClearBufferfi
+command glRenderbufferStorageMultisample
+command glGetInternalformativ

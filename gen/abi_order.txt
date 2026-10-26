@@ -243,3 +243,9 @@ glTexStorage2D
 glTexStorage3D
 glCompressedTexImage3D
 glCompressedTexSubImage3D
+glClearBufferiv
+glClearBufferuiv
+glClearBufferfv
+glClearBufferfi
+glRenderbufferStorageMultisample
+glGetInternalformativ

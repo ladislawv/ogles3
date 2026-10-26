@@ -1054,6 +1054,397 @@ static void test_etc2(void)
     glDeleteProgram(pa);
 }
 
+/* ---- render targets beyond 8 bits (GLES3 plan stage B item 10) ---- */
+
+static GLuint storage_texture(GLenum ifmt)
+{
+    GLuint t;
+    glGenTextures(1, &t);
+    glBindTexture(GL_TEXTURE_2D, t);
+    glTexStorage2D(GL_TEXTURE_2D, 1, ifmt, 16, 16);
+    return t;
+}
+
+/* The read buffer's pixel (x, y) as RGBA floats is want (within tol). */
+static int floats_are(int x, int y, const GLfloat *want, GLfloat tol)
+{
+    GLfloat px[4];
+    int k;
+    px[0] = px[1] = px[2] = px[3] = -99.0f;
+    glReadPixels(x, y, 1, 1, GL_RGBA, GL_FLOAT, px);
+    for (k = 0; k < 4; k++)
+        if (px[k] - want[k] > tol || want[k] - px[k] > tol) { /* in thousandths: libnix prints no floats */
+            printf("     pixel (%d, %d) is %ld %ld %ld %ld, not %ld %ld %ld %ld (x 1/1000)\n", x, y,
+                   (long)(px[0] * 1000), (long)(px[1] * 1000), (long)(px[2] * 1000), (long)(px[3] * 1000),
+                   (long)(want[0] * 1000), (long)(want[1] * 1000), (long)(want[2] * 1000), (long)(want[3] * 1000));
+            return 0;
+        }
+    return 1;
+}
+
+/* The read buffer's pixel (x, y) as RGBA_INTEGER of `type` is want. */
+static int ints_are(int x, int y, GLenum type, const GLint *want)
+{
+    GLint px[4];
+    int k;
+    px[0] = px[1] = px[2] = px[3] = 99;
+    glReadPixels(x, y, 1, 1, GL_RGBA_INTEGER, type, px);
+    for (k = 0; k < 4; k++)
+        if (px[k] != want[k]) {
+            printf("     pixel (%d, %d) is %ld %ld %ld %ld, not %ld %ld %ld %ld\n", x, y, (long)px[0], (long)px[1],
+                   (long)px[2], (long)px[3], (long)want[0], (long)want[1], (long)want[2], (long)want[3]);
+            return 0;
+        }
+    return 1;
+}
+
+static void rt_uniforms(GLuint p, const GLfloat *f, const GLint *i, const GLuint *u, GLfloat z)
+{
+    glUseProgram(p);
+    glUniform4fv(glGetUniformLocation(p, "f"), 1, f);
+    glUniform4iv(glGetUniformLocation(p, "i"), 1, i);
+    glUniform4uiv(glGetUniformLocation(p, "u"), 1, u);
+    glUniform1f(glGetUniformLocation(p, "z"), z);
+}
+
+/* An RGBA32F, an RGBA8I and an R32UI target at once (es3rt's three
+ * outputs: 32-bit writes, software blending's key, 128-bit 16x16 tiles),
+ * read as ES 3.0's RGBA/FLOAT and RGBA_INTEGER; each cleared by
+ * glClearBuffer* in the tile buffer, one confined by the scissor box (the
+ * CPU's fill); RGBA32F blended in the shader, the integer target not. */
+static void test_rt_wide(void)
+{
+    static const GLenum bufs[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+    static const GLfloat f[4] = { 0.25f, -2.0f, 100.5f, 0.5f }, cf[4] = { 1.5f, 2.5f, -3.0f, 4.0f };
+    static const GLfloat sf[4] = { 7.0f, 7.0f, 7.0f, 7.0f }, bf[4] = { 1.75f, 0.5f, 97.5f, 4.5f };
+    static const GLint iv[4] = { -5, 7, -128, 127 }, ci[4] = { -1, -2, -3, -4 };
+    static const GLuint uv[4] = { 4000000000u, 1, 2, 3 }, cu[4] = { 9, 8, 7, 6 };
+    static const GLint ru[4] = { (GLint)4000000000u, 0, 0, 1 }, rcu[4] = { 9, 0, 0, 1 };
+    GLuint p = program("es3rt"), fb, t[2], rb;
+    GLint fmt = 0, type = 0;
+    if (!p) {
+        check(0, "render targets: es3rt links");
+        return;
+    }
+    glGenFramebuffers(1, &fb);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb);
+    t[0] = storage_texture(GL_RGBA32F);
+    t[1] = storage_texture(GL_RGBA8I);
+    glGenRenderbuffers(1, &rb);
+    glBindRenderbuffer(GL_RENDERBUFFER, rb);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_R32UI, 16, 16);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, t[0], 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, t[1], 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_RENDERBUFFER, rb);
+    glDrawBuffers(3, bufs);
+    check(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE && glGetError() == GL_NO_ERROR,
+          "render targets: RGBA32F, RGBA8I and R32UI complete");
+    glViewport(0, 0, 16, 16);
+    rt_uniforms(p, f, iv, uv, 0.0f);
+    draw_cover(p);
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
+    glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &type);
+    check(floats_are(8, 8, f, 0.0f) && type == GL_FLOAT, "render targets: RGBA32F drawn, read as RGBA/FLOAT");
+    glReadBuffer(GL_COLOR_ATTACHMENT1);
+    glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &fmt);
+    check(ints_are(8, 8, GL_INT, iv) && fmt == GL_RGBA_INTEGER, "render targets: RGBA8I drawn, read as RGBA_INTEGER");
+    glReadBuffer(GL_COLOR_ATTACHMENT2);
+    check(ints_are(8, 8, GL_UNSIGNED_INT, ru), "render targets: R32UI drawn (4000000000, 0, 0, 1)");
+
+    glClearBufferfv(GL_COLOR, 0, cf);
+    glClearBufferiv(GL_COLOR, 1, ci);
+    glClearBufferuiv(GL_COLOR, 2, cu);
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
+    check(floats_are(8, 8, cf, 0.0f) && glGetError() == GL_NO_ERROR, "glClearBufferfv: RGBA32F");
+    glReadBuffer(GL_COLOR_ATTACHMENT1);
+    check(ints_are(8, 8, GL_INT, ci), "glClearBufferiv: RGBA8I");
+    glReadBuffer(GL_COLOR_ATTACHMENT2);
+    check(ints_are(8, 8, GL_UNSIGNED_INT, rcu), "glClearBufferuiv: R32UI");
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(0, 0, 4, 4);
+    glClearBufferfv(GL_COLOR, 0, sf);
+    glDisable(GL_SCISSOR_TEST);
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
+    check(floats_are(2, 2, sf, 0.0f) && floats_are(8, 8, cf, 0.0f), "glClearBufferfv in the scissor box: RGBA32F");
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE);
+    draw_cover(p);
+    glDisable(GL_BLEND);
+    check(floats_are(8, 8, bf, 0.0f), "software blending: RGBA32F, ONE + ONE");
+    glReadBuffer(GL_COLOR_ATTACHMENT1);
+    check(ints_are(8, 8, GL_INT, iv) && glGetError() == GL_NO_ERROR, "software blending: RGBA8I not blended");
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, 64, 64);
+    glDeleteFramebuffers(1, &fb);
+    glDeleteTextures(2, t);
+    glDeleteRenderbuffers(1, &rb);
+    glDeleteProgram(p);
+}
+
+/* One target of each 8-bit and 16F kind: (0.5, 0.25, 0.75, 1) drawn and
+ * read back; sRGB stored encoded; R11F_G11F_B10F and R16F read as floats.
+ * Then RG8 blended with GL_DST_ALPHA: a target without alpha reads 1. */
+static int one_rt_is(GLuint p, GLenum ifmt, const GLubyte *want, const GLfloat *wantf)
+{
+    static const GLfloat f[4] = { 0.5f, 0.25f, 0.75f, 1.0f };
+    static const GLint iv[4] = { 0, 0, 0, 0 };
+    static const GLuint uv[4] = { 0, 0, 0, 0 };
+    GLuint fb, t = storage_texture(ifmt);
+    int ok;
+    glGenFramebuffers(1, &fb);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, t, 0);
+    glViewport(0, 0, 16, 16);
+    rt_uniforms(p, f, iv, uv, 0.0f);
+    draw_cover(p);
+    ok = glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE &&
+         (want ? pixel_is(8, 8, want[0], want[1], want[2], want[3], 1) : floats_are(8, 8, wantf, 0.0f));
+    if (!ok)
+        printf("     (format 0x%04lx)\n", (unsigned long)ifmt);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, 64, 64);
+    glDeleteFramebuffers(1, &fb);
+    glDeleteTextures(1, &t);
+    return ok;
+}
+
+static void test_rt_formats(void)
+{
+    static const GLubyte r8[4] = { 128, 0, 0, 255 }, rg8[4] = { 128, 64, 0, 255 };
+    static const GLubyte srgb[4] = { 188, 137, 225, 255 }, rgb10a2[4] = { 128, 64, 191, 255 };
+    static const GLfloat r11[4] = { 0.5f, 0.25f, 0.75f, 1.0f }, r16[4] = { 0.5f, 0.0f, 0.0f, 1.0f };
+    static const GLfloat f[4] = { 0.5f, 0.25f, 0.75f, 1.0f }, clear0[4] = { 0, 0, 0, 0 };
+    static const GLint iv[4] = { 0, 0, 0, 0 };
+    static const GLuint uv[4] = { 0, 0, 0, 0 };
+    GLuint p = program("es3rt"), fb, t;
+    if (!p) {
+        check(0, "render target formats: es3rt links");
+        return;
+    }
+    check(one_rt_is(p, GL_R8, r8, 0) && one_rt_is(p, GL_RG8, rg8, 0), "render targets: R8 and RG8");
+    check(one_rt_is(p, GL_SRGB8_ALPHA8, srgb, 0), "render targets: SRGB8_ALPHA8 stored encoded");
+    check(one_rt_is(p, GL_RGB10_A2, rgb10a2, 0), "render targets: RGB10_A2");
+    check(one_rt_is(p, GL_R11F_G11F_B10F, 0, r11) && one_rt_is(p, GL_R16F, 0, r16) && glGetError() == GL_NO_ERROR,
+          "render targets: R11F_G11F_B10F and R16F read as floats");
+
+    glGenFramebuffers(1, &fb);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb);
+    t = storage_texture(GL_RG8);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, t, 0);
+    glViewport(0, 0, 16, 16);
+    glClearBufferfv(GL_COLOR, 0, clear0);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_DST_ALPHA, GL_ZERO);
+    rt_uniforms(p, f, iv, uv, 0.0f);
+    draw_cover(p);
+    glDisable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ZERO);
+    check(pixel_is(8, 8, 128, 64, 0, 255, 1) && glGetError() == GL_NO_ERROR,
+          "blending: RG8 reads a destination alpha of 1");
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, 64, 64);
+    glDeleteFramebuffers(1, &fb);
+    glDeleteTextures(1, &t);
+    glDeleteProgram(p);
+}
+
+/* DEPTH32F_STENCIL8 as depth and stencil (32F depth in the tile buffer, its
+ * stencil an S8 image of its own): cleared by glClearBufferfi to 0.5 and 3;
+ * green nearer passes both tests, red farther fails the depth test, blue
+ * with another reference fails the stencil test. */
+static void test_rt_depth32f(void)
+{
+    static const GLfloat black[4] = { 0, 0, 0, 1 };
+    static const GLfloat green[4] = { 0, 1, 0, 1 }, red[4] = { 1, 0, 0, 1 }, blue[4] = { 0, 0, 1, 1 };
+    static const GLint iv[4] = { 0, 0, 0, 0 };
+    static const GLuint uv[4] = { 0, 0, 0, 0 };
+    GLuint p = program("es3rt"), fb, rb[2];
+    GLint ct = 0;
+    if (!p) {
+        check(0, "32F depth: es3rt links");
+        return;
+    }
+    glGenFramebuffers(1, &fb);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb);
+    glGenRenderbuffers(2, rb);
+    glBindRenderbuffer(GL_RENDERBUFFER, rb[0]);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA8, 16, 16);
+    glBindRenderbuffer(GL_RENDERBUFFER, rb[1]);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH32F_STENCIL8, 16, 16);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, rb[0]);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rb[1]);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rb[1]);
+    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                                          GL_FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE, &ct);
+    check(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE && ct == GL_FLOAT &&
+              glGetError() == GL_NO_ERROR,
+          "32F depth: DEPTH32F_STENCIL8 complete, its depth GL_FLOAT");
+    glViewport(0, 0, 16, 16);
+    glClearBufferfv(GL_COLOR, 0, black);
+    glClearBufferfi(GL_DEPTH_STENCIL, 0, 0.5f, 3);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_EQUAL, 3, 0xff);
+    rt_uniforms(p, green, iv, uv, -0.5f);
+    draw_cover(p);
+    rt_uniforms(p, red, iv, uv, 0.5f);
+    draw_cover(p);
+    glStencilFunc(GL_EQUAL, 4, 0xff);
+    rt_uniforms(p, blue, iv, uv, -0.9f);
+    draw_cover(p);
+    glDisable(GL_STENCIL_TEST);
+    glStencilFunc(GL_ALWAYS, 0, 0xff);
+    glDisable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    check(pixel_is(8, 8, 0, 255, 0, 255, 0) && glGetError() == GL_NO_ERROR,
+          "32F depth: depth and stencil tests against glClearBufferfi's 0.5 and 3");
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, 64, 64);
+    glDeleteFramebuffers(1, &fb);
+    glDeleteRenderbuffers(2, rb);
+    glDeleteProgram(p);
+}
+
+/* An RGBA8 and an R32I target with depth and stencil: partial clears where
+ * a 16-bit colour write must not reach the integer target (it upsets the
+ * GPU until a power cycle): the stencil through the program that writes no
+ * colour, each colour on the CPU; then a draw where the stencil is 1. */
+static void test_rt_mixed_clears(void)
+{
+    static const GLenum bufs[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+    static const GLfloat black[4] = { 0, 0, 0, 1 }, blue[4] = { 0, 0, 1, 1 }, green[4] = { 0, 1, 0, 1 };
+    static const GLint zero[4] = { 0, 0, 0, 0 }, seven[4] = { 7, 0, 0, 0 }, iv[4] = { -5, 0, 0, 0 };
+    static const GLint r_draw[4] = { -5, 0, 0, 1 }, r_seven[4] = { 7, 0, 0, 1 }, r_zero[4] = { 0, 0, 0, 1 };
+    static const GLuint uv[4] = { 0, 0, 0, 0 };
+    GLuint p = program("es3rt"), fb, t[2], rb;
+    if (!p) {
+        check(0, "mixed clears: es3rt links");
+        return;
+    }
+    glGenFramebuffers(1, &fb);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb);
+    glGenTextures(2, t);
+    glBindTexture(GL_TEXTURE_2D, t[0]);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, 128, 128);
+    glBindTexture(GL_TEXTURE_2D, t[1]);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_R32I, 128, 128);
+    glGenRenderbuffers(1, &rb);
+    glBindRenderbuffer(GL_RENDERBUFFER, rb);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 128, 128);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, t[0], 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, t[1], 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rb);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rb);
+    glDrawBuffers(2, bufs);
+    glViewport(0, 0, 128, 128);
+    glClearBufferfv(GL_COLOR, 0, black);
+    glClearBufferiv(GL_COLOR, 1, zero);
+    glClearBufferfi(GL_DEPTH_STENCIL, 0, 1.0f, 0);
+    rt_uniforms(p, green, iv, uv, 0.0f); /* a draw first: the clears below cannot be the tile buffer's */
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(0, 0, 128, 1);
+    draw_cover(p);
+    glScissor(0, 0, 64, 128);
+    glClearStencil(1);
+    glClear(GL_STENCIL_BUFFER_BIT);
+    glClearStencil(0);
+    glScissor(64, 0, 64, 64);
+    glClearBufferfv(GL_COLOR, 0, blue);
+    glClearBufferiv(GL_COLOR, 1, seven);
+    glDisable(GL_SCISSOR_TEST);
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_EQUAL, 1, 0xff);
+    draw_cover(p);
+    glDisable(GL_STENCIL_TEST);
+    glStencilFunc(GL_ALWAYS, 0, 0xff);
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
+    check(pixel_is(10, 100, 0, 255, 0, 255, 0) && pixel_is(100, 100, 0, 0, 0, 255, 0) &&
+              pixel_is(100, 10, 0, 0, 255, 255, 0) && glGetError() == GL_NO_ERROR,
+          "mixed clears: RGBA8 beside R32I, stencil cleared in half, colour in a quarter");
+    glReadBuffer(GL_COLOR_ATTACHMENT1);
+    check(ints_are(10, 100, GL_INT, r_draw) && ints_are(100, 100, GL_INT, r_zero) &&
+              ints_are(100, 10, GL_INT, r_seven) && glGetError() == GL_NO_ERROR,
+          "mixed clears: the R32I target the same");
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, 64, 64);
+    glDeleteFramebuffers(1, &fb);
+    glDeleteTextures(2, t);
+    glDeleteRenderbuffers(1, &rb);
+    glDeleteProgram(p);
+}
+
+/* Texel (x, y) of t sampled (es3tc, nearest) is (r, g, b). */
+static int texel_at(GLuint p, GLuint t, int w, int h, int x, int y, int r, int g, int b)
+{
+    glBindTexture(GL_TEXTURE_2D, t);
+    glUseProgram(p);
+    glUniform1i(glGetUniformLocation(p, "tex"), 0);
+    glUniform2f(glGetUniformLocation(p, "at"), ((GLfloat)x + 0.5f) / (GLfloat)w, ((GLfloat)y + 0.5f) / (GLfloat)h);
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    if (!pixel_is(32, 32, r, g, b, 255, 1)) {
+        printf("     (texel %d, %d of %dx%d)\n", x, y, w, h);
+        return 0;
+    }
+    return 1;
+}
+
+/* A texture a framebuffer object drew into, sampled: green, its left 64
+ * columns red (drawn with the scissor test), at sizes whose layouts differ
+ * (dEQP-GLES3's fbo.color.tex2d draws into 129x117). */
+static int rendered_is_sampled(GLuint pr, GLuint pt, int w, int h)
+{
+    static const GLfloat green[4] = { 0, 1, 0, 1 }, red[4] = { 1, 0, 0, 1 };
+    static const GLint iv[4] = { 0, 0, 0, 0 };
+    static const GLuint uv[4] = { 0, 0, 0, 0 };
+    GLuint fb, t;
+    int ok;
+    glGenTextures(1, &t);
+    glBindTexture(GL_TEXTURE_2D, t);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glGenFramebuffers(1, &fb);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, t, 0);
+    glViewport(0, 0, w, h);
+    rt_uniforms(pr, green, iv, uv, 0.0f);
+    draw_cover(pr);
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(0, 0, 64, h);
+    rt_uniforms(pr, red, iv, uv, 0.0f);
+    draw_cover(pr);
+    glDisable(GL_SCISSOR_TEST);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, 64, 64);
+    ok = texel_at(pt, t, w, h, 10, h / 2, 255, 0, 0) && texel_at(pt, t, w, h, (w + 64) / 2, h / 2, 0, 255, 0) &&
+         texel_at(pt, t, w, h, 63, h - 1, 255, 0, 0) && texel_at(pt, t, w, h, 64, 0, 0, 255, 0) &&
+         texel_at(pt, t, w, h, w - 1, h - 1, 0, 255, 0);
+    glDeleteFramebuffers(1, &fb);
+    glDeleteTextures(1, &t);
+    return ok;
+}
+
+static void test_rendered_textures(void)
+{
+    GLuint pr = program("es3rt"), pt = program("es3tc");
+    if (!pr || !pt) {
+        check(0, "rendered textures: es3rt and es3tc link");
+        return;
+    }
+    check(rendered_is_sampled(pr, pt, 128, 128) && glGetError() == GL_NO_ERROR,
+          "rendered textures: 128x128 drawn, then sampled");
+    check(rendered_is_sampled(pr, pt, 129, 117) && glGetError() == GL_NO_ERROR,
+          "rendered textures: 129x117 drawn, then sampled");
+    check(rendered_is_sampled(pr, pt, 99, 128) && glGetError() == GL_NO_ERROR,
+          "rendered textures: 99x128 drawn, then sampled");
+    glDeleteProgram(pr);
+    glDeleteProgram(pt);
+}
+
 /* ES 3.0's integer textures through es3utex (usampler2D) and es3itex
  * (isampler2D, magnitudes): 8-bit unsigned, 32-bit unsigned (32-bit
  * returns), 16-bit signed; with a linear filter incomplete, the integer
@@ -1205,6 +1596,11 @@ int main(void)
     test_formats3();
     test_int_textures();
     test_etc2();
+    test_rt_wide();
+    test_rt_formats();
+    test_rt_depth32f();
+    test_rendered_textures();
+    test_rt_mixed_clears();
     check(glGetError() == GL_NO_ERROR, "no GL error left over");
     aglDestroyContext(ctx);
     if ((ctx = aglCreateContextTags2(&e, OGLES2_CCT_BITMAP, (ULONG)bm, OGLES2_CCT_PISTORM_ES_VERSION, 30,

@@ -13,6 +13,7 @@
 #include <GLES2/gl2ext.h>
 #include <GLES3/gl31.h>       /* the OpenGL ES 3.0 and 3.1 enums (ES3 contexts) */
 #include <libraries/ogles2.h> /* the extensions' enums gl2ext.h lacks */
+#include "variant_key.h"      /* struct OGLES2VkTargets (a program's last variants' key) */
 
 /* 1.1: glDrawRangeElements appended to the dispatch table. 1.2: the
  * extension entries of AmigaOS 4's ogles2 (program binaries, glPolygonMode,
@@ -460,6 +461,7 @@ struct OGLES2Program
      * es3_variants): each stage's 32-bit samplers, alpha to coverage. */
     ULONG var_bits[2];
     BOOL var_a2c;
+    struct OGLES2VkTargets var_tg;  /* and the render targets' key fields (variant_key.h) */
     /* ES 3.0: each uniform block's buffer binding (glUniformBlockBinding;
      * from the image's at link), one per image block. */
     ULONG *block_binding;
@@ -523,8 +525,32 @@ struct OGLES2Surface
     UBYTE mem_format;      /* V3D_MEMORY_FORMAT_* (the level's own tiling) */
     UBYTE format;          /* V3D_OUTPUT_IMAGE_FORMAT_* */
     UBYTE force_alpha1;    /* load: an RGB format */
+    UBYTE cpp;             /* bytes per pixel of the image */
     ULONG ub;              /* UIF: padded height in UIF blocks; else 0 */
 };
+
+/* A colour render target's format (texture.c, ogles2_texture_rt; GLES3
+ * plan stage B item 10): what the tile buffer, the store, clears, reads
+ * and the fragment key need of it (Mesa's v3dx_format_table.c). */
+struct OGLES2RtFormat
+{
+    UBYTE out;             /* V3D_OUTPUT_IMAGE_FORMAT_* */
+    UBYTE type;            /* V3D_INTERNAL_TYPE_* in the tile buffer */
+    UBYTE bpp;             /* V3D_INTERNAL_BPP_* */
+    UBYTE clamp;           /* V3D_RENDER_TARGET_CLAMP_* */
+    UBYTE kind;            /* OGLES2_RT_* */
+    UBYTE comps;           /* its channels, 1 to 4 */
+    UBYTE bits;            /* bits of its red channel */
+    UBYTE no_alpha;        /* its alpha reads 1 (Mesa's blend_dst_alpha_one) */
+    UBYTE swz[4];          /* PIPE_SWIZZLE_*: the fragment key's color_fmt */
+    ULONG pipe;            /* Mesa's enum pipe_format: the same */
+};
+#define OGLES2_RT_NONE  0
+#define OGLES2_RT_UNORM 1  /* fixed point and sRGB: blended in the tile buffer */
+#define OGLES2_RT_F16   2  /* half and small floats: blended in the tile buffer */
+#define OGLES2_RT_F32   3  /* 32-bit floats: written as such, blended in the shader */
+#define OGLES2_RT_INT   4  /* signed integers: written as such, never blended */
+#define OGLES2_RT_UINT  5  /* unsigned integers: the same */
 
 /* What a framebuffer object's job renders into (ogles2_fbo_target). */
 struct OGLES2Texture;
@@ -538,9 +564,10 @@ struct OGLES2Target
     UBYTE colors;          /* bit i: colour attachment i is drawn (a draw buffer) and has an image */
     UBYTE nrt;             /* the tile buffer's render targets: the highest drawn + 1 (1 with none) */
     UBYTE tile_w, tile_h;  /* the tile size nrt and bpp give (Mesa's v3d_choose_tile_size) */
-    UBYTE bpp;             /* V3D_INTERNAL_BPP_*: the widest drawn target's (64 with a 16F one) */
+    UBYTE bpp;             /* V3D_INTERNAL_BPP_*: the widest drawn target's */
     BOOL has_z, has_s, packed_zs; /* packed: one D24S8 image for both */
     struct OGLES2Surface color[OGLES2_MAX_DRAW_BUFFERS], z, s;
+    struct OGLES2RtFormat rt[OGLES2_MAX_DRAW_BUFFERS]; /* the drawn targets' formats */
     UBYTE depth_type;      /* V3D_INTERNAL_TYPE_DEPTH* for the tile buffer */
     ULONG ta_addr, ta_size, ts_addr; /* own tile pools, 4096-aligned; 0: the context's fit */
 };
@@ -562,7 +589,11 @@ struct OGLES2Context
     BOOL msaa;                      /* 4x MSAA on the default framebuffer (OGLES2_CCT_PISTORM_MSAA) */
     UBYTE es_version;               /* OGLES2_CCT_PISTORM_ES_VERSION: 20, or 30 (ogles2_es3) */
     UBYTE job_clear_stencil;        /* the open job's stencil clear value (job.c) */
-    GLfloat job_clear_rgba[4];      /* its colour clear value, for 16F targets (job.c) */
+    /* The open job's colour clear values, a target each: four floats' bits,
+     * or (is_int, glClearBufferiv/uiv) four integers; packed per target
+     * when the job renders (job.c). */
+    struct { ULONG v[4]; UBYTE is_int; } job_clear_rt[4];
+    UBYTE job_clear_targets;        /* the targets the open job clears (glClear: all) */
     UBYTE copy_logged;              /* glCopyTex* on the GPU: 1 from the default framebuffer, 2 from
                                      * an object, logged (copy.c) */
     GLint viewport[4];              /* x, y, width, height */
@@ -623,6 +654,9 @@ struct OGLES2Context
     UBYTE fb_depth_bits, fb_stencil_bits, fb_depth_format;
     UBYTE fb_draw_mask;             /* EXT_draw_buffers: bit i, output i is drawn into an image */
     UBYTE fb_nrt;                   /* the tile buffer's render targets for it: 1 to 4 */
+    struct OGLES2RtFormat fb_rt[OGLES2_MAX_DRAW_BUFFERS]; /* the drawn targets' formats (kind NONE: none) */
+    UBYTE fb_soft_blend;            /* a drawn target the tile buffer cannot blend: the shader blends (Mesa) */
+    UBYTE draw_rts;                 /* the draw buffers a draw writes (ogles2_draw_clear: those it clears) */
     GLenum default_draw_buffer;     /* glDrawBuffersEXT on the default framebuffer: GL_BACK, GL_NONE */
     /* M6 overlap (job.c): a render submitted and not waited for yet. The
      * submission lock went at the submission; the next submitter waits for
@@ -719,11 +753,10 @@ void ogles2_texture_detach(struct OGLES2Context *ctx, struct OGLES2Texture *t, B
 /* The image of face k, level l: FALSE if not defined. */
 BOOL ogles2_texture_image(const struct OGLES2Texture *t, int k, int l, UWORD *w, UWORD *h,
                           GLenum *format, GLenum *type);
-/* Colour-renderable (plan 7.7): RGBA8, RGB565, RGBA4, RGB5_A1 storage; RGBA16F
- * (half-float RGBA, EXT_color_buffer_half_float). */
-BOOL ogles2_texture_renderable(const struct OGLES2Texture *t, int k, int l);
-/* That image is half-float: a 64-bit render target (16F in the tile buffer). */
-BOOL ogles2_texture_half(const struct OGLES2Texture *t, int k, int l);
+/* Colour-renderable (plan 7.7; ES 3.0's formats, stage B item 10), and the
+ * image's format as a render target. */
+BOOL ogles2_texture_renderable(struct OGLES2Texture *t, int k, int l);
+BOOL ogles2_texture_rt(struct OGLES2Texture *t, int k, int l, struct OGLES2RtFormat *rf);
 UWORD ogles2_float_to_half(GLfloat f); /* IEEE half precision, by the bits (texture.c) */
 /* glCopyTex* on the GPU (copy.c): the default framebuffer's region tiled by
  * the TFU into a scratch texture (0: could not); unit 0's 2D texture swapped
@@ -800,11 +833,21 @@ extern ULONG ogles2_wide_seen; /* such a texture was ever given an image */
 /* A box of the image as RGBA8 rows (row 0 = GL's bottom), from the GPU's copy. */
 BOOL ogles2_texture_read(struct OGLES2Texture *t, int k, int l, int x, int y, int w, int h,
                          UBYTE *rgba, ULONG stride);
-/* A renderbuffer's colour storage: a texture of its own, in no name table. */
+/* The same of a float or integer image as 16-byte texels: RGBA floats, or
+ * four 32-bit integers (ES 3.0's glReadPixels of such targets). */
+BOOL ogles2_texture_read_wide(struct OGLES2Texture *t, int k, int l, int x, int y, int w, int h, UBYTE *out,
+                              ULONG stride);
+/* A renderbuffer's colour storage: a texture of its own, in no name table;
+ * of an ES 3.0 sized format (0: not one the library stores). */
 struct OGLES2Texture *ogles2_texture_hidden(struct OGLES2Context *ctx, UWORD w, UWORD h,
                                             GLenum format, GLenum type);
+struct OGLES2Texture *ogles2_texture_hidden_sized(struct OGLES2Context *ctx, UWORD w, UWORD h, GLenum ifmt);
 void ogles2_texture_hidden_free(struct OGLES2Context *ctx, struct OGLES2Texture *t);
+/* frame.c: GL_IMPLEMENTATION_COLOR_READ_FORMAT and _TYPE of the read buffer */
+void ogles2_read_format(struct OGLES2Context *ctx, GLenum *format, GLenum *type);
 /* fbo.c */
+BOOL ogles2_fbo_read_format(struct OGLES2Context *ctx, struct OGLES2RtFormat *rf); /* the read buffer's */
+BOOL ogles2_fbo_read_wide(struct OGLES2Context *ctx, int x, int y, int w, int h, UBYTE *out, ULONG stride);
 void ogles2_fb_update(struct OGLES2Context *ctx);       /* the fb_* fields from the binding */
 GLenum ogles2_fb_status(struct OGLES2Context *ctx);     /* of the draw framebuffer */
 BOOL ogles2_fb_ready(struct OGLES2Context *ctx);        /* complete; else GL_INVALID_FRAMEBUFFER_OPERATION */
@@ -886,13 +929,26 @@ ULONG ogles2_buffer_copy(struct OGLES2Context *ctx, struct OGLES2Buffer *b, ULON
                          void (*convert)(UBYTE *dst, ULONG dst_stride, const UBYTE *src,
                                          ULONG src_stride, ULONG count, GLint size, GLenum type));
 /* glClear's quad path (draw.c): for clears the tile buffer cannot do. */
-void ogles2_draw_clear(struct OGLES2Context *ctx, GLbitfield mask);
+/* A clear drawn as a rectangle: the colour of draw buffers rts (the
+ * others left as they are), depth and stencil, with these values (draw.c). */
+void ogles2_draw_clear(struct OGLES2Context *ctx, GLbitfield mask, UBYTE rts, const GLfloat *color, GLfloat depth,
+                       GLint stencil);
+/* A box of draw buffer rt, a 32-bit float or integer image, set by the CPU
+ * to v (floats' bits, or integers) in the channels mask lets through: the
+ * jobs that draw into it have rendered (fbo.c, texture.c). */
+BOOL ogles2_fbo_fill(struct OGLES2Context *ctx, int rt, int x, int y, int w, int h, const ULONG *v, BOOL is_int,
+                     const GLboolean *mask);
+BOOL ogles2_texture_fill(struct OGLES2Texture *t, int k, int l, int x, int y, int w, int h, const ULONG *v,
+                         BOOL is_int, const GLboolean *mask);
 /* TRUE once the open job has a draw (its tile-buffer clear would come too early). */
 BOOL ogles2_job_has_draws(struct OGLES2Context *ctx);
 
 /* ---- jobs (job.c) ---- */
 void ogles2_job_begin(struct OGLES2Context *ctx);
-void ogles2_job_clear(struct OGLES2Context *ctx, GLbitfield mask);
+/* The tile buffer's clear: the colour of targets rts from cv (floats'
+ * bits, or integers), depth and stencil (job.c). */
+void ogles2_job_clear(struct OGLES2Context *ctx, GLbitfield mask, UBYTE rts, const ULONG *cv, BOOL is_int,
+                      GLfloat depth, GLint stencil);
 BOOL ogles2_job_flush(struct OGLES2Context *ctx, BOOL frame_end); /* FALSE: dropped. Mid-frame (frame_end FALSE): depth and stencil are kept for the next job */
 void ogles2_job_free(struct OGLES2Context *ctx); /* aglDestroyContext: job.c's memory */
 void ogles2_job_discard(struct OGLES2Context *ctx);

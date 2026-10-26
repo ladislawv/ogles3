@@ -258,31 +258,58 @@ void ogles2_job_begin(struct OGLES2Context *ctx)
     v->first_ez_state = V3D_EZ_UNDECIDED;
     v->pending_clear_color = FALSE;
     v->pending_clear_depth = FALSE;
+    ctx->job_clear_targets = 0;
     v->frame_corrupted = bad;
     v->draw_state_configured = FALSE;
 }
 
 static v3d_u8 to_byte(GLfloat f)
 {
-    return (v3d_u8)(f * 255.0f + 0.5f); /* f is clamped to [0,1] by glClearColor */
+    return f <= 0.0f ? 0 : f >= 1.0f ? 255 : (v3d_u8)(f * 255.0f + 0.5f); /* ES 3.0 keeps it unclamped */
 }
 
-/* glClear's whole-framebuffer path: the tile buffer is cleared when the job
- * renders. The values are those current at the glClear (Mesa snapshots them
- * the same way), not at the flush. */
-void ogles2_job_clear(struct OGLES2Context *ctx, GLbitfield mask)
+static ULONG fbits(GLfloat f)
+{
+    union { GLfloat f; ULONG u; } x;
+    x.f = f;
+    return x.u;
+}
+
+static GLfloat bitsf(ULONG u)
+{
+    union { GLfloat f; ULONG u; } x;
+    x.u = u;
+    return x.f;
+}
+
+/* The whole-buffer path of glClear and glClearBuffer*: the tile buffer is
+ * cleared when the job renders. The values are those current at the clear
+ * (Mesa snapshots them the same way), not at the flush: the colour of the
+ * targets `rts` (glClear: every one) from cv (floats' bits, or with is_int
+ * integers), depth and stencil. */
+void ogles2_job_clear(struct OGLES2Context *ctx, GLbitfield mask, UBYTE rts, const ULONG *cv, BOOL is_int,
+                      GLfloat depth, GLint stencil)
 {
     V3DContext *v = ctx->v3d;
-    const GLfloat *c = ctx->state.clear_color;
     int k;
 
     ogles2_job_begin(ctx);
     if (mask & GL_COLOR_BUFFER_BIT) {
+        GLfloat c[4];
+        for (k = 0; k < 4; k++)
+            c[k] = is_int ? (GLfloat)(LONG)cv[k] : bitsf(cv[k]);
         v->pending_clear_color = TRUE;
-        v->clear_color_value = ((v3d_u32)to_byte(c[3]) << 24) | ((v3d_u32)to_byte(c[0]) << 16) |
-                               ((v3d_u32)to_byte(c[1]) << 8) | to_byte(c[2]); /* ARGB */
-        for (k = 0; k < 4; k++) /* a 16F target's (build_render_fbo) */
-            ctx->job_clear_rgba[k] = c[k];
+        if (rts & 1) /* the default framebuffer's */
+            v->clear_color_value = ((v3d_u32)to_byte(c[3]) << 24) | ((v3d_u32)to_byte(c[0]) << 16) |
+                                   ((v3d_u32)to_byte(c[1]) << 8) | to_byte(c[2]); /* ARGB */
+        for (k = 0; k < 4; k++) /* a framebuffer object's targets' (build_render_fbo) */
+            if (rts & (1 << k)) {
+                int j;
+                for (j = 0; j < 4; j++)
+                    ctx->job_clear_rt[k].v[j] = cv[j];
+                ctx->job_clear_rt[k].is_int = (UBYTE)is_int;
+                ctx->job_clear_targets |= (UBYTE)(1 << k);
+            }
     }
     /* The tile buffer clears depth and stencil together; each keeps the
      * value of the last glClear that named it (a stencil clear after a full
@@ -295,9 +322,9 @@ void ogles2_job_clear(struct OGLES2Context *ctx, GLbitfield mask)
         }
         v->pending_clear_depth = TRUE;
         if (mask & GL_DEPTH_BUFFER_BIT)
-            v->clear_depth_value = ctx->state.clear_depth;
+            v->clear_depth_value = depth;
         if (mask & GL_STENCIL_BUFFER_BIT)
-            ctx->job_clear_stencil = (UBYTE)ctx->state.clear_stencil; /* the low 8 bits (GLES 2.0 4.2.3) */
+            ctx->job_clear_stencil = (UBYTE)stencil; /* the low 8 bits (GLES 2.0 4.2.3) */
     }
 }
 
@@ -461,54 +488,110 @@ static void supertiles(V3DContext *v, ULONG w, ULONG h, ULONG sw, ULONG sh, ULON
         }
 }
 
-/* TILE_RENDERING_MODE_CFG (Clear Colors Part3), render target rt: only
- * the UIF padding, as raw little-endian bytes. Mesa (v3dx_rcl.c) sends it
- * when the image's padded height exceeds the job's by 15 UIF blocks or
- * more. */
-static void clear_colors_part3(V3DContext *v, UBYTE rt, ULONG pad)
+/* TILE_RENDERING_MODE_CFG (Clear Colors Part1, Part2 for a 64- or
+ * 128-bit target, Part3 for a 128-bit one or the UIF padding), render
+ * target rt, as raw little-endian bytes: c[0..3] the clear colour in the
+ * target's internal type (Mesa's v3dx_rcl.c: Part1 the low 32 bits and the
+ * next 24, Part2 the 56 after them, Part3 the high 16 and the padding, which
+ * Mesa sends when the image's padded height exceeds the job's by 15 UIF
+ * blocks or more). */
+static void put_bits(UBYTE *b, ULONG v, int n)
 {
-    UBYTE *b = v3d_buffer_claim_memory(v->current_buf, 9);
-    if (!b)
-        return;
-    b[0] = v3d_OP_TILE_RENDERING_MODE_CFG_CLEAR_COLORS_PART3;
-    b[1] = (UBYTE)(5 | rt << 4);    /* sub-id 5, the render target */
-    b[2] = b[3] = 0;                /* clear colour, high 16 bits */
-    b[4] = b[5] = 0;                /* raster stride or image height */
-    b[6] = (UBYTE)pad;              /* bits 40..52: the padded height */
-    b[7] = (UBYTE)((pad >> 8) & 0x1f);
-    b[8] = 0;
+    int i;
+    for (i = 0; i < n; i++)
+        b[i] = (UBYTE)(v >> (8 * i));
 }
 
-/* TILE_RENDERING_MODE_CFG (Clear Colors Part1, and Part2 for a 64-bit
- * target), render target rt, as raw little-endian bytes: the clear colour
- * in the target's internal type, lo and hi its first and second 32 bits
- * (Mesa's v3dx_rcl.c: Part1 the low 32 bits and the next 24, Part2 the 32
- * after them; the rest is 0 up to 64 bits). */
-static void clear_colors(V3DContext *v, UBYTE rt, ULONG lo, ULONG hi, BOOL wide)
+static void clear_colors(V3DContext *v, UBYTE rt, const ULONG *c, UBYTE bpp, ULONG pad)
 {
-    UBYTE *b = v3d_buffer_claim_memory(v->current_buf, wide ? 18 : 9);
-    int i;
+    UBYTE *b = v3d_buffer_claim_memory(v->current_buf, 9 + (bpp >= V3D_INTERNAL_BPP_64 ? 9 : 0) +
+                                                           (bpp >= V3D_INTERNAL_BPP_128 || pad ? 9 : 0));
     if (!b)
         return;
     b[0] = v3d_OP_TILE_RENDERING_MODE_CFG_CLEAR_COLORS_PART1;
     b[1] = (UBYTE)(3 | rt << 4); /* sub-id 3, the render target */
-    for (i = 0; i < 4; i++)
-        b[2 + i] = (UBYTE)(lo >> (8 * i));
-    for (i = 0; i < 3; i++)
-        b[6 + i] = (UBYTE)(hi >> (8 * i));
-    if (!wide)
-        return;
-    b[9] = v3d_OP_TILE_RENDERING_MODE_CFG_CLEAR_COLORS_PART2;
-    b[10] = (UBYTE)(4 | rt << 4); /* sub-id 4 */
-    b[11] = (UBYTE)(hi >> 24);
-    for (i = 12; i < 18; i++)
-        b[i] = 0;
+    put_bits(b + 2, c[0], 4);
+    put_bits(b + 6, c[1], 3);
+    b += 9;
+    if (bpp >= V3D_INTERNAL_BPP_64) {
+        b[0] = v3d_OP_TILE_RENDERING_MODE_CFG_CLEAR_COLORS_PART2;
+        b[1] = (UBYTE)(4 | rt << 4); /* sub-id 4 */
+        put_bits(b + 2, (c[1] >> 24) | (c[2] << 8), 4);
+        put_bits(b + 6, (c[2] >> 24) | ((c[3] & 0xffff) << 8), 3);
+        b += 9;
+    }
+    if (bpp >= V3D_INTERNAL_BPP_128 || pad) {
+        b[0] = v3d_OP_TILE_RENDERING_MODE_CFG_CLEAR_COLORS_PART3;
+        b[1] = (UBYTE)(5 | rt << 4); /* sub-id 5 */
+        put_bits(b + 2, c[3] >> 16, 2);
+        b[4] = b[5] = 0;              /* raster stride or image height */
+        b[6] = (UBYTE)pad;            /* bits 40..52: the padded height */
+        b[7] = (UBYTE)((pad >> 8) & 0x1f);
+        b[8] = 0;
+    }
 }
 
-/* Bytes per pixel of a colour target's image (V3D_OUTPUT_IMAGE_FORMAT_*). */
-static ULONG target_cpp(UBYTE format)
+/* An integer clamped to `bits` (signed or not), as Mesa's util_clamp_color
+ * does to a clear value for the target's format. */
+static ULONG clamp_int(ULONG v, int bits, BOOL sgn)
 {
-    return format == V3D_OUTPUT_IMAGE_FORMAT_RGBA16F ? 8 : format == V3D_OUTPUT_IMAGE_FORMAT_RGBA8 ? 4 : 2;
+    if (bits >= 32)
+        return v;
+    if (sgn) {
+        LONG x = (LONG)v, lo = -(1L << (bits - 1)), hi = (1L << (bits - 1)) - 1;
+        return (ULONG)(x < lo ? lo : x > hi ? hi : x);
+    }
+    return v > (1UL << bits) - 1 ? (1UL << bits) - 1 : v;
+}
+
+/* Target rt's clear value in its internal type (Mesa's v3d_tlb_clear): the
+ * format's clamps first (fixed point to [0, 1], integers to their range),
+ * then 8-bit, 16F, 16-bit integer or 32-bit channels. */
+static void pack_clear(struct OGLES2Context *ctx, const struct OGLES2RtFormat *rf, int rt, ULONG *c)
+{
+    const ULONG *v = ctx->job_clear_rt[rt].v;
+    BOOL is_int = ctx->job_clear_rt[rt].is_int;
+    BOOL integer = rf->kind == OGLES2_RT_INT || rf->kind == OGLES2_RT_UINT;
+    ULONG u[4];
+    GLfloat f[4];
+    int k;
+    for (k = 0; k < 4; k++) {
+        f[k] = is_int ? (GLfloat)(LONG)v[k] : bitsf(v[k]);
+        if (rf->kind == OGLES2_RT_UNORM)
+            f[k] = f[k] < 0.0f ? 0.0f : f[k] > 1.0f ? 1.0f : f[k];
+        u[k] = is_int ? v[k] : (ULONG)(LONG)f[k];
+        if (integer)
+            u[k] = clamp_int(u[k], rf->out == V3D_OUTPUT_IMAGE_FORMAT_RGB10A2UI ? (k == 3 ? 2 : 10) : rf->bits,
+                             rf->kind == OGLES2_RT_INT);
+    }
+    c[0] = c[1] = c[2] = c[3] = 0;
+    switch (rf->type) {
+    case V3D_INTERNAL_TYPE_8:
+        c[0] = (ULONG)to_byte(f[0]) | (ULONG)to_byte(f[1]) << 8 | (ULONG)to_byte(f[2]) << 16 |
+               (ULONG)to_byte(f[3]) << 24;
+        break;
+    case V3D_INTERNAL_TYPE_8I:
+    case V3D_INTERNAL_TYPE_8UI:
+        c[0] = (u[0] & 0xff) | (u[1] & 0xff) << 8 | (u[2] & 0xff) << 16 | (u[3] & 0xff) << 24;
+        break;
+    case V3D_INTERNAL_TYPE_16F:
+        c[0] = ogles2_float_to_half(f[0]) | (ULONG)ogles2_float_to_half(f[1]) << 16;
+        c[1] = ogles2_float_to_half(f[2]) | (ULONG)ogles2_float_to_half(f[3]) << 16;
+        break;
+    case V3D_INTERNAL_TYPE_16I:
+    case V3D_INTERNAL_TYPE_16UI:
+        c[0] = (u[0] & 0xffff) | u[1] << 16;
+        c[1] = (u[2] & 0xffff) | u[3] << 16;
+        break;
+    case V3D_INTERNAL_TYPE_32F:
+        for (k = 0; k < 4; k++)
+            c[k] = fbits(f[k]);
+        break;
+    default: /* 32-bit integers */
+        for (k = 0; k < 4; k++)
+            c[k] = u[k];
+        break;
+    }
 }
 
 /* The render list of a framebuffer object's job (Mesa's v3dx_rcl.c): colour
@@ -522,7 +605,7 @@ static void build_render_fbo(struct OGLES2Context *ctx, const struct OGLES2Targe
     v3d_u8 s = v->build_slot;
     UWORD width = tg->w, height = tg->h;
     ULONG tilesX = (width + tg->tile_w - 1) / tg->tile_w, tilesY = (height + tg->tile_h - 1) / tg->tile_h;
-    ULONG start, end, sw = 1, sh = 1, fw, fh, argb, abgr;
+    ULONG start, end, sw = 1, sh = 1, fw, fh;
     UBYTE rt_bpp[4], rt_type[4], rt_clamp[4];
     UBYTE rt;
     UBYTE clear_color = v->pending_clear_color, clear_zs = v->pending_clear_depth;
@@ -549,9 +632,9 @@ static void build_render_fbo(struct OGLES2Context *ctx, const struct OGLES2Targe
     SetBuffer(v, &v->tile_list_buf[s]);
     start = CurrentBufferAddress(v);
     DoCommand(v, v3d_OP_TILE_COORDINATES_IMPLICIT);
-    if (!clear_color && !(no_load & OGLES2_DISCARD_COLOR))
+    if (!(no_load & OGLES2_DISCARD_COLOR))
         for (rt = 0; rt < tg->nrt; rt++)
-            if (tg->colors & (1 << rt)) {
+            if ((tg->colors & (1 << rt)) && !(clear_color && (ctx->job_clear_targets & (1 << rt)))) {
                 c = &tg->color[rt];
                 LoadTileBufferGeneral(v, v3d_RENDER_TARGET_0 + rt, c->mem_format, FALSE,
                                       V3D_DECIMATE_MODE_SAMPLE_0, c->format, c->force_alpha1, FALSE, FALSE,
@@ -602,32 +685,29 @@ static void build_render_fbo(struct OGLES2Context *ctx, const struct OGLES2Targe
                                ez == V3D_EZ_GT_GE ? v3d_EARLY_Z_DIRECTION_GT_GE
                                                   : v3d_EARLY_Z_DIRECTION_LT_LE,
                                ez_off, tg->depth_type, early_zs_clear);
-    argb = v->clear_color_value;
-    abgr = (argb & 0xFF00FF00UL) | ((argb & 0x00FF0000UL) >> 16) | ((argb & 0x000000FFUL) << 16);
-    /* Each target's internal type: 8 bits a channel, or 16F for a half-float
-     * image (64 bits; EXT_color_buffer_half_float), not clamped (Mesa: clamp
-     * none but for sRGB and integer formats). The fragment shader writes both
-     * alike, as 16-bit floats (Mesa's key changes only for 32-bit, 16-bit
-     * normalized and integer targets), so its variants are the same. */
+    /* Each target's internal type, bpp and clamp (Mesa's
+     * v3d_setup_render_target: clamped to the format's range for integers,
+     * to [0, 1] for sRGB, else not) and its clear value in that type; a
+     * target no draw buffer names is an 8-bit one. The fragment shader
+     * writes 32-bit floats or integers to the 32F and integer ones (the
+     * key's f32_color_rb, draw.c), 16-bit floats to the rest. */
     for (rt = 0; rt < tg->nrt; rt++) {
-        BOOL wide;
+        static const struct OGLES2RtFormat plain = { V3D_OUTPUT_IMAGE_FORMAT_RGBA8, V3D_INTERNAL_TYPE_8,
+                                                     V3D_INTERNAL_BPP_32, 0, OGLES2_RT_UNORM, 4, 8, 0,
+                                                     { 0, 1, 2, 3 }, 84 };
+        const struct OGLES2RtFormat *rf = (tg->colors & (1 << rt)) ? &tg->rt[rt] : &plain;
+        ULONG cc[4], pad = 0;
         c = &tg->color[rt];
-        wide = (tg->colors & (1 << rt)) && c->format == V3D_OUTPUT_IMAGE_FORMAT_RGBA16F;
-        rt_bpp[rt] = wide ? V3D_INTERNAL_BPP_64 : V3D_INTERNAL_BPP_32;
-        rt_type[rt] = wide ? V3D_INTERNAL_TYPE_16F : V3D_INTERNAL_TYPE_8;
-        rt_clamp[rt] = 0;
-        if (wide) {
-            const GLfloat *f = ctx->job_clear_rgba;
-            clear_colors(v, rt, ogles2_float_to_half(f[0]) | (ULONG)ogles2_float_to_half(f[1]) << 16,
-                         ogles2_float_to_half(f[2]) | (ULONG)ogles2_float_to_half(f[3]) << 16, TRUE);
-        } else {
-            clear_colors(v, rt, abgr, 0, FALSE);
-        }
+        rt_bpp[rt] = rf->bpp;
+        rt_type[rt] = rf->type;
+        rt_clamp[rt] = rf->clamp;
+        pack_clear(ctx, rf, rt, cc);
         if ((tg->colors & (1 << rt)) && c->ub) {
-            ULONG ubh = 2 * v3d_utile_height((int)target_cpp(c->format));
+            ULONG ubh = 2 * v3d_utile_height((int)c->cpp);
             if (c->ub - (height + ubh - 1) / ubh >= 15)
-                clear_colors_part3(v, rt, c->ub);
+                pad = c->ub;
         }
+        clear_colors(v, rt, cc, rf->bpp, pad);
     }
     TileRenderingModeCFGColorEach(v, tg->nrt, rt_bpp, rt_type, rt_clamp);
     TileRenderingModeCFGZSClearValues(v, clear_zs ? ctx->job_clear_stencil : 0,

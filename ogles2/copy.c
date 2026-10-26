@@ -31,11 +31,15 @@ BOOL ogles2_copy_gpu(struct OGLES2Context *ctx, struct OGLES2Texture *t, int k, 
     struct OGLES2Texture *src = 0;
     struct OGLES2TexParams params;
     struct OGLES2Surface surf;
+    struct OGLES2RtFormat rf;
     LONG x0, y0, x1, y1, cw, ch;
     GLfloat tc[4];
     BOOL ok;
 
-    if (!ctx->v3d || (ctx->probe & OGLES2_PROBE_CPU_COPY) || !ogles2_texture_renderable(t, k, level))
+    /* the copy's program writes 16-bit floats: targets the tile buffer
+     * blends (8-bit and 16F), as 1.x's */
+    if (!ctx->v3d || (ctx->probe & OGLES2_PROBE_CPU_COPY) || !ogles2_texture_rt(t, k, level, &rf) ||
+        (rf.kind != OGLES2_RT_UNORM && rf.kind != OGLES2_RT_F16))
         return FALSE;
     ogles2_fb_update(ctx);
     /* Only what lies inside the framebuffer: the rest of the region gives

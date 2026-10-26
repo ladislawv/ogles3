@@ -94,21 +94,61 @@ void ogles2_glFinish(struct OGLES2Context *ctx)
  * two reversed 16-bit packings: the open job is rendered first, then the
  * rows are read from the render bitmap bottom-up (GL's origin is the
  * bottom-left, 7.11), or from a framebuffer object's colour image (fbo.c;
- * its row 0 is GL's). Pixels outside the framebuffer are left as they are. */
+ * its row 0 is GL's). Pixels outside the framebuffer are left as they are.
+ * ES 3.0's (4.3.1, stage B item 10): a float read buffer reads as
+ * RGBA/FLOAT, a signed or unsigned integer one as RGBA_INTEGER with INT or
+ * UNSIGNED_INT, RGB10_A2 also as its packed type; each one's pair is its
+ * implementation read format (ogles2_read_format). */
+static BOOL read_format(BOOL es3, GLenum f)
+{
+    return f == GL_ALPHA || f == GL_RGB || f == GL_RGBA || f == GL_LUMINANCE || f == GL_LUMINANCE_ALPHA ||
+           f == GL_BGRA_EXT ||
+           (es3 && (f == GL_RED || f == GL_RG || f == GL_RED_INTEGER || f == GL_RG_INTEGER ||
+                    f == GL_RGB_INTEGER || f == GL_RGBA_INTEGER));
+}
+
+static BOOL read_type(BOOL es3, GLenum t)
+{
+    return t == GL_UNSIGNED_BYTE || t == GL_UNSIGNED_SHORT_5_6_5 || t == GL_UNSIGNED_SHORT_4_4_4_4 ||
+           t == GL_UNSIGNED_SHORT_5_5_5_1 || t == GL_UNSIGNED_SHORT_4_4_4_4_REV_EXT ||
+           t == GL_UNSIGNED_SHORT_1_5_5_5_REV_EXT ||
+           (es3 && (t == GL_BYTE || t == GL_UNSIGNED_SHORT || t == GL_SHORT || t == GL_UNSIGNED_INT ||
+                    t == GL_INT || t == GL_HALF_FLOAT || t == GL_FLOAT || t == GL_UNSIGNED_INT_2_10_10_10_REV ||
+                    t == GL_UNSIGNED_INT_10F_11F_11F_REV || t == GL_UNSIGNED_INT_5_9_9_9_REV));
+}
+
+/* The implementation read format and type of the current read buffer
+ * (state.c's GL_IMPLEMENTATION_COLOR_READ_*): RGBA/UNSIGNED_BYTE but for
+ * ES 3.0's float and integer buffers and RGB10_A2. */
+void ogles2_read_format(struct OGLES2Context *ctx, GLenum *format, GLenum *type)
+{
+    struct OGLES2RtFormat rf;
+    *format = GL_RGBA;
+    *type = GL_UNSIGNED_BYTE;
+    if (!ogles2_es3(ctx) || !ctx->draw_fb || !ogles2_fbo_read_format(ctx, &rf))
+        return;
+    if (rf.kind == OGLES2_RT_F16 || rf.kind == OGLES2_RT_F32) {
+        *type = GL_FLOAT;
+    } else if (rf.kind == OGLES2_RT_INT || rf.kind == OGLES2_RT_UINT) {
+        *format = GL_RGBA_INTEGER;
+        *type = rf.kind == OGLES2_RT_INT ? GL_INT : GL_UNSIGNED_INT;
+    } else if (rf.bits == 10) { /* RGB10_A2 */
+        *type = GL_UNSIGNED_INT_2_10_10_10_REV;
+    }
+}
+
 void ogles2_glReadPixels(struct OGLES2Context *ctx, GLint x, GLint y, GLsizei width, GLsizei height,
                          GLenum format, GLenum type, void *pixels)
 {
     LONG x0, y0, x1, y1;
     ULONG stride, bpp, rgba_stride;
     UBYTE *rgba, *first;
-    BOOL ok = TRUE;
+    GLenum impl_f, impl_t;
+    BOOL ok = TRUE, es3, wide;
     if (!ogles2_context_valid(ctx))
         return;
-    if ((format != GL_ALPHA && format != GL_RGB && format != GL_RGBA && format != GL_LUMINANCE &&
-         format != GL_LUMINANCE_ALPHA && format != GL_BGRA_EXT) ||
-        (type != GL_UNSIGNED_BYTE && type != GL_UNSIGNED_SHORT_5_6_5 &&
-         type != GL_UNSIGNED_SHORT_4_4_4_4 && type != GL_UNSIGNED_SHORT_5_5_5_1 &&
-         type != GL_UNSIGNED_SHORT_4_4_4_4_REV_EXT && type != GL_UNSIGNED_SHORT_1_5_5_5_REV_EXT)) {
+    es3 = ogles2_es3(ctx);
+    if (!read_format(es3, format) || !read_type(es3, type)) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
@@ -116,13 +156,21 @@ void ogles2_glReadPixels(struct OGLES2Context *ctx, GLint x, GLint y, GLsizei wi
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
-    if (!(format == GL_RGBA && type == GL_UNSIGNED_BYTE) &&
-        !(format == GL_BGRA_EXT && (type == GL_UNSIGNED_BYTE || type == GL_UNSIGNED_SHORT_4_4_4_4_REV_EXT ||
-                                    type == GL_UNSIGNED_SHORT_1_5_5_5_REV_EXT))) {
+    /* RGBA bytes for a fixed-point buffer (or a GLES2 half-float one),
+     * EXT_read_format_bgra's, and ES 3.0's implementation pair of the
+     * buffer read */
+    ogles2_read_format(ctx, &impl_f, &impl_t);
+    if (!(format == impl_f && type == impl_t) &&
+        !(format == GL_RGBA && type == GL_UNSIGNED_BYTE && impl_t != GL_FLOAT && impl_f != GL_RGBA_INTEGER) &&
+        !(format == GL_BGRA_EXT && impl_t != GL_FLOAT && impl_f != GL_RGBA_INTEGER &&
+          (type == GL_UNSIGNED_BYTE || type == GL_UNSIGNED_SHORT_4_4_4_4_REV_EXT ||
+           type == GL_UNSIGNED_SHORT_1_5_5_5_REV_EXT))) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
-    bpp = type == GL_UNSIGNED_BYTE ? 4 : 2;
+    wide = type == GL_FLOAT || type == GL_INT || type == GL_UNSIGNED_INT || type == GL_UNSIGNED_INT_2_10_10_10_REV;
+    bpp = type == GL_FLOAT || type == GL_INT || type == GL_UNSIGNED_INT ? 16
+        : type == GL_UNSIGNED_BYTE || type == GL_UNSIGNED_INT_2_10_10_10_REV ? 4 : 2;
     /* ES 3.0's GL_PACK_ROW_LENGTH and _SKIP_ROWS, _SKIP_PIXELS (4.3.1) */
     stride = ((ULONG)(ctx->pack.row_length ? ctx->pack.row_length : width) * bpp + ctx->pack.alignment - 1) &
              ~(ULONG)(ctx->pack.alignment - 1);
@@ -141,7 +189,7 @@ void ogles2_glReadPixels(struct OGLES2Context *ctx, GLint x, GLint y, GLsizei wi
     }
     if (!has_surface(ctx) || !ogles2_fb_ready(ctx) || !pixels || !ctx->display.bitmap)
         return;
-    if (ogles2_es3(ctx) && !ctx->draw_fb && ogles2_fbo_default_read_none(ctx)) {
+    if (es3 && !ctx->draw_fb && ogles2_fbo_default_read_none(ctx)) {
         ogles2_error(ctx, GL_INVALID_OPERATION); /* ES 3.0 4.3.1: GL_READ_BUFFER is GL_NONE */
         return;
     }
@@ -155,6 +203,33 @@ void ogles2_glReadPixels(struct OGLES2Context *ctx, GLint x, GLint y, GLsizei wi
     ogles2_job_finish(ctx);
     first = (UBYTE *)pixels + (ULONG)(y0 - y + ctx->pack.skip_rows) * stride +
             (ULONG)(x0 - x + ctx->pack.skip_pixels) * bpp;
+    if (wide) {
+        /* 16-byte texels: straight into the application's memory, or (the
+         * packed RGB10_A2) through a copy */
+        LONG i, j;
+        if (bpp == 16) {
+            if (!ogles2_fbo_read_wide(ctx, (int)x0, (int)y0, (int)(x1 - x0), (int)(y1 - y0), first, stride))
+                ogles2_error(ctx, GL_INVALID_OPERATION);
+            return;
+        }
+        rgba_stride = (ULONG)(x1 - x0) * 16;
+        if (!(rgba = AllocVec(rgba_stride * (ULONG)(y1 - y0), MEMF_ANY))) {
+            ogles2_error(ctx, GL_OUT_OF_MEMORY);
+            return;
+        }
+        if (!ogles2_fbo_read_wide(ctx, (int)x0, (int)y0, (int)(x1 - x0), (int)(y1 - y0), rgba, rgba_stride))
+            ogles2_error(ctx, GL_INVALID_OPERATION);
+        else
+            for (j = 0; j < y1 - y0; j++) {
+                const GLfloat *s = (const GLfloat *)(rgba + (ULONG)j * rgba_stride);
+                ULONG *d = (ULONG *)(first + (ULONG)j * stride);
+                for (i = 0; i < x1 - x0; i++, s += 4) /* GL's packing: red in the low bits */
+                    d[i] = (ULONG)(s[0] * 1023.0f + 0.5f) | (ULONG)(s[1] * 1023.0f + 0.5f) << 10 |
+                           (ULONG)(s[2] * 1023.0f + 0.5f) << 20 | (ULONG)(s[3] * 3.0f + 0.5f) << 30;
+            }
+        FreeVec(rgba);
+        return;
+    }
     /* RGBA bytes: straight into the application's memory; the 16-bit
      * packings through a copy of the region. */
     if (bpp == 4) {
@@ -217,55 +292,167 @@ void ogles2_glHint(struct OGLES2Context *ctx, GLenum target, GLenum mode)
         ctx->state.derivative_hint = mode;
 }
 
-void ogles2_glClear(struct OGLES2Context *ctx, GLbitfield mask)
+/* A clear of `mask` the tile buffer cannot do: confined by the scissor
+ * box or by write masks (plan 7.7), or depth or stencil alone where both
+ * are loaded (job.c: the tile buffer clears both or neither). Depth and
+ * stencil are cleared together at the start of every tile; unless they
+ * were loaded (kept from a mid-frame flush, or a framebuffer object's) they
+ * hold nothing before a job's first draw, so clearing only one there is
+ * still exact. */
+static BOOL clear_partial(struct OGLES2Context *ctx, GLbitfield mask)
 {
-    const struct OGLES2State *s;
-    BOOL partial;
+    const struct OGLES2State *s = &ctx->state;
+    return ((s->caps & OGLES2_CAP_SCISSOR_TEST) &&
+            (ctx->scissor[0] > 0 || ctx->scissor[1] > 0 ||
+             ctx->scissor[0] + ctx->scissor[2] < (GLint)ctx->fb_w ||
+             ctx->scissor[1] + ctx->scissor[3] < (GLint)ctx->fb_h)) ||
+           ((mask & GL_COLOR_BUFFER_BIT) &&
+            !(s->color_mask[0] && s->color_mask[1] && s->color_mask[2] && s->color_mask[3])) ||
+           ((mask & GL_DEPTH_BUFFER_BIT) && !s->depth_mask) ||
+           ((mask & GL_STENCIL_BUFFER_BIT) && (s->stencil_write_mask[0] & 0xff) != 0xff) ||
+           ((ctx->draw_fb || ctx->zs_saved) && ctx->fb_stencil_bits && ctx->fb_depth_bits &&
+            (mask & (GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT)) &&
+            (mask & (GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT)) != (GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
+}
 
-    if (!ogles2_context_valid(ctx))
-        return;
-    if (mask & ~(GLbitfield)(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT)) {
-        ogles2_error(ctx, GL_INVALID_VALUE);
-        return;
-    }
-    if (!ctx->v3d || !mask || !ogles2_fb_ready(ctx))
+/* glClear and glClearBuffer*: `mask`'s buffers, the colour of the draw
+ * buffers rts, with these values (cv floats' bits, or with is_int
+ * integers). The tile buffer clears whole buffers at the start of the
+ * job's render, before any draw; a partial clear, or one after a draw of
+ * this job, is drawn as a rectangle instead (ogles2_draw_clear), but for
+ * 32-bit float and integer targets, which its program cannot write: the
+ * CPU fills their box once the jobs drawing into them have rendered. */
+static void clear(struct OGLES2Context *ctx, GLbitfield mask, UBYTE rts, const ULONG *cv, BOOL is_int,
+                  GLfloat depth, GLint stencil)
+{
+    GLfloat color[4];
+    UBYTE cpu = 0;
+    int k;
+    if (!ctx->v3d || !ogles2_fb_ready(ctx))
         return;
     /* GL_RASTERIZER_DISCARD (ES 3.0 4.2.3) discards clears too, as Mesa does
      * (main/clear.c). */
     if (ctx->state.caps & OGLES2_CAP_RASTERIZER_DISCARD)
         return;
     /* EXT_draw_buffers: colour clears the draw buffers, none with GL_NONE. */
-    if (!ctx->fb_draw_mask)
+    rts &= ctx->fb_draw_mask;
+    if (!rts)
         mask &= ~(GLbitfield)GL_COLOR_BUFFER_BIT;
     if (!mask)
         return;
-    s = &ctx->state;
-    /* The tile buffer clears whole buffers at the start of the job's render,
-     * before any draw: a clear confined by the scissor box or by write
-     * masks, or one after a draw of this job, is drawn as a rectangle
-     * instead (plan 7.7). Depth and stencil are cleared together at the
-     * start of every tile; unless they were loaded (kept from a mid-frame
-     * flush, or a framebuffer object's) they hold nothing before a job's
-     * first draw, so clearing only one there is still exact. */
-    partial = ((s->caps & OGLES2_CAP_SCISSOR_TEST) &&
-               (ctx->scissor[0] > 0 || ctx->scissor[1] > 0 ||
-                ctx->scissor[0] + ctx->scissor[2] < (GLint)ctx->fb_w ||
-                ctx->scissor[1] + ctx->scissor[3] < (GLint)ctx->fb_h)) ||
-              ((mask & GL_COLOR_BUFFER_BIT) &&
-               !(s->color_mask[0] && s->color_mask[1] && s->color_mask[2] && s->color_mask[3])) ||
-              ((mask & GL_DEPTH_BUFFER_BIT) && !s->depth_mask) ||
-              ((mask & GL_STENCIL_BUFFER_BIT) && (s->stencil_write_mask[0] & 0xff) != 0xff) ||
-              /* depth and stencil loaded (job.c): the tile buffer clears
-               * both or neither */
-              ((ctx->draw_fb || ctx->zs_saved) && ctx->fb_stencil_bits && ctx->fb_depth_bits &&
-               (mask & (GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT)) &&
-               (mask & (GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT)) !=
-                   (GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
-    /* A job with draws for this framebuffer: too late for its tile clear. */
-    if (partial || (ogles2_job_has_draws(ctx) && ctx->job_fb == ctx->draw_fb))
-        ogles2_draw_clear(ctx, mask);
+    if (!clear_partial(ctx, mask) && !(ogles2_job_has_draws(ctx) && ctx->job_fb == ctx->draw_fb)) {
+        ogles2_job_clear(ctx, mask, rts, cv, is_int, depth, stencil);
+        return;
+    }
+    for (k = 0; k < 4; k++) {
+        union { ULONG u; GLfloat f; } x;
+        x.u = cv[k];
+        color[k] = is_int ? (GLfloat)(LONG)cv[k] : x.f;
+        /* beside a 32-bit float or integer target every target: the
+         * built-in clears for several targets would write it too, at the
+         * wrong width (draw.c) */
+        if ((mask & GL_COLOR_BUFFER_BIT) && (rts & (1 << k)) && ctx->fb_soft_blend &&
+            ctx->fb_rt[k].kind != OGLES2_RT_NONE)
+            cpu |= (UBYTE)(1 << k);
+    }
+    if (cpu) {
+        LONG x0 = 0, y0 = 0, x1 = ctx->fb_w, y1 = ctx->fb_h;
+        if (ctx->state.caps & OGLES2_CAP_SCISSOR_TEST) {
+            if (ctx->scissor[0] > x0) x0 = ctx->scissor[0];
+            if (ctx->scissor[1] > y0) y0 = ctx->scissor[1];
+            if (ctx->scissor[0] + ctx->scissor[2] < x1) x1 = ctx->scissor[0] + ctx->scissor[2];
+            if (ctx->scissor[1] + ctx->scissor[3] < y1) y1 = ctx->scissor[1] + ctx->scissor[3];
+        }
+        if (ctx->job_fb == ctx->draw_fb)
+            ogles2_job_flush(ctx, FALSE); /* none open: nothing */
+        ogles2_job_finish(ctx);
+        for (k = 0; k < 4 && x0 < x1 && y0 < y1; k++)
+            if (cpu & (1 << k))
+                ogles2_fbo_fill(ctx, k, (int)x0, (int)y0, (int)(x1 - x0), (int)(y1 - y0), cv, is_int,
+                                ctx->state.color_mask);
+        rts &= (UBYTE)~cpu;
+        if (!rts)
+            mask &= ~(GLbitfield)GL_COLOR_BUFFER_BIT;
+    }
+    if (mask)
+        ogles2_draw_clear(ctx, mask, rts, color, depth, stencil);
+}
+
+void ogles2_glClear(struct OGLES2Context *ctx, GLbitfield mask)
+{
+    ULONG cv[4];
+    int k;
+    if (!ogles2_context_valid(ctx))
+        return;
+    if (mask & ~(GLbitfield)(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT)) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    for (k = 0; k < 4; k++) {
+        union { ULONG u; GLfloat f; } x;
+        x.f = ctx->state.clear_color[k];
+        cv[k] = x.u;
+    }
+    clear(ctx, mask, 0x0F, cv, FALSE, ctx->state.clear_depth, ctx->state.clear_stencil);
+}
+
+/* ES 3.0's glClearBuffer* (4.2.3): one draw buffer's colour (floats, or
+ * signed or unsigned integers, raw), the depth (clamped to [0, 1]), the
+ * stencil, or both; GL_INVALID_ENUM for a buffer the entry does not take,
+ * GL_INVALID_VALUE for a draw buffer out of range (depth and stencil: 0). */
+static BOOL clear_buffer_ok(struct OGLES2Context *ctx, GLenum buffer, GLint drawbuffer, BOOL ok_buffer)
+{
+    if (!ok_buffer) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return FALSE;
+    }
+    if (buffer == GL_COLOR ? drawbuffer < 0 || drawbuffer >= OGLES2_MAX_DRAW_BUFFERS : drawbuffer != 0) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return FALSE;
+    }
+    return TRUE;
+}
+
+static GLfloat clamp_depth(GLfloat d)
+{
+    return d < 0.0f ? 0.0f : d > 1.0f ? 1.0f : d;
+}
+
+void ogles2_glClearBufferiv(struct OGLES2Context *ctx, GLenum buffer, GLint drawbuffer, const GLint *value)
+{
+    if (!ogles2_es3_entry(ctx) ||
+        !clear_buffer_ok(ctx, buffer, drawbuffer, buffer == GL_COLOR || buffer == GL_STENCIL) || !value)
+        return;
+    if (buffer == GL_COLOR)
+        clear(ctx, GL_COLOR_BUFFER_BIT, (UBYTE)(1 << drawbuffer), (const ULONG *)value, TRUE, 0.0f, 0);
     else
-        ogles2_job_clear(ctx, mask);
+        clear(ctx, GL_STENCIL_BUFFER_BIT, 0, 0, FALSE, 0.0f, value[0]);
+}
+
+void ogles2_glClearBufferuiv(struct OGLES2Context *ctx, GLenum buffer, GLint drawbuffer, const GLuint *value)
+{
+    if (!ogles2_es3_entry(ctx) || !clear_buffer_ok(ctx, buffer, drawbuffer, buffer == GL_COLOR) || !value)
+        return;
+    clear(ctx, GL_COLOR_BUFFER_BIT, (UBYTE)(1 << drawbuffer), (const ULONG *)value, TRUE, 0.0f, 0);
+}
+
+void ogles2_glClearBufferfv(struct OGLES2Context *ctx, GLenum buffer, GLint drawbuffer, const GLfloat *value)
+{
+    if (!ogles2_es3_entry(ctx) ||
+        !clear_buffer_ok(ctx, buffer, drawbuffer, buffer == GL_COLOR || buffer == GL_DEPTH) || !value)
+        return;
+    if (buffer == GL_COLOR)
+        clear(ctx, GL_COLOR_BUFFER_BIT, (UBYTE)(1 << drawbuffer), (const ULONG *)value, FALSE, 0.0f, 0);
+    else
+        clear(ctx, GL_DEPTH_BUFFER_BIT, 0, 0, FALSE, clamp_depth(value[0]), 0);
+}
+
+void ogles2_glClearBufferfi(struct OGLES2Context *ctx, GLenum buffer, GLint drawbuffer, GLfloat depth,
+                            GLint stencil)
+{
+    if (!ogles2_es3_entry(ctx) || !clear_buffer_ok(ctx, buffer, drawbuffer, buffer == GL_DEPTH_STENCIL))
+        return;
+    clear(ctx, GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, 0, 0, FALSE, clamp_depth(depth), stencil);
 }
 
 void ogles2_glViewport(struct OGLES2Context *ctx, GLint x, GLint y, GLsizei width, GLsizei height)
