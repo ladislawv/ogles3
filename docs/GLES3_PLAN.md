@@ -255,16 +255,21 @@ Mesa's driver, so they could follow later as an extension
     `-20261027-0920-chain`; the last 26 chunks as one script on the A1200,
     their programs since 11:45 compiled on the PC, below). Failing,
     stage B's: the 336 `operator.binary_operator.*shift*` cases at highp
-    (every one; all 672 at lowp and mediump pass; with the A1200's own
-    compiler too, `ogles2-m8-2-20261027-123631`): shift amounts to 27
-    and 28 bits, not yet looked into (the GPU's code, or dEQP's reference
-    on the 68k); `derivate.dfdx.texture.basic.float_mediump`, 12 pixels;
+    (every one; all 672 at lowp and mediump passed; with the A1200's own
+    compiler too, `ogles2-m8-2-20261027-123631`), not the library's:
+    libnix's printf wrote their result scale 5e-10 into the shaders as
+    `1.5e-09` (the GPU's results were right, three times dEQP's
+    reference); fixed in the dEQP port (`ports/deqp/README.md`, "libnix's
+    printf"), the 1008 shift cases pass (`ogles2-m8-2-20261027-130545`);
+    `derivate.dfdx.texture.basic.float_mediump`, 12 pixels;
     and the 10 of `state_query` and `lifetime` fixed since (§5 items 2
     and 11; their A1200 run next). The rest of the failures are stage
     C's (transform feedback, multisampling, program binaries), whose
-    groups later runs leave out (below). Next: the shifts, the 10 fixes on
-    the A1200, item 8's base levels beyond 0 (no dEQP case fails on
-    them).
+    groups later runs leave out (below). The 10 fixes pass in dEQP since
+    (`state_query` and `lifetime` fail only stage C's transform feedback
+    and program binary cases, `ogles2-m8-2-20261027-124745`, `-124856`).
+    Next: the `derivate` case, item 8's base levels beyond 0 (no dEQP case
+    fails on them).
     **Trap:**
     `ports/deqp/build.sh` copies the CTS with `rsync -a`, which keeps the
     sources' old dates, so a patch changed or removed rebuilds nothing:

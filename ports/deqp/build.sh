@@ -203,6 +203,27 @@ if [ -f "$OBJ/FAILED" ]; then
     exit 1
 fi
 
+# libnix's printf (its math library's, which -lm brings) prints some numbers
+# wrongly in %e and %g, 5e-10f as "1.5e-09"; dEQP writes float constants
+# into shader sources with it (dEQP-GLES3's highp shifts: all 336 failed).
+# Its __vfprintf_total_size, from the toolchain's own libnix sources
+# (dev/host-setup/build_toolchains.sh keeps them, at the commit
+# toolchain-pins.txt pins) with libnix/'s fix, replaces it.
+LIBNIX=${LIBNIX:-$HOME/toolchain-build/src-gcc162/projects/libnix}
+VFP=$LIBNIX/sources/nix/stdio/__vfprintf_total_size.c
+if [ -f "$VFP" ]; then
+    cp "$VFP" "$OBJ/libnix_vfprintf.c"
+    for p in "$HERE"/libnix/*.patch; do
+        patch -s "$OBJ/libnix_vfprintf.c" < "$p" || { echo "deqp: $p does not apply"; exit 1; }
+    done
+    "$TC16/bin/m68k-amigaos-gcc" $FLAGS -DFULL_SPECIFIERS -I"$LIBNIX/sources/headers" \
+        -c "$OBJ/libnix_vfprintf.c" -o "$OBJ/libnix_vfprintf.o" || exit 1
+else
+    echo "deqp: no libnix sources in $LIBNIX: built with libnix's own printf, which prints some"
+    echo "      floats wrongly (ports/deqp/README.md)"
+    rm -f "$OBJ/libnix_vfprintf.o"
+fi
+
 "$TC16/bin/m68k-amigaos-g++" -mcpu=68020 -m68881 -noixemul -o "$OUT/deqp-$MODULE" "$OBJ"/*.o \
     -L"$B" -logles2 -lm
 rm -rf "$OUT/$MODULE"

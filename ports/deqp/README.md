@@ -69,8 +69,25 @@ see "dEQP-GLES3" below.
     libnix lacks.
   - `amiga-compat.cpp`: the C-only locale and `__xpg_strerror_r`, as in
     glmark2's port.
+- **`libnix/`**: patches to libnix's printf, built into dEQP in place of
+  the toolchain's (below).
 
 ## Traps (beyond glmark2's)
+
+- **libnix's printf prints some floats wrongly** (libnix `61726a7`, the
+  commit `dev/host-setup/toolchain-pins.txt` pins): in `%e` and `%g`, when
+  rounding carries into the first digit and exponent + precision < 0, a
+  rule meant for `%f` takes the carry for a new digit, so `5e-10f`
+  (4.999999859e-10) prints as `1.5e-09` and 4.9999999e-9 as `1.5e-08`.
+  libstdc++'s streams use it, and dEQP writes float constants into shader
+  sources with them: dEQP-GLES3's 336 highp shift cases
+  (`shaders.operator.binary_operator.*shift*`, result scale 5e-10) all
+  failed on the GPU's correct results. `build.sh` compiles libnix's
+  `__vfprintf_total_size.c` from the toolchain's own sources
+  (`~/toolchain-build/src-gcc162/projects/libnix`, `LIBNIX`) with
+  `libnix/0001-printf-e-g-rounding.patch` and links it before `-lm`'s; the
+  1008 shift cases pass (`ogles2-m8-2-20261027-130545`). Without those
+  sources it warns and keeps libnix's. Worth reporting to libnix (bebbo).
 
 - **`int32_t` is `long`** in this toolchain (GCC's `__INT32_TYPE__`, which
   newlib's `<machine/_default_types.h>` follows). dEQP takes it to be `int`

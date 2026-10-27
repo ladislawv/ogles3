@@ -1,0 +1,16 @@
+libnix (61726a7, dev/host-setup/toolchain-pins.txt): %e and %g printed a number
+whose rounding carries into its first digit, when exponent + precision < 0, as
+if the carry had made a new digit (5e-10f as "1.5e-09"): a rule %f needs. Only
+%f takes it now. ports/deqp/README.md.
+
+--- a/__vfprintf_total_size.c
++++ b/__vfprintf_total_size.c
+@@ -1190,7 +1190,7 @@
+ 										++leading;
+ 										++ digits_to_compute;
+ 									}
+-								} else if (exponent + preci < 0 && buffer[tpos] == '5') {
++								} else if ((type == 'f' || type == 'F') && exponent + preci < 0 && buffer[tpos] == '5') {
+ 									startPos = 0;
+ 									buffer[0] = '1';
+ 									exponent++; /* Exponent shifts up globally for all format paths */
