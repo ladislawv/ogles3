@@ -10,8 +10,9 @@
 # Needs, after `. ./local.env` in WSL: the station (tools/amictl, station.local),
 # `python3 tools/amictl/compile_bridge.py` running in another shell (it runs
 # the host v3dglslc), and the package run once before (its drawer on the
-# A1200). Without a bridge v3dglslc-remote hands every request to the
-# A1200's own compiler: the run is right, only slow.
+# A1200). Without a bridge a compile fails (v3dglslc-remote's NOFALLBACK):
+# nothing is compiled on the A1200, where one program held a run for 20
+# minutes (2026-10-27); a run does not start without a bridge process.
 set -u
 PKG=m8-2
 KEYS=""
@@ -38,7 +39,12 @@ ES3=${ES3_BUILD:-$HOME/ogles3-build/m68k-es3}
 [ -x $ES3/amictl/v3dglslc-remote ] || { echo "no $ES3/amictl/v3dglslc-remote: make ES3=1 B=$ES3"; exit 1; }
 $X put $ES3/amictl/v3dglslc-remote $P/bin/v3dglslc-remote > /dev/null ||
     { echo "cannot put v3dglslc-remote into $P/bin: run the package once without the PC (amictl runpkg)"; exit 1; }
-job=$($X start -d $P bin/v3dglslc-remote WAIT COMPILER=$P/libs/v3dglslc)
+# Never on the A1200's own compiler (a compile there held a run for 20
+# minutes): without the bridge a compile fails (NOFALLBACK), and a run
+# without a bridge process does not start.
+pgrep -f compile_bridge.py > /dev/null ||
+    { echo "no compile_bridge.py running: start python3 tools/amictl/compile_bridge.py first"; exit 1; }
+job=$($X start -d $P bin/v3dglslc-remote WAIT NOFALLBACK COMPILER=$P/libs/v3dglslc)
 $X runpkg tests/a1200/out/ogles2-$PKG -t ${TIMEOUT:-3000} -a "CASES=$PATTERN NAME=$NAME${KEYS:+ $KEYS}" | tail -1
 d=$(ls -d tests/a1200/results/ogles2-$PKG-2* | tail -1)
 echo "$NAME ($d): $(grep -o 'StatusCode="[A-Za-z]*"' $d/results/$NAME.qpa 2>/dev/null |

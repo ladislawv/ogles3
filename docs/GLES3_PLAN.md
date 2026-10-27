@@ -244,9 +244,9 @@ Mesa's driver, so they could follow later as an extension
       `negative_api`, with `ports/deqp/run_pc.sh` and the PC compiling;
       (3) dropped (the update above); (4) stage C items 2 and 6 (done
       2026-10-27), then stage D, each with the dEQP groups of its own
-      features (under way: §7's "Compute" note; next its dEQP-GLES31
-      `compute` and `ssbo` groups, robust storage access, then items 3,
-      4 and 5); (5) stage
+      features (under way: §7's "Compute" and "Then" notes, the last one
+      ending with where to go on: first the A1200 restarts dEQP-GLES31's
+      `draw_indirect.draw_arrays_indirect.first.first_1` causes); (5) stage
       B's end without dEQP-GLES2 and the whole dEQP-GLES3 run at the end.
     - **Open points:** the `derivate.dfdx.texture.basic.float_mediump`
       failure seen once (12 pixels); a program's default variants can
@@ -2608,6 +2608,21 @@ busy on that one program for over 15 minutes. `m8_draw`'s own indirect
 draws pass; the difference is not known yet. Tools for it: `m8_draw`
 skips tests named in `ENV:M8_SKIP`, `cmd/pistat` also prints exec's last
 alert; the station returns a job's output only when it ends.
+Bisected one case at a time on 2026-10-27 (23:50, the bridge working):
+`negative.command_bad_alignment_1` passes, `points.single_attribute` (an
+indirect draw of points) passes, `first.first_1` restarted the A1200
+again (fifth time). **Where to go on (2026-10-28):** run the other
+`draw_arrays_indirect` cases singly (`triangles.*`, the other `first.*`),
+then compare `first_1`'s spec (triangles, two buffer attributes, the first
+a 4-float array read as vec2, first 1, 1/5/25 primitives, a vertex array
+object, a 256x256 window) with `m8_draw`'s `test_indirect` and grow that
+test towards it until the A1200 restarts; then the cause. Then dEQP's
+`draw_indirect` and `uniform_location` groups, `ssbo`,
+`program_interface_query`, and items 2 (images), 4 and 5.
+`ports/deqp/run_pc.sh` now never compiles on the A1200 (`v3dglslc-remote
+NOFALLBACK`: without the bridge a compile fails) and does not start
+without a `compile_bridge.py` process (the bridge had died unnoticed at
+21:59, and the A1200's compiler then sat on one program for 20 minutes).
 `cmd/pistat` (the Pi's temperature, throttling and clocks, through the
 firmware only) ruled out heat and power: 51 C, no flags. **Trap:** a
 freeze after GPU work that comes back after warm resets needs a power

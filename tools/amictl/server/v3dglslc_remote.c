@@ -9,12 +9,15 @@
  *
  * With no bridge connected, or the link lost, the requests go to a local
  * "v3dglslc SERVER" (COMPILER) and this program ends: a run goes on, at the
- * A1200's speed. A QUIT request (each library expunge sends one) does not
+ * A1200's speed; with NOFALLBACK (dEQP runs: ports/deqp/run_pc.sh) a request
+ * waits up to 10 s for the bridge, then is refused ("compile failed") and
+ * this program keeps the port, so nothing compiles on the A1200 (a compile
+ * there took a dEQP run 20 minutes on one program). A QUIT request (each library expunge sends one) does not
  * end it: the bridge starts its compiler anew, as the local server would
  * be. Ctrl-C ends it. WAIT: while a local server has the port, wait for it
  * to leave (it does at the next expunge) instead of ending.
  *
- *   v3dglslc-remote [PORT=6802] [TOKEN=//amictld.token] [COMPILER=LIBS:v3dglslc] [WAIT]
+ *   v3dglslc-remote [PORT=6802] [TOKEN=//amictld.token] [COMPILER=LIBS:v3dglslc] [WAIT] [NOFALLBACK]
  *
  * TOKEN's default is amictld's, from a package's directory in amictld's
  * work/. Frames (big-endian u32s; a string is its length, 0xffffffff for
@@ -55,7 +58,8 @@ static char token[80];
 static const char *compiler = "LIBS:v3dglslc";
 static int ls = -1, cs = -1; /* listening; the bridge's */
 static struct MsgPort *port;
-static unsigned long served;
+static unsigned long served, refused;
+static int no_fallback;
 
 /* ---- the link ---- */
 
@@ -290,6 +294,35 @@ static void pass_quit(void)
     free(log);
 }
 
+/* NOFALLBACK: up to 10 s for the bridge to connect (it tries every 5 s);
+ * TRUE if it has. */
+static int await_bridge(void)
+{
+    int t;
+    for (t = 0; t < 10 && cs < 0; t++) {
+        fd_set rd;
+        struct timeval tv;
+        FD_ZERO(&rd);
+        FD_SET(ls, &rd);
+        tv.tv_sec = 1;
+        tv.tv_usec = 0;
+        if (WaitSelect(ls + 1, &rd, 0, 0, &tv, 0) > 0 && FD_ISSET(ls, &rd))
+            take_connection();
+    }
+    return cs >= 0;
+}
+
+/* NOFALLBACK without a bridge: r fails, the port stays ours. */
+static void refuse(struct V3DGLSLRequest *r)
+{
+    r->result = 2;
+    if (r->log && r->log_size)
+        snprintf(r->log, r->log_size, "v3dglslc-remote: no bridge to the PC; not compiled on the A1200 (NOFALLBACK)");
+    done(r);
+    if (!refused++)
+        printf("v3dglslc-remote: no bridge: requests refused (NOFALLBACK)\n");
+}
+
 /* No bridge: the local compiler takes r and everything after it, and this
  * program ends. The port goes first (the server starts only without one). */
 static void fall_back(struct V3DGLSLRequest *r)
@@ -357,8 +390,11 @@ int main(int argc, char **argv)
             compiler = argv[i] + 9;
         else if (!strcmp(argv[i], "WAIT"))
             wait_free = 1;
+        else if (!strcmp(argv[i], "NOFALLBACK"))
+            no_fallback = 1;
         else {
-            printf("usage: v3dglslc-remote [PORT=6802] [TOKEN=//amictld.token] [COMPILER=LIBS:v3dglslc] [WAIT]\n");
+            printf("usage: v3dglslc-remote [PORT=6802] [TOKEN=//amictld.token] [COMPILER=LIBS:v3dglslc] [WAIT] "
+                   "[NOFALLBACK]\n");
             return 10;
         }
     }
@@ -434,6 +470,12 @@ int main(int argc, char **argv)
                 r->result = 0;
                 done(r); /* a library expunge: the next library finds us again */
                 pass_quit();
+            } else if (no_fallback) {
+                /* a link lost mid-request: once more, on a new one */
+                if ((cs >= 0 || await_bridge()) && forward(r))
+                    ;
+                else if (!await_bridge() || !forward(r))
+                    refuse(r);
             } else if (cs < 0 || !forward(r)) {
                 fall_back(r);
                 goto out;
@@ -453,7 +495,7 @@ int main(int argc, char **argv)
         }
     }
 out:
-    printf("v3dglslc-remote: done, %lu request(s) compiled on the PC\n", served);
+    printf("v3dglslc-remote: done, %lu request(s) compiled on the PC, %lu refused\n", served, refused);
     DeleteMsgPort(port);
     drop_link("ending");
     CloseSocket(ls);
