@@ -271,3 +271,6 @@ glBindTransformFeedback
 glGenTransformFeedbacks
 glDeleteTransformFeedbacks
 glIsTransformFeedback
+glGetProgramBinary
+glProgramBinary
+glProgramParameteri

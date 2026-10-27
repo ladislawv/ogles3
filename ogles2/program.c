@@ -1440,6 +1440,7 @@ void ogles2_glLinkProgram(struct OGLES2Context *ctx, GLuint program)
     /* A program in use keeps its old image in the open job until relinked:
      * the job's records already point at its code (ogles2_image_free defers). */
     unlink_program(ctx, p);
+    p->binary_hint = p->binary_hint_pending;
     if (!p->vs || !p->fs || !p->vs->compiled || !p->fs->compiled) {
         /* Say which shader failed, with its compiler messages. */
         if (p->vs && p->fs && !p->vs->compiled)
@@ -1651,6 +1652,13 @@ void ogles2_glGetProgramiv(struct OGLES2Context *ctx, GLuint program, GLenum pna
         break;
     case GL_PROGRAM_BINARY_LENGTH_OES:
         *params = p->linked && im ? (GLint)im->binary_len : 0;
+        break;
+    case GL_PROGRAM_BINARY_RETRIEVABLE_HINT: /* ES 3.0 */
+        if (!ogles2_es3(ctx)) {
+            ogles2_error(ctx, GL_INVALID_ENUM);
+            break;
+        }
+        *params = p->binary_hint;
         break;
     case GL_ACTIVE_UNIFORM_BLOCKS: /* ES 3.0 */
     case GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH:
@@ -1998,6 +2006,10 @@ void ogles2_glProgramBinaryOES(struct OGLES2Context *ctx, GLuint program, GLenum
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
+    if (ogles2_xfb_program_busy(ctx, p)) { /* as glLinkProgram (ES 3.0 2.15.2) */
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
     unlink_program(ctx, p);
     if (!binary || length <= 0) {
         set_log(p, "the program binary was refused: ", "empty");
@@ -2037,7 +2049,39 @@ void ogles2_glProgramBinaryOES(struct OGLES2Context *ctx, GLuint program, GLenum
         return;
     }
     p->linked = GL_TRUE;
+    p->binary_hint = p->binary_hint_pending;
     set_log(p, "", 0);
+}
+
+/* ES 3.0's names (stage C item 4): the extension's, in ES3 contexts. */
+void ogles2_glGetProgramBinary(struct OGLES2Context *ctx, GLuint program, GLsizei bufSize,
+                               GLsizei *length, GLenum *binaryFormat, void *binary)
+{
+    if (ogles2_es3_entry(ctx))
+        ogles2_glGetProgramBinaryOES(ctx, program, bufSize, length, binaryFormat, binary);
+}
+
+void ogles2_glProgramBinary(struct OGLES2Context *ctx, GLuint program, GLenum binaryFormat,
+                            const void *binary, GLsizei length)
+{
+    if (ogles2_es3_entry(ctx))
+        ogles2_glProgramBinaryOES(ctx, program, binaryFormat, binary, length);
+}
+
+void ogles2_glProgramParameteri(struct OGLES2Context *ctx, GLuint program, GLenum pname, GLint value)
+{
+    struct OGLES2Program *p;
+    if (!ogles2_es3_entry(ctx) || !(p = lookup(ctx, program, OGLES2_OBJ_PROGRAM)))
+        return;
+    if (pname != GL_PROGRAM_BINARY_RETRIEVABLE_HINT) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    if (value != GL_FALSE && value != GL_TRUE) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    p->binary_hint_pending = (UBYTE)value;
 }
 
 void ogles2_glGetProgramInfoLog(struct OGLES2Context *ctx, GLuint program, GLsizei bufSize,

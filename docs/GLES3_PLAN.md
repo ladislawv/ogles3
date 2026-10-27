@@ -7,8 +7,9 @@ done, tested on the A1200 (§4, each item's "Done" paragraph and "Stage A's
 end", 2026-10-23): the GLES2 regression set and the speed figures as at
 1.3.1; dEQP-GLES2's whole list is postponed until the ES3 library is
 finished. Stage B's features are done (2026-10-27; its end checkpoint
-open), stage C has begun (transform feedback, not yet run on the A1200),
-stage D is to come; §1's "Hand-off of 2026-10-27" is where to start.
+open), stage C has begun (transform feedback passes on the A1200, the ES
+3.0 table is complete; multisampled framebuffers and SDL to come), stage D
+is to come; §1's "Hand-off of 2026-10-27" is where to start.
 Its facts were checked against this repository, Mesa at the pinned commit
 (`~/mesa-build/mesa`), Khronos' `gl.xml` (`gen/khronos/`) and extension
 specifications, the Linux kernel's V3D driver (`drivers/gpu/drm/v3d`,
@@ -204,9 +205,18 @@ Mesa's driver, so they could follow later as an extension
       case, §5 item 13's notes). Its end checkpoint is open: the GLES2
       regression set and the speed against 1.x (above), then release
       2.0, when the developer says so. Stage C item 1, transform
-      feedback, is written and checked on the PC only (§6 item 1,
-      "Written, on the host only"): the next thing to run on the A1200.
-      Stage C items 2 to 6 and stage D are not begun.
+      feedback, passes on the A1200 (§6 item 1, 2026-10-27), items 3
+      (done in stage B) and 4 are done; items 2, 5 and 6 and stage D are
+      not begun.
+    - **Update of 2026-10-27, evening:** the developer's order: dEQP-GLES3
+      runs only the groups of what is new; stages C and D come first, as
+      far as they go, and the whole dEQP-GLES3 run at the end. The
+      `texture` and `negative_api` reruns of step (3) below are dropped
+      (`negative_api` ran: 307 of 316, §6 item 1). After that run's stop
+      from the PC (its `runpkg` killed mid-run) `amictld` answered no
+      request (ping and TCP connects did, `amictl reboot` too timed out):
+      a reset by hand. Stop a run on the A1200's side (`amictl abort`)
+      rather than its PC side.
     - **The developer's standing decisions:** dEQP-GLES2 is not run, not
       even single groups, until stages B to D are all finished; a run
       leaves out the groups of features not written yet; ask before
@@ -226,15 +236,14 @@ Mesa's driver, so they could follow later as an extension
       `cache-before-*`) to delete: PFS3 grows slow with tens of
       thousands of files in a drawer and the whole run filled them (§5
       item 6's stops).
-    - **Next, in order:** (1) package `m8-1` (`m8_es3` with the GPU,
-      `m8_draw`'s `test_xfb`) and `m7-4`, fixing what transform feedback
-      gets wrong; (2) dEQP-GLES3's `transform_feedback` and
-      `rasterizer_discard` groups and the transform feedback cases of
-      `state_query` and `negative_api`, with `ports/deqp/run_pc.sh` and
-      the PC compiling; (3) the `texture` and `negative_api` runs the
-      stop cut short (after item 8's base levels; `texture.mipmap` 240 of
-      240 passed); (4) stage B's end without dEQP-GLES2; (5) stage C
-      items 2 to 6.
+    - **Next, in order:** (1) and (2), done 2026-10-27: package `m8-1`
+      (`m8_es3` with the GPU, `m8_draw`'s `test_xfb`) and `m7-4`;
+      dEQP-GLES3's `transform_feedback` and `rasterizer_discard` groups
+      and the transform feedback cases of `state_query` and
+      `negative_api`, with `ports/deqp/run_pc.sh` and the PC compiling;
+      (3) dropped (the update above); (4) stage C items 2 and 6, then
+      stage D, each with the dEQP groups of its own features; (5) stage
+      B's end without dEQP-GLES2 and the whole dEQP-GLES3 run at the end.
     - **Open points:** the `derivate.dfdx.texture.basic.float_mediump`
       failure seen once (12 pixels); a program's default variants can
       depend on the program the same compiler process compiled before it
@@ -2310,6 +2319,19 @@ figures unchanged; **release 2.0** with the GLES2 extensions (§1).
    read by the GPU in the same job (Mesa's `WAIT_FOR_TRANSFORM_FEEDBACK`;
    the CPU path renders the job first for vertex and index reads, a
    uniform buffer read waits for nothing).
+   **On the A1200 (2026-10-27), right the first time:** `m8-1` 27, 132
+   (`m8_es3` with the GPU, its transform feedback draws), 139, 139, 139
+   (`m8_draw` with `test_xfb`), `ogles2-m8-1-20261027-161353`; `m7-4` 23,
+   44, 33, 29 as at 1.3; dEQP-GLES3 with the PC compiling:
+   `transform_feedback` 987 passed, 333 "NotSupported" and none failing
+   (1320; 5 minutes), `rasterizer_discard` 51 of 51, and the transform
+   feedback cases of `state_query` 37 of 37, `negative_api` 10 of 10 and
+   `lifetime` 8 of 8 (`ogles2-m8-2-20261027-161555` to `-162246`). The
+   333 fail to link on the limits the library gives, which are Mesa's V3D
+   driver's (4 separate components, 64 interleaved, 16 vertex inputs), so
+   they are "NotSupported" there too (`es3fTransformFeedbackTests.cpp:1035`).
+   The whole of `negative_api` then: 307 of 316, its 5 failures stage C's
+   (items 2 and 4) and 4 "NotSupported" (`EXT_draw_buffers_indexed`).
 2. **Multisampled framebuffer objects:** `glRenderbufferStorageMultisample`
    with samples (stage B's entry, which took 0 only; 4x: storage of twice the
    width and height, the job in 4x mode with the tile size it needs;
@@ -2331,8 +2353,27 @@ figures unchanged; **release 2.0** with the GLES2 extensions (§1).
    for `glReadPixels` and texture uploads. They use the buffer's CPU copy:
    the library converts pixels on the CPU anyway (stage B item 1 keeps the
    copies in step).
+   **Done in stage B** (`buffer.c`'s `ogles2_buffer_pixels`, for
+   `glReadPixels` and every upload; dEQP-GLES3's `pbo` 54 of 54, §5 item
+   10).
 4. **The rest:** `glGetProgramBinary`/`glProgramBinary` (ES3 names),
    `glProgramParameteri`, everything left of Appendix A's ES 3.0 table.
+   **Done (2026-10-27):** those three were all that was left: `api.txt`'s
+   ES 3.0 block is now `feature GL_ES_VERSION_3_0`, the table has 274
+   entries and no stub (`abi_order.txt` appended). The ES3 names are the
+   OES functions in ES3 contexts (`program.c`); glProgramBinary, as
+   glLinkProgram, refuses a program an active transform feedback uses;
+   `GL_PROGRAM_BINARY_RETRIEVABLE_HINT` takes effect at the next link or
+   binary, as Mesa's (`shaderapi.c:1452`, `:2566`; dEQP-GLES3
+   `state_query.shader.program_binary`); the binary is the `.v3dp` file
+   either way. `GL_EXT_conservative_depth` is listed in ES3 contexts: the
+   compiler (Mesa, which offers it in ES 3.0) already took it, and dEQP-GLES3
+   `negative_api.shader.redeclaring_gl_frag_depth` fails while the library
+   does not list it. `m8_es3`'s `program_binary`, 12 checks (131 of 131
+   under vamos). On the A1200: `m8-1` 27, 144, 139, 139, 139
+   (`ogles2-m8-1-20261027-165553`); dEQP-GLES3 `negative_api.shader` 63 of
+   63 and `state_query.shader` 48 of 48 (`ogles2-m8-2-20261027-165644`,
+   `-165659`).
 5. **dEQP-GLES3's must-pass lists** on the A1200: `gles3-main` (with
    `transform_feedback`, `rasterizer_discard`, `pbo`, `multisample`,
    `negative_api`, `state_query` and what stage B left out) and

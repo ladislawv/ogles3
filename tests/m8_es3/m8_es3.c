@@ -356,6 +356,51 @@ static void xfb_state(int draws)
     glDeleteBuffers(2, b);
 }
 
+/* ES 3.0's names of the program binary entries, and glProgramParameteri's
+ * hint, in effect from the next link (dEQP-GLES3 negative_api.shader.*
+ * and state_query.shader.program_binary). */
+static void program_binary(void)
+{
+    GLint ok, len = 0, got = -1, hint = -1;
+    GLenum fmt = 0;
+    GLuint p = link_files("es3", &ok), q = glCreateProgram(), s = glCreateShader(GL_VERTEX_SHADER);
+    void *bin;
+    glGetProgramiv(p, GL_PROGRAM_BINARY_LENGTH, &len);
+    bin = len > 0 ? malloc(len) : 0;
+    check(ok && bin, "program binary: es3 linked, with a length");
+    if (!bin)
+        return;
+    glGetProgramBinary(p, len - 1, &got, &fmt, bin);
+    check(glGetError() == GL_INVALID_OPERATION, "program binary: a buffer one byte short");
+    glGetProgramBinary(p, len, &got, &fmt, bin);
+    check(glGetError() == GL_NO_ERROR && got == len && fmt == 0x56334450, "program binary: glGetProgramBinary");
+    glProgramBinary(s, fmt, bin, len);
+    check(glGetError() == GL_INVALID_OPERATION, "program binary: into a shader");
+    glProgramBinary(q, (GLenum)-1, bin, len);
+    check(glGetError() == GL_INVALID_ENUM, "program binary: an unknown format");
+    glProgramBinary(q, fmt, bin, len);
+    glGetProgramiv(q, GL_LINK_STATUS, &ok);
+    check(glGetError() == GL_NO_ERROR && ok, "program binary: glProgramBinary links");
+    glGetProgramiv(p, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, &hint);
+    check(glGetError() == GL_NO_ERROR && hint == GL_FALSE, "program binary: the hint is GL_FALSE");
+    glProgramParameteri(0, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
+    check(glGetError() == GL_INVALID_VALUE, "program binary: the hint of program 0");
+    glProgramParameteri(p, (GLenum)-1, GL_TRUE);
+    check(glGetError() == GL_INVALID_ENUM, "program binary: another parameter");
+    glProgramParameteri(p, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, 2);
+    check(glGetError() == GL_INVALID_VALUE, "program binary: a hint of 2");
+    glProgramParameteri(p, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
+    glGetProgramiv(p, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, &hint);
+    check(glGetError() == GL_NO_ERROR && hint == GL_FALSE, "program binary: the hint waits for the link");
+    glLinkProgram(p);
+    glGetProgramiv(p, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, &hint);
+    check(glGetError() == GL_NO_ERROR && hint == GL_TRUE, "program binary: the hint after the link");
+    glDeleteShader(s);
+    glDeleteProgram(q);
+    glDeleteProgram(p);
+    free(bin);
+}
+
 /* The same programs in a GLES2 context: not linked, and their binary
  * (format 2) refused. */
 static void es3_programs_in_es2(void *c3, void *c2)
@@ -883,6 +928,7 @@ int main(int argc, char **argv)
         }
         es3_programs();
         xfb_state(!nogpu);
+        program_binary();
         es3_programs_in_es2(c3, c2);
         aglDestroyContext(c3);
     }

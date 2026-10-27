@@ -354,6 +354,9 @@ static const struct { const char *name; UBYTE in; } extensions[] = {
     {"GL_EXT_color_buffer_half_float", EXT_ALL}, {"GL_EXT_frag_depth", EXT_ALL},
     {"GL_OES_vertex_array_object", EXT_ALL}, {"GL_EXT_instanced_arrays", EXT_ALL},
     {"GL_EXT_color_buffer_float", EXT_ES3}, /* stage B item 10: the float targets */
+    /* The compiler's (Mesa offers it in ES 3.0 contexts): gl_FragDepth's
+     * layout is a hint the hardware has no use for. */
+    {"GL_EXT_conservative_depth", EXT_ES3},
 };
 #define NUM_EXTENSIONS (sizeof(extensions) / sizeof(extensions[0]))
 

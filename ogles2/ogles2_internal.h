@@ -509,6 +509,10 @@ struct OGLES2Program
     GLenum xfb_mode;
     UWORD nxfb;
     char *xfb_names;                  /* AllocVec'd; NULL: none */
+    /* ES 3.0's GL_PROGRAM_BINARY_RETRIEVABLE_HINT: glProgramParameteri's
+     * value, in effect from the next link or glProgramBinary (as Mesa). The
+     * binary is the .v3dp file either way. */
+    UBYTE binary_hint, binary_hint_pending;
 };
 
 struct OGLES2Context;

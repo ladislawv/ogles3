@@ -39,7 +39,7 @@ ES3=${ES3_BUILD:-$HOME/ogles3-build/m68k-es3}
 $X put $ES3/amictl/v3dglslc-remote $P/bin/v3dglslc-remote > /dev/null ||
     { echo "cannot put v3dglslc-remote into $P/bin: run the package once without the PC (amictl runpkg)"; exit 1; }
 job=$($X start -d $P bin/v3dglslc-remote WAIT COMPILER=$P/libs/v3dglslc)
-$X runpkg tests/a1200/out/ogles2-$PKG -t ${TIMEOUT:-3000} -a "CASES=$PATTERN NAME=$NAME $KEYS" | tail -1
+$X runpkg tests/a1200/out/ogles2-$PKG -t ${TIMEOUT:-3000} -a "CASES=$PATTERN NAME=$NAME${KEYS:+ $KEYS}" | tail -1
 d=$(ls -d tests/a1200/results/ogles2-$PKG-2* | tail -1)
 echo "$NAME ($d): $(grep -o 'StatusCode="[A-Za-z]*"' $d/results/$NAME.qpa 2>/dev/null |
     sed 's/StatusCode=//' | sort | uniq -c | tr '\n' ' ')"
