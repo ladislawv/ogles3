@@ -2521,12 +2521,25 @@ size 0; a storage block's stages from the stage maps, Mesa leaves its
 a storage buffer, indirect, the errors, the queries): `m8-5` 47 of 47,
 163 of 163. dEQP-GLES31 `compute.basic` before the queries: 1 of 41 (the
 rest stopped at the missing queries, images and atomic counters failed
-to compile). **Open:** the three runs after that left the A1200 stuck
-before the package's script started (its old results not yet deleted;
-an upload alone went through in 10 s, then the machine stuck too); the
-cause is not known, and the shared-variable fix above (sized for one work
-group before) had not run yet. Next on the A1200: `m8-5` first, to see
-whether the machine is stable, then `compute.basic` watched.
+to compile). **The A1200's freezes (found 2026-10-27):** after runs with
+dispatches the whole machine froze some minutes later, idle (19:49's
+`m8-5`, frozen at 20:00; the station's own log, `amictld.log`, shows no
+request after), and again within minutes of each warm reset until it was
+switched off: what a warm reset keeps (Emu68, below the Amiga's RAM, and
+the GPU) was hit, not AmigaOS. The cause: `compute.c` had CFG3's two
+supergroup fields swapped (`WGS_PER_SG` is bits 11:8, `BATCHES_PER_SG_M1`
+19:12, Mesa's `common/v3d_csd.h`), so each dispatch described 16 work
+groups a supergroup of two batches against `CFG4`'s total. Results were
+right in the tests, the machine not. Now as Mesa with one work group a
+supergroup, and a dispatch of more than 2^32 batches is refused (logged).
+After the fix: `m8-5` 47 of 47 and 163 of 163, dEQP-GLES31
+`compute.basic` 29 of 41 (the rest images and atomic counters: 8 fail
+to compile, 2 not supported), and the A1200 up 20 minutes after them.
+`cmd/pistat` (the Pi's temperature, throttling and clocks, through the
+firmware only) ruled out heat and power: 51 C, no flags. **Trap:** a
+freeze after GPU work that comes back after warm resets needs a power
+cycle; the station's log (`Stuff:amictld/amictld.log`) shows when it
+stopped.
 
 1. **Compute shaders.** The largest single piece:
    - `v3dcore`: a CSD submission path beside the binning/render one, under

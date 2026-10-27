@@ -414,5 +414,10 @@ $(B)/cmd/OGLES2Log: cmd/OGLES2Log.c $(B)/libogles2.a
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
 
+# The Pi's temperature, throttling and clocks (the test station; no library)
+$(B)/cmd/pistat: cmd/pistat.c v3dcore/hw/devicetree_protos.h
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -Iv3dcore/include -Iv3dcore/hw $< -o $@
+
 clean:
 	rm -rf $(B)

@@ -38,10 +38,14 @@ struct OGLES2Compute
 #define MAX_WORK_GROUPS     65535 /* GL_MAX_COMPUTE_WORK_GROUP_COUNT (state.c) */
 #define SHARED_BYTES_MAX    (64UL << 20) /* a dispatch's shared variables at most, all groups */
 
-/* Mesa's common/v3d_csd.h fields (V3D 4.2). */
+/* Mesa's common/v3d_csd.h fields (V3D 4.2): CFG3 is the group size in bits
+ * 7:0, work groups a supergroup in 11:8 (0: 16), batches a supergroup - 1
+ * in 19:12. (These two were swapped here at first: every dispatch said 16
+ * groups a supergroup of two batches each against CFG4's total, and the
+ * A1200 froze minutes later, again after warm resets until switched off.) */
 #define CFG012_WG_COUNT_SHIFT     16
-#define CFG3_WGS_PER_SG_SHIFT     12
-#define CFG3_BATCHES_PER_SG_M1_SHIFT 8
+#define CFG3_WGS_PER_SG_SHIFT     8
+#define CFG3_BATCHES_PER_SG_M1_SHIFT 12
 #define CFG3_WG_SIZE_SHIFT        0
 #define CFG5_PROPAGATE_NANS       (1UL << 2)
 #define CFG5_SINGLE_SEG           (1UL << 1)
@@ -251,7 +255,16 @@ static void dispatch(struct OGLES2Context *ctx, const ULONG *groups)
     }
 
     wg_size = (ULONG)v->local_size[0] * v->local_size[1] * v->local_size[2];
-    batches = (wg_size + 15) / 16 * groups[0] * groups[1] * groups[2];
+    /* Batches of 16 invocations, one work group a supergroup (Mesa's choice
+     * when supergroups cannot be used): CFG4's total must fit 32 bits. */
+    batches = (wg_size + 15) / 16 * groups[0]; /* below 2^20 */
+    if (!wg_size || wg_size > 256 || groups[1] > 0xffffffffUL / batches ||
+        groups[2] > 0xffffffffUL / (batches * groups[1])) {
+        ogles2_log("glDispatchCompute: %ld x %ld x %ld work groups of %ld: too many batches, not dispatched",
+                   (LONG)groups[0], (LONG)groups[1], (LONG)groups[2], (LONG)wg_size);
+        return;
+    }
+    batches *= groups[1] * groups[2];
     for (k = 0; k < 3; k++)
         cfg[k] = groups[k] << CFG012_WG_COUNT_SHIFT;
     cfg[3] = (1UL << CFG3_WGS_PER_SG_SHIFT) | (((wg_size + 15) / 16 - 1) << CFG3_BATCHES_PER_SG_M1_SHIFT) |
