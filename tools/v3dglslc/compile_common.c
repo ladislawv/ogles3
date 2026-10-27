@@ -145,7 +145,9 @@ static GLuint compile_src(GLenum type, const char *label, const char *src, int *
     fprintf(stderr, "v3dglslc: compile %s: %s%s%s\n", label, ok ? "ok" : "FAILED",
             info[0] ? "\n" : "", info);
     if (!ok || info[0]) {
-        log_add(log, log_size, type == GL_VERTEX_SHADER ? "vertex shader: " : "fragment shader: ",
+        log_add(log, log_size,
+                type == GL_VERTEX_SHADER ? "vertex shader: " : type == GL_FRAGMENT_SHADER ? "fragment shader: "
+                                                                                          : "compute shader: ",
                 ok ? "" : "compile failed\n");
         log_add(log, log_size, info, NULL);
     }
@@ -204,6 +206,62 @@ static int link_pair(const char *vs_label, const char *fs_label, const char *vs_
     return ok;
 }
 
+#ifdef V3DC_WRITER
+/* ES 3.1: a compute program from memory, as link_pair (written with
+ * write_program's fragment source NULL). */
+static int link_compute(const char *label, const char *src, const char *target, char *log, size_t log_size)
+{
+    GLuint p, cs;
+    GLint ok = 0;
+    int cs_ok;
+    char info[2048];
+
+    fprintf(stderr, "v3dglslc: ==== program %s\n", label);
+    cs = compile_src(GL_COMPUTE_SHADER, label, src, &cs_ok, log, log_size);
+    if (!cs_ok) {
+        glDeleteShader(cs);
+        return 0;
+    }
+    p = glCreateProgram();
+    glAttachShader(p, cs);
+    glLinkProgram(p);
+    glGetProgramiv(p, GL_LINK_STATUS, &ok);
+    info[0] = 0;
+    glGetProgramInfoLog(p, sizeof(info), NULL, info);
+    fprintf(stderr, "v3dglslc: link: %s%s%s\n", ok ? "ok" : "FAILED", info[0] ? "\n" : "", info);
+    if (!ok || info[0]) {
+        log_add(log, log_size, ok ? "link: " : "link failed: ", info);
+        log_add(log, log_size, "\n", NULL);
+    }
+    if (ok && target) {
+        ok = write_program(p, target, src, NULL);
+        if (!ok)
+            log_add(log, log_size, "the program binary could not be written: ", target);
+    }
+    glDeleteProgram(p);
+    glDeleteShader(cs);
+    return ok;
+}
+
+/* One compute shader file (the command line: a name ending in .comp). */
+static int compile_link_compute(const char *cs_path)
+{
+    char *src = load_text(cs_path), path[512];
+    const char *target = NULL;
+    int ok = 0;
+    if (out_dir) {
+        program_path(path, sizeof(path), cs_path, NULL);
+        target = path;
+    }
+    if (!src)
+        fprintf(stderr, "v3dglslc: cannot read %s\n", cs_path);
+    else
+        ok = link_compute(cs_path, src, target, NULL, 0);
+    free(src);
+    return ok;
+}
+#endif
+
 /* One pair of shader files (the command line). */
 static int compile_link(const char *vs_path, const char *fs_path)
 {
@@ -226,12 +284,30 @@ static int compile_link(const char *vs_path, const char *fs_path)
     return ok;
 }
 
+/* The command line's programs: vertex and fragment shader files in pairs;
+ * with V3DC_WRITER a file whose name ends in ".comp" is a compute program
+ * of its own (ES 3.1). */
 static int run_pairs(int argc, char **argv, int first)
 {
     int i, failed = 0;
-    for (i = first; i + 1 < argc; i += 2)
+    for (i = first; i < argc;) {
+        size_t n = strlen(argv[i]);
+#ifdef V3DC_WRITER
+        if (n > 5 && !strcmp(argv[i] + n - 5, ".comp")) {
+            if (!compile_link_compute(argv[i]))
+                failed++;
+            i++;
+            continue;
+        }
+#else
+        (void)n;
+#endif
+        if (i + 1 >= argc)
+            break;
         if (!compile_link(argv[i], argv[i + 1]))
             failed++;
+        i += 2;
+    }
     fprintf(stderr, "v3dglslc: done, %d program(s) failed\n", failed);
     return failed ? 10 : 0;
 }

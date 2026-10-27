@@ -51,6 +51,11 @@
                                    * `layout_crc` (another compiler made the program's .v3dp).
                                    * docs/GLES3_PLAN.md stage A item 5. A compiler older than this
                                    * answers 3. */
+#define V3DGLSL_LINK_COMPUTE 8 /* ES 3.1: compile `vs` as a compute shader, link it alone, write the
+                                * compute program's .v3dp to out_path (fs unused). docs/GLES3_PLAN.md
+                                * stage D item 1. A compiler older than this answers 3. */
+#define V3DGLSL_COMPILE_COMPUTE 9 /* ES 3.1: as COMPILE, `vs` a compute shader. A compiler older than
+                                   * this answers 3. */
 #define V3DGLSL_KEY_OUTPUTS_FROM_FS 0x100 /* in a vertex key's stage word: its used outputs are
                                            * the inputs of the fragment variant compiled just
                                            * before it in the same request (Mesa's

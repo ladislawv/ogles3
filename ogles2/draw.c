@@ -2670,6 +2670,10 @@ static void draw_instances(struct OGLES2Context *ctx, GLenum mode, GLint first, 
     if (!ogles2_fb_ready(ctx)) /* GL_INVALID_FRAMEBUFFER_OPERATION */
         return;
     p = ctx->program;
+    if (p && p->image && p->image->compute) { /* ES 3.1 11.1.3.11: no vertex or fragment shader */
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
     if (!p || !ctx->v3d || count == 0 || instances == 0) /* no program: undefined; nothing is drawn */
         return;
     if (!arrays_ok(ctx, p, (ULONG)first + (ULONG)count, instances, "glDrawArrays"))
@@ -2731,6 +2735,10 @@ static void draw_elements(struct OGLES2Context *ctx, GLenum mode, GLsizei count,
     if (!ogles2_fb_ready(ctx))
         return;
     p = ctx->program;
+    if (p && p->image && p->image->compute) { /* ES 3.1 11.1.3.11 */
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
     if (!p || !ctx->v3d || count == 0)
         return;
     {

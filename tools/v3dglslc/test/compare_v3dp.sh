@@ -9,14 +9,15 @@ OUT=${OUT:-$HOME/ogles2-build/v3dglslc}
 T="$(dirname "$(readlink -f "$0")")"
 V="$(dirname "$(dirname "$(dirname "$T")")")/v3dp"
 W=$OUT/v3dpcmp && rm -rf $W && mkdir -p $W/host $W/m68k && cd $W
-cp "$T"/shaders/*.vert "$T"/shaders/*.frag "$T"/shaders/*.link . || exit 1
+cp "$T"/shaders/*.vert "$T"/shaders/*.frag "$T"/shaders/*.link "$T"/shaders/*.comp . || exit 1
 # The source hash covers the exact text: LF line ends, as in the repository
 # and the A1200 packages (a Windows checkout must not turn them into CRLF).
 sed -i 's/\r$//' *.vert *.frag *.link
 PAIRS="tex.vert tex.frag light.vert light.frag skin.vert skin.frag tex.vert proc.frag state.vert state.frag mrt.vert mrt.frag
        es3.vert es3.frag es3tex.vert es3tex.frag es3uni.vert es3uni.frag es3flat.vert es3flat.frag
        es3block.vert es3block.frag es3size.vert es3size.frag es3vid.vert es3vid.frag
-       es3out.vert es3out.frag es3wide.vert es3wide.frag"
+       es3out.vert es3out.frag es3wide.vert es3wide.frag
+       es31cs.comp" # a compute program (ES 3.1): one file
 
 $OUT/host/v3dglslc -o host $PAIRS > host.txt 2>&1
 echo "host v3dglslc rc=$?"

@@ -44,3 +44,12 @@ command glGetTexLevelParameteriv
 command glGetTexLevelParameterfv
 command glFramebufferParameteri
 command glGetFramebufferParameteriv
+command glDispatchCompute
+command glDispatchComputeIndirect
+command glMemoryBarrier
+command glMemoryBarrierByRegion
+command glGetProgramInterfaceiv
+command glGetProgramResourceIndex
+command glGetProgramResourceName
+command glGetProgramResourceiv
+command glGetProgramResourceLocation

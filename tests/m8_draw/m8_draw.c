@@ -2184,6 +2184,132 @@ static void test_vab(void)
     glDeleteProgram(p);
 }
 
+/* dst[i] is src[i] * scale + i for i below n, else `rest` (glMapBufferRange
+ * of the storage buffer: the dispatch's results copied back). */
+static int storage_is(GLuint buf, const GLuint *src, GLuint scale, int n, int total, GLuint rest)
+{
+    const GLuint *d;
+    int i, ok = 1;
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, buf);
+    d = (const GLuint *)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, total * 4, GL_MAP_READ_BIT);
+    if (!d)
+        return 0;
+    for (i = 0; i < total && ok; i++)
+        if (d[i] != (i < n ? src[i] * scale + (GLuint)i : rest)) {
+            printf("     dst[%d] is %lu\n", i, (unsigned long)d[i]);
+            ok = 0;
+        }
+    glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    return ok;
+}
+
+/* ES 3.1's compute shaders and storage buffers (GLES3 plan stage D items 1
+ * and 2): es31cs (16 invocations a work group) writes dst[i] = src[i] *
+ * scale + i, src at storage binding 0, dst at 3; read back through a
+ * mapping. The errors: a draw with a compute program, a dispatch without
+ * one or past the work group limit; glDispatchComputeIndirect. */
+static void test_compute(void)
+{
+    static const GLuint ind[3] = { 2, 1, 1 };
+    GLuint src[64], zero[64], b[3], p, s, vao;
+    char *text = read_text("es31cs.comp"), log[256];
+    GLint ok = 0, i;
+    if (!text) {
+        check(0, "compute: shaders/es31cs.comp");
+        return;
+    }
+    p = glCreateProgram();
+    s = glCreateShader(GL_COMPUTE_SHADER);
+    glShaderSource(s, 1, (const GLchar *const *)&text, 0);
+    glCompileShader(s);
+    glAttachShader(p, s);
+    glDeleteShader(s);
+    free(text);
+    glLinkProgram(p);
+    glGetProgramiv(p, GL_LINK_STATUS, &ok);
+    if (!ok) {
+        log[0] = 0;
+        glGetProgramInfoLog(p, sizeof(log), 0, log);
+        printf("     es31cs: link failed: %s\n", log);
+        check(0, "compute: es31cs links");
+        glDeleteProgram(p);
+        return;
+    }
+    {
+        /* ES 3.1's program interface queries on it */
+        static const GLenum bprops[3] = { GL_BUFFER_BINDING, GL_NUM_ACTIVE_VARIABLES, GL_REFERENCED_BY_COMPUTE_SHADER };
+        static const GLenum vprops[4] = { GL_OFFSET, GL_ARRAY_STRIDE, GL_ARRAY_SIZE, GL_BLOCK_INDEX };
+        GLint bv[3] = { -1, -1, -1 }, vv[4] = { -1, -1, -1, -1 }, n = -1, len = -1;
+        GLuint out = glGetProgramResourceIndex(p, GL_SHADER_STORAGE_BLOCK, "Out");
+        GLuint dst = glGetProgramResourceIndex(p, GL_BUFFER_VARIABLE, "dst[0]");
+        char name[16];
+        glGetProgramInterfaceiv(p, GL_BUFFER_VARIABLE, GL_ACTIVE_RESOURCES, &n);
+        if (out != GL_INVALID_INDEX)
+            glGetProgramResourceiv(p, GL_SHADER_STORAGE_BLOCK, out, 3, bprops, 3, 0, bv);
+        if (dst != GL_INVALID_INDEX) {
+            glGetProgramResourceiv(p, GL_BUFFER_VARIABLE, dst, 4, vprops, 4, 0, vv);
+            glGetProgramResourceName(p, GL_BUFFER_VARIABLE, dst, sizeof(name), &len, name);
+        }
+        check(glGetError() == GL_NO_ERROR && n == 2 && bv[0] == 3 && bv[1] == 1 && bv[2] == 1 &&
+                  vv[0] == 0 && vv[1] == 4 && vv[2] == 0 && vv[3] == (GLint)out && len == 6 && !strcmp(name, "dst[0]") &&
+                  glGetProgramResourceIndex(p, GL_BUFFER_VARIABLE, "dst") == dst &&
+                  glGetProgramResourceLocation(p, GL_UNIFORM, "scale") == glGetUniformLocation(p, "scale"),
+              "compute: program interface queries (storage block Out, buffer variable dst[], uniform scale)");
+        if (!(n == 2 && bv[0] == 3))
+            printf("     %d buffer variables; Out %lu: binding %d, %d variables, compute %d; dst %lu: offset %d, "
+                   "stride %d, size %d, block %d\n", (int)n, (unsigned long)out, (int)bv[0], (int)bv[1], (int)bv[2],
+                   (unsigned long)dst, (int)vv[0], (int)vv[1], (int)vv[2], (int)vv[3]);
+    }
+    for (i = 0; i < 64; i++) {
+        src[i] = (GLuint)(i * 3 + 1);
+        zero[i] = 0;
+    }
+    glGenBuffers(3, b);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, b[0]);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(src), src, GL_STATIC_DRAW);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, b[1]);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(zero), zero, GL_DYNAMIC_READ);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, b[0]);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, b[1]);
+
+    glDispatchCompute(1, 1, 1);
+    check(glGetError() == GL_INVALID_OPERATION, "compute: a dispatch without a compute program is refused");
+    glUseProgram(p);
+    glUniform1ui(glGetUniformLocation(p, "scale"), 5);
+    glDispatchCompute(4, 1, 1);
+    glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT);
+    check(glGetError() == GL_NO_ERROR && storage_is(b[1], src, 5, 64, 64, 0),
+          "compute: 4 work groups of 16 write 64 words of a storage buffer");
+
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, b[1]);
+    glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(zero), zero);
+    glGenBuffers(1, &b[2]);
+    glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, b[2]);
+    glBufferData(GL_DISPATCH_INDIRECT_BUFFER, sizeof(ind), ind, GL_STATIC_DRAW);
+    glUniform1ui(glGetUniformLocation(p, "scale"), 7);
+    glDispatchComputeIndirect(0);
+    check(glGetError() == GL_NO_ERROR && storage_is(b[1], src, 7, 32, 64, 0),
+          "compute: glDispatchComputeIndirect, 2 work groups from a buffer, after glBufferSubData");
+    glDispatchComputeIndirect(2);
+    check(glGetError() == GL_INVALID_VALUE, "compute: an indirect offset not a word's is GL_INVALID_VALUE");
+    glDispatchComputeIndirect(4);
+    check(glGetError() == GL_INVALID_OPERATION, "compute: an indirect command past the buffer's end is refused");
+    glDispatchCompute(65536, 1, 1);
+    check(glGetError() == GL_INVALID_VALUE, "compute: 65536 work groups is GL_INVALID_VALUE");
+
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    check(glGetError() == GL_INVALID_OPERATION, "compute: a draw with a compute program is refused");
+    glBindVertexArray(0);
+    glDeleteVertexArrays(1, &vao);
+    glUseProgram(0);
+    glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, 0);
+    glDeleteBuffers(3, b);
+    glDeleteProgram(p);
+}
+
 /* Texel (x, y) of t sampled (es3tc, nearest) is (r, g, b). */
 static int texel_at(GLuint p, GLuint t, int w, int h, int x, int y, int r, int g, int b)
 {
@@ -2423,8 +2549,10 @@ int main(void)
     {
         GLint minor = 0;
         glGetIntegerv(GL_MINOR_VERSION, &minor);
-        if (minor >= 1) /* an ES 3.1 context (an ES31=1 library) */
+        if (minor >= 1) { /* an ES 3.1 context (an ES31=1 library) */
             test_vab();
+            test_compute();
+        }
     }
     check(glGetError() == GL_NO_ERROR, "no GL error left over");
     aglDestroyContext(ctx);

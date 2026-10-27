@@ -223,8 +223,12 @@ struct OGLES2Array
 #define OGLES2_U_GET_UBO_SIZE      21 /* data: the stage's uniform block index */
 #define OGLES2_U_LINE_WIDTH        26
 #define OGLES2_U_AA_LINE_WIDTH     27
+#define OGLES2_U_SSBO_OFFSET       19 /* ES 3.1: storage buffer data's address; data: the stage's buffer */
+#define OGLES2_U_GET_SSBO_SIZE     20 /* its size in bytes */
+#define OGLES2_U_NUM_WORK_GROUPS   28 /* compute: the dispatch's work groups; data: the dimension */
 #define OGLES2_U_SPILL_OFFSET      31 /* the context's spill area (register spilling, draw.c) */
 #define OGLES2_U_SPILL_SIZE_PER_THREAD 32
+#define OGLES2_U_SHARED_OFFSET     33 /* compute: the dispatch's shared memory's address */
 #define OGLES2_U_BLEND_CONSTANT_R  42 /* to _A, 45 */
 #define OGLES2_U_CLIP_Z_COEFF      46 /* Mesa patch 0013 (EXT_clip_control): z lerped towards w */
 #define OGLES2_U_PISTORM_VP_WIDTH  0x100 /* PiStorm3D's scale_p: viewport width in pixels */
@@ -238,6 +242,7 @@ struct OGLES2Array
 #define OGLES2_VARIANT_VS 0 /* .v3dp VARIANT stages */
 #define OGLES2_VARIANT_CS 1 /* binning (coordinate) shader */
 #define OGLES2_VARIANT_FS 4
+#define OGLES2_VARIANT_COMPUTE 5 /* ES 3.1's compute shader (docs/GLES3_PLAN.md stage D item 1) */
 
 /* One compiled shader (a .v3dp VARIANT): its key fields the runtime selects
  * on, its prog_data, its code and its uniform recipe. */
@@ -255,6 +260,10 @@ struct OGLES2Variant
     UBYTE num_inputs, writes_z, writes_z_from_fep, disable_ez, uses_center_w;
     UBYTE uses_implicit_point_line_varyings, lock_scoreboard_on_first_thrsw, uses_pid;
     ULONG flat_shade_flags[3], noperspective_flags[3], centroid_flags[3];
+    /* compute: the work group's shared memory and size; supergroups allowed */
+    ULONG shared_size;
+    UWORD local_size[3];
+    UBYTE can_use_supergroups;
     ULONG spill_size;
     /* code, little-endian QPU instructions; its offset in the image's code */
     const UBYTE *code;
@@ -304,6 +313,7 @@ struct OGLES2ImageBlock
     UBYTE packing;        /* 0 std140, 1 shared, 2 packed, 3 std430 */
     UWORD nmembers;
     const UWORD *members; /* their indices in the image's uniforms */
+    const LONG *top_level; /* a storage block's: each member's top-level array size and stride */
 };
 
 /* Format 2: one input or output of the program (INTERFACE). */
@@ -333,6 +343,7 @@ struct OGLES2Place
 #define OGLES2_UNIFORM_SAMPLER 1
 #define OGLES2_UNIFORM_BUILTIN 2
 #define OGLES2_UNIFORM_HIDDEN  4
+#define OGLES2_UNIFORM_BUFFER  8 /* ES 3.1: a storage block's member (GL_BUFFER_VARIABLE), no uniform */
 
 struct OGLES2ImageUniform
 {
@@ -442,6 +453,15 @@ struct OGLES2Image
     BOOL xs_tried, xc_tried, x_failed;
     char *bind_src;
     const struct OGLES2ImageXfb *xfb; /* transform feedback varyings (NULL: none) */
+    /* ES 3.1 (stage D): a compute program (its one stage in slot 0 of the
+     * per-stage arrays: constant buffer, block maps); its shader storage
+     * blocks and each stage's map from its storage buffer i
+     * (QUNIFORM_SSBO_OFFSET data i) to them, as the uniform blocks'. */
+    BOOL compute;
+    UWORD nsblocks;
+    const struct OGLES2ImageBlock *sblocks;
+    UBYTE stage_nsblocks[2];
+    const UWORD *stage_sblock[2];
 };
 
 /* GL shader and program objects share one name space (GLES 2.0 section 2.10). */
@@ -467,6 +487,7 @@ struct OGLES2Program
     BOOL delete_pending;
     GLuint name;
     struct OGLES2Shader *vs, *fs;
+    struct OGLES2Shader *cs;          /* ES 3.1: a compute shader (a program of it alone) */
     GLboolean linked;
     const struct OGLES2Image *image;  /* after a successful link */
     UBYTE attrib_index[OGLES2_MAX_IMAGE_ATTRIBS]; /* image attribute i <- generic attribute */
@@ -697,6 +718,7 @@ struct OGLES2Context
     struct OGLES2Context *share_next; /* the group's next member */
     struct OGLES2Program *program;  /* glUseProgram */
     struct OGLES2Draw *draw;        /* draw.c's per-context state, NULL until the first draw */
+    struct OGLES2Compute *compute;  /* compute.c's, NULL until the first dispatch (ES 3.1) */
     struct OGLES2TexState *tex;     /* texture.c's, NULL until first used */
     struct OGLES2PixelStore unpack, pack; /* glPixelStorei */
     ULONG job_serial;               /* the open job's, unique across contexts (job.c); objects note the
@@ -807,6 +829,7 @@ void ogles2_display_read(struct OGLES2Display *d, UWORD x, UWORD y, UWORD w, UWO
 void *ogles2_object(struct OGLES2Context *ctx, GLuint name, UBYTE kind); /* NULL if not that kind */
 void ogles2_objects_free(struct OGLES2Context *ctx); /* aglDestroyContext: programs, shaders, cache */
 void ogles2_draw_free(struct OGLES2Context *ctx);    /* aglDestroyContext, after the last job */
+void ogles2_compute_free(struct OGLES2Context *ctx); /* the same */
 const struct OGLES2Image *ogles2_builtin_image(void);
 /* texture.c */
 void ogles2_textures_free(struct OGLES2Context *ctx);
@@ -992,6 +1015,9 @@ BOOL ogles2_image_compile_variants(struct OGLES2Context *ctx, struct OGLES2Image
 /* One shader through the front end: 1 compiled, 0 GLSL errors (in log),
  * -1 the compiler could not be run. */
 int ogles2_compile_shader(BOOL fragment, const char *src, char *log, ULONG log_size);
+/* ES 3.1's compute programs and shaders (V3DGLSL_LINK_COMPUTE, _COMPILE_COMPUTE). */
+BOOL ogles2_compile_compute(const char *cs, const char *path, char *log, ULONG log_size);
+int ogles2_compile_compute_shader(const char *src, char *log, ULONG log_size);
 void ogles2_compiler_stop(void);
 /* buffer.c */
 void ogles2_buffers_free(struct OGLES2Context *ctx);
@@ -1003,6 +1029,8 @@ UBYTE *ogles2_buffer_pixels(struct OGLES2Context *ctx, BOOL pack, ULONG offset, 
  * buffer binding `index`'s address and bytes (0: none bound). */
 ULONG ogles2_buffer_words(struct OGLES2Context *ctx, struct OGLES2Buffer *b);
 ULONG ogles2_buffer_uniform(struct OGLES2Context *ctx, ULONG index, ULONG *size);
+ULONG ogles2_buffer_storage(struct OGLES2Context *ctx, ULONG index, ULONG *size);
+GLenum ogles2_buffer_dispatch_indirect(struct OGLES2Context *ctx, GLintptr offset, ULONG *groups);
 struct OGLES2Buffer *ogles2_buffer_array(struct OGLES2Context *ctx);
 /* The GL_ELEMENT_ARRAY_BUFFER binding, which a vertex array object holds (vao.c). */
 struct OGLES2Buffer *ogles2_buffer_element(struct OGLES2Context *ctx);
@@ -1084,6 +1112,7 @@ void ogles2_job_discard(struct OGLES2Context *ctx);
 /* The submitted render waited for (M6 overlap): before the CPU reads what it
  * writes or changes what it reads. */
 void ogles2_job_finish(struct OGLES2Context *ctx);
+void ogles2_job_take_gpu(struct OGLES2Context *ctx); /* submission lock held: a render left running finishes */
 /* A job not rendered yet (open, or submitted and running) of any context in
  * ctx's share group is job `serial`: that context, else NULL. Serials are
  * unique across contexts. */

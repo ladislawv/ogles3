@@ -1,0 +1,13 @@
+#version 310 es
+// m8_es31's compute program (docs/GLES3_PLAN.md stage D item 1): each
+// invocation reads its value from one storage block and writes it, scaled
+// by a uniform and its invocation's number added, to another.
+layout(local_size_x = 16) in;
+layout(std430, binding = 0) readonly buffer In { uint src[]; };
+layout(std430, binding = 3) writeonly buffer Out { uint dst[]; };
+uniform uint scale;
+void main()
+{
+    uint i = gl_GlobalInvocationID.x;
+    dst[i] = src[i] * scale + i;
+}

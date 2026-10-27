@@ -74,6 +74,8 @@ struct OGLES2Buffer
     ULONG words_job;         /* the job that last read it */
     ULONG xfb_job;           /* a job that writes it (transform feedback), not known rendered: the
                               * shadow is stale until gpu_written (0: none) */
+    BOOL cs_written;         /* a compute dispatch wrote its words (finished): the shadow is stale
+                              * until gpu_written (ES 3.1 storage buffers, compute.c) */
     /* Deleted while a vertex array object not bound uses it (ES 3.0
      * appendix D.1.2): out of the name table, on the share group's list of
      * them, freed when nothing uses it any more (ogles2_buffer_release). */
@@ -145,13 +147,14 @@ static void gpu_written(struct OGLES2Context *ctx, struct OGLES2Buffer *b)
 {
     struct OGLES2Context *user;
     ULONG i, n, len;
-    if (!b || !b->xfb_job)
+    if (!b || (!b->xfb_job && !b->cs_written))
         return;
-    if ((user = ogles2_job_user(ctx, b->xfb_job)) != 0 && user->v3d) {
+    if (b->xfb_job && (user = ogles2_job_user(ctx, b->xfb_job)) != 0 && user->v3d) {
         ogles2_job_flush(user, FALSE);
         ogles2_job_finish(user);
     }
     b->xfb_job = 0;
+    b->cs_written = FALSE;
     if (!b->words.hostptr || !b->data || b->words_serial != b->serial)
         return;
     len = b->words_bytes;
@@ -985,6 +988,47 @@ ULONG ogles2_buffer_uniform(struct OGLES2Context *ctx, ULONG index, ULONG *size)
     if (r->size && r->size < *size)
         *size = r->size;
     return a + r->offset;
+}
+
+/* Storage buffer binding `index` as a compute dispatch reads and writes it
+ * (ES 3.1, compute.c): as ogles2_buffer_uniform; the dispatch is waited for,
+ * so the buffer's shadow is then stale (gpu_written copies the words back
+ * before the CPU or a draw next uses it). */
+ULONG ogles2_buffer_storage(struct OGLES2Context *ctx, ULONG index, ULONG *size)
+{
+    struct OGLES2BufState *bs = ctx->buf;
+    struct buf_range *r;
+    ULONG a;
+    if (!bs || index >= MAX_SSBO_BINDINGS)
+        return 0;
+    r = &bs->ssbo[index];
+    if (!r->b || r->offset >= r->b->size)
+        return 0;
+    gpu_written(ctx, r->b); /* transform feedback's, or an earlier dispatch's (already the words) */
+    if (!(a = ogles2_buffer_words(ctx, r->b)))
+        return 0;
+    r->b->cs_written = TRUE;
+    *size = r->b->size - r->offset;
+    if (r->size && r->size < *size)
+        *size = r->size;
+    return a + r->offset;
+}
+
+/* glDispatchComputeIndirect's three work group counts at `offset` in the
+ * GL_DISPATCH_INDIRECT_BUFFER binding: 0, or the error (ES 3.1 17:
+ * GL_INVALID_VALUE for an offset not a word's, GL_INVALID_OPERATION without
+ * a buffer or past its end). */
+GLenum ogles2_buffer_dispatch_indirect(struct OGLES2Context *ctx, GLintptr offset, ULONG *groups)
+{
+    struct OGLES2BufState *bs = bs_get(ctx);
+    struct OGLES2Buffer *b = bs ? bs->dispatch_indirect : 0;
+    if (offset < 0 || (offset & 3))
+        return GL_INVALID_VALUE;
+    if (!b || !b->data || (ULONG)offset > b->size || b->size - (ULONG)offset < 12)
+        return GL_INVALID_OPERATION;
+    gpu_written(ctx, b);
+    memcpy(groups, b->data + offset, 12);
+    return 0;
 }
 
 /* Transform feedback writes b in the open job (xfb.c): the address of its

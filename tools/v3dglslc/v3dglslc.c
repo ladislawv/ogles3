@@ -519,6 +519,78 @@ static void bind_uniform_blocks(GLuint p)
     }
 }
 
+/* ES 3.1's storage blocks: each block's binding a buffer of 64 KB of zeros
+ * (the driver writes the bound buffers' addresses into the uniforms). */
+static void bind_storage_blocks(GLuint p)
+{
+    static GLuint ssbo;
+    static const GLenum prop = GL_BUFFER_BINDING;
+    GLint n = 0, i, binding;
+    _mesa_GetProgramInterfaceiv(p, GL_SHADER_STORAGE_BLOCK, GL_ACTIVE_RESOURCES, &n);
+    if (!n)
+        return;
+    if (!ssbo) {
+        void *zeros = calloc(1, 65536);
+        _mesa_GenBuffers(1, &ssbo);
+        _mesa_BindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+        _mesa_BufferData(GL_SHADER_STORAGE_BUFFER, 65536, zeros, GL_STATIC_DRAW);
+        free(zeros);
+    }
+    for (i = 0; i < n; i++) {
+        binding = 0;
+        _mesa_GetProgramResourceiv(p, GL_SHADER_STORAGE_BLOCK, (GLuint)i, 1, &prop, 1, NULL, &binding);
+        _mesa_BindBufferBase(GL_SHADER_STORAGE_BUFFER, (GLuint)binding, ssbo);
+    }
+}
+
+/* A compute program's default variant (ES 3.1, docs/GLES3_PLAN.md stage D
+ * item 1): one dispatch of one work group with its samplers, uniform and
+ * storage blocks bound; the driver compiles the shader then
+ * (v3d_launch_grid), and the fake device runs nothing. */
+static int dispatch_key_state(GLuint p, int wide)
+{
+    GLint err;
+    _mesa_UseProgram(p);
+    bind_samplers(p, 0, wide);
+    bind_uniform_blocks(p);
+    bind_storage_blocks(p);
+    _mesa_DispatchCompute(1, 1, 1);
+    _mesa_Flush();
+    bind_samplers(p, 1, 0);
+    _mesa_UseProgram(0);
+    err = _mesa_GetError();
+    if (err != GL_NO_ERROR) {
+        fprintf(stderr, "v3dglslc: GL error 0x%04x in the key-state dispatch\n", (unsigned)err);
+        return 0;
+    }
+    return 1;
+}
+
+static int draw_key_states(GLuint p, int wide);
+
+/* The default key states: a compute program's dispatch, any other's draws. */
+static int key_states(GLuint p, int wide)
+{
+    GET_CURRENT_CONTEXT(ctx);
+    struct gl_shader_program *sp = _mesa_lookup_shader_program(ctx, p);
+    int s;
+    /* Atomic counters and images (ES 3.1) are refused before a draw or a
+     * dispatch: the driver would read their bindings, which nothing binds
+     * (v3dp_write refuses them too, docs/GLES3_PLAN.md stage D item 2). */
+    if (sp && sp->data->NumAtomicBuffers) {
+        fprintf(stderr, "v3dp: atomic counters are not supported yet\n");
+        return 0;
+    }
+    for (s = 0; sp && s < MESA_SHADER_STAGES; s++)
+        if (sp->_LinkedShaders[s] && sp->_LinkedShaders[s]->Program->info.num_images) {
+            fprintf(stderr, "v3dp: images are not supported yet\n");
+            return 0;
+        }
+    if (sp && sp->_LinkedShaders[MESA_SHADER_COMPUTE])
+        return dispatch_key_state(p, wide);
+    return draw_key_states(p, wide);
+}
+
 /* Draw once per default key state (plan section 8.2) so the driver compiles
  * the variants real draws use: triangles, lines and points into an RGBA8
  * target with depth on. The fake device runs nothing; the draws only make
@@ -631,16 +703,16 @@ static int draw_key_states(GLuint p, int wide)
 static int write_files(struct gl_shader_program *prog, GLuint p, const char *path, unsigned nsrc,
                        const unsigned *stages, const char *const *sources);
 
-/* -o: <dir>/<vs>-<fs>.v3dp. */
+/* -o: <dir>/<vs>-<fs>.v3dp; a compute program's (fs_path NULL) <dir>/<cs>.v3dp. */
 static void program_path(char *out, size_t size, const char *vs_path, const char *fs_path)
 {
     char vs_base[32], fs_base[32];
     size_t n = strlen(out_dir);
     base_name(vs_base, vs_path);
-    base_name(fs_base, fs_path);
-    snprintf(out, size, "%s%s%s-%s.%s", out_dir,
-             n && out_dir[n - 1] != '/' && out_dir[n - 1] != ':' ? "/" : "", vs_base, fs_base,
-             write_mode == WRITE_A2C ? "v3da" : "v3dp");
+    if (fs_path)
+        base_name(fs_base, fs_path);
+    snprintf(out, size, "%s%s%s%s%s.%s", out_dir, n && out_dir[n - 1] != '/' && out_dir[n - 1] != ':' ? "/" : "",
+             vs_base, fs_path ? "-" : "", fs_path ? fs_base : "", write_mode == WRITE_A2C ? "v3da" : "v3dp");
 }
 
 static int write_program(GLuint p, const char *path, const char *vs_src, const char *fs_src)
@@ -659,6 +731,12 @@ static int write_program(GLuint p, const char *path, const char *vs_src, const c
 
     if (!prog)
         return 0;
+    /* ES 3.1: a compute program (fs_src NULL), its one source, no link state */
+    if (!fs_src) {
+        stages[0] = MESA_SHADER_COMPUTE;
+        sources[0] = vs_src;
+        return write_files(prog, p, path, 1, stages, sources);
+    }
     sources[0] = vs_src;
     sources[1] = fs_src;
     if (link_bindings && link_bindings != (xfbv ? xfbv - (sizeof(XFBV_MARK) - 1) : NULL)) {
@@ -692,7 +770,7 @@ static int write_files(struct gl_shader_program *prog, GLuint p, const char *pat
         char xpath[512];
         size_t n = strlen(path), at = 0, used;
         int ok = 1;
-        if (n <= 5 || n >= sizeof(xpath) || !draw_key_states(p, 0))
+        if (n <= 5 || n >= sizeof(xpath) || !key_states(p, 0))
             return 0;
         snprintf(xpath, sizeof(xpath), "%.*s.v3dx", (int)(n - 5), path);
         v3dp_capture_begin();
@@ -746,14 +824,14 @@ static int write_files(struct gl_shader_program *prog, GLuint p, const char *pat
     if (write_mode == WRITE_A2C) {
         v3dp_capture_begin();
         v3d_force_alpha_to_coverage = true;
-        drawn = draw_key_states(p, 0);
+        drawn = key_states(p, 0);
         v3d_force_alpha_to_coverage = false;
         v3dp_capture_end();
         return drawn && v3dp_write(path, prog, nsrc, stages, sources) == 0;
     }
     if (write_mode != WRITE_WIDE) {
         v3dp_capture_begin();
-        drawn = draw_key_states(p, 0);
+        drawn = key_states(p, 0);
         v3dp_capture_end();
         if (!drawn || v3dp_write(path, prog, nsrc, stages, sources) != 0)
             return 0;
@@ -772,7 +850,7 @@ static int write_files(struct gl_shader_program *prog, GLuint p, const char *pat
         else
             return 0;
         v3dp_capture_begin();
-        drawn = draw_key_states(p, 1);
+        drawn = key_states(p, 1);
         v3dp_capture_end();
         if (!drawn || v3dp_write(wpath, prog, nsrc, stages, sources) != 0)
             return 0;
@@ -872,6 +950,27 @@ static int handle(uint32_t op, const char *vs, const char *fs, const char *out_p
     int result;
     if (log && log_size)
         log[0] = 0;
+    /* ES 3.1: a compute shader, its source in `vs` */
+    if (op == V3DGLSL_COMPILE_COMPUTE || op == V3DGLSL_LINK_COMPUTE) {
+        int ok;
+        if (!vs || (op == V3DGLSL_LINK_COMPUTE && !out_path)) {
+            log_add(log, log_size, "the compiler does not understand this request", NULL);
+            return 3;
+        }
+        if (op == V3DGLSL_LINK_COMPUTE) {
+            write_mode = WRITE_PLAIN;
+            return link_compute("compute shader", vs, out_path, log, log_size) ? 0 : 1;
+        }
+        {
+            GLuint s = compile_src(GL_COMPUTE_SHADER, "compute shader", vs, &ok, NULL, 0);
+            char info[2048];
+            info[0] = 0;
+            glGetShaderInfoLog(s, sizeof(info), NULL, info);
+            log_add(log, log_size, info, NULL);
+            glDeleteShader(s);
+            return ok ? 0 : 1;
+        }
+    }
     if ((op != V3DGLSL_LINK && op != V3DGLSL_COMPILE && op != V3DGLSL_LINK32 && op != V3DGLSL_LINK_BOUND &&
          op != V3DGLSL_LINK_A2C && op != V3DGLSL_COMPILE_VARIANT) ||
         (op != V3DGLSL_COMPILE && (!vs || !fs || !out_path)) || (op == V3DGLSL_LINK_BOUND && !bindings) ||

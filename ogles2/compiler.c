@@ -259,7 +259,7 @@ static BOOL request(ULONG op, const char *vs, const char *fs, const char *bindin
     DeleteMsgPort(reply);
     DateStamp(&t1);
     ogles2_log("compiler: %s %s in %ld ms%s%s",
-               (ULONG)(op == V3DGLSL_COMPILE ? "shader" : op == V3DGLSL_COMPILE_VARIANT ? "variants" : "program"),
+               (ULONG)(op == V3DGLSL_COMPILE || op == V3DGLSL_COMPILE_COMPUTE ? "shader" : op == V3DGLSL_COMPILE_VARIANT ? "variants" : "program"),
                (ULONG)(r.result ? "failed" : "compiled"),
                ((t1.ds_Days - t0.ds_Days) * 86400L * 50 + (t1.ds_Minute - t0.ds_Minute) * 3000L +
                 (t1.ds_Tick - t0.ds_Tick)) * 20,
@@ -316,6 +316,23 @@ int ogles2_compile_variants(const char *vs, const char *fs, const char *bindings
                  layout_crc))
         return -1;
     return result == 0 ? 1 : result == 3 ? -1 : 0;
+}
+
+/* ES 3.1: a compute program's .v3dp (docs/GLES3_PLAN.md stage D item 1). A
+ * compiler older than V3DGLSL_LINK_COMPUTE refuses the request (result 3). */
+BOOL ogles2_compile_compute(const char *cs, const char *path, char *log, ULONG log_size)
+{
+    LONG result;
+    return request(V3DGLSL_LINK_COMPUTE, cs, 0, 0, path, log, log_size, &result, 0, 0, 0) && result == 0;
+}
+
+/* ES 3.1: as ogles2_compile_shader, a compute shader. */
+int ogles2_compile_compute_shader(const char *src, char *log, ULONG log_size)
+{
+    LONG result;
+    if (!request(V3DGLSL_COMPILE_COMPUTE, src, 0, 0, 0, log, log_size, &result, 0, 0, 0))
+        return -1;
+    return result == 0 ? 1 : result == 1 ? 0 : -1;
 }
 
 int ogles2_compile_shader(BOOL fragment, const char *src, char *log, ULONG log_size)

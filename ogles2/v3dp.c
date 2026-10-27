@@ -145,6 +145,15 @@ static BOOL recipe_ok(ULONG t)
            (t >= OGLES2_U_BLEND_CONSTANT_R && t <= OGLES2_U_BLEND_CONSTANT_R + 3) || t == OGLES2_U_CLIP_Z_COEFF;
 }
 
+/* ES 3.1's types, a compute shader's only so far (compute.c writes them;
+ * draw.c's streams do not): storage buffers, the dispatch's size, shared
+ * memory. */
+static BOOL compute_recipe_ok(ULONG t)
+{
+    return t == OGLES2_U_SSBO_OFFSET || t == OGLES2_U_GET_SSBO_SIZE || t == OGLES2_U_NUM_WORK_GROUPS ||
+           t == OGLES2_U_SHARED_OFFSET;
+}
+
 /* The columns of a matrix attribute (matCxR has C, each in a slot of its
  * own), 1 for the others. */
 static UBYTE matrix_columns(GLenum t)
@@ -162,7 +171,11 @@ static UBYTE matrix_columns(GLenum t)
 #define FORMAT2      2
 #define FORMAT2_PROV 0x8002
 #define MAX_SECTIONS 256
-#define V3DP_FEATURE_TF 0x1 /* format 2's feature bit: transform feedback (v3dp_writer.h) */
+#define V3DP_FEATURE_TF 0x1 /* format 2's feature bits (v3dp_writer.h): transform feedback, */
+#define V3DP_FEATURE_STORAGE 0x2 /* shader storage blocks (ES 3.1), */
+#define V3DP_FEATURE_COMPUTE 0x4 /* a compute program (ES 3.1) */
+#define V3DP_FEATURES (V3DP_FEATURE_TF | V3DP_FEATURE_STORAGE | V3DP_FEATURE_COMPUTE)
+#define COMPUTE_STAGES 0x20 /* PROGRAM's stages: bit 5 */
 
 /* The common prog data (FORMAT.md "Common key and prog data"), 28 bytes. */
 static void read_common_prog_data(struct rd *r, struct OGLES2Variant *v)
@@ -261,17 +274,19 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             memcpy(im->hash, s.p, 32);
             s.p += 32;
             stages = u32(&s);
-            /* Format 2's must-understand features: transform feedback. */
-            if (format2 && ((features = u32(&s)) & ~V3DP_FEATURE_TF))
+            /* Format 2's must-understand features: transform feedback,
+             * storage blocks, compute. */
+            if (format2 && ((features = u32(&s)) & ~V3DP_FEATURES))
                 FAIL("the program uses features this library does not know", 0, ~0UL);
+            im->compute = (features & V3DP_FEATURE_COMPUTE) != 0;
             break;
         case 3: { /* STAGE_PARAMS */
             ULONG stage = u32(&s), nvalues = u32(&s), nparams = u32(&s), si;
             ULONG *tmpl;
             struct OGLES2StateVar *sv;
-            if (stage != 0 && stage != 4)
+            if (stage != 0 && stage != 4 && stage != 5)
                 FAIL("STAGE_PARAMS for an unknown stage", 0, stage);
-            si = stage == 4;
+            si = stage == 4; /* a compute program's one stage in slot 0 */
             if (nvalues > 4096)
                 FAIL("constant buffer too large:", 0, nvalues);
             /* Parameters: only state variables matter (the template holds the rest). */
@@ -356,15 +371,18 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                 u[k].sampler[1] = u32(&s);
                 u[k].block = -1;
                 if (format2) {
-                    ULONG b = u32(&s);
+                    ULONG b = u32(&s), flags2;
                     u[k].offset = (LONG)u32(&s);
                     u[k].array_stride = (LONG)u32(&s);
                     u[k].matrix_stride = (LONG)u32(&s);
-                    u[k].row_major = (UBYTE)(u32(&s) & 1);
+                    flags2 = u32(&s);
+                    u[k].row_major = (UBYTE)(flags2 & 1);
                     if (b != 0xffffffffUL) {
                         if (b > 0x7fff || np)
                             FAIL("a uniform block member that is not one: ", u[k].name, b);
                         u[k].block = (WORD)b;
+                        if (flags2 & 2) /* a storage block's: a buffer variable (ES 3.1) */
+                            u[k].flags |= OGLES2_UNIFORM_BUFFER;
                     }
                 }
             }
@@ -466,6 +484,15 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                     v->noperspective_flags[j] = u32(&s);
                 for (j = 0; j < 3; j++)
                     v->centroid_flags[j] = u32(&s);
+            } else if (v->stage == OGLES2_VARIANT_COMPUTE) {
+                skip(&s, COMMON_KEY_BYTES);       /* the key: the common one (FORMAT.md) */
+                klen = COMMON_KEY_BYTES;
+                read_common_prog_data(&s, v);
+                v->shared_size = u32(&s);
+                for (j = 0; j < 3; j++)
+                    v->local_size[j] = u16(&s);
+                v->can_use_supergroups = u8(&s);
+                skip(&s, 1);
             } else {
                 FAIL("variant of an unknown stage", 0, v->stage);
             }
@@ -484,7 +511,7 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             rd2 = rt + n;
             for (j = 0; j < n; j++) {
                 rt[j] = u32(&s);
-                if (!recipe_ok(rt[j]))
+                if (!recipe_ok(rt[j]) && !(v->stage == OGLES2_VARIANT_COMPUTE && compute_recipe_ok(rt[j])))
                     FAIL("uniform recipe type not implemented yet:", 0, rt[j]);
             }
             for (j = 0; j < n; j++) {
@@ -571,7 +598,7 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             for (k = 0; k < nmaps && !s.bad; k++) {
                 ULONG stage = u32(&s), nb = u32(&s), si;
                 UWORD *map;
-                if (stage != 0 && stage != 4)
+                if (stage != 0 && stage != 4 && stage != 5)
                     FAIL("a uniform block map for an unknown stage", 0, stage);
                 si = stage == 4;
                 if (nb > 255 || !(map = alloc(im, nb * 2 + 2)))
@@ -585,6 +612,59 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                 im->stage_block[si] = map;
             }
             have_blocks = TRUE;
+            break;
+        }
+        case 11: { /* STORAGE_BLOCKS (format 2, feature bit 1; ES 3.1): as UNIFORM_BLOCKS */
+            ULONG n, nmaps, j;
+            struct OGLES2ImageBlock *b;
+            if (!format2 || !(features & V3DP_FEATURE_STORAGE))
+                FAIL("a STORAGE_BLOCKS section without its feature bit", 0, ~0UL);
+            n = u32(&s);
+            if (n > 1024)
+                FAIL("too many storage blocks:", 0, n);
+            if (!(b = alloc(im, (n + 1) * sizeof(*b))))
+                FAIL("out of memory", 0, ~0UL);
+            for (k = 0; k < n; k++) {
+                UWORD *m;
+                LONG *top;
+                ULONG nm;
+                b[k].name = STR(u32(&s));
+                b[k].binding = u32(&s);
+                b[k].size = u32(&s);
+                b[k].stages = (UBYTE)u32(&s);
+                b[k].packing = (UBYTE)u32(&s);
+                nm = u32(&s);
+                if (nm > 4096 || !(m = alloc(im, nm * 2 + 2)) || !(top = alloc(im, nm * 8 + 8)))
+                    FAIL("a storage block's members: ", b[k].name, nm);
+                for (j = 0; j < nm; j++) { /* each with its top-level array's size and stride */
+                    m[j] = (UWORD)u32(&s);
+                    top[2 * j] = (LONG)u32(&s);
+                    top[2 * j + 1] = (LONG)u32(&s);
+                }
+                b[k].nmembers = (UWORD)nm;
+                b[k].members = m;
+                b[k].top_level = top;
+            }
+            im->nsblocks = (UWORD)n;
+            im->sblocks = b;
+            nmaps = u32(&s);
+            for (k = 0; k < nmaps && !s.bad; k++) {
+                ULONG stage = u32(&s), nb = u32(&s), si;
+                UWORD *map;
+                if (stage != 0 && stage != 4 && stage != 5)
+                    FAIL("a storage block map for an unknown stage", 0, stage);
+                si = stage == 4;
+                if (nb > 255 || !(map = alloc(im, nb * 2 + 2)))
+                    FAIL("a stage's storage blocks:", 0, nb);
+                for (j = 0; j < nb; j++) {
+                    map[j] = (UWORD)u32(&s);
+                    if (map[j] >= n)
+                        FAIL("a stage's storage block past the program's last", 0, map[j]);
+                    b[map[j]].stages |= (UBYTE)(1 << stage); /* Mesa leaves a storage block's stageref 0 */
+                }
+                im->stage_nsblocks[si] = (UBYTE)nb;
+                im->stage_sblock[si] = map;
+            }
             break;
         }
         case 9: /* VARIANT_OF: a .v3dx, a program's draw-time variants */
@@ -665,8 +745,10 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
         if (s.bad)
             FAIL("truncated section", 0, i);
     }
-    if (stages != 0x11)
-        FAIL("not a vertex and fragment program", 0, ~0UL);
+    if (im->compute ? stages != COMPUTE_STAGES : stages != 0x11)
+        FAIL(im->compute ? "a compute program of other stages" : "not a vertex and fragment program", 0, ~0UL);
+    if ((features & V3DP_FEATURE_STORAGE) && !im->v3dx && !im->sblocks)
+        FAIL("storage blocks without their STORAGE_BLOCKS section", 0, ~0UL);
     if (format2 && !im->v3dx && (!have_blocks || !have_interface))
         FAIL("a format 2 file without UNIFORM_BLOCKS or INTERFACE", 0, ~0UL);
     if ((features & V3DP_FEATURE_TF) && !im->v3dx && !im->xfb)
@@ -684,15 +766,34 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             }
         im->layout_crc = from ? crc32(from, (ULONG)(to - from)) : 0;
     }
+    /* Block members: uniforms of the image, in a block of their kind. */
+    for (k = 0; k < im->nuniforms; k++) {
+        const struct OGLES2ImageUniform *u = &im->uniforms[k];
+        if (u->block >= 0 && u->block >= ((u->flags & OGLES2_UNIFORM_BUFFER) ? im->nsblocks : im->nublocks))
+            FAIL("a block member of a block the program does not have: ", u->name, (ULONG)u->block);
+    }
+    for (k = 0; k < (ULONG)im->nublocks + im->nsblocks; k++) {
+        const struct OGLES2ImageBlock *b = k < im->nublocks ? &im->ublocks[k] : &im->sblocks[k - im->nublocks];
+        ULONG j;
+        for (j = 0; j < b->nmembers; j++)
+            if (b->members[j] >= im->nuniforms)
+                FAIL("a block member past the last uniform", 0, b->members[j]);
+    }
     /* Uniform blocks the variants read must be the stage's (its map; a
      * .v3dx's are checked against its program's when it is taken). */
     for (k = 0; k < im->nvariants && !im->v3dx; k++) {
         const struct OGLES2Variant *v = &vars[k];
         ULONG j, si = v->stage == OGLES2_VARIANT_FS;
-        for (j = 0; j < v->nrecipe; j++)
+        for (j = 0; j < v->nrecipe; j++) {
             if ((v->rtype[j] == OGLES2_U_UBO_ADDR && (v->rdata[j] >> 24) > im->stage_nblocks[si]) ||
                 (v->rtype[j] == OGLES2_U_GET_UBO_SIZE && v->rdata[j] >= im->stage_nblocks[si]))
                 FAIL("a variant reads a uniform block its stage does not have", 0, v->rdata[j]);
+            if ((v->rtype[j] == OGLES2_U_SSBO_OFFSET || v->rtype[j] == OGLES2_U_GET_SSBO_SIZE) &&
+                v->rdata[j] >= im->stage_nsblocks[si])
+                FAIL("a variant reads a storage block its stage does not have", 0, v->rdata[j]);
+        }
+        if (im->compute != (v->stage == OGLES2_VARIANT_COMPUTE))
+            FAIL("a variant of a stage the program does not have", 0, v->stage);
     }
     im->variants = vars;
 
@@ -747,6 +848,8 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             ((struct OGLES2ImageUniform *)im->uniforms)[k].name += d;
         for (k = 0; k < im->nublocks; k++)
             ((struct OGLES2ImageBlock *)im->ublocks)[k].name += d;
+        for (k = 0; k < im->nsblocks; k++)
+            ((struct OGLES2ImageBlock *)im->sblocks)[k].name += d;
         for (k = 0; k < im->ninterface; k++)
             ((struct OGLES2ImageVar *)im->interface)[k].name += d;
         for (k = 0; im->xfb && k < im->xfb->nvaryings; k++)

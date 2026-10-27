@@ -917,6 +917,12 @@ static void take_gpu(struct OGLES2Context *ctx)
     ReleaseSemaphore(&OGLES2LibBase->lock);
 }
 
+/* compute.c's dispatches, with the submission lock held. */
+void ogles2_job_take_gpu(struct OGLES2Context *ctx)
+{
+    take_gpu(ctx);
+}
+
 static BOOL any_overflow(V3DContext *v)
 {
     v3d_u8 s = v->build_slot;

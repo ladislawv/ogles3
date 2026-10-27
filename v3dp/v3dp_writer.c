@@ -36,13 +36,14 @@ enum {
     SEC_INTERFACE = 8,      /* format 2 */
     SEC_VARIANT_OF = 9,     /* .v3dx files */
     SEC_TRANSFORM_FEEDBACK = 10, /* format 2, with the feature bit V3DP_FEATURE_TF */
+    SEC_STORAGE_BLOCKS = 11,     /* format 2, with the feature bit V3DP_FEATURE_STORAGE */
 };
 
-enum { VARIANT_VS = 0, VARIANT_VS_BIN = 1, VARIANT_FS = 4 };
+enum { VARIANT_VS = 0, VARIANT_VS_BIN = 1, VARIANT_FS = 4, VARIANT_CS = 5 };
 
 /* The file numbers stages as Mesa does; the fixed-size arrays below are part
  * of the format, so a Mesa that changes them needs a new format version. */
-static_assert(MESA_SHADER_VERTEX == 0 && MESA_SHADER_FRAGMENT == 4, "stage numbers");
+static_assert(MESA_SHADER_VERTEX == 0 && MESA_SHADER_FRAGMENT == 4 && MESA_SHADER_COMPUTE == 5, "stage numbers");
 static_assert(V3D_MAX_ANY_STAGE_INPUTS == 64, "vs key used_outputs");
 static_assert(V3D_MAX_VS_INPUTS == 64 && V3D_MAX_FS_INPUTS == 64, "inputs");
 static_assert(V3D_MAX_DRAW_BUFFERS == 8, "draw buffers");
@@ -261,6 +262,20 @@ static void put_fs(struct buf *b, const struct v3d_fs_key *k, const struct v3d_f
         put_u32(b, d->centroid_flags[i]);
 }
 
+/* A compute shader (ES 3.1, docs/GLES3_PLAN.md stage D item 1): the common
+ * key (Mesa's v3d_update_compiled_cs has no more), then its prog data. */
+static void put_cs(struct buf *b, const struct v3d_key *k, const struct v3d_compute_prog_data *d)
+{
+    put_key_common(b, k);
+    put_prog_data_common(b, &d->base);
+    put_u32(b, d->shared_size);
+    put_u16(b, d->local_size[0]);
+    put_u16(b, d->local_size[1]);
+    put_u16(b, d->local_size[2]);
+    put_u8(b, d->can_use_supergroups);
+    put_u8(b, 0);
+}
+
 /* ---- keys from their bytes (the draw-time variants: v3dp_key_parse) ---- */
 
 struct rd {
@@ -409,6 +424,9 @@ static void variant_hook(mesa_shader_stage stage, const struct v3d_key *key, siz
         for (i = 0; i < 64; i++)
             last_fs_slots[i] = fd->input_slots[i].slot_and_component;
         last_fs_valid = 1;
+    } else if (stage == MESA_SHADER_COMPUTE && key_size == sizeof(struct v3d_key)) {
+        put_u32(b, VARIANT_CS);
+        put_cs(b, key, (const struct v3d_compute_prog_data *)prog_data);
     } else {
         fprintf(stderr, "v3dp: unexpected variant (stage %d, key size %u)\n", (int)stage,
                 (unsigned)key_size);
@@ -504,7 +522,10 @@ static int stage_index(mesa_shader_stage stage)
     return stage == MESA_SHADER_VERTEX ? 0 : stage == MESA_SHADER_FRAGMENT ? 1 : -1;
 }
 
-static const mesa_shader_stage stages_in_file[2] = { MESA_SHADER_VERTEX, MESA_SHADER_FRAGMENT };
+/* A program's stages in file order: vertex and fragment, or (ES 3.1) compute. */
+#define NUM_FILE_STAGES 3
+static const mesa_shader_stage stages_in_file[NUM_FILE_STAGES] = { MESA_SHADER_VERTEX, MESA_SHADER_FRAGMENT,
+                                                                  MESA_SHADER_COMPUTE };
 
 static int put_stage_params(struct buf *b, struct buf *strings, mesa_shader_stage stage,
                             const struct gl_program_parameter_list *pl)
@@ -574,7 +595,7 @@ static int put_uniforms(struct buf *b, struct buf *strings, struct gl_shader_pro
             const struct gl_uniform_driver_storage *ds = &u->driver_storage[j];
             int found = -1;
             uint32_t offset = 0;
-            for (s = 0; s < 2 && found < 0; s++) {
+            for (s = 0; s < NUM_FILE_STAGES && found < 0; s++) {
                 const struct gl_linked_shader *sh = prog->_LinkedShaders[stages_in_file[s]];
                 const struct gl_program_parameter_list *pl;
                 const union gl_constant_value *pv;
@@ -600,19 +621,24 @@ static int put_uniforms(struct buf *b, struct buf *strings, struct gl_shader_pro
             put_u8(b, ds->format);
             put_u8(b, 0);
         }
+        /* The vertex and fragment stages' sampler index; a compute program's
+         * compute stage's in the first word (FORMAT.md, format 2). */
         for (s = 0; s < 2; s++) {
-            mesa_shader_stage st = stages_in_file[s];
-            put_u32(b, sampler && u->opaque[st].active ? u->opaque[st].index : 0xffffffffu);
+            mesa_shader_stage st = prog->_LinkedShaders[MESA_SHADER_COMPUTE] ? (s ? MESA_SHADER_NONE : MESA_SHADER_COMPUTE)
+                                                                         : stages_in_file[s];
+            put_u32(b, sampler && st != MESA_SHADER_NONE && u->opaque[st].active ? u->opaque[st].index : 0xffffffffu);
         }
         /* Format 2: a uniform block member's place in its block (its
-         * storage places are none: the block's buffer holds it). */
+         * storage places are none: the block's buffer holds it); a storage
+         * block's member (a buffer variable, ES 3.1) the same, flags2 bit 1,
+         * its block one of STORAGE_BLOCKS. */
         if (format2) {
-            int in_block = u->block_index >= 0 && !u->is_shader_storage;
+            int in_block = u->block_index >= 0;
             put_u32(b, in_block ? (uint32_t)u->block_index : 0xffffffffu);
             put_u32(b, in_block ? (uint32_t)u->offset : 0xffffffffu);
             put_u32(b, in_block ? (uint32_t)u->array_stride : 0xffffffffu);
             put_u32(b, in_block ? (uint32_t)u->matrix_stride : 0xffffffffu);
-            put_u32(b, in_block && u->row_major ? 1u : 0u);
+            put_u32(b, (in_block && u->row_major ? 1u : 0u) | (in_block && u->is_shader_storage ? 2u : 0u));
         }
     }
     return 0;
@@ -641,11 +667,11 @@ static int put_uniform_blocks(struct buf *b, struct buf *strings, struct gl_shad
             if (d->UniformStorage[j].block_index == (int)i && !d->UniformStorage[j].is_shader_storage)
                 put_u32(b, j);
     }
-    for (s = 0, n = 0; s < 2; s++)
+    for (s = 0, n = 0; s < NUM_FILE_STAGES; s++)
         if (prog->_LinkedShaders[stages_in_file[s]])
             n++;
     put_u32(b, n);
-    for (s = 0; s < 2; s++) {
+    for (s = 0; s < NUM_FILE_STAGES; s++) {
         const struct gl_linked_shader *sh = prog->_LinkedShaders[stages_in_file[s]];
         if (!sh)
             continue;
@@ -658,6 +684,57 @@ static int put_uniform_blocks(struct buf *b, struct buf *strings, struct gl_shad
                 return -1;
             }
             put_u32(b, (uint32_t)(ub - d->UniformBlocks));
+        }
+    }
+    return 0;
+}
+
+/* Format 2, ES 3.1: the program's shader storage blocks, then each stage's
+ * map from its storage buffer numbers (QUNIFORM_SSBO_OFFSET's data) to the
+ * program's, as UNIFORM_BLOCKS. */
+static int put_storage_blocks(struct buf *b, struct buf *strings, struct gl_shader_program *prog)
+{
+    const struct gl_shader_program_data *d = prog->data;
+    unsigned i, j, n, s;
+
+    put_u32(b, d->NumShaderStorageBlocks);
+    for (i = 0; i < d->NumShaderStorageBlocks; i++) {
+        const struct gl_uniform_block *sb = &d->ShaderStorageBlocks[i];
+        put_u32(b, str_add(strings, sb->name.string));
+        put_u32(b, sb->Binding);
+        put_u32(b, sb->UniformBufferSize);
+        put_u32(b, sb->stageref);
+        put_u32(b, (uint32_t)sb->_Packing);
+        for (j = 0, n = 0; j < d->NumUniformStorage; j++)
+            if (d->UniformStorage[j].block_index == (int)i && d->UniformStorage[j].is_shader_storage)
+                n++;
+        put_u32(b, n);
+        /* each member's index in UNIFORMS, then its top-level array's
+         * size and stride (GL_TOP_LEVEL_ARRAY_SIZE and _STRIDE) */
+        for (j = 0; j < d->NumUniformStorage; j++)
+            if (d->UniformStorage[j].block_index == (int)i && d->UniformStorage[j].is_shader_storage) {
+                put_u32(b, j);
+                put_u32(b, (uint32_t)d->UniformStorage[j].top_level_array_size);
+                put_u32(b, (uint32_t)d->UniformStorage[j].top_level_array_stride);
+            }
+    }
+    for (s = 0, n = 0; s < NUM_FILE_STAGES; s++)
+        if (prog->_LinkedShaders[stages_in_file[s]])
+            n++;
+    put_u32(b, n);
+    for (s = 0; s < NUM_FILE_STAGES; s++) {
+        const struct gl_linked_shader *sh = prog->_LinkedShaders[stages_in_file[s]];
+        if (!sh)
+            continue;
+        put_u32(b, stages_in_file[s]);
+        put_u32(b, sh->Program->info.num_ssbos);
+        for (i = 0; i < sh->Program->info.num_ssbos; i++) {
+            const struct gl_uniform_block *sb = sh->Program->sh.ShaderStorageBlocks[i];
+            if (sb < d->ShaderStorageBlocks || sb >= d->ShaderStorageBlocks + d->NumShaderStorageBlocks) {
+                fprintf(stderr, "v3dp: a stage's storage block is not the program's\n");
+                return -1;
+            }
+            put_u32(b, (uint32_t)(sb - d->ShaderStorageBlocks));
         }
     }
     return 0;
@@ -867,13 +944,16 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
     for (i = 0; i < num_sources; i++)
         if (stages[i] == V3DP_HASH_XFBV || stages[i] == V3DP_HASH_SEPA)
             format2 = 1;
-    /* ES 3.1's objects have no place in the file before stage D
-     * (docs/GLES3_PLAN.md §7): no ES 3.1 context asks for them yet. */
-    if (prog->data->NumShaderStorageBlocks || prog->data->NumAtomicBuffers) {
-        fprintf(stderr, "v3dp: storage blocks and atomic counters are not supported yet\n");
+    /* ES 3.1's objects come with stage D (docs/GLES3_PLAN.md §7): storage
+     * blocks and compute programs so far; atomic counters and images not
+     * yet. */
+    if (prog->data->NumAtomicBuffers) {
+        fprintf(stderr, "v3dp: atomic counters are not supported yet\n");
         return -1;
     }
-    for (i = 0; i < 2; i++) {
+    if (prog->data->NumShaderStorageBlocks || prog->_LinkedShaders[MESA_SHADER_COMPUTE])
+        format2 = 1;
+    for (i = 0; i < NUM_FILE_STAGES; i++) {
         const struct gl_linked_shader *sh = prog->_LinkedShaders[stages_in_file[i]];
         if (sh && sh->Program->info.num_images) {
             fprintf(stderr, "v3dp: images are not supported yet\n");
@@ -895,19 +975,21 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
         buf_free(&hb);
     }
     _mesa_blake3_final(&h, hash);
-    for (i = 0; i < 2; i++)
+    for (i = 0; i < NUM_FILE_STAGES; i++)
         if (prog->_LinkedShaders[stages_in_file[i]])
             stage_mask |= 1u << stages_in_file[i];
     put_bytes(&sec, hash, sizeof(hash));
     put_u32(&sec, stage_mask);
     if (format2) /* features (FORMAT.md, format 2) */
-        put_u32(&sec, tf_info(prog) ? V3DP_FEATURE_TF : 0);
+        put_u32(&sec, (tf_info(prog) ? V3DP_FEATURE_TF : 0) |
+                          (prog->data->NumShaderStorageBlocks ? V3DP_FEATURE_STORAGE : 0) |
+                          (prog->_LinkedShaders[MESA_SHADER_COMPUTE] ? V3DP_FEATURE_COMPUTE : 0));
     put_section(&program, SEC_PROGRAM, &sec);
     num_sections++;
     buf_free(&sec);
 
     /* STAGE_PARAMS */
-    for (i = 0; i < 2; i++) {
+    for (i = 0; i < NUM_FILE_STAGES; i++) {
         const struct gl_linked_shader *sh = prog->_LinkedShaders[stages_in_file[i]];
         if (!sh)
             continue;
@@ -945,6 +1027,13 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
             if (put_tf(&sec, &strings, prog, tf_info(prog)))
                 goto out;
             put_section(&body, SEC_TRANSFORM_FEEDBACK, &sec);
+            num_sections++;
+            buf_free(&sec);
+        }
+        if (prog->data->NumShaderStorageBlocks) {
+            if (put_storage_blocks(&sec, &strings, prog))
+                goto out;
+            put_section(&body, SEC_STORAGE_BLOCKS, &sec);
             num_sections++;
             buf_free(&sec);
         }

@@ -64,13 +64,13 @@ static const ULONG smooth_rdata[20] = {0, 0, 0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10,
  * (vertex), a VCM cache of 4 batches, four varyings using the pixel centre w. */
 static const struct OGLES2Variant smooth_variants[3] = {
     {OGLES2_VARIANT_CS, 4, 1, 0, 0, 4, 0, 0, 0, {3}, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-     {0}, {0}, {0}, 0, builtin_coordinate, sizeof(builtin_coordinate), 0, 20, smooth_rtype,
+     {0}, {0}, {0}, 0, {0}, 0, 0, builtin_coordinate, sizeof(builtin_coordinate), 0, 20, smooth_rtype,
      smooth_rdata, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {OGLES2_VARIANT_VS, 4, 1, 0, 0, 4, 0, 0, 0, {3, 4}, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-     {0}, {0}, {0}, 0, builtin_vertex_smooth, sizeof(builtin_vertex_smooth),
+     {0}, {0}, {0}, 0, {0}, 0, 0, builtin_vertex_smooth, sizeof(builtin_vertex_smooth),
      sizeof(builtin_coordinate), 20, smooth_rtype, smooth_rdata, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {OGLES2_VARIANT_FS, 4, 0, 0, 0, 0, 0, 0, 0, {0}, 0, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 0,
-     {0}, {0}, {0}, 0, builtin_fragment_smooth, sizeof(builtin_fragment_smooth),
+     {0}, {0}, {0}, 0, {0}, 0, 0, builtin_fragment_smooth, sizeof(builtin_fragment_smooth),
      sizeof(builtin_coordinate) + sizeof(builtin_vertex_smooth), 0, 0, 0, 0, 0, 0, 0, 0,
      1 /* render target 0 */, 0, 0, 0},
 };
@@ -94,6 +94,7 @@ static const struct OGLES2Image builtin_smooth = {
     0, 0, 0, {0, 0}, {0, 0}, 0, 0, /* format 1.0: no uniform blocks or interface */
     0, 0, 0, 0, 0, 0, 0, 0, 0,     /* no draw-time variants */
     0,                             /* no transform feedback */
+    0, 0, 0, {0, 0}, {0, 0},       /* not a compute program, no storage blocks */
 };
 
 const struct OGLES2Image *ogles2_builtin_image(void)
@@ -260,6 +261,7 @@ static void free_program(struct OGLES2Context *ctx, struct OGLES2Program *p)
     ctx->share->objects[p->name] = 0;
     release_shader(ctx, p->vs);
     release_shader(ctx, p->fs);
+    release_shader(ctx, p->cs);
     unlink_program(ctx, p);
     if (p->info_log)
         FreeVec(p->info_log);
@@ -333,7 +335,8 @@ GLuint ogles2_glCreateShader(struct OGLES2Context *ctx, GLenum type)
     struct OGLES2Shader *s;
     if (!ogles2_context_valid(ctx))
         return 0;
-    if (type != GL_VERTEX_SHADER && type != GL_FRAGMENT_SHADER) {
+    if (type != GL_VERTEX_SHADER && type != GL_FRAGMENT_SHADER &&
+        !(type == GL_COMPUTE_SHADER && ogles2_es31(ctx))) { /* ES 3.1's compute shaders */
         ogles2_error(ctx, GL_INVALID_ENUM);
         return 0;
     }
@@ -502,7 +505,8 @@ void ogles2_glCompileShader(struct OGLES2Context *ctx, GLuint shader)
         s->compiled = GL_TRUE; /* checked again at link */
         return;
     }
-    rc = ogles2_compile_shader(s->type == GL_FRAGMENT_SHADER, s->source, log, 4096);
+    rc = s->type == GL_COMPUTE_SHADER ? ogles2_compile_compute_shader(s->source, log, 4096)
+                                      : ogles2_compile_shader(s->type == GL_FRAGMENT_SHADER, s->source, log, 4096);
     if (rc < 0) {
         s->compiled = GL_TRUE; /* no compiler after all: as S1, the link decides */
     } else {
@@ -616,7 +620,7 @@ void ogles2_glAttachShader(struct OGLES2Context *ctx, GLuint program, GLuint sha
     if (!(p = lookup(ctx, program, OGLES2_OBJ_PROGRAM)) ||
         !(s = lookup(ctx, shader, OGLES2_OBJ_SHADER)))
         return;
-    slot = s->type == GL_VERTEX_SHADER ? &p->vs : &p->fs;
+    slot = s->type == GL_VERTEX_SHADER ? &p->vs : s->type == GL_COMPUTE_SHADER ? &p->cs : &p->fs;
     if (*slot) { /* already attached, or one of that type already is */
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
@@ -638,6 +642,8 @@ void ogles2_glDetachShader(struct OGLES2Context *ctx, GLuint program, GLuint sha
         p->vs = 0;
     else if (p->fs == s)
         p->fs = 0;
+    else if (p->cs == s)
+        p->cs = 0;
     else {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
@@ -662,6 +668,8 @@ void ogles2_glGetAttachedShaders(struct OGLES2Context *ctx, GLuint program, GLsi
         shaders[n++] = p->vs->name;
     if (p->fs && n < maxCount)
         shaders[n++] = p->fs->name;
+    if (p->cs && n < maxCount)
+        shaders[n++] = p->cs->name;
     if (count)
         *count = n;
 }
@@ -794,12 +802,14 @@ static void program_hash(const struct OGLES2Program *p, const char *state, UBYTE
     const char *src[4], *x = xfbv_part(state);
     ULONG stage[4], len[4];
     int k, n = 2;
-    src[0] = p->vs->source;
-    stage[0] = 0;
-    src[1] = p->fs->source;
+    src[0] = p->cs ? p->cs->source : p->vs->source; /* ES 3.1: a compute program's one shader */
+    stage[0] = p->cs ? 5 : 0;
+    src[1] = p->cs ? 0 : p->fs->source;
     stage[1] = 4;
     len[0] = str_len(src[0]);
-    len[1] = str_len(src[1]);
+    len[1] = p->cs ? 0 : str_len(src[1]);
+    if (p->cs)
+        n = 1;
     if (state && (len[n] = x ? (ULONG)(x - 5 - state) : str_len(state)) != 0) {
         src[n] = state;
         stage[n++] = 0x42494E44UL; /* V3DP_HASH_BINDINGS */
@@ -864,7 +874,7 @@ static void shader_record_path(char *path, const char *dir, const struct OGLES2S
     static const char digits[] = "0123456789abcdef";
     struct blake3 h;
     UBYTE out[32], w[8];
-    ULONG stage = s->type == GL_FRAGMENT_SHADER ? 4 : 0, len = str_len(s->source), i;
+    ULONG stage = s->type == GL_FRAGMENT_SHADER ? 4 : s->type == GL_COMPUTE_SHADER ? 5 : 0, len = str_len(s->source), i;
     char *q;
     blake3_init(&h);
     for (i = 0; i < 4; i++) {
@@ -982,10 +992,15 @@ static void note_missing(const struct OGLES2Program *p, const char *hex)
     Seek(fh, 0, OFFSET_END);
     FPuts(fh, (STRPTR) "--- program ");
     FPuts(fh, (STRPTR)hex);
-    FPuts(fh, (STRPTR) "\n--- vertex shader\n");
-    FPuts(fh, (STRPTR)p->vs->source);
-    FPuts(fh, (STRPTR) "\n--- fragment shader\n");
-    FPuts(fh, (STRPTR)p->fs->source);
+    if (p->cs) {
+        FPuts(fh, (STRPTR) "\n--- compute shader\n");
+        FPuts(fh, (STRPTR)p->cs->source);
+    } else {
+        FPuts(fh, (STRPTR) "\n--- vertex shader\n");
+        FPuts(fh, (STRPTR)p->vs->source);
+        FPuts(fh, (STRPTR) "\n--- fragment shader\n");
+        FPuts(fh, (STRPTR)p->fs->source);
+    }
     FPuts(fh, (STRPTR) "\n--- end\n");
     Close(fh);
 }
@@ -997,7 +1012,7 @@ static void note_missing(const struct OGLES2Program *p, const char *hex)
  * ES3 parts: docs/GLES3_PLAN.md §3). */
 static BOOL es3_program(const struct OGLES2Program *p)
 {
-    return glsl_version(p->vs->source) >= 300 || glsl_version(p->fs->source) >= 300;
+    return p->cs || glsl_version(p->vs->source) >= 300 || glsl_version(p->fs->source) >= 300;
 }
 
 /* Reads and checks one .v3dp file: the image, or 0 (with *refused set and
@@ -1029,6 +1044,11 @@ static struct OGLES2Image *try_file(struct OGLES2Program *p, const UBYTE *hash, 
         ogles2_image_free(im, 0);
         im = 0;
         strcpy(why, "a GLSL ES 3.x program in a format 1.0 file (made by an older compiler)");
+    }
+    if (im && im->compute != (p->cs != 0)) { /* the same hash, the other kind: cannot be, but checked */
+        ogles2_image_free(im, 0);
+        im = 0;
+        strcpy(why, p->cs ? "not a compute program" : "a compute program");
     }
     if (im) {
         ogles2_log("glLinkProgram: %s (%ld variants, %ld bytes of code)", (ULONG)path,
@@ -1079,7 +1099,8 @@ static struct OGLES2Image *load_image(struct OGLES2Program *p, const UBYTE *hash
             return 0;
         }
         file_path(path, dirs[2], hex);
-        ok = bindings ? ogles2_compile_program_bound(p->vs->source, p->fs->source, bindings, path, log, 4096)
+        ok = p->cs     ? ogles2_compile_compute(p->cs->source, path, log, 4096)
+           : bindings ? ogles2_compile_program_bound(p->vs->source, p->fs->source, bindings, path, log, 4096)
                       : ogles2_compile_program(p->vs->source, p->fs->source, path, log, 4096);
         if (ok && (im = try_file(p, hash, path, &refused))) {
             FreeVec(log);
@@ -1376,7 +1397,7 @@ static BOOL bind_image(struct OGLES2Program *p, const struct OGLES2Image *im)
 
     /* Uniform locations: one per array element of every visible uniform. */
     for (u = 0; u < im->nuniforms; u++)
-        if (!(im->uniforms[u].flags & (OGLES2_UNIFORM_BUILTIN | OGLES2_UNIFORM_HIDDEN)))
+        if (!(im->uniforms[u].flags & (OGLES2_UNIFORM_BUILTIN | OGLES2_UNIFORM_HIDDEN | OGLES2_UNIFORM_BUFFER)))
             nloc += im->uniforms[u].array ? im->uniforms[u].array : 1;
     p->loc_uniform = AllocVec(nloc * 4 + 4, MEMF_ANY);
     /* A sampler array's elements are samplers of their own (consecutive
@@ -1399,7 +1420,7 @@ static BOOL bind_image(struct OGLES2Program *p, const struct OGLES2Image *im)
         const struct OGLES2ImageUniform *un = &im->uniforms[u];
         UWORD e, ne = un->array ? un->array : 1;
         p->uniform_loc[u] = 0xFFFF;
-        if (un->flags & (OGLES2_UNIFORM_BUILTIN | OGLES2_UNIFORM_HIDDEN))
+        if (un->flags & (OGLES2_UNIFORM_BUILTIN | OGLES2_UNIFORM_HIDDEN | OGLES2_UNIFORM_BUFFER))
             continue;
         p->uniform_loc[u] = (UWORD)nloc;
         for (e = 0; e < ne; e++) {
@@ -1441,7 +1462,16 @@ void ogles2_glLinkProgram(struct OGLES2Context *ctx, GLuint program)
      * the job's records already point at its code (ogles2_image_free defers). */
     unlink_program(ctx, p);
     p->binary_hint = p->binary_hint_pending;
-    if (!p->vs || !p->fs || !p->vs->compiled || !p->fs->compiled) {
+    if (p->cs) { /* ES 3.1: a compute shader links alone (7.3: else a link error) */
+        if (p->vs || p->fs) {
+            set_log(p, "a compute shader cannot be linked with a vertex or fragment shader", 0);
+            return;
+        }
+        if (!p->cs->compiled) {
+            set_log(p, "the compute shader did not compile:\n", p->cs->info_log);
+            return;
+        }
+    } else if (!p->vs || !p->fs || !p->vs->compiled || !p->fs->compiled) {
         /* Say which shader failed, with its compiler messages. */
         if (p->vs && p->fs && !p->vs->compiled)
             set_log(p, "the vertex shader did not compile:\n", p->vs->info_log);
@@ -1451,7 +1481,7 @@ void ogles2_glLinkProgram(struct OGLES2Context *ctx, GLuint program)
             set_log(p, "a compiled vertex shader and fragment shader must be attached", 0);
         return;
     }
-    bindings = link_state(p);
+    bindings = p->cs ? 0 : link_state(p); /* a compute program has no attributes or varyings */
     program_hash(p, bindings, hash, hex);
     for (im = ctx->share->images; im && memcmp(im->hash, hash, 32); im = im->next)
         ;
@@ -1468,14 +1498,20 @@ void ogles2_glLinkProgram(struct OGLES2Context *ctx, GLuint program)
         im->next = ctx->share->images;
         ctx->share->images = im;
         /* Kept for its 32-bit-sampler variants, compiled when a draw first
-         * needs them (ogles2_image_wide). */
-        im->vs_src = dup_text(p->vs->source, str_len(p->vs->source));
-        im->fs_src = dup_text(p->fs->source, str_len(p->fs->source));
-        /* A binary proves both shaders compile: record them, so the next
-         * glCompileShader of either needs no compiler. */
+         * needs them (ogles2_image_wide); a compute program draws not. */
+        if (!p->cs) {
+            im->vs_src = dup_text(p->vs->source, str_len(p->vs->source));
+            im->fs_src = dup_text(p->fs->source, str_len(p->fs->source));
+        }
+        /* A binary proves its shaders compile: record them, so the next
+         * glCompileShader of one needs no compiler. */
         if (ogles2_compiler_installed()) {
-            mark_compiled(p->vs);
-            mark_compiled(p->fs);
+            if (p->cs) {
+                mark_compiled(p->cs);
+            } else {
+                mark_compiled(p->vs);
+                mark_compiled(p->fs);
+            }
         }
     }
     if (bindings)
@@ -1506,7 +1542,8 @@ static void describe_variants(struct OGLES2Program *p, const struct OGLES2Image 
     n = ogles2_format(t, size, "program %.24s: %ld variants\n", (ULONG)hex, (LONG)im->nvariants);
     for (i = 0; i < im->nvariants; i++) {
         const struct OGLES2Variant *v = &im->variants[i];
-        const char *what = v->stage == OGLES2_VARIANT_FS
+        const char *what = v->stage == OGLES2_VARIANT_COMPUTE ? "compute"
+                           : v->stage == OGLES2_VARIANT_FS
                                ? (v->is_points ? "fragment, points" : v->is_lines ? "fragment, lines"
                                                                                   : "fragment, triangles")
                                : v->stage == OGLES2_VARIANT_CS
@@ -1586,7 +1623,7 @@ static ULONG active_name_len(const struct OGLES2ImageUniform *u)
 
 static BOOL visible(const struct OGLES2ImageUniform *u)
 {
-    return !(u->flags & (OGLES2_UNIFORM_BUILTIN | OGLES2_UNIFORM_HIDDEN));
+    return !(u->flags & (OGLES2_UNIFORM_BUILTIN | OGLES2_UNIFORM_HIDDEN | OGLES2_UNIFORM_BUFFER));
 }
 
 /* The index'th visible uniform, or NULL. */
@@ -1625,7 +1662,7 @@ void ogles2_glGetProgramiv(struct OGLES2Context *ctx, GLuint program, GLenum pna
     case GL_INFO_LOG_LENGTH:
         *params = (p->info_log && p->info_log[0]) ? (GLint)str_len(p->info_log) + 1 : 0;
         break;
-    case GL_ATTACHED_SHADERS:  *params = (p->vs ? 1 : 0) + (p->fs ? 1 : 0); break;
+    case GL_ATTACHED_SHADERS:  *params = (p->vs ? 1 : 0) + (p->fs ? 1 : 0) + (p->cs ? 1 : 0); break;
     case GL_ACTIVE_ATTRIBUTES:
         for (n = 0; im && active_attrib(im, (GLuint)n); n++)
             ;
@@ -2751,4 +2788,405 @@ void ogles2_glShaderBinary(struct OGLES2Context *ctx, GLsizei count, const GLuin
     (void)length;
     if (ogles2_context_valid(ctx))
         ogles2_error(ctx, GL_INVALID_ENUM);
+}
+
+/* ---- ES 3.1's program interface queries (ES 3.1 7.3.1; docs/GLES3_PLAN.md
+ * stage D item 6), as Mesa's shader_query.cpp answers them. The resources
+ * of each interface are the image's: GL_UNIFORM the active uniforms (the
+ * same indices as glGetActiveUniform), GL_BUFFER_VARIABLE the storage
+ * blocks' members in the image's order, the blocks in theirs, the inputs
+ * and outputs the INTERFACE section's, transform feedback's varyings as
+ * linked; no atomic counter buffers yet (the compiler refuses them). ---- */
+
+/* The interface's resources: their count; -1 for an interface that is none. */
+static LONG resources(const struct OGLES2Image *im, GLenum iface)
+{
+    LONG n = 0;
+    UWORD k;
+    switch (iface) {
+    case GL_UNIFORM:
+        for (k = 0; im && k < im->nuniforms; k++)
+            n += visible(&im->uniforms[k]);
+        return n;
+    case GL_BUFFER_VARIABLE:
+        for (k = 0; im && k < im->nuniforms; k++)
+            n += (im->uniforms[k].flags & OGLES2_UNIFORM_BUFFER) != 0;
+        return n;
+    case GL_UNIFORM_BLOCK:        return im ? im->nublocks : 0;
+    case GL_SHADER_STORAGE_BLOCK: return im ? im->nsblocks : 0;
+    case GL_PROGRAM_INPUT:
+    case GL_PROGRAM_OUTPUT:
+        for (k = 0; im && k < im->ninterface; k++)
+            n += im->interface[k].iface == iface;
+        return n;
+    case GL_TRANSFORM_FEEDBACK_VARYING: return im && im->xfb ? im->xfb->nvaryings : 0;
+    case GL_ATOMIC_COUNTER_BUFFER:      return 0;
+    default:                            return -1;
+    }
+}
+
+/* Resource i of an interface (below its count): its name, whether with
+ * "[0]" (an array's, Mesa's add_index_to_name), and what it is: the
+ * image's uniform u (its index ui), block, or variable. */
+struct resource
+{
+    const char *name;
+    BOOL add0;
+    UWORD ui;
+    const struct OGLES2ImageUniform *u;
+    const struct OGLES2ImageBlock *b;
+    const struct OGLES2ImageVar *v;
+    const struct OGLES2ImageXfbVar *x;
+};
+
+static BOOL ends_bracket(const char *s)
+{
+    ULONG n = str_len(s);
+    return n && s[n - 1] == ']';
+}
+
+static void resource(const struct OGLES2Image *im, GLenum iface, ULONG i, struct resource *r)
+{
+    UWORD k;
+    memset(r, 0, sizeof(*r));
+    switch (iface) {
+    case GL_UNIFORM:
+    case GL_BUFFER_VARIABLE:
+        for (k = 0; k < im->nuniforms; k++) {
+            const struct OGLES2ImageUniform *u = &im->uniforms[k];
+            if (!(iface == GL_UNIFORM ? visible(u) : (u->flags & OGLES2_UNIFORM_BUFFER) != 0) || i-- != 0)
+                continue;
+            r->u = u;
+            r->ui = k;
+            r->name = u->name;
+            /* an unsized array (an array stride, no elements) too: Mesa's
+             * _mesa_program_resource_array_size */
+            r->add0 = u->array || (iface == GL_BUFFER_VARIABLE && u->array_stride > 0);
+            return;
+        }
+        return;
+    case GL_UNIFORM_BLOCK:
+        r->b = &im->ublocks[i];
+        r->name = r->b->name;
+        return;
+    case GL_SHADER_STORAGE_BLOCK:
+        r->b = &im->sblocks[i];
+        r->name = r->b->name;
+        return;
+    case GL_PROGRAM_INPUT:
+    case GL_PROGRAM_OUTPUT:
+        for (k = 0; k < im->ninterface; k++)
+            if (im->interface[k].iface == iface && i-- == 0) {
+                r->v = &im->interface[k];
+                r->name = r->v->name;
+                r->add0 = r->v->array && !ends_bracket(r->name);
+                return;
+            }
+        return;
+    case GL_TRANSFORM_FEEDBACK_VARYING:
+        r->x = &im->xfb->varyings[i];
+        r->name = r->x->name;
+        r->add0 = r->x->size > 1 && !ends_bracket(r->name);
+        return;
+    }
+}
+
+/* The program of an ES 3.1 interface query and its interface's resources
+ * counted into *n; NULL after an error (GL_INVALID_ENUM: an interface that
+ * is none). A program not linked has none. */
+static struct OGLES2Program *iface_program(struct OGLES2Context *ctx, GLuint program, GLenum iface, LONG *n)
+{
+    struct OGLES2Program *p;
+    if (!ogles2_es31_entry(ctx) || !(p = lookup(ctx, program, OGLES2_OBJ_PROGRAM)))
+        return 0;
+    if ((*n = resources(p->linked ? p->image : 0, iface)) < 0) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return 0;
+    }
+    return p;
+}
+
+/* The stages that reference a uniform, Mesa's stage bits (0 vertex, 4
+ * fragment, 5 compute): its block's, else its constant buffers' and its
+ * samplers' (slot 0 a compute program's compute stage). */
+static ULONG uniform_stages(const struct OGLES2Image *im, const struct OGLES2ImageUniform *u)
+{
+    ULONG m = 0, first = im->compute ? 0x20 : 0x01;
+    UBYTE k;
+    if (u->block >= 0)
+        return (u->flags & OGLES2_UNIFORM_BUFFER ? im->sblocks : im->ublocks)[u->block].stages;
+    for (k = 0; k < u->nplaces; k++)
+        m |= u->places[k].stage ? 0x10 : first;
+    if (u->sampler[0] != ~0UL)
+        m |= first;
+    if (u->sampler[1] != ~0UL)
+        m |= 0x10;
+    return m;
+}
+
+/* Image uniform u's index among the buffer variables (GL_BUFFER_VARIABLE's). */
+static GLint buffer_var_index(const struct OGLES2Image *im, UWORD u)
+{
+    UWORD k;
+    GLint n = 0;
+    for (k = 0; k < u; k++)
+        if (im->uniforms[k].flags & OGLES2_UNIFORM_BUFFER)
+            n++;
+    return n;
+}
+
+void ogles2_glGetProgramInterfaceiv(struct OGLES2Context *ctx, GLuint program, GLenum programInterface,
+                                    GLenum pname, GLint *params)
+{
+    struct OGLES2Program *p;
+    struct resource r;
+    LONG n, i, m = 0;
+    BOOL blocks = programInterface == GL_UNIFORM_BLOCK || programInterface == GL_SHADER_STORAGE_BLOCK ||
+                  programInterface == GL_ATOMIC_COUNTER_BUFFER;
+    if (!(p = iface_program(ctx, program, programInterface, &n)) || !params)
+        return;
+    switch (pname) {
+    case GL_ACTIVE_RESOURCES:
+        *params = n;
+        return;
+    case GL_MAX_NAME_LENGTH: /* with the terminating null; 0 without resources */
+        if (programInterface == GL_ATOMIC_COUNTER_BUFFER) {
+            ogles2_error(ctx, GL_INVALID_OPERATION);
+            return;
+        }
+        for (i = 0; i < n; i++) {
+            resource(p->image, programInterface, (ULONG)i, &r);
+            if ((LONG)str_len(r.name) + (r.add0 ? 4 : 1) > m)
+                m = (LONG)str_len(r.name) + (r.add0 ? 4 : 1);
+        }
+        *params = m;
+        return;
+    case GL_MAX_NUM_ACTIVE_VARIABLES:
+        if (!blocks) {
+            ogles2_error(ctx, GL_INVALID_OPERATION);
+            return;
+        }
+        for (i = 0; i < n; i++) {
+            resource(p->image, programInterface, (ULONG)i, &r);
+            if (r.b && r.b->nmembers > m)
+                m = r.b->nmembers;
+        }
+        *params = m;
+        return;
+    default:
+        ogles2_error(ctx, GL_INVALID_ENUM);
+    }
+}
+
+/* "name", or an array's "name[0]": the resource's index; an element past
+ * the first is none (Mesa's _mesa_program_resource_find_name). */
+GLuint ogles2_glGetProgramResourceIndex(struct OGLES2Context *ctx, GLuint program, GLenum programInterface,
+                                        const GLchar *name)
+{
+    struct OGLES2Program *p;
+    struct resource r;
+    LONG n, i;
+    if (!(p = iface_program(ctx, program, programInterface, &n)))
+        return GL_INVALID_INDEX;
+    if (programInterface == GL_ATOMIC_COUNTER_BUFFER) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return GL_INVALID_INDEX;
+    }
+    for (i = 0; name && i < n; i++) {
+        ULONG len;
+        resource(p->image, programInterface, (ULONG)i, &r);
+        len = str_len(r.name);
+        if (str_eq(r.name, name) || (r.add0 && !strncmp(r.name, name, len) && str_eq(name + len, "[0]")))
+            return (GLuint)i;
+    }
+    return GL_INVALID_INDEX;
+}
+
+void ogles2_glGetProgramResourceName(struct OGLES2Context *ctx, GLuint program, GLenum programInterface,
+                                     GLuint index, GLsizei bufSize, GLsizei *length, GLchar *name)
+{
+    struct OGLES2Program *p;
+    struct resource r;
+    LONG n;
+    GLsizei k;
+    if (!(p = iface_program(ctx, program, programInterface, &n)))
+        return;
+    if (programInterface == GL_ATOMIC_COUNTER_BUFFER) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    if (index > 0x7fffffffUL || (LONG)index >= n || bufSize < 0) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    resource(p->image, programInterface, index, &r);
+    k = copy_out(name, bufSize, r.name);
+    if (r.add0 && name)
+        k += copy_out(name + k, bufSize - k, "[0]");
+    if (length)
+        *length = k;
+}
+
+/* A property of a resource: its values into v (room for `room`), how
+ * many; -1 for a property its interface has not (GL_INVALID_OPERATION),
+ * -2 for no property at all (GL_INVALID_ENUM). */
+static LONG property(struct OGLES2Program *p, GLenum iface, const struct resource *r, GLenum prop, GLint *v,
+                     LONG room)
+{
+    const struct OGLES2Image *im = p->image;
+    const struct OGLES2ImageUniform *u = r->u;
+    BOOL uni = iface == GL_UNIFORM || iface == GL_BUFFER_VARIABLE;
+    BOOL var = uni || iface == GL_PROGRAM_INPUT || iface == GL_PROGRAM_OUTPUT;
+    BOOL blk = iface == GL_UNIFORM_BLOCK || iface == GL_SHADER_STORAGE_BLOCK;
+    ULONG stages;
+    LONG k;
+    switch (prop) {
+    case GL_NAME_LENGTH:
+        if (iface == GL_ATOMIC_COUNTER_BUFFER)
+            return -1;
+        v[0] = (GLint)str_len(r->name) + (r->add0 ? 4 : 1);
+        return 1;
+    case GL_TYPE:
+    case GL_ARRAY_SIZE:
+        if (!var && iface != GL_TRANSFORM_FEEDBACK_VARYING)
+            return -1;
+        if (prop == GL_TYPE)
+            v[0] = (GLint)(u ? u->type : r->v ? r->v->type : r->x->type);
+        else if (u && iface == GL_BUFFER_VARIABLE && u->array_stride > 0)
+            v[0] = u->array; /* an unsized array's: 0 */
+        else
+            v[0] = u ? (u->array ? u->array : 1) : r->v ? (r->v->array ? r->v->array : 1) : r->x->size;
+        return 1;
+    case GL_OFFSET:
+    case GL_ARRAY_STRIDE:
+    case GL_MATRIX_STRIDE:
+    case GL_IS_ROW_MAJOR:
+    case GL_BLOCK_INDEX:
+        if (!uni)
+            return -1;
+        /* the default block's: -1 offsets and strides, as Mesa's */
+        v[0] = prop == GL_BLOCK_INDEX   ? u->block
+             : u->block < 0             ? (prop == GL_IS_ROW_MAJOR ? 0 : -1)
+             : prop == GL_OFFSET        ? u->offset
+             : prop == GL_ARRAY_STRIDE  ? u->array_stride
+             : prop == GL_MATRIX_STRIDE ? u->matrix_stride
+                                        : (u->row_major ? 1 : 0);
+        return 1;
+    case GL_ATOMIC_COUNTER_BUFFER_INDEX:
+        if (iface != GL_UNIFORM)
+            return -1;
+        v[0] = -1;
+        return 1;
+    case GL_TOP_LEVEL_ARRAY_SIZE:
+    case GL_TOP_LEVEL_ARRAY_STRIDE:
+        if (iface != GL_BUFFER_VARIABLE)
+            return -1;
+        {
+            const struct OGLES2ImageBlock *b = &im->sblocks[u->block];
+            v[0] = 0;
+            for (k = 0; k < b->nmembers; k++)
+                if (b->members[k] == r->ui)
+                    v[0] = b->top_level[2 * k + (prop == GL_TOP_LEVEL_ARRAY_STRIDE)];
+        }
+        return 1;
+    case GL_BUFFER_BINDING:
+    case GL_BUFFER_DATA_SIZE:
+    case GL_NUM_ACTIVE_VARIABLES:
+        if (!blk && iface != GL_ATOMIC_COUNTER_BUFFER)
+            return -1;
+        v[0] = prop == GL_BUFFER_DATA_SIZE      ? (GLint)r->b->size
+             : prop == GL_NUM_ACTIVE_VARIABLES ? r->b->nmembers
+             : iface == GL_UNIFORM_BLOCK       ? (GLint)p->block_binding[r->b - im->ublocks]
+                                               : (GLint)r->b->binding;
+        return 1;
+    case GL_ACTIVE_VARIABLES:
+        if (!blk && iface != GL_ATOMIC_COUNTER_BUFFER)
+            return -1;
+        for (k = 0; k < r->b->nmembers && k < room; k++)
+            v[k] = iface == GL_UNIFORM_BLOCK ? active_index(im, r->b->members[k])
+                                             : buffer_var_index(im, r->b->members[k]);
+        return k;
+    case GL_REFERENCED_BY_VERTEX_SHADER:
+    case GL_REFERENCED_BY_FRAGMENT_SHADER:
+    case GL_REFERENCED_BY_COMPUTE_SHADER:
+        if (iface == GL_TRANSFORM_FEEDBACK_VARYING)
+            return -1;
+        stages = u ? uniform_stages(im, u) : r->b ? r->b->stages : r->v ? r->v->stages : 0;
+        v[0] = (stages & (prop == GL_REFERENCED_BY_VERTEX_SHADER     ? 0x01
+                          : prop == GL_REFERENCED_BY_FRAGMENT_SHADER ? 0x10
+                                                                     : 0x20)) != 0;
+        return 1;
+    case GL_LOCATION:
+        if (iface != GL_UNIFORM && iface != GL_PROGRAM_INPUT && iface != GL_PROGRAM_OUTPUT)
+            return -1;
+        if (u) {
+            v[0] = u->block >= 0 || p->uniform_loc[r->ui] == 0xFFFF ? -1 : (GLint)p->uniform_loc[r->ui];
+        } else {
+            v[0] = r->v->location;
+            /* a vertex input the runtime numbered (no layout(location)) */
+            if (iface == GL_PROGRAM_INPUT && v[0] >= 0)
+                for (k = 0; k < im->nattribs; k++)
+                    if (str_eq(im->attribs[k].name, r->v->name))
+                        v[0] = p->attrib_index[k] == 0xff ? -1 : p->attrib_index[k];
+        }
+        return 1;
+    default:
+        return -2;
+    }
+}
+
+void ogles2_glGetProgramResourceiv(struct OGLES2Context *ctx, GLuint program, GLenum programInterface,
+                                   GLuint index, GLsizei propCount, const GLenum *props, GLsizei bufSize,
+                                   GLsizei *length, GLint *params)
+{
+    struct OGLES2Program *p;
+    struct resource r;
+    GLint v[1];
+    LONG n, got;
+    GLsizei k, out = 0;
+    if (!(p = iface_program(ctx, program, programInterface, &n)))
+        return;
+    if (index > 0x7fffffffUL || (LONG)index >= n || propCount <= 0 || bufSize < 0 || !props) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    resource(p->image, programInterface, index, &r);
+    /* every property checked first: a bad one is an error even past bufSize */
+    for (k = 0; k < propCount; k++)
+        if ((got = property(p, programInterface, &r, props[k], v, 1)) < 0) {
+            ogles2_error(ctx, got == -2 ? GL_INVALID_ENUM : GL_INVALID_OPERATION);
+            return;
+        }
+    for (k = 0; k < propCount && out < bufSize && params; k++)
+        out += (GLsizei)property(p, programInterface, &r, props[k], params + out, bufSize - out);
+    if (length)
+        *length = out;
+}
+
+GLint ogles2_glGetProgramResourceLocation(struct OGLES2Context *ctx, GLuint program, GLenum programInterface,
+                                          const GLchar *name)
+{
+    struct OGLES2Program *p;
+    LONG n;
+    GLint loc;
+    if (!(p = iface_program(ctx, program, programInterface, &n)))
+        return -1;
+    if (programInterface != GL_UNIFORM && programInterface != GL_PROGRAM_INPUT &&
+        programInterface != GL_PROGRAM_OUTPUT) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return -1;
+    }
+    if (!p->linked) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return -1;
+    }
+    if (!name || !strncmp(name, "gl_", 3))
+        return -1;
+    if (programInterface == GL_PROGRAM_OUTPUT)
+        return ogles2_glGetFragDataLocation(ctx, program, name);
+    if (programInterface == GL_PROGRAM_INPUT)
+        return ogles2_glGetAttribLocation(ctx, program, name);
+    loc = ogles2_glGetUniformLocation(ctx, program, name);
+    /* a uniform block's member has none */
+    return loc >= 0 && p->image->uniforms[p->loc_uniform[loc]].block >= 0 ? -1 : loc;
 }

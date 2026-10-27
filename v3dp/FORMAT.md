@@ -264,10 +264,11 @@ bits. A reader refuses a file with a bit it does not know, so a library never mi
 program a newer one compiled (`glProgramBinary`, or a cache after a downgrade). Additions an
 older reader may skip go into new sections and minor versions, as in 1.0. Bit 0 (0x1,
 2026-10-27): transform feedback, the program has a `TRANSFORM_FEEDBACK` section (and its
-binning shaders output the varyings fed back). The ES 3.1 objects (stage D: storage blocks,
-atomic counters, images, compute, separable programs, explicit uniform locations) add theirs. Stages
-may also be bit 5 (compute, Mesa's `MESA_SHADER_COMPUTE`), and a separable program may have
-one stage only (stage D).
+binning shaders output the varyings fed back). Bit 1 (0x2, 2026-10-27, ES 3.1): shader
+storage blocks, a `STORAGE_BLOCKS` section. Bit 2 (0x4, 2026-10-27, ES 3.1): a compute
+program, its stages bit 5 alone (Mesa's `MESA_SHADER_COMPUTE`), its variants of stage 5. The
+other ES 3.1 objects (stage D: atomic counters, images, separable programs, explicit uniform
+locations) add theirs; a separable program may have one stage only (stage D).
 
 **The hash** covers the program's link state after the shaders and the bindings, each as a
 pseudo-stage written the way the bindings' `"BIND"` is (stage `u32`, length `u32`, text),
@@ -279,10 +280,13 @@ and only when the state is there:
 
 So two programs of the same sources and different link state never share a file.
 
-**`UNIFORMS`**, each uniform after its two sampler words: `i32` block (its index in
+**`UNIFORMS`**: a compute program's sampler words are its compute stage's index, then
+0xffffffff. Each uniform after its two sampler words: `i32` block (its index in
 `UNIFORM_BLOCKS`, -1 outside a block), `i32` offset in the block in bytes, `i32` array stride,
 `i32` matrix stride (-1 each outside a block; Mesa's `gl_uniform_storage` fields), `u32` flags2:
-bit 0 row-major. A block member has no storage places.
+bit 0 row-major; bit 1 (ES 3.1) a storage block's member, a buffer variable (its block an index
+in `STORAGE_BLOCKS`; not a uniform: `GL_BUFFER_VARIABLE`'s). A block member has no storage
+places.
 
 **`ATTRIBUTES`**: the GL type may be an integer one (`GL_INT_VEC4`, `GL_UNSIGNED_INT`, ...)
 or a non-square matrix (`GL_FLOAT_MAT2x3`, ...; its columns as for square ones). In the
@@ -298,6 +302,20 @@ location word, bit 30: the input has a location of its own (`layout(location)`, 
 | 8 | `INTERFACE` | exactly 1 |
 | 9 | `VARIANT_OF` | `.v3dx` files only, exactly 1, third |
 | 10 | `TRANSFORM_FEEDBACK` | exactly 1 with feature bit 0, else none |
+| 11 | `STORAGE_BLOCKS` | exactly 1 with feature bit 1, else none |
+
+**`VARIANT`** of stage 5, a compute shader (feature bit 2): the common key (Mesa's
+`v3d_update_compiled_cs` keys compute shaders by it alone), the common prog data, then
+`u32 shared_size` (bytes of shared memory a work group uses), `u16 local_size[3]`,
+`u8 can_use_supergroups`, `u8 pad`. `v3dglslc` compiles it with one dispatch of one work
+group, its storage blocks bound to buffers.
+
+**`STORAGE_BLOCKS`**: the program's shader storage blocks (Mesa's `ShaderStorageBlocks`),
+then each stage's map to them, as `UNIFORM_BLOCKS` (the same fields per block, but each member
+three `u32`s: its index in `UNIFORMS`, its top-level array's size and stride, Mesa's
+`top_level_array_size` and `_stride`, for `GL_TOP_LEVEL_ARRAY_SIZE` and `_STRIDE`). A stage reads its storage buffer *i*
+(`QUNIFORM_SSBO_OFFSET` and `QUNIFORM_GET_SSBO_SIZE` data *i*) as the program's block its
+map's *i*-th entry names; the buffer is the one bound at that block's binding.
 
 **`UNIFORM_BLOCKS`**: the program's uniform blocks, then each stage's map to them.
 

@@ -34,6 +34,8 @@ int v3dp_last_fs_inputs(uint8_t *num_inputs, uint8_t *slots);
 
 /* Format 2's must-understand feature bits (PROGRAM's features word). */
 #define V3DP_FEATURE_TF 0x1u /* transform feedback: a TRANSFORM_FEEDBACK section */
+#define V3DP_FEATURE_STORAGE 0x2u /* shader storage blocks: a STORAGE_BLOCKS section (ES 3.1) */
+#define V3DP_FEATURE_COMPUTE 0x4u /* a compute program: its one stage compute, VARIANTs of stage 5 (ES 3.1) */
 
 /* Transform feedback as the V3D driver laid it out for the program's vertex
  * shader (its v3d_uncompiled_shader, read after a draw): written with a

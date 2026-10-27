@@ -244,6 +244,7 @@ void ogles2_aglDestroyContext(struct OGLES2Context *ctx)
     ogles2_job_discard(ctx);
     ogles2_trace(ctx, "aglDestroyContext: the job finished", -1, 0);
     ogles2_draw_free(ctx);
+    ogles2_compute_free(ctx);
     ogles2_job_free(ctx);
     ogles2_trace(ctx, "aglDestroyContext: draw and job state freed", -1, 0);
     ogles2_xfbs_free(ctx); /* before the programs: an active object holds one */

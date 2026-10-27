@@ -287,3 +287,12 @@ glGetTexLevelParameteriv
 glGetTexLevelParameterfv
 glFramebufferParameteri
 glGetFramebufferParameteriv
+glDispatchCompute
+glDispatchComputeIndirect
+glMemoryBarrier
+glMemoryBarrierByRegion
+glGetProgramInterfaceiv
+glGetProgramResourceIndex
+glGetProgramResourceName
+glGetProgramResourceiv
+glGetProgramResourceLocation

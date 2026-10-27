@@ -1,0 +1,35 @@
+diff --git a/src/mesa/program/prog_cache.c b/src/mesa/program/prog_cache.c
+index ae22a970258..c79b3f0a318 100644
+--- a/src/mesa/program/prog_cache.c
++++ b/src/mesa/program/prog_cache.c
+@@ -60,10 +60,9 @@ static GLuint
+ hash_key(const void *key, GLuint key_size)
+ {
+    const GLuint *ikey = (const GLuint *) key;
++   const GLubyte *tail = (const GLubyte *) key;
+    GLuint hash = 0, i;
+ 
+-   assert(key_size >= 4);
+-
+    /* Make a slightly better attempt at a hash function:
+     */
+    for (i = 0; i < key_size / sizeof(*ikey); i++)
+@@ -73,6 +72,18 @@ hash_key(const void *key, GLuint key_size)
+       hash ^= (hash >> 6);
+    }
+ 
++   /* m68k aligns 32-bit fields to 2 bytes, so a key (the fixed-function
++    * fragment program's with no texture unit enabled: a compute dispatch's)
++    * can be shorter than 4 bytes or end on a 2-byte boundary: fold in the
++    * trailing bytes.
++    */
++   for (i = key_size / sizeof(*ikey) * sizeof(*ikey); i < key_size; i++)
++   {
++      hash += (GLuint) tail[i] << (8 * (i % 4));
++      hash += (hash << 10);
++      hash ^= (hash >> 6);
++   }
++
+    return hash;
+ }
+ 

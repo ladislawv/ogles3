@@ -244,7 +244,9 @@ Mesa's driver, so they could follow later as an extension
       `negative_api`, with `ports/deqp/run_pc.sh` and the PC compiling;
       (3) dropped (the update above); (4) stage C items 2 and 6 (done
       2026-10-27), then stage D, each with the dEQP groups of its own
-      features; (5) stage
+      features (under way: §7's "Compute" note; next its dEQP-GLES31
+      `compute` and `ssbo` groups, robust storage access, then items 3,
+      4 and 5); (5) stage
       B's end without dEQP-GLES2 and the whole dEQP-GLES3 run at the end.
     - **Open points:** the `derivate.dfdx.texture.basic.float_mediump`
       failure seen once (12 pixels); a program's default variants can
@@ -2482,6 +2484,49 @@ Package `m8-5` (an ES31 build: `m8_es31` with the GPU, its limits, and
 limits identical, 155 of 155. dEQP-GLES31 `vertex_attribute_binding` 31
 of 31, `state_query` 556 passed and 43 failed (multisample textures 32,
 item 4; compute and separate shader objects the rest).
+
+**Compute (2026-10-27), items 1, 2 and 6 begun.** The compiler writes
+compute programs (feature bit 2, stage 5 variants: the common key and prog
+data, shared size, local size; `V3DGLSL_LINK_COMPUTE` and
+`_COMPILE_COMPUTE`, `.comp` arguments; its default variant from one
+dispatch with the blocks bound, `dispatch_key_state`) and storage blocks
+(feature bit 1, `STORAGE_BLOCKS`; buffer variables in `UNIFORMS` with
+their places, flags2 bit 1, and their top-level arrays in the block);
+Mesa patch 0016 lets `prog_cache.c` hash the compute key's odd size on
+the 68k; `compare_v3dp.sh` 22 of 22 identical with `es31cs.comp`. Atomic
+counters and images are refused before the key-state draw or dispatch
+(the driver read their unbound slots: the host compiler crashed). The
+library: `ogles2_compile_compute*`, compute shaders in programs (a compute
+shader links alone; draws refuse a compute program), the reader's compute
+variants and recipe types (`SSBO_OFFSET`, `GET_SSBO_SIZE`,
+`NUM_WORK_GROUPS`, `SHARED_OFFSET`), `v3dcore/hw/v3d_csd.c` (the
+kernel's CSD registers and clean sequence; completion polled), and
+`compute.c`: `glDispatchCompute` and `glDispatchComputeIndirect`
+synchronous (the open job rendered first, the dispatch waited for under
+the GPU lock after `take_gpu`, so `glMemoryBarrier` and
+`glMemoryBarrierByRegion` only check their bits), the configuration words
+as `v3d_launch_grid` (one work group a supergroup), the uniform stream
+in the context's own GPU memory, storage buffers as their words
+(`ogles2_buffer_storage`; `cs_written` makes the CPU and draws copy them
+back, as transform feedback's), shared variables for every work group
+that can be in memory at once (`shared_groups`: the dispatch's, at most
+2^(16 - local index bits)), a dispatch refused (logged) with a storage
+block without a buffer or with textures (not yet). Not yet: robust
+storage access (the No MMU point above), textures in compute shaders,
+atomic counters, images. Item 6's program interface queries
+(`glGetProgramInterfaceiv`, `glGetProgramResourceIndex`, `_Name`, `iv`,
+`_Location`, Mesa's names and properties: unsized arrays named `[0]` with
+size 0; a storage block's stages from the stage maps, Mesa leaves its
+`stageref` 0). `m8_draw`'s `test_compute` (8 checks: 4 groups of 16 into
+a storage buffer, indirect, the errors, the queries): `m8-5` 47 of 47,
+163 of 163. dEQP-GLES31 `compute.basic` before the queries: 1 of 41 (the
+rest stopped at the missing queries, images and atomic counters failed
+to compile). **Open:** the three runs after that left the A1200 stuck
+before the package's script started (its old results not yet deleted;
+an upload alone went through in 10 s, then the machine stuck too); the
+cause is not known, and the shared-variable fix above (sized for one work
+group before) had not run yet. Next on the A1200: `m8-5` first, to see
+whether the machine is stable, then `compute.basic` watched.
 
 1. **Compute shaders.** The largest single piece:
    - `v3dcore`: a CSD submission path beside the binning/render one, under

@@ -8,12 +8,15 @@ this exits with status 1. Usage: v3dp_dump.py file.v3dp [--qpu]
 import struct, sys, zlib
 
 STAGES = {0: "vertex", 4: "fragment", 5: "compute"}
-VARIANT_STAGES = {0: "vertex", 1: "vertex binning", 4: "fragment"}
+VARIANT_STAGES = {0: "vertex", 1: "vertex binning", 4: "fragment", 5: "compute"}
 KINDS = {0: "uniform", 1: "constant", 2: "state"}
 SECTIONS = {1: "PROGRAM", 2: "STRINGS", 3: "STAGE_PARAMS", 4: "UNIFORMS", 5: "ATTRIBUTES",
             6: "VARIANT", 7: "UNIFORM_BLOCKS", 8: "INTERFACE", 9: "VARIANT_OF",
-            10: "TRANSFORM_FEEDBACK"}
+            10: "TRANSFORM_FEEDBACK", 11: "STORAGE_BLOCKS"}
 FEATURE_TF = 0x1  # format 2: transform feedback (a TRANSFORM_FEEDBACK section)
+FEATURE_STORAGE = 0x2  # ES 3.1: shader storage blocks (a STORAGE_BLOCKS section)
+FEATURE_COMPUTE = 0x4  # ES 3.1: a compute program
+FEATURES = FEATURE_TF | FEATURE_STORAGE | FEATURE_COMPUTE
 # Format 2 (ES3 programs) is written as major 0x8002 until release 2.1 (FORMAT.md).
 FORMAT2 = (2, 0x8002)
 PACKING = {0: "std140", 1: "shared", 2: "packed", 3: "std430"}
@@ -144,6 +147,16 @@ def fs_variant(r):
     return k, d
 
 
+def cs_variant(r):
+    k = key_common(r)
+    d = prog_data_common(r)
+    d["shared_size"] = r.u32()
+    d["local_size"] = [r.u16() for _ in range(3)]
+    d["can_use_supergroups"] = r.u8()
+    r.pad(1)
+    return k, d
+
+
 def nonzero(dic):
     """Fields worth printing: drop zeros and all-zero arrays."""
     out = []
@@ -210,13 +223,18 @@ def dump(path, show_qpu):
             mask = r.u32()
             features = r.u32() if v2 else 0
             r.done()
-            if features & ~FEATURE_TF:
-                raise Bad("unknown feature bits %08x" % (features & ~FEATURE_TF))
+            if features & ~FEATURES:
+                raise Bad("unknown feature bits %08x" % (features & ~FEATURES))
             if not v3dx and bool(features & FEATURE_TF) != any(s == 10 for s, _ in secs):
                 raise Bad("the transform feedback bit and section disagree")
-            print("PROGRAM hash %s, stages %s%s" %
+            if not v3dx and bool(features & FEATURE_STORAGE) != any(s == 11 for s, _ in secs):
+                raise Bad("the storage bit and section disagree")
+            if bool(features & FEATURE_COMPUTE) != (mask == 1 << 5):
+                raise Bad("the compute bit and the stages disagree")
+            print("PROGRAM hash %s, stages %s%s%s" %
                   (h, ", ".join(STAGES[s] for s in STAGES if mask & (1 << s)),
-                   ", transform feedback" if features & FEATURE_TF else ""))
+                   ", transform feedback" if features & FEATURE_TF else "",
+                   ", storage blocks" if features & FEATURE_STORAGE else ""))
         elif t == 2:
             print("STRINGS %d bytes" % len(payload))
         elif t == 3:
@@ -264,15 +282,17 @@ def dump(path, show_qpu):
                     if bi >= 0:
                         if nst:
                             raise Bad("block member with storage places")
-                        block = " block %d +%d astride %d mstride %d%s" % (
-                            bi, boff, astride, mstride, " row_major" if flags2 & 1 else "")
+                        block = " %s %d +%d astride %d mstride %d%s" % (
+                            "storage block" if flags2 & 2 else "block", bi, boff, astride, mstride,
+                            " row_major" if flags2 & 1 else "")
                     elif (boff, astride, mstride, flags2) != (-1, -1, -1, 0):
                         raise Bad("block fields outside a block")
                 fl = [f for b, f in ((1, "sampler"), (2, "builtin"), (4, "hidden")) if flags & b]
                 print("  %-24s type 0x%04x%s %s %s%s%s" %
                       (string(strings, nm), gtype, "[%d]" % arr if arr else "", ",".join(fl),
                        " ".join(places),
-                       " units vs=%s fs=%s" % tuple("-" if x == 0xffffffff else x for x in samp)
+                       " units %s" % " ".join("%s=%s" % (w, "-" if x == 0xffffffff else x)
+                                              for w, x in zip(("vs/cs", "fs"), samp))
                        if flags & 1 else "", block))
             r.done()
             nuniforms = n
@@ -294,6 +314,8 @@ def dump(path, show_qpu):
                 k, d = vs_variant(r)
             elif stage == 4:
                 k, d = fs_variant(r)
+            elif stage == 5:
+                k, d = cs_variant(r)
             else:
                 raise Bad("variant stage %d" % stage)
             n = r.u32()
@@ -335,6 +357,29 @@ def dump(path, show_qpu):
                 if any(b >= n for b in blocks):
                     raise Bad("stage map names a block past the last")
                 print("  %s: unit i+1 -> block %s" % (STAGES.get(stage, stage), blocks))
+            r.done()
+        elif t == 11 and v2:
+            n = r.u32()
+            print("STORAGE_BLOCKS %d" % n)
+            for _ in range(n):
+                nm, binding, size, stageref, packing, nmem = (r.u32(), r.u32(), r.u32(), r.u32(),
+                                                              r.u32(), r.u32())
+                triples = [r.u32s(3) for _ in range(nmem)]  # member, top-level array size, stride
+                members = [t[0] for t in triples]
+                if packing not in PACKING:
+                    raise Bad("block packing %d" % packing)
+                if nuniforms is not None and any(m >= nuniforms for m in members):
+                    raise Bad("block member outside UNIFORMS")
+                print("  %-24s binding %d, %d bytes, %s, stages %s, members %s" %
+                      (string(strings, nm), binding, size, PACKING[packing],
+                       ",".join(STAGES[s] for s in STAGES if stageref & (1 << s)),
+                       ["%d (top-level %d, stride %d)" % tuple(t) for t in triples]))
+            for _ in range(r.u32()):
+                stage, m = r.u32(), r.u32()
+                blocks = r.u32s(m)
+                if any(b >= n for b in blocks):
+                    raise Bad("stage map names a block past the last")
+                print("  %s: buffer i -> block %s" % (STAGES.get(stage, stage), blocks))
             r.done()
         elif t == 8 and v2:
             n = r.u32()
