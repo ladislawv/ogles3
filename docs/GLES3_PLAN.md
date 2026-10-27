@@ -126,7 +126,7 @@ Mesa's driver, so they could follow later as an extension
     its notes say which it left out. A1200 time is scarce; the 2026-10-26
     run spent hours on 1212 `transform_feedback` cases that could only
     fail.
-  - **Compiling on the PC (proposed 2026-10-27, not built):** the A1200
+  - **Compiling on the PC (built 2026-10-27; its A1200 test below):** the A1200
     spends most of a shader group's time in the compiler (a
     `builtin_functions.precision` case: 0.7 s for the program, 2.9 s for
     its variants; a 500-case chunk 45 minutes), the host `v3dglslc` 15 ms
@@ -144,22 +144,45 @@ Mesa's driver, so they could follow later as an extension
       CRC, the output file's name, and for `V3DGLSL_COMPILE_VARIANT` the
       existing `.v3dx` (its variants are kept, `v3dp_write_variants`). The
       answer (result, log, the written file: `.v3dp`, `.v3dw`, `.v3da` or
-      `.v3dx` by op) is written to `out_path` and the request replied.
-      `V3DGLSL_QUIT` is freed and ignored (each `Run-M1`'s `Avail FLUSH`
-      expunges the library, which sends it); Ctrl-C ends it. With no PC
-      connected, or the link lost, it hands requests to a local server
-      under another port name (`v3dglslc SERVER` with a port-name
-      argument), so a run goes on, slowly.
-    - `v3dglslc` on the host: a `SERVE` mode reading frames on stdin and
-      answering on stdout, the Amiga server's dispatch (`serve()`'s
-      request handling, which uses nothing of exec's) shared between the
-      two.
+      `.v3dx` by op) is written next to `out_path` and the request
+      replied. `V3DGLSL_QUIT` (each `Run-M1`'s `Avail FLUSH` expunges the
+      library, which sends it) does not end it: it goes on to the bridge,
+      which starts its compiler anew, as the local server would be (a
+      program's default variants can depend on the program compiled before
+      it in the same process: `es3uni` after `es3tex`, 7 bytes, its CRC and
+      three in its variants; in the A1200's server too, not yet looked
+      into). Ctrl-C ends it; `WAIT` waits for a local server to leave
+      first. With no bridge connected, or the link lost, it removes its
+      port, starts the local `v3dglslc SERVER` (`COMPILER`), hands it the
+      request and the queued ones and ends: a run goes on, slowly.
+      `tools/amictl/server/v3dglslc_remote.c`, 20 KB
+      (`$(B)/amictl/v3dglslc-remote`).
+    - `v3dglslc` on the host: `SERVE` reads the requests as frames on
+      stdin and answers on stdout (`serve_stdio`); both servers call one
+      `handle()`, and `v3dglsl_port.h`'s `V3DGLSL_OPS_ONLY` gives the host
+      the op codes without Exec.
     - `tools/amictl/compile_bridge.py`: connects to the A1200's 6802
-      with the station's token, runs the host `v3dglslc SERVE`, and pipes
-      frames between them.
-    The test packages start `v3dglslc-remote` before dEQP when a bridge
-    answers. A run's compiles then cost a network round trip each (a few
-    KB each way); the A1200's own compiler keeps its runs in the
+      with the station's token, runs the host `v3dglslc SERVE`, each
+      request in a directory of its own (the `.v3dx` sent along placed
+      there first), and sends back the files written or changed.
+      `--check`: the 25 test programs through that path, 25 identical to
+      the command line's files.
+    **On the A1200 (2026-10-27):** started with `WAIT` in the middle of
+    the whole run, it took the port at the next chunk and compiled the
+    last 21 chunks' programs on the PC (about 12,500 requests, none
+    failing; a program 40 ms, the round trip and the file's writing
+    included, against 3.6 s; a 500-case chunk 2.5 minutes instead of 45).
+    The same 56 `texture_functions.texture` cases into fresh caches, once
+    with the A1200's compiler and once through the PC: 95 files, all
+    identical (`ogles2-m8-2-20261027-123827`, `-123926`). How (no
+    wrapper script yet): start `python3 tools/amictl/compile_bridge.py`
+    on the PC (after `. ./local.env`: the host compiler), put
+    `$B/amictl/v3dglslc-remote` into the package's `bin/` and `amictl start
+    -d <package> bin/v3dglslc-remote WAIT COMPILER=<package>/libs/v3dglslc`
+    before the runs, `amictl abort <job>` after them.
+    The test packages can start `v3dglslc-remote` before dEQP when a
+    bridge answers. A run's compiles then cost a network round trip each
+    (a few KB each way); the A1200's own compiler keeps its runs in the
     m8-1 package (it is what users run).
   - **The GLES2 regression set** (§3): the packages take `B`, `BS`, `V`
     from `local.env`, except `m5-1`, `m6-6`, `m6-8`, `m6-10`, `m7-2` and
@@ -226,9 +249,22 @@ Mesa's driver, so they could follow later as an extension
     `fbo` 2032 of 2075 and none failing, `fragment_ops` 3174 of 3174.
     Since then glCopyTexSubImage3D and ES 3.0's texture errors (item 8):
     `negative_api` 287 of 314, the rest stage C's; and `EXT_frag_depth`
-    (item 12, now done); every `ubo` case passes. Next: item 8's base
-    levels beyond 0 (no dEQP case fails on them), then stage B's whole
-    dEQP-GLES3 run.
+    (item 12, now done); every `ubo` case passes. **Stage B's whole
+    dEQP-GLES3 run (2026-10-26 to 27):** the 75 groups, the shader groups
+    in chunks of 500 cases (`ogles2-m8-2-20261026-*` to
+    `-20261027-0920-chain`; the last 26 chunks as one script on the A1200,
+    their programs since 11:45 compiled on the PC, below). Failing,
+    stage B's: the 336 `operator.binary_operator.*shift*` cases at highp
+    (every one; all 672 at lowp and mediump pass; with the A1200's own
+    compiler too, `ogles2-m8-2-20261027-123631`): shift amounts to 27
+    and 28 bits, not yet looked into (the GPU's code, or dEQP's reference
+    on the 68k); `derivate.dfdx.texture.basic.float_mediump`, 12 pixels;
+    and the 10 of `state_query` and `lifetime` fixed since (§5 items 2
+    and 11; their A1200 run next). The rest of the failures are stage
+    C's (transform feedback, multisampling, program binaries), whose
+    groups later runs leave out (below). Next: the shifts, the 10 fixes on
+    the A1200, item 8's base levels beyond 0 (no dEQP case fails on
+    them).
     **Trap:**
     `ports/deqp/build.sh` copies the CTS with `rsync -a`, which keeps the
     sources' old dates, so a patch changed or removed rebuilds nothing:

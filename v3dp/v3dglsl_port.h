@@ -19,7 +19,11 @@
 #ifndef V3DGLSL_PORT_H
 #define V3DGLSL_PORT_H
 
+/* V3DGLSL_OPS_ONLY: the op codes and key flags alone, for code without
+ * Exec (the host compiler's SERVE, tools/amictl/compile_bridge.py's peer). */
+#ifndef V3DGLSL_OPS_ONLY
 #include <exec/ports.h>
+#endif
 
 #define V3DGLSL_PORT_NAME "v3dglsl compiler"
 #define V3DGLSL_VERSION   1
@@ -53,6 +57,7 @@
                                            * v3d_update_compiled_vs), whatever its bytes say:
                                            * both variants in one request */
 
+#ifndef V3DGLSL_OPS_ONLY
 struct V3DGLSLRequest
 {
     struct Message msg;   /* mn_ReplyPort: the sender's */
@@ -71,5 +76,6 @@ struct V3DGLSLRequest
     ULONG keys_len;
     ULONG layout_crc;     /* the program's .v3dp's (FORMAT.md, VARIANT_OF) */
 };
+#endif
 
 #endif
