@@ -381,6 +381,26 @@ int main(int argc, char **argv)
         check(glGetError() == GL_INVALID_ENUM, "ES 2.0: GL_COPY_READ_BUFFER is GL_INVALID_ENUM");
         glBindVertexArray(0);
         check(glGetError() == GL_INVALID_OPERATION, "ES 2.0: glBindVertexArray is GL_INVALID_OPERATION");
+        {
+            /* OES_vertex_array_object and EXT_instanced_arrays: ES 3.0's
+             * objects and divisors through the extensions' entries */
+            const char *ext = (const char *)glGetString(GL_EXTENSIONS);
+            GLuint a = 0;
+            GLint b = -5, d = -5;
+            glGenVertexArraysOES(1, &a);
+            glBindVertexArrayOES(a);
+            glVertexAttribDivisorEXT(1, 3);
+            glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &b);
+            glGetVertexAttribiv(1, GL_VERTEX_ATTRIB_ARRAY_DIVISOR, &d);
+            check(ext && strstr(ext, "GL_OES_vertex_array_object") && strstr(ext, "GL_EXT_instanced_arrays") &&
+                      a && glIsVertexArrayOES(a) && b == (GLint)a && d == 3 && glGetError() == GL_NO_ERROR,
+                  "ES 2.0: OES_vertex_array_object's object holds EXT_instanced_arrays' divisor");
+            glBindVertexArrayOES(0);
+            glGetVertexAttribiv(1, GL_VERTEX_ATTRIB_ARRAY_DIVISOR, &d);
+            glDeleteVertexArraysOES(1, &a);
+            check(d == 0 && !glIsVertexArrayOES(a) && glGetError() == GL_NO_ERROR,
+                  "ES 2.0: object 0's divisor 0 again; the object deleted");
+        }
         glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, &v);
         check(v == -5 && glGetError() == GL_INVALID_ENUM, "ES 2.0: GL_TEXTURE_COMPARE_MODE is GL_INVALID_ENUM");
         glDeleteTextures(1, &t);
@@ -602,6 +622,41 @@ int main(int argc, char **argv)
             check(ok, "ES 3.0: deleting the bound object binds object 0; its name is gone");
             glDeleteVertexArrays(1, va + 1);
             glDeleteBuffers(1, &bu);
+        }
+        { /* dEQP-GLES3 state_query.integers.element_array_buffer_binding, lifetime's buffer_vertex_array */
+            static const GLubyte idx[4] = { 7, 6, 5, 4 };
+            GLuint va[2], bu[2];
+            GLint el = -1, ab = -1;
+            const GLubyte *p;
+            int ok;
+            glGenVertexArrays(2, va);
+            glGenBuffers(2, bu);
+            glBindVertexArray(va[1]);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bu[1]);
+            if (!nogpu) /* glBufferData times itself */
+                glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4, idx, GL_STATIC_DRAW);
+            glBindBuffer(GL_ARRAY_BUFFER, bu[1]);
+            glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_FALSE, 0, 0);
+            glBindVertexArray(va[0]);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bu[0]);
+            glDeleteBuffers(2, bu);
+            glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &el);
+            ok = el == 0 && !glIsBuffer(bu[1]);
+            glBindVertexArray(va[1]);
+            glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &el);
+            glGetVertexAttribiv(2, GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING, &ab);
+            ok = ok && el == (GLint)bu[1] && ab == (GLint)bu[1];
+            if (!nogpu) {
+                p = glMapBufferRange(GL_ELEMENT_ARRAY_BUFFER, 0, 4, GL_MAP_READ_BIT);
+                ok = ok && p && p[0] == 7 && p[3] == 4;
+                glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+            }
+            ok = ok && glGetError() == GL_NO_ERROR;
+            check(ok, "ES 3.0: a deleted buffer stays in the vertex array objects not bound, data and all");
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); /* one reference left: the array's */
+            glBindVertexArray(0);
+            glDeleteVertexArrays(2, va); /* and the buffer with it */
+            check(glGetError() == GL_NO_ERROR, "ES 3.0: the last reference gone, the deleted buffer too");
         }
         if (!nogpu) { /* glTex(Sub)Image2D time themselves too */
             GLuint tx;

@@ -119,7 +119,48 @@ Mesa's driver, so they could follow later as an extension
     m8-2` after `. ./local.env`), groups with `python ports/deqp/run_groups.py
     --package=m8-2 <group>...` (patch `gles3/0001`, which let a run go on
     past the state reset stage A's library refused, is gone since
-    2026-10-25: §5 item 13).
+    2026-10-25: §5 item 13). **Only groups of features the library has**
+    (the developer, 2026-10-27): a run leaves out the groups of a later
+    stage's work (stage C: `transform_feedback`, `multisample`, program
+    binaries in `shader_api`, and the like) until that stage starts, and
+    its notes say which it left out. A1200 time is scarce; the 2026-10-26
+    run spent hours on 1212 `transform_feedback` cases that could only
+    fail.
+  - **Compiling on the PC (proposed 2026-10-27, not built):** the A1200
+    spends most of a shader group's time in the compiler (a
+    `builtin_functions.precision` case: 0.7 s for the program, 2.9 s for
+    its variants; a 500-case chunk 45 minutes), the host `v3dglslc` 15 ms
+    a program with its variants (`tools/v3dglslc/test/shaders`, one
+    process), and the two write the same files byte for byte
+    (`compare_v3dp.sh`). The library needs no change: it sends every
+    request to the public port `v3dglsl compiler` and starts its own
+    server only when the port is missing (`compiler.c`'s `send`). Three
+    parts:
+    - `v3dglslc-remote` on the A1200 (GCC 6 + libnix and Roadshow's
+      `bsdsocket.library`, as `amictld`): adds the port, listens on TCP
+      6802 (the PC connects to it, as to `amictld`: no inbound port on the
+      PC, which WSL's NAT and Windows' firewall would need), and turns each
+      request into a frame: op, both sources, bindings, keys and layout
+      CRC, the output file's name, and for `V3DGLSL_COMPILE_VARIANT` the
+      existing `.v3dx` (its variants are kept, `v3dp_write_variants`). The
+      answer (result, log, the written file: `.v3dp`, `.v3dw`, `.v3da` or
+      `.v3dx` by op) is written to `out_path` and the request replied.
+      `V3DGLSL_QUIT` is freed and ignored (each `Run-M1`'s `Avail FLUSH`
+      expunges the library, which sends it); Ctrl-C ends it. With no PC
+      connected, or the link lost, it hands requests to a local server
+      under another port name (`v3dglslc SERVER` with a port-name
+      argument), so a run goes on, slowly.
+    - `v3dglslc` on the host: a `SERVE` mode reading frames on stdin and
+      answering on stdout, the Amiga server's dispatch (`serve()`'s
+      request handling, which uses nothing of exec's) shared between the
+      two.
+    - `tools/amictl/compile_bridge.py`: connects to the A1200's 6802
+      with the station's token, runs the host `v3dglslc SERVE`, and pipes
+      frames between them.
+    The test packages start `v3dglslc-remote` before dEQP when a bridge
+    answers. A run's compiles then cost a network round trip each (a few
+    KB each way); the A1200's own compiler keeps its runs in the
+    m8-1 package (it is what users run).
   - **The GLES2 regression set** (§3): the packages take `B`, `BS`, `V`
     from `local.env`, except `m5-1`, `m6-6`, `m6-8`, `m6-10`, `m7-2` and
     `m7-3`, whose `B` is the sync build (`B=$BS V=$V bash
@@ -1265,7 +1306,21 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    (`ogles2_buffer_pixels`; past the end or mapped, `GL_INVALID_OPERATION`),
    and the library's own images and reads set it aside
    (`OGLES2PixelStore.own`). Deleting unbinds a buffer from all of them in
-   every member. Not yet: the references that keep a deleted buffer alive.
+   every member. **References done (2026-10-27, under vamos; the A1200
+   run waits for the whole run's end):** a buffer deleted while a vertex
+   array object not bound uses it leaves the name table (its name is free
+   again, `glIsBuffer` false) and waits on the share group's
+   `orphans` list, data and GPU copies kept; the object still answers its
+   old name and draws from it. Each dropped reference
+   (`glVertexAttribPointer`, the element binding, `glDeleteVertexArrays`,
+   the context's end) calls `ogles2_buffer_release`, which frees a deleted
+   buffer no member's arrays, element binding or other objects use
+   (`in_use`, `ogles2_vao_uses_buffer`). The indexed bindings are the
+   context's own state and are unbound (ES 3.0 2.9.1); transform feedback
+   objects (stage C) will be the other holder. For dEQP-GLES3's
+   `state_query.integers.element_array_buffer_binding*` (4) and
+   `lifetime.attach.deleted_*.buffer_vertex_array` (2). `m8_es3`'s check
+   (95 of 95 under vamos; on the A1200 the data read back too).
    `m8_es3`'s targets, bindings, ranges and errors (under vamos without
    `glBufferData`: it times itself on the Pi's system timer, which vamos
    lacks); `m8_draw`'s texel from an unpack buffer, the pixel read into a
@@ -1295,8 +1350,8 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    loads the new one's and the draw path is unchanged (object 0's waits
    meanwhile). Stage D's attribute bindings will split the arrays into
    formats and bindings then. Client arrays are refused in an object but
-   0. A deleted buffer is unbound from the context's other objects too
-   (ES 3.0 keeps it alive there: item 2's references). Not yet:
+   0. A deleted buffer stays in the context's other objects (item 2's
+   references, 2026-10-27). Not yet:
    `OES_vertex_array_object` in GLES2 contexts (and with it dropping patch
    0004). `m8_es3`'s state and errors, `m8_draw`'s two objects with their
    own buffers, one with an element buffer (`ogles2-m8-1-20261025-141310`:
@@ -1414,6 +1469,31 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    the machine came of the long run before it (1387 cases in one dEQP
    process), not of the case; if a whole run stops there again, that is
    the place to look (the compiler server's memory after many programs).
+   **The whole run's stops (2026-10-27):** three more, each in a case that
+   passes alone. `texture_functions` case 518, an invalid shader the
+   host compiler refuses cleanly; `builtin_functions` chunk 00, where
+   only the network died (ping unreachable, Workbench usable) while dEQP
+   finished its 500 cases (all pass) an hour later on its own; chunk 01
+   after 30 minutes (209 cases, fresh boot and process), the machine
+   frozen but for the mouse pointer, the synchronous log ending at
+   `cosh.highp_vertex.vec2`'s program compile (alone: 4 of 4 in 50 s). The
+   compiler server has its 4 MB stack (`NP_StackSize` holds; sampled on
+   the A1200 with a task lister), priority 0, as are Roadshow's
+   `TCP/IP Control` and the `genet` driver. A frozen machine whose pointer
+   moves keeps `input.device` (priority 20) running: something busy above
+   the other tasks, or a deadlock, during heavy compiling. The likely
+   cause: the package's `cache/` on the A1200 (`Stuff:`, PFS3 on the SD
+   card, 98% full) was never emptied since 2026-10-24 and holds every
+   program dEQP compiled, so many files that listing it timed out after
+   5 minutes; every compile looks up and creates files in it, and a DOS
+   handler runs above the priority-0 tasks (Workbench, Roadshow, `genet`,
+   dEQP), which fits the frozen machine with a moving pointer and ping
+   taking 14-41 ms instead of 1. Moved aside (`cache-old`) for the rest of
+   the run, which goes as one script on the Amiga with a sampler (task
+   list and `Avail` every 30 s into `results/tasks.log`), so a stop leaves
+   the state before it. If it holds, the library's cache wants
+   subdirectories (by the hash's first digits) before 2.0, since a cache
+   is never pruned.
 7. **Sampler objects** (`glGenSamplers`, ...): the sampler state record per
    unit from the sampler object when one is bound (`ogles2_texture_state`).
    The texture's cached records (`texture.c:2765-2771`) are keyed on the
@@ -1773,8 +1853,8 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
     the closest variant of an ES3 one without a compiler can do it. Left:
     GLES2 (format 1) programs cannot draw into 32-bit float or integer
     targets (they get no variant of the width: stage C's request codes);
-    textures in `DEPTH32F_STENCIL8` hold the depth only (their stencil is
-    not attachable); the blend colour is still clamped when set; the
+    (textures in `DEPTH32F_STENCIL8` have their stencil since: item 11's
+    "Then"); the blend colour is still clamped when set; the
     built-ins for 32-bit targets are the CPU's fill and the no-colour
     program rather than precompiled variants.
 11. **Framebuffers:** separate draw and read framebuffer bindings
@@ -1805,7 +1885,11 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
     `GL_STENCIL`; on an empty attachment `OBJECT_NAME` 0 and
     `GL_INVALID_OPERATION` for the rest; the new `*_SIZE`, `COMPONENT_TYPE`,
     `COLOR_ENCODING` and `TEXTURE_LAYER` names; dEQP-GLES3's
-    `fbo.api.attachment_query_empty_fbo`), and ES 3.0's completeness rules
+    `fbo.api.attachment_query_empty_fbo`; since 2026-10-27 an image
+    without storage answers sizes 0 and `COMPONENT_TYPE` `GL_NONE`
+    (`att_specified`), and `GL_DEPTH_STENCIL_ATTACHMENT` both its sizes:
+    `state_query.fbo`'s 4 failures, `m8_draw`'s attachment queries), and
+    ES 3.0's completeness rules
     in ES3 contexts (`fbo.c`'s `status_of`; dEQP-GLES3's checker,
     `es3fFboCompletenessTests.cpp:179-240`): attachments of different sizes
     are complete and drawing covers their common area (no

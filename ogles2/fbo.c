@@ -1962,6 +1962,18 @@ static void tex_bits(const struct OGLES2Attachment *at, GLint *r, GLint *g, GLin
     if (ty == GL_HALF_FLOAT_OES) { *r = *g = *b = 16; *a = f == GL_RGBA ? 16 : 0; }
 }
 
+/* Whether an attachment's image has storage: a renderbuffer's
+ * glRenderbufferStorage, a texture level's glTexImage. ES 3.0 6.1.13: the
+ * sizes of one without are 0, its component type GL_NONE. */
+static BOOL att_specified(const struct OGLES2Attachment *at)
+{
+    UWORD w, h;
+    GLenum f, ty;
+    if (at->type == GL_RENDERBUFFER)
+        return at->rb->w != 0;
+    return ogles2_texture_image(at->tex, at->face, at->level, &w, &h, &f, &ty);
+}
+
 /* EXT_color_buffer_half_float, ES 3.0: an attachment's component type. */
 static GLint component_type(const struct OGLES2Attachment *at, int a)
 {
@@ -2044,6 +2056,7 @@ void ogles2_glGetFramebufferAttachmentParameteriv(struct OGLES2Context *ctx, GLe
     BOOL es3;
     GLint bits[6];
     int a, which;
+    BOOL both = FALSE;
     if (!ogles2_context_valid(ctx) || !params)
         return;
     es3 = ogles2_es3(ctx);
@@ -2103,6 +2116,7 @@ void ogles2_glGetFramebufferAttachmentParameteriv(struct OGLES2Context *ctx, GLe
             return;
         }
         a = ATT_DEPTH;
+        both = TRUE; /* its depth and its stencil sizes */
     }
     at = &fb->att[a];
     if (pname == GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE) {
@@ -2142,7 +2156,7 @@ void ogles2_glGetFramebufferAttachmentParameteriv(struct OGLES2Context *ctx, GLe
         }
         break;
     case GL_FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE_EXT:
-        *params = component_type(at, a);
+        *params = !es3 || att_specified(at) ? component_type(at, a) : GL_NONE;
         return;
     case GL_FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING:
         if (es3) {
@@ -2159,6 +2173,10 @@ void ogles2_glGetFramebufferAttachmentParameteriv(struct OGLES2Context *ctx, GLe
     case GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE:
         if (!es3)
             break;
+        if (!att_specified(at)) {
+            *params = 0;
+            return;
+        }
         bits[0] = bits[1] = bits[2] = bits[3] = bits[4] = bits[5] = 0;
         if (a < ATT_DEPTH) {
             if (at->type == GL_TEXTURE)
@@ -2172,16 +2190,16 @@ void ogles2_glGetFramebufferAttachmentParameteriv(struct OGLES2Context *ctx, GLe
         } else if (at->type == GL_RENDERBUFFER) {
             GLint r, g, b, al;
             rb_bits(at->rb->format, &r, &g, &b, &al, &bits[4], &bits[5]);
-            if (a == ATT_DEPTH)
+            if (a == ATT_DEPTH && !both)
                 bits[5] = 0;
-            else
+            else if (a == ATT_STENCIL)
                 bits[4] = 0;
         } else {
             UBYTE db;
             BOOL st;
             if (ogles2_texture_depth(at->tex, at->level, &db, &st)) {
                 bits[4] = a == ATT_DEPTH ? db : 0;
-                bits[5] = a == ATT_STENCIL && st ? 8 : 0;
+                bits[5] = (a == ATT_STENCIL || both) && st ? 8 : 0;
             }
         }
         *params = bits[pname - GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE];

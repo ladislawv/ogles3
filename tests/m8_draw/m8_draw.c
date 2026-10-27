@@ -1404,6 +1404,77 @@ static void test_copy3d(void)
     glDeleteTextures(2, t);
 }
 
+/* OES_vertex_array_object and EXT_instanced_arrays through their own
+ * entries, with a GLSL ES 1.00 program: two instances of one triangle,
+ * the colour an instanced attribute's (the last instance's shows). */
+static void test_instanced_ext(void)
+{
+    static const GLfloat col[8] = { 1, 0, 0, 1, 0, 1, 0, 1 }; /* red, green */
+    static const GLushort idx[3] = { 0, 1, 2 };
+    GLuint p = program("inst100"), a = 0;
+    GLint pos, c;
+    int ok;
+    if (!p) {
+        check(0, "EXT_instanced_arrays: inst100 links");
+        return;
+    }
+    pos = glGetAttribLocation(p, "pos");
+    c = glGetAttribLocation(p, "col");
+    glGenVertexArraysOES(1, &a);
+    glBindVertexArrayOES(a);
+    glUseProgram(p);
+    glVertexAttribPointer((GLuint)pos, 2, GL_FLOAT, GL_FALSE, 0, cover);
+    glEnableVertexAttribArray((GLuint)pos);
+    glVertexAttribPointer((GLuint)c, 4, GL_FLOAT, GL_FALSE, 0, col);
+    glEnableVertexAttribArray((GLuint)c);
+    glVertexAttribDivisorEXT((GLuint)c, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawArraysInstancedEXT(GL_TRIANGLES, 0, 3, 2);
+    ok = pixel_is(30, 30, 0, 255, 0, 255, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawElementsInstancedEXT(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, idx, 1); /* one: the first colour */
+    ok = ok && pixel_is(30, 30, 255, 0, 0, 255, 0);
+    glBindVertexArrayOES(0);
+    glDeleteVertexArraysOES(1, &a);
+    check(ok && glGetError() == GL_NO_ERROR,
+          "EXT_instanced_arrays: an instanced colour in an OES_vertex_array_object object, both draws");
+    glDeleteProgram(p);
+}
+
+/* dEQP-GLES3 state_query.fbo: the sizes and component type of attachments
+ * without storage are 0 and GL_NONE; GL_DEPTH_STENCIL_ATTACHMENT answers
+ * both sizes of a depth and stencil renderbuffer. */
+static void test_attachment_queries(void)
+{
+    GLuint fb, rb, tx;
+    GLint r = -1, ct = -1, tr = -1, d = -1, s = -1;
+    glGenFramebuffers(1, &fb);
+    glGenRenderbuffers(1, &rb);
+    glGenTextures(1, &tx);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb);
+    glBindRenderbuffer(GL_RENDERBUFFER, rb);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, rb);
+    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE, &r);
+    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                          GL_FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE, &ct);
+    glBindTexture(GL_TEXTURE_2D, tx);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tx, 0);
+    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE, &tr);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 16, 16);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rb);
+    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+                                          GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE, &d);
+    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+                                          GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE, &s);
+    check(r == 0 && ct == GL_NONE && tr == 0 && d == 24 && s == 8 && glGetError() == GL_NO_ERROR,
+          "attachment queries: no storage 0 and GL_NONE; depth and stencil 24 and 8");
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDeleteFramebuffers(1, &fb);
+    glDeleteRenderbuffers(1, &rb);
+    glDeleteTextures(1, &tx);
+}
+
 /* EXT_frag_depth: a GLSL ES 1.00 program's gl_FragDepthEXT is tested
  * against the cleared 0.5 (its triangle's own depth is 0.5 too), in an
  * object with a depth renderbuffer (the context has none). */
@@ -1980,6 +2051,8 @@ int main(void)
     test_rb_resize();
     test_copy3d();
     test_frag_depth();
+    test_instanced_ext();
+    test_attachment_queries();
     check(glGetError() == GL_NO_ERROR, "no GL error left over");
     aglDestroyContext(ctx);
     if ((ctx = aglCreateContextTags2(&e, OGLES2_CCT_BITMAP, (ULONG)bm, OGLES2_CCT_PISTORM_ES_VERSION, 30,

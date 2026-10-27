@@ -133,6 +133,7 @@ static BOOL set_pointer(struct OGLES2Context *ctx, GLuint index, GLint size, GLe
                         GLsizei stride, const void *pointer, GLboolean integer)
 {
     struct OGLES2Array *a;
+    struct OGLES2Buffer *old;
     if (!ogles2_context_valid(ctx))
         return FALSE;
     if (index >= OGLES2_MAX_VERTEX_ATTRIBS || size < 1 || size > 4 || stride < 0) {
@@ -154,6 +155,7 @@ static BOOL set_pointer(struct OGLES2Context *ctx, GLuint index, GLint size, GLe
         return FALSE;
     }
     a = &ctx->array[index];
+    old = a->buffer;
     a->size = size;
     a->type = type;
     a->normalized = normalized ? GL_TRUE : GL_FALSE;
@@ -161,6 +163,8 @@ static BOOL set_pointer(struct OGLES2Context *ctx, GLuint index, GLint size, GLe
     a->pointer = pointer;
     a->buffer = ogles2_buffer_array(ctx); /* GLES 2.0 2.9: captured now */
     a->integer = integer;
+    if (old != a->buffer)
+        ogles2_buffer_release(ctx, old); /* a vertex array object's deleted buffer */
     return TRUE;
 }
 
@@ -184,15 +188,26 @@ void ogles2_glVertexAttribIPointer(struct OGLES2Context *ctx, GLuint index, GLin
     set_pointer(ctx, index, size, type, GL_FALSE, stride, pointer, GL_TRUE);
 }
 
-void ogles2_glVertexAttribDivisor(struct OGLES2Context *ctx, GLuint index, GLuint divisor)
+static void attrib_divisor(struct OGLES2Context *ctx, GLuint index, GLuint divisor)
 {
-    if (!ogles2_es3_entry(ctx))
-        return;
     if (index >= OGLES2_MAX_VERTEX_ATTRIBS) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
     ctx->array[index].divisor = divisor;
+}
+
+void ogles2_glVertexAttribDivisor(struct OGLES2Context *ctx, GLuint index, GLuint divisor)
+{
+    if (ogles2_es3_entry(ctx))
+        attrib_divisor(ctx, index, divisor);
+}
+
+/* EXT_instanced_arrays (GLES2 contexts; ES3 ones have both) */
+void ogles2_glVertexAttribDivisorEXT(struct OGLES2Context *ctx, GLuint index, GLuint divisor)
+{
+    if (ogles2_context_valid(ctx))
+        attrib_divisor(ctx, index, divisor);
 }
 
 static void enable_array(struct OGLES2Context *ctx, GLuint index, GLboolean on)
@@ -235,13 +250,15 @@ void ogles2_glGetVertexAttribiv(struct OGLES2Context *ctx, GLuint index, GLenum 
     case GL_VERTEX_ATTRIB_ARRAY_TYPE:           *params = (GLint)a->type; break;
     case GL_VERTEX_ATTRIB_ARRAY_NORMALIZED:     *params = a->normalized; break;
     case GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING: *params = (GLint)ogles2_buffer_name(a->buffer); break;
-    case GL_VERTEX_ATTRIB_ARRAY_DIVISOR:
+    case GL_VERTEX_ATTRIB_ARRAY_DIVISOR: /* also EXT_instanced_arrays' */
+        *params = (GLint)a->divisor;
+        break;
     case GL_VERTEX_ATTRIB_ARRAY_INTEGER:
         if (!ogles2_es3(ctx)) {
             ogles2_error(ctx, GL_INVALID_ENUM);
             break;
         }
-        *params = pname == GL_VERTEX_ATTRIB_ARRAY_DIVISOR ? (GLint)a->divisor : a->integer;
+        *params = a->integer;
         break;
     case GL_CURRENT_VERTEX_ATTRIB:
         for (k = 0; k < 4; k++)
@@ -2465,6 +2482,12 @@ void ogles2_glDrawArraysInstanced(struct OGLES2Context *ctx, GLenum mode, GLint 
         draw_instances(ctx, mode, first, count, instancecount);
 }
 
+void ogles2_glDrawArraysInstancedEXT(struct OGLES2Context *ctx, GLenum mode, GLint first, GLsizei count,
+                                     GLsizei instancecount)
+{
+    draw_instances(ctx, mode, first, count, instancecount);
+}
+
 /* glDrawElements, and with a base vertex added to every index
  * (OES_draw_elements_base_vertex): the copied range moves by basevertex,
  * the rebased indices stay as they are. With `range` (glDrawRangeElements)
@@ -2616,17 +2639,29 @@ void ogles2_glDrawElements(struct OGLES2Context *ctx, GLenum mode, GLsizei count
     draw_elements(ctx, mode, count, type, indices, 0, 0, 1, "glDrawElements");
 }
 
-void ogles2_glDrawElementsInstanced(struct OGLES2Context *ctx, GLenum mode, GLsizei count, GLenum type,
-                                    const void *indices, GLsizei instancecount)
+static void elements_instanced(struct OGLES2Context *ctx, GLenum mode, GLsizei count, GLenum type,
+                               const void *indices, GLsizei instancecount)
 {
-    if (!ogles2_es3_entry(ctx))
-        return;
     if (instancecount < 0) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
     if (instancecount)
         draw_elements(ctx, mode, count, type, indices, 0, 0, instancecount, "glDrawElementsInstanced");
+}
+
+void ogles2_glDrawElementsInstanced(struct OGLES2Context *ctx, GLenum mode, GLsizei count, GLenum type,
+                                    const void *indices, GLsizei instancecount)
+{
+    if (ogles2_es3_entry(ctx))
+        elements_instanced(ctx, mode, count, type, indices, instancecount);
+}
+
+void ogles2_glDrawElementsInstancedEXT(struct OGLES2Context *ctx, GLenum mode, GLsizei count, GLenum type,
+                                       const void *indices, GLsizei instancecount)
+{
+    if (ogles2_context_valid(ctx))
+        elements_instanced(ctx, mode, count, type, indices, instancecount);
 }
 
 void ogles2_glDrawElementsBaseVertexOES(struct OGLES2Context *ctx, GLenum mode, GLsizei count,

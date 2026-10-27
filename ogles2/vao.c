@@ -1,5 +1,6 @@
 /*
- * Vertex array objects (ES 3.0; docs/GLES3_PLAN.md §5 item 3): a context's
+ * Vertex array objects (ES 3.0, and OES_vertex_array_object in GLES2
+ * contexts; docs/GLES3_PLAN.md §5 item 3): a context's
  * attribute arrays and element buffer binding, by name. Not shared: each
  * context has its own (ES 3.0 appendix D).
  *
@@ -54,14 +55,12 @@ static void bind(struct OGLES2Context *ctx, struct OGLES2VaoState *vs, struct OG
     vs->bound = to == &vs->zero ? 0 : to;
 }
 
-void ogles2_glGenVertexArrays(struct OGLES2Context *ctx, GLsizei n, GLuint *arrays)
+static void genvertexarrays(struct OGLES2Context *ctx, GLsizei n, GLuint *arrays)
 {
     struct OGLES2VaoState *vs;
     GLsizei k;
     GLuint i = 1, nn, j;
     int a;
-    if (!ogles2_es3_entry(ctx))
-        return;
     if (n < 0) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
@@ -102,13 +101,30 @@ void ogles2_glGenVertexArrays(struct OGLES2Context *ctx, GLsizei n, GLuint *arra
     }
 }
 
+/* An object going away (o out of the table already): its buffers' references
+ * dropped, each buffer once, so a deleted one nothing else uses is freed. */
+static void drop_buffers(struct OGLES2Context *ctx, struct OGLES2VertexArray *o)
+{
+    struct OGLES2Buffer *b;
+    int a, j;
+    for (a = 0; a <= OGLES2_MAX_VERTEX_ATTRIBS; a++) {
+        b = a < OGLES2_MAX_VERTEX_ATTRIBS ? o->array[a].buffer : o->element;
+        if (!b)
+            continue;
+        for (j = 0; j < OGLES2_MAX_VERTEX_ATTRIBS; j++)
+            if (o->array[j].buffer == b)
+                o->array[j].buffer = 0;
+        if (o->element == b)
+            o->element = 0;
+        ogles2_buffer_release(ctx, b);
+    }
+}
+
 /* ES 3.0 2.10: deleting the bound object binds object 0. */
-void ogles2_glDeleteVertexArrays(struct OGLES2Context *ctx, GLsizei n, const GLuint *arrays)
+static void deletevertexarrays(struct OGLES2Context *ctx, GLsizei n, const GLuint *arrays)
 {
     struct OGLES2VaoState *vs;
     GLsizei k;
-    if (!ogles2_es3_entry(ctx))
-        return;
     if (n < 0) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
@@ -122,25 +138,24 @@ void ogles2_glDeleteVertexArrays(struct OGLES2Context *ctx, GLsizei n, const GLu
         if (vs->bound == o)
             bind(ctx, vs, &vs->zero);
         vs->tab[o->name] = 0;
+        drop_buffers(ctx, o);
         FreeVec(o);
     }
 }
 
-GLboolean ogles2_glIsVertexArray(struct OGLES2Context *ctx, GLuint array)
+static GLboolean isvertexarray(struct OGLES2Context *ctx, GLuint array)
 {
     struct OGLES2VertexArray *o;
-    if (!ogles2_es3_entry(ctx) || !ctx->vao)
+    if (!ctx->vao)
         return GL_FALSE;
     o = by_name(ctx->vao, array);
     return o && o->bound_once ? GL_TRUE : GL_FALSE;
 }
 
-void ogles2_glBindVertexArray(struct OGLES2Context *ctx, GLuint array)
+static void bindvertexarray(struct OGLES2Context *ctx, GLuint array)
 {
     struct OGLES2VaoState *vs;
     struct OGLES2VertexArray *o = 0;
-    if (!ogles2_es3_entry(ctx))
-        return;
     if (!(vs = vs_get(ctx))) {
         ogles2_error(ctx, GL_OUT_OF_MEMORY);
         return;
@@ -155,47 +170,106 @@ void ogles2_glBindVertexArray(struct OGLES2Context *ctx, GLuint array)
     bind(ctx, vs, o ? o : &vs->zero);
 }
 
+/* ES 3.0's entries, and OES_vertex_array_object's in GLES2 contexts (the
+ * same objects; ES3 contexts have both too). */
+void ogles2_glGenVertexArrays(struct OGLES2Context *ctx, GLsizei n, GLuint *arrays)
+{
+    if (ogles2_es3_entry(ctx))
+        genvertexarrays(ctx, n, arrays);
+}
+
+void ogles2_glDeleteVertexArrays(struct OGLES2Context *ctx, GLsizei n, const GLuint *arrays)
+{
+    if (ogles2_es3_entry(ctx))
+        deletevertexarrays(ctx, n, arrays);
+}
+
+GLboolean ogles2_glIsVertexArray(struct OGLES2Context *ctx, GLuint array)
+{
+    return ogles2_es3_entry(ctx) ? isvertexarray(ctx, array) : GL_FALSE;
+}
+
+void ogles2_glBindVertexArray(struct OGLES2Context *ctx, GLuint array)
+{
+    if (ogles2_es3_entry(ctx))
+        bindvertexarray(ctx, array);
+}
+
+void ogles2_glGenVertexArraysOES(struct OGLES2Context *ctx, GLsizei n, GLuint *arrays)
+{
+    if (ogles2_context_valid(ctx))
+        genvertexarrays(ctx, n, arrays);
+}
+
+void ogles2_glDeleteVertexArraysOES(struct OGLES2Context *ctx, GLsizei n, const GLuint *arrays)
+{
+    if (ogles2_context_valid(ctx))
+        deletevertexarrays(ctx, n, arrays);
+}
+
+GLboolean ogles2_glIsVertexArrayOES(struct OGLES2Context *ctx, GLuint array)
+{
+    return ogles2_context_valid(ctx) ? isvertexarray(ctx, array) : GL_FALSE;
+}
+
+void ogles2_glBindVertexArrayOES(struct OGLES2Context *ctx, GLuint array)
+{
+    if (ogles2_context_valid(ctx))
+        bindvertexarray(ctx, array);
+}
+
 /* The bound object's name (GL_VERTEX_ARRAY_BINDING); 0: object 0. */
 GLuint ogles2_vao_bound(const struct OGLES2Context *ctx)
 {
     return ctx->vao && ctx->vao->bound ? ctx->vao->bound->name : 0;
 }
 
-/* glDeleteBuffers: b is unbound from the context's objects that are not
- * bound now (the bound one's state is the context's, which buffer.c
- * clears). ES 3.0 would keep it alive in them (appendix D), §5 item 2's
- * references; until then they lose it, so none points at freed memory. */
-void ogles2_vao_buffer_deleted(struct OGLES2Context *ctx, const struct OGLES2Buffer *b)
+/* Whether one of the context's objects not bound now uses b (the bound
+ * one's state is the context's): glDeleteBuffers keeps such a buffer
+ * (ES 3.0 appendix D.1.2), and buffer.c frees it when none does. */
+BOOL ogles2_vao_uses_buffer(struct OGLES2Context *ctx, const struct OGLES2Buffer *b)
 {
     struct OGLES2VaoState *vs = ctx->vao;
     GLuint i;
     int a;
     if (!vs)
-        return;
+        return FALSE;
     for (i = 0; i <= vs->ntab; i++) {
         struct OGLES2VertexArray *o = i < vs->ntab ? vs->tab[i] : &vs->zero;
         if (!o || o == vs->bound || (o == &vs->zero && !vs->bound))
             continue;
-        for (a = 0; a < OGLES2_MAX_VERTEX_ATTRIBS; a++)
-            if (o->array[a].buffer == b) {
-                o->array[a].buffer = 0;
-                o->array[a].pointer = 0;
-            }
         if (o->element == b)
-            o->element = 0;
+            return TRUE;
+        for (a = 0; a < OGLES2_MAX_VERTEX_ATTRIBS; a++)
+            if (o->array[a].buffer == b)
+                return TRUE;
     }
+    return FALSE;
 }
 
-/* aglDestroyContext. */
+/* aglDestroyContext: the objects, and the references they and the
+ * context's own arrays hold (a deleted buffer only they used is freed). */
 void ogles2_vaos_free(struct OGLES2Context *ctx)
 {
     struct OGLES2VaoState *vs = ctx->vao;
+    struct OGLES2VertexArray *o;
     GLuint i;
     if (!vs)
         return;
+    bind(ctx, vs, &vs->zero);
+    o = &vs->zero;
+    memcpy(o->array, ctx->array, sizeof(ctx->array));
+    o->element = ogles2_buffer_element(ctx);
+    for (i = 0; i < OGLES2_MAX_VERTEX_ATTRIBS; i++)
+        ctx->array[i].buffer = 0;
+    ogles2_buffer_set_element(ctx, 0);
+    drop_buffers(ctx, o);
     for (i = 1; i < vs->ntab; i++)
-        if (vs->tab[i])
-            FreeVec(vs->tab[i]);
+        if ((o = vs->tab[i])) {
+            vs->tab[i] = 0;
+            drop_buffers(ctx, o);
+            FreeVec(o);
+        }
     if (vs->tab)
         FreeVec(vs->tab);
     FreeVec(vs);

@@ -351,6 +351,7 @@ static const struct { const char *name; UBYTE in; } extensions[] = {
     {"GL_EXT_clip_control", EXT_ALL}, {"GL_EXT_draw_buffers", EXT_ALL},
     {"GL_NV_fbo_color_attachments", EXT_ALL}, {"GL_OES_required_internalformat", EXT_ALL},
     {"GL_EXT_color_buffer_half_float", EXT_ALL}, {"GL_EXT_frag_depth", EXT_ALL},
+    {"GL_OES_vertex_array_object", EXT_ALL}, {"GL_EXT_instanced_arrays", EXT_ALL},
     {"GL_EXT_color_buffer_float", EXT_ES3}, /* stage B item 10: the float targets */
 };
 #define NUM_EXTENSIONS (sizeof(extensions) / sizeof(extensions[0]))

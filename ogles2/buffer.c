@@ -72,6 +72,11 @@ struct OGLES2Buffer
     ULONG words_bytes;       /* its allocation */
     ULONG words_serial;      /* the data serial it holds; 0: none */
     ULONG words_job;         /* the job that last read it */
+    /* Deleted while a vertex array object not bound uses it (ES 3.0
+     * appendix D.1.2): out of the name table, on the share group's list of
+     * them, freed when nothing uses it any more (ogles2_buffer_release). */
+    BOOL deleted;
+    struct OGLES2Buffer *next_orphan;
 };
 
 #define MAX_UNIFORM_BINDINGS 108 /* GL_MAX_UNIFORM_BUFFER_BINDINGS (state.c) */
@@ -155,6 +160,11 @@ void ogles2_buffers_free(struct OGLES2Context *ctx)
         sh->buf = 0;
         sh->nbuf = 0;
         ogles2_names_free(&sh->far_buf);
+        while (sh->orphans) {
+            struct OGLES2Buffer *b = sh->orphans;
+            sh->orphans = b->next_orphan;
+            free_buffer(ctx, b);
+        }
     }
     if (!bs)
         return;
@@ -215,6 +225,38 @@ static void unbind_all(struct OGLES2BufState *bs, struct OGLES2Buffer *b)
     for (i = 0; i < MAX_XFB_BINDINGS; i++)
         if (bs->xfb_range[i].b == b)
             memset(&bs->xfb_range[i], 0, sizeof(bs->xfb_range[i]));
+}
+
+/* Whether a member of ctx's share group uses b: its attribute arrays and
+ * element binding, or one of its vertex array objects not bound. */
+static BOOL in_use(struct OGLES2Context *ctx, const struct OGLES2Buffer *b)
+{
+    struct OGLES2Context *m;
+    int a;
+    for (m = ctx->share->first; m; m = m->share_next) {
+        if (m->buf && m->buf->element == b)
+            return TRUE;
+        for (a = 0; a < OGLES2_MAX_VERTEX_ATTRIBS; a++)
+            if (m->array[a].buffer == b)
+                return TRUE;
+        if (ogles2_vao_uses_buffer(m, b))
+            return TRUE;
+    }
+    return FALSE;
+}
+
+/* A reference to b dropped: a deleted buffer nothing uses any more is freed. */
+void ogles2_buffer_release(struct OGLES2Context *ctx, struct OGLES2Buffer *b)
+{
+    struct OGLES2Buffer **at;
+    if (!b || !b->deleted || in_use(ctx, b))
+        return;
+    for (at = &ctx->share->orphans; *at; at = &(*at)->next_orphan)
+        if (*at == b) {
+            *at = b->next_orphan;
+            break;
+        }
+    free_buffer(ctx, b);
 }
 
 static BOOL table_room(struct OGLES2BufState *bs, GLuint name)
@@ -307,12 +349,13 @@ void ogles2_glDeleteBuffers(struct OGLES2Context *ctx, GLsizei n, const GLuint *
             continue;
         /* GLES 2.0 2.9: a deleted buffer is unbound wherever it is bound
          * in the context, attribute arrays included; here in every member
-         * of the share group (GL would keep it while bound elsewhere). */
+         * of the share group (GL would keep it while bound elsewhere).
+         * ES 3.0 2.9.1: only the bound vertex array object's; the others
+         * keep it (below). */
         for (m = ctx->share->first; m; m = m->share_next) {
             struct OGLES2BufState *mbs = m->buf;
             if (mbs)
                 unbind_all(mbs, b);
-            ogles2_vao_buffer_deleted(m, b);
             for (a = 0; a < OGLES2_MAX_VERTEX_ATTRIBS; a++)
                 if (m->array[a].buffer == b) {
                     m->array[a].buffer = 0;
@@ -321,7 +364,12 @@ void ogles2_glDeleteBuffers(struct OGLES2Context *ctx, GLsizei n, const GLuint *
         }
         bs->sh->buf[ogles2_name_slot(&bs->sh->far_buf, b->name, FALSE)] = 0;
         ogles2_name_forget(&bs->sh->far_buf, b->name);
-        free_buffer(ctx, b);
+        if (in_use(ctx, b)) {
+            b->deleted = TRUE;
+            b->next_orphan = bs->sh->orphans;
+            bs->sh->orphans = b;
+        } else
+            free_buffer(ctx, b);
     }
 }
 
@@ -354,7 +402,11 @@ void ogles2_glBindBuffer(struct OGLES2Context *ctx, GLenum target, GLuint buffer
         }
         b->bound_once = TRUE;
     }
-    *at = b;
+    if (*at != b) {
+        struct OGLES2Buffer *old = *at;
+        *at = b;
+        ogles2_buffer_release(ctx, old); /* a vertex array object's deleted element buffer */
+    }
 }
 
 static struct OGLES2Buffer *bound(struct OGLES2Context *ctx, struct OGLES2BufState *bs, GLenum target)

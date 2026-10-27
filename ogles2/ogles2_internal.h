@@ -82,6 +82,7 @@ struct OGLES2Share
     struct OGLES2Sampler **smp;       /* texture.c: ES 3.0's sampler objects, by name (glGenSamplers') */
     GLuint nsmp;
     struct OGLES2Sync *syncs;         /* sync.c: ES 3.0's sync objects */
+    struct OGLES2Buffer *orphans;     /* buffer.c: deleted buffers vertex array objects still use */
 };
 
 /* glPixelStorei's state for one direction (ES 3.0 3.7.1 and 4.3.1; the
@@ -933,10 +934,13 @@ struct OGLES2Buffer *ogles2_buffer_array(struct OGLES2Context *ctx);
 /* The GL_ELEMENT_ARRAY_BUFFER binding, which a vertex array object holds (vao.c). */
 struct OGLES2Buffer *ogles2_buffer_element(struct OGLES2Context *ctx);
 void ogles2_buffer_set_element(struct OGLES2Context *ctx, struct OGLES2Buffer *b);
-/* vao.c: the bound vertex array object's name (0: object 0); a deleted
- * buffer unbound from the objects not bound; freed with the context. */
+/* A reference to b dropped (an attribute array's or an element binding's):
+ * a deleted buffer that nothing uses any more is freed. */
+void ogles2_buffer_release(struct OGLES2Context *ctx, struct OGLES2Buffer *b);
+/* vao.c: the bound vertex array object's name (0: object 0); whether an
+ * object not bound uses b; freed with the context. */
 GLuint ogles2_vao_bound(const struct OGLES2Context *ctx);
-void ogles2_vao_buffer_deleted(struct OGLES2Context *ctx, const struct OGLES2Buffer *b);
+BOOL ogles2_vao_uses_buffer(struct OGLES2Context *ctx, const struct OGLES2Buffer *b);
 void ogles2_vaos_free(struct OGLES2Context *ctx);
 void ogles2_syncs_free(struct OGLES2Context *ctx); /* sync.c, with the group's last member */
 /* query.c: the occlusion counter off around the library's own draws; freed with the context */

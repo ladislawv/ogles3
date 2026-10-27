@@ -254,3 +254,10 @@ glInvalidateFramebuffer
 glInvalidateSubFramebuffer
 glBlitFramebuffer
 glCopyTexSubImage3D
+glGenVertexArraysOES
+glDeleteVertexArraysOES
+glIsVertexArrayOES
+glBindVertexArrayOES
+glDrawArraysInstancedEXT
+glDrawElementsInstancedEXT
+glVertexAttribDivisorEXT

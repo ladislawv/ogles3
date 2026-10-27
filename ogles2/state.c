@@ -653,9 +653,6 @@ static int lookup_es3(struct OGLES2Context *ctx, GLenum pname, struct value *v)
     case GL_NUM_EXTENSIONS:
         v->i[0] = (GLint)ogles2_num_extensions(ctx);
         return 1;
-    case GL_VERTEX_ARRAY_BINDING:
-        v->i[0] = (GLint)ogles2_vao_bound(ctx);
-        return 1;
     /* Transform feedback (stage C) is never active yet. */
     case GL_TRANSFORM_FEEDBACK_ACTIVE:
     case GL_TRANSFORM_FEEDBACK_PAUSED:
@@ -911,6 +908,9 @@ static int lookup(struct OGLES2Context *ctx, GLenum pname, struct value *v)
         return 1;
     case GL_CURRENT_PROGRAM:
         v->kind = K_INT; v->n = 1; v->i[0] = ctx->program ? (GLint)ctx->program->name : 0;
+        return 1;
+    case GL_VERTEX_ARRAY_BINDING: /* also OES_vertex_array_object's */
+        v->kind = K_INT; v->n = 1; v->i[0] = (GLint)ogles2_vao_bound(ctx);
         return 1;
     default:
         if (ogles2_texture_query(ctx, pname, &v->i[0]) || ogles2_buffer_query(ctx, pname, &v->i[0]) ||

@@ -111,3 +111,10 @@ command glInvalidateFramebuffer
 command glInvalidateSubFramebuffer
 command glBlitFramebuffer
 command glCopyTexSubImage3D
+command glGenVertexArraysOES
+command glDeleteVertexArraysOES
+command glIsVertexArrayOES
+command glBindVertexArrayOES
+command glDrawArraysInstancedEXT
+command glDrawElementsInstancedEXT
+command glVertexAttribDivisorEXT
