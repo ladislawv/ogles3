@@ -114,6 +114,11 @@ From the PC:
   cases) into a file per group, `shaders-<subgroup>.txt` for the shader
   tests. Package `m7-1` ships them as `caselists/`. With `MODULE=gles3` it
   splits GLES3's (44,768 cases) for package `m8-2`.
+- `bash ports/deqp/run_pc.sh [--package m8-2|m7-1] [--images] [--build]
+  PATTERN NAME` runs the cases of a pattern with their shaders compiled on
+  the PC (`tools/amictl/compile_bridge.py` running beside it,
+  `docs/GLES3_PLAN.md` §1 "Compiling on the PC"): a 500-case shader chunk
+  in minutes instead of 45. It prints the log's status counts.
 - `python ports/deqp/run_groups.py [GROUP...] [--shaders | --all]` runs
   groups on the A1200 through `amictl runpkg`, one package run per list.
   Without arguments it runs every non-shader group. `--package=m8-2` runs

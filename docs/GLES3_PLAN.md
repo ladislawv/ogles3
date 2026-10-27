@@ -6,8 +6,9 @@ the same day), work on branch `gles3`.** Stage A (begun 2026-10-22) is
 done, tested on the A1200 (§4, each item's "Done" paragraph and "Stage A's
 end", 2026-10-23): the GLES2 regression set and the speed figures as at
 1.3.1; dEQP-GLES2's whole list is postponed until the ES3 library is
-finished. Stages B-D are still to come; §1 "Where to go on" is the
-hand-off.
+finished. Stage B's features are done (2026-10-27; its end checkpoint
+open), stage C has begun (transform feedback, not yet run on the A1200),
+stage D is to come; §1's "Hand-off of 2026-10-27" is where to start.
 Its facts were checked against this repository, Mesa at the pinned commit
 (`~/mesa-build/mesa`), Khronos' `gl.xml` (`gen/khronos/`) and extension
 specifications, the Linux kernel's V3D driver (`drivers/gpu/drm/v3d`,
@@ -174,9 +175,10 @@ Mesa's driver, so they could follow later as an extension
     included, against 3.6 s; a 500-case chunk 2.5 minutes instead of 45).
     The same 56 `texture_functions.texture` cases into fresh caches, once
     with the A1200's compiler and once through the PC: 95 files, all
-    identical (`ogles2-m8-2-20261027-123827`, `-123926`). How (no
-    wrapper script yet): start `python3 tools/amictl/compile_bridge.py`
-    on the PC (after `. ./local.env`: the host compiler), put
+    identical (`ogles2-m8-2-20261027-123827`, `-123926`). How: start
+    `python3 tools/amictl/compile_bridge.py` on the PC (after
+    `. ./local.env`: the host compiler) and run cases with `bash
+    ports/deqp/run_pc.sh PATTERN NAME`, which does the rest; by hand: put
     `$B/amictl/v3dglslc-remote` into the package's `bin/` and `amictl start
     -d <package> bin/v3dglslc-remote WAIT COMPILER=<package>/libs/v3dglslc`
     before the runs, `amictl abort <job>` after them.
@@ -194,6 +196,62 @@ Mesa's driver, so they could follow later as an extension
     After a crash on the A1200 the library stays in memory, open (`Version
     ogles2.library` answers though `LIBS:` has none): reboot, with the
     developer's leave, before the next run.
+  - **Hand-off of 2026-10-27 (read this first; the older notes below are
+    the history it summarises).**
+    - **Where the work stands.** Stage A is done. Stage B's features are
+      all in, each item's "Done" paragraph in §5: the whole dEQP-GLES3
+      run fails only stage C's groups (and one intermittent `derivate`
+      case, §5 item 13's notes). Its end checkpoint is open: the GLES2
+      regression set and the speed against 1.x (above), then release
+      2.0, when the developer says so. Stage C item 1, transform
+      feedback, is written and checked on the PC only (§6 item 1,
+      "Written, on the host only"): the next thing to run on the A1200.
+      Stage C items 2 to 6 and stage D are not begun.
+    - **The developer's standing decisions:** dEQP-GLES2 is not run, not
+      even single groups, until stages B to D are all finished; a run
+      leaves out the groups of features not written yet; ask before
+      rebooting the A1200 or changing its system files, and before
+      changing the library's cache layout; release 2.0 waits for the
+      developer; commit and push each finished piece.
+    - **The A1200 as this session left it** (check before the first run):
+      `LIBS:ogles2.library` and `LIBS:v3dglslc` are renamed to `.saved`,
+      with the owner's leave, so packages use their own; rename them
+      back when the test runs end (`List LIBS:ogles2#? LIBS:v3dglslc#?`).
+      The work stopped mid-run (2026-10-27 about 15:00, the developer
+      needed the machine): a dEQP-GLES3 `texture` run of package `m8-2`
+      and its `v3dglslc-remote` may have been left running or killed;
+      `amictl run Status` lists the processes, and `Avail FLUSH`
+      expunges a library left open. `Stuff:amictld/work/ogles2-m8-2/`
+      holds old cache drawers (`cache-old`, `cache-r-*`,
+      `cache-before-*`) to delete: PFS3 grows slow with tens of
+      thousands of files in a drawer and the whole run filled them (§5
+      item 6's stops).
+    - **Next, in order:** (1) package `m8-1` (`m8_es3` with the GPU,
+      `m8_draw`'s `test_xfb`) and `m7-4`, fixing what transform feedback
+      gets wrong; (2) dEQP-GLES3's `transform_feedback` and
+      `rasterizer_discard` groups and the transform feedback cases of
+      `state_query` and `negative_api`, with `ports/deqp/run_pc.sh` and
+      the PC compiling; (3) the `texture` and `negative_api` runs the
+      stop cut short (after item 8's base levels; `texture.mipmap` 240 of
+      240 passed); (4) stage B's end without dEQP-GLES2; (5) stage C
+      items 2 to 6.
+    - **Open points:** the `derivate.dfdx.texture.basic.float_mediump`
+      failure seen once (12 pixels); a program's default variants can
+      depend on the program the same compiler process compiled before it
+      (`es3uni` after `es3tex`, "Compiling on the PC"); a buffer fed back
+      and read as a uniform buffer in the same job is not waited for (§6
+      item 1); the library's cache in one drawer (subdrawers proposed, the
+      developer to decide).
+    - **Tools:** `ports/deqp/run_pc.sh` (cases with PC compiles),
+      `tools/amictl/compile_bridge.py`, `ports/deqp/summary.py`,
+      `failed_list.py`, `qpa_images.py` (`ports/deqp/README.md`);
+      `tools/v3dglslc/test/compare_v3dp.sh` after any compiler change
+      (host and m68k byte for byte); `bash tests/vamos.sh m8_es3 NOGPU
+      ES3` with `B=~/ogles3-build/m68k-es3` for state tests without the
+      A1200. CONTRIBUTING.md's traps, and those in this plan's notes. The
+      results directories the notes name since 2026-10-23
+      (`tests/a1200/results/ogles2-*`) stayed in the working copy that
+      made them, not committed: what they showed is in these notes.
   - **Where to go on, in order** (hand-off of 2026-10-23: stage A is done
     but for dEQP-GLES2, §4 "Stage A's end"; 2026-10-24: dEQP-GLES3's
     `builtin_variable.fragcoord_xyz` and `fragcoord_w` pass, 2 of 2,
