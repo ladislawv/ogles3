@@ -64,7 +64,9 @@ extern "C" {
  * 4x multisample antialiasing in the GPU's tile buffer, resolved as each
  * frame is stored (GL_SAMPLE_BUFFERS 1, GL_SAMPLES 4). Without the tag,
  * the environment variable OGLES2/MSAA (4 or 0) decides, so a program can
- * be given it from the Shell. Framebuffer objects are not multisampled. */
+ * be given it from the Shell. Framebuffer objects are multisampled by their
+ * renderbuffers' samples (glRenderbufferStorageMultisample, OpenGL ES 3.0
+ * contexts), whatever this tag says. */
 #define OGLES2_CCT_PISTORM_MSAA             (OGLES2_CCT_PISTORM_MIN + 5)
 /* ULONG: the OpenGL ES version the context offers, major x 10 + minor: 20
  * (the default) an OpenGL ES 2.0 context; 30 or 31 an OpenGL ES 3.x one, the

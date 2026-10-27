@@ -613,6 +613,7 @@ struct OGLES2Target
     UBYTE nrt;             /* the tile buffer's render targets: the highest drawn + 1 (1 with none) */
     UBYTE tile_w, tile_h;  /* the tile size nrt and bpp give (Mesa's v3d_choose_tile_size) */
     UBYTE bpp;             /* V3D_INTERNAL_BPP_*: the widest drawn target's */
+    BOOL msaa;             /* multisampled renderbuffers: 4x, every image with all four samples */
     BOOL has_z, has_s, packed_zs; /* packed: one D24S8 image for both */
     struct OGLES2Surface color[OGLES2_MAX_DRAW_BUFFERS], z, s;
     struct OGLES2RtFormat rt[OGLES2_MAX_DRAW_BUFFERS]; /* the drawn targets' formats */
@@ -697,7 +698,7 @@ struct OGLES2Context
     struct OGLES2Framebuffer *draw_fb; /* GL_FRAMEBUFFER (ES 3.0: GL_DRAW_FRAMEBUFFER) binding; NULL: the default */
     struct OGLES2Framebuffer *read_fb; /* ES 3.0's GL_READ_FRAMEBUFFER binding (GLES2: draw_fb's) */
     struct OGLES2Framebuffer *job_fb;  /* what the open job renders into */
-    BOOL job_msaa;                  /* the open job is 4x MSAA (the default framebuffer's, job.c) */
+    BOOL job_msaa;                  /* the open job is 4x MSAA (the default framebuffer's, or multisampled renderbuffers', job.c) */
     UWORD fb_w, fb_h;
     BOOL fb_flip;                   /* the default framebuffer: drawn upside down (plan 7.11) */
     UBYTE fb_depth_bits, fb_stencil_bits, fb_depth_format;
@@ -924,6 +925,7 @@ BOOL ogles2_fbo_read_wide(struct OGLES2Context *ctx, int x, int y, int w, int h,
 void ogles2_fb_update(struct OGLES2Context *ctx);       /* the fb_* fields from the binding */
 GLenum ogles2_fb_status(struct OGLES2Context *ctx);     /* of the draw framebuffer */
 BOOL ogles2_fb_ready(struct OGLES2Context *ctx);        /* complete; else GL_INVALID_FRAMEBUFFER_OPERATION */
+BOOL ogles2_fbo_read_ready(struct OGLES2Context *ctx);  /* and, read from, not multisampled (GL_INVALID_OPERATION) */
 BOOL ogles2_fbo_target(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb, BOOL surfaces,
                        struct OGLES2Target *t);
 void ogles2_fbo_rendered(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb);

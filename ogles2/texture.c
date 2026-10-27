@@ -4336,7 +4336,7 @@ static void copy_tex_image(struct OGLES2Context *ctx, GLenum target, GLint level
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
-    if (!ogles2_fb_ready(ctx)) /* GL_INVALID_FRAMEBUFFER_OPERATION */
+    if (!ogles2_fbo_read_ready(ctx)) /* GL_INVALID_FRAMEBUFFER_OPERATION, multisampled */
         return;
     /* RGB and RGBA on the GPU (copy.c): the level made empty, as
      * glTexImage2D makes it (its errors are glTexImage2D's), then the
@@ -4381,7 +4381,7 @@ static void copy_tex_sub_image(struct OGLES2Context *ctx, GLenum target, GLint l
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
-    if (!ogles2_fb_ready(ctx)) /* GL_INVALID_FRAMEBUFFER_OPERATION */
+    if (!ogles2_fbo_read_ready(ctx)) /* GL_INVALID_FRAMEBUFFER_OPERATION, multisampled */
         return;
     /* In the level's own format, so the conversion is table 3.15's (a
      * LUMINANCE texture takes red); glTexSubImage2D reports a level that
@@ -4445,7 +4445,7 @@ void ogles2_glCopyTexSubImage3D(struct OGLES2Context *ctx, GLenum target, GLint 
     if ((t->f[0].defined & (1UL << level)) && base_components(t->f[0].format[level]))
         fmt = t->f[0].format[level];
     saved = ogles2_fbo_read_begin(ctx);
-    if (ogles2_fb_ready(ctx)) {
+    if (ogles2_fbo_read_ready(ctx)) {
         if (width && height && !(img = read_region(ctx, x, y, width, height, fmt))) {
             ogles2_fbo_read_end(ctx, saved);
             ogles2_error(ctx, GL_OUT_OF_MEMORY);

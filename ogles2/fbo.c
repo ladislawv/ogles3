@@ -81,7 +81,10 @@ struct OGLES2Renderbuffer
     v3d_mem smem;               /* DEPTH32F_STENCIL8's stencil, S8 */
     ULONG sbase, sub, sbytes;
     UBYTE cpp;
-    UBYTE samples;              /* glRenderbufferStorageMultisample's (stored single-sampled: stage C) */
+    /* glRenderbufferStorageMultisample's: 0, or 4 for any count asked of 1
+     * to 4. Multisampled storage holds all four samples, each pixel a 2x2
+     * square of them (Mesa's msaa_scale, v3d_resource.c): twice w and h. */
+    UBYTE samples;
     UWORD refs;                 /* framebuffer attachment points that refer to it */
     BOOL orphan;                /* deleted while attached: freed with the last of them */
 };
@@ -271,13 +274,18 @@ BOOL ogles2_fbo_zs_alloc(UWORD w, UWORD h, ULONG cpp, v3d_mem *mem, ULONG *base,
     return TRUE;
 }
 
+/* The storage's width and height: twice the size's when multisampled. */
+#define RB_SW(rb) ((UWORD)((rb)->w << ((rb)->samples ? 1 : 0)))
+#define RB_SH(rb) ((UWORD)((rb)->h << ((rb)->samples ? 1 : 0)))
+
 static BOOL rb_zs_storage(struct OGLES2Renderbuffer *rb)
 {
     ULONG cpp = rb->format == GL_DEPTH_COMPONENT16 ? 2 : rb->format == GL_STENCIL_INDEX8 ? 1 : 4;
-    if (!ogles2_fbo_zs_alloc(rb->w, rb->h, cpp, &rb->mem, &rb->base, &rb->ub, &rb->bytes))
+    if (!ogles2_fbo_zs_alloc(RB_SW(rb), RB_SH(rb), cpp, &rb->mem, &rb->base, &rb->ub, &rb->bytes))
         return FALSE;
     rb->cpp = (UBYTE)cpp;
-    if (rb->format == GL_DEPTH32F_STENCIL8 && !ogles2_fbo_zs_alloc(rb->w, rb->h, 1, &rb->smem, &rb->sbase, &rb->sub, &rb->sbytes))
+    if (rb->format == GL_DEPTH32F_STENCIL8 &&
+        !ogles2_fbo_zs_alloc(RB_SW(rb), RB_SH(rb), 1, &rb->smem, &rb->sbase, &rb->sub, &rb->sbytes))
         return FALSE; /* rb_free_storage frees the depth */
     return TRUE;
 }
@@ -721,10 +729,10 @@ static void rb_storage(struct OGLES2Context *ctx, GLenum target, GLenum internal
     rb->format = internalformat;
     rb->w = (UWORD)width;
     rb->h = (UWORD)height;
-    rb->samples = (UBYTE)samples;
+    rb->samples = samples ? 4 : 0;
     if (width && height && ctx->v3d) {
         if (ogles2_es3(ctx) && es3_color(internalformat)) {
-            ok = (rb->color = ogles2_texture_hidden_sized(ctx, (UWORD)width, (UWORD)height, internalformat)) != 0;
+            ok = (rb->color = ogles2_texture_hidden_sized(ctx, RB_SW(rb), RB_SH(rb), internalformat)) != 0;
         } else if (is_color(internalformat)) {
             GLenum f = internalformat == GL_RGB565 || internalformat == GL_RGB8_OES ? GL_RGB : GL_RGBA;
             GLenum ty = internalformat == GL_RGBA4    ? GL_UNSIGNED_SHORT_4_4_4_4
@@ -732,7 +740,7 @@ static void rb_storage(struct OGLES2Context *ctx, GLenum target, GLenum internal
                       : internalformat == GL_RGB565   ? GL_UNSIGNED_SHORT_5_6_5
                       : is_half(internalformat)       ? GL_HALF_FLOAT_OES
                                                       : GL_UNSIGNED_BYTE;
-            ok = (rb->color = ogles2_texture_hidden(ctx, (UWORD)width, (UWORD)height, f, ty)) != 0;
+            ok = (rb->color = ogles2_texture_hidden(ctx, RB_SW(rb), RB_SH(rb), f, ty)) != 0;
         } else {
             ok = rb_zs_storage(rb);
         }
@@ -756,8 +764,17 @@ static BOOL int_color(GLenum f)
     return (f >= GL_RGBA32UI && f <= GL_RGB8I) || f == GL_RGB10_A2UI || (f >= GL_R8I && f <= GL_RG32UI);
 }
 
+/* A format with no sample counts: the integer ones (ES 3.0's rule, as
+ * Mesa's in 3.0 contexts, main/multisample.c:237-249), and the 32-bit float
+ * ones, which dEQP-GLES3 allows none (es3fFboTestCase.cpp:281-338) and
+ * which the tile buffer could neither blend nor resolve. */
+static BOOL no_samples(GLenum f)
+{
+    return es3_color(f) && (int_color(f) || f == GL_R32F || f == GL_RG32F || f == GL_RGBA32F);
+}
+
 /* ES 3.0 6.1.15: a renderbuffer format's sample counts, GL_MAX_SAMPLES (4)
- * for every renderable format but the integer ones (none). */
+ * for every renderable format but those (none). */
 void ogles2_glGetInternalformativ(struct OGLES2Context *ctx, GLenum target, GLenum internalformat, GLenum pname,
                                   GLsizei bufSize, GLint *params)
 {
@@ -773,7 +790,7 @@ void ogles2_glGetInternalformativ(struct OGLES2Context *ctx, GLenum target, GLen
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
-    none = es3_color(internalformat) && int_color(internalformat);
+    none = no_samples(internalformat);
     if (!bufSize || !params)
         return;
     if (pname == GL_NUM_SAMPLE_COUNTS)
@@ -782,30 +799,22 @@ void ogles2_glGetInternalformativ(struct OGLES2Context *ctx, GLenum target, GLen
         params[0] = 4;
 }
 
-/* ES 3.0 4.4.2.1: up to GL_MAX_SAMPLES (4), none for an integer format.
- * Multisampled renderbuffers come with stage C (the resolve of
- * glBlitFramebuffer): until then one is stored single-sampled, its
- * GL_RENDERBUFFER_SAMPLES what was asked for (logged once). */
+/* ES 3.0 4.4.2.1: up to GL_MAX_SAMPLES (4), none for the formats
+ * no_samples names; 1 to 4 samples give 4 (GL_RENDERBUFFER_SAMPLES 4, as
+ * Mesa's), the job then in 4x mode (job.c), and glBlitFramebuffer resolves
+ * (blit.c; docs/GLES3_PLAN.md stage C item 2). */
 void ogles2_glRenderbufferStorageMultisample(struct OGLES2Context *ctx, GLenum target, GLsizei samples,
                                              GLenum internalformat, GLsizei width, GLsizei height)
 {
-    static BOOL logged;
-    BOOL integer;
     if (!ogles2_es3_entry(ctx))
         return;
     if (samples < 0) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
-    integer = int_color(internalformat);
-    if (samples > 4 || (samples > 0 && integer && es3_color(internalformat))) {
+    if (samples > 4 || (samples > 0 && no_samples(internalformat))) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
-    }
-    if (samples > 0 && !logged) {
-        logged = TRUE;
-        ogles2_log("glRenderbufferStorageMultisample: %ld samples stored single-sampled (multisampled "
-                   "renderbuffers: GLES3 stage C; logged once)", (LONG)samples);
     }
     rb_storage(ctx, target, internalformat, width, height, samples);
 }
@@ -1446,8 +1455,8 @@ static BOOL pools(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb, struc
             v3d_mem_free(ogles2_device(), &fb->pool_state);
         fb->pool_tiles = 0;
         /* sized for 32x32 tiles when the job's are smaller than 64x64; for
-         * smaller ones (32x16, 16x16: several 64- or 128-bit targets) as
-         * 32x32 over a frame that much larger, as many tiles */
+         * smaller ones (32x16 to 8x8: several 64- or 128-bit targets, 4x
+         * MSAA) as 32x32 over a frame that much larger, as many tiles */
         v3d_frame_compute_pool_sizes(t->tile_w < 32 ? (UWORD)(t->w * (32 / t->tile_w)) : t->w,
                                      t->tile_h < 32 ? (UWORD)(t->h * (32 / t->tile_h)) : t->h, 16,
                                      t->tile_w < 64 || t->tile_h < 64, &zs, &ts, &ta, &tx, &ty);
@@ -1499,13 +1508,15 @@ BOOL ogles2_fbo_target(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb, 
     for (i = 0; i < OGLES2_MAX_DRAW_BUFFERS; i++)
         if ((drawn & (1 << i)) && t->rt[i].kind != OGLES2_RT_NONE && t->rt[i].bpp > t->bpp)
             t->bpp = t->rt[i].bpp;
+    t->msaa = ogles2_fbo_samples(fb) != 0;
     /* Mesa's v3d_choose_tile_size for V3D 4.x: 64x64 for one 32-bit
-     * target, a step smaller for two, two steps for three or four, and a
-     * step more for each doubling of the widest target (64x32, 32x32, 32x16,
-     * 16x16); the hardware derives the same from the configuration packets. */
+     * target, a step smaller for two, two steps for three or four, two
+     * steps more with 4x MSAA, and a step more for each doubling of the
+     * widest target (64x32, 32x32, 32x16, 16x16, 16x8, 8x8); the hardware
+     * derives the same from the configuration packets. */
     {
-        static const UBYTE sizes[] = {64, 64, 64, 32, 32, 32, 32, 16, 16, 16};
-        int k = (t->nrt > 2 ? 2 : t->nrt > 1 ? 1 : 0) + t->bpp;
+        static const UBYTE sizes[] = {64, 64, 64, 32, 32, 32, 32, 16, 16, 16, 16, 8, 8, 8};
+        int k = (t->nrt > 2 ? 2 : t->nrt > 1 ? 1 : 0) + (t->msaa ? 2 : 0) + t->bpp;
         t->tile_w = sizes[2 * k];
         t->tile_h = sizes[2 * k + 1];
     }
@@ -1714,11 +1725,11 @@ static void zs_view(const struct OGLES2Renderbuffer *rb, BOOL sep, V3DTexture *v
 {
     ULONG cpp = sep ? 1 : rb->cpp;
     ULONG ub_w = 2 * v3d_utile_width((int)cpp), ub_h = 2 * v3d_utile_height((int)cpp);
-    ULONG pw = (rb->w + 4 * ub_w - 1) / (4 * ub_w) * (4 * ub_w), ph = (rb->h + ub_h - 1) / ub_h * ub_h;
+    ULONG pw = (RB_SW(rb) + 4 * ub_w - 1) / (4 * ub_w) * (4 * ub_w), ph = (RB_SH(rb) + ub_h - 1) / ub_h * ub_h;
     memset(v, 0, sizeof(*v));
     v->texture_mem.hostptr = (void *)(sep ? rb->sbase : rb->base);
-    v->width = rb->w;
-    v->height = rb->h;
+    v->width = RB_SW(rb);
+    v->height = RB_SH(rb);
     v->cpp = (v3d_u8)cpp;
     v->num_levels = 1;
     v->levels[0].offset = 0;
@@ -1730,18 +1741,22 @@ static void zs_view(const struct OGLES2Renderbuffer *rb, BOOL sep, V3DTexture *v
 }
 
 /* One side of a depth or stencil blit: its image as a texture view, the
- * bytes of a texel the part is (a mask: bit i byte i), and the rows the
- * framebuffer has (the default one's are stored top down: flip). */
+ * bytes of a texel the part is (a mask: bit i byte i), the rows the
+ * framebuffer has (the default one's are stored top down: flip), and a
+ * multisampled image's 2 (a pixel's sample 0 at twice its coordinates:
+ * the blit's resolve takes that one, as ES 3.0 4.3.3 allows). */
 struct zs_side
 {
     V3DTexture v;
     ULONG w, h;
     UBYTE bytes;
     BOOL flip;
+    UBYTE scale;
 };
 
 static BOOL zs_side(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb, BOOL stencil, struct zs_side *z)
 {
+    z->scale = 1;
     if (!fb) {
         if (!ogles2_job_zs_view(ctx, &z->v))
             return FALSE;
@@ -1755,6 +1770,7 @@ static BOOL zs_side(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb, BOO
         z->w = rb->w;
         z->h = rb->h;
         z->flip = FALSE;
+        z->scale = rb->samples ? 2 : 1;
         if (stencil)
             z->bytes = 1; /* S8, the separate S8, or D24S8's low byte */
         else
@@ -1815,7 +1831,7 @@ void ogles2_fbo_blit_zs(struct OGLES2Context *ctx, BOOL stencil, GLint sx0, GLin
                 continue;
             sr = sz.flip ? sz.h - 1 - (ULONG)iv : (ULONG)iv;
             dr = dz.flip ? dz.h - 1 - (ULONG)y : (ULONG)y;
-            s = src + (sr * sw + (ULONG)iu) * cpp;
+            s = src + (sr * sz.scale * sw + (ULONG)iu * sz.scale) * cpp;
             d = dst + (dr * dw + (ULONG)x) * cpp;
             for (b = 0; b < (int)cpp; b++)
                 if (dz.bytes & (1 << b))
@@ -1836,6 +1852,20 @@ UBYTE ogles2_fbo_samples(const struct OGLES2Framebuffer *fb)
         if (fb->att[a].type == GL_RENDERBUFFER && fb->att[a].rb->samples > n)
             n = fb->att[a].rb->samples;
     return n;
+}
+
+/* glReadPixels and the copies from the read framebuffer (the draw one
+ * between ogles2_fbo_read_begin and _end): complete, and not multisampled
+ * (ES 3.0 4.3.1 and 3.8.5: GL_INVALID_OPERATION). */
+BOOL ogles2_fbo_read_ready(struct OGLES2Context *ctx)
+{
+    if (!ogles2_fb_ready(ctx))
+        return FALSE;
+    if (ogles2_fbo_samples(ctx->draw_fb)) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return FALSE;
+    }
+    return TRUE;
 }
 
 /* glBlitFramebuffer from a multisampled read buffer: its format is each

@@ -1,0 +1,12 @@
+ogles2 M8 run 4 - notes
+Write a few words after each item. "ok" is a fine answer.
+
+Did the run finish? If not, what did the screen show?
+
+Did the machine hang, crash or show a requester at any point?
+
+Steps 1 and 2: did a small window show a green triangle on red?
+
+Step 3: did the cube spin?
+
+Anything else you noticed:

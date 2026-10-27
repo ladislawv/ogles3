@@ -49,10 +49,11 @@ extern void OGLES2Close(void);
 static bool os3_gles2_open;
 static int os3_gles2_swap_interval;
 
-/* The profile SDL asks for: ES 2.x goes to ogles2.library. */
+/* The profile SDL asks for: ES 2.x and 3.x go to ogles2.library. */
 static bool OS3_GLES2_Wanted(SDL_VideoDevice *_this)
 {
-    return _this->gl_config.profile_mask == SDL_GL_CONTEXT_PROFILE_ES && _this->gl_config.major_version == 2;
+    return _this->gl_config.profile_mask == SDL_GL_CONTEXT_PROFILE_ES &&
+           (_this->gl_config.major_version == 2 || _this->gl_config.major_version == 3);
 }
 
 static void OS3_GLES2_SetFunctions(SDL_VideoDevice *device)
@@ -152,9 +153,17 @@ SDL_GLContext OS3_GLES2_CreateContext(SDL_VideoDevice *_this, SDL_Window *window
     struct Window *w;
     ULONG err = 0;
     void *ctx;
+    /* OGLES2_CCT_PISTORM_ES_VERSION: 20, or 30 and 31 for ES 3.x (ogles2
+     * 2.0 on); 3.2 and later no ogles2.library offers. */
+    int major = _this->gl_config.major_version, minor = _this->gl_config.minor_version;
+    ULONG version = major == 3 ? (ULONG)(30 + minor) : 20;
 
     if (!d || !d->syswin) {
         SDL_SetError("AmigaOS3: SDL window has no native drawable");
+        return NULL;
+    }
+    if (major == 3 && minor > 1) {
+        SDL_SetError("AmigaOS3: ogles2.library has no OpenGL ES %d.%d contexts", major, minor);
         return NULL;
     }
     if (d->gl_context) {
@@ -177,16 +186,31 @@ SDL_GLContext OS3_GLES2_CreateContext(SDL_VideoDevice *_this, SDL_Window *window
                                 OGLES2_CCT_VSYNC, (ULONG)os3_gles2_swap_interval,
                                 OGLES2_CCT_DEPTH, (ULONG)_this->gl_config.depth_size,
                                 OGLES2_CCT_STENCIL, (ULONG)_this->gl_config.stencil_size,
+                                OGLES2_CCT_PISTORM_ES_VERSION, version,
                                 TAG_DONE);
+    if (!ctx && err == OGLES2_CCE_UNSUPPORTED && major == 3) {
+        SDL_SetError("AmigaOS3: this ogles2.library has no OpenGL ES %d.%d contexts", major, minor);
+        return NULL;
+    }
     if (!ctx) {
         SDL_SetError("AmigaOS3: ogles2.library could not create a context (error %lu)", (unsigned long)err);
         return NULL;
+    }
+    aglMakeCurrent(ctx);
+    /* A library before 2.0 ignores the version tag: an ES 2.0 context. */
+    if (major == 3) {
+        const char *v = (const char *)glGetString(GL_VERSION);
+        if (!v || SDL_strncmp(v, "OpenGL ES 3", 11) != 0) {
+            aglMakeCurrent(NULL);
+            aglDestroyContext(ctx);
+            SDL_SetError("AmigaOS3: ogles2.library before 2.0 has no OpenGL ES 3 contexts");
+            return NULL;
+        }
     }
     d->gl_context = (SDL_GLContext)ctx;
     d->gl_es = true;
     d->gl_width = inner_w(w);
     d->gl_height = inner_h(w);
-    aglMakeCurrent(ctx);
     glViewport(0, 0, d->gl_width, d->gl_height);
     return (SDL_GLContext)ctx;
 }

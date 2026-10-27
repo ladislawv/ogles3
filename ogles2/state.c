@@ -837,11 +837,13 @@ static int lookup(struct OGLES2Context *ctx, GLenum pname, struct value *v)
             v->i[0] = pname == GL_DEPTH_BITS ? ctx->depth_bits
                     : pname == GL_STENCIL_BITS ? ctx->stencil_bits : ctx->v3d ? 8 : 0;
         return 1;
-    case GL_SAMPLE_BUFFERS: /* 4x MSAA on the default framebuffer only (plan 7.2) */
-    case GL_SAMPLES:
+    case GL_SAMPLE_BUFFERS: /* 4x MSAA: the default framebuffer's (plan 7.2), an object's renderbuffers' */
+    case GL_SAMPLES: {
+        UBYTE n = ctx->draw_fb ? ogles2_fbo_samples(ctx->draw_fb) : ctx->msaa ? 4 : 0;
         v->kind = K_INT; v->n = 1;
-        v->i[0] = ctx->draw_fb || !ctx->msaa ? 0 : pname == GL_SAMPLES ? 4 : 1;
+        v->i[0] = !n ? 0 : pname == GL_SAMPLES ? n : 1;
         return 1;
+    }
     case GL_CULL_FACE_MODE:
         v->kind = K_INT; v->n = 1; v->i[0] = (GLint)s->cull_face_mode;
         return 1;

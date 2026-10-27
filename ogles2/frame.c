@@ -210,7 +210,7 @@ static void read_pixels(struct OGLES2Context *ctx, GLint x, GLint y, GLsizei wid
         if (dst)
             pixels = dst;
     }
-    if (!has_surface(ctx) || !ogles2_fb_ready(ctx) || !pixels || !ctx->display.bitmap)
+    if (!has_surface(ctx) || !ogles2_fbo_read_ready(ctx) || !pixels || !ctx->display.bitmap)
         return;
     if (es3 && !ctx->draw_fb && ogles2_fbo_default_read_none(ctx)) {
         ogles2_error(ctx, GL_INVALID_OPERATION); /* ES 3.0 4.3.1: GL_READ_BUFFER is GL_NONE */

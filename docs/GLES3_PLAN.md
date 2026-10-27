@@ -7,9 +7,9 @@ done, tested on the A1200 (§4, each item's "Done" paragraph and "Stage A's
 end", 2026-10-23): the GLES2 regression set and the speed figures as at
 1.3.1; dEQP-GLES2's whole list is postponed until the ES3 library is
 finished. Stage B's features are done (2026-10-27; its end checkpoint
-open), stage C has begun (transform feedback passes on the A1200, the ES
-3.0 table is complete; multisampled framebuffers and SDL to come), stage D
-is to come; §1's "Hand-off of 2026-10-27" is where to start.
+open), stage C's features are done (transform feedback, multisampled
+renderbuffers, the complete ES 3.0 table, SDL; its must-pass run waits
+for the end), stage D is next; §1's "Hand-off of 2026-10-27" is where to start.
 Its facts were checked against this repository, Mesa at the pinned commit
 (`~/mesa-build/mesa`), Khronos' `gl.xml` (`gen/khronos/`) and extension
 specifications, the Linux kernel's V3D driver (`drivers/gpu/drm/v3d`,
@@ -205,9 +205,10 @@ Mesa's driver, so they could follow later as an extension
       case, §5 item 13's notes). Its end checkpoint is open: the GLES2
       regression set and the speed against 1.x (above), then release
       2.0, when the developer says so. Stage C item 1, transform
-      feedback, passes on the A1200 (§6 item 1, 2026-10-27), items 3
-      (done in stage B) and 4 are done; items 2, 5 and 6 and stage D are
-      not begun.
+      feedback, passes on the A1200 (§6 item 1, 2026-10-27), items 2
+      (multisampled renderbuffers), 3 (done in stage B), 4 and 6 (SDL)
+      are done; item 5 (the must-pass lists) waits for the whole run at
+      the end, and stage D is next.
     - **Update of 2026-10-27, evening:** the developer's order: dEQP-GLES3
       runs only the groups of what is new; stages C and D come first, as
       far as they go, and the whole dEQP-GLES3 run at the end. The
@@ -241,8 +242,9 @@ Mesa's driver, so they could follow later as an extension
       dEQP-GLES3's `transform_feedback` and `rasterizer_discard` groups
       and the transform feedback cases of `state_query` and
       `negative_api`, with `ports/deqp/run_pc.sh` and the PC compiling;
-      (3) dropped (the update above); (4) stage C items 2 and 6, then
-      stage D, each with the dEQP groups of its own features; (5) stage
+      (3) dropped (the update above); (4) stage C items 2 and 6 (done
+      2026-10-27), then stage D, each with the dEQP groups of its own
+      features; (5) stage
       B's end without dEQP-GLES2 and the whole dEQP-GLES3 run at the end.
     - **Open points:** the `derivate.dfdx.texture.basic.float_mediump`
       failure seen once (12 pixels); a program's default variants can
@@ -2349,6 +2351,42 @@ figures unchanged; **release 2.0** with the GLES2 extensions (§1).
    `es3fFboTestCase.cpp:281-338`), and integer formats refuse samples in ES
    3.0 (`GL_INVALID_OPERATION`, ES 3.0.0's rule, which Mesa applies in 3.0
    contexts, `main/multisample.c:237-249`).
+   **Done (2026-10-27), the resolve on the CPU:** 1 to 4 samples give 4
+   (`GL_RENDERBUFFER_SAMPLES` 4, as Mesa's); none for the integer and the
+   32-bit float formats (`glGetInternalformativ`, and `GL_INVALID_OPERATION`
+   asked with samples). A multisampled renderbuffer's storage, colour (its
+   hidden texture) and depth/stencil alike, is twice the width and height:
+   every sample, each pixel a 2x2 square of them (Mesa's `msaa_scale` and
+   its `txf_ms` lowering). `ogles2_fbo_target` sets the target's `msaa`
+   and the tile size two steps smaller (Mesa's `v3d_choose_tile_size`, its
+   table to 8x8); the job (`job_msaa`) is in 4x mode in both
+   configurations and loads and stores every image with
+   `V3D_DECIMATE_MODE_ALL_SAMPLES`; alpha to coverage and the rasterizer's
+   four samples follow the job's mode; `GL_SAMPLE_BUFFERS`/`GL_SAMPLES`
+   are the draw framebuffer's. `glBlitFramebuffer` resolves on the CPU, as
+   its other blits: `blit.c`'s `read_box` reads the read buffer's box at
+   twice the size (sRGB decoded to floats) and averages each pixel's four
+   samples, as the tile buffer resolves in its 8-bit or 16F type (the
+   decimating store, Appendix B.3, would need a whole surface and equal
+   boxes; ES 3.0 asks for equal boxes, the scissor box still applies);
+   depth and stencil take sample 0 (`zs_side`'s scale). `glReadPixels`
+   and the `glCopyTex*` read a multisampled framebuffer as
+   `GL_INVALID_OPERATION` (`ogles2_fbo_read_ready`). `m8_draw`'s
+   `test_msaa`, 13 checks (an RGBA8 and a D24S8 renderbuffer of 4 samples:
+   an edge's pixel half covered after the resolve, a second job over every
+   sample kept with alpha to coverage, the errors). On the A1200 right the
+   first time: `m8-1` 152 of 152 in each step, `m7-4` as before
+   (`ogles2-m8-1-20261027-170300`, `ogles2-m7-4-20261027-170313`);
+   dEQP-GLES3 `fbo.msaa` 41 passed and 29 "NotSupported" (8 samples, and
+   the 32-bit floats; one is RGBA16F's 2 samples: the library lists only 4,
+   as Mesa's V3D driver, so a count above a format's minimum not listed is
+   NotSupported, `es3fFboTestCase.cpp:363-376`), `fbo.completeness.samples`
+   13 of 13, `fbo.invalidate.*msaa*` 8 of 8,
+   `rasterization.fbo.rbo_multisample*` 24 of 24, `negative_api.buffer` 38
+   of 38, `state_query.internal_format` 35 of 35, `state_query.rbo` 5 of
+   5, `shaders.derivate.*msaa*` 120 of 120 (`ogles2-m8-2-20261027-170352`
+   to `-170610`). The `multisample` group needs a 4x default framebuffer
+   (`rgba8888d24s8ms4`, the `gles3-multisample` list): item 5.
 3. **Pixel buffer objects:** `GL_PIXEL_PACK_BUFFER`, `GL_PIXEL_UNPACK_BUFFER`
    for `glReadPixels` and texture uploads. They use the buffer's CPU copy:
    the library converts pixels on the CPU anyway (stage B item 1 keeps the
@@ -2382,6 +2420,16 @@ figures unchanged; **release 2.0** with the GLES2 extensions (§1).
    tag's 30 or 31 (today `OS3_GLES2_Wanted` accepts major version 2 only,
    Appendix B.5); a request for 3.1 on 2.1 is refused by the library and
    the port reports it, and the ports need the 2.1 SDK.
+   **Done (2026-10-27):** `OS3_GLES2_Wanted` takes ES 2.x and 3.x; the
+   context asks for `OGLES2_CCT_PISTORM_ES_VERSION` 20, 30 or 31 (3.2 and
+   later refused by the port); `OGLES2_CCE_UNSUPPORTED` becomes SDL's "this
+   ogles2.library has no OpenGL ES 3.x contexts", and a library before 2.0,
+   which ignores the tag, is caught by `GL_VERSION` (the context
+   destroyed, SDL's error). `gles3test` in both ports (`ports/sdl*/tests`)
+   and package `m8-4`: with the ES3 test build ES 3.0 given and its GLSL ES
+   3.00 program drawn, 3.2 refused, 2.0 as before, SDL2's testgles2 (513
+   fps); with a release build ES 3.0 refused with that message; all
+   passing on the A1200, SDL2 and SDL3 (`ogles2-m8-4-20261027-170743`).
 
 Done when: dEQP-GLES3 passes except documented deviations, as dEQP-GLES2
 does; **release 2.1** with ES 3.0 contexts.

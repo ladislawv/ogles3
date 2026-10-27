@@ -233,10 +233,11 @@ void ogles2_job_begin(struct OGLES2Context *ctx)
         }
     }
     ctx->job_fb = ctx->draw_fb;
-    /* 4x MSAA on the default framebuffer only (plan 7.2): 32x32 tiles, Mesa's
+    /* 4x MSAA on the default framebuffer (plan 7.2): 32x32 tiles, Mesa's
      * v3d_choose_tile_size for one 32-bpp target; the hardware derives the
-     * same from the configuration packets. */
-    ctx->job_msaa = !ctx->draw_fb && ctx->msaa;
+     * same from the configuration packets. An object's with multisampled
+     * renderbuffers (GLES3 stage C item 2): its tile size ogles2_fbo_target's. */
+    ctx->job_msaa = ctx->draw_fb ? !bad && tg.msaa : ctx->msaa;
     ctx->t_job_begin = ogles2_clock_us();
     ctx->job_discard = 0;
     ctx->job_noload = ctx->draw_fb ? ogles2_fbo_take_discarded(ctx->draw_fb) : 0;
@@ -632,7 +633,9 @@ static void pack_clear(struct OGLES2Context *ctx, const struct OGLES2RtFormat *r
  * loaded unless cleared, depth and stencil loaded unless cleared, all
  * stored, in the images' own layouts; no Y flip. Each colour image drawn
  * into is a render target of its own (EXT_draw_buffers: output i, target
- * i), all cleared alike. */
+ * i), all cleared alike. Multisampled renderbuffers: 4x mode, every image
+ * loaded and stored with all four samples (Mesa's decimate mode for a
+ * surface of more than one sample). */
 static void build_render_fbo(struct OGLES2Context *ctx, const struct OGLES2Target *tg, ULONG ta)
 {
     V3DContext *v = ctx->v3d;
@@ -653,6 +656,7 @@ static void build_render_fbo(struct OGLES2Context *ctx, const struct OGLES2Targe
     BOOL store_s = tg->has_s && !(no_store & OGLES2_DISCARD_STENCIL);
     /* Mesa: the early Z/S clear only without a Z/S load or store. */
     UBYTE early_zs_clear = !(tg->has_z || tg->has_s);
+    UBYTE dm = tg->msaa ? V3D_DECIMATE_MODE_ALL_SAMPLES : V3D_DECIMATE_MODE_SAMPLE_0;
     const struct OGLES2Surface *c, *z = &tg->z, *st = &tg->s;
 
     v->current_buf = &v->binning_buf[s];
@@ -671,18 +675,17 @@ static void build_render_fbo(struct OGLES2Context *ctx, const struct OGLES2Targe
         for (rt = 0; rt < tg->nrt; rt++)
             if ((tg->colors & (1 << rt)) && !(clear_color && (ctx->job_clear_targets & (1 << rt)))) {
                 c = &tg->color[rt];
-                LoadTileBufferGeneral(v, v3d_RENDER_TARGET_0 + rt, c->mem_format, FALSE,
-                                      V3D_DECIMATE_MODE_SAMPLE_0, c->format, c->force_alpha1, FALSE, FALSE,
-                                      c->ub, 0, c->addr);
+                LoadTileBufferGeneral(v, v3d_RENDER_TARGET_0 + rt, c->mem_format, FALSE, dm, c->format,
+                                      c->force_alpha1, FALSE, FALSE, c->ub, 0, c->addr);
             }
     if (!clear_zs) {
         if (tg->has_z && !((no_load & OGLES2_DISCARD_DEPTH) &&
                            (!tg->packed_zs || (no_load & OGLES2_DISCARD_STENCIL) || !ctx->fb_stencil_bits)))
-            LoadTileBufferGeneral(v, tg->packed_zs ? v3d_ZSTENCIL : v3d_Z, z->mem_format, FALSE,
-                                  V3D_DECIMATE_MODE_SAMPLE_0, z->format, FALSE, FALSE, FALSE, z->ub, 0, z->addr);
+            LoadTileBufferGeneral(v, tg->packed_zs ? v3d_ZSTENCIL : v3d_Z, z->mem_format, FALSE, dm, z->format,
+                                  FALSE, FALSE, FALSE, z->ub, 0, z->addr);
         if (tg->has_s && !(no_load & OGLES2_DISCARD_STENCIL))
-            LoadTileBufferGeneral(v, v3d_STENCIL, st->mem_format, FALSE, V3D_DECIMATE_MODE_SAMPLE_0,
-                                  st->format, FALSE, FALSE, FALSE, st->ub, 0, st->addr);
+            LoadTileBufferGeneral(v, v3d_STENCIL, st->mem_format, FALSE, dm, st->format, FALSE, FALSE, FALSE,
+                                  st->ub, 0, st->addr);
     }
     DoCommand(v, v3d_OP_END_OF_LOADS);
     PrimListFormat(v, v3d_LIST_TRIANGLES, FALSE);
@@ -693,16 +696,14 @@ static void build_render_fbo(struct OGLES2Context *ctx, const struct OGLES2Targe
             if (tg->colors & (1 << rt)) {
                 c = &tg->color[rt];
                 StoreTileBufferGeneral(v, v3d_RENDER_TARGET_0 + rt, c->mem_format, FALSE, V3D_DITHER_MODE_NONE,
-                                       V3D_DECIMATE_MODE_SAMPLE_0, c->format, FALSE, FALSE, FALSE, c->ub, 0,
-                                       c->addr);
+                                       dm, c->format, FALSE, FALSE, FALSE, c->ub, 0, c->addr);
             }
     if (store_z)
         StoreTileBufferGeneral(v, tg->packed_zs ? v3d_ZSTENCIL : v3d_Z, z->mem_format, FALSE,
-                               V3D_DITHER_MODE_NONE, V3D_DECIMATE_MODE_SAMPLE_0, z->format, FALSE, FALSE,
-                               FALSE, z->ub, 0, z->addr);
+                               V3D_DITHER_MODE_NONE, dm, z->format, FALSE, FALSE, FALSE, z->ub, 0, z->addr);
     if (store_s)
-        StoreTileBufferGeneral(v, v3d_STENCIL, st->mem_format, FALSE, V3D_DITHER_MODE_NONE,
-                               V3D_DECIMATE_MODE_SAMPLE_0, st->format, FALSE, FALSE, FALSE, st->ub, 0, st->addr);
+        StoreTileBufferGeneral(v, v3d_STENCIL, st->mem_format, FALSE, V3D_DITHER_MODE_NONE, dm, st->format,
+                               FALSE, FALSE, FALSE, st->ub, 0, st->addr);
     if (!store_c && !store_z && !store_s) /* Mesa: a tile stores something */
         StoreTileBufferGeneral(v, v3d_NONE, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     if (clear_color || clear_zs)
@@ -716,7 +717,7 @@ static void build_render_fbo(struct OGLES2Context *ctx, const struct OGLES2Targe
     SetBuffer(v, &v->render_buf[s]);
     if (ctx->probe & OGLES2_PROBE_SEMAPHORE)
         DoCommand(v, v3d_OP_WAIT_ON_SEMAPHORE);
-    TileRenderingModeCFGCommon(v, tg->nrt, width, height, tg->bpp, FALSE, FALSE,
+    TileRenderingModeCFGCommon(v, tg->nrt, width, height, tg->bpp, tg->msaa, FALSE,
                                ez == V3D_EZ_GT_GE ? v3d_EARLY_Z_DIRECTION_GT_GE
                                                   : v3d_EARLY_Z_DIRECTION_LT_LE,
                                ez_off, tg->depth_type, early_zs_clear);

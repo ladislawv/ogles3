@@ -1476,7 +1476,7 @@ static void emit_state(struct OGLES2Context *ctx, struct dedup *dd, int prim,
     wf = s->polygon_mode != GL_FILL;
     pf = s->polygon_mode == GL_POINT;
     pv = s->provoking_vertex == GL_FIRST_VERTEX_CONVENTION;
-    /* 4x MSAA (the default framebuffer's job): the rasterizer samples four
+    /* 4x MSAA (the job's, job.c): the rasterizer samples four
      * points a pixel (Mesa v3dx_emit.c), and glSampleCoverage's mask, as
      * Mesa's state tracker makes one: round(value x 4) samples, inverted on
      * request. */
@@ -2060,9 +2060,11 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
      * v3d_rasterizes_lines/points). */
     fsmode = mode >= GL_TRIANGLES && ctx->state.polygon_mode != GL_FILL
                  ? (ctx->state.polygon_mode == GL_POINT ? GL_POINTS : GL_LINES) : mode;
-    /* A 4x MSAA default framebuffer with GL_SAMPLE_ALPHA_TO_COVERAGE (Mesa
-     * turns alpha into the sample mask in the fragment shader). */
-    a2c = ctx->msaa && !ctx->draw_fb && (ctx->state.caps & OGLES2_CAP_SAMPLE_ALPHA_TO_COVERAGE) != 0;
+    /* A 4x MSAA default framebuffer, or multisampled renderbuffers, with
+     * GL_SAMPLE_ALPHA_TO_COVERAGE (Mesa turns alpha into the sample mask in
+     * the fragment shader). */
+    a2c = (ctx->state.caps & OGLES2_CAP_SAMPLE_ALPHA_TO_COVERAGE) != 0 &&
+          (ctx->draw_fb ? ogles2_fbo_samples(ctx->draw_fb) != 0 : ctx->msaa);
     fim = im;
     bits[0] = bits[1] = 0;
     memset(&tg, 0, sizeof(tg));

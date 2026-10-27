@@ -48,10 +48,11 @@ extern void OGLES2Close(void);
 static int os3_gles2_open;
 static int os3_gles2_swap_interval;
 
-/* The profile SDL asks for: ES 2.x goes to ogles2.library. */
+/* The profile SDL asks for: ES 2.x and 3.x go to ogles2.library. */
 static SDL_bool OS3_GLES2_Wanted(_THIS)
 {
-    return _this->gl_config.profile_mask == SDL_GL_CONTEXT_PROFILE_ES && _this->gl_config.major_version == 2
+    return _this->gl_config.profile_mask == SDL_GL_CONTEXT_PROFILE_ES &&
+                   (_this->gl_config.major_version == 2 || _this->gl_config.major_version == 3)
                ? SDL_TRUE
                : SDL_FALSE;
 }
@@ -144,9 +145,17 @@ SDL_GLContext OS3_GLES2_CreateContext(_THIS, SDL_Window *window)
     struct Window *iwin;
     ULONG err = 0;
     void *ctx;
+    /* OGLES2_CCT_PISTORM_ES_VERSION: 20, or 30 and 31 for ES 3.x (ogles2
+     * 2.0 on); 3.2 and later no ogles2.library offers. */
+    int major = _this->gl_config.major_version, minor = _this->gl_config.minor_version;
+    ULONG version = major == 3 ? (ULONG)(30 + minor) : 20;
 
     if (!window || !window->driverdata) {
         SDL_SetError("OS3: invalid SDL window for an OpenGL ES 2 context");
+        return NULL;
+    }
+    if (major == 3 && minor > 1) {
+        SDL_SetError("OS3: ogles2.library has no OpenGL ES %d.%d contexts", major, minor);
         return NULL;
     }
     data = (OS3_WindowData *)window->driverdata;
@@ -170,16 +179,31 @@ SDL_GLContext OS3_GLES2_CreateContext(_THIS, SDL_Window *window)
                                 OGLES2_CCT_VSYNC, (ULONG)os3_gles2_swap_interval,
                                 OGLES2_CCT_DEPTH, (ULONG)_this->gl_config.depth_size,
                                 OGLES2_CCT_STENCIL, (ULONG)_this->gl_config.stencil_size,
+                                OGLES2_CCT_PISTORM_ES_VERSION, version,
                                 TAG_DONE);
+    if (!ctx && err == OGLES2_CCE_UNSUPPORTED && major == 3) {
+        SDL_SetError("OS3: this ogles2.library has no OpenGL ES %d.%d contexts", major, minor);
+        return NULL;
+    }
     if (!ctx) {
         SDL_SetError("OS3: ogles2.library could not create a context (error %lu)", (unsigned long)err);
         return NULL;
+    }
+    aglMakeCurrent(ctx);
+    /* A library before 2.0 ignores the version tag: an ES 2.0 context. */
+    if (major == 3) {
+        const char *v = (const char *)glGetString(GL_VERSION);
+        if (!v || SDL_strncmp(v, "OpenGL ES 3", 11) != 0) {
+            aglMakeCurrent(NULL);
+            aglDestroyContext(ctx);
+            SDL_SetError("OS3: ogles2.library before 2.0 has no OpenGL ES 3 contexts");
+            return NULL;
+        }
     }
     data->gl_context = ctx;
     data->gl_es = 1;
     data->gl_width = iwin->Width - iwin->BorderLeft - iwin->BorderRight;
     data->gl_height = iwin->Height - iwin->BorderTop - iwin->BorderBottom;
-    aglMakeCurrent(ctx);
     glViewport(0, 0, data->gl_width, data->gl_height);
     return (SDL_GLContext)ctx;
 }

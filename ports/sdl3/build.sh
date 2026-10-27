@@ -80,5 +80,8 @@ done
 # task contending for SDL's atomics and spinlocks while a tone plays).
 m68k-amigaos-gcc "${CFLAGS[@]}" "$HERE/tests/atomictest.c" -L"$O" -lSDL3 -L"$B" -logles2 -L"$O/lib" -lminigl \
     -ldebug -lamiga -lm881 -latomic -lstubs -o "$O/tests/atomictest"
+# gles3test: OpenGL ES 3 contexts through SDL (GLES3 plan stage C item 6).
+m68k-amigaos-gcc "${CFLAGS[@]}" "$HERE/tests/gles3test.c" -L"$O" -lSDL3 -L"$B" -logles2 -L"$O/lib" -lminigl \
+    -ldebug -lamiga -lm881 -latomic -lstubs -o "$O/tests/gles3test"
 cp "$L/test/icon.png" "$L/test/sample.png" "$O/tests/"
 ls -l "$O/tests"

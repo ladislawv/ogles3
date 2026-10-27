@@ -2007,6 +2007,110 @@ static void test_blit(void)
     glDeleteProgram(p);
 }
 
+/* Multisampled renderbuffers (GLES3 plan stage C item 2): an RGBA8 and a
+ * D24S8 one of 4 samples, a triangle's diagonal edge drawn into them, then
+ * resolved by glBlitFramebuffer into a texture: inside red, outside the
+ * clear colour, the pixels the edge crosses in between. A second job loads
+ * every sample back and draws over all with alpha to coverage (alpha 0.5:
+ * two samples of four). And ES 3.0's errors: no samples for RGBA32F,
+ * reads and copies from a multisampled framebuffer, blits into one or of
+ * another rectangle. */
+static void test_msaa(void)
+{
+    static const GLfloat red[4] = { 1, 0, 0, 1 }, half_green[4] = { 0, 1, 0, 0.5f };
+    static const GLfloat tri[6] = { -1, -1, 1, -1, -1, 1 }; /* x + y < 16 of 16x16 */
+    static const GLint iv[4] = { 0, 0, 0, 0 };
+    static const GLuint uv[4] = { 0, 0, 0, 0 };
+    GLuint p = program("es3rt"), fb[2], rb[2], t;
+    GLint n = -1, sb = -1, pos;
+    GLubyte px[4];
+    if (!p) {
+        check(0, "msaa: es3rt links");
+        return;
+    }
+    glGetInternalformativ(GL_RENDERBUFFER, GL_RGBA8, GL_SAMPLES, 1, &n);
+    check(n == 4 && glGetError() == GL_NO_ERROR, "msaa: RGBA8 takes 4 samples");
+    glGetInternalformativ(GL_RENDERBUFFER, GL_RGBA32F, GL_NUM_SAMPLE_COUNTS, 1, &n);
+    check(n == 0 && glGetError() == GL_NO_ERROR, "msaa: RGBA32F takes none");
+    glGenRenderbuffers(2, rb);
+    glGenFramebuffers(2, fb);
+    glBindRenderbuffer(GL_RENDERBUFFER, rb[0]);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 2, GL_RGBA32F, 16, 16);
+    check(glGetError() == GL_INVALID_OPERATION, "msaa: RGBA32F with samples is GL_INVALID_OPERATION");
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 2, GL_RGBA8, 16, 16);
+    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_SAMPLES, &n);
+    check(n == 4 && glGetError() == GL_NO_ERROR, "msaa: 2 samples asked, 4 given");
+    glBindRenderbuffer(GL_RENDERBUFFER, rb[1]);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, 16, 16);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb[0]);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, rb[0]);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rb[1]);
+    glGetIntegerv(GL_SAMPLE_BUFFERS, &sb);
+    glGetIntegerv(GL_SAMPLES, &n);
+    check(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE && sb == 1 && n == 4,
+          "msaa: complete, GL_SAMPLE_BUFFERS 1 and GL_SAMPLES 4");
+    glReadPixels(0, 0, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, px);
+    check(glGetError() == GL_INVALID_OPERATION, "msaa: glReadPixels is GL_INVALID_OPERATION");
+    glGenTextures(1, &t);
+    glBindTexture(GL_TEXTURE_2D, t);
+    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, 4, 4, 0);
+    check(glGetError() == GL_INVALID_OPERATION, "msaa: glCopyTexImage2D is GL_INVALID_OPERATION");
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, 16, 16);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb[1]);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, t, 0);
+
+    /* the edge, depth tested against a cleared depth of 1 */
+    glBindFramebuffer(GL_FRAMEBUFFER, fb[0]);
+    glViewport(0, 0, 16, 16);
+    glClearColor(0, 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+    rt_uniforms(p, red, iv, uv, 0.0f);
+    pos = glGetAttribLocation(p, "pos");
+    glVertexAttribPointer((GLuint)pos, 2, GL_FLOAT, GL_FALSE, 0, tri);
+    glEnableVertexAttribArray((GLuint)pos);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDisableVertexAttribArray((GLuint)pos);
+    glDisable(GL_DEPTH_TEST);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb[1]);
+    glBlitFramebuffer(0, 0, 16, 16, 0, 0, 16, 16, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    check(glGetError() == GL_NO_ERROR, "msaa: resolved by glBlitFramebuffer");
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fb[1]);
+    glReadPixels(7, 8, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, px);
+    check(pixel_is(2, 2, 255, 0, 0, 255, 0) && pixel_is(14, 14, 0, 0, 0, 0, 0), "msaa: inside red, outside clear");
+    check(px[0] > 32 && px[0] < 224 && px[0] == px[3],
+          "msaa: a pixel on the edge partly covered (its samples averaged)");
+    if (!(px[0] > 32 && px[0] < 224))
+        printf("     pixel (7, 8) is %d %d %d %d\n", px[0], px[1], px[2], px[3]);
+
+    /* a second job: every sample loaded, half of them drawn over */
+    glBindFramebuffer(GL_FRAMEBUFFER, fb[0]);
+    glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+    rt_uniforms(p, half_green, iv, uv, 0.0f);
+    draw_cover(p);
+    glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb[1]);
+    glBlitFramebuffer(0, 0, 16, 16, 0, 0, 16, 16, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fb[1]);
+    check(pixel_is(2, 2, 128, 128, 0, 191, 3) && pixel_is(14, 14, 0, 128, 0, 64, 3),
+          "msaa: a second job over the samples kept, alpha to coverage covering two");
+
+    /* ES 3.0 4.3.3's errors */
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fb[0]);
+    glBlitFramebuffer(0, 0, 16, 16, 0, 0, 8, 8, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    check(glGetError() == GL_INVALID_OPERATION, "msaa: a resolve into another rectangle is GL_INVALID_OPERATION");
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fb[1]);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb[0]);
+    glBlitFramebuffer(0, 0, 16, 16, 0, 0, 16, 16, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    check(glGetError() == GL_INVALID_OPERATION, "msaa: a blit into multisampled renderbuffers is GL_INVALID_OPERATION");
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, 64, 64);
+    glDeleteFramebuffers(2, fb);
+    glDeleteRenderbuffers(2, rb);
+    glDeleteTextures(1, &t);
+    glDeleteProgram(p);
+}
+
 /* Texel (x, y) of t sampled (es3tc, nearest) is (r, g, b). */
 static int texel_at(GLuint p, GLuint t, int w, int h, int x, int y, int r, int g, int b)
 {
@@ -2242,6 +2346,7 @@ int main(void)
     test_instanced_ext();
     test_attachment_queries();
     test_xfb();
+    test_msaa();
     check(glGetError() == GL_NO_ERROR, "no GL error left over");
     aglDestroyContext(ctx);
     if ((ctx = aglCreateContextTags2(&e, OGLES2_CCT_BITMAP, (ULONG)bm, OGLES2_CCT_PISTORM_ES_VERSION, 30,

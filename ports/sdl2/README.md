@@ -42,7 +42,11 @@ A program links `-lSDL2 -logles2 -lminigl -ldebug -lamiga -lm881 -lstubs`
 - **The backend is chosen when SDL loads the GL library**, by the profile
   the program asks for, as AmigaOS 4's driver does: ES 2.x
   (`SDL_GL_CONTEXT_PROFILE_ES`, which SDL's GLES2 renderer sets) gets
-  ogles2.library; anything else gets minigl.library as before.
+  ogles2.library; anything else gets minigl.library as before. ES 3.0 and
+  3.1 go to ogles2.library too, asked for with
+  `OGLES2_CCT_PISTORM_ES_VERSION`: a library without them (before 2.1, or
+  a build without ES 3 contexts) is refused with SDL's error, ES 3.2 and
+  later always. `tests/gles3test.c` checks it (package `m8-4`).
 - **`patches/0001-gles2-on-ogles2.patch`**: the configuration
   (`SDL_VIDEO_OPENGL_ES2`, `SDL_VIDEO_RENDER_OGL_ES2`), the device's
   `GL_LoadLibrary`, a `gl_es` flag in the window data, MiniGL's resize and
