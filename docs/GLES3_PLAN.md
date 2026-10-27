@@ -2474,6 +2474,15 @@ framebuffer defaults). `compile_bridge.py` turns TCP keepalive on: after
 the A1200's reset it waited on a dead link and every compile fell back to
 the A1200's own compiler.
 
+**Then (2026-10-27):** item 5's vertex attribute binding (below), item
+4's `glGetTexLevelParameter*` and ES 3.1's sample counts, item 6's
+framebuffer parameters (state only; drawing without attachments to come).
+Package `m8-5` (an ES31 build: `m8_es31` with the GPU, its limits, and
+`m8_draw` in a 3.1 context, whose ES 3.1 draws run only there): 47 of 47,
+limits identical, 155 of 155. dEQP-GLES31 `vertex_attribute_binding` 31
+of 31, `state_query` 556 passed and 43 failed (multisample textures 32,
+item 4; compute and separate shader objects the rest).
+
 1. **Compute shaders.** The largest single piece:
    - `v3dcore`: a CSD submission path beside the binning/render one, under
      the same GPU lock (`v3d_gpu_lock.c`): the registers and the start, wait
@@ -2605,6 +2614,18 @@ the A1200's own compiler.
    a pixel). The four float formats offer none: dEQP-GLES31's multisample
    texture cases report "not supported" for a count a format does not
    offer (`es31fTextureMultisampleTests.cpp:1235-1239`).
+   **Begun (2026-10-27):** `glGetTexLevelParameteriv`/`fv` (target and
+   level checked, a cube map's faces, the initial values for a level not
+   defined; sizes and component types from a table of the sized formats,
+   an unsized level as the sized format it stores, ES 3.0 table 3.2; each
+   level keeps its internal format as given, `OGLES2Face.ifmt`, which
+   glTexImage* would otherwise lose to the base format); ES 3.1 contexts
+   give the integer formats 4 samples (renderbuffers, and
+   `glGetInternalformativ` for `GL_TEXTURE_2D_MULTISAMPLE`), the 32-bit
+   floats none; a blit resolves an integer format with each pixel's sample
+   0 (on the CPU, `blit.c`). `GL_SAMPLE_MASK_VALUE`'s 64-bit query is the
+   mask as a signed int, as Mesa's. dEQP-GLES31 `state_query.texture_level`:
+   all but the 2D multisample target's.
 5. **Vertex attribute binding** (`glBindVertexBuffer`, `glVertexAttribFormat`,
    `glVertexAttribIFormat`, `glVertexAttribBinding`, `glVertexBindingDivisor`)
    and **separate shader objects** (program pipelines, `glProgramUniform*`).
@@ -2627,6 +2648,26 @@ the A1200's own compiler.
    programs' hashes (vertex, then fragment; 24 hex digits, as a program's).
    Without a compiler a pipeline draws only from a shipped `.v3dx` for its
    pair, a deviation `ogles2.doc` lists.
+   **Vertex attribute binding done (2026-10-27):** `struct OGLES2Array`
+   keeps what the draws read (buffer, pointer, stride, divisor) and gains
+   ES 3.1's split: the attribute's binding index and relative offset, and in
+   slot i binding i's buffer, offset, stride and divisor (as many bindings
+   as attributes, 16; vertex array objects copy the slots whole, so they
+   carry it). `draw.c`'s `vab_refresh` makes an attribute's draw state from
+   its binding after any change; glVertexAttribPointer is ES 3.1's format
+   plus binding `index` (its stride 0 the packed size there, the given 0
+   kept for `GL_VERTEX_ATTRIB_ARRAY_STRIDE`), glVertexAttribDivisor the
+   binding's divisor. A binding of stride 0 gives every vertex its first
+   element: the draw copies one element and reads it at record stride 0, as
+   a current value. The five entries refuse vertex array object 0 and a
+   buffer name glGenBuffers did not give (`GL_INVALID_OPERATION`, as Mesa
+   for ES 3.1), strides above 2048 and relative offsets above 2047. The
+   buffers' references count the bindings too (`in_use`, deletion,
+   `vao.c`). The library's clear and copy draws, which borrow attributes 14
+   and 15, now clear their integer flag (an integer array there would have
+   read the clear's floats as integers). `m8_es31` 13 checks, `m8_draw`'s
+   `test_vab` 3 (interleaved through one binding, stride 0, a binding's
+   divisor).
 6. **GLSL ES 3.10 and queries:** explicit uniform locations and
    `layout(binding)` (from the file, §3), arrays of arrays,
    `glGetProgramInterfaceiv`, `glGetProgramResource*`, everything left of

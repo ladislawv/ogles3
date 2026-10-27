@@ -81,7 +81,8 @@ static BOOL read_raw(struct OGLES2Context *ctx, int x, int y, int w, int h, UBYT
 /* read_raw's box, resolved from a multisampled read buffer (stage C item
  * 2): each pixel's four samples, a 2x2 square of the image (fbo.c), read
  * as floats (sRGB decoded) and averaged, as the tile buffer resolves in
- * its 8-bit or 16F type. Integer formats have no samples. */
+ * its 8-bit or 16F type; an integer format's (ES 3.1) its sample 0, the
+ * one value ES 3.1 4.3.3 asks of a pixel. */
 static BOOL read_box(struct OGLES2Context *ctx, int x, int y, int w, int h, UBYTE *box, BOOL *ints)
 {
     GLfloat *all, *out = (GLfloat *)box;
@@ -97,7 +98,7 @@ static BOOL read_box(struct OGLES2Context *ctx, int x, int y, int w, int h, UBYT
         for (i = 0; i < w; i++)
             for (c = 0; c < 4; c++) {
                 const GLfloat *s = all + (ULONG)2 * j * row + (ULONG)i * 8 + c;
-                out[((ULONG)j * w + i) * 4 + c] = (s[0] + s[4] + s[row] + s[row + 4]) * 0.25f;
+                out[((ULONG)j * w + i) * 4 + c] = *ints ? s[0] : (s[0] + s[4] + s[row] + s[row + 4]) * 0.25f;
             }
     FreeVec(all);
     return ok;

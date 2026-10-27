@@ -181,6 +181,20 @@ struct OGLES2Array
     struct OGLES2Buffer *buffer; /* the GL_ARRAY_BUFFER binding when it was set; NULL: client memory */
     GLuint divisor;      /* ES 3.0's glVertexAttribDivisor: 0 per vertex, n an element per n instances */
     GLboolean integer;   /* ES 3.0's glVertexAttribIPointer: read as integers */
+    /* ES 3.1's vertex attribute binding (docs/GLES3_PLAN.md stage D item 5):
+     * the attribute reads binding `binding` at `reloffset`; slot i also
+     * holds binding i's own state (bbuffer at boffset, bstride exact,
+     * bdivisor). buffer, pointer, stride and divisor above are the draw's,
+     * made from them (draw.c, vab_refresh); zero_stride: the binding's
+     * stride is 0, every vertex reads its first element. ustride is
+     * glVertexAttribPointer's stride as given (its query). */
+    UBYTE binding;
+    GLboolean zero_stride;
+    GLuint reloffset;
+    struct OGLES2Buffer *bbuffer;
+    const void *boffset;
+    GLsizei bstride, ustride;
+    GLuint bdivisor;
 };
 
 /* ---- program images (program.c, v3dp.c) ----
@@ -932,6 +946,8 @@ BOOL ogles2_fbo_read_ready(struct OGLES2Context *ctx);  /* and, read from, not m
  * image units' (texture.c): -1 no such query, 0 an error set, 1 *v. */
 int ogles2_indexed_query(struct OGLES2Context *ctx, GLenum pname, GLuint index, GLint64 *v);
 int ogles2_image_query(struct OGLES2Context *ctx, GLenum pname, GLuint index, GLint64 *v);
+int ogles2_vab_query(struct OGLES2Context *ctx, GLenum pname, GLuint index, GLint64 *v); /* draw.c's bindings */
+struct OGLES2Buffer *ogles2_buffer_get(struct OGLES2Context *ctx, GLuint name); /* NULL: no such buffer */
 BOOL ogles2_fbo_target(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb, BOOL surfaces,
                        struct OGLES2Target *t);
 void ogles2_fbo_rendered(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb);

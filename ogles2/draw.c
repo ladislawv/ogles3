@@ -128,15 +128,46 @@ static ULONG elem_bytes(const struct OGLES2Array *a)
 #define CONV_INT_FLOAT   0x10000UL /* GL_INT, + 1: normalized; + 2, + 3: GL_UNSIGNED_INT */
 #define CONV_HALF3_FLOAT 0x10004UL
 
-/* glVertexAttribPointer and glVertexAttribIPointer (`integer`); FALSE: an error. */
+/* ES 3.1's vertex attribute binding (stage D item 5): every attribute that
+ * reads binding j takes its buffer, offset, stride and divisor (the fields
+ * the draws read), the attribute's relative offset added. The buffers no
+ * longer referenced are released (a deleted one only they held). GLES2
+ * and ES 3.0 contexts change formats and bindings together, attribute i on
+ * binding i, so the draws see what they always saw. */
+static void vab_refresh(struct OGLES2Context *ctx, GLuint j)
+{
+    struct OGLES2Buffer *old[OGLES2_MAX_VERTEX_ATTRIBS];
+    const struct OGLES2Array *bnd = &ctx->array[j];
+    int i, n = 0;
+    for (i = 0; i < OGLES2_MAX_VERTEX_ATTRIBS; i++) {
+        struct OGLES2Array *a = &ctx->array[i];
+        if (a->binding != j)
+            continue;
+        if (a->buffer != bnd->bbuffer)
+            old[n++] = a->buffer;
+        a->buffer = bnd->bbuffer;
+        a->pointer = (const UBYTE *)bnd->boffset + a->reloffset;
+        a->stride = bnd->bstride;
+        a->zero_stride = bnd->bstride == 0;
+        a->divisor = bnd->bdivisor;
+    }
+    while (n--)
+        ogles2_buffer_release(ctx, old[n]);
+}
+
+/* glVertexAttribPointer and glVertexAttribIPointer (`integer`); FALSE: an
+ * error. ES 3.1 2.9.1: the attribute's format with relative offset 0, on
+ * binding `index`, whose buffer, offset and stride (0: the format's packed
+ * size) it sets. */
 static BOOL set_pointer(struct OGLES2Context *ctx, GLuint index, GLint size, GLenum type, GLboolean normalized,
                         GLsizei stride, const void *pointer, GLboolean integer)
 {
-    struct OGLES2Array *a;
+    struct OGLES2Array *a, *bnd;
     struct OGLES2Buffer *old;
     if (!ogles2_context_valid(ctx))
         return FALSE;
-    if (index >= OGLES2_MAX_VERTEX_ATTRIBS || size < 1 || size > 4 || stride < 0) {
+    if (index >= OGLES2_MAX_VERTEX_ATTRIBS || size < 1 || size > 4 || stride < 0 ||
+        (ogles2_es31(ctx) && stride > 2048)) { /* GL_MAX_VERTEX_ATTRIB_STRIDE */
         ogles2_error(ctx, GL_INVALID_VALUE);
         return FALSE;
     }
@@ -155,15 +186,20 @@ static BOOL set_pointer(struct OGLES2Context *ctx, GLuint index, GLint size, GLe
         return FALSE;
     }
     a = &ctx->array[index];
-    old = a->buffer;
     a->size = size;
     a->type = type;
     a->normalized = normalized ? GL_TRUE : GL_FALSE;
-    a->stride = stride;
-    a->pointer = pointer;
-    a->buffer = ogles2_buffer_array(ctx); /* GLES 2.0 2.9: captured now */
     a->integer = integer;
-    if (old != a->buffer)
+    a->reloffset = 0;
+    a->ustride = stride;
+    a->binding = (UBYTE)index;
+    bnd = a; /* binding `index`'s state is slot index's */
+    old = bnd->bbuffer;
+    bnd->bbuffer = ogles2_buffer_array(ctx); /* GLES 2.0 2.9: captured now */
+    bnd->boffset = pointer;
+    bnd->bstride = stride ? stride : (GLsizei)elem_bytes(a);
+    vab_refresh(ctx, index);
+    if (old != bnd->bbuffer)
         ogles2_buffer_release(ctx, old); /* a vertex array object's deleted buffer */
     return TRUE;
 }
@@ -188,13 +224,151 @@ void ogles2_glVertexAttribIPointer(struct OGLES2Context *ctx, GLuint index, GLin
     set_pointer(ctx, index, size, type, GL_FALSE, stride, pointer, GL_TRUE);
 }
 
+/* ES 3.1 2.9.1: glVertexAttribDivisor is the attribute on binding index,
+ * that binding's divisor set. */
 static void attrib_divisor(struct OGLES2Context *ctx, GLuint index, GLuint divisor)
 {
+    GLuint old;
     if (index >= OGLES2_MAX_VERTEX_ATTRIBS) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
-    ctx->array[index].divisor = divisor;
+    old = ctx->array[index].binding;
+    ctx->array[index].binding = (UBYTE)index;
+    ctx->array[index].bdivisor = divisor;
+    vab_refresh(ctx, index);
+    if (old != index)
+        vab_refresh(ctx, old);
+}
+
+/* ---- ES 3.1's vertex attribute binding (stage D item 5) ---- */
+
+/* An ES 3.1 context with a vertex array object other than 0 bound: ES 3.1
+ * 10.3.1 (and Mesa for ES 3.1, as for core GL) refuses the entries
+ * below with object 0 (GL_INVALID_OPERATION). */
+static BOOL vab_entry(struct OGLES2Context *ctx)
+{
+    if (!ogles2_es31_entry(ctx))
+        return FALSE;
+    if (!ogles2_vao_bound(ctx)) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return FALSE;
+    }
+    return TRUE;
+}
+
+void ogles2_glBindVertexBuffer(struct OGLES2Context *ctx, GLuint bindingindex, GLuint buffer, GLintptr offset,
+                               GLsizei stride)
+{
+    struct OGLES2Array *bnd;
+    struct OGLES2Buffer *b = 0, *old;
+    if (!vab_entry(ctx))
+        return;
+    if (bindingindex >= OGLES2_MAX_VERTEX_ATTRIBS || offset < 0 || stride < 0 || stride > 2048) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    if (buffer && !(b = ogles2_buffer_get(ctx, buffer))) { /* not a name glGenBuffers gave */
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
+    bnd = &ctx->array[bindingindex];
+    old = bnd->bbuffer;
+    bnd->bbuffer = b;
+    bnd->boffset = (const void *)offset;
+    bnd->bstride = stride;
+    vab_refresh(ctx, bindingindex);
+    if (old != b)
+        ogles2_buffer_release(ctx, old);
+}
+
+/* glVertexAttribFormat and glVertexAttribIFormat (`integer`). */
+static void attrib_format(struct OGLES2Context *ctx, GLuint index, GLint size, GLenum type, GLboolean normalized,
+                          GLuint relativeoffset, GLboolean integer)
+{
+    struct OGLES2Array *a;
+    if (index >= OGLES2_MAX_VERTEX_ATTRIBS || size < 1 || size > 4 || relativeoffset > 2047) {
+        ogles2_error(ctx, GL_INVALID_VALUE); /* GL_MAX_VERTEX_ATTRIB_RELATIVE_OFFSET */
+        return;
+    }
+    if (!type_size(type) || (integer && type != GL_BYTE && type != GL_UNSIGNED_BYTE && type != GL_SHORT &&
+                             type != GL_UNSIGNED_SHORT && type != GL_INT && type != GL_UNSIGNED_INT)) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    if (packed_type(type) && size != 4) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
+    a = &ctx->array[index];
+    a->size = size;
+    a->type = type;
+    a->normalized = normalized ? GL_TRUE : GL_FALSE;
+    a->integer = integer;
+    a->reloffset = relativeoffset;
+    vab_refresh(ctx, a->binding);
+}
+
+void ogles2_glVertexAttribFormat(struct OGLES2Context *ctx, GLuint attribindex, GLint size, GLenum type,
+                                 GLboolean normalized, GLuint relativeoffset)
+{
+    if (vab_entry(ctx))
+        attrib_format(ctx, attribindex, size, type, normalized, relativeoffset, GL_FALSE);
+}
+
+void ogles2_glVertexAttribIFormat(struct OGLES2Context *ctx, GLuint attribindex, GLint size, GLenum type,
+                                  GLuint relativeoffset)
+{
+    if (vab_entry(ctx))
+        attrib_format(ctx, attribindex, size, type, GL_FALSE, relativeoffset, GL_TRUE);
+}
+
+void ogles2_glVertexAttribBinding(struct OGLES2Context *ctx, GLuint attribindex, GLuint bindingindex)
+{
+    GLuint old;
+    if (!vab_entry(ctx))
+        return;
+    if (attribindex >= OGLES2_MAX_VERTEX_ATTRIBS || bindingindex >= OGLES2_MAX_VERTEX_ATTRIBS) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    old = ctx->array[attribindex].binding;
+    ctx->array[attribindex].binding = (UBYTE)bindingindex;
+    vab_refresh(ctx, bindingindex);
+    if (old != bindingindex)
+        vab_refresh(ctx, old);
+}
+
+void ogles2_glVertexBindingDivisor(struct OGLES2Context *ctx, GLuint bindingindex, GLuint divisor)
+{
+    if (!vab_entry(ctx))
+        return;
+    if (bindingindex >= OGLES2_MAX_VERTEX_ATTRIBS) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    ctx->array[bindingindex].bdivisor = divisor;
+    vab_refresh(ctx, bindingindex);
+}
+
+/* glGetIntegeri_v's GL_VERTEX_BINDING_* (state.c asks): -1 another query,
+ * 0 an error set, 1 *v. */
+int ogles2_vab_query(struct OGLES2Context *ctx, GLenum pname, GLuint index, GLint64 *v)
+{
+    const struct OGLES2Array *bnd;
+    if (pname != GL_VERTEX_BINDING_BUFFER && pname != GL_VERTEX_BINDING_OFFSET && pname != GL_VERTEX_BINDING_STRIDE &&
+        pname != GL_VERTEX_BINDING_DIVISOR)
+        return -1;
+    if (index >= OGLES2_MAX_VERTEX_ATTRIBS) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return 0;
+    }
+    bnd = &ctx->array[index];
+    *v = pname == GL_VERTEX_BINDING_BUFFER   ? (GLint64)ogles2_buffer_name(bnd->bbuffer)
+       : pname == GL_VERTEX_BINDING_OFFSET   ? (GLint64)(ULONG)bnd->boffset
+       : pname == GL_VERTEX_BINDING_STRIDE   ? (GLint64)bnd->bstride
+                                             : (GLint64)bnd->bdivisor;
+    return 1;
 }
 
 void ogles2_glVertexAttribDivisor(struct OGLES2Context *ctx, GLuint index, GLuint divisor)
@@ -246,7 +420,15 @@ void ogles2_glGetVertexAttribiv(struct OGLES2Context *ctx, GLuint index, GLenum 
     switch (pname) {
     case GL_VERTEX_ATTRIB_ARRAY_ENABLED:        *params = a->enabled; break;
     case GL_VERTEX_ATTRIB_ARRAY_SIZE:           *params = a->size; break;
-    case GL_VERTEX_ATTRIB_ARRAY_STRIDE:         *params = a->stride; break;
+    case GL_VERTEX_ATTRIB_ARRAY_STRIDE:         *params = a->ustride; break; /* as given (glVertexAttribPointer) */
+    case GL_VERTEX_ATTRIB_BINDING: /* ES 3.1 */
+    case GL_VERTEX_ATTRIB_RELATIVE_OFFSET:
+        if (!ogles2_es31(ctx)) {
+            ogles2_error(ctx, GL_INVALID_ENUM);
+            break;
+        }
+        *params = pname == GL_VERTEX_ATTRIB_BINDING ? (GLint)a->binding : (GLint)a->reloffset;
+        break;
     case GL_VERTEX_ATTRIB_ARRAY_TYPE:           *params = (GLint)a->type; break;
     case GL_VERTEX_ATTRIB_ARRAY_NORMALIZED:     *params = a->normalized; break;
     case GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING: *params = (GLint)ogles2_buffer_name(a->buffer); break;
@@ -2237,6 +2419,11 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
         BOOL ok;
         if (g >= OGLES2_MAX_VERTEX_ATTRIBS) {
             ok = constant_attrib(ctx, 0, &src[i]); /* a slot no attribute claims */
+        } else if (ctx->array[g].enabled && ctx->array[g].zero_stride) {
+            /* ES 3.1: a binding of stride 0, every vertex its first element:
+             * one element read as a current value is (record stride 0) */
+            ok = copy_array(ctx, &ctx->array[g], 0, 1, &src[i], FALSE);
+            src[i].stride = 0;
         } else if (ctx->array[g].enabled && ctx->array[g].divisor) {
             /* ES 3.0's instanced arrays: an element per `divisor` instances,
              * from element 0, whatever the vertices (the record's divisor,
@@ -2439,7 +2626,9 @@ static BOOL arrays_ok(struct OGLES2Context *ctx, const struct OGLES2Program *p, 
         ULONG end_a = end;
         if (p->image->attribs[a].slot == 0xff || !arr->enabled)
             continue;
-        if (arr->divisor) /* an instanced array's elements */
+        if (arr->zero_stride) /* ES 3.1: a binding of stride 0, its first element */
+            end_a = 1;
+        else if (arr->divisor) /* an instanced array's elements */
             end_a = ((ULONG)instances + arr->divisor - 1) / arr->divisor;
         if (arr->buffer) {
             ULONG es = elem_bytes(arr);
@@ -2829,6 +3018,8 @@ BOOL ogles2_draw_copy(struct OGLES2Context *ctx, struct OGLES2Texture *src, cons
         a->type = GL_FLOAT;
         a->normalized = GL_FALSE;
         a->stride = 0;
+        a->zero_stride = GL_FALSE;
+        a->integer = GL_FALSE;
         a->pointer = k ? (const void *)uv : (const void *)pos;
         a->buffer = 0;
         a->divisor = 0; /* the application's, set aside with the rest */
@@ -2929,6 +3120,8 @@ void ogles2_draw_clear(struct OGLES2Context *ctx, GLbitfield mask, UBYTE rts, co
     ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2].type = GL_FLOAT;
     ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2].normalized = GL_FALSE;
     ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2].stride = 0;
+    ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2].zero_stride = GL_FALSE;
+    ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2].integer = GL_FALSE;
     ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2].pointer = pos;
     ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2].buffer = 0;
     ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2].divisor = 0;

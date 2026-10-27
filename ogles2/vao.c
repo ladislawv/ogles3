@@ -94,6 +94,8 @@ static void genvertexarrays(struct OGLES2Context *ctx, GLsizei n, GLuint *arrays
         for (a = 0; a < OGLES2_MAX_VERTEX_ATTRIBS; a++) { /* as a context's (state.c) */
             o->array[a].size = 4;
             o->array[a].type = GL_FLOAT;
+            o->array[a].binding = (UBYTE)a; /* ES 3.1: its own binding, of stride 16 */
+            o->array[a].bstride = 16;
         }
         vs->tab[i] = o;
         if (arrays)
@@ -107,13 +109,18 @@ static void drop_buffers(struct OGLES2Context *ctx, struct OGLES2VertexArray *o)
 {
     struct OGLES2Buffer *b;
     int a, j;
-    for (a = 0; a <= OGLES2_MAX_VERTEX_ATTRIBS; a++) {
-        b = a < OGLES2_MAX_VERTEX_ATTRIBS ? o->array[a].buffer : o->element;
+    for (a = 0; a <= 2 * OGLES2_MAX_VERTEX_ATTRIBS; a++) {
+        b = a < OGLES2_MAX_VERTEX_ATTRIBS ? o->array[a].buffer
+          : a < 2 * OGLES2_MAX_VERTEX_ATTRIBS ? o->array[a - OGLES2_MAX_VERTEX_ATTRIBS].bbuffer /* ES 3.1's bindings */
+                                              : o->element;
         if (!b)
             continue;
-        for (j = 0; j < OGLES2_MAX_VERTEX_ATTRIBS; j++)
+        for (j = 0; j < OGLES2_MAX_VERTEX_ATTRIBS; j++) {
             if (o->array[j].buffer == b)
                 o->array[j].buffer = 0;
+            if (o->array[j].bbuffer == b)
+                o->array[j].bbuffer = 0;
+        }
         if (o->element == b)
             o->element = 0;
         ogles2_buffer_release(ctx, b);
@@ -241,7 +248,7 @@ BOOL ogles2_vao_uses_buffer(struct OGLES2Context *ctx, const struct OGLES2Buffer
         if (o->element == b)
             return TRUE;
         for (a = 0; a < OGLES2_MAX_VERTEX_ATTRIBS; a++)
-            if (o->array[a].buffer == b)
+            if (o->array[a].buffer == b || o->array[a].bbuffer == b)
                 return TRUE;
     }
     return FALSE;

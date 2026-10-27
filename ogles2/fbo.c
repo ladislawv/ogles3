@@ -108,6 +108,11 @@ struct OGLES2Framebuffer
     v3d_mem pool_alloc, pool_state; /* tile pools of its own when bigger than the context's */
     ULONG pool_tiles;
     GLenum read_buf;            /* ES 3.0's glReadBuffer: COLOR_ATTACHMENTi or NONE */
+    /* ES 3.1's glFramebufferParameteri: the size and samples of a framebuffer
+     * without attachments (drawn with stage D item 6) */
+    UWORD default_w, default_h;
+    UBYTE default_samples;
+    GLboolean default_fixed;
 };
 
 struct OGLES2FboState
@@ -764,24 +769,28 @@ static BOOL int_color(GLenum f)
     return (f >= GL_RGBA32UI && f <= GL_RGB8I) || f == GL_RGB10_A2UI || (f >= GL_R8I && f <= GL_RG32UI);
 }
 
-/* A format with no sample counts: the integer ones (ES 3.0's rule, as
- * Mesa's in 3.0 contexts, main/multisample.c:237-249), and the 32-bit float
- * ones, which dEQP-GLES3 allows none (es3fFboTestCase.cpp:281-338) and
- * which the tile buffer could neither blend nor resolve. */
-static BOOL no_samples(GLenum f)
+/* A format with no sample counts: the 32-bit float ones, which dEQP-GLES3
+ * allows none (es3fFboTestCase.cpp:281-338; dEQP-GLES31 skips them before
+ * 3.2) and which the tile buffer could neither blend nor resolve; and in
+ * ES 3.0 contexts the integer ones (ES 3.0's rule, as Mesa's in 3.0
+ * contexts, main/multisample.c:237-249). ES 3.1 drops that rule and asks
+ * GL_MAX_INTEGER_SAMPLES (4) of them (dEQP-GLES31 internal_format). */
+static BOOL no_samples(struct OGLES2Context *ctx, GLenum f)
 {
-    return es3_color(f) && (int_color(f) || f == GL_R32F || f == GL_RG32F || f == GL_RGBA32F);
+    return es3_color(f) && ((!ogles2_es31(ctx) && int_color(f)) || f == GL_R32F || f == GL_RG32F || f == GL_RGBA32F);
 }
 
 /* ES 3.0 6.1.15: a renderbuffer format's sample counts, GL_MAX_SAMPLES (4)
- * for every renderable format but those (none). */
+ * for every renderable format but those (none); ES 3.1's
+ * GL_TEXTURE_2D_MULTISAMPLE the same. */
 void ogles2_glGetInternalformativ(struct OGLES2Context *ctx, GLenum target, GLenum internalformat, GLenum pname,
                                   GLsizei bufSize, GLint *params)
 {
     BOOL none;
     if (!ogles2_es3_entry(ctx))
         return;
-    if (target != GL_RENDERBUFFER || (pname != GL_NUM_SAMPLE_COUNTS && pname != GL_SAMPLES) ||
+    if ((target != GL_RENDERBUFFER && !(ogles2_es31(ctx) && target == GL_TEXTURE_2D_MULTISAMPLE)) ||
+        (pname != GL_NUM_SAMPLE_COUNTS && pname != GL_SAMPLES) ||
         !(es3_color(internalformat) || is_depth(internalformat) || is_stencil(internalformat))) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
@@ -790,7 +799,7 @@ void ogles2_glGetInternalformativ(struct OGLES2Context *ctx, GLenum target, GLen
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
-    none = no_samples(internalformat);
+    none = no_samples(ctx, internalformat);
     if (!bufSize || !params)
         return;
     if (pname == GL_NUM_SAMPLE_COUNTS)
@@ -812,7 +821,7 @@ void ogles2_glRenderbufferStorageMultisample(struct OGLES2Context *ctx, GLenum t
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
-    if (samples > 4 || (samples > 0 && no_samples(internalformat))) {
+    if (samples > 4 || (samples > 0 && no_samples(ctx, internalformat))) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
@@ -1929,6 +1938,56 @@ BOOL ogles2_fbo_read_wide(struct OGLES2Context *ctx, int x, int y, int w, int h,
                 }
     }
     return TRUE;
+}
+
+/* ---- ES 3.1's framebuffer parameters (stage D item 6) ---- */
+
+/* The bound object of target's binding for glFramebufferParameteri and its
+ * query; NULL with the error set (the default framebuffer has none). */
+static struct OGLES2Framebuffer *param_fb(struct OGLES2Context *ctx, GLenum target, GLenum pname)
+{
+    struct OGLES2Framebuffer *fb;
+    int which;
+    if (!(which = fb_target(ctx, target)) ||
+        (pname != GL_FRAMEBUFFER_DEFAULT_WIDTH && pname != GL_FRAMEBUFFER_DEFAULT_HEIGHT &&
+         pname != GL_FRAMEBUFFER_DEFAULT_SAMPLES && pname != GL_FRAMEBUFFER_DEFAULT_FIXED_SAMPLE_LOCATIONS)) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return 0;
+    }
+    if (!(fb = target_fb(ctx, which)))
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+    return fb;
+}
+
+void ogles2_glFramebufferParameteri(struct OGLES2Context *ctx, GLenum target, GLenum pname, GLint param)
+{
+    struct OGLES2Framebuffer *fb;
+    if (!ogles2_es31_entry(ctx) || !(fb = param_fb(ctx, target, pname)))
+        return;
+    if (param < 0 || ((pname == GL_FRAMEBUFFER_DEFAULT_WIDTH || pname == GL_FRAMEBUFFER_DEFAULT_HEIGHT)
+                          ? param > OGLES2_MAX_VIEWPORT /* GL_MAX_FRAMEBUFFER_WIDTH, _HEIGHT */
+                          : pname == GL_FRAMEBUFFER_DEFAULT_SAMPLES && param > 4)) { /* GL_MAX_FRAMEBUFFER_SAMPLES */
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    before_fb_change(ctx, fb);
+    switch (pname) {
+    case GL_FRAMEBUFFER_DEFAULT_WIDTH:   fb->default_w = (UWORD)param; break;
+    case GL_FRAMEBUFFER_DEFAULT_HEIGHT:  fb->default_h = (UWORD)param; break;
+    case GL_FRAMEBUFFER_DEFAULT_SAMPLES: fb->default_samples = (UBYTE)param; break;
+    default:                             fb->default_fixed = param ? GL_TRUE : GL_FALSE; break;
+    }
+}
+
+void ogles2_glGetFramebufferParameteriv(struct OGLES2Context *ctx, GLenum target, GLenum pname, GLint *params)
+{
+    struct OGLES2Framebuffer *fb;
+    if (!ogles2_es31_entry(ctx) || !(fb = param_fb(ctx, target, pname)) || !params)
+        return;
+    *params = pname == GL_FRAMEBUFFER_DEFAULT_WIDTH     ? fb->default_w
+            : pname == GL_FRAMEBUFFER_DEFAULT_HEIGHT    ? fb->default_h
+            : pname == GL_FRAMEBUFFER_DEFAULT_SAMPLES   ? fb->default_samples
+                                                        : fb->default_fixed;
 }
 
 /* ---- queries ---- */

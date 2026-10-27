@@ -145,6 +145,78 @@ static void buffers(void)
           "buffers: deleted, unbound from every binding");
 }
 
+static GLint attrib_int(GLuint index, GLenum pname)
+{
+    GLint v = -12345;
+    glGetVertexAttribiv(index, pname, &v);
+    return v;
+}
+
+/* Vertex attribute binding (stage D item 5): formats apart from bindings,
+ * glVertexAttribPointer and glVertexAttribDivisor through them. */
+static void attrib_binding(void)
+{
+    static const GLfloat data[4] = { 0, 0, 0, 0 };
+    GLuint b, vao;
+    GLint64 off = -1;
+    glBindVertexBuffer(0, 0, 0, 16);
+    glVertexAttribBinding(0, 0);
+    check(glGetError() == GL_INVALID_OPERATION, "binding: refused with vertex array object 0 (GL_INVALID_OPERATION)");
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    glBindVertexBuffer(0, 1234, 0, 16);
+    check(glGetError() == GL_INVALID_OPERATION, "binding: a buffer name glGenBuffers did not give");
+    check(attrib_int(7, GL_VERTEX_ATTRIB_BINDING) == 7 && attrib_int(7, GL_VERTEX_ATTRIB_RELATIVE_OFFSET) == 0 &&
+              get_inti(GL_VERTEX_BINDING_STRIDE, 7) == 16 && get_inti(GL_VERTEX_BINDING_DIVISOR, 7) == 0 &&
+              get_inti(GL_VERTEX_BINDING_BUFFER, 7) == 0 && glGetError() == GL_NO_ERROR,
+          "binding: attribute 7 on binding 7, stride 16 (the initial state)");
+    glGenBuffers(1, &b);
+    glBindVertexBuffer(3, b, 8, 12);
+    glGetInteger64i_v(GL_VERTEX_BINDING_OFFSET, 3, &off);
+    check(glGetError() == GL_NO_ERROR && get_inti(GL_VERTEX_BINDING_BUFFER, 3) == (GLint)b && off == 8 &&
+              get_inti(GL_VERTEX_BINDING_STRIDE, 3) == 12,
+          "binding: a buffer at offset 8, stride 12, on binding 3");
+    glVertexAttribBinding(0, 3);
+    glVertexAttribFormat(0, 3, GL_FLOAT, GL_FALSE, 4);
+    check(glGetError() == GL_NO_ERROR && attrib_int(0, GL_VERTEX_ATTRIB_BINDING) == 3 &&
+              attrib_int(0, GL_VERTEX_ATTRIB_RELATIVE_OFFSET) == 4 && attrib_int(0, GL_VERTEX_ATTRIB_ARRAY_SIZE) == 3 &&
+              attrib_int(0, GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING) == (GLint)b,
+          "binding: attribute 0 reads binding 3 as 3 floats at relative offset 4");
+    glVertexAttribIFormat(1, 2, GL_UNSIGNED_SHORT, 0);
+    check(glGetError() == GL_NO_ERROR && attrib_int(1, GL_VERTEX_ATTRIB_ARRAY_INTEGER) == GL_TRUE,
+          "binding: an integer format");
+    glBindVertexBuffer(16, b, 0, 4);
+    check(glGetError() == GL_INVALID_VALUE, "binding: binding 16 is GL_INVALID_VALUE");
+    glBindVertexBuffer(0, b, 0, 2049);
+    check(glGetError() == GL_INVALID_VALUE, "binding: a stride of 2049 is GL_INVALID_VALUE");
+    glVertexAttribFormat(0, 4, GL_FLOAT, GL_FALSE, 2048);
+    check(glGetError() == GL_INVALID_VALUE, "binding: a relative offset of 2048 is GL_INVALID_VALUE");
+    glVertexAttribIFormat(0, 4, GL_FLOAT, 0);
+    check(glGetError() == GL_INVALID_ENUM, "binding: an integer format of floats is GL_INVALID_ENUM");
+    glVertexAttribBinding(0, 16);
+    check(glGetError() == GL_INVALID_VALUE, "binding: attribute 0 on binding 16 is GL_INVALID_VALUE");
+    glVertexAttribDivisor(2, 3);
+    check(glGetError() == GL_NO_ERROR && get_inti(GL_VERTEX_BINDING_DIVISOR, 2) == 3 &&
+              attrib_int(2, GL_VERTEX_ATTRIB_BINDING) == 2 && attrib_int(2, GL_VERTEX_ATTRIB_ARRAY_DIVISOR) == 3,
+          "binding: glVertexAttribDivisor sets binding 2's divisor");
+    glVertexAttribBinding(5, 3);
+    glBindBuffer(GL_ARRAY_BUFFER, b); /* a vertex array object: no client arrays */
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 0, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    check(glGetError() == GL_NO_ERROR && attrib_int(5, GL_VERTEX_ATTRIB_BINDING) == 5 &&
+              attrib_int(5, GL_VERTEX_ATTRIB_ARRAY_STRIDE) == 0 && get_inti(GL_VERTEX_BINDING_STRIDE, 5) == 16 &&
+              get_inti(GL_VERTEX_BINDING_BUFFER, 3) == (GLint)b,
+          "binding: glVertexAttribPointer puts attribute 5 on binding 5, stride 0 as 16 there");
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 2049, data);
+    check(glGetError() == GL_INVALID_VALUE, "binding: glVertexAttribPointer's stride of 2049 is GL_INVALID_VALUE");
+    glDeleteBuffers(1, &b);
+    check(get_inti(GL_VERTEX_BINDING_BUFFER, 3) == 0 && attrib_int(0, GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING) == 0 &&
+              glGetError() == GL_NO_ERROR,
+          "binding: the buffer deleted, binding 3 and attribute 0 without it");
+    glBindVertexArray(0);
+    glDeleteVertexArrays(1, &vao);
+}
+
 /* The sample mask, the textures' new state, pipelines, image units (those
  * of a texture with storage with the GPU only). */
 static void others(int gpu)
@@ -210,6 +282,24 @@ static void others(int gpu)
     glGenTextures(1, &t[0]);
     glBindTexture(GL_TEXTURE_2D, t[0]);
     glTexStorage2D(GL_TEXTURE_2D, 2, GL_RGBA8, 4, 4);
+    {
+        GLint w = -1, f = -1, rs = -1, rt = -1, w2 = -1, d = -1;
+        GLfloat ff = 0.0f;
+        glGetTexLevelParameteriv(GL_TEXTURE_2D, 1, GL_TEXTURE_WIDTH, &w);
+        glGetTexLevelParameteriv(GL_TEXTURE_2D, 1, GL_TEXTURE_INTERNAL_FORMAT, &f);
+        glGetTexLevelParameteriv(GL_TEXTURE_2D, 1, GL_TEXTURE_RED_SIZE, &rs);
+        glGetTexLevelParameteriv(GL_TEXTURE_2D, 1, GL_TEXTURE_RED_TYPE, &rt);
+        glGetTexLevelParameteriv(GL_TEXTURE_2D, 1, GL_TEXTURE_DEPTH_SIZE, &d);
+        glGetTexLevelParameteriv(GL_TEXTURE_2D, 3, GL_TEXTURE_WIDTH, &w2);
+        glGetTexLevelParameterfv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &ff);
+        check(glGetError() == GL_NO_ERROR && w == 2 && f == GL_RGBA8 && rs == 8 && rt == GL_UNSIGNED_NORMALIZED &&
+                  d == 0 && w2 == 0 && ff == 4.0f,
+              "level queries: an RGBA8 texture's levels, one not defined");
+        glGetTexLevelParameteriv(GL_TEXTURE_CUBE_MAP, 0, GL_TEXTURE_WIDTH, &w);
+        check(glGetError() == GL_INVALID_ENUM, "level queries: GL_TEXTURE_CUBE_MAP is GL_INVALID_ENUM");
+        glGetTexLevelParameteriv(GL_TEXTURE_2D, -1, GL_TEXTURE_WIDTH, &w);
+        check(glGetError() == GL_INVALID_VALUE, "level queries: level -1 is GL_INVALID_VALUE");
+    }
     glBindImageTexture(3, t[0], 1, GL_TRUE, 2, GL_WRITE_ONLY, GL_RGBA8);
     glGetBooleani_v(GL_IMAGE_BINDING_LAYERED, 3, &bv);
     check(glGetError() == GL_NO_ERROR && get_inti(GL_IMAGE_BINDING_NAME, 3) == (GLint)t[0] &&
@@ -281,6 +371,7 @@ int main(int argc, char **argv)
                   get_int(GL_MAJOR_VERSION) == 3 && get_int(GL_MINOR_VERSION) == 1,
               "ES 3.1: the version strings and numbers");
         buffers();
+        attrib_binding();
         others(gpu);
         check(glGetError() == GL_NO_ERROR, "ES 3.1: no GL error left over");
         aglDestroyContext(c31);

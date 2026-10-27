@@ -25,7 +25,7 @@
 #include <proto/exec.h>
 #include <proto/graphics.h>
 #include <proto/ogles2.h>
-#include <GLES3/gl3.h>
+#include <GLES3/gl31.h> /* ES 3.0 and, in ES 3.1 contexts, 3.1 */
 
 #ifndef GL_ETC1_RGB8_OES
 #define GL_ETC1_RGB8_OES 0x8D64 /* OES_compressed_ETC1_RGB8_texture */
@@ -2111,6 +2111,79 @@ static void test_msaa(void)
     glDeleteProgram(p);
 }
 
+/* ES 3.1's vertex attribute binding (GLES3 plan stage D item 5), in an ES
+ * 3.1 context only (an ES31=1 library gives one for 3.0): es3inst's pos and
+ * col interleaved in one buffer read through one binding at two relative
+ * offsets; col from a binding of stride 0 (every vertex its first
+ * element); col an element per instance by glVertexBindingDivisor. The
+ * triangle covers the lower left of x + y < 0 (NDC); instance 1 moves
+ * right by 1 (32 pixels). */
+static void test_vab(void)
+{
+    static const GLfloat inter[18] = { -1, -1, 0, 1, 0, 1,   0, -1, 0, 1, 0, 1,   -1, 0, 0, 1, 0, 1 };
+    static const GLfloat pos[6] = { -1, -1, 0, -1, -1, 0 };
+    static const GLfloat cols[8] = { 1, 0, 0, 1,   1, 1, 0, 1 };
+    static const GLfloat blue[8] = { 0, 0, 1, 1,   1, 1, 0, 1 };
+    GLuint p = program("es3inst"), b[3], vao;
+    GLint lp, lc;
+    if (!p) {
+        check(0, "vertex attribute binding: es3inst links");
+        return;
+    }
+    lp = glGetAttribLocation(p, "pos");
+    lc = glGetAttribLocation(p, "col");
+    glUseProgram(p);
+    glGenVertexArrays(1, &vao); /* ES 3.1: not with object 0 */
+    glBindVertexArray(vao);
+    glGenBuffers(3, b);
+    glBindBuffer(GL_ARRAY_BUFFER, b[0]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(inter), inter, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, b[1]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(pos), pos, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, b[2]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cols), cols, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glEnableVertexAttribArray((GLuint)lp);
+    glEnableVertexAttribArray((GLuint)lc);
+
+    /* interleaved: binding 0, stride 24; pos at 0, col (green) at 8 */
+    glBindVertexBuffer(0, b[0], 0, 24);
+    glVertexAttribFormat((GLuint)lp, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexAttribFormat((GLuint)lc, 4, GL_FLOAT, GL_FALSE, 8);
+    glVertexAttribBinding((GLuint)lp, 0);
+    glVertexAttribBinding((GLuint)lc, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    check(pixel_is(4, 4, 0, 255, 0, 255, 0) && pixel_is(40, 40, 0, 0, 0, 0, 0) && glGetError() == GL_NO_ERROR,
+          "vertex attribute binding: one interleaved buffer, two relative offsets");
+
+    /* col from binding 1 of stride 0: its first element (red) for every vertex */
+    glBindVertexBuffer(1, b[2], 0, 0);
+    glBindVertexBuffer(0, b[1], 0, 8);
+    glVertexAttribFormat((GLuint)lc, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexAttribBinding((GLuint)lc, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    check(pixel_is(4, 4, 255, 0, 0, 255, 0) && glGetError() == GL_NO_ERROR,
+          "vertex attribute binding: a binding of stride 0 gives every vertex its first element");
+
+    /* col an element per instance: binding 1 at stride 16, divisor 1 */
+    glBindBuffer(GL_ARRAY_BUFFER, b[2]);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(blue), blue);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexBuffer(1, b[2], 0, 16);
+    glVertexBindingDivisor(1, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawArraysInstanced(GL_TRIANGLES, 0, 3, 2);
+    check(pixel_is(4, 4, 0, 0, 255, 255, 0) && pixel_is(36, 4, 255, 255, 0, 255, 0) && glGetError() == GL_NO_ERROR,
+          "vertex attribute binding: glVertexBindingDivisor, an element per instance");
+
+    glBindVertexArray(0);
+    glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(3, b);
+    glDeleteProgram(p);
+}
+
 /* Texel (x, y) of t sampled (es3tc, nearest) is (r, g, b). */
 static int texel_at(GLuint p, GLuint t, int w, int h, int x, int y, int r, int g, int b)
 {
@@ -2347,6 +2420,12 @@ int main(void)
     test_attachment_queries();
     test_xfb();
     test_msaa();
+    {
+        GLint minor = 0;
+        glGetIntegerv(GL_MINOR_VERSION, &minor);
+        if (minor >= 1) /* an ES 3.1 context (an ES31=1 library) */
+            test_vab();
+    }
     check(glGetError() == GL_NO_ERROR, "no GL error left over");
     aglDestroyContext(ctx);
     if ((ctx = aglCreateContextTags2(&e, OGLES2_CCT_BITMAP, (ULONG)bm, OGLES2_CCT_PISTORM_ES_VERSION, 30,

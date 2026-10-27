@@ -302,7 +302,7 @@ static BOOL in_use(struct OGLES2Context *ctx, const struct OGLES2Buffer *b)
         if (m->buf && m->buf->element == b)
             return TRUE;
         for (a = 0; a < OGLES2_MAX_VERTEX_ATTRIBS; a++)
-            if (m->array[a].buffer == b)
+            if (m->array[a].buffer == b || m->array[a].bbuffer == b) /* ES 3.1's bindings too */
                 return TRUE;
         if (ogles2_vao_uses_buffer(m, b) || ogles2_xfb_uses_buffer(m, b))
             return TRUE;
@@ -365,6 +365,18 @@ static struct OGLES2Buffer *by_name(struct OGLES2BufState *bs, GLuint name)
     return slot < bs->sh->nbuf ? bs->sh->buf[slot] : 0;
 }
 
+/* The buffer named `name` (not 0): glGenBuffers' names have one (ES 3.1's
+ * glBindVertexBuffer, draw.c); NULL: a name it did not give, or deleted. */
+struct OGLES2Buffer *ogles2_buffer_get(struct OGLES2Context *ctx, GLuint name)
+{
+    struct OGLES2BufState *bs = bs_get(ctx);
+    struct OGLES2Buffer *b;
+    if (!bs || !(b = by_name(bs, name)))
+        return 0;
+    b->bound_once = TRUE;
+    return b;
+}
+
 void ogles2_glGenBuffers(struct OGLES2Context *ctx, GLsizei n, GLuint *buffers)
 {
     struct OGLES2BufState *bs;
@@ -421,11 +433,16 @@ void ogles2_glDeleteBuffers(struct OGLES2Context *ctx, GLsizei n, const GLuint *
             struct OGLES2BufState *mbs = m->buf;
             if (mbs)
                 unbind_all(m, mbs, b);
-            for (a = 0; a < OGLES2_MAX_VERTEX_ATTRIBS; a++)
+            for (a = 0; a < OGLES2_MAX_VERTEX_ATTRIBS; a++) {
                 if (m->array[a].buffer == b) {
                     m->array[a].buffer = 0;
                     m->array[a].pointer = 0;
                 }
+                if (m->array[a].bbuffer == b) { /* ES 3.1's bindings: GL_VERTEX_BINDING_BUFFER 0 */
+                    m->array[a].bbuffer = 0;
+                    m->array[a].boffset = 0;
+                }
+            }
         }
         bs->sh->buf[ogles2_name_slot(&bs->sh->far_buf, b->name, FALSE)] = 0;
         ogles2_name_forget(&bs->sh->far_buf, b->name);

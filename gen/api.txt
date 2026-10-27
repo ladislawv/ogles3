@@ -35,3 +35,12 @@ command glSampleMaski
 command glBindImageTexture
 command glGetBooleani_v
 command glBindProgramPipeline
+command glBindVertexBuffer
+command glVertexAttribFormat
+command glVertexAttribIFormat
+command glVertexAttribBinding
+command glVertexBindingDivisor
+command glGetTexLevelParameteriv
+command glGetTexLevelParameterfv
+command glFramebufferParameteri
+command glGetFramebufferParameteriv

@@ -65,6 +65,7 @@ struct OGLES2Face
                                      * storage (sRGB; R11F_G11F_B10F and RGB9_E5 given as floats); else 0 */
     ULONG sized_given;              /* levels given a sized internal format (ES 3.0 4.4.4: only those of
                                      * ES 3.0's further formats are colour-renderable, rt_out) */
+    GLenum ifmt[MAX_LEVELS];        /* the internal format as given (ES 3.1's GL_TEXTURE_INTERNAL_FORMAT) */
 };
 
 struct OGLES2Texture
@@ -177,8 +178,9 @@ static BOOL sized_storage(GLenum ifmt, GLenum *format, GLenum *type);
 static BOOL es3_sized(GLenum ifmt);
 static void rect_defaults(struct OGLES2Texture *t);
 static void put_level(struct OGLES2Face *f, int level, UBYTE *img, GLsizei width, GLsizei height, GLenum format,
-                      GLenum type, BOOL given, GLenum sized, BOOL sized_given);
+                      GLenum type, BOOL given, GLenum sized, BOOL sized_given, GLenum ifmt);
 static void drop_level(struct OGLES2Face *f, int level);
+static BOOL face_target(GLenum target);
 static int int_components(GLenum format);
 
 /* A texture's and a new sampler object's sampling parameters. */
@@ -1040,6 +1042,182 @@ void ogles2_glGetTexParameterfv(struct OGLES2Context *ctx, GLenum target, GLenum
     GLfloat v;
     if (params && get_param(ctx, target, pname, &v))
         *params = v;
+}
+
+/* ---- ES 3.1's glGetTexLevelParameter* (stage D item 4) ---- */
+
+/* A sized internal format's components: red, green, blue, alpha, depth
+ * and stencil bits, the shared exponent's, the colour's and depth's
+ * component types (GL_UNSIGNED_NORMALIZED, ...; 0 none), and whether it is
+ * compressed (its sizes those it decodes to). */
+struct level_fmt
+{
+    GLenum f;
+    UBYTE r, g, b, a, d, s, shared;
+    GLenum ctype, dtype;
+    BOOL compressed;
+};
+
+#define UN GL_UNSIGNED_NORMALIZED
+#define SN GL_SIGNED_NORMALIZED
+static const struct level_fmt level_fmts[] = {
+    {GL_R8, 8, 0, 0, 0, 0, 0, 0, UN, 0, 0}, {GL_R8_SNORM, 8, 0, 0, 0, 0, 0, 0, SN, 0, 0},
+    {GL_RG8, 8, 8, 0, 0, 0, 0, 0, UN, 0, 0}, {GL_RG8_SNORM, 8, 8, 0, 0, 0, 0, 0, SN, 0, 0},
+    {GL_RGB8, 8, 8, 8, 0, 0, 0, 0, UN, 0, 0}, {GL_RGB8_SNORM, 8, 8, 8, 0, 0, 0, 0, SN, 0, 0},
+    {GL_RGB565, 5, 6, 5, 0, 0, 0, 0, UN, 0, 0}, {GL_RGBA4, 4, 4, 4, 4, 0, 0, 0, UN, 0, 0},
+    {GL_RGB5_A1, 5, 5, 5, 1, 0, 0, 0, UN, 0, 0}, {GL_RGBA8, 8, 8, 8, 8, 0, 0, 0, UN, 0, 0},
+    {GL_RGBA8_SNORM, 8, 8, 8, 8, 0, 0, 0, SN, 0, 0}, {GL_RGB10_A2, 10, 10, 10, 2, 0, 0, 0, UN, 0, 0},
+    {GL_RGB10_A2UI, 10, 10, 10, 2, 0, 0, 0, GL_UNSIGNED_INT, 0, 0}, {GL_SRGB8, 8, 8, 8, 0, 0, 0, 0, UN, 0, 0},
+    {GL_SRGB8_ALPHA8, 8, 8, 8, 8, 0, 0, 0, UN, 0, 0}, {GL_R16F, 16, 0, 0, 0, 0, 0, 0, GL_FLOAT, 0, 0},
+    {GL_RG16F, 16, 16, 0, 0, 0, 0, 0, GL_FLOAT, 0, 0}, {GL_RGB16F, 16, 16, 16, 0, 0, 0, 0, GL_FLOAT, 0, 0},
+    {GL_RGBA16F, 16, 16, 16, 16, 0, 0, 0, GL_FLOAT, 0, 0}, {GL_R32F, 32, 0, 0, 0, 0, 0, 0, GL_FLOAT, 0, 0},
+    {GL_RG32F, 32, 32, 0, 0, 0, 0, 0, GL_FLOAT, 0, 0}, {GL_RGB32F, 32, 32, 32, 0, 0, 0, 0, GL_FLOAT, 0, 0},
+    {GL_RGBA32F, 32, 32, 32, 32, 0, 0, 0, GL_FLOAT, 0, 0},
+    {GL_R11F_G11F_B10F, 11, 11, 10, 0, 0, 0, 0, GL_FLOAT, 0, 0}, {GL_RGB9_E5, 9, 9, 9, 0, 0, 0, 5, GL_FLOAT, 0, 0},
+    {GL_R8I, 8, 0, 0, 0, 0, 0, 0, GL_INT, 0, 0}, {GL_R8UI, 8, 0, 0, 0, 0, 0, 0, GL_UNSIGNED_INT, 0, 0},
+    {GL_R16I, 16, 0, 0, 0, 0, 0, 0, GL_INT, 0, 0}, {GL_R16UI, 16, 0, 0, 0, 0, 0, 0, GL_UNSIGNED_INT, 0, 0},
+    {GL_R32I, 32, 0, 0, 0, 0, 0, 0, GL_INT, 0, 0}, {GL_R32UI, 32, 0, 0, 0, 0, 0, 0, GL_UNSIGNED_INT, 0, 0},
+    {GL_RG8I, 8, 8, 0, 0, 0, 0, 0, GL_INT, 0, 0}, {GL_RG8UI, 8, 8, 0, 0, 0, 0, 0, GL_UNSIGNED_INT, 0, 0},
+    {GL_RG16I, 16, 16, 0, 0, 0, 0, 0, GL_INT, 0, 0}, {GL_RG16UI, 16, 16, 0, 0, 0, 0, 0, GL_UNSIGNED_INT, 0, 0},
+    {GL_RG32I, 32, 32, 0, 0, 0, 0, 0, GL_INT, 0, 0}, {GL_RG32UI, 32, 32, 0, 0, 0, 0, 0, GL_UNSIGNED_INT, 0, 0},
+    {GL_RGB8I, 8, 8, 8, 0, 0, 0, 0, GL_INT, 0, 0}, {GL_RGB8UI, 8, 8, 8, 0, 0, 0, 0, GL_UNSIGNED_INT, 0, 0},
+    {GL_RGB16I, 16, 16, 16, 0, 0, 0, 0, GL_INT, 0, 0}, {GL_RGB16UI, 16, 16, 16, 0, 0, 0, 0, GL_UNSIGNED_INT, 0, 0},
+    {GL_RGB32I, 32, 32, 32, 0, 0, 0, 0, GL_INT, 0, 0}, {GL_RGB32UI, 32, 32, 32, 0, 0, 0, 0, GL_UNSIGNED_INT, 0, 0},
+    {GL_RGBA8I, 8, 8, 8, 8, 0, 0, 0, GL_INT, 0, 0}, {GL_RGBA8UI, 8, 8, 8, 8, 0, 0, 0, GL_UNSIGNED_INT, 0, 0},
+    {GL_RGBA16I, 16, 16, 16, 16, 0, 0, 0, GL_INT, 0, 0}, {GL_RGBA16UI, 16, 16, 16, 16, 0, 0, 0, GL_UNSIGNED_INT, 0, 0},
+    {GL_RGBA32I, 32, 32, 32, 32, 0, 0, 0, GL_INT, 0, 0}, {GL_RGBA32UI, 32, 32, 32, 32, 0, 0, 0, GL_UNSIGNED_INT, 0, 0},
+    {GL_DEPTH_COMPONENT16, 0, 0, 0, 0, 16, 0, 0, 0, UN, 0}, {GL_DEPTH_COMPONENT24, 0, 0, 0, 0, 24, 0, 0, 0, UN, 0},
+    {GL_DEPTH_COMPONENT32F, 0, 0, 0, 0, 32, 0, 0, 0, GL_FLOAT, 0},
+    {GL_DEPTH24_STENCIL8, 0, 0, 0, 0, 24, 8, 0, 0, UN, 0}, {GL_DEPTH32F_STENCIL8, 0, 0, 0, 0, 32, 8, 0, 0, GL_FLOAT, 0},
+    {GL_STENCIL_INDEX8, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0},
+    /* compressed: ETC2/EAC (ES 3.0), ETC1, S3TC */
+    {GL_COMPRESSED_R11_EAC, 11, 0, 0, 0, 0, 0, 0, UN, 0, 1}, {GL_COMPRESSED_SIGNED_R11_EAC, 11, 0, 0, 0, 0, 0, 0, SN, 0, 1},
+    {GL_COMPRESSED_RG11_EAC, 11, 11, 0, 0, 0, 0, 0, UN, 0, 1},
+    {GL_COMPRESSED_SIGNED_RG11_EAC, 11, 11, 0, 0, 0, 0, 0, SN, 0, 1},
+    {GL_COMPRESSED_RGB8_ETC2, 8, 8, 8, 0, 0, 0, 0, UN, 0, 1}, {GL_COMPRESSED_SRGB8_ETC2, 8, 8, 8, 0, 0, 0, 0, UN, 0, 1},
+    {GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2, 8, 8, 8, 1, 0, 0, 0, UN, 0, 1},
+    {GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2, 8, 8, 8, 1, 0, 0, 0, UN, 0, 1},
+    {GL_COMPRESSED_RGBA8_ETC2_EAC, 8, 8, 8, 8, 0, 0, 0, UN, 0, 1},
+    {GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC, 8, 8, 8, 8, 0, 0, 0, UN, 0, 1},
+    {GL_ETC1_RGB8_OES, 8, 8, 8, 0, 0, 0, 0, UN, 0, 1},
+    {GL_COMPRESSED_RGB_S3TC_DXT1_EXT, 5, 6, 5, 0, 0, 0, 0, UN, 0, 1},
+    {GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, 5, 5, 5, 1, 0, 0, 0, UN, 0, 1},
+    {GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, 5, 6, 5, 4, 0, 0, 0, UN, 0, 1},
+    {GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, 5, 6, 5, 8, 0, 0, 0, UN, 0, 1},
+};
+#undef UN
+#undef SN
+
+/* An unsized format and type as the sized format they store (ES 3.0 table
+ * 3.2's pairs, OES_texture_float's and the luminance and alpha ones as
+ * their nearest); 0 for none. */
+static GLenum unsized_as_sized(GLenum format, GLenum type)
+{
+    BOOL half = type == GL_HALF_FLOAT || type == GL_HALF_FLOAT_OES, fl = type == GL_FLOAT;
+    switch (format) {
+    case GL_RGBA:
+    case GL_BGRA_EXT:
+        return type == GL_UNSIGNED_SHORT_4_4_4_4 ? GL_RGBA4 : type == GL_UNSIGNED_SHORT_5_5_5_1 ? GL_RGB5_A1
+             : fl ? GL_RGBA32F : half ? GL_RGBA16F : GL_RGBA8;
+    case GL_RGB:
+        return type == GL_UNSIGNED_SHORT_5_6_5 ? GL_RGB565 : fl ? GL_RGB32F : half ? GL_RGB16F : GL_RGB8;
+    case GL_LUMINANCE_ALPHA:
+        return fl ? GL_RG32F : half ? GL_RG16F : GL_RG8;
+    case GL_LUMINANCE:
+    case GL_ALPHA:
+        return fl ? GL_R32F : half ? GL_R16F : GL_R8;
+    case GL_DEPTH_COMPONENT:
+        return type == GL_UNSIGNED_SHORT ? GL_DEPTH_COMPONENT16 : fl ? GL_DEPTH_COMPONENT32F : GL_DEPTH_COMPONENT24;
+    case GL_DEPTH_STENCIL:
+        return type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV ? GL_DEPTH32F_STENCIL8 : GL_DEPTH24_STENCIL8;
+    default:
+        return 0;
+    }
+}
+
+/* glGetTexLevelParameteriv and fv: target's (a face's for a cube map)
+ * level's size, format and components (ES 3.1 8.10.3); a level not
+ * defined answers the initial values (0, GL_NONE, internal format
+ * GL_RGBA, fixed sample locations TRUE). FALSE: an error set. */
+static BOOL level_param(struct OGLES2Context *ctx, GLenum target, GLint level, GLenum pname, GLint *v)
+{
+    struct OGLES2TexState *ts;
+    struct OGLES2Texture *t;
+    const struct OGLES2Face *f;
+    const struct level_fmt *lf = 0;
+    GLenum bind = face_target(target) ? GL_TEXTURE_CUBE_MAP : target, ifmt;
+    BOOL defined;
+    int k = face_target(target) ? (int)(target - GL_TEXTURE_CUBE_MAP_POSITIVE_X) : 0;
+    ULONG n;
+    if (!ogles2_es31_entry(ctx) || !(ts = ts_get(ctx)))
+        return FALSE;
+    if (bind != GL_TEXTURE_2D && bind != GL_TEXTURE_3D && bind != GL_TEXTURE_2D_ARRAY &&
+        bind != GL_TEXTURE_2D_MULTISAMPLE && !face_target(target)) {
+        ogles2_error(ctx, GL_INVALID_ENUM); /* GL_TEXTURE_CUBE_MAP itself too */
+        return FALSE;
+    }
+    if (level < 0 || level >= (bind == GL_TEXTURE_2D_MULTISAMPLE ? 1 : MAX_LEVELS)) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return FALSE;
+    }
+    if (!(t = bound(ctx, ts, bind)))
+        return FALSE;
+    f = &t->f[k];
+    defined = (f->defined & (1UL << level)) != 0;
+    ifmt = !defined ? 0 : f->ifmt[level] ? f->ifmt[level] : f->format[level];
+    if (defined) {
+        GLenum sized = f->sized[level] ? f->sized[level] : ifmt;
+        for (n = 0; n < sizeof(level_fmts) / sizeof(level_fmts[0]) && !lf; n++)
+            if (level_fmts[n].f == sized)
+                lf = &level_fmts[n];
+        if (!lf && (sized = unsized_as_sized(f->format[level], f->type[level])) != 0)
+            for (n = 0; n < sizeof(level_fmts) / sizeof(level_fmts[0]) && !lf; n++)
+                if (level_fmts[n].f == sized)
+                    lf = &level_fmts[n];
+    }
+    switch (pname) {
+    case GL_TEXTURE_WIDTH:  *v = defined ? (GLint)f->w[level] : 0; break;
+    case GL_TEXTURE_HEIGHT: *v = defined ? (GLint)f->h[level] : 0; break;
+    case GL_TEXTURE_DEPTH:
+        *v = !defined ? 0 : (bind == GL_TEXTURE_3D || bind == GL_TEXTURE_2D_ARRAY) ? (GLint)t->d[level] : 1;
+        break;
+    case GL_TEXTURE_SAMPLES: *v = 0; break;                /* multisample storage: stage D item 4 */
+    case GL_TEXTURE_FIXED_SAMPLE_LOCATIONS: *v = GL_TRUE; break;
+    case GL_TEXTURE_INTERNAL_FORMAT: *v = defined ? (GLint)ifmt : GL_RGBA; break;
+    case GL_TEXTURE_RED_SIZE:     *v = lf ? lf->r : 0; break;
+    case GL_TEXTURE_GREEN_SIZE:   *v = lf ? lf->g : 0; break;
+    case GL_TEXTURE_BLUE_SIZE:    *v = lf ? lf->b : 0; break;
+    case GL_TEXTURE_ALPHA_SIZE:   *v = lf ? lf->a : 0; break;
+    case GL_TEXTURE_DEPTH_SIZE:   *v = lf ? lf->d : 0; break;
+    case GL_TEXTURE_STENCIL_SIZE: *v = lf ? lf->s : 0; break;
+    case GL_TEXTURE_SHARED_SIZE:  *v = lf ? lf->shared : 0; break;
+    case GL_TEXTURE_RED_TYPE:     *v = lf && lf->r ? (GLint)lf->ctype : GL_NONE; break;
+    case GL_TEXTURE_GREEN_TYPE:   *v = lf && lf->g ? (GLint)lf->ctype : GL_NONE; break;
+    case GL_TEXTURE_BLUE_TYPE:    *v = lf && lf->b ? (GLint)lf->ctype : GL_NONE; break;
+    case GL_TEXTURE_ALPHA_TYPE:   *v = lf && lf->a ? (GLint)lf->ctype : GL_NONE; break;
+    case GL_TEXTURE_DEPTH_TYPE:   *v = lf && lf->d ? (GLint)lf->dtype : GL_NONE; break;
+    case GL_TEXTURE_COMPRESSED:   *v = lf && lf->compressed ? GL_TRUE : GL_FALSE; break;
+    default:
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return FALSE;
+    }
+    return TRUE;
+}
+
+void ogles2_glGetTexLevelParameteriv(struct OGLES2Context *ctx, GLenum target, GLint level, GLenum pname,
+                                     GLint *params)
+{
+    GLint v;
+    if (params && level_param(ctx, target, level, pname, &v))
+        *params = v;
+}
+
+void ogles2_glGetTexLevelParameterfv(struct OGLES2Context *ctx, GLenum target, GLint level, GLenum pname,
+                                     GLfloat *params)
+{
+    GLint v;
+    if (params && level_param(ctx, target, level, pname, &v))
+        *params = (GLfloat)v;
 }
 
 void ogles2_glPixelStorei(struct OGLES2Context *ctx, GLenum pname, GLint param)
@@ -3611,7 +3789,7 @@ void ogles2_texture_params_restore(struct OGLES2Texture *t, const struct OGLES2T
 
 static void set_level(struct OGLES2Context *ctx, struct OGLES2Texture *t, int k, GLint level, UBYTE *img,
                       GLsizei width, GLsizei height, GLenum format, GLenum type, BOOL given, GLenum sized,
-                      BOOL sized_given);
+                      BOOL sized_given, GLenum ifmt);
 
 /* OES_required_internalformat: a sized colour format's base format (0 for
  * any other value). */
@@ -3701,7 +3879,7 @@ static void tex_image(struct OGLES2Context *ctx, GLenum target, GLint level, GLi
 {
     struct OGLES2TexState *ts;
     struct OGLES2Texture *t;
-    GLenum err, keep, f0, t0;
+    GLenum err, keep, f0, t0, given = (GLenum)internalformat; /* as given: GL_TEXTURE_INTERNAL_FORMAT */
     UBYTE *img;
     ULONG cb;
     BOOL sized;
@@ -3788,14 +3966,15 @@ static void tex_image(struct OGLES2Context *ctx, GLenum target, GLint level, GLi
         const UBYTE *src = unpack_image(ctx, pixels, format, type, width, height, &row, &image);
         convert(img, (ULONG)width * cb, src, format, type, width, height, row);
     }
-    set_level(ctx, t, k, level, img, width, height, format, type, pixels != 0, keep, sized);
+    set_level(ctx, t, k, level, img, width, height, format, type, pixels != 0, keep, sized, given);
 }
 
 /* A face's level becomes `img`, its new RAM copy (0: empty); `given`: it
  * holds the image's texels, else zeros. */
 static void put_level(struct OGLES2Face *f, int level, UBYTE *img, GLsizei width, GLsizei height, GLenum format,
-                      GLenum type, BOOL given, GLenum sized, BOOL sized_given)
+                      GLenum type, BOOL given, GLenum sized, BOOL sized_given, GLenum ifmt)
 {
+    f->ifmt[level] = ifmt;
     f->sized[level] = sized;
     if (sized_given)
         f->sized_given |= 1UL << level;
@@ -3831,10 +4010,10 @@ static void drop_level(struct OGLES2Face *f, int level)
  * with the jobs that use the texture (before_change). */
 static void set_level(struct OGLES2Context *ctx, struct OGLES2Texture *t, int k, GLint level, UBYTE *img,
                       GLsizei width, GLsizei height, GLenum format, GLenum type, BOOL given, GLenum sized,
-                      BOOL sized_given)
+                      BOOL sized_given, GLenum ifmt)
 {
     struct OGLES2Face *f = &t->f[k];
-    put_level(f, level, img, width, height, format, type, given, sized, sized_given);
+    put_level(f, level, img, width, height, format, type, given, sized, sized_given, ifmt);
     if (!ctx->v3d)
         return; /* a state-only context keeps the images only */
     /* No GPU texture yet, a new level 0, or a level the chain has no room
@@ -3981,7 +4160,7 @@ void ogles2_glTexImage3D(struct OGLES2Context *ctx, GLenum target, GLint level, 
 {
     struct OGLES2TexState *ts;
     struct OGLES2Texture *t;
-    GLenum err, keep, f0, t0;
+    GLenum err, keep, f0, t0, given = (GLenum)internalformat; /* as given: GL_TEXTURE_INTERNAL_FORMAT */
     ULONG cb, row, in;
     const UBYTE *src;
     int k, max;
@@ -4051,7 +4230,7 @@ void ogles2_glTexImage3D(struct OGLES2Context *ctx, GLenum target, GLint level, 
         }
         if (img && pixels)
             convert(img, (ULONG)width * cb, src + (ULONG)k * in, format, type, width, height, row);
-        put_level(&t->f[k], level, img, width, height, format, type, pixels != 0, keep, sized);
+        put_level(&t->f[k], level, img, width, height, format, type, pixels != 0, keep, sized, given);
     }
     for (k = depth; k < t->nf; k++)
         drop_level(&t->f[k], level);
@@ -4252,7 +4431,7 @@ static void tex_storage(struct OGLES2Context *ctx, GLenum target, GLsizei levels
                 ogles2_error(ctx, GL_OUT_OF_MEMORY);
                 return;
             }
-            put_level(&t->f[k], l, img, w, h, format, type, FALSE, keep_sized(ifmt), TRUE);
+            put_level(&t->f[k], l, img, w, h, format, type, FALSE, keep_sized(ifmt), TRUE, ifmt);
         }
         if (layers)
             t->d[l] = (UWORD)d;
@@ -4334,7 +4513,7 @@ void ogles2_glCompressedTexImage3D(struct OGLES2Context *ctx, GLenum target, GLi
         }
         if (img && data)
             CopyMem((UBYTE *)data + (ULONG)k * layer, img, layer);
-        put_level(&t->f[k], level, img, width, height, internalformat, 0, data != 0, 0, FALSE);
+        put_level(&t->f[k], level, img, width, height, internalformat, 0, data != 0, 0, FALSE, internalformat);
     }
     for (k = depth; k < t->nf; k++)
         drop_level(&t->f[k], level);
@@ -4667,7 +4846,7 @@ static void dxt_image(struct OGLES2Context *ctx, struct OGLES2TexState *ts, GLen
     }
     if (img && data)
         CopyMem((APTR)data, img, bytes);
-    set_level(ctx, t, k, level, img, width, height, format, 0, data != 0, 0, FALSE);
+    set_level(ctx, t, k, level, img, width, height, format, 0, data != 0, 0, FALSE, format);
 }
 
 void ogles2_glCompressedTexImage2D(struct OGLES2Context *ctx, GLenum target, GLint level,
@@ -4884,7 +5063,7 @@ static BOOL generate_volume(struct OGLES2Context *ctx, struct OGLES2Texture *t, 
             }
             FreeVec(two);
             put_level(&t->f[z], l, img, w, h, a->format[l - 1], a->type[l - 1], TRUE, a->sized[l - 1],
-                      (a->sized_given >> (l - 1)) & 1);
+                      (a->sized_given >> (l - 1)) & 1, a->ifmt[l - 1]);
         }
         for (z = d; z < t->nf; z++)
             drop_level(&t->f[z], l);
@@ -5005,6 +5184,7 @@ void ogles2_glGenerateMipmap(struct OGLES2Context *ctx, GLenum target)
             f->format[l] = f->format[l - 1];
             f->type[l] = f->type[l - 1];
             f->sized[l] = f->sized[l - 1];
+            f->ifmt[l] = f->ifmt[l - 1];
             f->sized_given = (f->sized_given & ~(1UL << l)) | (((f->sized_given >> (l - 1)) & 1) << l);
             f->defined |= 1UL << l;
             f->blank &= ~(1UL << l);

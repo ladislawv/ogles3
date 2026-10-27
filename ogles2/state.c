@@ -69,6 +69,8 @@ void ogles2_state_init(struct OGLES2Context *ctx)
         s->attrib[i][3] = 1.0f;
         ctx->array[i].size = 4;
         ctx->array[i].type = GL_FLOAT;
+        ctx->array[i].binding = (UBYTE)i; /* ES 3.1: its own binding, of stride 16 */
+        ctx->array[i].bstride = 16;
     }
     s->cull_face_mode = GL_BACK;
     s->front_face = GL_CCW;
@@ -270,7 +272,7 @@ int ogles2_indexed_query(struct OGLES2Context *ctx, GLenum pname, GLuint index, 
                 ogles2_error(ctx, GL_INVALID_VALUE);
                 return 0;
             }
-            *v = (GLint64)(ULONG)ctx->state.sample_mask;
+            *v = (GLint64)(LONG)ctx->state.sample_mask; /* as an int, as Mesa's 64-bit query answers it */
             return 1;
         case GL_MAX_COMPUTE_WORK_GROUP_COUNT:
         case GL_MAX_COMPUTE_WORK_GROUP_SIZE:
@@ -281,7 +283,7 @@ int ogles2_indexed_query(struct OGLES2Context *ctx, GLenum pname, GLuint index, 
             *v = pname == GL_MAX_COMPUTE_WORK_GROUP_COUNT ? 65535 : 256; /* v3dglslc -L */
             return 1;
         }
-        if ((r = ogles2_image_query(ctx, pname, index, v)) >= 0)
+        if ((r = ogles2_image_query(ctx, pname, index, v)) >= 0 || (r = ogles2_vab_query(ctx, pname, index, v)) >= 0)
             return r;
     }
     ogles2_error(ctx, GL_INVALID_ENUM);

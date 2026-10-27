@@ -278,3 +278,12 @@ glSampleMaski
 glBindImageTexture
 glGetBooleani_v
 glBindProgramPipeline
+glBindVertexBuffer
+glVertexAttribFormat
+glVertexAttribIFormat
+glVertexAttribBinding
+glVertexBindingDivisor
+glGetTexLevelParameteriv
+glGetTexLevelParameterfv
+glFramebufferParameteri
+glGetFramebufferParameteriv
