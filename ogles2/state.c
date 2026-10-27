@@ -28,6 +28,8 @@ static ULONG cap_bit(const struct OGLES2Context *ctx, GLenum cap)
     case GL_PRIMITIVE_RESTART_FIXED_INDEX: return ogles2_es3(ctx) ? OGLES2_CAP_PRIMITIVE_RESTART : 0;
     /* ES 3.0: no fragments (draws and clears produce nothing; draw.c, frame.c) */
     case GL_RASTERIZER_DISCARD: return ogles2_es3(ctx) ? OGLES2_CAP_RASTERIZER_DISCARD : 0;
+    /* ES 3.1: glSampleMaski's mask on the samples covered (draw.c) */
+    case GL_SAMPLE_MASK: return ogles2_es31(ctx) ? OGLES2_CAP_SAMPLE_MASK : 0;
     default:                          return 0;
     }
 }
@@ -61,6 +63,7 @@ void ogles2_state_init(struct OGLES2Context *ctx)
     s->polygon_offset_factor = s->polygon_offset_units = 0.0f;
     s->sample_coverage_value = 1.0f;
     s->sample_coverage_invert = GL_FALSE;
+    s->sample_mask = ~0U;
     for (i = 0; i < OGLES2_MAX_VERTEX_ATTRIBS; i++) {
         s->attrib[i][0] = s->attrib[i][1] = s->attrib[i][2] = 0.0f;
         s->attrib[i][3] = 1.0f;
@@ -238,6 +241,51 @@ void ogles2_glSampleCoverage(struct OGLES2Context *ctx, GLfloat value, GLboolean
     ctx->state.sample_coverage_value = clamp01(value);
     ctx->state.sample_coverage_invert = invert ? GL_TRUE : GL_FALSE;
     ctx->state_ver++; /* the sample mask with 4x MSAA (draw.c) */
+}
+
+/* ES 3.1: the sample mask's word maskNumber (one word: 4 samples). */
+void ogles2_glSampleMaski(struct OGLES2Context *ctx, GLuint maskNumber, GLbitfield mask)
+{
+    if (!ogles2_es31_entry(ctx))
+        return;
+    if (maskNumber >= 1) { /* GL_MAX_SAMPLE_MASK_WORDS */
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    ctx->state.sample_mask = mask;
+    ctx->state_ver++;
+}
+
+/* glGetIntegeri_v's and glGetBooleani_v's indexed state other than the
+ * buffer bindings (buffer.c): ES 3.1's sample mask word, compute limits and
+ * image units (texture.c). -1: no such query (GL_INVALID_ENUM, set here);
+ * 0: an error set; 1: *v. */
+int ogles2_indexed_query(struct OGLES2Context *ctx, GLenum pname, GLuint index, GLint64 *v)
+{
+    int r;
+    if (ogles2_es31(ctx)) {
+        switch (pname) {
+        case GL_SAMPLE_MASK_VALUE:
+            if (index >= 1) {
+                ogles2_error(ctx, GL_INVALID_VALUE);
+                return 0;
+            }
+            *v = (GLint64)(ULONG)ctx->state.sample_mask;
+            return 1;
+        case GL_MAX_COMPUTE_WORK_GROUP_COUNT:
+        case GL_MAX_COMPUTE_WORK_GROUP_SIZE:
+            if (index >= 3) {
+                ogles2_error(ctx, GL_INVALID_VALUE);
+                return 0;
+            }
+            *v = pname == GL_MAX_COMPUTE_WORK_GROUP_COUNT ? 65535 : 256; /* v3dglslc -L */
+            return 1;
+        }
+        if ((r = ogles2_image_query(ctx, pname, index, v)) >= 0)
+            return r;
+    }
+    ogles2_error(ctx, GL_INVALID_ENUM);
+    return -1;
 }
 
 /* ---- current vertex attributes ---- */
@@ -638,6 +686,54 @@ static const struct { GLenum pname; GLint value; } es3_limits[] = {
     {GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS, 4},
 };
 
+/* ES 3.1's (stage D), in ES 3.1 contexts: `v3dglslc -L`'s as well. The
+ * indexed ones (the compute work group's count and size) are
+ * ogles2_indexed_query's. */
+static const struct { GLenum pname; GLint value; } es31_limits[] = {
+    {GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, 256},
+    {GL_MAX_COMPUTE_UNIFORM_BLOCKS, 15},
+    {GL_MAX_COMPUTE_TEXTURE_IMAGE_UNITS, 16},
+    {GL_MAX_COMPUTE_SHARED_MEMORY_SIZE, 32768},
+    {GL_MAX_COMPUTE_UNIFORM_COMPONENTS, 16384},
+    {GL_MAX_COMPUTE_ATOMIC_COUNTER_BUFFERS, 16},
+    {GL_MAX_COMPUTE_ATOMIC_COUNTERS, 4096},
+    {GL_MAX_COMBINED_COMPUTE_UNIFORM_COMPONENTS, 262144},
+    {GL_MAX_COMPUTE_IMAGE_UNIFORMS, 32},
+    {GL_MAX_COMPUTE_SHADER_STORAGE_BLOCKS, 16},
+    {GL_MAX_UNIFORM_LOCATIONS, 81852},
+    {GL_MAX_FRAMEBUFFER_WIDTH, 4096},
+    {GL_MAX_FRAMEBUFFER_HEIGHT, 4096},
+    {GL_MAX_FRAMEBUFFER_SAMPLES, 4},
+    {GL_MAX_VERTEX_ATOMIC_COUNTER_BUFFERS, 0},
+    {GL_MAX_FRAGMENT_ATOMIC_COUNTER_BUFFERS, 16},
+    {GL_MAX_COMBINED_ATOMIC_COUNTER_BUFFERS, 16},
+    {GL_MAX_VERTEX_ATOMIC_COUNTERS, 0},
+    {GL_MAX_FRAGMENT_ATOMIC_COUNTERS, 4096},
+    {GL_MAX_COMBINED_ATOMIC_COUNTERS, 4096},
+    {GL_MAX_ATOMIC_COUNTER_BUFFER_SIZE, 16384},
+    {GL_MAX_ATOMIC_COUNTER_BUFFER_BINDINGS, 16},
+    {GL_MAX_VERTEX_IMAGE_UNIFORMS, 32},
+    {GL_MAX_FRAGMENT_IMAGE_UNIFORMS, 32},
+    {GL_MAX_COMBINED_IMAGE_UNIFORMS, 96},
+    {GL_MAX_VERTEX_SHADER_STORAGE_BLOCKS, 0},
+    {GL_MAX_FRAGMENT_SHADER_STORAGE_BLOCKS, 16},
+    {GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS, 32},
+    {GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS, 32},
+    {GL_MAX_SHADER_STORAGE_BLOCK_SIZE, 134217728},
+    {GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT, 4},
+    {GL_MAX_IMAGE_UNITS, 256},
+    {GL_MAX_COMBINED_SHADER_OUTPUT_RESOURCES, 132},
+    {GL_MIN_PROGRAM_TEXTURE_GATHER_OFFSET, -8},
+    {GL_MAX_PROGRAM_TEXTURE_GATHER_OFFSET, 7},
+    {GL_MAX_SAMPLE_MASK_WORDS, 1},
+    {GL_MAX_COLOR_TEXTURE_SAMPLES, 4},
+    {GL_MAX_DEPTH_TEXTURE_SAMPLES, 4},
+    {GL_MAX_INTEGER_SAMPLES, 4},
+    {GL_MAX_VERTEX_ATTRIB_RELATIVE_OFFSET, 2047},
+    {GL_MAX_VERTEX_ATTRIB_BINDINGS, 16},
+    {GL_MAX_VERTEX_ATTRIB_STRIDE, 2048},
+};
+
 static int lookup_es3(struct OGLES2Context *ctx, GLenum pname, struct value *v)
 {
     ULONG k;
@@ -662,10 +758,20 @@ static int lookup_es3(struct OGLES2Context *ctx, GLenum pname, struct value *v)
     case GL_TRANSFORM_FEEDBACK_BINDING:
         v->i[0] = (GLint)ogles2_xfb_bound_name(ctx);
         return 1;
+    case GL_PROGRAM_PIPELINE_BINDING: /* ES 3.1: none bound yet (stage D item 5) */
+        if (!ogles2_es31(ctx))
+            return 0;
+        v->i[0] = 0;
+        return 1;
     }
     for (k = 0; k < sizeof(es3_limits) / sizeof(es3_limits[0]); k++)
         if (es3_limits[k].pname == pname) {
             v->i[0] = es3_limits[k].value;
+            return 1;
+        }
+    for (k = 0; ogles2_es31(ctx) && k < sizeof(es31_limits) / sizeof(es31_limits[0]); k++)
+        if (es31_limits[k].pname == pname) {
+            v->i[0] = es31_limits[k].value;
             return 1;
         }
     return 0;

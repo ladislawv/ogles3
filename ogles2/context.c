@@ -418,11 +418,13 @@ const GLubyte *ogles2_glGetString(struct OGLES2Context *ctx, GLenum name)
         return (const GLubyte *)"ogles2.library";
     case GL_RENDERER:
         return (const GLubyte *)ogles2_device_renderer();
-    case GL_VERSION: /* must begin "OpenGL ES 2.0" or "OpenGL ES 3.0" (plan section 7.10) */
-        return (const GLubyte *)(ogles2_es3(ctx) ? "OpenGL ES 3.0 " LIB_VERSION_TEXT
-                                                 : "OpenGL ES 2.0 " LIB_VERSION_TEXT);
-    case GL_SHADING_LANGUAGE_VERSION: /* must begin "OpenGL ES GLSL ES 1.00" or "3.00" */
-        return (const GLubyte *)(ogles2_es3(ctx) ? "OpenGL ES GLSL ES 3.00" : "OpenGL ES GLSL ES 1.00");
+    case GL_VERSION: /* must begin "OpenGL ES 2.0", "3.0" or "3.1" (plan section 7.10) */
+        return (const GLubyte *)(ogles2_es31(ctx) ? "OpenGL ES 3.1 " LIB_VERSION_TEXT
+                                 : ogles2_es3(ctx) ? "OpenGL ES 3.0 " LIB_VERSION_TEXT
+                                                   : "OpenGL ES 2.0 " LIB_VERSION_TEXT);
+    case GL_SHADING_LANGUAGE_VERSION: /* must begin "OpenGL ES GLSL ES 1.00", "3.00" or "3.10" */
+        return (const GLubyte *)(ogles2_es31(ctx) ? "OpenGL ES GLSL ES 3.10"
+                                 : ogles2_es3(ctx) ? "OpenGL ES GLSL ES 3.00" : "OpenGL ES GLSL ES 1.00");
     case GL_EXTENSIONS:
         return (const GLubyte *)ext_string(ctx);
     default:

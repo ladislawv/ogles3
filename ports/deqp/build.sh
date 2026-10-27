@@ -6,7 +6,8 @@
 #   bash ports/deqp/build.sh
 # MODULE=gles3 builds dEQP-GLES3 instead, into $B/deqp-gles3 (deqp-gles3 and
 # its data in gles3/), from a copy of its own: it needs an ES3 build of the
-# library to run (docs/GLES3_PLAN.md stage A item 6).
+# library to run (docs/GLES3_PLAN.md stage A item 6). MODULE=gles31 builds
+# dEQP-GLES31 the same way into $B/deqp-gles31, for an ES31 build (stage D).
 # VK-GL-CTS (pinned below) is C++17, so it is built with GCC 16.2 ($TC16),
 # as glmark2 is (ports/glmark2). Only what deqp-gles2 needs is compiled, by
 # this script rather than the CTS's CMake (which would configure Vulkan,
@@ -26,7 +27,8 @@ MODULE=${MODULE:-gles2}
 case $MODULE in
 gles2) OUT=$B/deqp ;;
 gles3) OUT=$B/deqp-gles3 ;;
-*) echo "MODULE is gles2 or gles3"; exit 1 ;;
+gles31) OUT=$B/deqp-gles31 ;;
+*) echo "MODULE is gles2, gles3 or gles31"; exit 1 ;;
 esac
 TC16=${TC16:-$HOME/amiga-gcc162-install}
 J=${J:-8}
@@ -173,8 +175,8 @@ amiga tcuAmigaPlatform.cpp amiga-compat.cpp
 EOF
 )
 $(cd "$ROOT" && ls framework/randomshaders/rsg*.cpp | grep -v rsgTest.cpp)
-$(cd "$ROOT" && ls modules/glshared/*.cpp modules/$MODULE/*.cpp modules/$MODULE/accuracy/*.cpp \
-    modules/$MODULE/functional/*.cpp modules/$MODULE/performance/*.cpp modules/$MODULE/stress/*.cpp |
+$(cd "$ROOT" && for d in modules/glshared modules/$MODULE modules/$MODULE/accuracy modules/$MODULE/functional \
+    modules/$MODULE/performance modules/$MODULE/stress; do [ -d "$d" ] && ls $d/*.cpp; done |
     grep -v '/tgl45')"
 
 # Compiles what changed, in up to $J jobs; a failure leaves its log beside its

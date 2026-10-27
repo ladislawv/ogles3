@@ -127,6 +127,13 @@ def serve(host, port, token, comp):
     if recv_all(s, 4) != b"V3OK":
         raise ConnectionError("the A1200 refused the token")
     s.settimeout(None)  # requests come when a program links
+    # A reset A1200 leaves the link dead without a word: TCP keepalive ends
+    # it within a minute, and the loop connects again.
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+    if hasattr(socket, "TCP_KEEPIDLE"):
+        s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 30)
+        s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 10)
+        s.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 3)
     print("%s connected to %s:%d" % (time.strftime("%H:%M:%S"), host, port), flush=True)
     n = 0
     while True:

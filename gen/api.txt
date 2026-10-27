@@ -30,3 +30,8 @@ command glDrawElementsInstancedEXT
 command glVertexAttribDivisorEXT
 # OpenGL ES 3.0 (docs/GLES3_PLAN.md, Appendix A), all of it since stage C item 4
 feature GL_ES_VERSION_3_0
+# OpenGL ES 3.1 (docs/GLES3_PLAN.md §7), as each entry is implemented; the feature line when all of it is in
+command glSampleMaski
+command glBindImageTexture
+command glGetBooleani_v
+command glBindProgramPipeline

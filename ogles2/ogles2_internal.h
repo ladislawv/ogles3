@@ -131,6 +131,7 @@ struct OGLES2PixelStore
 #define OGLES2_CAP_SAMPLE_COVERAGE          (1UL << 8)
 #define OGLES2_CAP_PRIMITIVE_RESTART       (1UL << 9) /* GL_PRIMITIVE_RESTART_FIXED_INDEX (ES 3.0) */
 #define OGLES2_CAP_RASTERIZER_DISCARD      (1UL << 10) /* GL_RASTERIZER_DISCARD (ES 3.0) */
+#define OGLES2_CAP_SAMPLE_MASK             (1UL << 11) /* GL_SAMPLE_MASK (ES 3.1) */
 
 /* Fixed-function state (state.c), GLES 2.0 defaults set by ogles2_state_init. */
 struct OGLES2State
@@ -146,6 +147,7 @@ struct OGLES2State
     GLenum clip_origin, clip_depth; /* glClipControlEXT (M7): GL_LOWER_LEFT_EXT, GL_NEGATIVE_ONE_TO_ONE_EXT */
     GLfloat polygon_offset_factor, polygon_offset_units;
     GLfloat sample_coverage_value;
+    GLbitfield sample_mask;         /* ES 3.1's glSampleMaski word 0 (GL_MAX_SAMPLE_MASK_WORDS 1) */
     GLfloat attrib[OGLES2_MAX_VERTEX_ATTRIBS][4]; /* current generic attributes */
     GLenum generate_mipmap_hint;    /* glHint */
     GLenum derivative_hint;         /* glHint, OES_standard_derivatives */
@@ -636,7 +638,7 @@ struct OGLES2Context
     UBYTE depth_bits, stencil_bits; /* of the default framebuffer */
     UBYTE depth_format;             /* OGLES2_DEPTH_*: the tile buffer's depth type */
     BOOL msaa;                      /* 4x MSAA on the default framebuffer (OGLES2_CCT_PISTORM_MSAA) */
-    UBYTE es_version;               /* OGLES2_CCT_PISTORM_ES_VERSION: 20, or 30 (ogles2_es3) */
+    UBYTE es_version;               /* OGLES2_CCT_PISTORM_ES_VERSION: 20, 30 or 31 (ogles2_es3, ogles2_es31) */
     UBYTE job_clear_stencil;        /* the open job's stencil clear value (job.c) */
     /* The open job's colour clear values, a target each: four floats' bits,
      * or (is_int, glClearBufferiv/uiv) four integers; packed per target
@@ -926,6 +928,10 @@ void ogles2_fb_update(struct OGLES2Context *ctx);       /* the fb_* fields from 
 GLenum ogles2_fb_status(struct OGLES2Context *ctx);     /* of the draw framebuffer */
 BOOL ogles2_fb_ready(struct OGLES2Context *ctx);        /* complete; else GL_INVALID_FRAMEBUFFER_OPERATION */
 BOOL ogles2_fbo_read_ready(struct OGLES2Context *ctx);  /* and, read from, not multisampled (GL_INVALID_OPERATION) */
+/* glGetIntegeri_v's state beyond the buffer bindings (state.c), and the
+ * image units' (texture.c): -1 no such query, 0 an error set, 1 *v. */
+int ogles2_indexed_query(struct OGLES2Context *ctx, GLenum pname, GLuint index, GLint64 *v);
+int ogles2_image_query(struct OGLES2Context *ctx, GLenum pname, GLuint index, GLint64 *v);
 BOOL ogles2_fbo_target(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb, BOOL surfaces,
                        struct OGLES2Target *t);
 void ogles2_fbo_rendered(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb);
@@ -1107,9 +1113,12 @@ static inline BOOL ogles2_context_valid(struct OGLES2Context *ctx)
 {
     return ctx && ctx->magic == OGLES2_CONTEXT_MAGIC;
 }
-/* The highest OpenGL ES version contexts may have: 3.0 only in test builds
- * until it is complete (Makefile, ES3=1; docs/GLES3_PLAN.md §3). */
-#ifdef OGLES2_ES3_CONTEXTS
+/* The highest OpenGL ES version contexts may have: 3.0 and 3.1 only in test
+ * builds until each is complete (Makefile, ES3=1 and ES31=1;
+ * docs/GLES3_PLAN.md §3). */
+#if defined(OGLES2_ES31_CONTEXTS)
+#define OGLES2_ES_MAX 31
+#elif defined(OGLES2_ES3_CONTEXTS)
 #define OGLES2_ES_MAX 30
 #else
 #define OGLES2_ES_MAX 20
@@ -1128,6 +1137,22 @@ static inline BOOL ogles2_es3_entry(struct OGLES2Context *ctx)
     if (!ogles2_context_valid(ctx))
         return FALSE;
     if (ctx->es_version < 30) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return FALSE;
+    }
+    return TRUE;
+}
+/* An OpenGL ES 3.1 context (stage D). */
+static inline BOOL ogles2_es31(const struct OGLES2Context *ctx)
+{
+    return ctx->es_version >= 31;
+}
+/* An ES 3.1-only entry: as ogles2_es3_entry, for a 3.1 context. */
+static inline BOOL ogles2_es31_entry(struct OGLES2Context *ctx)
+{
+    if (!ogles2_context_valid(ctx))
+        return FALSE;
+    if (ctx->es_version < 31) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return FALSE;
     }

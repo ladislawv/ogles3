@@ -28,6 +28,12 @@ CFLAGS := -std=gnu99 -O2 -Wall -Wextra -Wno-unused-parameter -fno-strict-aliasin
 ifeq ($(ES3),1)
 CFLAGS += -DOGLES2_ES3_CONTEXTS
 endif
+# ES31=1: a test build whose contexts are OpenGL ES 3.1 for 30 and 31 alike
+# (stage D, docs/GLES3_PLAN.md §7, while it is being built), e.g.
+# B=~/ogles3-build/m68k-es31; ES3=1 builds keep giving ES 3.0 contexts.
+ifeq ($(ES31),1)
+CFLAGS += -DOGLES2_ES3_CONTEXTS -DOGLES2_ES31_CONTEXTS
+endif
 INC    := -Iinclude -I$(B)/gen/include -Iogles2 -I$(B)/gen/ogles2
 # Library objects must not pull C library or startup code.
 LIBLINK := $(CPU) -mcrt=clib2 -nostdlib -nostartfiles -nodefaultlibs -noixemul
@@ -61,7 +67,7 @@ CLIENT_OBJ := $(patsubst %.c,$(B)/obj/%.o,$(CLIENT_SRC)) $(B)/obj/client/lvo.o \
 .PHONY: all gen clean vbcc
 all: $(B)/fpcheck.ok $(B)/libv3dcore.a $(B)/ogles2.library $(B)/libogles2.a $(B)/tests/abi_layout $(B)/tests/smoke \
      $(B)/tests/abi_probe $(B)/tests/m1_clear $(B)/tests/m1_probe $(B)/tests/m1_draw $(B)/tests/m1_hwprobe $(B)/tests/m1_soak $(B)/tests/m2_link $(B)/tests/m2_texture $(B)/tests/m2_elements $(B)/tests/m2_buffers $(B)/tests/m4_stress $(B)/tests/m4_depth $(B)/tests/m4_setbitmap $(B)/tests/gears_gles2 $(B)/tests/cachetime $(B)/tests/emuspeed $(B)/tests/m5_fbo \
-     $(B)/tests/rtt_churn $(B)/tests/m6_share $(B)/tests/m6_tasks $(B)/tests/m6_ext $(B)/tests/m6_tfu $(B)/tests/m6_flip $(B)/tests/m6_vsync $(B)/tests/m6_msaa $(B)/tests/m7_points $(B)/tests/m7_s3tc $(B)/tests/m7_clip $(B)/tests/m7_mrt $(B)/tests/m7_half $(B)/tests/m7_copy $(B)/tests/m8_es3 $(B)/tests/m8_draw $(B)/cmd/OGLES2Log $(B)/amictl/amictld \
+     $(B)/tests/rtt_churn $(B)/tests/m6_share $(B)/tests/m6_tasks $(B)/tests/m6_ext $(B)/tests/m6_tfu $(B)/tests/m6_flip $(B)/tests/m6_vsync $(B)/tests/m6_msaa $(B)/tests/m7_points $(B)/tests/m7_s3tc $(B)/tests/m7_clip $(B)/tests/m7_mrt $(B)/tests/m7_half $(B)/tests/m7_copy $(B)/tests/m8_es3 $(B)/tests/m8_draw $(B)/tests/m8_es31 $(B)/cmd/OGLES2Log $(B)/amictl/amictld \
      $(B)/amictl/v3dglslc-remote
 
 # ---- generated code (plan section 6.6). Re-run when the inputs or the set of
@@ -211,6 +217,9 @@ $(B)/tests/m8_es3: tests/m8_es3/m8_es3.c $(B)/libogles2.a
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
 $(B)/tests/m8_draw: tests/m8_draw/m8_draw.c $(B)/libogles2.a
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
+$(B)/tests/m8_es31: tests/m8_es31/m8_es31.c $(B)/libogles2.a
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
 # The GLES3 headers with <proto/ogles2.h> in every order (docs/GLES3_PLAN.md

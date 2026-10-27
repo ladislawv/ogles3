@@ -2436,6 +2436,44 @@ does; **release 2.1** with ES 3.0 contexts.
 
 ## 7. Stage D: ES 3.1 (5-7 weeks)
 
+**Begun (2026-10-27): the ground.** `make ES31=1` (its own `B`,
+`~/ogles3-build/m68k-es31`) builds a test library whose contexts are ES 3.1
+(`OGLES2_ES31_CONTEXTS`; `OGLES2_ES_MAX` 31, so a request for 3.0 gets 3.1
+there: ES3=1 builds keep giving 3.0 for dEQP-GLES3), "OpenGL ES 3.1" and
+"OpenGL ES GLSL ES 3.10", `ogles2_es31` and `ogles2_es31_entry` beside the
+ES 3.0 ones. The compiler already takes GLSL ES 3.10 (`textureGather`
+included; compute shaders are item 1's). dEQP-GLES31: `MODULE=gles31
+ports/deqp/build.sh` (no `accuracy` or `performance` directories, `tgl45*`
+left out; the platform takes ES 3.1 configurations, `glw::initES31`),
+package `m8-3` (an ES31 build, its own must-pass group lists from
+`gles31-main.txt`; `run_pc.sh --package m8-3`). Its first run stopped at
+the first case: `glu::resetState` sets ES 3.1's state, so that state came
+first, each piece with its errors and queries (the GPU side with its item):
+the `GL_DRAW_INDIRECT_BUFFER`, `GL_DISPATCH_INDIRECT_BUFFER`,
+`GL_SHADER_STORAGE_BUFFER` and `GL_ATOMIC_COUNTER_BUFFER` targets, the
+storage (32) and atomic counter (16) buffers' indexed bindings (offsets at
+4, `buffer.c`'s `ranges`; `glGetIntegeri_v`/`64i_v` through one
+`indexed`, and `ogles2_indexed_query` for the rest), `glGetBooleani_v`;
+`GL_SAMPLE_MASK` and `glSampleMaski` (one word; the job's `SAMPLE_STATE`
+mask takes it with 4x MSAA, `draw.c`); `GL_DEPTH_STENCIL_TEXTURE_MODE`;
+the `GL_TEXTURE_2D_MULTISAMPLE` target (bound, swizzle and levels, no
+sampler state, base level 0; storage with item 4); `glBindProgramPipeline`
+of 0 (pipelines with item 5); the image units (`glBindImageTexture` with
+ES 3.1's errors in Mesa's order, 256 units, the `GL_IMAGE_BINDING_*`
+queries, a deleted texture unbound); ES 3.1's limits (`state.c`'s
+`es31_limits`, `v3dglslc -L`'s; `tests/m8_es31/check_limits.sh`: 44
+identical). The table: `api.txt` lists ES 3.1's entries as they come (4
+so far). Test `m8_es31` (state-only: 26 of 26 under vamos; under vamos
+nothing that uploads or calls `glBufferData`, which read the Pi's timer,
+0xF2003004). Then dEQP-GLES31 `info` 6 of 6 and `state_query` as a work
+list (311 pass, 288 fail, 732 not supported: ES 3.2's extensions and the
+like): `texture_level` 190 (`glGetTexLevelParameter*`, item 4),
+`internal_format` 54 (ES 3.1's sample counts, item 4), `vertex_attribute_binding`
+24 (item 5), the rest a case or a few each (pipelines, compute,
+framebuffer defaults). `compile_bridge.py` turns TCP keepalive on: after
+the A1200's reset it waited on a dead link and every compile fell back to
+the A1200's own compiler.
+
 1. **Compute shaders.** The largest single piece:
    - `v3dcore`: a CSD submission path beside the binning/render one, under
      the same GPU lock (`v3d_gpu_lock.c`): the registers and the start, wait

@@ -155,8 +155,8 @@ static bool fits(int asked, int have)
 RenderContext::RenderContext(const glu::RenderConfig &config) : m_type(config.type), m_ctx(nullptr)
 {
     const glu::ApiType api = config.type.getAPI();
-    if (api != glu::ApiType::es(2, 0) && api != glu::ApiType::es(3, 0))
-        throw tcu::NotSupportedError("ogles2.library: OpenGL ES 2.0 and 3.0 only");
+    if (api != glu::ApiType::es(2, 0) && api != glu::ApiType::es(3, 0) && api != glu::ApiType::es(3, 1))
+        throw tcu::NotSupportedError("ogles2.library: OpenGL ES 2.0, 3.0 and 3.1 only");
     if (config.componentType == glu::RenderConfig::COMPONENT_TYPE_FLOAT)
         throw tcu::NotSupportedError("ogles2.library: no floating-point default framebuffer");
     if (!fits(config.redBits, 8) || !fits(config.greenBits, 8) || !fits(config.blueBits, 8) ||
@@ -168,14 +168,16 @@ RenderContext::RenderContext(const glu::RenderConfig &config) : m_type(config.ty
 
     const int width  = glu::getValueOrDefault(config, &glu::RenderConfig::width, 256);
     const int height = glu::getValueOrDefault(config, &glu::RenderConfig::height, 256);
-    const bool es3   = api == glu::ApiType::es(3, 0);
+    const bool es31  = api == glu::ApiType::es(3, 1);
+    const bool es3   = api == glu::ApiType::es(3, 0) || es31;
     ULONG err        = 0;
     m_ctx            = aglCreateContextTags2(
         &err, OGLES2_CCT_PISTORM_WIDTH, (ULONG)width, OGLES2_CCT_PISTORM_HEIGHT, (ULONG)height, OGLES2_CCT_DEPTH,
         24UL, OGLES2_CCT_STENCIL, 8UL, OGLES2_CCT_VSYNC, (ULONG)FALSE, OGLES2_CCT_PISTORM_MSAA,
-        (ULONG)(samples ? 4 : 0), OGLES2_CCT_PISTORM_ES_VERSION, es3 ? 30UL : 20UL, TAG_DONE);
+        (ULONG)(samples ? 4 : 0), OGLES2_CCT_PISTORM_ES_VERSION, es31 ? 31UL : es3 ? 30UL : 20UL, TAG_DONE);
     if (!m_ctx && err == OGLES2_CCE_UNSUPPORTED && es3)
-        throw tcu::NotSupportedError("ogles2.library: no OpenGL ES 3.0 contexts in this build");
+        throw tcu::NotSupportedError(es31 ? "ogles2.library: no OpenGL ES 3.1 contexts in this build"
+                                          : "ogles2.library: no OpenGL ES 3.0 contexts in this build");
     if (!m_ctx)
         throw tcu::ResourceError("aglCreateContextTags2 failed, error " + de::toString((unsigned long)err));
     aglMakeCurrent(m_ctx);
@@ -189,13 +191,17 @@ RenderContext::RenderContext(const glu::RenderConfig &config) : m_type(config.ty
     {
         const char *(*getString)(unsigned int) = (const char *(*)(unsigned int))aglGetProcAddress("glGetString");
         const char *version                    = getString ? getString(GL_VERSION) : nullptr;
-        if (!version || std::string(version).compare(0, 13, "OpenGL ES 3.0") != 0)
+        if (!version || std::string(version).compare(0, 13, es31 ? "OpenGL ES 3.1" : "OpenGL ES 3.0") != 0)
         {
             aglDestroyContext(m_ctx);
             m_ctx = nullptr;
-            throw tcu::NotSupportedError("ogles2.library: no OpenGL ES 3.0 contexts before 2.0");
+            throw tcu::NotSupportedError(es31 ? "ogles2.library: no OpenGL ES 3.1 context (an ES31 build is needed)"
+                                              : "ogles2.library: no OpenGL ES 3.0 contexts before 2.0");
         }
-        glw::initES30(&m_gl, &loader);
+        if (es31)
+            glw::initES31(&m_gl, &loader);
+        else
+            glw::initES30(&m_gl, &loader);
     }
     else
         glw::initES20(&m_gl, &loader);

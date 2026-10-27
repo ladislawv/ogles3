@@ -103,6 +103,8 @@ struct OGLES2Texture
     /* ES 3.0's texture swizzle (GL_TEXTURE_SWIZZLE_R..A: GL_RED..GL_ALPHA,
      * GL_ZERO, GL_ONE), composed with the format's own (swizzle above). */
     GLenum gl_swizzle[4];
+    GLenum ds_mode;                 /* ES 3.1's GL_DEPTH_STENCIL_TEXTURE_MODE: GL_DEPTH_COMPONENT or
+                                     * GL_STENCIL_INDEX (stencil texturing, stage D item 4) */
     ULONG st_sver;                  /* the records' sampler object's version (0: none) */
     struct OGLES2Face f6[6];
     UWORD nf;                       /* faces f has room for */
@@ -125,14 +127,28 @@ typedef char ogles2_rec_fits[sizeof(v3d_texture_shader_state) <= 32 && sizeof(v3
 
 /* ---- the context's texture state ---- */
 
+/* ES 3.1's image units (glBindImageTexture, stage D item 2): a texture's
+ * level, all its layers or one, the access and the format shaders see. */
+#define MAX_IMAGE_UNITS 256 /* GL_MAX_IMAGE_UNITS (v3dglslc -L) */
+struct OGLES2ImageUnit
+{
+    struct OGLES2Texture *t;        /* NULL: none */
+    GLint level, layer;
+    GLboolean layered;
+    GLenum access, format;
+};
+
 struct OGLES2TexState
 {
     struct OGLES2Share *sh;         /* the named textures: sh->tex, sh->ntex (share.c) */
     struct OGLES2Texture default2d, defaultcube, defaultrect; /* name 0: the context's own */
     struct OGLES2Texture default3d, defaultarray; /* ES 3.0 */
+    struct OGLES2Texture default2dms; /* ES 3.1 */
     struct OGLES2Texture *unit2d[OGLES2_MAX_TEXTURE_UNITS], *unitcube[OGLES2_MAX_TEXTURE_UNITS];
     struct OGLES2Texture *unitrect[OGLES2_MAX_TEXTURE_UNITS]; /* ARB_texture_rectangle */
     struct OGLES2Texture *unit3d[OGLES2_MAX_TEXTURE_UNITS], *unitarray[OGLES2_MAX_TEXTURE_UNITS]; /* ES 3.0 */
+    struct OGLES2Texture *unit2dms[OGLES2_MAX_TEXTURE_UNITS]; /* ES 3.1's GL_TEXTURE_2D_MULTISAMPLE */
+    struct OGLES2ImageUnit *images; /* ES 3.1's glBindImageTexture units (NULL until first bound) */
     struct OGLES2Texture fallback;  /* 1x1 (0,0,0,1): what an incomplete texture samples */
     struct OGLES2Texture fallback_int; /* the same in RGBA8UI, for an integer sampler (ES 3.0) */
     UBYTE active;
@@ -191,6 +207,7 @@ static void init_object(struct OGLES2Texture *t, GLuint name, GLenum target)
     t->gl_swizzle[1] = GL_GREEN;
     t->gl_swizzle[2] = GL_BLUE;
     t->gl_swizzle[3] = GL_ALPHA;
+    t->ds_mode = GL_DEPTH_COMPONENT;
     rect_defaults(t);
 }
 
@@ -221,12 +238,14 @@ static struct OGLES2TexState *ts_get(struct OGLES2Context *ctx)
     init_object(&ts->defaultrect, 0, GL_TEXTURE_RECTANGLE);
     init_object(&ts->default3d, 0, GL_TEXTURE_3D);
     init_object(&ts->defaultarray, 0, GL_TEXTURE_2D_ARRAY);
+    init_object(&ts->default2dms, 0, GL_TEXTURE_2D_MULTISAMPLE);
     for (i = 0; i < OGLES2_MAX_TEXTURE_UNITS; i++) {
         ts->unit2d[i] = &ts->default2d;
         ts->unitcube[i] = &ts->defaultcube;
         ts->unitrect[i] = &ts->defaultrect;
         ts->unit3d[i] = &ts->default3d;
         ts->unitarray[i] = &ts->defaultarray;
+        ts->unit2dms[i] = &ts->default2dms;
     }
     ctx->tex = ts;
     return ts;
@@ -326,6 +345,9 @@ void ogles2_textures_free(struct OGLES2Context *ctx)
     free_levels(&ts->defaultrect);
     free_levels(&ts->default3d);
     free_levels(&ts->defaultarray);
+    free_levels(&ts->default2dms);
+    if (ts->images)
+        FreeVec(ts->images);
     free_levels(&ts->fallback);
     free_levels(&ts->fallback_int);
     ogles2_texture_hidden_free(ctx, ts->scratch);
@@ -472,6 +494,114 @@ static void destroy(struct OGLES2Context *ctx, struct OGLES2TexState *ts, struct
     FreeVec(t);
 }
 
+/* ---- ES 3.1's image units ---- */
+
+/* A deleted texture leaves the image units it was bound to (ES 3.1 8.22). */
+static void image_units_forget(struct OGLES2TexState *ts, const struct OGLES2Texture *t)
+{
+    int u;
+    for (u = 0; ts->images && u < MAX_IMAGE_UNITS; u++)
+        if (ts->images[u].t == t)
+            ts->images[u].t = 0;
+}
+
+/* ES 3.1 table 8.27, the formats an image unit takes. */
+static BOOL image_format(GLenum f)
+{
+    switch (f) {
+    case GL_RGBA32F: case GL_RGBA16F: case GL_R32F: case GL_RGBA32UI: case GL_RGBA16UI: case GL_RGBA8UI:
+    case GL_R32UI: case GL_RGBA32I: case GL_RGBA16I: case GL_RGBA8I: case GL_R32I: case GL_RGBA8:
+    case GL_RGBA8_SNORM:
+        return TRUE;
+    default:
+        return FALSE;
+    }
+}
+
+/* The units, made at the first use: each unbound, level 0, not layered,
+ * GL_READ_ONLY and GL_R32UI (ES 3.1 table 20.34's initial values). */
+static struct OGLES2ImageUnit *image_units(struct OGLES2TexState *ts)
+{
+    int u;
+    if (!ts->images && (ts->images = AllocVec(MAX_IMAGE_UNITS * sizeof(*ts->images), MEMF_ANY | MEMF_CLEAR)))
+        for (u = 0; u < MAX_IMAGE_UNITS; u++) {
+            ts->images[u].access = GL_READ_ONLY;
+            ts->images[u].format = GL_R32UI;
+        }
+    return ts->images;
+}
+
+void ogles2_glBindImageTexture(struct OGLES2Context *ctx, GLuint unit, GLuint texture, GLint level,
+                               GLboolean layered, GLint layer, GLenum access, GLenum format)
+{
+    struct OGLES2TexState *ts;
+    struct OGLES2ImageUnit *im;
+    struct OGLES2Texture *t = 0;
+    if (!ogles2_es31_entry(ctx) || !(ts = ts_get(ctx)))
+        return;
+    /* Mesa's order (shaderimage.c, validate_bind_image_texture) */
+    if (unit >= MAX_IMAGE_UNITS || level < 0 || layer < 0) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    if (access != GL_READ_ONLY && access != GL_WRITE_ONLY && access != GL_READ_WRITE) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    if (!image_format(format)) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    if (texture) {
+        if (!(t = by_name(ts, texture))) {
+            ogles2_error(ctx, GL_INVALID_VALUE);
+            return;
+        }
+        if (!t->immutable_levels) { /* ES 3.1: an immutable texture's only */
+            ogles2_error(ctx, GL_INVALID_OPERATION);
+            return;
+        }
+    }
+    if (!(im = image_units(ts))) {
+        ogles2_error(ctx, GL_OUT_OF_MEMORY);
+        return;
+    }
+    im += unit;
+    im->t = t;
+    im->level = level;
+    im->layered = layered ? GL_TRUE : GL_FALSE;
+    im->layer = layer;
+    im->access = access;
+    im->format = format;
+}
+
+/* glGetIntegeri_v and glGetBooleani_v's GL_IMAGE_BINDING_* (state.c asks):
+ * -1 another query, 0 an error set, 1 *v. */
+int ogles2_image_query(struct OGLES2Context *ctx, GLenum pname, GLuint index, GLint64 *v)
+{
+    struct OGLES2TexState *ts;
+    const struct OGLES2ImageUnit *im;
+    if (pname != GL_IMAGE_BINDING_NAME && pname != GL_IMAGE_BINDING_LEVEL && pname != GL_IMAGE_BINDING_LAYERED &&
+        pname != GL_IMAGE_BINDING_LAYER && pname != GL_IMAGE_BINDING_ACCESS && pname != GL_IMAGE_BINDING_FORMAT)
+        return -1;
+    if (index >= MAX_IMAGE_UNITS) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return 0;
+    }
+    if (!(ts = ts_get(ctx)) || !(im = image_units(ts))) {
+        ogles2_error(ctx, GL_OUT_OF_MEMORY);
+        return 0;
+    }
+    im += index;
+    *v = pname == GL_IMAGE_BINDING_NAME    ? (GLint64)(im->t ? im->t->name : 0)
+       : pname == GL_IMAGE_BINDING_LEVEL   ? (GLint64)im->level
+       : pname == GL_IMAGE_BINDING_LAYERED ? (GLint64)im->layered
+       : pname == GL_IMAGE_BINDING_LAYER   ? (GLint64)im->layer
+       : pname == GL_IMAGE_BINDING_ACCESS  ? (GLint64)im->access
+                                           : (GLint64)im->format;
+    return 1;
+}
+
 void ogles2_glDeleteTextures(struct OGLES2Context *ctx, GLsizei n, const GLuint *textures)
 {
     struct OGLES2TexState *ts;
@@ -510,7 +640,10 @@ void ogles2_glDeleteTextures(struct OGLES2Context *ctx, GLsizei n, const GLuint 
                     mts->unit3d[u] = &mts->default3d;
                 if (mts->unitarray[u] == t)
                     mts->unitarray[u] = &mts->defaultarray;
+                if (mts->unit2dms[u] == t)
+                    mts->unit2dms[u] = &mts->default2dms;
             }
+            image_units_forget(mts, t); /* ES 3.1: the image units it was bound to */
         }
         ts->sh->tex[ogles2_name_slot(&ts->sh->far_tex, t->name, FALSE)] = 0;
         ogles2_name_forget(&ts->sh->far_tex, t->name);
@@ -573,7 +706,8 @@ void ogles2_glBindTexture(struct OGLES2Context *ctx, GLenum target, GLuint textu
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
         return;
     if (target != GL_TEXTURE_2D && target != GL_TEXTURE_CUBE_MAP && target != GL_TEXTURE_RECTANGLE &&
-        !(ogles2_es3(ctx) && (target == GL_TEXTURE_3D || target == GL_TEXTURE_2D_ARRAY))) {
+        !(ogles2_es3(ctx) && (target == GL_TEXTURE_3D || target == GL_TEXTURE_2D_ARRAY)) &&
+        !(ogles2_es31(ctx) && target == GL_TEXTURE_2D_MULTISAMPLE)) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
@@ -581,7 +715,8 @@ void ogles2_glBindTexture(struct OGLES2Context *ctx, GLenum target, GLuint textu
         t = target == GL_TEXTURE_2D ? &ts->default2d
           : target == GL_TEXTURE_CUBE_MAP ? &ts->defaultcube
           : target == GL_TEXTURE_3D ? &ts->default3d
-          : target == GL_TEXTURE_2D_ARRAY ? &ts->defaultarray : &ts->defaultrect;
+          : target == GL_TEXTURE_2D_ARRAY ? &ts->defaultarray
+          : target == GL_TEXTURE_2D_MULTISAMPLE ? &ts->default2dms : &ts->defaultrect;
     } else {
         t = by_name(ts, texture);
         /* GLES2 lets a program bind a name glGenTextures did not return. */
@@ -606,6 +741,8 @@ void ogles2_glBindTexture(struct OGLES2Context *ctx, GLenum target, GLuint textu
         ts->unit3d[ts->active] = t;
     else if (target == GL_TEXTURE_2D_ARRAY)
         ts->unitarray[ts->active] = t;
+    else if (target == GL_TEXTURE_2D_MULTISAMPLE)
+        ts->unit2dms[ts->active] = t;
     else
         ts->unitrect[ts->active] = t;
 }
@@ -624,6 +761,8 @@ static struct OGLES2Texture *bound(struct OGLES2Context *ctx, struct OGLES2TexSt
         return ts->unit3d[ts->active];
     if (ogles2_es3(ctx) && target == GL_TEXTURE_2D_ARRAY)
         return ts->unitarray[ts->active];
+    if (ogles2_es31(ctx) && target == GL_TEXTURE_2D_MULTISAMPLE)
+        return ts->unit2dms[ts->active];
     ogles2_error(ctx, GL_INVALID_ENUM);
     return 0;
 }
@@ -757,7 +896,26 @@ static void tex_param(struct OGLES2Context *ctx, GLenum target, GLenum pname, GL
             return;
         }
     }
+    /* ES 3.1 8.10: a multisample texture has no sampler state, and its one
+     * level is the base level */
+    if (target == GL_TEXTURE_2D_MULTISAMPLE) {
+        if (pname != GL_TEXTURE_BASE_LEVEL && pname != GL_TEXTURE_MAX_LEVEL && pname != GL_DEPTH_STENCIL_TEXTURE_MODE &&
+            (pname < GL_TEXTURE_SWIZZLE_R || pname > GL_TEXTURE_SWIZZLE_A)) {
+            ogles2_error(ctx, GL_INVALID_ENUM);
+            return;
+        }
+        if (pname == GL_TEXTURE_BASE_LEVEL && i != 0) {
+            ogles2_error(ctx, GL_INVALID_OPERATION);
+            return;
+        }
+    }
     switch (pname) {
+    case GL_DEPTH_STENCIL_TEXTURE_MODE: /* ES 3.1 */
+        if (!ogles2_es31(ctx) || (e != GL_DEPTH_COMPONENT && e != GL_STENCIL_INDEX))
+            break;
+        t->ds_mode = e;
+        t->pver++;
+        return;
     case GL_TEXTURE_LOD_BIAS:
         t->lod_bias = f; /* clamped where it is used (GL keeps the value) */
         t->pver++;
@@ -833,7 +991,14 @@ static BOOL get_param(struct OGLES2Context *ctx, GLenum target, GLenum pname, GL
     struct OGLES2Texture *t;
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)) || !(t = bound(ctx, ts, target)))
         return FALSE;
+    if (target == GL_TEXTURE_2D_MULTISAMPLE && smp_get(ctx, &t->s, pname, v))
+        pname = GL_NONE; /* no sampler state (ES 3.1 8.10): GL_INVALID_ENUM below */
     switch (pname) {
+    case GL_DEPTH_STENCIL_TEXTURE_MODE:
+        if (!ogles2_es31(ctx))
+            break;
+        *v = (GLfloat)t->ds_mode;
+        return TRUE;
     case GL_TEXTURE_LOD_BIAS:            *v = t->lod_bias; return TRUE;
     case GL_TEXTURE_IMMUTABLE_FORMAT:
     case GL_TEXTURE_IMMUTABLE_LEVELS:
@@ -922,6 +1087,11 @@ BOOL ogles2_texture_query(struct OGLES2Context *ctx, GLenum pname, GLint *v)
     case GL_TEXTURE_BINDING_2D:   *v = ts ? (GLint)ts->unit2d[ts->active]->name : 0; return TRUE;
     case GL_TEXTURE_BINDING_CUBE_MAP: *v = ts ? (GLint)ts->unitcube[ts->active]->name : 0; return TRUE;
     case GL_TEXTURE_BINDING_RECTANGLE: *v = ts ? (GLint)ts->unitrect[ts->active]->name : 0; return TRUE;
+    case GL_TEXTURE_BINDING_2D_MULTISAMPLE:
+        if (!ogles2_es31(ctx))
+            return FALSE;
+        *v = ts ? (GLint)ts->unit2dms[ts->active]->name : 0;
+        return TRUE;
     case GL_TEXTURE_BINDING_3D:
     case GL_TEXTURE_BINDING_2D_ARRAY:
         if (!ogles2_es3(ctx))
@@ -4031,11 +4201,12 @@ static void tex_storage(struct OGLES2Context *ctx, GLenum target, GLsizei levels
     int l, k, max, n = 1, big;
     if (!ogles2_es3_entry(ctx) || !(ts = ts_get(ctx)))
         return;
-    if (!(t = bound(ctx, ts, target)) || target == GL_TEXTURE_RECTANGLE) {
-        if (target == GL_TEXTURE_RECTANGLE)
-            ogles2_error(ctx, GL_INVALID_ENUM);
+    if (target == GL_TEXTURE_RECTANGLE || target == GL_TEXTURE_2D_MULTISAMPLE) { /* the latter's: glTexStorage2DMultisample */
+        ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
+    if (!(t = bound(ctx, ts, target)))
+        return;
     if (!sized_storage(ifmt, &format, &type)) {
         ogles2_error(ctx, es3_sized(ifmt) ? GL_INVALID_OPERATION : GL_INVALID_ENUM);
         return;
@@ -4748,7 +4919,7 @@ void ogles2_glGenerateMipmap(struct OGLES2Context *ctx, GLenum target)
     int l, n, k, cls, b, e, d;
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
         return;
-    if (target == GL_TEXTURE_RECTANGLE) { /* ARB_texture_rectangle: no mip levels */
+    if (target == GL_TEXTURE_RECTANGLE || target == GL_TEXTURE_2D_MULTISAMPLE) { /* no mip levels */
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }

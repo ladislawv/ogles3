@@ -1488,6 +1488,8 @@ static void emit_state(struct OGLES2Context *ctx, struct dedup *dd, int prim,
         if (s->sample_coverage_invert)
             smask = (UBYTE)(~smask & 0xF);
     }
+    if (ctx->job_msaa && (s->caps & OGLES2_CAP_SAMPLE_MASK)) /* ES 3.1's glSampleMaski */
+        smask &= (UBYTE)(s->sample_mask & 0xF);
     if (!dd->cfg || dd->effp != effp || dd->erfp != erfp || dd->cp != cp || dd->edo != edo ||
         dd->dtf != dtf || dd->zue != zue || dd->eze != eze || dd->ezue != ezue || dd->be != be ||
         dd->se != se || dd->wf != wf || dd->pf != pf || dd->pv != pv || dd->rom != rom) {

@@ -274,3 +274,7 @@ glIsTransformFeedback
 glGetProgramBinary
 glProgramBinary
 glProgramParameteri
+glSampleMaski
+glBindImageTexture
+glGetBooleani_v
+glBindProgramPipeline

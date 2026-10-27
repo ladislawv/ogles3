@@ -2053,6 +2053,15 @@ void ogles2_glProgramBinaryOES(struct OGLES2Context *ctx, GLuint program, GLenum
     set_log(p, "", 0);
 }
 
+/* ES 3.1's program pipelines (stage D item 5): until they come, only 0 is
+ * bound, and any other name is no pipeline object (GL_INVALID_OPERATION,
+ * as for a name glGenProgramPipelines did not give). */
+void ogles2_glBindProgramPipeline(struct OGLES2Context *ctx, GLuint pipeline)
+{
+    if (ogles2_es31_entry(ctx) && pipeline)
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+}
+
 /* ES 3.0's names (stage C item 4): the extension's, in ES3 contexts. */
 void ogles2_glGetProgramBinary(struct OGLES2Context *ctx, GLuint program, GLsizei bufSize,
                                GLsizei *length, GLenum *binaryFormat, void *binary)

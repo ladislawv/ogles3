@@ -82,6 +82,8 @@ struct OGLES2Buffer
 };
 
 #define MAX_UNIFORM_BINDINGS 108 /* GL_MAX_UNIFORM_BUFFER_BINDINGS (state.c) */
+#define MAX_SSBO_BINDINGS    32  /* GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS (ES 3.1) */
+#define MAX_ATOMIC_BINDINGS  16  /* GL_MAX_ATOMIC_COUNTER_BUFFER_BINDINGS (ES 3.1) */
 
 /* An indexed binding (glBindBufferBase, glBindBufferRange); size 0: the
  * whole buffer (glBindBufferBase). */
@@ -101,6 +103,11 @@ struct OGLES2BufState
      * items 6 and stage C. */
     struct OGLES2Buffer *copy_read, *copy_write, *pack, *unpack, *xfb, *uniform;
     struct buf_range ubo[MAX_UNIFORM_BINDINGS]; /* (transform feedback's: xfb.c's objects) */
+    /* ES 3.1's (docs/GLES3_PLAN.md §7): the indirect draw and dispatch
+     * commands' buffers (items 1 and 3), the storage and atomic counter
+     * buffers and their indexed bindings (item 2). */
+    struct OGLES2Buffer *draw_indirect, *dispatch_indirect, *storage, *atomic;
+    struct buf_range ssbo[MAX_SSBO_BINDINGS], acbo[MAX_ATOMIC_BINDINGS];
 };
 
 static struct OGLES2BufState *bs_get(struct OGLES2Context *ctx)
@@ -227,6 +234,14 @@ static struct OGLES2Buffer **slot(struct OGLES2Context *ctx, struct OGLES2BufSta
     case GL_PIXEL_UNPACK_BUFFER:      return &bs->unpack;
     case GL_TRANSFORM_FEEDBACK_BUFFER: return &bs->xfb;
     case GL_UNIFORM_BUFFER:           return &bs->uniform;
+    }
+    if (!ogles2_es31(ctx))
+        return 0;
+    switch (target) {
+    case GL_DRAW_INDIRECT_BUFFER:     return &bs->draw_indirect;
+    case GL_DISPATCH_INDIRECT_BUFFER: return &bs->dispatch_indirect;
+    case GL_SHADER_STORAGE_BUFFER:    return &bs->storage;
+    case GL_ATOMIC_COUNTER_BUFFER:    return &bs->atomic;
     default:                          return 0;
     }
 }
@@ -246,7 +261,7 @@ static BOOL valid_usage(struct OGLES2Context *ctx, GLenum usage)
 static void unbind_all(struct OGLES2Context *ctx, struct OGLES2BufState *bs, struct OGLES2Buffer *b)
 {
     struct OGLES2XfbBinding *x = ogles2_xfb_bindings(ctx);
-    struct OGLES2Buffer **one[8];
+    struct OGLES2Buffer **one[12];
     int i;
     one[0] = &bs->array;
     one[1] = &bs->element;
@@ -256,12 +271,22 @@ static void unbind_all(struct OGLES2Context *ctx, struct OGLES2BufState *bs, str
     one[5] = &bs->unpack;
     one[6] = &bs->xfb;
     one[7] = &bs->uniform;
-    for (i = 0; i < 8; i++)
+    one[8] = &bs->draw_indirect;
+    one[9] = &bs->dispatch_indirect;
+    one[10] = &bs->storage;
+    one[11] = &bs->atomic;
+    for (i = 0; i < 12; i++)
         if (*one[i] == b)
             *one[i] = 0;
     for (i = 0; i < MAX_UNIFORM_BINDINGS; i++)
         if (bs->ubo[i].b == b)
             memset(&bs->ubo[i], 0, sizeof(bs->ubo[i]));
+    for (i = 0; i < MAX_SSBO_BINDINGS; i++)
+        if (bs->ssbo[i].b == b)
+            memset(&bs->ssbo[i], 0, sizeof(bs->ssbo[i]));
+    for (i = 0; i < MAX_ATOMIC_BINDINGS; i++)
+        if (bs->acbo[i].b == b)
+            memset(&bs->acbo[i], 0, sizeof(bs->acbo[i]));
     for (i = 0; x && i < OGLES2_MAX_XFB_BUFFERS; i++)
         if (x[i].b == b)
             memset(&x[i], 0, sizeof(x[i]));
@@ -851,6 +876,10 @@ BOOL ogles2_buffer_query(struct OGLES2Context *ctx, GLenum pname, GLint *v)
     case GL_PIXEL_UNPACK_BUFFER_BINDING:       target = GL_PIXEL_UNPACK_BUFFER; break;
     case GL_TRANSFORM_FEEDBACK_BUFFER_BINDING: target = GL_TRANSFORM_FEEDBACK_BUFFER; break;
     case GL_UNIFORM_BUFFER_BINDING:            target = GL_UNIFORM_BUFFER; break;
+    case GL_DRAW_INDIRECT_BUFFER_BINDING:      target = GL_DRAW_INDIRECT_BUFFER; break;
+    case GL_DISPATCH_INDIRECT_BUFFER_BINDING:  target = GL_DISPATCH_INDIRECT_BUFFER; break;
+    case GL_SHADER_STORAGE_BUFFER_BINDING:     target = GL_SHADER_STORAGE_BUFFER; break;
+    case GL_ATOMIC_COUNTER_BUFFER_BINDING:     target = GL_ATOMIC_COUNTER_BUFFER; break;
     default:                                   return FALSE;
     }
     if (!bs) {
@@ -954,38 +983,68 @@ ULONG ogles2_buffer_xfb(struct OGLES2Context *ctx, struct OGLES2Buffer *b)
 
 /* ---- ES 3.0's indexed bindings and copies ---- */
 
+/* The indexed bindings of a target that has them (ES 3.0's uniform buffers;
+ * ES 3.1's storage and atomic counter buffers in 3.1 contexts): their
+ * array, count and general binding; NULL for transform feedback's (the
+ * bound object's, xfb.c) and every other target. */
+static struct buf_range *ranges(struct OGLES2Context *ctx, struct OGLES2BufState *bs, GLenum target, ULONG *n,
+                                struct OGLES2Buffer ***general)
+{
+    switch (target) {
+    case GL_UNIFORM_BUFFER:
+        *n = MAX_UNIFORM_BINDINGS;
+        *general = &bs->uniform;
+        return bs->ubo;
+    case GL_SHADER_STORAGE_BUFFER:
+        *n = MAX_SSBO_BINDINGS;
+        *general = &bs->storage;
+        return ogles2_es31(ctx) ? bs->ssbo : 0;
+    case GL_ATOMIC_COUNTER_BUFFER:
+        *n = MAX_ATOMIC_BINDINGS;
+        *general = &bs->atomic;
+        return ogles2_es31(ctx) ? bs->acbo : 0;
+    default:
+        return 0;
+    }
+}
+
 static void bind_range(struct OGLES2Context *ctx, GLenum target, GLuint index, GLuint buffer, GLintptr offset,
                        GLsizeiptr size, BOOL ranged)
 {
     struct OGLES2BufState *bs;
-    struct OGLES2Buffer *b = 0;
+    struct OGLES2Buffer *b = 0, **general = 0;
     struct buf_range *r;
     struct OGLES2XfbBinding *x = 0;
-    BOOL uniform = target == GL_UNIFORM_BUFFER;
+    ULONG n = OGLES2_MAX_XFB_BUFFERS, align;
     if (!ogles2_es3_entry(ctx) || !(bs = bs_get(ctx)))
         return;
-    if (!uniform && target != GL_TRANSFORM_FEEDBACK_BUFFER) {
+    r = ranges(ctx, bs, target, &n, &general);
+    if (!r && target != GL_TRANSFORM_FEEDBACK_BUFFER) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
-    if (index >= (uniform ? MAX_UNIFORM_BINDINGS : OGLES2_MAX_XFB_BUFFERS)) {
+    if (index >= (r ? n : OGLES2_MAX_XFB_BUFFERS)) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
     /* transform feedback's are the bound transform feedback object's, and
      * stay while it is active (ES 3.0 2.15.2) */
-    if (!uniform && ogles2_xfb_active(ctx)) {
+    if (!r && ogles2_xfb_active(ctx)) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
-    if (!uniform && !(x = ogles2_xfb_bindings(ctx))) {
+    if (!r && !(x = ogles2_xfb_bindings(ctx))) {
         ogles2_error(ctx, GL_OUT_OF_MEMORY);
         return;
     }
     /* Mesa's checks (bufferobj.c): a range of a buffer is not empty, and
-     * starts at GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT; transform feedback's
-     * at a word, a whole number of words long. */
-    if (ranged && buffer && (size <= 0 || offset < 0 || (uniform ? (offset & 255) : ((offset | size) & 3)))) {
+     * starts at GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT (256), a storage
+     * buffer's at GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT (4), an atomic
+     * counter buffer's at a word; transform feedback's at a word, a whole
+     * number of words long. */
+    align = target == GL_UNIFORM_BUFFER ? 255 : 3;
+    if (ranged && buffer &&
+        (size <= 0 || offset < 0 || (offset & align) || (target == GL_TRANSFORM_FEEDBACK_BUFFER && (size & 3)))) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
@@ -997,12 +1056,12 @@ static void bind_range(struct OGLES2Context *ctx, GLenum target, GLuint index, G
         b->bound_once = TRUE;
     }
     /* the target's own binding too (ES 3.0 2.9.1) */
-    if (uniform) {
-        r = &bs->ubo[index];
+    if (r) {
+        r += index;
         r->b = b;
         r->offset = ranged && b ? (ULONG)offset : 0;
         r->size = ranged && b ? (ULONG)size : 0;
-        bs->uniform = b;
+        *general = b;
     } else {
         struct OGLES2Buffer *old = x[index].b;
         x[index].b = b;
@@ -1024,58 +1083,106 @@ void ogles2_glBindBufferBase(struct OGLES2Context *ctx, GLenum target, GLuint in
     bind_range(ctx, target, index, buffer, 0, 0, FALSE);
 }
 
-/* glGetIntegeri_v and glGetInteger64i_v: the indexed state ES 3.0 has, the
- * uniform and transform feedback buffer bindings. */
-static BOOL indexed(struct OGLES2Context *ctx, GLenum target, GLuint index, GLint64 *v)
+/* An indexed buffer binding's query: its target and which of the three
+ * values (0 the name, 1 the start, 2 the size); FALSE: none of them. */
+static BOOL indexed_pname(GLenum pname, GLenum *target, int *what)
+{
+    static const GLenum q[4][4] = {
+        {GL_UNIFORM_BUFFER, GL_UNIFORM_BUFFER_BINDING, GL_UNIFORM_BUFFER_START, GL_UNIFORM_BUFFER_SIZE},
+        {GL_TRANSFORM_FEEDBACK_BUFFER, GL_TRANSFORM_FEEDBACK_BUFFER_BINDING, GL_TRANSFORM_FEEDBACK_BUFFER_START,
+         GL_TRANSFORM_FEEDBACK_BUFFER_SIZE},
+        {GL_SHADER_STORAGE_BUFFER, GL_SHADER_STORAGE_BUFFER_BINDING, GL_SHADER_STORAGE_BUFFER_START,
+         GL_SHADER_STORAGE_BUFFER_SIZE},
+        {GL_ATOMIC_COUNTER_BUFFER, GL_ATOMIC_COUNTER_BUFFER_BINDING, GL_ATOMIC_COUNTER_BUFFER_START,
+         GL_ATOMIC_COUNTER_BUFFER_SIZE},
+    };
+    int t, k;
+    for (t = 0; t < 4; t++)
+        for (k = 1; k < 4; k++)
+            if (q[t][k] == pname) {
+                *target = q[t][0];
+                *what = k - 1;
+                return TRUE;
+            }
+    return FALSE;
+}
+
+/* glGetIntegeri_v and glGetInteger64i_v's buffer bindings: ES 3.0's uniform
+ * and transform feedback buffers, ES 3.1's storage and atomic counter ones.
+ * -1: not such a query (others answer it: ogles2_indexed_query); 0: an
+ * error set; 1: *v. */
+static int indexed(struct OGLES2Context *ctx, GLenum pname, GLuint index, GLint64 *v)
 {
     struct OGLES2BufState *bs;
+    struct OGLES2Buffer **general;
+    const struct buf_range *r = 0;
     const struct OGLES2Buffer *b;
-    ULONG offset, size;
-    BOOL uniform = target == GL_UNIFORM_BUFFER_BINDING || target == GL_UNIFORM_BUFFER_START ||
-                   target == GL_UNIFORM_BUFFER_SIZE;
-    if (!ogles2_es3_entry(ctx))
-        return FALSE;
-    if (!uniform && target != GL_TRANSFORM_FEEDBACK_BUFFER_BINDING && target != GL_TRANSFORM_FEEDBACK_BUFFER_START &&
-        target != GL_TRANSFORM_FEEDBACK_BUFFER_SIZE) {
-        ogles2_error(ctx, GL_INVALID_ENUM);
-        return FALSE;
+    ULONG offset, size, n = OGLES2_MAX_XFB_BUFFERS;
+    GLenum target;
+    int what;
+    if (!indexed_pname(pname, &target, &what))
+        return -1;
+    if (!(bs = bs_get(ctx))) {
+        ogles2_error(ctx, GL_OUT_OF_MEMORY);
+        return 0;
     }
-    if (index >= (uniform ? MAX_UNIFORM_BINDINGS : OGLES2_MAX_XFB_BUFFERS)) {
+    if (target != GL_TRANSFORM_FEEDBACK_BUFFER && !(r = ranges(ctx, bs, target, &n, &general))) {
+        ogles2_error(ctx, GL_INVALID_ENUM); /* ES 3.1's in an ES 3.0 context */
+        return 0;
+    }
+    if (index >= n) {
         ogles2_error(ctx, GL_INVALID_VALUE);
-        return FALSE;
+        return 0;
     }
-    if (uniform) {
-        if (!(bs = bs_get(ctx))) {
-            *v = 0;
-            return TRUE;
-        }
-        b = bs->ubo[index].b;
-        offset = bs->ubo[index].offset;
-        size = bs->ubo[index].size;
+    if (r) {
+        b = r[index].b;
+        offset = r[index].offset;
+        size = r[index].size;
     } else {
         const struct OGLES2XfbBinding *x = ogles2_xfb_bindings(ctx); /* the bound object's */
         b = x ? x[index].b : 0;
         offset = x ? x[index].offset : 0;
         size = x ? x[index].size : 0;
     }
-    *v = target == GL_UNIFORM_BUFFER_BINDING || target == GL_TRANSFORM_FEEDBACK_BUFFER_BINDING
-             ? (b ? (GLint64)b->name : 0)
-         : target == GL_UNIFORM_BUFFER_START || target == GL_TRANSFORM_FEEDBACK_BUFFER_START ? (GLint64)offset
-                                                                                           : (GLint64)size;
-    return TRUE;
+    *v = what == 0 ? (b ? (GLint64)b->name : 0) : what == 1 ? (GLint64)offset : (GLint64)size;
+    return 1;
 }
 
 void ogles2_glGetIntegeri_v(struct OGLES2Context *ctx, GLenum target, GLuint index, GLint *data)
 {
     GLint64 v;
-    if (data && indexed(ctx, target, index, &v))
+    int r;
+    if (!ogles2_es3_entry(ctx) || !data)
+        return;
+    if ((r = indexed(ctx, target, index, &v)) < 0)
+        r = ogles2_indexed_query(ctx, target, index, &v);
+    if (r > 0)
         *data = (GLint)v;
+}
+
+/* ES 3.1's: the same indexed state as booleans (GL_IMAGE_BINDING_LAYERED's
+ * kind; the rest converted as glGetBooleanv converts). */
+void ogles2_glGetBooleani_v(struct OGLES2Context *ctx, GLenum target, GLuint index, GLboolean *data)
+{
+    GLint64 v;
+    int r;
+    if (!ogles2_es31_entry(ctx) || !data)
+        return;
+    if ((r = indexed(ctx, target, index, &v)) < 0)
+        r = ogles2_indexed_query(ctx, target, index, &v);
+    if (r > 0)
+        *data = v ? GL_TRUE : GL_FALSE;
 }
 
 void ogles2_glGetInteger64i_v(struct OGLES2Context *ctx, GLenum target, GLuint index, GLint64 *data)
 {
     GLint64 v;
-    if (data && indexed(ctx, target, index, &v))
+    int r;
+    if (!ogles2_es3_entry(ctx) || !data)
+        return;
+    if ((r = indexed(ctx, target, index, &v)) < 0)
+        r = ogles2_indexed_query(ctx, target, index, &v);
+    if (r > 0)
         *data = v;
 }
 
