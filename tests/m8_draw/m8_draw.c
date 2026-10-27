@@ -2204,20 +2204,16 @@ static int storage_is(GLuint buf, const GLuint *src, GLuint scale, int n, int to
     return ok;
 }
 
-/* ES 3.1's compute shaders and storage buffers (GLES3 plan stage D items 1
- * and 2): es31cs (16 invocations a work group) writes dst[i] = src[i] *
- * scale + i, src at storage binding 0, dst at 3; read back through a
- * mapping. The errors: a draw with a compute program, a dispatch without
- * one or past the work group limit; glDispatchComputeIndirect. */
-static void test_compute(void)
+/* shaders/<name>.comp, linked alone; 0 if not (the log printed). */
+static GLuint compute_program(const char *name)
 {
-    static const GLuint ind[3] = { 2, 1, 1 };
-    GLuint src[64], zero[64], b[3], p, s, vao;
-    char *text = read_text("es31cs.comp"), log[256];
-    GLint ok = 0, i;
-    if (!text) {
-        check(0, "compute: shaders/es31cs.comp");
-        return;
+    char fn[32], log[256], *text;
+    GLuint p, s;
+    GLint ok = 0;
+    snprintf(fn, sizeof(fn), "%s.comp", name);
+    if (!(text = read_text(fn))) {
+        printf("     no shaders/%s\n", fn);
+        return 0;
     }
     p = glCreateProgram();
     s = glCreateShader(GL_COMPUTE_SHADER);
@@ -2231,9 +2227,290 @@ static void test_compute(void)
     if (!ok) {
         log[0] = 0;
         glGetProgramInfoLog(p, sizeof(log), 0, log);
-        printf("     es31cs: link failed: %s\n", log);
-        check(0, "compute: es31cs links");
+        printf("     %s: link failed: %s\n", name, log);
         glDeleteProgram(p);
+        return 0;
+    }
+    return p;
+}
+
+/* ES 3.1's bounds checks (Mesa patch 0017; the V3D's MMU is unused, so a
+ * store outside its buffer would land in the Amiga's memory): es31oob
+ * writes dst[i] = i + tmp[l] (tmp[l] = 1) for 64 invocations, and also
+ * dst[i + 64] and tmp[l + 16], past their ends. dst is a 256-byte range of
+ * a 512-byte buffer: a storage store out of range is dropped, so the second
+ * half keeps its 0x55 bytes. A shared one goes to offset 0 instead (Mesa's
+ * nir_lower_robust_access: inside the array), so tmp[0] may read 7; were
+ * it unchecked, it would land in the next work group's array (its other
+ * elements 7) or past the block. Either way only the test's memory is
+ * hit. */
+static void test_compute_bounds(void)
+{
+    GLuint p = compute_program("es31oob"), b;
+    GLubyte fill[512];
+    const GLuint *d;
+    int i, ok;
+    if (!p) {
+        check(0, "compute bounds: es31oob links");
+        return;
+    }
+    memset(fill, 0x55, sizeof(fill));
+    glGenBuffers(1, &b);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, b);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(fill), fill, GL_DYNAMIC_READ);
+    glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 1, b, 0, 256);
+    glUseProgram(p);
+    glUniform1ui(glGetUniformLocation(p, "past"), 16);
+    glDispatchCompute(4, 1, 1);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, b);
+    d = (const GLuint *)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, sizeof(fill), GL_MAP_READ_BIT);
+    ok = d != 0;
+    for (i = 0; ok && i < 128; i++)
+        if (d[i] != (i < 64 ? (GLuint)i + 1 : 0x55555555UL) && !(i < 64 && i % 16 == 0 && d[i] == (GLuint)i + 7)) {
+            printf("     word %d is 0x%08lx\n", i, (unsigned long)d[i]);
+            ok = 0;
+        }
+    if (d)
+        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+    check(ok && glGetError() == GL_NO_ERROR,
+          "compute bounds: a storage store out of range dropped, a shared one kept in its array");
+    glUseProgram(0);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    glDeleteBuffers(1, &b);
+    glDeleteProgram(p);
+}
+
+/* ES 3.1's atomic counters (GLES3 plan stage D item 2): es31ac's 64
+ * invocations each store what atomicCounterIncrement gave them (binding 2,
+ * offset 4: the counter is the buffer's word 1, starting at 100). The
+ * counter ends at 164, the stored values are 100 to 163 once each, the
+ * words beside it keep theirs; the queries see the buffer and the counter. */
+static void test_atomic_counters(void)
+{
+    static const GLuint init[3] = { 0x77, 100, 0x77 };
+    static const GLenum props[2] = { GL_BUFFER_BINDING, GL_NUM_ACTIVE_VARIABLES };
+    static const GLenum uprops[2] = { GL_ATOMIC_COUNTER_BUFFER_INDEX, GL_OFFSET };
+    GLuint p = compute_program("es31ac"), b[2], seen[2] = { 0, 0 }, cu;
+    GLint bv[2] = { -1, -1 }, uv[2] = { -1, -1 }, n = -1, na = -1;
+    const GLuint *d;
+    int i, ok;
+    if (!p) {
+        check(0, "atomic counters: es31ac links");
+        return;
+    }
+    glGetProgramiv(p, GL_ACTIVE_ATOMIC_COUNTER_BUFFERS, &na);
+    glGetProgramInterfaceiv(p, GL_ATOMIC_COUNTER_BUFFER, GL_ACTIVE_RESOURCES, &n);
+    if (n == 1)
+        glGetProgramResourceiv(p, GL_ATOMIC_COUNTER_BUFFER, 0, 2, props, 2, 0, bv);
+    cu = glGetProgramResourceIndex(p, GL_UNIFORM, "count");
+    if (cu != GL_INVALID_INDEX)
+        glGetProgramResourceiv(p, GL_UNIFORM, cu, 2, uprops, 2, 0, uv);
+    check(glGetError() == GL_NO_ERROR && na == 1 && n == 1 && bv[0] == 2 && bv[1] == 1 && uv[0] == 0 &&
+              uv[1] == 4 && glGetUniformLocation(p, "count") == -1,
+          "atomic counters: the queries (buffer binding 2, one counter at offset 4, no location)");
+    glGenBuffers(2, b);
+    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, b[0]);
+    glBufferData(GL_ATOMIC_COUNTER_BUFFER, sizeof(init), init, GL_DYNAMIC_READ);
+    glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 2, b[0]);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, b[1]);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, 64 * 4, 0, GL_DYNAMIC_READ);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, b[1]);
+    glUseProgram(p);
+    glDispatchCompute(4, 1, 1);
+    glMemoryBarrier(GL_ATOMIC_COUNTER_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT);
+    d = (const GLuint *)glMapBufferRange(GL_ATOMIC_COUNTER_BUFFER, 0, sizeof(init), GL_MAP_READ_BIT);
+    ok = d && d[0] == 0x77 && d[1] == 164 && d[2] == 0x77;
+    if (d && !ok)
+        printf("     counter buffer 0x%lx %lu 0x%lx\n", (unsigned long)d[0], (unsigned long)d[1], (unsigned long)d[2]);
+    if (d)
+        glUnmapBuffer(GL_ATOMIC_COUNTER_BUFFER);
+    d = (const GLuint *)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, 64 * 4, GL_MAP_READ_BIT);
+    for (i = 0; ok && d && i < 64; i++) {
+        GLuint v = d[i] - 100;
+        if (v >= 64 || (seen[v / 32] & (1UL << (v % 32)))) {
+            printf("     dst[%d] is %lu\n", i, (unsigned long)d[i]);
+            ok = 0;
+        } else {
+            seen[v / 32] |= 1UL << (v % 32);
+        }
+    }
+    if (d)
+        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+    check(ok && d && glGetError() == GL_NO_ERROR,
+          "atomic counters: 64 increments, each value given once, the counter at 164");
+    glUseProgram(0);
+    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    glDeleteBuffers(2, b);
+    glDeleteProgram(p);
+}
+
+/* ES 3.1's explicit uniform locations (GLES3 plan stage D item 6): es31loc
+ * has tint at 7 and scale at 2 (the colour is tint * scale), an unused
+ * uniform at 20 (not active: glUniform* there is ignored), nothing at 3
+ * (GL_INVALID_OPERATION); tint and scale set with glProgramUniform* first. */
+static void test_uniform_locations(void)
+{
+    GLuint p = program("es31loc");
+    if (!p) {
+        check(0, "uniform locations: es31loc links");
+        return;
+    }
+    check(glGetUniformLocation(p, "tint") == 7 && glGetUniformLocation(p, "scale") == 2 &&
+              glGetUniformLocation(p, "unused") == -1 &&
+              glGetProgramResourceLocation(p, GL_UNIFORM, "tint") == 7 && glGetError() == GL_NO_ERROR,
+          "uniform locations: layout(location) 7 and 2 as given, an inactive one -1");
+    /* ES 3.1's glProgramUniform*: set while another program (none) is in use */
+    glUseProgram(0);
+    glProgramUniform4f(p, 7, 0.0f, 1.0f, 0.5f, 1.0f);
+    glProgramUniform1f(p, 2, 1.0f);
+    check(glGetError() == GL_NO_ERROR, "uniform locations: glProgramUniform* on a program not in use");
+    glUseProgram(p);
+    glUniform4f(20, 1.0f, 1.0f, 1.0f, 1.0f);
+    check(glGetError() == GL_NO_ERROR, "uniform locations: glUniform* at an inactive explicit location is ignored");
+    glUniform1f(3, 1.0f);
+    check(glGetError() == GL_INVALID_OPERATION, "uniform locations: a location of no uniform is GL_INVALID_OPERATION");
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    check(pixel_is(32, 32, 0, 255, 128, 255, 2) && glGetError() == GL_NO_ERROR,
+          "uniform locations: a draw with tint and scale set at 7 and 2");
+    glUseProgram(0);
+    glDeleteProgram(p);
+}
+
+/* ES 3.1's indirect draws (GLES3 plan stage D item 3) with es3inst (the
+ * triangle on the lower left of x + y < 0, instance i moved right by 32
+ * pixels): glDrawArraysIndirect of 2 instances (green), then
+ * glDrawElementsIndirect with a base vertex of 3 (vertices 0 to 2 lie off
+ * the screen) and its command at offset 16 (blue); then ES 3.1's errors:
+ * an offset not a word's, a command past the buffer's end, vertex array
+ * object 0, no indirect buffer. */
+static void test_indirect(void)
+{
+    static const GLfloat pos[12] = { 5, 5, 6, 5, 5, 6,   -1, -1, 0, -1, -1, 0 };
+    static const GLubyte idx[3] = { 0, 1, 2 };
+    static const GLuint cmds[9] = { 3, 2, 3, 0,   3, 1, 0, 3, 0 }; /* arrays: first 3; elements at 16 */
+    GLuint p = program("es3inst"), b[3], vao;
+    GLint lp, lc;
+    if (!p) {
+        check(0, "indirect draws: es3inst links");
+        return;
+    }
+    lp = glGetAttribLocation(p, "pos");
+    lc = glGetAttribLocation(p, "col");
+    glUseProgram(p);
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    glGenBuffers(3, b);
+    glBindBuffer(GL_ARRAY_BUFFER, b[0]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(pos), pos, GL_STATIC_DRAW);
+    glVertexAttribPointer((GLuint)lp, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray((GLuint)lp);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, b[1]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(idx), idx, GL_STATIC_DRAW);
+    glBindBuffer(GL_DRAW_INDIRECT_BUFFER, b[2]);
+    glBufferData(GL_DRAW_INDIRECT_BUFFER, sizeof(cmds), cmds, GL_STATIC_DRAW);
+
+    glVertexAttrib4f((GLuint)lc, 0, 1, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawArraysIndirect(GL_TRIANGLES, (const void *)0);
+    check(pixel_is(4, 4, 0, 255, 0, 255, 0) && pixel_is(36, 4, 0, 255, 0, 255, 0) &&
+              pixel_is(40, 40, 0, 0, 0, 0, 0) && glGetError() == GL_NO_ERROR,
+          "indirect draws: glDrawArraysIndirect, 2 instances from first 3");
+    glVertexAttrib4f((GLuint)lc, 0, 0, 1, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_BYTE, (const void *)16);
+    check(pixel_is(4, 4, 0, 0, 255, 255, 0) && pixel_is(36, 4, 0, 0, 0, 0, 0) && glGetError() == GL_NO_ERROR,
+          "indirect draws: glDrawElementsIndirect at offset 16, base vertex 3");
+
+    glDrawArraysIndirect(GL_TRIANGLES, (const void *)2);
+    check(glGetError() == GL_INVALID_VALUE, "indirect draws: an offset not a word's is GL_INVALID_VALUE");
+    glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_BYTE, (const void *)20);
+    check(glGetError() == GL_INVALID_OPERATION, "indirect draws: a command past the buffer's end is refused");
+    glBindVertexArray(0);
+    glDrawArraysIndirect(GL_TRIANGLES, (const void *)0);
+    check(glGetError() == GL_INVALID_OPERATION, "indirect draws: vertex array object 0 is refused");
+    glBindVertexArray(vao);
+    glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+    glDrawArraysIndirect(GL_TRIANGLES, (const void *)0);
+    check(glGetError() == GL_INVALID_OPERATION, "indirect draws: no indirect buffer is refused");
+
+    glBindVertexArray(0);
+    glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(3, b);
+    glUseProgram(0);
+    glDeleteProgram(p);
+}
+
+/* ES 3.1's storage buffers and atomic counters in a fragment shader (GLES3
+ * plan stage D item 2): es31frag over the whole 64x64 framebuffer counts
+ * its fragments (binding 1) and stores each one's count in its pixel's
+ * word (binding 2). The counter ends at 4096, every word holds one of 1 to
+ * 4096 and no two the same; the pixels are green. Read back through
+ * mappings: the job is waited for and its writes cleaned to memory. */
+static void test_fragment_storage(void)
+{
+    GLuint p = program("es31frag"), b[2], seen[128];
+    GLuint zero = 0;
+    const GLuint *d;
+    int i, ok;
+    if (!p) {
+        check(0, "fragment storage: es31frag links");
+        return;
+    }
+    memset(seen, 0, sizeof(seen));
+    glGenBuffers(2, b);
+    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, b[0]);
+    glBufferData(GL_ATOMIC_COUNTER_BUFFER, 4, &zero, GL_DYNAMIC_READ);
+    glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 1, b[0]);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, b[1]);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, 4096 * 4, 0, GL_DYNAMIC_READ);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, b[1]);
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    ok = pixel_is(4, 4, 0, 255, 0, 255, 0) && pixel_is(60, 60, 0, 255, 0, 255, 0);
+    glMemoryBarrier(GL_ATOMIC_COUNTER_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT);
+    d = (const GLuint *)glMapBufferRange(GL_ATOMIC_COUNTER_BUFFER, 0, 4, GL_MAP_READ_BIT);
+    if (!d || d[0] != 4096) {
+        printf("     the counter is %lu\n", d ? (unsigned long)d[0] : 0UL);
+        ok = 0;
+    }
+    if (d)
+        glUnmapBuffer(GL_ATOMIC_COUNTER_BUFFER);
+    d = (const GLuint *)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, 4096 * 4, GL_MAP_READ_BIT);
+    for (i = 0; ok && d && i < 4096; i++) {
+        GLuint v = d[i] - 1;
+        if (v >= 4096 || (seen[v / 32] & (1UL << (v % 32)))) {
+            printf("     pixel %d, %d holds %lu\n", i % 64, i / 64, (unsigned long)d[i]);
+            ok = 0;
+        } else {
+            seen[v / 32] |= 1UL << (v % 32);
+        }
+    }
+    if (d)
+        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+    check(ok && d && glGetError() == GL_NO_ERROR,
+          "fragment storage: 4096 fragments counted, each storing its count in its pixel's word");
+    glUseProgram(0);
+    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    glDeleteBuffers(2, b);
+    glDeleteProgram(p);
+}
+
+/* ES 3.1's compute shaders and storage buffers (GLES3 plan stage D items 1
+ * and 2): es31cs (16 invocations a work group) writes dst[i] = src[i] *
+ * scale + i, src at storage binding 0, dst at 3; read back through a
+ * mapping. The errors: a draw with a compute program, a dispatch without
+ * one or past the work group limit; glDispatchComputeIndirect. */
+static void test_compute(void)
+{
+    static const GLuint ind[3] = { 2, 1, 1 };
+    GLuint src[64], zero[64], b[3], p = compute_program("es31cs"), vao;
+    GLint i;
+    if (!p) {
+        check(0, "compute: es31cs links");
         return;
     }
     {
@@ -2485,6 +2762,21 @@ static void test_wide_a2c(void)
     glDeleteProgram(p);
 }
 
+/* ENV:M8_SKIP names tests to leave out (words of their names after
+ * "test_", e.g. "indirect fragment_storage"): bisecting a fault on the A1200. */
+static int skipped(const char *name)
+{
+    const char *list = getenv("M8_SKIP");
+    size_t n = strlen(name);
+    const char *at;
+    for (at = list; at && (at = strstr(at, name)) != 0; at += n)
+        if ((at == list || at[-1] == ' ') && (at[n] == 0 || at[n] == ' ')) {
+            printf("SKIP: test_%s (ENV:M8_SKIP)\n", name);
+            return 1;
+        }
+    return 0;
+}
+
 int main(void)
 {
     struct BitMap *bm;
@@ -2550,8 +2842,20 @@ int main(void)
         GLint minor = 0;
         glGetIntegerv(GL_MINOR_VERSION, &minor);
         if (minor >= 1) { /* an ES 3.1 context (an ES31=1 library) */
-            test_vab();
-            test_compute();
+            if (!skipped("vab"))
+                test_vab();
+            if (!skipped("compute"))
+                test_compute();
+            if (!skipped("compute_bounds"))
+                test_compute_bounds();
+            if (!skipped("atomic_counters"))
+                test_atomic_counters();
+            if (!skipped("fragment_storage"))
+                test_fragment_storage();
+            if (!skipped("indirect"))
+                test_indirect();
+            if (!skipped("uniform_locations"))
+                test_uniform_locations();
         }
     }
     check(glGetError() == GL_NO_ERROR, "no GL error left over");

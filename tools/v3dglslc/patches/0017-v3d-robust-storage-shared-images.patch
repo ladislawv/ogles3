@@ -1,0 +1,75 @@
+--- a/src/broadcom/compiler/vir.c
++++ b/src/broadcom/compiler/vir.c
+@@ -1881,6 +1881,12 @@
+         case nir_intrinsic_store_ssbo:
+         case nir_intrinsic_ssbo_atomic:
+         case nir_intrinsic_ssbo_atomic_swap:
++        /* ogles2 (PiStorm, no MMU): shared variables too, with the storage
++         * buffers (v3d_program.c's v3d_setup_robust_key) */
++        case nir_intrinsic_load_shared:
++        case nir_intrinsic_store_shared:
++        case nir_intrinsic_shared_atomic:
++        case nir_intrinsic_shared_atomic_swap:
+                 return key->robust_storage_access;
+ 
+         case nir_intrinsic_image_load:
+--- a/src/gallium/drivers/v3d/v3d_program.c
++++ b/src/gallium/drivers/v3d/v3d_program.c
+@@ -571,6 +571,25 @@
+         ralloc_free(shader);
+ }
+ 
++/* ogles2 (PiStorm): the V3D's MMU is unused, so a store outside its buffer
++ * would land in the Amiga's memory. A stage with storage buffers or shared
++ * variables keeps its accesses inside them (robust_storage_access, shared
++ * memory included: vir.c's should_lower_robustness), one with images
++ * inside its images; other keys stay as they were. docs/GLES3_PLAN.md
++ * stage D item 2. */
++static void
++v3d_setup_robust_key(struct v3d_key *key, const struct v3d_uncompiled_shader *so)
++{
++        const nir_shader *s = so ? so->base.ir.nir : NULL;
++
++        if (!s)
++                return;
++        if (s->info.num_ssbos || s->info.shared_size)
++                key->robust_storage_access = true;
++        if (s->info.num_images)
++                key->robust_image_access = true;
++}
++
+ static void
+ v3d_setup_shared_key(struct v3d_context *v3d, struct v3d_key *key,
+                      struct v3d_texture_stateobj *texstate)
+@@ -654,6 +673,7 @@
+ 
+         memset(key, 0, sizeof(*key));
+         v3d_setup_shared_key(v3d, &key->base, &v3d->tex[MESA_SHADER_FRAGMENT]);
++        v3d_setup_robust_key(&key->base, v3d->prog.bind_fs);
+         key->ucp_enables = v3d->rasterizer->base.clip_plane_enable;
+         key->is_points = v3d_rasterizes_points(v3d, prim_mode);
+         key->is_lines = v3d_rasterizes_lines(v3d, prim_mode);
+@@ -833,6 +853,7 @@
+ 
+         memset(key, 0, sizeof(*key));
+         v3d_setup_shared_key(v3d, &key->base, &v3d->tex[MESA_SHADER_GEOMETRY]);
++        v3d_setup_robust_key(&key->base, v3d->prog.bind_gs);
+         key->base.is_last_geometry_stage = true;
+         key->num_used_outputs = v3d->prog.fs->prog_data.fs->num_inputs;
+         STATIC_ASSERT(sizeof(key->used_outputs) ==
+@@ -905,6 +926,7 @@
+ 
+         memset(key, 0, sizeof(*key));
+         v3d_setup_shared_key(v3d, &key->base, &v3d->tex[MESA_SHADER_VERTEX]);
++        v3d_setup_robust_key(&key->base, v3d->prog.bind_vs);
+         key->base.is_last_geometry_stage = !v3d->prog.bind_gs;
+ 
+         if (!v3d->prog.bind_gs) {
+@@ -1018,6 +1040,7 @@
+ 
+         memset(key, 0, sizeof(*key));
+         v3d_setup_shared_key(v3d, key, &v3d->tex[MESA_SHADER_COMPUTE]);
++        v3d_setup_robust_key(key, v3d->prog.bind_compute);
+ 
+         struct v3d_compiled_shader *cs =
+                 v3d_get_compiled_shader(v3d, key, sizeof(*key),

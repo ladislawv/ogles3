@@ -690,7 +690,7 @@ static BOOL ubo_copies(struct OGLES2Context *ctx, const struct OGLES2Program *p,
          * one block of the context's, made once. Only the GPU reads it; the
          * cache clean before every submission covers the zeros written
          * here. */
-        if (v[k]->uses_blocks && !ts->zero_ubo) {
+        if ((v[k]->uses_blocks || v[k]->uses_storage) && !ts->zero_ubo) {
             struct OGLES2Draw *d = ctx->draw;
             if (!d->zero_ubo.hostptr) {
                 if (v3d_mem_alloc(ogles2_device(), &d->zero_ubo, ZERO_UBO_BYTES + 256) < 0) {
@@ -704,6 +704,32 @@ static BOOL ubo_copies(struct OGLES2Context *ctx, const struct OGLES2Program *p,
         }
     }
     return TRUE;
+}
+
+/* A fragment shader's storage buffer k (ES 3.1; Mesa's SSBO k of the
+ * stage, FORMAT.md's map: a storage block, or 0x8000 | an atomic counter
+ * buffer binding): the range bound there, which the job then writes
+ * (job_storage: its caches cleaned after the render). Without one, size 0
+ * at the zeroed block: the bounds checks every such program has (Mesa
+ * patch 0017) drop its accesses there. *size: the range's bytes. */
+static ULONG draw_storage(struct OGLES2Context *ctx, const struct OGLES2Program *p, int si, ULONG k,
+                          const struct tex_states *tst, ULONG *size)
+{
+    const struct OGLES2Image *im = p->image;
+    ULONG a = 0;
+    UWORD e;
+    *size = 0;
+    if (k < im->stage_nsblocks[si]) {
+        e = im->stage_sblock[si][k];
+        a = ogles2_buffer_storage_draw(ctx, (e & 0x8000) != 0, (e & 0x8000) ? e & 0x7fff : im->sblocks[e].binding,
+                                       size);
+    }
+    if (a) {
+        ctx->job_storage = TRUE;
+        return a;
+    }
+    *size = 0;
+    return tst->zero_ubo;
 }
 
 /* The buffer a stage's uniform block k (its block map's: Mesa's UBO k + 1)
@@ -926,6 +952,14 @@ static ULONG write_uniforms(struct OGLES2Context *ctx, const struct OGLES2Progra
         case OGLES2_U_SPILL_SIZE_PER_THREAD: w = ctx->draw->spill_size; break;
         case OGLES2_U_PISTORM_VP_WIDTH:  w = float_bits((GLfloat)ctx->viewport[2]); break;
         case OGLES2_U_PISTORM_VP_HEIGHT: w = float_bits((GLfloat)ctx->viewport[3]); break;
+        case OGLES2_U_SSBO_OFFSET: { /* a fragment shader's storage buffer (ES 3.1) */
+            ULONG bytes;
+            w = draw_storage(ctx, p, si, d, tst, &bytes);
+            break;
+        }
+        case OGLES2_U_GET_SSBO_SIZE:
+            draw_storage(ctx, p, si, d, tst, &w);
+            break;
         default:                         w = 0; break; /* the loader refuses the rest */
         }
         u[i] = le32(w);
@@ -2907,6 +2941,87 @@ void ogles2_glDrawRangeElements(struct OGLES2Context *ctx, GLenum mode, GLuint s
     range[0] = start;
     range[1] = end;
     draw_elements(ctx, mode, count, type, indices, 0, range, 1, "glDrawRangeElements");
+}
+
+/* ---- ES 3.1's indirect draws (docs/GLES3_PLAN.md stage D item 3): the
+ * command read on the CPU, as glDispatchComputeIndirect's (the draws copy
+ * and convert their attributes and indices: the counts are needed here),
+ * then the direct draw it describes. ---- */
+
+/* ES 3.1 10.5's checks after the mode's, in Mesa's order: a vertex array
+ * object other than 0, no enabled array in client memory, no transform
+ * feedback drawing; then the command (buffer.c). FALSE: the error set. */
+static BOOL indirect_command(struct OGLES2Context *ctx, const void *indirect, ULONG bytes, ULONG *cmd)
+{
+    GLenum e;
+    int k;
+    if (!ogles2_vao_bound(ctx) || ogles2_xfb_drawing(ctx)) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return FALSE;
+    }
+    for (k = 0; k < OGLES2_MAX_VERTEX_ATTRIBS; k++)
+        if (ctx->array[k].enabled && !ctx->array[k].buffer) {
+            ogles2_error(ctx, GL_INVALID_OPERATION);
+            return FALSE;
+        }
+    if ((e = ogles2_buffer_draw_indirect(ctx, (GLintptr)indirect, bytes, cmd)) != 0) {
+        ogles2_error(ctx, e);
+        return FALSE;
+    }
+    return TRUE;
+}
+
+/* DrawArraysIndirectCommand: count, instance count, first, a reserved word
+ * (base instance, 0 in ES). Counts past GLsizei's range or a reserved word
+ * not 0: undefined, nothing drawn (logged). */
+void ogles2_glDrawArraysIndirect(struct OGLES2Context *ctx, GLenum mode, const void *indirect)
+{
+    ULONG cmd[4];
+    if (!ogles2_es31_entry(ctx))
+        return;
+    if (mode > GL_TRIANGLE_FAN) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    if (!indirect_command(ctx, indirect, sizeof(cmd), cmd))
+        return;
+    if ((cmd[0] | cmd[1] | cmd[2]) > 0x7fffffffUL || cmd[3]) {
+        ogles2_log("glDrawArraysIndirect: a command with count %lu, %lu instances, first %lu, reserved %lu: "
+                   "nothing drawn", cmd[0], cmd[1], cmd[2], cmd[3]);
+        return;
+    }
+    if (cmd[0] && cmd[1])
+        draw_instances(ctx, mode, (GLint)cmd[2], (GLsizei)cmd[0], (GLsizei)cmd[1]);
+}
+
+/* DrawElementsIndirectCommand: count, instance count, first index, base
+ * vertex, a reserved word; the indices from the element array buffer,
+ * which must be bound. */
+void ogles2_glDrawElementsIndirect(struct OGLES2Context *ctx, GLenum mode, GLenum type, const void *indirect)
+{
+    ULONG cmd[5], size;
+    if (!ogles2_es31_entry(ctx))
+        return;
+    if (mode > GL_TRIANGLE_FAN ||
+        (type != GL_UNSIGNED_BYTE && type != GL_UNSIGNED_SHORT && type != GL_UNSIGNED_INT)) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    if (!ogles2_buffer_element(ctx)) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
+    if (!indirect_command(ctx, indirect, sizeof(cmd), cmd))
+        return;
+    size = index_size(type);
+    if ((cmd[0] | cmd[1]) > 0x7fffffffUL || cmd[2] > 0xffffffffUL / size || cmd[4]) {
+        ogles2_log("glDrawElementsIndirect: a command with count %lu, %lu instances, first index %lu, "
+                   "reserved %lu: nothing drawn", cmd[0], cmd[1], cmd[2], cmd[4]);
+        return;
+    }
+    if (cmd[0] && cmd[1])
+        draw_elements(ctx, mode, (GLsizei)cmd[0], type, (const void *)(cmd[2] * size), (GLint)cmd[3], 0,
+                      (GLsizei)cmd[1], "glDrawElementsIndirect");
 }
 
 #include "clear_mrt_v3dp.h"

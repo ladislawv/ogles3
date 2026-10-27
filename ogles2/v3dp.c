@@ -173,8 +173,10 @@ static UBYTE matrix_columns(GLenum t)
 #define MAX_SECTIONS 256
 #define V3DP_FEATURE_TF 0x1 /* format 2's feature bits (v3dp_writer.h): transform feedback, */
 #define V3DP_FEATURE_STORAGE 0x2 /* shader storage blocks (ES 3.1), */
-#define V3DP_FEATURE_COMPUTE 0x4 /* a compute program (ES 3.1) */
-#define V3DP_FEATURES (V3DP_FEATURE_TF | V3DP_FEATURE_STORAGE | V3DP_FEATURE_COMPUTE)
+#define V3DP_FEATURE_COMPUTE 0x4 /* a compute program (ES 3.1), */
+#define V3DP_FEATURE_ATOMIC 0x8 /* atomic counter buffers (ES 3.1) */
+#define V3DP_FEATURES (V3DP_FEATURE_TF | V3DP_FEATURE_STORAGE | V3DP_FEATURE_COMPUTE | V3DP_FEATURE_ATOMIC)
+#define MAX_ATOMIC_BINDINGS 16 /* GL_MAX_ATOMIC_COUNTER_BUFFER_BINDINGS (state.c) */
 #define COMPUTE_STAGES 0x20 /* PROGRAM's stages: bit 5 */
 
 /* The common prog data (FORMAT.md "Common key and prog data"), 28 bytes. */
@@ -383,6 +385,8 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                         u[k].block = (WORD)b;
                         if (flags2 & 2) /* a storage block's: a buffer variable (ES 3.1) */
                             u[k].flags |= OGLES2_UNIFORM_BUFFER;
+                        else if (flags2 & 4) /* an atomic counter: its ATOMIC_BUFFERS entry (ES 3.1) */
+                            u[k].flags |= OGLES2_UNIFORM_ATOMIC;
                     }
                 }
             }
@@ -511,7 +515,11 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             rd2 = rt + n;
             for (j = 0; j < n; j++) {
                 rt[j] = u32(&s);
-                if (!recipe_ok(rt[j]) && !(v->stage == OGLES2_VARIANT_COMPUTE && compute_recipe_ok(rt[j])))
+                /* storage buffers (atomic counters too) also in a fragment
+                 * shader (ES 3.1; GL_MAX_VERTEX_SHADER_STORAGE_BLOCKS 0) */
+                if (!recipe_ok(rt[j]) && !(v->stage == OGLES2_VARIANT_COMPUTE && compute_recipe_ok(rt[j])) &&
+                    !(v->stage == OGLES2_VARIANT_FS &&
+                      (rt[j] == OGLES2_U_SSBO_OFFSET || rt[j] == OGLES2_U_GET_SSBO_SIZE)))
                     FAIL("uniform recipe type not implemented yet:", 0, rt[j]);
             }
             for (j = 0; j < n; j++) {
@@ -524,6 +532,8 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                     FAIL("a uniform block other than the default one", 0, rd2[j] >> 24);
                 if (rt[j] == OGLES2_U_UBO_ADDR)
                     v->uses_ubo = 1;
+                if (rt[j] == OGLES2_U_SSBO_OFFSET)
+                    v->uses_storage = 1;
                 if (rt[j] == OGLES2_U_UBO_ADDR && (rd2[j] >> 24) != 0)
                     v->uses_blocks = 1;
                 if (rt[j] == OGLES2_U_CLIP_Z_COEFF)
@@ -658,6 +668,11 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                     FAIL("a stage's storage blocks:", 0, nb);
                 for (j = 0; j < nb; j++) {
                     map[j] = (UWORD)u32(&s);
+                    if (map[j] & 0x8000) { /* atomic counter buffer binding map[j] & 0x7fff */
+                        if (!(features & V3DP_FEATURE_ATOMIC) || (map[j] & 0x7fff) >= MAX_ATOMIC_BINDINGS)
+                            FAIL("a stage's atomic counter buffer slot that cannot be", 0, map[j]);
+                        continue;
+                    }
                     if (map[j] >= n)
                         FAIL("a stage's storage block past the program's last", 0, map[j]);
                     b[map[j]].stages |= (UBYTE)(1 << stage); /* Mesa leaves a storage block's stageref 0 */
@@ -665,6 +680,46 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                 im->stage_nsblocks[si] = (UBYTE)nb;
                 im->stage_sblock[si] = map;
             }
+            break;
+        }
+        case 12: { /* ATOMIC_BUFFERS (format 2, feature bit 3; ES 3.1) */
+            ULONG n, j;
+            struct OGLES2ImageAtomic *a;
+            if (!format2 || !(features & V3DP_FEATURE_ATOMIC))
+                FAIL("an ATOMIC_BUFFERS section without its feature bit", 0, ~0UL);
+            n = u32(&s);
+            if (n > MAX_ATOMIC_BINDINGS || !(a = alloc(im, (n + 1) * sizeof(*a))))
+                FAIL("atomic counter buffers:", 0, n);
+            for (k = 0; k < n; k++) {
+                UWORD *c;
+                ULONG nc;
+                a[k].binding = u32(&s);
+                a[k].size = u32(&s);
+                a[k].stages = (UBYTE)u32(&s);
+                nc = u32(&s);
+                if (a[k].binding >= MAX_ATOMIC_BINDINGS || nc > 4096 || !(c = alloc(im, nc * 2 + 2)))
+                    FAIL("an atomic counter buffer:", 0, a[k].binding);
+                for (j = 0; j < nc; j++)
+                    c[j] = (UWORD)u32(&s);
+                a[k].ncounters = (UWORD)nc;
+                a[k].counters = c;
+            }
+            im->nabuffers = (UWORD)n;
+            im->abuffers = a;
+            break;
+        }
+        case 13: { /* UNIFORM_LOCATIONS (format 2): Mesa's locations */
+            ULONG n = u32(&s), j, x;
+            UWORD *r;
+            if (!format2 || n > 4096 || !(r = alloc(im, n * 2 + 2)))
+                FAIL("uniform locations:", 0, n);
+            for (j = 0; j < n; j++) {
+                x = u32(&s);
+                r[j] = x == 0xffffffffUL ? OGLES2_LOC_NONE : x == 0xfffffffeUL ? OGLES2_LOC_INACTIVE
+                     : x < 0xfffe ? (UWORD)x : OGLES2_LOC_NONE;
+            }
+            im->nremap = (UWORD)n;
+            im->remap = r;
             break;
         }
         case 9: /* VARIANT_OF: a .v3dx, a program's draw-time variants */
@@ -749,6 +804,8 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
         FAIL(im->compute ? "a compute program of other stages" : "not a vertex and fragment program", 0, ~0UL);
     if ((features & V3DP_FEATURE_STORAGE) && !im->v3dx && !im->sblocks)
         FAIL("storage blocks without their STORAGE_BLOCKS section", 0, ~0UL);
+    if ((features & V3DP_FEATURE_ATOMIC) && !im->v3dx && (!im->abuffers || !(features & V3DP_FEATURE_STORAGE)))
+        FAIL("atomic counters without their ATOMIC_BUFFERS and STORAGE_BLOCKS sections", 0, ~0UL);
     if (format2 && !im->v3dx && (!have_blocks || !have_interface))
         FAIL("a format 2 file without UNIFORM_BLOCKS or INTERFACE", 0, ~0UL);
     if ((features & V3DP_FEATURE_TF) && !im->v3dx && !im->xfb)
@@ -766,10 +823,15 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             }
         im->layout_crc = from ? crc32(from, (ULONG)(to - from)) : 0;
     }
+    for (k = 0; k < im->nremap; k++)
+        if (im->remap[k] < OGLES2_LOC_INACTIVE && im->remap[k] >= im->nuniforms)
+            FAIL("a uniform location of no uniform", 0, im->remap[k]);
     /* Block members: uniforms of the image, in a block of their kind. */
     for (k = 0; k < im->nuniforms; k++) {
         const struct OGLES2ImageUniform *u = &im->uniforms[k];
-        if (u->block >= 0 && u->block >= ((u->flags & OGLES2_UNIFORM_BUFFER) ? im->nsblocks : im->nublocks))
+        if (u->block >= 0 && u->block >= ((u->flags & OGLES2_UNIFORM_BUFFER)   ? im->nsblocks
+                                          : (u->flags & OGLES2_UNIFORM_ATOMIC) ? im->nabuffers
+                                                                               : im->nublocks))
             FAIL("a block member of a block the program does not have: ", u->name, (ULONG)u->block);
     }
     for (k = 0; k < (ULONG)im->nublocks + im->nsblocks; k++) {

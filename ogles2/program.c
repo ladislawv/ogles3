@@ -65,14 +65,14 @@ static const ULONG smooth_rdata[20] = {0, 0, 0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10,
 static const struct OGLES2Variant smooth_variants[3] = {
     {OGLES2_VARIANT_CS, 4, 1, 0, 0, 4, 0, 0, 0, {3}, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
      {0}, {0}, {0}, 0, {0}, 0, 0, builtin_coordinate, sizeof(builtin_coordinate), 0, 20, smooth_rtype,
-     smooth_rdata, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+     smooth_rdata, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {OGLES2_VARIANT_VS, 4, 1, 0, 0, 4, 0, 0, 0, {3, 4}, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
      {0}, {0}, {0}, 0, {0}, 0, 0, builtin_vertex_smooth, sizeof(builtin_vertex_smooth),
-     sizeof(builtin_coordinate), 20, smooth_rtype, smooth_rdata, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+     sizeof(builtin_coordinate), 20, smooth_rtype, smooth_rdata, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {OGLES2_VARIANT_FS, 4, 0, 0, 0, 0, 0, 0, 0, {0}, 0, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 0,
      {0}, {0}, {0}, 0, {0}, 0, 0, builtin_fragment_smooth, sizeof(builtin_fragment_smooth),
      sizeof(builtin_coordinate) + sizeof(builtin_vertex_smooth), 0, 0, 0, 0, 0, 0, 0, 0,
-     1 /* render target 0 */, 0, 0, 0},
+     1 /* render target 0 */, 0, 0, 0, 0},
 };
 
 static const struct OGLES2Image builtin_smooth = {
@@ -95,6 +95,8 @@ static const struct OGLES2Image builtin_smooth = {
     0, 0, 0, 0, 0, 0, 0, 0, 0,     /* no draw-time variants */
     0,                             /* no transform feedback */
     0, 0, 0, {0, 0}, {0, 0},       /* not a compute program, no storage blocks */
+    0, 0,                          /* no atomic counter buffers */
+    0, 0,                          /* locations numbered by the runtime */
 };
 
 const struct OGLES2Image *ogles2_builtin_image(void)
@@ -1395,9 +1397,14 @@ static BOOL bind_image(struct OGLES2Program *p, const struct OGLES2Image *im)
         used |= ((1UL << n) - 1) << i;
     }
 
-    /* Uniform locations: one per array element of every visible uniform. */
-    for (u = 0; u < im->nuniforms; u++)
-        if (!(im->uniforms[u].flags & (OGLES2_UNIFORM_BUILTIN | OGLES2_UNIFORM_HIDDEN | OGLES2_UNIFORM_BUFFER)))
+    /* Uniform locations: Mesa's (format 2's UNIFORM_LOCATIONS: explicit
+     * ones among them, gaps and inactive ones), else one per array element
+     * of every visible uniform. */
+    if (im->remap)
+        nloc = im->nremap;
+    else for (u = 0; u < im->nuniforms; u++)
+        if (!(im->uniforms[u].flags & (OGLES2_UNIFORM_BUILTIN | OGLES2_UNIFORM_HIDDEN | OGLES2_UNIFORM_BUFFER |
+                                       OGLES2_UNIFORM_ATOMIC)))
             nloc += im->uniforms[u].array ? im->uniforms[u].array : 1;
     p->loc_uniform = AllocVec(nloc * 4 + 4, MEMF_ANY);
     /* A sampler array's elements are samplers of their own (consecutive
@@ -1415,12 +1422,26 @@ static BOOL bind_image(struct OGLES2Program *p, const struct OGLES2Image *im)
         return FALSE;
     }
     p->loc_element = p->loc_uniform + nloc;
-    nloc = 0;
-    for (u = 0; u < im->nuniforms; u++) {
+    if (im->remap) {
+        UWORD l, e;
+        for (u = 0; u < im->nuniforms; u++)
+            p->uniform_loc[u] = 0xFFFF;
+        for (l = 0; l < nloc; l++) {
+            p->loc_uniform[l] = u = im->remap[l];
+            p->loc_element[l] = 0;
+            if (u >= OGLES2_LOC_INACTIVE)
+                continue;
+            if (p->uniform_loc[u] == 0xFFFF)
+                p->uniform_loc[u] = l; /* its first element's */
+            e = (UWORD)(l - p->uniform_loc[u]);
+            p->loc_element[l] = e;
+        }
+        nloc = im->nremap;
+    } else for (u = 0, nloc = 0; u < im->nuniforms; u++) {
         const struct OGLES2ImageUniform *un = &im->uniforms[u];
         UWORD e, ne = un->array ? un->array : 1;
         p->uniform_loc[u] = 0xFFFF;
-        if (un->flags & (OGLES2_UNIFORM_BUILTIN | OGLES2_UNIFORM_HIDDEN | OGLES2_UNIFORM_BUFFER))
+        if (un->flags & (OGLES2_UNIFORM_BUILTIN | OGLES2_UNIFORM_HIDDEN | OGLES2_UNIFORM_BUFFER | OGLES2_UNIFORM_ATOMIC))
             continue;
         p->uniform_loc[u] = (UWORD)nloc;
         for (e = 0; e < ne; e++) {
@@ -1696,6 +1717,13 @@ void ogles2_glGetProgramiv(struct OGLES2Context *ctx, GLuint program, GLenum pna
             break;
         }
         *params = p->binary_hint;
+        break;
+    case GL_ACTIVE_ATOMIC_COUNTER_BUFFERS: /* ES 3.1 */
+        if (!ogles2_es31(ctx)) {
+            ogles2_error(ctx, GL_INVALID_ENUM);
+            break;
+        }
+        *params = im && p->linked ? im->nabuffers : 0;
         break;
     case GL_ACTIVE_UNIFORM_BLOCKS: /* ES 3.0 */
     case GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH:
@@ -1983,12 +2011,12 @@ void ogles2_glGetActiveUniformsiv(struct OGLES2Context *ctx, GLuint program, GLs
     for (k = 0; uniformIndices && params && k < uniformCount; k++) {
         BOOL in_block;
         u = active_uniform(im, uniformIndices[k]);
-        in_block = u->block >= 0;
+        in_block = u->block >= 0; /* an atomic counter's offset and stride too (ES 3.1) */
         /* the default block's: -1 offsets and strides, as Mesa's */
         params[k] = pname == GL_UNIFORM_TYPE          ? (GLint)u->type
                   : pname == GL_UNIFORM_SIZE          ? (u->array ? u->array : 1)
                   : pname == GL_UNIFORM_NAME_LENGTH   ? (GLint)active_name_len(u) + 1
-                  : pname == GL_UNIFORM_BLOCK_INDEX   ? u->block
+                  : pname == GL_UNIFORM_BLOCK_INDEX   ? (u->flags & OGLES2_UNIFORM_ATOMIC ? -1 : u->block)
                   : pname == GL_UNIFORM_OFFSET        ? (in_block ? u->offset : -1)
                   : pname == GL_UNIFORM_ARRAY_STRIDE  ? (in_block ? u->array_stride : -1)
                   : pname == GL_UNIFORM_MATRIX_STRIDE ? (in_block ? u->matrix_stride : -1)
@@ -2265,8 +2293,11 @@ GLint ogles2_glGetUniformLocation(struct OGLES2Context *ctx, GLuint program, con
         }
     }
     for (loc = 0; loc < p->nlocations; loc++) {
-        const struct OGLES2ImageUniform *u = &im->uniforms[p->loc_uniform[loc]];
-        if (p->loc_element[loc])
+        const struct OGLES2ImageUniform *u;
+        if (p->loc_element[loc] || p->loc_uniform[loc] >= OGLES2_LOC_INACTIVE) /* an element past the first, a gap */
+            continue;
+        u = &im->uniforms[p->loc_uniform[loc]];
+        if (u->flags & OGLES2_UNIFORM_ATOMIC) /* a location of its own, but -1 by name (Mesa's) */
             continue;
         if (str_eq(u->name, name))
             return loc; /* the whole name, struct members included */
@@ -2387,10 +2418,12 @@ static void set_uniform(struct OGLES2Context *ctx, GLint location, GLsizei count
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
-    if (location < 0 || location >= p->nlocations) {
+    if (location < 0 || location >= p->nlocations || p->loc_uniform[location] == OGLES2_LOC_NONE) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
+    if (p->loc_uniform[location] == OGLES2_LOC_INACTIVE) /* ES 3.1 7.6.1: ignored */
+        return;
     u = &p->image->uniforms[p->loc_uniform[location]];
     first = p->loc_element[location];
     if (!type_shape(u->type, &ukind, &ucomps, &ucols) || ucomps != comps || ucols != cols ||
@@ -2695,7 +2728,7 @@ static void get_uniform(struct OGLES2Context *ctx, GLuint program, GLint locatio
     int kind, comps, cols, c, k;
     if (!ogles2_context_valid(ctx) || !(p = linked(ctx, program)))
         return;
-    if (location < 0 || location >= p->nlocations) {
+    if (location < 0 || location >= p->nlocations || p->loc_uniform[location] >= OGLES2_LOC_INACTIVE) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
@@ -2820,7 +2853,7 @@ static LONG resources(const struct OGLES2Image *im, GLenum iface)
             n += im->interface[k].iface == iface;
         return n;
     case GL_TRANSFORM_FEEDBACK_VARYING: return im && im->xfb ? im->xfb->nvaryings : 0;
-    case GL_ATOMIC_COUNTER_BUFFER:      return 0;
+    case GL_ATOMIC_COUNTER_BUFFER:      return im ? im->nabuffers : 0;
     default:                            return -1;
     }
 }
@@ -2837,6 +2870,7 @@ struct resource
     const struct OGLES2ImageBlock *b;
     const struct OGLES2ImageVar *v;
     const struct OGLES2ImageXfbVar *x;
+    const struct OGLES2ImageAtomic *a;
 };
 
 static BOOL ends_bracket(const char *s)
@@ -2883,6 +2917,10 @@ static void resource(const struct OGLES2Image *im, GLenum iface, ULONG i, struct
                 return;
             }
         return;
+    case GL_ATOMIC_COUNTER_BUFFER: /* no name */
+        r->a = &im->abuffers[i];
+        r->name = "";
+        return;
     case GL_TRANSFORM_FEEDBACK_VARYING:
         r->x = &im->xfb->varyings[i];
         r->name = r->x->name;
@@ -2913,6 +2951,8 @@ static ULONG uniform_stages(const struct OGLES2Image *im, const struct OGLES2Ima
 {
     ULONG m = 0, first = im->compute ? 0x20 : 0x01;
     UBYTE k;
+    if (u->block >= 0 && (u->flags & OGLES2_UNIFORM_ATOMIC))
+        return im->abuffers[u->block].stages;
     if (u->block >= 0)
         return (u->flags & OGLES2_UNIFORM_BUFFER ? im->sblocks : im->ublocks)[u->block].stages;
     for (k = 0; k < u->nplaces; k++)
@@ -2970,6 +3010,8 @@ void ogles2_glGetProgramInterfaceiv(struct OGLES2Context *ctx, GLuint program, G
             resource(p->image, programInterface, (ULONG)i, &r);
             if (r.b && r.b->nmembers > m)
                 m = r.b->nmembers;
+            if (r.a && r.a->ncounters > m)
+                m = r.a->ncounters;
         }
         *params = m;
         return;
@@ -3065,7 +3107,8 @@ static LONG property(struct OGLES2Program *p, GLenum iface, const struct resourc
         if (!uni)
             return -1;
         /* the default block's: -1 offsets and strides, as Mesa's */
-        v[0] = prop == GL_BLOCK_INDEX   ? u->block
+        /* an atomic counter: in no block, its offset and stride in its buffer */
+        v[0] = prop == GL_BLOCK_INDEX   ? (u->flags & OGLES2_UNIFORM_ATOMIC ? -1 : u->block)
              : u->block < 0             ? (prop == GL_IS_ROW_MAJOR ? 0 : -1)
              : prop == GL_OFFSET        ? u->offset
              : prop == GL_ARRAY_STRIDE  ? u->array_stride
@@ -3075,7 +3118,7 @@ static LONG property(struct OGLES2Program *p, GLenum iface, const struct resourc
     case GL_ATOMIC_COUNTER_BUFFER_INDEX:
         if (iface != GL_UNIFORM)
             return -1;
-        v[0] = -1;
+        v[0] = u->flags & OGLES2_UNIFORM_ATOMIC ? u->block : -1;
         return 1;
     case GL_TOP_LEVEL_ARRAY_SIZE:
     case GL_TOP_LEVEL_ARRAY_STRIDE:
@@ -3094,6 +3137,12 @@ static LONG property(struct OGLES2Program *p, GLenum iface, const struct resourc
     case GL_NUM_ACTIVE_VARIABLES:
         if (!blk && iface != GL_ATOMIC_COUNTER_BUFFER)
             return -1;
+        if (r->a) { /* an atomic counter buffer */
+            v[0] = (GLint)(prop == GL_BUFFER_DATA_SIZE      ? r->a->size
+                         : prop == GL_NUM_ACTIVE_VARIABLES ? r->a->ncounters
+                                                           : r->a->binding);
+            return 1;
+        }
         v[0] = prop == GL_BUFFER_DATA_SIZE      ? (GLint)r->b->size
              : prop == GL_NUM_ACTIVE_VARIABLES ? r->b->nmembers
              : iface == GL_UNIFORM_BLOCK       ? (GLint)p->block_binding[r->b - im->ublocks]
@@ -3102,6 +3151,11 @@ static LONG property(struct OGLES2Program *p, GLenum iface, const struct resourc
     case GL_ACTIVE_VARIABLES:
         if (!blk && iface != GL_ATOMIC_COUNTER_BUFFER)
             return -1;
+        if (r->a) { /* its counters, as active uniforms */
+            for (k = 0; k < r->a->ncounters && k < room; k++)
+                v[k] = active_index(im, r->a->counters[k]);
+            return k;
+        }
         for (k = 0; k < r->b->nmembers && k < room; k++)
             v[k] = iface == GL_UNIFORM_BLOCK ? active_index(im, r->b->members[k])
                                              : buffer_var_index(im, r->b->members[k]);
@@ -3111,7 +3165,7 @@ static LONG property(struct OGLES2Program *p, GLenum iface, const struct resourc
     case GL_REFERENCED_BY_COMPUTE_SHADER:
         if (iface == GL_TRANSFORM_FEEDBACK_VARYING)
             return -1;
-        stages = u ? uniform_stages(im, u) : r->b ? r->b->stages : r->v ? r->v->stages : 0;
+        stages = u ? uniform_stages(im, u) : r->b ? r->b->stages : r->a ? r->a->stages : r->v ? r->v->stages : 0;
         v[0] = (stages & (prop == GL_REFERENCED_BY_VERTEX_SHADER     ? 0x01
                           : prop == GL_REFERENCED_BY_FRAGMENT_SHADER ? 0x10
                                                                      : 0x20)) != 0;
@@ -3189,4 +3243,328 @@ GLint ogles2_glGetProgramResourceLocation(struct OGLES2Context *ctx, GLuint prog
     loc = ogles2_glGetUniformLocation(ctx, program, name);
     /* a uniform block's member has none */
     return loc >= 0 && p->image->uniforms[p->loc_uniform[loc]].block >= 0 ? -1 : loc;
+}
+
+/* ---- ES 3.1's glProgramUniform* (docs/GLES3_PLAN.md stage D item 5): a
+ * program's uniform set whether it is in use or not: glUniform*'s, the
+ * program made the target for the one call. Its errors first: no such
+ * object GL_INVALID_VALUE, a shader or a program not linked
+ * GL_INVALID_OPERATION. (Written out: the generator finds implemented
+ * entries by their definitions.) ---- */
+
+static struct OGLES2Program *uniform_target(struct OGLES2Context *ctx, GLuint program)
+{
+    struct OGLES2Program *p, *saved;
+    if (!ogles2_es31_entry(ctx) || !(p = lookup(ctx, program, OGLES2_OBJ_PROGRAM)))
+        return 0;
+    if (!p->linked) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return 0;
+    }
+    saved = ctx->program;
+    ctx->program = p;
+    return saved ? saved : (struct OGLES2Program *)ctx; /* ctx: none was in use */
+}
+
+static void uniform_target_end(struct OGLES2Context *ctx, struct OGLES2Program *saved)
+{
+    ctx->program = saved == (struct OGLES2Program *)ctx ? 0 : saved;
+}
+
+
+void ogles2_glProgramUniform1f(struct OGLES2Context *ctx, GLuint program, GLint location, GLfloat v0)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniform1f(ctx, location, v0);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniform2f(struct OGLES2Context *ctx, GLuint program, GLint location, GLfloat v0, GLfloat v1)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniform2f(ctx, location, v0, v1);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniform3f(struct OGLES2Context *ctx, GLuint program, GLint location, GLfloat v0, GLfloat v1, GLfloat v2)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniform3f(ctx, location, v0, v1, v2);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniform4f(struct OGLES2Context *ctx, GLuint program, GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniform4f(ctx, location, v0, v1, v2, v3);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniform1i(struct OGLES2Context *ctx, GLuint program, GLint location, GLint v0)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniform1i(ctx, location, v0);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniform2i(struct OGLES2Context *ctx, GLuint program, GLint location, GLint v0, GLint v1)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniform2i(ctx, location, v0, v1);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniform3i(struct OGLES2Context *ctx, GLuint program, GLint location, GLint v0, GLint v1, GLint v2)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniform3i(ctx, location, v0, v1, v2);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniform4i(struct OGLES2Context *ctx, GLuint program, GLint location, GLint v0, GLint v1, GLint v2, GLint v3)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniform4i(ctx, location, v0, v1, v2, v3);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniform1ui(struct OGLES2Context *ctx, GLuint program, GLint location, GLuint v0)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniform1ui(ctx, location, v0);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniform2ui(struct OGLES2Context *ctx, GLuint program, GLint location, GLuint v0, GLuint v1)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniform2ui(ctx, location, v0, v1);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniform3ui(struct OGLES2Context *ctx, GLuint program, GLint location, GLuint v0, GLuint v1, GLuint v2)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniform3ui(ctx, location, v0, v1, v2);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniform4ui(struct OGLES2Context *ctx, GLuint program, GLint location, GLuint v0, GLuint v1, GLuint v2, GLuint v3)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniform4ui(ctx, location, v0, v1, v2, v3);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniform1fv(struct OGLES2Context *ctx, GLuint program, GLint location, GLsizei count, const GLfloat *value)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniform1fv(ctx, location, count, value);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniform2fv(struct OGLES2Context *ctx, GLuint program, GLint location, GLsizei count, const GLfloat *value)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniform2fv(ctx, location, count, value);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniform3fv(struct OGLES2Context *ctx, GLuint program, GLint location, GLsizei count, const GLfloat *value)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniform3fv(ctx, location, count, value);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniform4fv(struct OGLES2Context *ctx, GLuint program, GLint location, GLsizei count, const GLfloat *value)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniform4fv(ctx, location, count, value);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniform1iv(struct OGLES2Context *ctx, GLuint program, GLint location, GLsizei count, const GLint *value)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniform1iv(ctx, location, count, value);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniform2iv(struct OGLES2Context *ctx, GLuint program, GLint location, GLsizei count, const GLint *value)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniform2iv(ctx, location, count, value);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniform3iv(struct OGLES2Context *ctx, GLuint program, GLint location, GLsizei count, const GLint *value)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniform3iv(ctx, location, count, value);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniform4iv(struct OGLES2Context *ctx, GLuint program, GLint location, GLsizei count, const GLint *value)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniform4iv(ctx, location, count, value);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniform1uiv(struct OGLES2Context *ctx, GLuint program, GLint location, GLsizei count, const GLuint *value)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniform1uiv(ctx, location, count, value);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniform2uiv(struct OGLES2Context *ctx, GLuint program, GLint location, GLsizei count, const GLuint *value)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniform2uiv(ctx, location, count, value);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniform3uiv(struct OGLES2Context *ctx, GLuint program, GLint location, GLsizei count, const GLuint *value)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniform3uiv(ctx, location, count, value);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniform4uiv(struct OGLES2Context *ctx, GLuint program, GLint location, GLsizei count, const GLuint *value)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniform4uiv(ctx, location, count, value);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniformMatrix2fv(struct OGLES2Context *ctx, GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniformMatrix2fv(ctx, location, count, transpose, value);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniformMatrix3fv(struct OGLES2Context *ctx, GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniformMatrix3fv(ctx, location, count, transpose, value);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniformMatrix4fv(struct OGLES2Context *ctx, GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniformMatrix4fv(ctx, location, count, transpose, value);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniformMatrix2x3fv(struct OGLES2Context *ctx, GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniformMatrix2x3fv(ctx, location, count, transpose, value);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniformMatrix3x2fv(struct OGLES2Context *ctx, GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniformMatrix3x2fv(ctx, location, count, transpose, value);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniformMatrix2x4fv(struct OGLES2Context *ctx, GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniformMatrix2x4fv(ctx, location, count, transpose, value);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniformMatrix4x2fv(struct OGLES2Context *ctx, GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniformMatrix4x2fv(ctx, location, count, transpose, value);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniformMatrix3x4fv(struct OGLES2Context *ctx, GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniformMatrix3x4fv(ctx, location, count, transpose, value);
+    uniform_target_end(ctx, saved);
+}
+
+void ogles2_glProgramUniformMatrix4x3fv(struct OGLES2Context *ctx, GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value)
+{
+    struct OGLES2Program *saved = uniform_target(ctx, program);
+    if (!saved)
+        return;
+    ogles2_glUniformMatrix4x3fv(ctx, location, count, transpose, value);
+    uniform_target_end(ctx, saved);
 }

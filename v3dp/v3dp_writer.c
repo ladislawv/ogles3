@@ -10,6 +10,7 @@
 
 #include "main/mtypes.h"
 #include "main/shader_types.h"
+#include "util/u_range_remap.h"
 #include "program/prog_parameter.h"
 #include "compiler/glsl_types.h"
 #include "compiler/v3d_compiler.h"
@@ -37,6 +38,8 @@ enum {
     SEC_VARIANT_OF = 9,     /* .v3dx files */
     SEC_TRANSFORM_FEEDBACK = 10, /* format 2, with the feature bit V3DP_FEATURE_TF */
     SEC_STORAGE_BLOCKS = 11,     /* format 2, with the feature bit V3DP_FEATURE_STORAGE */
+    SEC_ATOMIC_BUFFERS = 12,     /* format 2, with the feature bit V3DP_FEATURE_ATOMIC */
+    SEC_UNIFORM_LOCATIONS = 13,  /* format 2 */
 };
 
 enum { VARIANT_VS = 0, VARIANT_VS_BIN = 1, VARIANT_FS = 4, VARIANT_CS = 5 };
@@ -633,12 +636,16 @@ static int put_uniforms(struct buf *b, struct buf *strings, struct gl_shader_pro
          * block's member (a buffer variable, ES 3.1) the same, flags2 bit 1,
          * its block one of STORAGE_BLOCKS. */
         if (format2) {
-            int in_block = u->block_index >= 0;
-            put_u32(b, in_block ? (uint32_t)u->block_index : 0xffffffffu);
+            /* an atomic counter (ES 3.1): its buffer (ATOMIC_BUFFERS) in the
+             * block word, its offset and array stride, flags2 bit 2 */
+            int atomic = glsl_contains_atomic(u->type) && u->atomic_buffer_index >= 0;
+            int in_block = u->block_index >= 0 || atomic;
+            put_u32(b, !in_block ? 0xffffffffu : atomic ? (uint32_t)u->atomic_buffer_index : (uint32_t)u->block_index);
             put_u32(b, in_block ? (uint32_t)u->offset : 0xffffffffu);
             put_u32(b, in_block ? (uint32_t)u->array_stride : 0xffffffffu);
             put_u32(b, in_block ? (uint32_t)u->matrix_stride : 0xffffffffu);
-            put_u32(b, (in_block && u->row_major ? 1u : 0u) | (in_block && u->is_shader_storage ? 2u : 0u));
+            put_u32(b, (in_block && u->row_major ? 1u : 0u) | (in_block && u->is_shader_storage ? 2u : 0u) |
+                           (atomic ? 4u : 0u));
         }
     }
     return 0;
@@ -724,12 +731,30 @@ static int put_storage_blocks(struct buf *b, struct buf *strings, struct gl_shad
     put_u32(b, n);
     for (s = 0; s < NUM_FILE_STAGES; s++) {
         const struct gl_linked_shader *sh = prog->_LinkedShaders[stages_in_file[s]];
+        unsigned num = 0, base, k;
+        int maxb = -1;
         if (!sh)
             continue;
+        /* The stage's atomic counters are storage buffers after its own
+         * blocks, at base + binding (nir_lower_atomics_to_ssbo, the state
+         * tracker's st_bind_atomics; it raises the NIR's num_ssbos, not the
+         * linked program's): those slots are written 0x8000 | binding, up
+         * to the highest binding the stage uses. The reader checks that a
+         * variant reads no slot past the map. */
+        base = sh->Program->info.num_ssbos;
+        for (k = 0; k < d->NumAtomicBuffers; k++)
+            if (d->AtomicBuffers[k].StageReferences[stages_in_file[s]] && (int)d->AtomicBuffers[k].Binding > maxb)
+                maxb = (int)d->AtomicBuffers[k].Binding;
+        num = base + (unsigned)(maxb + 1);
         put_u32(b, stages_in_file[s]);
-        put_u32(b, sh->Program->info.num_ssbos);
-        for (i = 0; i < sh->Program->info.num_ssbos; i++) {
-            const struct gl_uniform_block *sb = sh->Program->sh.ShaderStorageBlocks[i];
+        put_u32(b, num);
+        for (i = 0; i < num; i++) {
+            const struct gl_uniform_block *sb;
+            if (i >= base) {
+                put_u32(b, 0x8000u | (i - base));
+                continue;
+            }
+            sb = sh->Program->sh.ShaderStorageBlocks[i];
             if (sb < d->ShaderStorageBlocks || sb >= d->ShaderStorageBlocks + d->NumShaderStorageBlocks) {
                 fprintf(stderr, "v3dp: a stage's storage block is not the program's\n");
                 return -1;
@@ -738,6 +763,77 @@ static int put_storage_blocks(struct buf *b, struct buf *strings, struct gl_shad
         }
     }
     return 0;
+}
+
+/* Format 2, ES 3.1: the program's atomic counter buffers (Mesa's
+ * AtomicBuffers): binding, minimum size, the stages that reference it (bit
+ * per stage), its counters' indices in UNIFORMS. */
+/* Format 2: the program's uniform locations as Mesa numbered them (its
+ * UniformRemapTable, ranges of locations each pointing at a uniform;
+ * explicit locations, ES 3.1, among them): per location the uniform's
+ * index in UNIFORMS (an array's elements on consecutive locations),
+ * 0xfffffffe for an explicit location of a uniform that is not active
+ * (glUniform* there is ignored), 0xffffffff for none. */
+#define MAX_UNIFORM_LOCATIONS 4096 /* GL_MAX_UNIFORM_LOCATIONS (Mesa's) */
+static int put_uniform_locations(struct buf *b, struct gl_shader_program *prog)
+{
+    const struct gl_shader_program_data *d = prog->data;
+    const struct range_remap *r = prog->UniformRemapTable;
+    uint32_t *loc;
+    unsigned i, n = 0, k;
+
+    for (i = 0; r && r->sorted_array && i < r->sorted_array_length; i++)
+        if (r->sorted_array[i].end + 1 > n)
+            n = r->sorted_array[i].end + 1;
+    if (n > MAX_UNIFORM_LOCATIONS || !(loc = malloc((n + 1) * sizeof(*loc)))) {
+        fprintf(stderr, "v3dp: %u uniform locations\n", n);
+        return -1;
+    }
+    for (k = 0; k < n; k++)
+        loc[k] = 0xffffffffu;
+    for (i = 0; r && r->sorted_array && i < r->sorted_array_length; i++) {
+        const struct range_entry *e = &r->sorted_array[i];
+        const struct gl_uniform_storage *u = e->ptr;
+        uint32_t v;
+        if (!u) {
+            continue;
+        } else if (u == INACTIVE_UNIFORM_EXPLICIT_LOCATION) {
+            v = 0xfffffffeu;
+        } else if (u >= d->UniformStorage && u < d->UniformStorage + d->NumUniformStorage) {
+            v = (uint32_t)(u - d->UniformStorage);
+        } else {
+            fprintf(stderr, "v3dp: a uniform location of no uniform of the program\n");
+            free(loc);
+            return -1;
+        }
+        for (k = e->start; k <= e->end; k++)
+            loc[k] = v;
+    }
+    put_u32(b, n);
+    for (k = 0; k < n; k++)
+        put_u32(b, loc[k]);
+    free(loc);
+    return 0;
+}
+
+static void put_atomic_buffers(struct buf *b, struct gl_shader_program *prog)
+{
+    const struct gl_shader_program_data *d = prog->data;
+    unsigned i, j, stages;
+
+    put_u32(b, d->NumAtomicBuffers);
+    for (i = 0; i < d->NumAtomicBuffers; i++) {
+        const struct gl_active_atomic_buffer *ab = &d->AtomicBuffers[i];
+        put_u32(b, ab->Binding);
+        put_u32(b, ab->MinimumSize);
+        for (j = 0, stages = 0; j < MESA_SHADER_STAGES; j++)
+            if (ab->StageReferences[j])
+                stages |= 1u << j;
+        put_u32(b, stages);
+        put_u32(b, ab->NumUniforms);
+        for (j = 0; j < ab->NumUniforms; j++)
+            put_u32(b, ab->Uniforms[j]);
+    }
 }
 
 /* Format 2: the program's inputs and outputs (Mesa's GL_PROGRAM_INPUT and
@@ -945,13 +1041,10 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
         if (stages[i] == V3DP_HASH_XFBV || stages[i] == V3DP_HASH_SEPA)
             format2 = 1;
     /* ES 3.1's objects come with stage D (docs/GLES3_PLAN.md §7): storage
-     * blocks and compute programs so far; atomic counters and images not
+     * blocks, atomic counters and compute programs so far; images not
      * yet. */
-    if (prog->data->NumAtomicBuffers) {
-        fprintf(stderr, "v3dp: atomic counters are not supported yet\n");
-        return -1;
-    }
-    if (prog->data->NumShaderStorageBlocks || prog->_LinkedShaders[MESA_SHADER_COMPUTE])
+    if (prog->data->NumShaderStorageBlocks || prog->data->NumAtomicBuffers ||
+        prog->_LinkedShaders[MESA_SHADER_COMPUTE])
         format2 = 1;
     for (i = 0; i < NUM_FILE_STAGES; i++) {
         const struct gl_linked_shader *sh = prog->_LinkedShaders[stages_in_file[i]];
@@ -982,7 +1075,9 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
     put_u32(&sec, stage_mask);
     if (format2) /* features (FORMAT.md, format 2) */
         put_u32(&sec, (tf_info(prog) ? V3DP_FEATURE_TF : 0) |
-                          (prog->data->NumShaderStorageBlocks ? V3DP_FEATURE_STORAGE : 0) |
+                          (prog->data->NumShaderStorageBlocks || prog->data->NumAtomicBuffers
+                               ? V3DP_FEATURE_STORAGE : 0) |
+                          (prog->data->NumAtomicBuffers ? V3DP_FEATURE_ATOMIC : 0) |
                           (prog->_LinkedShaders[MESA_SHADER_COMPUTE] ? V3DP_FEATURE_COMPUTE : 0));
     put_section(&program, SEC_PROGRAM, &sec);
     num_sections++;
@@ -1030,13 +1125,24 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
             num_sections++;
             buf_free(&sec);
         }
-        if (prog->data->NumShaderStorageBlocks) {
+        if (prog->data->NumShaderStorageBlocks || prog->data->NumAtomicBuffers) {
             if (put_storage_blocks(&sec, &strings, prog))
                 goto out;
             put_section(&body, SEC_STORAGE_BLOCKS, &sec);
             num_sections++;
             buf_free(&sec);
         }
+        if (prog->data->NumAtomicBuffers) {
+            put_atomic_buffers(&sec, prog);
+            put_section(&body, SEC_ATOMIC_BUFFERS, &sec);
+            num_sections++;
+            buf_free(&sec);
+        }
+        if (put_uniform_locations(&sec, prog))
+            goto out;
+        put_section(&body, SEC_UNIFORM_LOCATIONS, &sec);
+        num_sections++;
+        buf_free(&sec);
     }
 
     if (v3dx) {

@@ -2535,6 +2535,79 @@ supergroup, and a dispatch of more than 2^32 batches is refused (logged).
 After the fix: `m8-5` 47 of 47 and 163 of 163, dEQP-GLES31
 `compute.basic` 29 of 41 (the rest images and atomic counters: 8 fail
 to compile, 2 not supported), and the A1200 up 20 minutes after them.
+
+**Then (2026-10-27): bounds checks, atomic counters, storage in fragment
+shaders.** Mesa patch 0017 (`v3d-robust-storage-shared-images`): a stage
+with storage buffers or shared variables gets `robust_storage_access` in
+its key, one with images `robust_image_access` (GLES2 keys unchanged), and
+V3D's `should_lower_robustness` takes the shared-memory intrinsics too:
+`nir_lower_robust_access` drops a storage store out of range (predicated
+on `GET_SSBO_SIZE`, the bound range's size) and moves a shared access out
+of range to offset 0, inside the work group's array (GL's robust rules:
+the memory stays the program's). The library computes no such key: a
+draw-time key starts from the program's own variant's bytes. Test
+`es31oob.comp`, `m8_draw`'s `test_compute_bounds`. Atomic counters: the
+compiler writes them (feature bit 3, `ATOMIC_BUFFERS`; a counter is a
+`UNIFORMS` entry with flags2 bit 2, its buffer and offset; Mesa makes each
+buffer the stage's storage slot after its blocks, at base + binding, which
+the stage's storage map gives as 0x8000 | binding; the base is the linked
+program's `num_ssbos`, which the lowering does not raise); the key-state
+draw and dispatch bind atomic counter buffers too (unbound, the driver read
+a NULL slot: the host compiler crashed); the library takes the range bound
+at `GL_ATOMIC_COUNTER_BUFFER` binding b (`ogles2_buffer_atomic`), answers
+the `GL_ATOMIC_COUNTER_BUFFER` interface, `GL_ATOMIC_COUNTER_BUFFER_INDEX`,
+`GL_ACTIVE_ATOMIC_COUNTER_BUFFERS`; a counter has no location. Storage
+buffers and atomic counters in fragment shaders (Mesa's limits give the
+fragment stage 16 of each, the vertex stage none): the reader takes the
+storage recipe types in fragment variants, `draw.c`'s `draw_storage` the
+range (none: size 0 at the zeroed block, every access dropped by the
+bounds checks), the buffer marked written by the open job as transform
+feedback's are (`ogles2_buffer_storage_draw`; the CPU's next access waits
+and copies the words back), and such a job is never left running and
+cleans the GPU's caches after its render under the lock (`job_storage`,
+`after_render`; Mesa's `needs_flush`). Tests `es31ac.comp`
+(`test_atomic_counters`: 64 increments, each value given once) and
+`es31frag` (`test_fragment_storage`: 4096 fragments counted, each storing
+its count in its pixel's word). `m8-5` 47 of 47, 166 of 166 (before the
+fragment test); dEQP-GLES31 `compute` 183 of 195 (the 12 left images:
+compile refused, `OES_shader_image_atomic` not offered; the 4
+`atomic_counter_*` had run on a compiler from before atomic counters:
+`compile_bridge.py` now restarts its compiler when the file changes),
+`atomic_counter` 285 of 298 (12 dispatches of thousands of atomic
+operations on one counter reset as stuck: the CSD's wait is now a
+watchdog on progress, `CURRENT_CFG4`, whole seconds without it); after
+it `atomic_counter` 298 of 298, `compute` 187 of 195 (the 8 left
+images), `m8-5` 167 of 167.
+
+**Then (2026-10-27): indirect draws, explicit uniform locations,
+`glProgramUniform*`.** Item 3: `glDrawArraysIndirect` and
+`glDrawElementsIndirect` read the command on the CPU
+(`ogles2_buffer_draw_indirect`) and make the direct draw (instances,
+base vertex); ES 3.1's errors in Mesa's order (mode and type, vertex
+array object 0, an enabled array in client memory, transform feedback
+drawing, an offset not a word's `GL_INVALID_VALUE`, no buffer or a command
+past its end, a negative offset among them, `GL_INVALID_OPERATION`); a
+command with counts past `GLsizei` or a reserved word not 0 draws nothing
+(logged). Item 6's explicit locations: the compiler writes Mesa's
+`UniformRemapTable` (format 2 section 13, `UNIFORM_LOCATIONS`: per location
+the uniform, an inactive explicit one, or none), and the library numbers
+locations by it when present (gaps `GL_INVALID_OPERATION`, an inactive
+explicit location ignored, an atomic counter's location -1 by name as
+Mesa's); so block members now have none, as GL wants. Item 5's
+`glProgramUniform*` (33 entries): `glUniform*`'s with the program made the
+target for the call. `m8_draw`'s `test_indirect` (6 checks) and
+`test_uniform_locations` (5): `m8-5` 178 of 178. **Open:** dEQP-GLES31's
+first `draw_indirect` case, `draw_arrays_indirect.first.first_1`, restarts
+the A1200 by itself (21:59, 22:31, 22:57, 23:23; no alert recorded, so
+below AmigaOS; the disk loses the run's last writes, results included, so
+the station's and the library's logs show nothing of it). Its first
+program was compiled on the PC at 21:59, then the machine went down. A
+run of it on the A1200's own compiler (the bridge had died with the 21:59
+crash, unnoticed: `v3dglslc-remote` says "no bridge") had the compiler
+busy on that one program for over 15 minutes. `m8_draw`'s own indirect
+draws pass; the difference is not known yet. Tools for it: `m8_draw`
+skips tests named in `ENV:M8_SKIP`, `cmd/pistat` also prints exec's last
+alert; the station returns a job's output only when it ends.
 `cmd/pistat` (the Pi's temperature, throttling and clocks, through the
 firmware only) ruled out heat and power: 51 C, no flags. **Trap:** a
 freeze after GPU work that comes back after warm resets needs a power

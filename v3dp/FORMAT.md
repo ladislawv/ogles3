@@ -266,9 +266,10 @@ older reader may skip go into new sections and minor versions, as in 1.0. Bit 0 
 2026-10-27): transform feedback, the program has a `TRANSFORM_FEEDBACK` section (and its
 binning shaders output the varyings fed back). Bit 1 (0x2, 2026-10-27, ES 3.1): shader
 storage blocks, a `STORAGE_BLOCKS` section. Bit 2 (0x4, 2026-10-27, ES 3.1): a compute
-program, its stages bit 5 alone (Mesa's `MESA_SHADER_COMPUTE`), its variants of stage 5. The
-other ES 3.1 objects (stage D: atomic counters, images, separable programs, explicit uniform
-locations) add theirs; a separable program may have one stage only (stage D).
+program, its stages bit 5 alone (Mesa's `MESA_SHADER_COMPUTE`), its variants of stage 5. Bit 3
+(0x8, 2026-10-27, ES 3.1): atomic counter buffers, an `ATOMIC_BUFFERS` section (with bit 1 and
+its `STORAGE_BLOCKS` section: Mesa makes them storage buffers). The other ES 3.1 objects (stage
+D: images, separable programs, explicit uniform locations) add theirs; a separable program may have one stage only (stage D).
 
 **The hash** covers the program's link state after the shaders and the bindings, each as a
 pseudo-stage written the way the bindings' `"BIND"` is (stage `u32`, length `u32`, text),
@@ -285,7 +286,9 @@ So two programs of the same sources and different link state never share a file.
 `UNIFORM_BLOCKS`, -1 outside a block), `i32` offset in the block in bytes, `i32` array stride,
 `i32` matrix stride (-1 each outside a block; Mesa's `gl_uniform_storage` fields), `u32` flags2:
 bit 0 row-major; bit 1 (ES 3.1) a storage block's member, a buffer variable (its block an index
-in `STORAGE_BLOCKS`; not a uniform: `GL_BUFFER_VARIABLE`'s). A block member has no storage
+in `STORAGE_BLOCKS`; not a uniform: `GL_BUFFER_VARIABLE`'s); bit 2 (ES 3.1) an atomic counter
+(its block an index in `ATOMIC_BUFFERS`, its offset and array stride in its buffer; a uniform
+without a location). A block member has no storage
 places.
 
 **`ATTRIBUTES`**: the GL type may be an integer one (`GL_INT_VEC4`, `GL_UNSIGNED_INT`, ...)
@@ -303,6 +306,8 @@ location word, bit 30: the input has a location of its own (`layout(location)`, 
 | 9 | `VARIANT_OF` | `.v3dx` files only, exactly 1, third |
 | 10 | `TRANSFORM_FEEDBACK` | exactly 1 with feature bit 0, else none |
 | 11 | `STORAGE_BLOCKS` | exactly 1 with feature bit 1, else none |
+| 12 | `ATOMIC_BUFFERS` | exactly 1 with feature bit 3, else none |
+| 13 | `UNIFORM_LOCATIONS` | at most 1 (format 2; written since 2026-10-27) |
 
 **`VARIANT`** of stage 5, a compute shader (feature bit 2): the common key (Mesa's
 `v3d_update_compiled_cs` keys compute shaders by it alone), the common prog data, then
@@ -315,7 +320,22 @@ then each stage's map to them, as `UNIFORM_BLOCKS` (the same fields per block, b
 three `u32`s: its index in `UNIFORMS`, its top-level array's size and stride, Mesa's
 `top_level_array_size` and `_stride`, for `GL_TOP_LEVEL_ARRAY_SIZE` and `_STRIDE`). A stage reads its storage buffer *i*
 (`QUNIFORM_SSBO_OFFSET` and `QUNIFORM_GET_SSBO_SIZE` data *i*) as the program's block its
-map's *i*-th entry names; the buffer is the one bound at that block's binding.
+map's *i*-th entry names; the buffer is the one bound at that block's binding. An entry
+`0x8000 | b` (past the stage's own blocks) is atomic counter buffer binding *b*: Mesa lowers
+atomic counters to the storage slots after the stage's blocks (`nir_lower_atomics_to_ssbo`), the
+buffer the range bound at `GL_ATOMIC_COUNTER_BUFFER` binding *b* (`st_bind_atomics`).
+
+**`UNIFORM_LOCATIONS`**: the program's uniform locations as Mesa numbered them (its
+`UniformRemapTable`: `layout(location)`'s, ES 3.1, among them; none for block members,
+buffer variables, atomic counters and built-ins): `u32` count, then per location `u32` the
+uniform's index in `UNIFORMS` (an array's elements on consecutive locations), `0xfffffffe` an
+explicit location of a uniform that is not active (`glUniform*` there is ignored), `0xffffffff`
+none (`GL_INVALID_OPERATION`). Without the section the runtime numbers the visible uniforms'
+elements in `UNIFORMS` order, as format 1.0 does.
+
+**`ATOMIC_BUFFERS`**: `u32` count, then per buffer (Mesa's `AtomicBuffers`, in its order):
+`u32` binding, `u32` minimum size in bytes, `u32` stages that reference it (bit per stage),
+`u32` counters, then `u32[n]` their indices in `UNIFORMS`.
 
 **`UNIFORM_BLOCKS`**: the program's uniform blocks, then each stage's map to them.
 

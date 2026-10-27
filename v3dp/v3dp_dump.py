@@ -12,11 +12,12 @@ VARIANT_STAGES = {0: "vertex", 1: "vertex binning", 4: "fragment", 5: "compute"}
 KINDS = {0: "uniform", 1: "constant", 2: "state"}
 SECTIONS = {1: "PROGRAM", 2: "STRINGS", 3: "STAGE_PARAMS", 4: "UNIFORMS", 5: "ATTRIBUTES",
             6: "VARIANT", 7: "UNIFORM_BLOCKS", 8: "INTERFACE", 9: "VARIANT_OF",
-            10: "TRANSFORM_FEEDBACK", 11: "STORAGE_BLOCKS"}
+            10: "TRANSFORM_FEEDBACK", 11: "STORAGE_BLOCKS", 12: "ATOMIC_BUFFERS", 13: "UNIFORM_LOCATIONS"}
 FEATURE_TF = 0x1  # format 2: transform feedback (a TRANSFORM_FEEDBACK section)
 FEATURE_STORAGE = 0x2  # ES 3.1: shader storage blocks (a STORAGE_BLOCKS section)
 FEATURE_COMPUTE = 0x4  # ES 3.1: a compute program
-FEATURES = FEATURE_TF | FEATURE_STORAGE | FEATURE_COMPUTE
+FEATURE_ATOMIC = 0x8  # ES 3.1: atomic counter buffers (an ATOMIC_BUFFERS section)
+FEATURES = FEATURE_TF | FEATURE_STORAGE | FEATURE_COMPUTE | FEATURE_ATOMIC
 # Format 2 (ES3 programs) is written as major 0x8002 until release 2.1 (FORMAT.md).
 FORMAT2 = (2, 0x8002)
 PACKING = {0: "std140", 1: "shared", 2: "packed", 3: "std430"}
@@ -229,12 +230,17 @@ def dump(path, show_qpu):
                 raise Bad("the transform feedback bit and section disagree")
             if not v3dx and bool(features & FEATURE_STORAGE) != any(s == 11 for s, _ in secs):
                 raise Bad("the storage bit and section disagree")
+            if not v3dx and bool(features & FEATURE_ATOMIC) != any(s == 12 for s, _ in secs):
+                raise Bad("the atomic counter bit and section disagree")
+            if features & FEATURE_ATOMIC and not features & FEATURE_STORAGE:
+                raise Bad("atomic counters without the storage bit")
             if bool(features & FEATURE_COMPUTE) != (mask == 1 << 5):
                 raise Bad("the compute bit and the stages disagree")
             print("PROGRAM hash %s, stages %s%s%s" %
                   (h, ", ".join(STAGES[s] for s in STAGES if mask & (1 << s)),
                    ", transform feedback" if features & FEATURE_TF else "",
-                   ", storage blocks" if features & FEATURE_STORAGE else ""))
+                   ", storage blocks" if features & FEATURE_STORAGE else "") +
+                  (", atomic counters" if features & FEATURE_ATOMIC else ""))
         elif t == 2:
             print("STRINGS %d bytes" % len(payload))
         elif t == 3:
@@ -283,7 +289,8 @@ def dump(path, show_qpu):
                         if nst:
                             raise Bad("block member with storage places")
                         block = " %s %d +%d astride %d mstride %d%s" % (
-                            "storage block" if flags2 & 2 else "block", bi, boff, astride, mstride,
+                            "storage block" if flags2 & 2 else "atomic buffer" if flags2 & 4 else "block",
+                            bi, boff, astride, mstride,
                             " row_major" if flags2 & 1 else "")
                     elif (boff, astride, mstride, flags2) != (-1, -1, -1, 0):
                         raise Bad("block fields outside a block")
@@ -377,9 +384,30 @@ def dump(path, show_qpu):
             for _ in range(r.u32()):
                 stage, m = r.u32(), r.u32()
                 blocks = r.u32s(m)
-                if any(b >= n for b in blocks):
+                # 0x8000 | binding: atomic counter buffer `binding`
+                if any(b >= n and not b & 0x8000 for b in blocks):
                     raise Bad("stage map names a block past the last")
-                print("  %s: buffer i -> block %s" % (STAGES.get(stage, stage), blocks))
+                print("  %s: buffer i -> block %s" % (STAGES.get(stage, stage),
+                      ["atomic binding %d" % (b & 0x7fff) if b & 0x8000 else b for b in blocks]))
+            r.done()
+        elif t == 13 and v2:
+            n = r.u32()
+            locs = r.u32s(n)
+            if nuniforms is not None and any(x < 0xfffffffe and x >= nuniforms for x in locs):
+                raise Bad("a uniform location of no uniform")
+            used = ["%d:%s" % (i, "inactive" if x == 0xfffffffe else x) for i, x in enumerate(locs) if x != 0xffffffff]
+            print("UNIFORM_LOCATIONS %d: %s" % (n, " ".join(used)))
+            r.done()
+        elif t == 12 and v2:
+            n = r.u32()
+            print("ATOMIC_BUFFERS %d" % n)
+            for _ in range(n):
+                binding, size, stages, nu = r.u32(), r.u32(), r.u32(), r.u32()
+                counters = r.u32s(nu)
+                if nuniforms is not None and any(c >= nuniforms for c in counters):
+                    raise Bad("atomic counter outside UNIFORMS")
+                print("  binding %d, %d bytes, stages %s, counters %s" %
+                      (binding, size, ",".join(STAGES[s] for s in STAGES if stages & (1 << s)), counters))
             r.done()
         elif t == 8 and v2:
             n = r.u32()

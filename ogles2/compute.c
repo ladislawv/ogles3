@@ -120,15 +120,20 @@ static ULONG block_address(struct OGLES2Context *ctx, const struct OGLES2Program
     return zero;
 }
 
-/* Storage block k of the shader (Mesa's SSBO k): the range at its binding;
- * 0 without a buffer (or memory). */
+/* Storage buffer k of the shader (Mesa's SSBO k): a storage block's range
+ * at its binding, or past them an atomic counter buffer's (FORMAT.md's
+ * 0x8000 | binding); 0 without a buffer (or memory). */
 static ULONG storage_address(struct OGLES2Context *ctx, const struct OGLES2Program *p, ULONG k, ULONG *size)
 {
     const struct OGLES2Image *im = p->image;
+    UWORD e;
     *size = 0;
     if (k >= im->stage_nsblocks[0])
         return 0;
-    return ogles2_buffer_storage(ctx, im->sblocks[im->stage_sblock[0][k]].binding, size);
+    e = im->stage_sblock[0][k];
+    if (e & 0x8000)
+        return ogles2_buffer_atomic(ctx, e & 0x7fff, size);
+    return ogles2_buffer_storage(ctx, im->sblocks[e].binding, size);
 }
 
 /* The work groups whose shared variables can be in memory at once: the

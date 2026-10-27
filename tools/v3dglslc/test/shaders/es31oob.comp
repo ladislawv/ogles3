@@ -1,0 +1,16 @@
+#version 310 es
+// ES 3.1 bounds checks (Mesa patch 0017): stores past a storage range and
+// past a shared array stay inside them (m8_draw's test_compute_bounds).
+layout(local_size_x = 16) in;
+layout(std430, binding = 1) writeonly buffer Out { uint dst[]; };
+shared uint tmp[16];
+uniform uint past;
+void main()
+{
+    uint i = gl_GlobalInvocationID.x, l = gl_LocalInvocationID.x;
+    tmp[l] = 1u;
+    tmp[l + past] = 7u;
+    barrier();
+    dst[i + past * 4u] = 0xdeadu;
+    dst[i] = i + tmp[l];
+}

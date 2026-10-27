@@ -287,6 +287,7 @@ struct OGLES2Variant
      * built-in image. */
     const UBYTE *key;
     const UBYTE *input_slots;     /* fragment: prog data's 64 input slots (a vertex key's used outputs) */
+    UBYTE uses_storage;           /* the recipe has OGLES2_U_SSBO_OFFSET (ES 3.1; v3dp.c) */
 };
 #define OGLES2_VS_KEY_BYTES 88  /* struct v3d_vs_key as the file writes it */
 #define OGLES2_FS_KEY_BYTES 296 /* struct v3d_fs_key */
@@ -314,6 +315,16 @@ struct OGLES2ImageBlock
     UWORD nmembers;
     const UWORD *members; /* their indices in the image's uniforms */
     const LONG *top_level; /* a storage block's: each member's top-level array size and stride */
+};
+
+/* Format 2, ES 3.1: an atomic counter buffer of the program (ATOMIC_BUFFERS). */
+struct OGLES2ImageAtomic
+{
+    ULONG binding;        /* its GL_ATOMIC_COUNTER_BUFFER binding (layout(binding)) */
+    ULONG size;           /* the bytes its counters need */
+    UBYTE stages;         /* bit per mesa stage that references it */
+    UWORD ncounters;
+    const UWORD *counters; /* their indices in the image's uniforms */
 };
 
 /* Format 2: one input or output of the program (INTERFACE). */
@@ -344,6 +355,7 @@ struct OGLES2Place
 #define OGLES2_UNIFORM_BUILTIN 2
 #define OGLES2_UNIFORM_HIDDEN  4
 #define OGLES2_UNIFORM_BUFFER  8 /* ES 3.1: a storage block's member (GL_BUFFER_VARIABLE), no uniform */
+#define OGLES2_UNIFORM_ATOMIC  16 /* ES 3.1: an atomic counter (block: its atomic counter buffer), no location */
 
 struct OGLES2ImageUniform
 {
@@ -461,8 +473,17 @@ struct OGLES2Image
     UWORD nsblocks;
     const struct OGLES2ImageBlock *sblocks;
     UBYTE stage_nsblocks[2];
-    const UWORD *stage_sblock[2];
+    const UWORD *stage_sblock[2];       /* 0x8000 | b: atomic counter buffer binding b (FORMAT.md) */
+    UWORD nabuffers;                    /* atomic counter buffers (ES 3.1) */
+    const struct OGLES2ImageAtomic *abuffers;
+    /* Format 2's UNIFORM_LOCATIONS (explicit locations, ES 3.1): per
+     * location its uniform's index, OGLES2_LOC_INACTIVE or OGLES2_LOC_NONE;
+     * NULL: the runtime numbers the visible uniforms in order. */
+    UWORD nremap;
+    const UWORD *remap;
 };
+#define OGLES2_LOC_NONE     0xFFFF /* a location of no uniform (GL_INVALID_OPERATION) */
+#define OGLES2_LOC_INACTIVE 0xFFFE /* an inactive uniform's explicit location (ignored) */
 
 /* GL shader and program objects share one name space (GLES 2.0 section 2.10). */
 #define OGLES2_OBJ_SHADER  1
@@ -764,6 +785,7 @@ struct OGLES2Context
     ULONG oq_addr;                  /* the active occlusion query's counter (0: none): job.c points new jobs at it */
     struct OGLES2XfbState *xfb;     /* xfb.c's (ES 3.0's transform feedback objects), NULL until first used */
     BOOL job_xfb;                   /* the open job's binning list fed back: its end turns that off (xfb.c) */
+    BOOL job_storage;               /* a draw of the open job stores into storage buffers (ES 3.1, draw.c) */
 };
 
 #define OGLES2_DISCARD_COLOR   1
@@ -1030,7 +1052,10 @@ UBYTE *ogles2_buffer_pixels(struct OGLES2Context *ctx, BOOL pack, ULONG offset, 
 ULONG ogles2_buffer_words(struct OGLES2Context *ctx, struct OGLES2Buffer *b);
 ULONG ogles2_buffer_uniform(struct OGLES2Context *ctx, ULONG index, ULONG *size);
 ULONG ogles2_buffer_storage(struct OGLES2Context *ctx, ULONG index, ULONG *size);
+ULONG ogles2_buffer_atomic(struct OGLES2Context *ctx, ULONG index, ULONG *size);
+ULONG ogles2_buffer_storage_draw(struct OGLES2Context *ctx, BOOL atomic, ULONG index, ULONG *size);
 GLenum ogles2_buffer_dispatch_indirect(struct OGLES2Context *ctx, GLintptr offset, ULONG *groups);
+GLenum ogles2_buffer_draw_indirect(struct OGLES2Context *ctx, GLintptr offset, ULONG bytes, ULONG *words);
 struct OGLES2Buffer *ogles2_buffer_array(struct OGLES2Context *ctx);
 /* The GL_ELEMENT_ARRAY_BUFFER binding, which a vertex array object holds (vao.c). */
 struct OGLES2Buffer *ogles2_buffer_element(struct OGLES2Context *ctx);

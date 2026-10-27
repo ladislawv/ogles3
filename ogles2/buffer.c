@@ -994,20 +994,57 @@ ULONG ogles2_buffer_uniform(struct OGLES2Context *ctx, ULONG index, ULONG *size)
  * (ES 3.1, compute.c): as ogles2_buffer_uniform; the dispatch is waited for,
  * so the buffer's shadow is then stale (gpu_written copies the words back
  * before the CPU or a draw next uses it). */
-ULONG ogles2_buffer_storage(struct OGLES2Context *ctx, ULONG index, ULONG *size)
+static ULONG storage_range(struct OGLES2Context *ctx, struct buf_range *r, ULONG *size)
 {
-    struct OGLES2BufState *bs = ctx->buf;
-    struct buf_range *r;
     ULONG a;
-    if (!bs || index >= MAX_SSBO_BINDINGS)
-        return 0;
-    r = &bs->ssbo[index];
     if (!r->b || r->offset >= r->b->size)
         return 0;
     gpu_written(ctx, r->b); /* transform feedback's, or an earlier dispatch's (already the words) */
     if (!(a = ogles2_buffer_words(ctx, r->b)))
         return 0;
     r->b->cs_written = TRUE;
+    *size = r->b->size - r->offset;
+    if (r->size && r->size < *size)
+        *size = r->size;
+    return a + r->offset;
+}
+
+ULONG ogles2_buffer_storage(struct OGLES2Context *ctx, ULONG index, ULONG *size)
+{
+    struct OGLES2BufState *bs = ctx->buf;
+    if (!bs || index >= MAX_SSBO_BINDINGS)
+        return 0;
+    return storage_range(ctx, &bs->ssbo[index], size);
+}
+
+/* Atomic counter buffer binding `index` (ES 3.1): a storage buffer to the
+ * shader (Mesa lowers the counters to storage accesses), as above. */
+ULONG ogles2_buffer_atomic(struct OGLES2Context *ctx, ULONG index, ULONG *size)
+{
+    struct OGLES2BufState *bs = ctx->buf;
+    if (!bs || index >= MAX_ATOMIC_BINDINGS)
+        return 0;
+    return storage_range(ctx, &bs->acbo[index], size);
+}
+
+/* A storage buffer (or atomic counter buffer) binding a draw's fragment
+ * shader reads and writes (ES 3.1): its words, the range's address and
+ * bytes; the open job writes them, so the CPU's next access waits for it
+ * and copies them back (as transform feedback's, gpu_written). Not
+ * gpu_written here: a draw is building the job (the GPU reads the words,
+ * which are the newest data whoever wrote them). 0: no buffer or memory. */
+ULONG ogles2_buffer_storage_draw(struct OGLES2Context *ctx, BOOL atomic, ULONG index, ULONG *size)
+{
+    struct OGLES2BufState *bs = ctx->buf;
+    struct buf_range *r;
+    ULONG a;
+    *size = 0;
+    if (!bs || index >= (atomic ? MAX_ATOMIC_BINDINGS : MAX_SSBO_BINDINGS))
+        return 0;
+    r = atomic ? &bs->acbo[index] : &bs->ssbo[index];
+    if (!r->b || r->offset >= r->b->size || !(a = ogles2_buffer_words(ctx, r->b)))
+        return 0;
+    r->b->xfb_job = ctx->job_serial;
     *size = r->b->size - r->offset;
     if (r->size && r->size < *size)
         *size = r->size;
@@ -1028,6 +1065,24 @@ GLenum ogles2_buffer_dispatch_indirect(struct OGLES2Context *ctx, GLintptr offse
         return GL_INVALID_OPERATION;
     gpu_written(ctx, b);
     memcpy(groups, b->data + offset, 12);
+    return 0;
+}
+
+/* glDrawArraysIndirect's and glDrawElementsIndirect's command (ES 3.1
+ * 10.5), `bytes` at `offset` in the GL_DRAW_INDIRECT_BUFFER binding, into
+ * words: 0, or the error (Mesa's order: GL_INVALID_VALUE for an offset
+ * not a word's, GL_INVALID_OPERATION without a buffer or past its end; a
+ * negative offset is past it, dEQP-GLES31's signed32_wrap case). */
+GLenum ogles2_buffer_draw_indirect(struct OGLES2Context *ctx, GLintptr offset, ULONG bytes, ULONG *words)
+{
+    struct OGLES2BufState *bs = bs_get(ctx);
+    struct OGLES2Buffer *b = bs ? bs->draw_indirect : 0;
+    if (offset & 3)
+        return GL_INVALID_VALUE;
+    if (!b || !b->data || (ULONG)offset > b->size || b->size - (ULONG)offset < bytes)
+        return GL_INVALID_OPERATION;
+    gpu_written(ctx, b);
+    memcpy(words, b->data + offset, bytes);
     return 0;
 }
 

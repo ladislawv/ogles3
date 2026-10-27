@@ -43,14 +43,18 @@ def string(b):
 
 
 class Compiler:
-    """The host v3dglslc in SERVE mode; started again if it ends."""
+    """The host v3dglslc in SERVE mode; started again if it ends, or when its
+    file changes (a rebuilt compiler: the running one would answer for the
+    old code, as one did for a whole dEQP group on 2026-10-27)."""
 
     def __init__(self, path):
         self.path = path
         self.p = None
+        self.mtime = None
         self.log = open(os.path.join(tempfile.gettempdir(), "compile_bridge.log"), "ab")
 
     def start(self):
+        self.mtime = os.path.getmtime(self.path)
         self.p = subprocess.Popen([self.path, "SERVE"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                   stderr=self.log)
 
@@ -63,6 +67,8 @@ class Compiler:
 
     def request(self, op, crc, vs, fs, bindings, keys, out_path):
         """(result, log) of one request; the compiler writes out_path's files."""
+        if self.p and self.p.poll() is None and os.path.getmtime(self.path) != self.mtime:
+            self.restart()
         if not self.p or self.p.poll() is not None:
             self.start()
         self.p.stdin.write(b"V3Q1" + u32(op) + u32(crc) + string(vs) + string(fs) + string(bindings) +

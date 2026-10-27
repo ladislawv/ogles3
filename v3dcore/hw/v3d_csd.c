@@ -29,9 +29,15 @@
 #define L2TCACTL_TMUWCF    0x00010000
 #define L2TCACTL_FLM_CLEAN 0x04000000
 
-/* Polls of V3D_CSD_STATUS before a dispatch counts as stuck: a floor, plus
- * some for every batch of 16 invocations. */
+/* Polls of a register before the GPU counts as stuck: the dispatcher being
+ * idle before a dispatch, a cache operation. */
 #define CSD_POLLS_MIN 200000UL
+/* Polls of V3D_CSD_STATUS without progress (the batches left to start,
+ * CURRENT_CFG4, standing still) before a dispatch counts as stuck: whole
+ * seconds, since one batch may take long (dEQP-GLES31's atomic_counter
+ * cases: thousands of atomic operations on one counter took longer than a
+ * fixed 200,000 polls, and the dispatch was reset as stuck). */
+#define CSD_STALL_POLLS 4000000UL
 
 static v3d_u8 completed(void)
 {
@@ -58,7 +64,7 @@ void v3d_clean_caches(void)
 
 int v3d_csd_dispatch(const v3d_u32 cfg[7], v3d_u32 batches)
 {
-    v3d_u32 polls, limit;
+    v3d_u32 polls, left, last;
     v3d_u8 before;
     int i;
 
@@ -72,11 +78,15 @@ int v3d_csd_dispatch(const v3d_u32 cfg[7], v3d_u32 batches)
         V3D_CSD_QUEUED_CFG0[i] = LE32(cfg[i]);
     V3D_CSD_QUEUED_CFG0[0] = LE32(cfg[0]); /* queues it */
 
-    limit = CSD_POLLS_MIN + batches * 4;
+    (void)batches;
+    last = V3D_CSD_CURRENT_CFG4;
     for (polls = 0; completed() == before || busy(); polls++) {
-        if (polls > limit) {
-            D(("v3d_csd: no completion after %lu polls (batches left %lu)\n", (ULONG)polls,
-               (ULONG)LE32(V3D_CSD_CURRENT_CFG4)));
+        if ((left = V3D_CSD_CURRENT_CFG4) != last) { /* progress: the watchdog starts again */
+            last = left;
+            polls = 0;
+        }
+        if (polls > CSD_STALL_POLLS) {
+            D(("v3d_csd: no progress in %lu polls (batches left %lu)\n", (ULONG)polls, (ULONG)LE32(left)));
             return -2;
         }
     }

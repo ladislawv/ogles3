@@ -10,6 +10,7 @@
  */
 #include <stdio.h>
 #include <exec/types.h>
+#include <exec/execbase.h>
 #include <proto/exec.h>
 #include "v3d_types.h"
 #include "devicetree_protos.h"
@@ -135,5 +136,9 @@ int main(void)
     }
     if (property(0x00030003, 1, &v)) /* core voltage, microvolts */
         printf("core voltage %lu.%04lu V\n", (unsigned long)(v / 1000000), (unsigned long)(v % 1000000 / 100));
+    /* exec keeps the last alert (a Guru) across a warm reboot: its code and
+     * the task or address that raised it (-1: none since power-on) */
+    printf("last alert 0x%08lx, task/address 0x%08lx\n", (unsigned long)SysBase->LastAlert[0],
+           (unsigned long)SysBase->LastAlert[1]);
     return 0;
 }

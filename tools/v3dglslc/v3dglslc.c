@@ -519,15 +519,18 @@ static void bind_uniform_blocks(GLuint p)
     }
 }
 
-/* ES 3.1's storage blocks: each block's binding a buffer of 64 KB of zeros
- * (the driver writes the bound buffers' addresses into the uniforms). */
+/* ES 3.1's storage blocks and atomic counter buffers: each one's binding a
+ * buffer of 64 KB of zeros (the driver writes the bound buffers' addresses
+ * into the uniforms; an atomic counter buffer is a storage buffer to it, the
+ * state tracker's st_bind_atomics). */
 static void bind_storage_blocks(GLuint p)
 {
     static GLuint ssbo;
     static const GLenum prop = GL_BUFFER_BINDING;
-    GLint n = 0, i, binding;
+    GLint n = 0, na = 0, i, binding;
     _mesa_GetProgramInterfaceiv(p, GL_SHADER_STORAGE_BLOCK, GL_ACTIVE_RESOURCES, &n);
-    if (!n)
+    _mesa_GetProgramInterfaceiv(p, GL_ATOMIC_COUNTER_BUFFER, GL_ACTIVE_RESOURCES, &na);
+    if (!n && !na)
         return;
     if (!ssbo) {
         void *zeros = calloc(1, 65536);
@@ -540,6 +543,11 @@ static void bind_storage_blocks(GLuint p)
         binding = 0;
         _mesa_GetProgramResourceiv(p, GL_SHADER_STORAGE_BLOCK, (GLuint)i, 1, &prop, 1, NULL, &binding);
         _mesa_BindBufferBase(GL_SHADER_STORAGE_BUFFER, (GLuint)binding, ssbo);
+    }
+    for (i = 0; i < na; i++) {
+        binding = 0;
+        _mesa_GetProgramResourceiv(p, GL_ATOMIC_COUNTER_BUFFER, (GLuint)i, 1, &prop, 1, NULL, &binding);
+        _mesa_BindBufferBase(GL_ATOMIC_COUNTER_BUFFER, (GLuint)binding, ssbo);
     }
 }
 
@@ -574,13 +582,9 @@ static int key_states(GLuint p, int wide)
     GET_CURRENT_CONTEXT(ctx);
     struct gl_shader_program *sp = _mesa_lookup_shader_program(ctx, p);
     int s;
-    /* Atomic counters and images (ES 3.1) are refused before a draw or a
-     * dispatch: the driver would read their bindings, which nothing binds
-     * (v3dp_write refuses them too, docs/GLES3_PLAN.md stage D item 2). */
-    if (sp && sp->data->NumAtomicBuffers) {
-        fprintf(stderr, "v3dp: atomic counters are not supported yet\n");
-        return 0;
-    }
+    /* Images (ES 3.1) are refused before a draw or a dispatch: the driver
+     * would read their bindings, which nothing binds (v3dp_write refuses
+     * them too, docs/GLES3_PLAN.md stage D item 2). */
     for (s = 0; sp && s < MESA_SHADER_STAGES; s++)
         if (sp->_LinkedShaders[s] && sp->_LinkedShaders[s]->Program->info.num_images) {
             fprintf(stderr, "v3dp: images are not supported yet\n");
@@ -637,6 +641,7 @@ static int draw_key_states(GLuint p, int wide)
     _mesa_UseProgram(p);
     bind_samplers(p, 0, wide);
     bind_uniform_blocks(p);
+    bind_storage_blocks(p); /* a fragment shader's (ES 3.1) */
     _mesa_GetProgramiv(p, GL_ACTIVE_ATTRIBUTES, &n);
     for (i = 0; i < n; i++) {
         char name[256];

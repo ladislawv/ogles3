@@ -47,6 +47,7 @@
 #include "v3d_submit_timeout.h"
 #include "v3d_gpu_lock.h"
 #include "v3d_regs.h"
+#include "v3d_csd.h"
 
 #define GPU_LOCK_TIMEOUT_MS 5000
 
@@ -827,6 +828,14 @@ static void after_render(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb
         ogles2_display_unlock(&ctx->display);
     }
     ctx->sum_post += (double)(ULONG)(ogles2_clock_us() - t0);
+    /* Fragment shaders stored into storage buffers (ES 3.1): the TMU's
+     * writes cleaned to memory, as the kernel does for a job Mesa flags
+     * needs_flush (such a job is never left running: may_defer). */
+    if (ctx->job_storage) {
+        if (holds_lock)
+            v3d_clean_caches();
+        ctx->job_storage = FALSE;
+    }
     if (holds_lock)
         v3d_gpu_unlock(ogles2_device_gpu_lock());
     if (wr == v3d_wait_result_success) {
@@ -877,6 +886,8 @@ void ogles2_job_finish(struct OGLES2Context *ctx)
  * next submitter waits for that render on the GPU (take_gpu). */
 static BOOL may_defer(struct OGLES2Context *ctx, BOOL object)
 {
+    if (ctx->job_storage) /* its caches are cleaned after it, under the lock (after_render) */
+        return FALSE;
     return object || ctx->display.own_screen || ctx->display.direct;
 }
 
