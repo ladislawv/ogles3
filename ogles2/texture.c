@@ -112,6 +112,12 @@ struct OGLES2Texture
     BOOL es3_rules;                 /* its images were given in an ES3 context: ES 3.0's depth sampling */
     struct OGLES2S8 *s8;            /* DEPTH32F_STENCIL8: the stencil, made at its first use as a
                                      * job's (ogles2_texture_s8_surface); NULL: none */
+    /* ES 3.0 3.8.13: a mutable texture complete from its base level but not
+     * from level 0 is sampled through a texture of the library's own whose
+     * level 0 is that base level (based_view; its RAM copies are this
+     * texture's). Dropped at every change (before_change); NULL: none. */
+    struct OGLES2Texture *view;
+    GLint view_base;                /* the level the view's level 0 is */
 };
 
 /* Both records fit their halves of rec. */
@@ -241,9 +247,28 @@ static void free_gpu(struct OGLES2Texture *t)
     t->st_own = FALSE;
 }
 
+static void free_levels(struct OGLES2Texture *t);
+
+/* The base level's view (no job uses its GPU copy any more): its RAM
+ * copies are the texture's, kept. */
+static void free_view(struct OGLES2Texture *t)
+{
+    struct OGLES2Texture *v = t->view;
+    int k, l;
+    if (!v)
+        return;
+    t->view = 0;
+    for (k = 0; k < v->nf; k++)
+        for (l = 0; l < MAX_LEVELS; l++)
+            v->f[k].shadow[l] = 0;
+    free_levels(v);
+    FreeVec(v);
+}
+
 static void free_levels(struct OGLES2Texture *t)
 {
     int k, l;
+    free_view(t);
     for (k = 0; k < t->nf; k++) {
         for (l = 0; l < MAX_LEVELS; l++) {
             if (t->f[k].shadow[l])
@@ -320,6 +345,11 @@ static void before_change(struct OGLES2Context *ctx, struct OGLES2TexState *ts,
 {
     struct OGLES2Context *m, *user;
     V3DContext *v;
+    /* Its base level's view is made again at its next draw. */
+    if (t->view) {
+        before_change(ctx, ts, t->view);
+        free_view(t);
+    }
     /* Its records are made again at the next draw: a new level can change
      * the level count without a new GPU copy. */
     t->st_own = FALSE;
@@ -1739,10 +1769,11 @@ static int faces(const struct OGLES2Texture *t)
     return t->target == GL_TEXTURE_CUBE_MAP ? 6 : layered(t) ? t->d[0] : 1;
 }
 
-/* The faces level l has: a 3D texture's slices halve with its levels. */
+/* The faces level l has: a 3D texture's slices halve with its levels, a 2D
+ * array's layers are each level's own (complete: those of level 0). */
 static int faces_at(const struct OGLES2Texture *t, int l)
 {
-    return t->target == GL_TEXTURE_3D ? t->d[l] : faces(t);
+    return layered(t) ? t->d[l] : faces(t);
 }
 
 /* Level l has the depth (an array: the layers) the chain from level 0 gives it. */
@@ -1768,20 +1799,26 @@ static int chain_levels(const struct OGLES2Texture *t)
     return m > n ? m : n;
 }
 
-/* Level 0 exists; a cube map's on all six faces, square and of one size
- * (GLES 2.0 3.7.10, "cube complete"). */
-static BOOL base_ok(const struct OGLES2Texture *t)
+/* Level b exists; a cube map's on all six faces, square and of one size
+ * (GLES 2.0 3.7.10, "cube complete"; ES 3.0's at the base level). */
+static BOOL level_ok(const struct OGLES2Texture *t, int b)
 {
     const struct OGLES2Face *f0 = &t->f[0];
+    ULONG bit = 1UL << b;
     int k;
-    if (!(f0->defined & 1) || !f0->w[0] || !f0->h[0])
+    if (!(f0->defined & bit) || !f0->w[b] || !f0->h[b])
         return FALSE;
-    for (k = 1; k < faces(t); k++)
-        if (!(t->f[k].defined & 1) || t->f[k].w[0] != f0->w[0] || t->f[k].h[0] != f0->h[0] ||
-            level_class(&t->f[k], 0) != level_class(f0, 0) || t->f[k].format[0] != f0->format[0] ||
-            t->f[k].type[0] != f0->type[0])
+    for (k = 1; k < faces_at(t, b); k++)
+        if (!(t->f[k].defined & bit) || t->f[k].w[b] != f0->w[b] || t->f[k].h[b] != f0->h[b] ||
+            level_class(&t->f[k], b) != level_class(f0, b) || t->f[k].format[b] != f0->format[b] ||
+            t->f[k].type[b] != f0->type[b])
             return FALSE;
-    return t->target != GL_TEXTURE_CUBE_MAP || f0->w[0] == f0->h[0];
+    return t->target != GL_TEXTURE_CUBE_MAP || f0->w[b] == f0->h[b];
+}
+
+static BOOL base_ok(const struct OGLES2Texture *t)
+{
+    return level_ok(t, 0);
 }
 
 static BOOL mipmapped(GLenum min_filter)
@@ -1827,6 +1864,24 @@ static BOOL complete(const struct OGLES2Texture *t, GLenum min_filter, GLenum ma
     *first = b;
     *last = e;
     return TRUE;
+}
+
+/* ES 3.0 3.8.13 measures a mutable texture's mip chain from its base level,
+ * which need not be of level 0's chain (nor level 0 exist). The level such
+ * a texture is sampled from as its level 0 (based_view): its base level
+ * when level 0's chain does not hold it, else 0. */
+static int chain_base(const struct OGLES2Texture *t)
+{
+    int b = t->base_level, k;
+    if (!t->es3_rules || t->immutable_levels || b <= 0 || b >= MAX_LEVELS || !level_ok(t, b))
+        return 0;
+    if (base_ok(t) && b < chain_levels(t) && depth_ok(t, b)) { /* 1x1 past the chain's end: not of it */
+        for (k = 0; k < faces_at(t, b) && consistent(&t->f[k], b); k++)
+            ;
+        if (k == faces_at(t, b))
+            return 0;
+    }
+    return b;
 }
 
 /* A face's view of the GPU texture: face 0 is the texture itself; face k
@@ -2984,13 +3039,15 @@ BOOL ogles2_texture_wide(struct OGLES2Context *ctx, int unit, int kind)
 {
     struct OGLES2TexState *ts = ctx->tex;
     const struct OGLES2Texture *t;
+    int b;
     if (!ts || kind == OGLES2_TEX_NONE)
         return FALSE;
     t = unit_texture(ts, kind, unit);
     /* A depth comparison returns 16 bits (Mesa's v3d_get_tex_return_size). */
     if ((ts->unitsmp[unit] ? &ts->unitsmp[unit]->s : &t->s)->compare_mode == GL_COMPARE_REF_TO_TEXTURE)
         return FALSE;
-    return (t->f[0].defined & 1) && level_wide(&t->f[0], 0);
+    b = chain_base(t); /* its view's level 0 */
+    return (t->f[0].defined & (1UL << b)) && level_wide(&t->f[0], b);
 }
 
 void ogles2_texture_rendered(struct OGLES2Texture *t, int k, int l)
@@ -4622,14 +4679,14 @@ static BOOL generate_tfu(struct OGLES2Context *ctx, struct OGLES2TexState *ts, s
     return TRUE;
 }
 
-/* A 3D texture's levels 1 to n - 1 from level 0 on the CPU: each slice a
+/* A 3D texture's levels b + 1 to e from level b on the CPU: each slice a
  * box filter of two (the last one of an odd depth alone, as the 2D box
  * filter takes a row). */
-static BOOL generate_volume(struct OGLES2Context *ctx, struct OGLES2Texture *t, int n, int cls)
+static BOOL generate_volume(struct OGLES2Context *ctx, struct OGLES2Texture *t, int b, int e, int cls)
 {
     int l, z;
     ULONG i, cb = copy_bytes(cls);
-    for (l = 1; l < n; l++) {
+    for (l = b + 1; l <= e; l++) {
         int w = t->f[0].w[l - 1] > 1 ? t->f[0].w[l - 1] / 2 : 1, h = t->f[0].h[l - 1] > 1 ? t->f[0].h[l - 1] / 2 : 1;
         int d = t->d[l - 1] > 1 ? t->d[l - 1] / 2 : 1;
         for (z = 0; z < d; z++) {
@@ -4669,22 +4726,26 @@ static BOOL generate_volume(struct OGLES2Context *ctx, struct OGLES2Texture *t, 
 /* ES 3.0 3.8.10: a base level given a sized format is colour-renderable
  * and filterable: not a signed normalized, 32-bit float, RGB16F, RGB9_E5 or
  * SRGB8 one (integer, depth and compressed ones refused before). */
-static BOOL mip_sized_ok(const struct OGLES2Face *f)
+static BOOL mip_sized_ok(const struct OGLES2Face *f, int b)
 {
-    GLenum s = f->sized[0], ty = f->type[0];
-    if (!(f->defined & f->sized_given & 1) || s == GL_R11F_G11F_B10F || s == GL_SRGB8_ALPHA8)
+    GLenum s = f->sized[b], ty = f->type[b];
+    if (!((f->defined & f->sized_given) >> b & 1) || s == GL_R11F_G11F_B10F || s == GL_SRGB8_ALPHA8)
         return TRUE;
     if (s == GL_RGB9_E5 || s == GL_SRGB8 || ty == GL_UNSIGNED_INT_5_9_9_9_REV)
         return FALSE;
     return ty != GL_FLOAT && ty != GL_BYTE &&
-           !((ty == GL_HALF_FLOAT || ty == GL_HALF_FLOAT_OES) && f->format[0] == GL_RGB);
+           !((ty == GL_HALF_FLOAT || ty == GL_HALF_FLOAT_OES) && f->format[b] == GL_RGB);
 }
 
+/* ES 3.0 3.8.10: levels base + 1 to q from the base level (level 0 in
+ * GLES2 contexts), q the chain's last level or the max level, an immutable
+ * texture's base and max clamped to its levels. */
 void ogles2_glGenerateMipmap(struct OGLES2Context *ctx, GLenum target)
 {
     struct OGLES2TexState *ts;
     struct OGLES2Texture *t;
-    int l, n, k, cls;
+    const struct OGLES2Face *fb;
+    int l, n, k, cls, b, e, d;
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
         return;
     if (target == GL_TEXTURE_RECTANGLE) { /* ARB_texture_rectangle: no mip levels */
@@ -4693,18 +4754,24 @@ void ogles2_glGenerateMipmap(struct OGLES2Context *ctx, GLenum target)
     }
     if (!(t = bound(ctx, ts, target)))
         return;
-    /* A compressed level 0 (ETC1, S3TC), of any size: GLES 2.0 3.7.11; ES
-     * 3.0's integer ones */
-    if ((t->f[0].defined & 1) && (t->f[0].format[0] == GL_ETC1_RGB8_OES || dxt_block_bytes(t->f[0].format[0]) ||
-                                  int_components(t->f[0].format[0]))) {
+    b = ogles2_es3(ctx) ? t->base_level : 0;
+    if (t->immutable_levels && b > t->immutable_levels - 1)
+        b = t->immutable_levels - 1;
+    if (b >= MAX_LEVELS - 1)
+        return; /* no level past it */
+    fb = &t->f[0];
+    /* A compressed base level (ETC1, S3TC), of any size: GLES 2.0 3.7.11;
+     * ES 3.0's integer ones */
+    if ((fb->defined & (1UL << b)) &&
+        (fb->format[b] == GL_ETC1_RGB8_OES || dxt_block_bytes(fb->format[b]) || int_components(fb->format[b]))) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
-    if (ogles2_es3(ctx) && !mip_sized_ok(&t->f[0])) {
+    if (ogles2_es3(ctx) && !mip_sized_ok(fb, b)) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
-    if (!base_ok(t)) {
+    if (!level_ok(t, b)) {
         /* GLES 2.0 3.7.11: a cube map that is not cube complete. */
         if (target == GL_TEXTURE_CUBE_MAP)
             ogles2_error(ctx, GL_INVALID_OPERATION);
@@ -4712,27 +4779,43 @@ void ogles2_glGenerateMipmap(struct OGLES2Context *ctx, GLenum target)
     }
     /* Depth textures: no mip chain to filter (GLES 3.0's rule for formats
      * that are not filterable; OES_depth_texture says nothing). */
-    cls = level_class(&t->f[0], 0);
+    cls = level_class(fb, b);
     if (cls == CLASS_DEPTH16 || cls == CLASS_DEPTH24) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
-    n = chain_levels(t);
-    if (generate_tfu(ctx, ts, t, n))
+    n = level_count(fb->w[b], fb->h[b]); /* the chain from the base level (chain_levels') */
+    if (t->target == GL_TEXTURE_3D) {
+        int m = 1;
+        for (d = t->d[b]; d > 1; d /= 2)
+            m++;
+        if (m > n)
+            n = m;
+    }
+    e = b + n - 1;
+    if (e > t->max_level)
+        e = t->max_level;
+    if (t->immutable_levels && e > t->immutable_levels - 1)
+        e = t->immutable_levels - 1;
+    if (e > MAX_LEVELS - 1)
+        e = MAX_LEVELS - 1;
+    if (e <= b)
+        return;
+    if (b == 0 && generate_tfu(ctx, ts, t, e + 1))
         return;
     before_change(ctx, ts, t);
     if (t->target == GL_TEXTURE_3D) {
-        if (!generate_volume(ctx, t, n, cls))
+        if (!generate_volume(ctx, t, b, e, cls))
             ogles2_error(ctx, GL_OUT_OF_MEMORY);
         else if (ctx->v3d && !upload_all(t))
             ogles2_error(ctx, GL_OUT_OF_MEMORY);
         return;
     }
-    for (l = 1; l < n; l++)
-        t->d[l] = t->d[0]; /* an array's layers: every level has them all */
-    for (k = 0; k < faces(t); k++) {
+    for (l = b + 1; l <= e; l++)
+        t->d[l] = t->d[b]; /* an array's layers: every level has them all */
+    for (k = 0; k < faces_at(t, b); k++) {
         struct OGLES2Face *f = &t->f[k];
-        for (l = 1; l < n; l++) {
+        for (l = b + 1; l <= e; l++) {
             int w = f->w[l - 1] > 1 ? f->w[l - 1] / 2 : 1, h = f->h[l - 1] > 1 ? f->h[l - 1] / 2 : 1;
             UBYTE *img = AllocVec((ULONG)w * h * copy_bytes(cls), MEMF_ANY);
             if (!img) {
@@ -4771,12 +4854,15 @@ ULONG ogles2_texture_size(struct OGLES2Context *ctx, int unit, int kind, int wha
     struct OGLES2TexState *ts = ts_get(ctx);
     struct OGLES2Texture *t;
     ULONG s;
+    int b;
     if (!ts || kind == OGLES2_TEX_NONE)
         return 1;
     t = unit_texture(ts, kind, unit); /* the integer flag aside */
     /* the depth of a 3D texture (minified as width and height), the layers of an array */
     if (what >= 2 && !(what == 2 ? t->target == GL_TEXTURE_3D : t->target == GL_TEXTURE_2D_ARRAY))
         return 1;
+    if ((b = chain_base(t)) != 0) /* the base level's own (its view's level 0) */
+        return what >= 2 ? t->d[b] : what ? t->f[0].h[b] : t->f[0].w[b];
     s = what == 3 ? t->d[0] : what == 2 ? t->d[0] : what ? t->f[0].h[0] : t->f[0].w[0];
     if (!s || what == 3)
         return s;
@@ -5019,6 +5105,65 @@ static UBYTE wrap_mode(GLenum w)
          : w == GL_MIRROR_CLAMP_TO_EDGE ? V3D_WRAP_MODE_MIRRORONCE : V3D_WRAP_MODE_REPEAT;
 }
 
+/* What a draw samples for t: t, or the view of its base level (chain_base;
+ * Mesa lays a new resource out from the base level so), made again after
+ * a change or for another base level, with t's parameters. */
+static struct OGLES2Texture *based_view(struct OGLES2Context *ctx, struct OGLES2TexState *ts,
+                                        struct OGLES2Texture *t)
+{
+    struct OGLES2Texture *v = t->view;
+    int b = chain_base(t), n, k, l;
+    if (v && t->view_base != b) {
+        before_change(ctx, ts, v);
+        free_view(t);
+        v = 0;
+    }
+    if (!b)
+        return t;
+    if (!v) {
+        sync(t); /* the RAM copies current (a level a job drew into) */
+        n = faces_at(t, b);
+        if (!(v = AllocVec(sizeof(*v), MEMF_ANY | MEMF_CLEAR)))
+            return t;
+        init_object(v, 0, t->target);
+        if (!faces_room(v, n)) {
+            FreeVec(v);
+            return t;
+        }
+        for (l = b; l < MAX_LEVELS; l++) {
+            ULONG bit = 1UL << l, to = 1UL << (l - b);
+            v->d[l - b] = t->d[l];
+            for (k = 0; k < n && k < t->nf; k++) {
+                const struct OGLES2Face *s = &t->f[k];
+                struct OGLES2Face *f = &v->f[k];
+                if (!(s->defined & bit))
+                    continue;
+                f->w[l - b] = s->w[l];
+                f->h[l - b] = s->h[l];
+                f->format[l - b] = s->format[l];
+                f->type[l - b] = s->type[l];
+                f->sized[l - b] = s->sized[l];
+                f->shadow[l - b] = s->shadow[l]; /* t's (free_view) */
+                f->defined |= to;
+                if (s->blank & bit)
+                    f->blank |= to;
+                if (s->sized_given & bit)
+                    f->sized_given |= to;
+            }
+        }
+        v->es3_rules = TRUE;
+        t->view = v;
+        t->view_base = b;
+    }
+    v->s = t->s;
+    v->lod_bias = t->lod_bias;
+    memcpy(v->gl_swizzle, t->gl_swizzle, sizeof(v->gl_swizzle));
+    v->base_level = 0;
+    v->max_level = t->max_level - b;
+    v->pver = t->pver;
+    return v;
+}
+
 /* The texture and sampler state for unit `unit`'s texture of `cube`
  * kind, written into the job's state buffer (packing as PiStorm3D's
  * v3d_texture_emit_state; values as Mesa's v3dx_state.c). FALSE: out of
@@ -5053,7 +5198,7 @@ BOOL ogles2_texture_state(struct OGLES2Context *ctx, int unit, int kind, ULONG *
     if (kind == OGLES2_TEX_NONE && !(t = fallback(ts)))
         return FALSE;
     if (kind != OGLES2_TEX_NONE)
-        t = unit_texture(ts, kind, unit);
+        t = based_view(ctx, ts, unit_texture(ts, kind, unit));
     isfb = FALSE;
     /* The same records as the last draw with it: a texture a draw of a job
      * not yet rendered used gets a new GPU copy (another address) when its

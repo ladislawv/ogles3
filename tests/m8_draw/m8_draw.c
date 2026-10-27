@@ -888,6 +888,84 @@ static void test_storage(void)
     glDeleteProgram(p);
 }
 
+/* The colour es3wide samples from the bound 2D texture at (32, 32). */
+static int sampled_is(GLuint p, int r, int g, int b)
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    return pixel_is(32, 32, r, g, b, 255, 0);
+}
+
+/* ES 3.0 3.8.13: a mutable texture's chain is measured from its base
+ * level, whatever level 0 is (es3wide, es3size): a texture with levels 2
+ * and 3 only, then a level 0 not of their chain; glGenerateMipmap from base
+ * level 1, level 0 untouched. */
+static void test_base_levels(void)
+{
+    static GLubyte red[16 * 16 * 4], green[8 * 8 * 4];
+    static const GLubyte blue[4] = { 0, 0, 255, 255 };
+    GLuint p = program("es3wide"), ps = program("es3size"), t;
+    int i;
+    if (!p || !ps) {
+        check(0, "base levels: es3wide and es3size link");
+        return;
+    }
+    for (i = 0; i < 16 * 16; i++) {
+        red[i * 4] = 255;
+        red[i * 4 + 3] = 255;
+    }
+    for (i = 0; i < 8 * 8; i++) {
+        green[i * 4 + 1] = 255;
+        green[i * 4 + 3] = 255;
+    }
+    glUseProgram(p);
+    glUniform1i(glGetUniformLocation(p, "tex"), 0);
+    glUseProgram(ps);
+    glUniform1i(glGetUniformLocation(ps, "tex"), 0);
+    glGenTextures(1, &t);
+    glBindTexture(GL_TEXTURE_2D, t);
+    glTexImage2D(GL_TEXTURE_2D, 2, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, green);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 2);
+    check(sampled_is(p, 0, 255, 0), "base levels: level 2 alone, base level 2 (green)");
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+    check(sampled_is(p, 0, 0, 0), "base levels: mipmapped without level 3: incomplete (black)");
+    glTexImage2D(GL_TEXTURE_2D, 3, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, blue);
+    check(sampled_is(p, 0, 255, 0), "base levels: levels 2 and 3, mipmapped (green)");
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 3);
+    check(sampled_is(p, 0, 0, 255), "base levels: base level 3 (blue)");
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 2);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 16, 16, 0, GL_RGBA, GL_UNSIGNED_BYTE, red);
+    check(sampled_is(p, 0, 255, 0), "base levels: a level 0 not of their chain, base level 2 (green)");
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(ps);
+    check(pixel_is(20, 20, 2, 2, 0, 255, 0), "base levels: textureSize there (2x2)");
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    check(sampled_is(p, 255, 0, 0), "base levels: base level 0 (red)");
+    glDeleteTextures(1, &t);
+
+    glGenTextures(1, &t);
+    glBindTexture(GL_TEXTURE_2D, t);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 4, 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, red);
+    glTexImage2D(GL_TEXTURE_2D, 1, GL_RGBA, 8, 8, 0, GL_RGBA, GL_UNSIGNED_BYTE, green);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 1);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    check(glGetError() == GL_NO_ERROR, "base levels: glGenerateMipmap from base level 1");
+    check(sampled_is(p, 0, 255, 0), "base levels: its chain from level 1 (green)");
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 4);
+    check(sampled_is(p, 0, 255, 0), "base levels: its level 4, 1x1 (green)");
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    check(sampled_is(p, 255, 0, 0), "base levels: level 0 untouched (red)");
+    glDeleteTextures(1, &t);
+    glDeleteProgram(p);
+    glDeleteProgram(ps);
+}
+
 /* ES 3.0's R and RG formats sampled (es3wide): (r, 0, 0, 1) and (r, g, 0, 1). */
 static int one_texel_is(GLuint p, GLenum ifmt, GLenum format, GLenum type, const void *texel, int r, int g)
 {
@@ -2048,6 +2126,7 @@ int main(void)
     test_fence();
     test_query();
     test_storage();
+    test_base_levels();
     test_rg();
     test_formats3();
     test_int_textures();

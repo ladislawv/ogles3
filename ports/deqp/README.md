@@ -34,7 +34,7 @@ see "dEQP-GLES3" below.
   - `modules/glshared` and `modules/gles2` (or `modules/gles3`, without the
     desktop GL package `tgl45es3*`).
 - **`patches/`** are applied to a copy of the sources in `$B/deqp/src`, then
-  those of the module's own directory (`patches/gles2/`: 0003 and 0004;
+  those of the module's own directory (`patches/gles2/`: 0003;
   `patches/gles3/`: 0001):
   - `0001-amiga-m68k.patch`: delibs gains a 68k CPU (32-bit, big-endian).
     An assertion prints on stdout, then aborts. Aligned allocation uses
@@ -46,10 +46,9 @@ see "dEQP-GLES3" below.
   - `0003-big-endian-point-check.patch`: `rasterization.limits.points` read
     RGBA8 pixels as `uint32_t` and took red from the low byte, so it saw the
     green it wanted as red. It now builds the colour from the bytes.
-  - `0004-clip-control-without-vao.patch`: `clip_control` bound a vertex
-    array object without checking for `OES_vertex_array_object`, which
-    ogles2's GLES2 contexts do not offer; it now draws with the default
-    vertex array state there.
+  - (`0004-clip-control-without-vao.patch` is gone: `clip_control` binds
+    a vertex array object without checking for `OES_vertex_array_object`,
+    which ogles2's GLES2 contexts offer since 2026-10-27.)
   - `gles3/0001-big-endian-resize-check.patch`: as 0003, for dEQP-GLES3's
     `fbo.msaa.renderbuffer_resize`, whose four cases failed on the green
     they read. (The earlier `gles3/0001`, the state reset one, is gone:
@@ -147,7 +146,7 @@ stages B and C). Two things follow:
   nothing, returns 0 and prints the function's name once. A throw would end
   the run instead (an exception in a case's deinit terminates dEQP). The run's
   `.txt` lists them all when the first context is made (88 on 2026-10-23).
-  ES 2.0 contexts keep the null pointers, which `0004` tests for.
+  ES 2.0 contexts keep the null pointers.
 - **The state reset after each case:** `glu::resetState` checks
   `glGetError` after each part of the state it resets, and an error in a
   case's deinit ends the run. Until the library took all of the ES 3.0

@@ -261,21 +261,24 @@ Mesa's driver, so they could follow later as an extension
     `1.5e-09` (the GPU's results were right, three times dEQP's
     reference); fixed in the dEQP port (`ports/deqp/README.md`, "libnix's
     printf"), the 1008 shift cases pass (`ogles2-m8-2-20261027-130545`);
-    `derivate.dfdx.texture.basic.float_mediump`, 12 pixels;
+    `derivate.dfdx.texture.basic.float_mediump`, 12 pixels in pairs with
+    dFdx 0 (it passes alone and in the whole `derivate` group again, 612 of
+    612, `ogles2-m8-2-20261027-141357`: not reproduced; watch for it);
     and the 10 of `state_query` and `lifetime` fixed since (§5 items 2
     and 11; their A1200 run next). The rest of the failures are stage
     C's (transform feedback, multisampling, program binaries), whose
     groups later runs leave out (below). The 10 fixes pass in dEQP since
     (`state_query` and `lifetime` fail only stage C's transform feedback
     and program binary cases, `ogles2-m8-2-20261027-124745`, `-124856`).
-    Next: the `derivate` case, item 8's base levels beyond 0 (no dEQP case
-    fails on them).
+    Item 8's base levels beyond 0 since (2026-10-27).
     **Trap:**
     `ports/deqp/build.sh` copies the CTS with `rsync -a`, which keeps the
     sources' old dates, so a patch changed or removed rebuilds nothing:
     delete the copy (`$B/deqp-gles3/src`), and for a removed patch the
-    objects of the files it touched (`ports/deqp/README.md`). dEQP-GLES2's
-    whole list when the ES3 library is finished. §4's items each have a "Done"
+    objects of the files it touched (`ports/deqp/README.md`). **dEQP-GLES2
+    is not run, not even single groups, until all of ES3 (stages B, C and
+    D) is finished** (the developer's decision, 2026-10-27); its whole list
+    runs then, and the stage ends before go without it. §4's items each have a "Done"
     paragraph that says what is in and where; the code of this work so far
     is in `context.c` (versions, extensions), `state.c` (limits),
     `program.c` (the `#version` check, uniforms, `glGetFragDataLocation`,
@@ -1208,7 +1211,8 @@ The base everything else stands on.
    calls many of them after every case. In ES 3.0 contexts the platform now
    gives each a stub that does nothing, returns 0 and names it once (a throw
    would end the run: an exception in a case's deinit terminates dEQP); ES
-   2.0 contexts keep null pointers, which `patches/gles2/0004` tests for.
+   2.0 contexts keep null pointers (which `patches/gles2/0004` tested for
+   until GLES2 contexts offered `OES_vertex_array_object`).
    Then `dEQP-GLES3.info.vendor` passes in an ES 3.0 context, freed cleanly
    (`tests/a1200/results/ogles2-m8-2-20261023-135140`), but the run ends
    there: `resetState` checks `glGetError` after each part of the state, and
@@ -1398,8 +1402,9 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    one implementation); `GL_VERTEX_ARRAY_BINDING` answered in both
    versions. `m8_es3`'s GLES2-context check, `m8_draw`'s
    `test_instanced_ext` (item 4) in an object (with buffers: client
-   arrays are refused there). Not yet: dropping the dEQP-GLES2 port's
-   patch 0004. `m8_es3`'s state and errors, `m8_draw`'s two objects with their
+   arrays are refused there). The dEQP-GLES2 port's patch 0004 is gone
+   (2026-10-27; dEQP-GLES2 rebuilt, its `clip_control` not run yet: with
+   the whole list after ES3, §1). `m8_es3`'s state and errors, `m8_draw`'s two objects with their
    own buffers, one with an element buffer (`ogles2-m8-1-20261025-141310`:
    25, 89, 44 of 44; the GLES2 drawing tests as before,
    `ogles2-m7-4-20261025-141334`). dEQP-GLES3's `vertex_array_objects`
@@ -1747,9 +1752,28 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    54, `negative_api` 287 of 314 (`-180025`: the 23 left are transform
    feedback and program binaries, stage C; a multisampled read
    framebuffer's `glReadPixels`, stage C; `redeclaring_gl_frag_depth`, the
-   compiler's). Left in this item: ES 3.0's completeness of base levels
-   beyond 0 for mutable textures, the 3D textures' mipmaps from a base
-   level.
+   compiler's). **Base levels beyond 0 (2026-10-27, on the A1200):** ES
+   3.0 3.8.13 measures a mutable texture's chain from its base level, and
+   level 0 need not exist or be of that chain. The GPU copy stays laid out
+   from level 0. Such a texture (`chain_base`: ES3 rules, mutable, base
+   level b > 0 defined, and level 0 missing, not of b's chain, or its chain
+   shorter than b) is sampled through a view (`based_view`): a texture of
+   the library's own whose level i is level b + i. It shares the
+   texture's RAM copies, is dropped by `before_change` (its GPU copy
+   renamed as any texture's) and made again at the next draw, for another
+   base level too; its parameters are the texture's, max level less b.
+   `textureSize` and the 32-bit return choice read level b. glGenerateMipmap
+   makes levels b + 1 to q from the base level (ES3 contexts; the
+   immutable texture's base clamped), q also limited by the max level and
+   an immutable texture's levels; 2D arrays and 3D textures alike (the TFU
+   only from level 0). `faces_at` counts a 2D array's layers per level.
+   Not done: rendering into a level of such a texture while level 0 is
+   missing (the GPU copy has no level to attach). `m8_draw`'s
+   `test_base_levels`: levels 2 and 3 alone, then a 16x16 level 0 not of
+   their chain, textureSize there, glGenerateMipmap from base level 1
+   with level 0 untouched (`ogles2-m8-1-20261027-*`: 135 of 135 three
+   ways; the GLES2 drawing tests as before); dEQP-GLES3's
+   `texture.mipmap` 240 of 240 (`ogles2-m8-2-20261027-142634`).
 9. **ETC2/EAC** (mandatory in ES 3.0): native in the TMU (texture types
    `RGB8_ETC2`, `RGB8_PUNCHTHROUGH_ALPHA1`, `RGBA8_ETC2_EAC`, `R11_EAC`,
    `SIGNED_R11_EAC`, `RG11_EAC`, `SIGNED_RG11_EAC`; sRGB by the texture
@@ -2153,10 +2177,10 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
     `implementation_limits`, `polygon_offset`, `dither`, `color_clear`,
     `depth_stencil_clear`, `flush_finish`, `default_vertex_array_object`),
     from their own package
-    (`m8-2`, Appendix B.5); in GLES2 contexts, dEQP-GLES2's cases the
-    extensions change (`fbo.completeness.renderable`, `fbo.render`,
-    `state_query`) and the whole dEQP-GLES2 list again, gl4es (`m6-1`) and
-    Quake III through gl4es (`m6-2`).
+    (`m8-2`, Appendix B.5); in GLES2 contexts gl4es (`m6-1`) and Quake III
+    through gl4es (`m6-2`). dEQP-GLES2 (the cases the extensions change,
+    `fbo.completeness.renderable`, `fbo.render`, `state_query`, and its
+    whole list) waits until all of ES3 is finished (2026-10-27, §1).
 
 Done when: these dEQP-GLES3 groups pass on the A1200, GLES2 and the speed
 figures unchanged; **release 2.0** with the GLES2 extensions (§1).
