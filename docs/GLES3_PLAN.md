@@ -1342,8 +1342,7 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    (`ogles2_buffer_pixels`; past the end or mapped, `GL_INVALID_OPERATION`),
    and the library's own images and reads set it aside
    (`OGLES2PixelStore.own`). Deleting unbinds a buffer from all of them in
-   every member. **References done (2026-10-27, under vamos; the A1200
-   run waits for the whole run's end):** a buffer deleted while a vertex
+   every member. **References done (2026-10-27, on the A1200):** a buffer deleted while a vertex
    array object not bound uses it leaves the name table (its name is free
    again, `glIsBuffer` false) and waits on the share group's
    `orphans` list, data and GPU copies kept; the object still answers its
@@ -1356,7 +1355,8 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    objects (stage C) will be the other holder. For dEQP-GLES3's
    `state_query.integers.element_array_buffer_binding*` (4) and
    `lifetime.attach.deleted_*.buffer_vertex_array` (2). `m8_es3`'s check
-   (95 of 95 under vamos; on the A1200 the data read back too).
+   (95 of 95 under vamos; on the A1200, the data read back too, 27 and
+   104 of 104, `ogles2-m8-1-20261027-124405`).
    `m8_es3`'s targets, bindings, ranges and errors (under vamos without
    `glBufferData`: it times itself on the Pi's system timer, which vamos
    lacks); `m8_draw`'s texel from an unpack buffer, the pixel read into a
@@ -1387,9 +1387,14 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    meanwhile). Stage D's attribute bindings will split the arrays into
    formats and bindings then. Client arrays are refused in an object but
    0. A deleted buffer stays in the context's other objects (item 2's
-   references, 2026-10-27). Not yet:
-   `OES_vertex_array_object` in GLES2 contexts (and with it dropping patch
-   0004). `m8_es3`'s state and errors, `m8_draw`'s two objects with their
+   references, 2026-10-27). **`OES_vertex_array_object` in GLES2
+   contexts (2026-10-27, on the A1200):** the same objects, through
+   `glGenVertexArraysOES` and friends (`vao.c`'s ES3 and OES entries call
+   one implementation); `GL_VERTEX_ARRAY_BINDING` answered in both
+   versions. `m8_es3`'s GLES2-context check, `m8_draw`'s
+   `test_instanced_ext` (item 4) in an object (with buffers: client
+   arrays are refused there). Not yet: dropping the dEQP-GLES2 port's
+   patch 0004. `m8_es3`'s state and errors, `m8_draw`'s two objects with their
    own buffers, one with an element buffer (`ogles2-m8-1-20261025-141310`:
    25, 89, 44 of 44; the GLES2 drawing tests as before,
    `ogles2-m7-4-20261025-141334`). dEQP-GLES3's `vertex_array_objects`
@@ -1412,8 +1417,13 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    forms, packets 34 and 38, which v3dcore has no writers for; the packet
    check compares a record with a divisor too). An instanced array is not
    moved back for `gl_VertexID`; the library's own draws clear the
-   divisor of the arrays they borrow. Not yet: `EXT_instanced_arrays` in
-   GLES2 contexts. `m8_draw`'s `es3inst` (`gl_InstanceID` moves instance i
+   divisor of the arrays they borrow. **`EXT_instanced_arrays` in GLES2
+   contexts (2026-10-27, on the A1200):** `glVertexAttribDivisorEXT`,
+   `glDrawArraysInstancedEXT`, `glDrawElementsInstancedEXT` and the
+   divisor query; `m8_draw`'s `inst100` (GLSL ES 1.00, an instanced
+   colour, both draws: 124 of 124 in the three steps,
+   `ogles2-m8-1-20261027-124405`; the GLES2 drawing tests as before,
+   `ogles2-m7-4-20261027-124222`). `m8_draw`'s `es3inst` (`gl_InstanceID` moves instance i
    right by i): two instances, a divisor of 2, then none
    (`ogles2-m8-1-20261025-142206`: 25, 89, 47 of 47; the GLES2 drawing
    tests as before, `ogles2-m7-4-20261025-142237`). dEQP-GLES3's

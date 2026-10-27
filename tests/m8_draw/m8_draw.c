@@ -1411,8 +1411,9 @@ static void test_instanced_ext(void)
 {
     static const GLfloat col[8] = { 1, 0, 0, 1, 0, 1, 0, 1 }; /* red, green */
     static const GLushort idx[3] = { 0, 1, 2 };
-    GLuint p = program("inst100"), a = 0;
+    GLuint p = program("inst100"), a = 0, bu[3];
     GLint pos, c;
+    GLenum e;
     int ok;
     if (!p) {
         check(0, "EXT_instanced_arrays: inst100 links");
@@ -1423,20 +1424,31 @@ static void test_instanced_ext(void)
     glGenVertexArraysOES(1, &a);
     glBindVertexArrayOES(a);
     glUseProgram(p);
-    glVertexAttribPointer((GLuint)pos, 2, GL_FLOAT, GL_FALSE, 0, cover);
+    /* buffers: an object but 0 takes no client arrays */
+    glGenBuffers(3, bu);
+    glBindBuffer(GL_ARRAY_BUFFER, bu[0]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cover), cover, GL_STATIC_DRAW);
+    glVertexAttribPointer((GLuint)pos, 2, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray((GLuint)pos);
-    glVertexAttribPointer((GLuint)c, 4, GL_FLOAT, GL_FALSE, 0, col);
+    glBindBuffer(GL_ARRAY_BUFFER, bu[1]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(col), col, GL_STATIC_DRAW);
+    glVertexAttribPointer((GLuint)c, 4, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray((GLuint)c);
     glVertexAttribDivisorEXT((GLuint)c, 1);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bu[2]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(idx), idx, GL_STATIC_DRAW);
     glClear(GL_COLOR_BUFFER_BIT);
     glDrawArraysInstancedEXT(GL_TRIANGLES, 0, 3, 2);
     ok = pixel_is(30, 30, 0, 255, 0, 255, 0);
     glClear(GL_COLOR_BUFFER_BIT);
-    glDrawElementsInstancedEXT(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, idx, 1); /* one: the first colour */
+    glDrawElementsInstancedEXT(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0, 1); /* one: the first colour */
     ok = ok && pixel_is(30, 30, 255, 0, 0, 255, 0);
     glBindVertexArrayOES(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glDeleteVertexArraysOES(1, &a);
-    check(ok && glGetError() == GL_NO_ERROR,
+    glDeleteBuffers(3, bu);
+    e = glGetError(); /* read whatever ok says, so no error is left for the next test */
+    check(ok && e == GL_NO_ERROR,
           "EXT_instanced_arrays: an instanced colour in an OES_vertex_array_object object, both draws");
     glDeleteProgram(p);
 }
