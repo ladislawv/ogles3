@@ -398,6 +398,7 @@ static void build_render(struct OGLES2Context *ctx, struct zs_save *store_zs)
      * waits for it (VC4's protocol; packets 7 and 8 exist on V3D 4.2 too). */
     v->current_buf = &v->binning_buf[s];
     SetBuffer(v, &v->binning_buf[s]);
+    ogles2_xfb_job_end(ctx); /* after transform feedback: its counts, the specs off */
     if (ctx->probe & OGLES2_PROBE_SEMAPHORE)
         DoCommand(v, v3d_OP_INCREMENT_SEMAPHORE);
     DoCommand(v, v3d_OP_FLUSH);
@@ -656,6 +657,7 @@ static void build_render_fbo(struct OGLES2Context *ctx, const struct OGLES2Targe
 
     v->current_buf = &v->binning_buf[s];
     SetBuffer(v, &v->binning_buf[s]);
+    ogles2_xfb_job_end(ctx); /* after transform feedback: its counts, the specs off */
     if (ctx->probe & OGLES2_PROBE_SEMAPHORE)
         DoCommand(v, v3d_OP_INCREMENT_SEMAPHORE);
     DoCommand(v, v3d_OP_FLUSH);

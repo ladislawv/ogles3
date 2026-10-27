@@ -262,9 +262,10 @@ to 256 sections (1.x: 64).
 **`PROGRAM`**, after the hash and the stages: `u32 features`, the must-understand feature
 bits. A reader refuses a file with a bit it does not know, so a library never misreads a
 program a newer one compiled (`glProgramBinary`, or a cache after a downgrade). Additions an
-older reader may skip go into new sections and minor versions, as in 1.0. Stage A defines no
-bit; transform feedback (stage C) and the ES 3.1 objects (stage D: storage blocks, atomic
-counters, images, compute, separable programs, explicit uniform locations) add theirs. Stages
+older reader may skip go into new sections and minor versions, as in 1.0. Bit 0 (0x1,
+2026-10-27): transform feedback, the program has a `TRANSFORM_FEEDBACK` section (and its
+binning shaders output the varyings fed back). The ES 3.1 objects (stage D: storage blocks,
+atomic counters, images, compute, separable programs, explicit uniform locations) add theirs. Stages
 may also be bit 5 (compute, Mesa's `MESA_SHADER_COMPUTE`), and a separable program may have
 one stage only (stage D).
 
@@ -296,6 +297,7 @@ location word, bit 30: the input has a location of its own (`layout(location)`, 
 | 7 | `UNIFORM_BLOCKS` | exactly 1 |
 | 8 | `INTERFACE` | exactly 1 |
 | 9 | `VARIANT_OF` | `.v3dx` files only, exactly 1, third |
+| 10 | `TRANSFORM_FEEDBACK` | exactly 1 with feature bit 0, else none |
 
 **`UNIFORM_BLOCKS`**: the program's uniform blocks, then each stage's map to them.
 
@@ -338,6 +340,34 @@ program pipelines in stage D.
 | `u8` | flags: bit 0 explicit location |
 | `u8` | index (an output's; 0 in ES) |
 | `u32` | stages that reference it (bit per stage, `StageReferences`) |
+
+**`TRANSFORM_FEEDBACK`**: a program linked with transform feedback varyings (its hash's
+`"XFBV"`): the varyings as Mesa's linker laid them out (`LinkedTransformFeedback`, which
+`glGetTransformFeedbackVarying` answers), then the V3D driver's layout of them for the binning
+shader (`v3d_set_transform_feedback_outputs`, read from the driver's vertex shader state after
+a draw).
+
+| Type | Field |
+|---|---|
+| `u32` | buffer mode: `GL_INTERLEAVED_ATTRIBS` (0x8C8C) or `GL_SEPARATE_ATTRIBS` (0x8C8D) |
+| `u32` | number of varyings, in the order given |
+| per varying: | |
+| `str` | name as given (`a[2]`: one element) |
+| `u32` | GL type of one element |
+| `u32` | elements (`Size`) |
+| `u32` | buffer it is written to |
+| `u32` | its offset in a vertex's record in that buffer, in bytes |
+| `u32[4]` | each buffer's stride, in 32-bit words (0: unused) |
+| `u32` | number of `TRANSFORM_FEEDBACK_OUTPUT_DATA_SPEC`s (at most 16) |
+| `u16[n]` | the specs, packed as the `TRANSFORM_FEEDBACK_SPECS` packet takes them |
+| `u16[n]` | the same for a draw of points whose vertex shader writes `gl_PointSize` (each first value one later) |
+| pad | to 4 bytes |
+| `u32` | number of the binning shader's outputs for them (at most 64) |
+| `u8[n]` | each output's `slot_and_component` (slot × 4 + component), in VPM order after X, Y, Z, W, Xs, Ys (and the point size) |
+| pad | to 4 bytes |
+
+The binning shader variants of such a program are compiled with these outputs as their used
+outputs (Mesa's `v3d_update_compiled_vs`), whether or not a draw feeds back.
 
 ### `.v3dx`: a program's draw-time variants
 

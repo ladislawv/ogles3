@@ -2213,6 +2213,45 @@ figures unchanged; **release 2.0** with the GLES2 extensions (§1).
      `:485`, `:585`, `:619` and `:717-718`; dEQP-GLES3's
      `rasterizer_discard.*.clear_*`): the library's clears in the tile list
      (`ogles2_job_clear`) are skipped while it is on.
+   **Written, on the host only (2026-10-27; not run on the A1200 yet, which
+   was busy):** the compiler: a link request's bindings text carries the
+   varyings after a line `XFBV` (the text the hash takes, below the
+   bindings), so the port, `v3dglslc-remote`, the PC bridge and `SERVE`
+   pass it unchanged; `apply_xfb` calls `glTransformFeedbackVaryings`
+   before the link; `capture_tf` reads the driver's layout from
+   `v3d_context(...)->prog.bind_vs` after the key-state draws (no Mesa
+   patch); `v3dp_write` adds feature bit 0 and the `TRANSFORM_FEEDBACK`
+   section (`v3dp/FORMAT.md`: the varyings, the strides, the specs with and
+   without point size, the binning shader's outputs); `-b FILE` gives a
+   command-line link state (test programs' `<name>.link`, `make
+   test-v3dp`, `compare_v3dp.sh`: host and m68k 21 of 21 identical; the
+   driver packs each spec's bytes into a `uint16_t`, so `capture_tf` takes
+   the bytes, not the m68k's value of them). The binning variants then output the
+   varyings, which needs no key logic in the library (Mesa keys them by
+   the program, not by whether a draw feeds back). The library: `program.c`
+   (`glTransformFeedbackVaryings`, `glGetTransformFeedbackVarying`, the
+   program queries as given, as Mesa; `link_state` and the hash's `XFBV`;
+   glLinkProgram and glUseProgram refused while an active object uses the
+   program); `v3dp.c` reads the section; `xfb.c` (new): the objects, a
+   context's own, holding the indexed bindings (`buffer.c` binds through
+   `ogles2_xfb_bindings`; refs keep deleted buffers), begin, pause, resume
+   and end with ES 3.0's errors, and per draw the specs and
+   `TRANSFORM_FEEDBACK_BUFFER`s (the buffer's `words`, offset by the
+   vertices written so far), `TRANSFORM_FEEDBACK_FLUSH_AND_COUNT` after,
+   and at the binning list's end `PRIMITIVE_COUNTS_FEEDBACK` and the specs
+   off; the draws' rules (mode, room, no indexed draw: GL_INVALID_OPERATION)
+   and `GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN` counted on the CPU;
+   `GL_RASTERIZER_DISCARD` with feedback: both facings off in CFG_BITS.
+   `buffer.c`: a buffer transform feedback writes has its `words` current
+   (`xfb_job`); every CPU access (sub-data, maps, copies, pixel buffers,
+   indices, a draw's arrays before its job is built) renders and waits for
+   that job and swaps the words back (`gpu_written`). Tests: `m8_es3`'s
+   state and errors (119 of 119 under vamos), `m8_draw`'s `test_xfb` (a
+   triangle fed back and read by mapping, the query; with rasterizer
+   discard two triangles around a pause). Not yet: a buffer fed back and
+   read by the GPU in the same job (Mesa's `WAIT_FOR_TRANSFORM_FEEDBACK`;
+   the CPU path renders the job first for vertex and index reads, a
+   uniform buffer read waits for nothing).
 2. **Multisampled framebuffer objects:** `glRenderbufferStorageMultisample`
    with samples (stage B's entry, which took 0 only; 4x: storage of twice the
    width and height, the job in 4x mode with the tile size it needs;

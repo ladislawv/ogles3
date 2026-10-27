@@ -162,6 +162,7 @@ static UBYTE matrix_columns(GLenum t)
 #define FORMAT2      2
 #define FORMAT2_PROV 0x8002
 #define MAX_SECTIONS 256
+#define V3DP_FEATURE_TF 0x1 /* format 2's feature bit: transform feedback (v3dp_writer.h) */
 
 /* The common prog data (FORMAT.md "Common key and prog data"), 28 bytes. */
 static void read_common_prog_data(struct rd *r, struct OGLES2Variant *v)
@@ -191,6 +192,7 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
     ULONG *sec_type, *sec_len;
     BOOL commit_ok = FALSE, format2;
     BOOL have_blocks = FALSE, have_interface = FALSE;
+    ULONG features = 0;
 
     why[0] = 0;
     if (len < 32 || memcmp(file, "V3DP", 4))
@@ -259,8 +261,8 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             memcpy(im->hash, s.p, 32);
             s.p += 32;
             stages = u32(&s);
-            /* Format 2's must-understand features: none is known yet. */
-            if (format2 && u32(&s))
+            /* Format 2's must-understand features: transform feedback. */
+            if (format2 && ((features = u32(&s)) & ~V3DP_FEATURE_TF))
                 FAIL("the program uses features this library does not know", 0, ~0UL);
             break;
         case 3: { /* STAGE_PARAMS */
@@ -618,6 +620,45 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             have_interface = TRUE;
             break;
         }
+        case 10: { /* TRANSFORM_FEEDBACK (format 2, feature bit 0) */
+            struct OGLES2ImageXfb *x;
+            struct OGLES2ImageXfbVar *v;
+            ULONG n, nvar;
+            if (!format2 || !(features & V3DP_FEATURE_TF))
+                FAIL("a TRANSFORM_FEEDBACK section without its feature bit", 0, ~0UL);
+            if (!(x = alloc(im, sizeof(*x))))
+                FAIL("out of memory", 0, ~0UL);
+            x->mode = u32(&s);
+            n = u32(&s);
+            if ((x->mode != GL_INTERLEAVED_ATTRIBS && x->mode != GL_SEPARATE_ATTRIBS) || !n || n > 64)
+                FAIL("transform feedback of no known mode or size:", 0, n);
+            if (!(v = alloc(im, n * sizeof(*v))))
+                FAIL("out of memory", 0, ~0UL);
+            nvar = n;
+            for (k = 0; k < nvar; k++) {
+                v[k].name = STR(u32(&s));
+                v[k].type = u32(&s);
+                v[k].size = (UWORD)u32(&s);
+                v[k].buffer = (UBYTE)u32(&s);
+                v[k].offset = (UWORD)u32(&s);
+                if (v[k].buffer > 3)
+                    FAIL("a varying fed back into buffer", 0, v[k].buffer);
+            }
+            for (k = 0; k < 4; k++)
+                x->stride[k] = u32(&s);
+            n = u32(&s);
+            if (n > 16)
+                FAIL("too many transform feedback specs:", 0, n);
+            x->nspecs = (UBYTE)n;
+            for (k = 0; k < n; k++)
+                x->specs[k] = u16(&s);
+            for (k = 0; k < n; k++)
+                x->specs_psiz[k] = u16(&s);
+            x->nvaryings = (UWORD)nvar;
+            x->varyings = v;
+            im->xfb = x;
+            break;
+        }
         default:
             break; /* STRINGS, and sections from newer minor versions */
         }
@@ -628,6 +669,8 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
         FAIL("not a vertex and fragment program", 0, ~0UL);
     if (format2 && !im->v3dx && (!have_blocks || !have_interface))
         FAIL("a format 2 file without UNIFORM_BLOCKS or INTERFACE", 0, ~0UL);
+    if ((features & V3DP_FEATURE_TF) && !im->v3dx && !im->xfb)
+        FAIL("transform feedback without its TRANSFORM_FEEDBACK section", 0, ~0UL);
     im->format2 = format2;
     /* The layout CRC (FORMAT.md, VARIANT_OF): STAGE_PARAMS, UNIFORMS and
      * ATTRIBUTES, their headers and payloads, one after another in the file. */
@@ -706,6 +749,8 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             ((struct OGLES2ImageBlock *)im->ublocks)[k].name += d;
         for (k = 0; k < im->ninterface; k++)
             ((struct OGLES2ImageVar *)im->interface)[k].name += d;
+        for (k = 0; im->xfb && k < im->xfb->nvaryings; k++)
+            ((struct OGLES2ImageXfbVar *)im->xfb->varyings)[k].name += d;
     }
     im->name = "program binary";
     FreeVec(sec_start);

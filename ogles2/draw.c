@@ -1452,6 +1452,8 @@ static void emit_state(struct OGLES2Context *ctx, struct dedup *dd, int prim,
         if (s->cull_face_mode != GL_BACK) effp = FALSE;  /* FRONT or FRONT_AND_BACK */
         if (s->cull_face_mode != GL_FRONT) erfp = FALSE; /* BACK or FRONT_AND_BACK */
     }
+    if (s->caps & OGLES2_CAP_RASTERIZER_DISCARD) /* Mesa: both facings off (transform feedback still) */
+        effp = erfp = FALSE;
     cp = y_down(ctx) ? s->front_face == GL_CCW : s->front_face == GL_CW;
     edo = (s->caps & OGLES2_CAP_POLYGON_OFFSET_FILL) ? TRUE : FALSE;
     dtf = depth_on ? (UBYTE)(s->depth_func - GL_NEVER) : V3D_COMPARE_FUNC_ALWAYS;
@@ -2037,12 +2039,14 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
     ULONG bits[2];   /* an ES3 program's 32-bit samplers, vertex and fragment */
     struct OGLES2VkTargets tg; /* and its render targets' key fields */
     GLenum itype_gl; /* the indices' type as the GPU gets them */
+    BOOL xfb;        /* it feeds back (transform feedback, xfb.c) */
     ULONG unif[3], code[3], defattr, rec, idx_addr = 0, idx_size = 0;
     int a, nslots = 0, i;
 
-    /* GL_RASTERIZER_DISCARD: no fragments, and without transform feedback
-     * (stage C) a draw then has no effect at all: nothing is drawn. */
-    if (ctx->state.caps & OGLES2_CAP_RASTERIZER_DISCARD)
+    /* GL_RASTERIZER_DISCARD: no fragments, and without transform feedback a
+     * draw then has no effect at all: nothing is drawn. With it, binning
+     * still feeds back (CFG_BITS discards every primitive, emit_state). */
+    if ((ctx->state.caps & OGLES2_CAP_RASTERIZER_DISCARD) && !ogles2_xfb_drawing(ctx))
         return;
     if (!(d = draw_state(ctx))) {
         ogles2_error(ctx, GL_OUT_OF_MEMORY);
@@ -2344,6 +2348,9 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
     mark(ctx, 6);
     v->current_buf = &v->binning_buf[v->build_slot];
     emit_state(ctx, &d->dd, (int)mode, fs);
+    /* Transform feedback: its specs and buffers before the primitives, its
+     * flush after them (xfb.c; never indexed: draw_elements refuses that). */
+    xfb = ogles2_xfb_before_draw(ctx, mode, cs->writes_psiz);
     if (packets_ok(v)) {
         int itype = !el ? -1
                   : itype_gl == GL_UNSIGNED_INT ? v3d_INDEX_TYPE_32_BIT
@@ -2354,6 +2361,8 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
                          itype, idx_addr, idx_size,
                          el ? ((ULONG)el->count & 0x7FFFFFFFUL) | (el->restart ? 0x80000000UL : 0) : (ULONG)count,
                          vid ? (ULONG)first : 0, (ULONG)instances);
+        if (xfb)
+            ogles2_xfb_after_draw(ctx, mode, count, instances);
         mark(ctx, 7);
         return;
     }
@@ -2366,6 +2375,8 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
                          idx_addr, idx_size,
                          el ? ((ULONG)el->count & 0x7FFFFFFFUL) | (el->restart ? 0x80000000UL : 0) : (ULONG)count,
                          vid ? (ULONG)first : 0, (ULONG)instances);
+        if (xfb)
+            ogles2_xfb_after_draw(ctx, mode, count, instances);
         mark(ctx, 7);
         return;
     }
@@ -2385,6 +2396,8 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
          * gl_VertexID (the addresses moved back, above). */
         VertexArrayPrims(v, (UBYTE)mode, (ULONG)count, vid ? (ULONG)first : 0);
     }
+    if (xfb)
+        ogles2_xfb_after_draw(ctx, mode, count, instances);
     mark(ctx, 7);
     return;
 
@@ -2428,6 +2441,7 @@ static BOOL arrays_ok(struct OGLES2Context *ctx, const struct OGLES2Program *p, 
             ULONG es = elem_bytes(arr);
             ULONG st = arr->stride ? (ULONG)arr->stride : es;
             ULONG off = (ULONG)arr->pointer, size = ogles2_buffer_size(arr->buffer);
+            ogles2_buffer_cpu(ctx, arr->buffer); /* transform feedback's results, before the job is built */
             if (off + es > size || (size - off - es) / st + 1 < end_a) {
                 ogles2_log("%s: attribute %ld reads past the end of buffer %ld; nothing drawn",
                            (ULONG)fn, (ULONG)p->attrib_index[a], (ULONG)ogles2_buffer_name(arr->buffer));
@@ -2458,6 +2472,8 @@ static void draw_instances(struct OGLES2Context *ctx, GLenum mode, GLint first, 
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
+    if (!ogles2_xfb_draw_ok(ctx, mode, count, instances)) /* GL_INVALID_OPERATION (ES 3.0 2.15.2) */
+        return;
     if (!ogles2_fb_ready(ctx)) /* GL_INVALID_FRAMEBUFFER_OPERATION */
         return;
     p = ctx->program;
@@ -2513,6 +2529,10 @@ static void draw_elements(struct OGLES2Context *ctx, GLenum mode, GLsizei count,
     }
     if (count < 0) {
         ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    if (ogles2_xfb_drawing(ctx)) { /* ES 3.0 2.15.2: no indexed draw feeds back */
+        ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
     if (!ogles2_fb_ready(ctx))

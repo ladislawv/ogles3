@@ -10,8 +10,8 @@
  * byte boundary"): the hardware writes a counter elsewhere than an address
  * past a group's 64 bytes names, so each query's is a group's first word. A job begun while a query is
  * active points at it too (job.c, ctx->oq_addr), so a query spans jobs.
- * GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN counts nothing until stage C's
- * transform feedback: 0.
+ * GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN counts on the CPU what each draw
+ * feeds back (xfb.c: ES 3.0's draw rules make that exact).
  *
  * Not shared: each context has its own (ES 3.0 appendix D).
  */
@@ -31,6 +31,7 @@ struct OGLES2Query
     v3d_mem counter;            /* the occlusion counter's block */
     ULONG *word;                /* the counter: the block's first 1024-byte boundary */
     ULONG serial;               /* the query's last job; 0: none outstanding */
+    ULONG primitives;           /* GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN's, counted on the CPU (xfb.c) */
 };
 
 struct OGLES2QueryState
@@ -182,6 +183,7 @@ void ogles2_glBeginQuery(struct OGLES2Context *ctx, GLenum target, GLuint id)
     q->target = target;
     q->active = TRUE;
     if (!occlusion_target(target)) {
+        q->primitives = 0;
         qs->xfb = q;
         return;
     }
@@ -295,13 +297,24 @@ void ogles2_glGetQueryObjectuiv(struct OGLES2Context *ctx, GLuint id, GLenum pna
         return;
     }
     rendered(ctx, q, TRUE);
-    if (!occlusion_target(q->target) || !q->counter.hostptr) {
+    if (!occlusion_target(q->target)) { /* known on the CPU, at every draw (xfb.c) */
+        *params = q->primitives;
+        return;
+    }
+    if (!q->counter.hostptr) {
         *params = 0;
         return;
     }
     CachePostDMA(q->word, &len, 0); /* the GPU's word, not a cache line's */
     v = *(volatile ULONG *)q->word;
     *params = v ? GL_TRUE : GL_FALSE;
+}
+
+/* A draw fed back `primitives` (xfb.c): the active query of them counts them. */
+void ogles2_query_xfb_add(struct OGLES2Context *ctx, ULONG primitives)
+{
+    if (ctx->query && ctx->query->xfb)
+        ctx->query->xfb->primitives += primitives;
 }
 
 /* aglDestroyContext (its jobs finished). */

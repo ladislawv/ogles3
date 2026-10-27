@@ -57,6 +57,19 @@ struct OGLES2Sampler;
 struct OGLES2VaoState;
 struct OGLES2Sync;
 struct OGLES2QueryState;
+struct OGLES2XfbState;
+struct OGLES2Variant;
+struct OGLES2Program;
+
+#define OGLES2_MAX_XFB_BUFFERS 4 /* GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS (state.c) */
+
+/* An indexed transform feedback binding (glBindBufferBase, glBindBufferRange),
+ * a transform feedback object's (xfb.c); size 0: the whole buffer. */
+struct OGLES2XfbBinding
+{
+    struct OGLES2Buffer *b;
+    ULONG offset, size;
+};
 /* A name past OGLES2_NEAR_NAMES and its table slot (share.c). */
 struct OGLES2FarName
 {
@@ -330,6 +343,29 @@ struct OGLES2StateVar
 
 struct v3d_mem;
 
+/* A program's transform feedback (format 2's TRANSFORM_FEEDBACK section;
+ * docs/GLES3_PLAN.md stage C item 1): its varyings as linked, and the V3D
+ * driver's layout of them for the binning shader. */
+struct OGLES2ImageXfbVar
+{
+    const char *name;
+    GLenum type;          /* of one element */
+    UWORD size;           /* elements */
+    UBYTE buffer;         /* the buffer it is written to */
+    UWORD offset;         /* in a vertex's record there, bytes */
+};
+
+struct OGLES2ImageXfb
+{
+    GLenum mode;          /* GL_INTERLEAVED_ATTRIBS or GL_SEPARATE_ATTRIBS */
+    UWORD nvaryings;
+    const struct OGLES2ImageXfbVar *varyings;
+    ULONG stride[4];      /* a vertex's record in each buffer, 32-bit words (0: unused) */
+    UBYTE nspecs;
+    UWORD specs[16];      /* TRANSFORM_FEEDBACK_OUTPUT_DATA_SPECs, packed */
+    UWORD specs_psiz[16]; /* the same for points from a vertex shader that writes gl_PointSize */
+};
+
 struct OGLES2Image
 {
     const char *name;     /* for the log */
@@ -389,6 +425,7 @@ struct OGLES2Image
     struct OGLES2Image *xs, *xc;
     BOOL xs_tried, xc_tried, x_failed;
     char *bind_src;
+    const struct OGLES2ImageXfb *xfb; /* transform feedback varyings (NULL: none) */
 };
 
 /* GL shader and program objects share one name space (GLES 2.0 section 2.10). */
@@ -466,6 +503,12 @@ struct OGLES2Program
     /* ES 3.0: each uniform block's buffer binding (glUniformBlockBinding;
      * from the image's at link), one per image block. */
     ULONG *block_binding;
+    /* ES 3.0's glTransformFeedbackVaryings, applied at the next link
+     * (docs/GLES3_PLAN.md stage C item 1): the buffer mode (0: never set,
+     * GL_INTERLEAVED_ATTRIBS) and the names, "name\n" each, in order. */
+    GLenum xfb_mode;
+    UWORD nxfb;
+    char *xfb_names;                  /* AllocVec'd; NULL: none */
 };
 
 struct OGLES2Context;
@@ -676,6 +719,8 @@ struct OGLES2Context
     struct OGLES2VaoState *vao;     /* vao.c's (ES 3.0's vertex array objects), NULL until first used */
     struct OGLES2QueryState *query; /* query.c's (ES 3.0's query objects), NULL until first used */
     ULONG oq_addr;                  /* the active occlusion query's counter (0: none): job.c points new jobs at it */
+    struct OGLES2XfbState *xfb;     /* xfb.c's (ES 3.0's transform feedback objects), NULL until first used */
+    BOOL job_xfb;                   /* the open job's binning list fed back: its end turns that off (xfb.c) */
 };
 
 #define OGLES2_DISCARD_COLOR   1
@@ -937,6 +982,33 @@ void ogles2_buffer_set_element(struct OGLES2Context *ctx, struct OGLES2Buffer *b
 /* A reference to b dropped (an attribute array's or an element binding's):
  * a deleted buffer that nothing uses any more is freed. */
 void ogles2_buffer_release(struct OGLES2Context *ctx, struct OGLES2Buffer *b);
+/* The CPU reads or writes b next: what transform feedback wrote into it
+ * waited for and taken into its data (never while a draw builds its job);
+ * and the address transform feedback writes it at in the open job. */
+void ogles2_buffer_cpu(struct OGLES2Context *ctx, struct OGLES2Buffer *b);
+ULONG ogles2_buffer_xfb(struct OGLES2Context *ctx, struct OGLES2Buffer *b);
+/* xfb.c, ES 3.0's transform feedback (docs/GLES3_PLAN.md stage C item 1):
+ * the bound object's indexed bindings (NULL: no memory); whether it is
+ * active, and active and not paused (drawing); whether an active object of
+ * ctx's uses program p, or one of its objects holds buffer b; draws: the
+ * checks (errors set), the packets around a draw's primitives, the job's
+ * end; freed with the context. */
+struct OGLES2XfbBinding *ogles2_xfb_bindings(struct OGLES2Context *ctx);
+BOOL ogles2_xfb_active(const struct OGLES2Context *ctx);
+BOOL ogles2_xfb_drawing(const struct OGLES2Context *ctx);
+BOOL ogles2_xfb_program_busy(const struct OGLES2Context *ctx, const struct OGLES2Program *p);
+BOOL ogles2_xfb_uses_buffer(const struct OGLES2Context *ctx, const struct OGLES2Buffer *b);
+BOOL ogles2_xfb_draw_ok(struct OGLES2Context *ctx, GLenum mode, GLsizei count, GLsizei instances);
+BOOL ogles2_xfb_before_draw(struct OGLES2Context *ctx, GLenum mode, BOOL psiz);
+void ogles2_xfb_after_draw(struct OGLES2Context *ctx, GLenum mode, GLsizei count, GLsizei instances);
+void ogles2_xfb_job_end(struct OGLES2Context *ctx);
+void ogles2_xfbs_free(struct OGLES2Context *ctx);
+GLuint ogles2_xfb_bound_name(const struct OGLES2Context *ctx); /* GL_TRANSFORM_FEEDBACK_BINDING */
+BOOL ogles2_xfb_paused(const struct OGLES2Context *ctx);
+/* program.c: a transform feedback object let go of p */
+void ogles2_program_unref(struct OGLES2Context *ctx, struct OGLES2Program *p);
+/* query.c: primitives transform feedback wrote, for GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN */
+void ogles2_query_xfb_add(struct OGLES2Context *ctx, ULONG primitives);
 /* vao.c: the bound vertex array object's name (0: object 0); whether an
  * object not bound uses b; freed with the context. */
 GLuint ogles2_vao_bound(const struct OGLES2Context *ctx);

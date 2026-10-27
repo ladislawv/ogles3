@@ -35,6 +35,7 @@ enum {
     SEC_UNIFORM_BLOCKS = 7, /* format 2 */
     SEC_INTERFACE = 8,      /* format 2 */
     SEC_VARIANT_OF = 9,     /* .v3dx files */
+    SEC_TRANSFORM_FEEDBACK = 10, /* format 2, with the feature bit V3DP_FEATURE_TF */
 };
 
 enum { VARIANT_VS = 0, VARIANT_VS_BIN = 1, VARIANT_FS = 4 };
@@ -468,6 +469,25 @@ int v3dp_last_fs_inputs(uint8_t *num_inputs, uint8_t *slots)
 
 /* ---- program tables ---- */
 
+/* The driver's transform feedback layout for the next program (v3dp_set_tf). */
+static struct v3dp_tf tf_layout;
+static int tf_set;
+
+void v3dp_set_tf(const struct v3dp_tf *tf)
+{
+    tf_set = tf != NULL;
+    if (tf)
+        tf_layout = *tf;
+}
+
+/* The program's linked transform feedback varyings, or NULL. */
+static const struct gl_transform_feedback_info *tf_info(const struct gl_shader_program *prog)
+{
+    const struct gl_transform_feedback_info *info =
+        prog->last_vert_prog ? prog->last_vert_prog->sh.LinkedTransformFeedback : NULL;
+    return info && info->NumVarying > 0 ? info : NULL;
+}
+
 /* Offset of s in the string table; the table starts with the empty string. */
 static uint32_t str_add(struct buf *strings, const char *s)
 {
@@ -719,6 +739,41 @@ static int put_attributes(struct buf *b, struct buf *strings, struct gl_shader_p
     return 0;
 }
 
+/* TRANSFORM_FEEDBACK (format 2): the linked varyings and the driver's
+ * layout of them. -1 if the driver laid none out for the program. */
+static int put_tf(struct buf *b, struct buf *strings, const struct gl_shader_program *prog,
+                  const struct gl_transform_feedback_info *info)
+{
+    unsigned i;
+    if (!tf_set) {
+        fprintf(stderr, "v3dp: the driver laid out no transform feedback for the program's varyings\n");
+        return -1;
+    }
+    put_u32(b, prog->TransformFeedback.BufferMode);
+    put_u32(b, (uint32_t)info->NumVarying);
+    for (i = 0; i < (unsigned)info->NumVarying; i++) {
+        const struct gl_transform_feedback_varying_info *v = &info->Varyings[i];
+        put_u32(b, str_add(strings, v->name.string));
+        put_u32(b, v->Type);
+        put_u32(b, (uint32_t)v->Size);
+        put_u32(b, (uint32_t)v->BufferIndex);
+        put_u32(b, (uint32_t)v->Offset);
+    }
+    for (i = 0; i < 4; i++)
+        put_u32(b, tf_layout.stride[i]);
+    put_u32(b, tf_layout.num_specs);
+    for (i = 0; i < tf_layout.num_specs; i++)
+        put_u16(b, tf_layout.specs[i]);
+    for (i = 0; i < tf_layout.num_specs; i++)
+        put_u16(b, tf_layout.specs_psiz[i]);
+    put_pad4(b);
+    put_u32(b, tf_layout.num_outputs);
+    for (i = 0; i < tf_layout.num_outputs; i++)
+        put_u8(b, tf_layout.outputs[i]);
+    put_pad4(b);
+    return 0;
+}
+
 static void put_section(struct buf *out, uint32_t type, const struct buf *payload)
 {
     put_u32(out, type);
@@ -845,8 +900,8 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
             stage_mask |= 1u << stages_in_file[i];
     put_bytes(&sec, hash, sizeof(hash));
     put_u32(&sec, stage_mask);
-    if (format2)
-        put_u32(&sec, 0); /* features: none defined yet (FORMAT.md, format 2) */
+    if (format2) /* features (FORMAT.md, format 2) */
+        put_u32(&sec, tf_info(prog) ? V3DP_FEATURE_TF : 0);
     put_section(&program, SEC_PROGRAM, &sec);
     num_sections++;
     buf_free(&sec);
@@ -886,6 +941,13 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
         put_section(&body, SEC_INTERFACE, &sec);
         num_sections++;
         buf_free(&sec);
+        if (tf_info(prog)) {
+            if (put_tf(&sec, &strings, prog, tf_info(prog)))
+                goto out;
+            put_section(&body, SEC_TRANSFORM_FEEDBACK, &sec);
+            num_sections++;
+            buf_free(&sec);
+        }
     }
 
     if (v3dx) {

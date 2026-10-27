@@ -139,6 +139,10 @@ static char *read_text(const char *name)
     return s;
 }
 
+/* Transform feedback varyings link_files gives the next program (0: none). */
+static const char *const *xfb_names;
+static GLsizei xfb_count;
+
 /* Links shaders/<name>.vert and .frag; the program, its status in *ok. */
 static GLuint link_files(const char *name, GLint *ok)
 {
@@ -166,6 +170,8 @@ static GLuint link_files(const char *name, GLint *ok)
     glCompileShader(s);
     glAttachShader(p, s);
     glDeleteShader(s);
+    if (xfb_count)
+        glTransformFeedbackVaryings(p, xfb_count, xfb_names, GL_INTERLEAVED_ATTRIBS);
     glLinkProgram(p);
     glGetProgramiv(p, GL_LINK_STATUS, ok);
     if (!*ok) {
@@ -232,6 +238,122 @@ static void es3_programs(void)
         glUseProgram(0);
     }
     glDeleteProgram(p);
+}
+
+/* Transform feedback's state (stage C item 1): objects and their buffer
+ * bindings, a program's varyings (es3xfb, its file compiled with them:
+ * es3xfb.link), and the errors of beginning, pausing, ending and drawing. */
+static void xfb_state(int draws)
+{
+    static const char *const names[3] = { "v_twice", "v_pos", "v_id" };
+    GLuint t[2], b[2], p;
+    GLint ok, v[4];
+    GLsizei len = 0, size = 0;
+    GLenum type = 0;
+    char name[16];
+
+    glGenTransformFeedbacks(2, t);
+    check(!glIsTransformFeedback(t[0]) && glGetError() == GL_NO_ERROR,
+          "transform feedback: a name is no object until bound");
+    glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, t[0]);
+    glGetIntegerv(GL_TRANSFORM_FEEDBACK_BINDING, v);
+    check(glIsTransformFeedback(t[0]) && v[0] == (GLint)t[0], "transform feedback: bound, and the binding");
+    glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 77);
+    check(glGetError() == GL_INVALID_OPERATION, "transform feedback: a name not generated is not bound");
+    glGenBuffers(2, b);
+    glBindBufferRange(GL_TRANSFORM_FEEDBACK_BUFFER, 1, b[0], 8, 6);
+    check(glGetError() == GL_INVALID_VALUE, "transform feedback: a range not of whole words");
+    glBindBufferRange(GL_TRANSFORM_FEEDBACK_BUFFER, 1, b[0], 8, 64);
+    glGetIntegeri_v(GL_TRANSFORM_FEEDBACK_BUFFER_BINDING, 1, &v[0]);
+    glGetIntegeri_v(GL_TRANSFORM_FEEDBACK_BUFFER_START, 1, &v[1]);
+    glGetIntegeri_v(GL_TRANSFORM_FEEDBACK_BUFFER_SIZE, 1, &v[2]);
+    check(glGetError() == GL_NO_ERROR && v[0] == (GLint)b[0] && v[1] == 8 && v[2] == 64,
+          "transform feedback: an indexed binding");
+    glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, t[1]);
+    glGetIntegeri_v(GL_TRANSFORM_FEEDBACK_BUFFER_BINDING, 1, &v[0]);
+    glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, t[0]);
+    glGetIntegeri_v(GL_TRANSFORM_FEEDBACK_BUFFER_BINDING, 1, &v[1]);
+    check(v[0] == 0 && v[1] == (GLint)b[0], "transform feedback: the bindings are each object's");
+
+    xfb_names = names;
+    xfb_count = 3;
+    p = link_files("es3xfb", &ok);
+    xfb_names = 0;
+    xfb_count = 0;
+    check(ok, "transform feedback: es3xfb links with its varyings (its file has them)");
+    if (!ok) {
+        glDeleteProgram(p);
+        glDeleteBuffers(2, b);
+        glDeleteTransformFeedbacks(2, t);
+        return;
+    }
+    glGetProgramiv(p, GL_TRANSFORM_FEEDBACK_VARYINGS, &v[0]);
+    glGetProgramiv(p, GL_TRANSFORM_FEEDBACK_VARYING_MAX_LENGTH, &v[1]);
+    glGetProgramiv(p, GL_TRANSFORM_FEEDBACK_BUFFER_MODE, &v[2]);
+    check(v[0] == 3 && v[1] == 8 && v[2] == GL_INTERLEAVED_ATTRIBS && glGetError() == GL_NO_ERROR,
+          "transform feedback: the program's varyings, longest name, mode");
+    glGetTransformFeedbackVarying(p, 1, sizeof(name), &len, &size, &type, name);
+    check(glGetError() == GL_NO_ERROR && len == 5 && !strcmp(name, "v_pos") && size == 1 && type == GL_FLOAT_VEC4,
+          "transform feedback: glGetTransformFeedbackVarying");
+    glGetTransformFeedbackVarying(p, 3, sizeof(name), &len, &size, &type, name);
+    check(glGetError() == GL_INVALID_VALUE, "transform feedback: no varying 3");
+
+    glUseProgram(p);
+    glBeginTransformFeedback(GL_TRIANGLE_STRIP);
+    check(glGetError() == GL_INVALID_ENUM, "transform feedback: begun with a strip, GL_INVALID_ENUM");
+    glBeginTransformFeedback(GL_TRIANGLES);
+    check(glGetError() == GL_INVALID_OPERATION, "transform feedback: begun without buffer 0 bound");
+    glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, b[1]);
+    glBeginTransformFeedback(GL_TRIANGLES);
+    glGetIntegerv(GL_TRANSFORM_FEEDBACK_ACTIVE, &v[0]);
+    glGetIntegerv(GL_TRANSFORM_FEEDBACK_PAUSED, &v[1]);
+    check(glGetError() == GL_NO_ERROR && v[0] && !v[1], "transform feedback: begun, active");
+    glUseProgram(0);
+    check(glGetError() == GL_INVALID_OPERATION, "transform feedback: no other program while active");
+    glLinkProgram(p);
+    check(glGetError() == GL_INVALID_OPERATION, "transform feedback: its program not linked again");
+    glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, b[0]);
+    check(glGetError() == GL_INVALID_OPERATION, "transform feedback: its bindings stay while active");
+    if (draws) { /* they time themselves on the Pi's timer (vamos has none) */
+        glDrawArrays(GL_LINES, 0, 2);
+        check(glGetError() == GL_INVALID_OPERATION, "transform feedback: a draw of another mode");
+        glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_BYTE, names);
+        check(glGetError() == GL_INVALID_OPERATION, "transform feedback: an indexed draw");
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        check(glGetError() == GL_INVALID_OPERATION, "transform feedback: a draw past the buffer's end (empty)");
+    }
+    glDeleteTransformFeedbacks(1, t);
+    check(glGetError() == GL_INVALID_OPERATION && glIsTransformFeedback(t[0]),
+          "transform feedback: an active object is not deleted");
+    glPauseTransformFeedback();
+    glGetIntegerv(GL_TRANSFORM_FEEDBACK_PAUSED, &v[1]);
+    check(glGetError() == GL_NO_ERROR && v[1], "transform feedback: paused");
+    glPauseTransformFeedback();
+    check(glGetError() == GL_INVALID_OPERATION, "transform feedback: paused twice");
+    if (draws) {
+        glDrawElements(GL_POINTS, 0, GL_UNSIGNED_BYTE, names);
+        check(glGetError() == GL_NO_ERROR, "transform feedback: draws as usual while paused");
+    }
+    glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, t[1]);
+    glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, t[0]);
+    check(glGetError() == GL_NO_ERROR, "transform feedback: another object bound while paused");
+    glUseProgram(0);
+    glResumeTransformFeedback();
+    check(glGetError() == GL_INVALID_OPERATION, "transform feedback: resumed without its program");
+    glUseProgram(p);
+    glResumeTransformFeedback();
+    glEndTransformFeedback();
+    glGetIntegerv(GL_TRANSFORM_FEEDBACK_ACTIVE, &v[0]);
+    check(glGetError() == GL_NO_ERROR && !v[0], "transform feedback: resumed and ended");
+    glEndTransformFeedback();
+    check(glGetError() == GL_INVALID_OPERATION, "transform feedback: ended twice");
+    glUseProgram(0);
+    glDeleteProgram(p);
+    glDeleteTransformFeedbacks(2, t);
+    glGetIntegerv(GL_TRANSFORM_FEEDBACK_BINDING, v);
+    check(glGetError() == GL_NO_ERROR && v[0] == 0 && !glIsTransformFeedback(t[0]),
+          "transform feedback: deleted, object 0 bound again");
+    glDeleteBuffers(2, b);
 }
 
 /* The same programs in a GLES2 context: not linked, and their binary
@@ -760,6 +882,7 @@ int main(int argc, char **argv)
                   "ES 3.0: #version 310 es refused, with the reason in the log");
         }
         es3_programs();
+        xfb_state(!nogpu);
         es3_programs_in_es2(c3, c2);
         aglDestroyContext(c3);
     }

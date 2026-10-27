@@ -46,9 +46,9 @@ LIB_SRC   := ogles2/library.c ogles2/log.c ogles2/context.c ogles2/device.c ogle
              ogles2/state.c ogles2/display.c ogles2/job.c ogles2/frame.c ogles2/program.c \
              ogles2/draw.c ogles2/v3dp.c ogles2/blake3.c ogles2/texture.c \
              ogles2/buffer.c ogles2/compiler.c ogles2/fbo.c ogles2/copy.c ogles2/share.c \
-             ogles2/debug.c ogles2/variant_key.c ogles2/vao.c ogles2/sync.c ogles2/query.c ogles2/blit.c
+             ogles2/debug.c ogles2/variant_key.c ogles2/vao.c ogles2/sync.c ogles2/query.c ogles2/blit.c ogles2/xfb.c
 # Library files that use v3dcore directly
-V3D_USERS := device job draw v3dp texture buffer fbo share sync query
+V3D_USERS := device job draw v3dp texture buffer fbo share sync query xfb
 GEN_LIB   := $(B)/gen/ogles2/dispatch_table.c $(B)/gen/ogles2/stubs.c
 CLIENT_SRC := client/ogles2_open.c client/agl.c
 GEN_CLIENT := $(B)/gen/client/agl_gen.c $(B)/gen/client/procaddr.c
@@ -362,9 +362,9 @@ $(B)/v3dp/.stamp: $(wildcard tests/common/*.h) tools/v3dp_tests/emit.c v3dp/v3dp
 	    tools/v3dglslc/test/shaders/es3layer.* tools/v3dglslc/test/shaders/es3vol.* \
 	    tools/v3dglslc/test/shaders/es3inst.* tools/v3dglslc/test/shaders/es3int.* \
 	    tools/v3dglslc/test/shaders/es3utex.* tools/v3dglslc/test/shaders/es3itex.* \
-	    tools/v3dglslc/test/shaders/es3rt.* $(B)/v3dp/src/
+	    tools/v3dglslc/test/shaders/es3rt.* tools/v3dglslc/test/shaders/es3xfb.* $(B)/v3dp/src/
 	cd $(B)/v3dp/src && ../emit && for v in *.vert; do \
-	    $(V3DGLSLC) -o .. $$v $${v%.vert}.frag || exit 1; done
+	    $(V3DGLSLC) -o .. $$([ -f $${v%.vert}.link ] && echo -b $${v%.vert}.link) $$v $${v%.vert}.frag || exit 1; done
 	$(PYTHON) v3dp/v3dp_hashname.py $(B)/v3dp/*.v3dp $$(ls $(B)/v3dp/*.v3dw 2>/dev/null)
 	touch $@
 

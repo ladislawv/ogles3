@@ -72,6 +72,8 @@ struct OGLES2Buffer
     ULONG words_bytes;       /* its allocation */
     ULONG words_serial;      /* the data serial it holds; 0: none */
     ULONG words_job;         /* the job that last read it */
+    ULONG xfb_job;           /* a job that writes it (transform feedback), not known rendered: the
+                              * shadow is stale until gpu_written (0: none) */
     /* Deleted while a vertex array object not bound uses it (ES 3.0
      * appendix D.1.2): out of the name table, on the share group's list of
      * them, freed when nothing uses it any more (ogles2_buffer_release). */
@@ -80,7 +82,6 @@ struct OGLES2Buffer
 };
 
 #define MAX_UNIFORM_BINDINGS 108 /* GL_MAX_UNIFORM_BUFFER_BINDINGS (state.c) */
-#define MAX_XFB_BINDINGS     4   /* GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS */
 
 /* An indexed binding (glBindBufferBase, glBindBufferRange); size 0: the
  * whole buffer (glBindBufferBase). */
@@ -99,7 +100,7 @@ struct OGLES2BufState
      * frame.c), the uniform and transform feedback bindings held for
      * items 6 and stage C. */
     struct OGLES2Buffer *copy_read, *copy_write, *pack, *unpack, *xfb, *uniform;
-    struct buf_range ubo[MAX_UNIFORM_BINDINGS], xfb_range[MAX_XFB_BINDINGS];
+    struct buf_range ubo[MAX_UNIFORM_BINDINGS]; /* (transform feedback's: xfb.c's objects) */
 };
 
 static struct OGLES2BufState *bs_get(struct OGLES2Context *ctx)
@@ -126,6 +127,42 @@ static void drop_words(struct OGLES2Context *ctx, struct OGLES2Buffer *b)
     ogles2_share_defer_free(ctx, b->words_job, &b->words);
     memset(&b->words, 0, sizeof(b->words));
     b->words_bytes = b->words_serial = b->words_job = 0;
+}
+
+/* The CPU reads or writes b next: if a job not known rendered writes its
+ * words (transform feedback), that job is rendered and waited for, and the
+ * words are copied back into the shadow (docs/GLES3_PLAN.md §5 item 1).
+ * Never while a draw builds its job: draws call it before (arrays_ok,
+ * ogles2_buffer_indices). */
+static void gpu_written(struct OGLES2Context *ctx, struct OGLES2Buffer *b)
+{
+    struct OGLES2Context *user;
+    ULONG i, n, len;
+    if (!b || !b->xfb_job)
+        return;
+    if ((user = ogles2_job_user(ctx, b->xfb_job)) != 0 && user->v3d) {
+        ogles2_job_flush(user, FALSE);
+        ogles2_job_finish(user);
+    }
+    b->xfb_job = 0;
+    if (!b->words.hostptr || !b->data || b->words_serial != b->serial)
+        return;
+    len = b->words_bytes;
+    CachePostDMA(b->words.hostptr, &len, 0);
+    n = b->size / 4;
+    for (i = 0; i < n; i++)
+        ((ULONG *)b->data)[i] = LE32(((const ULONG *)b->words.hostptr)[i]);
+    if (b->size & 3) {
+        ULONG w = LE32(((const ULONG *)b->words.hostptr)[n]);
+        memcpy(b->data + 4 * n, &w, b->size & 3);
+    }
+    b->serial++;
+    b->words_serial = b->serial; /* the words are the data still */
+}
+
+void ogles2_buffer_cpu(struct OGLES2Context *ctx, struct OGLES2Buffer *b)
+{
+    gpu_written(ctx, b);
 }
 
 static void drop_copies(struct OGLES2Context *ctx, struct OGLES2Buffer *b)
@@ -203,9 +240,12 @@ static BOOL valid_usage(struct OGLES2Context *ctx, GLenum usage)
                                usage == GL_STATIC_COPY || usage == GL_DYNAMIC_READ || usage == GL_DYNAMIC_COPY);
 }
 
-/* Unbinds b from every binding of a context's (glDeleteBuffers). */
-static void unbind_all(struct OGLES2BufState *bs, struct OGLES2Buffer *b)
+/* Unbinds b from every binding of a context's (glDeleteBuffers), the bound
+ * transform feedback object's too (ES 3.0 2.9.1: not those of objects not
+ * bound). */
+static void unbind_all(struct OGLES2Context *ctx, struct OGLES2BufState *bs, struct OGLES2Buffer *b)
 {
+    struct OGLES2XfbBinding *x = ogles2_xfb_bindings(ctx);
     struct OGLES2Buffer **one[8];
     int i;
     one[0] = &bs->array;
@@ -222,9 +262,9 @@ static void unbind_all(struct OGLES2BufState *bs, struct OGLES2Buffer *b)
     for (i = 0; i < MAX_UNIFORM_BINDINGS; i++)
         if (bs->ubo[i].b == b)
             memset(&bs->ubo[i], 0, sizeof(bs->ubo[i]));
-    for (i = 0; i < MAX_XFB_BINDINGS; i++)
-        if (bs->xfb_range[i].b == b)
-            memset(&bs->xfb_range[i], 0, sizeof(bs->xfb_range[i]));
+    for (i = 0; x && i < OGLES2_MAX_XFB_BUFFERS; i++)
+        if (x[i].b == b)
+            memset(&x[i], 0, sizeof(x[i]));
 }
 
 /* Whether a member of ctx's share group uses b: its attribute arrays and
@@ -239,7 +279,7 @@ static BOOL in_use(struct OGLES2Context *ctx, const struct OGLES2Buffer *b)
         for (a = 0; a < OGLES2_MAX_VERTEX_ATTRIBS; a++)
             if (m->array[a].buffer == b)
                 return TRUE;
-        if (ogles2_vao_uses_buffer(m, b))
+        if (ogles2_vao_uses_buffer(m, b) || ogles2_xfb_uses_buffer(m, b))
             return TRUE;
     }
     return FALSE;
@@ -355,7 +395,7 @@ void ogles2_glDeleteBuffers(struct OGLES2Context *ctx, GLsizei n, const GLuint *
         for (m = ctx->share->first; m; m = m->share_next) {
             struct OGLES2BufState *mbs = m->buf;
             if (mbs)
-                unbind_all(mbs, b);
+                unbind_all(m, mbs, b);
             for (a = 0; a < OGLES2_MAX_VERTEX_ATTRIBS; a++)
                 if (m->array[a].buffer == b) {
                     m->array[a].buffer = 0;
@@ -446,6 +486,7 @@ static void buffer_data(struct OGLES2Context *ctx, GLenum target, GLsizeiptr siz
      * ioquake3's renderergl2 at every draw): the shadow is kept. Only the CPU
      * reads it (the GPU reads copies, and draws copy what they read), so
      * nothing waits; GL leaves the contents undefined without data. */
+    b->xfb_job = 0; /* new contents: what transform feedback wrote is gone */
     if (size && b->data && (ULONG)size == b->size && !b->mapped) {
         if (data)
             memcpy(b->data, data, (ULONG)size);
@@ -562,6 +603,7 @@ static void buffer_sub_data(struct OGLES2Context *ctx, GLenum target, GLintptr o
     }
     if (!size || !data)
         return;
+    gpu_written(ctx, b);
     memcpy(b->data + offset, data, (ULONG)size);
     b->serial++;
     patch_copies(ctx, b, (ULONG)offset, (ULONG)size);
@@ -642,6 +684,7 @@ void *ogles2_glMapBufferOES(struct OGLES2Context *ctx, GLenum target, GLenum acc
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return 0;
     }
+    gpu_written(ctx, b);
     b->mapped = TRUE;
     b->map_offset = 0;
     b->map_length = b->size;
@@ -713,6 +756,7 @@ void *ogles2_glMapBufferRange(struct OGLES2Context *ctx, GLenum target, GLintptr
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return 0;
     }
+    gpu_written(ctx, b); /* transform feedback's results (unsynchronized too: they would be lost) */
     b->mapped = TRUE;
     b->map_offset = (ULONG)offset;
     b->map_length = (ULONG)length;
@@ -839,6 +883,7 @@ UBYTE *ogles2_buffer_pixels(struct OGLES2Context *ctx, BOOL pack, ULONG offset, 
     }
     if (!b->data)
         return &none;
+    gpu_written(ctx, b);
     if (pack && bytes) {
         drop_copies(ctx, b);
         b->serial++;
@@ -896,6 +941,17 @@ ULONG ogles2_buffer_uniform(struct OGLES2Context *ctx, ULONG index, ULONG *size)
     return a + r->offset;
 }
 
+/* Transform feedback writes b in the open job (xfb.c): the address of its
+ * words (made current with the shadow, ogles2_buffer_words), which the
+ * shadow then waits for (gpu_written). 0: no data or memory. */
+ULONG ogles2_buffer_xfb(struct OGLES2Context *ctx, struct OGLES2Buffer *b)
+{
+    ULONG a = ogles2_buffer_words(ctx, b);
+    if (a)
+        b->xfb_job = ctx->job_serial;
+    return a;
+}
+
 /* ---- ES 3.0's indexed bindings and copies ---- */
 
 static void bind_range(struct OGLES2Context *ctx, GLenum target, GLuint index, GLuint buffer, GLintptr offset,
@@ -904,6 +960,7 @@ static void bind_range(struct OGLES2Context *ctx, GLenum target, GLuint index, G
     struct OGLES2BufState *bs;
     struct OGLES2Buffer *b = 0;
     struct buf_range *r;
+    struct OGLES2XfbBinding *x = 0;
     BOOL uniform = target == GL_UNIFORM_BUFFER;
     if (!ogles2_es3_entry(ctx) || !(bs = bs_get(ctx)))
         return;
@@ -911,8 +968,18 @@ static void bind_range(struct OGLES2Context *ctx, GLenum target, GLuint index, G
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
-    if (index >= (uniform ? MAX_UNIFORM_BINDINGS : MAX_XFB_BINDINGS)) {
+    if (index >= (uniform ? MAX_UNIFORM_BINDINGS : OGLES2_MAX_XFB_BUFFERS)) {
         ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    /* transform feedback's are the bound transform feedback object's, and
+     * stay while it is active (ES 3.0 2.15.2) */
+    if (!uniform && ogles2_xfb_active(ctx)) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
+    if (!uniform && !(x = ogles2_xfb_bindings(ctx))) {
+        ogles2_error(ctx, GL_OUT_OF_MEMORY);
         return;
     }
     /* Mesa's checks (bufferobj.c): a range of a buffer is not empty, and
@@ -929,15 +996,21 @@ static void bind_range(struct OGLES2Context *ctx, GLenum target, GLuint index, G
         }
         b->bound_once = TRUE;
     }
-    r = uniform ? &bs->ubo[index] : &bs->xfb_range[index];
-    r->b = b;
-    r->offset = ranged && b ? (ULONG)offset : 0;
-    r->size = ranged && b ? (ULONG)size : 0;
     /* the target's own binding too (ES 3.0 2.9.1) */
-    if (uniform)
+    if (uniform) {
+        r = &bs->ubo[index];
+        r->b = b;
+        r->offset = ranged && b ? (ULONG)offset : 0;
+        r->size = ranged && b ? (ULONG)size : 0;
         bs->uniform = b;
-    else
+    } else {
+        struct OGLES2Buffer *old = x[index].b;
+        x[index].b = b;
+        x[index].offset = ranged && b ? (ULONG)offset : 0;
+        x[index].size = ranged && b ? (ULONG)size : 0;
         bs->xfb = b;
+        ogles2_buffer_release(ctx, old); /* a deleted buffer only it held */
+    }
 }
 
 void ogles2_glBindBufferRange(struct OGLES2Context *ctx, GLenum target, GLuint index, GLuint buffer,
@@ -956,7 +1029,8 @@ void ogles2_glBindBufferBase(struct OGLES2Context *ctx, GLenum target, GLuint in
 static BOOL indexed(struct OGLES2Context *ctx, GLenum target, GLuint index, GLint64 *v)
 {
     struct OGLES2BufState *bs;
-    struct buf_range *r;
+    const struct OGLES2Buffer *b;
+    ULONG offset, size;
     BOOL uniform = target == GL_UNIFORM_BUFFER_BINDING || target == GL_UNIFORM_BUFFER_START ||
                    target == GL_UNIFORM_BUFFER_SIZE;
     if (!ogles2_es3_entry(ctx))
@@ -966,19 +1040,28 @@ static BOOL indexed(struct OGLES2Context *ctx, GLenum target, GLuint index, GLin
         ogles2_error(ctx, GL_INVALID_ENUM);
         return FALSE;
     }
-    if (index >= (uniform ? MAX_UNIFORM_BINDINGS : MAX_XFB_BINDINGS)) {
+    if (index >= (uniform ? MAX_UNIFORM_BINDINGS : OGLES2_MAX_XFB_BUFFERS)) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return FALSE;
     }
-    if (!(bs = bs_get(ctx))) {
-        *v = 0;
-        return TRUE;
+    if (uniform) {
+        if (!(bs = bs_get(ctx))) {
+            *v = 0;
+            return TRUE;
+        }
+        b = bs->ubo[index].b;
+        offset = bs->ubo[index].offset;
+        size = bs->ubo[index].size;
+    } else {
+        const struct OGLES2XfbBinding *x = ogles2_xfb_bindings(ctx); /* the bound object's */
+        b = x ? x[index].b : 0;
+        offset = x ? x[index].offset : 0;
+        size = x ? x[index].size : 0;
     }
-    r = uniform ? &bs->ubo[index] : &bs->xfb_range[index];
     *v = target == GL_UNIFORM_BUFFER_BINDING || target == GL_TRANSFORM_FEEDBACK_BUFFER_BINDING
-             ? (r->b ? (GLint64)r->b->name : 0)
-         : target == GL_UNIFORM_BUFFER_START || target == GL_TRANSFORM_FEEDBACK_BUFFER_START ? (GLint64)r->offset
-                                                                                           : (GLint64)r->size;
+             ? (b ? (GLint64)b->name : 0)
+         : target == GL_UNIFORM_BUFFER_START || target == GL_TRANSFORM_FEEDBACK_BUFFER_START ? (GLint64)offset
+                                                                                           : (GLint64)size;
     return TRUE;
 }
 
@@ -1022,6 +1105,8 @@ void ogles2_glCopyBufferSubData(struct OGLES2Context *ctx, GLenum readTarget, GL
     }
     if (!size)
         return;
+    gpu_written(ctx, r);
+    gpu_written(ctx, w);
     memmove(w->data + writeOffset, r->data + readOffset, (ULONG)size);
     w->serial++;
     patch_copies(ctx, w, (ULONG)writeOffset, (ULONG)size);
@@ -1070,6 +1155,7 @@ const void *ogles2_buffer_indices(struct OGLES2Context *ctx, ULONG offset, ULONG
         *bad = TRUE;
         return 0;
     }
+    gpu_written(ctx, bs->element); /* before the draw builds its job */
     return bs->element->data + offset;
 }
 

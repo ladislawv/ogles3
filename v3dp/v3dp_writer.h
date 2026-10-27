@@ -32,6 +32,25 @@ int v3dp_last_fs_inputs(uint8_t *num_inputs, uint8_t *slots);
 #define V3DP_HASH_XFBV 0x58464256u
 #define V3DP_HASH_SEPA 0x53455041u
 
+/* Format 2's must-understand feature bits (PROGRAM's features word). */
+#define V3DP_FEATURE_TF 0x1u /* transform feedback: a TRANSFORM_FEEDBACK section */
+
+/* Transform feedback as the V3D driver laid it out for the program's vertex
+ * shader (its v3d_uncompiled_shader, read after a draw): written with a
+ * program that has transform feedback varyings (format 2,
+ * TRANSFORM_FEEDBACK). */
+struct v3dp_tf {
+    unsigned num_specs;           /* TRANSFORM_FEEDBACK_OUTPUT_DATA_SPECs */
+    uint16_t specs[16];           /* packed, as the driver emits them */
+    uint16_t specs_psiz[16];      /* the same with a point size written per vertex (points) */
+    unsigned num_outputs;         /* the binning shader's outputs for them */
+    uint8_t outputs[64];          /* their slot_and_component */
+    unsigned stride[4];           /* each buffer's stride in 32-bit words */
+};
+
+/* The layout v3dp_write takes for the next program (NULL: none). */
+void v3dp_set_tf(const struct v3dp_tf *tf);
+
 /* Writes the program and the captured variants to path: in format 2 for a
  * GLSL ES 3.x program or one with ES3 link state, else in format 1.0.
  * sources[i] is the source of the shader attached i-th, stages[i] its

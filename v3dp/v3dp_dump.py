@@ -11,7 +11,9 @@ STAGES = {0: "vertex", 4: "fragment", 5: "compute"}
 VARIANT_STAGES = {0: "vertex", 1: "vertex binning", 4: "fragment"}
 KINDS = {0: "uniform", 1: "constant", 2: "state"}
 SECTIONS = {1: "PROGRAM", 2: "STRINGS", 3: "STAGE_PARAMS", 4: "UNIFORMS", 5: "ATTRIBUTES",
-            6: "VARIANT", 7: "UNIFORM_BLOCKS", 8: "INTERFACE", 9: "VARIANT_OF"}
+            6: "VARIANT", 7: "UNIFORM_BLOCKS", 8: "INTERFACE", 9: "VARIANT_OF",
+            10: "TRANSFORM_FEEDBACK"}
+FEATURE_TF = 0x1  # format 2: transform feedback (a TRANSFORM_FEEDBACK section)
 # Format 2 (ES3 programs) is written as major 0x8002 until release 2.1 (FORMAT.md).
 FORMAT2 = (2, 0x8002)
 PACKING = {0: "std140", 1: "shared", 2: "packed", 3: "std430"}
@@ -208,10 +210,13 @@ def dump(path, show_qpu):
             mask = r.u32()
             features = r.u32() if v2 else 0
             r.done()
-            if features:
-                raise Bad("unknown feature bits %08x" % features)
-            print("PROGRAM hash %s, stages %s" %
-                  (h, ", ".join(STAGES[s] for s in STAGES if mask & (1 << s))))
+            if features & ~FEATURE_TF:
+                raise Bad("unknown feature bits %08x" % (features & ~FEATURE_TF))
+            if not v3dx and bool(features & FEATURE_TF) != any(s == 10 for s, _ in secs):
+                raise Bad("the transform feedback bit and section disagree")
+            print("PROGRAM hash %s, stages %s%s" %
+                  (h, ", ".join(STAGES[s] for s in STAGES if mask & (1 << s)),
+                   ", transform feedback" if features & FEATURE_TF else ""))
         elif t == 2:
             print("STRINGS %d bytes" % len(payload))
         elif t == 3:
@@ -345,6 +350,33 @@ def dump(path, show_qpu):
                        " " + INTERP[interp] if interp else "", " " + PRECISION[prec] if prec else "",
                        index, ",".join(STAGES[s] for s in STAGES if stageref & (1 << s))))
             r.done()
+        elif t == 10 and v2:
+            mode, n = r.u32(), r.u32()
+            if mode not in (0x8C8C, 0x8C8D):
+                raise Bad("transform feedback buffer mode 0x%04x" % mode)
+            print("TRANSFORM_FEEDBACK %s, %d varyings" %
+                  ("interleaved" if mode == 0x8C8C else "separate", n))
+            for _ in range(n):
+                nm, gtype, size, buf, offset = r.u32(), r.u32(), r.u32(), r.u32(), r.u32()
+                print("  %-24s type 0x%04x size %d buffer %d offset %d" %
+                      (string(strings, nm), gtype, size, buf, offset))
+            strides = r.u32s(4)
+            nspecs = r.u32()
+            if nspecs > 16:
+                raise Bad("%d transform feedback specs" % nspecs)
+            specs = [r.u16() for _ in range(nspecs)]
+            psiz = [r.u16() for _ in range(nspecs)]
+            r.pad((4 - r.o % 4) % 4)
+            nout = r.u32()
+            if nout > 64:
+                raise Bad("%d binning shader outputs" % nout)
+            outputs = r.u8s(nout)
+            r.pad((4 - r.o % 4) % 4)
+            r.done()
+            print("  strides (words) %s, specs %s, with point size %s" %
+                  (strides, " ".join("%04x" % s for s in specs), " ".join("%04x" % s for s in psiz)))
+            print("  binning outputs (slot.component) %s" %
+                  " ".join("%d.%d" % (o >> 2, o & 3) for o in outputs))
         else:
             print("%s %d bytes (skipped)" % (name, len(payload)))
 

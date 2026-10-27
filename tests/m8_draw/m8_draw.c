@@ -65,6 +65,10 @@ static char *read_text(const char *name)
     return s;
 }
 
+/* Transform feedback varyings program() gives the next program (0: none). */
+static const char *const *xfb_names;
+static GLsizei xfb_count;
+
 /* shaders/<name>.vert and .frag, linked; 0 if not (the log printed). */
 static GLuint program(const char *name)
 {
@@ -88,6 +92,8 @@ static GLuint program(const char *name)
         glDeleteShader(s);
         free(src[k]);
     }
+    if (xfb_count)
+        glTransformFeedbackVaryings(p, xfb_count, xfb_names, GL_INTERLEAVED_ATTRIBS);
     glLinkProgram(p);
     glGetProgramiv(p, GL_LINK_STATUS, &ok);
     if (!ok) {
@@ -885,6 +891,97 @@ static void test_storage(void)
     check(pixel_is(32, 32, 0, 255, 0, 255, 0) && glGetError() == GL_NO_ERROR,
           "immutable storage: base level 5 clamped to the last (green)");
     glDeleteTextures(1, &t);
+    glDeleteProgram(p);
+}
+
+/* Transform feedback (stage C item 1) with es3xfb: each vertex's v_twice,
+ * v_pos and v_id, 6 words, read back by mapping the buffer. One triangle
+ * drawn and fed back, the primitives-written query 1; then with
+ * GL_RASTERIZER_DISCARD (nothing drawn) two triangles around a pause and a
+ * draw that does not feed back, the second appended after the first. */
+static int xfb_vertex_is(const GLfloat *w, GLfloat x, GLfloat y, GLfloat a, int id)
+{
+    GLint idw;
+    memcpy(&idw, &w[5], 4);
+    if (w[0] == a * 2 && w[1] == x * 2 && w[2] == y * 2 && w[3] == a * 2 && w[4] == 2 && idw == id)
+        return 1;
+    printf("     fed back %g, (%g %g %g %g), %ld; not %g, (%g %g %g 2), %d\n", w[0], w[1], w[2], w[3], w[4],
+           (long)idw, a * 2, x * 2, y * 2, a * 2, id);
+    return 0;
+}
+
+static void test_xfb(void)
+{
+    static const char *const names[3] = { "v_twice", "v_pos", "v_id" };
+    static const GLfloat pos[12] = { -1, -1, 3, -1, -1, 3, -0.5f, -0.5f, 0.25f, -0.5f, -0.5f, 0.25f };
+    static const GLfloat attr[6] = { 0.25f, 0.5f, 0.125f, 1, 2, 3 };
+    static GLubyte zeros[256];
+    GLuint p, b, q, prims = 0;
+    GLint lp, la, k, ok = 1;
+    const GLfloat *w;
+    xfb_names = names;
+    xfb_count = 3;
+    p = program("es3xfb");
+    xfb_names = 0;
+    xfb_count = 0;
+    if (!p) {
+        check(0, "transform feedback: es3xfb links with its varyings");
+        return;
+    }
+    lp = glGetAttribLocation(p, "pos");
+    la = glGetAttribLocation(p, "a");
+    glUseProgram(p);
+    glVertexAttribPointer((GLuint)lp, 2, GL_FLOAT, GL_FALSE, 0, pos);
+    glVertexAttribPointer((GLuint)la, 1, GL_FLOAT, GL_FALSE, 0, attr);
+    glEnableVertexAttribArray((GLuint)lp);
+    glEnableVertexAttribArray((GLuint)la);
+    glGenBuffers(1, &b);
+    glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, b);
+    glBufferData(GL_TRANSFORM_FEEDBACK_BUFFER, sizeof(zeros), zeros, GL_STREAM_READ);
+    glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, b);
+    glGenQueries(1, &q);
+    glClearColor(0, 0, 1, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, q);
+    glBeginTransformFeedback(GL_TRIANGLES);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glEndTransformFeedback();
+    glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+    glGetQueryObjectuiv(q, GL_QUERY_RESULT, &prims);
+    check(glGetError() == GL_NO_ERROR && prims == 1, "transform feedback: a triangle drawn, 1 primitive written");
+    w = glMapBufferRange(GL_TRANSFORM_FEEDBACK_BUFFER, 0, 72, GL_MAP_READ_BIT);
+    for (k = 0; w && k < 3; k++)
+        ok &= xfb_vertex_is(w + 6 * k, pos[2 * k], pos[2 * k + 1], attr[k], k);
+    check(w && ok, "transform feedback: each vertex's v_twice, v_pos and v_id in the buffer");
+    glUnmapBuffer(GL_TRANSFORM_FEEDBACK_BUFFER);
+
+    glClear(GL_COLOR_BUFFER_BIT);
+    glEnable(GL_RASTERIZER_DISCARD);
+    glBeginTransformFeedback(GL_TRIANGLES);
+    glDrawArrays(GL_TRIANGLES, 3, 3);
+    glPauseTransformFeedback();
+    glDrawArrays(GL_TRIANGLES, 0, 3); /* not fed back */
+    glResumeTransformFeedback();
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glEndTransformFeedback();
+    glDisable(GL_RASTERIZER_DISCARD);
+    check(glGetError() == GL_NO_ERROR && pixel_is(32, 32, 0, 0, 255, 255, 0),
+          "transform feedback: GL_RASTERIZER_DISCARD draws nothing");
+    w = glMapBufferRange(GL_TRANSFORM_FEEDBACK_BUFFER, 0, 144, GL_MAP_READ_BIT);
+    ok = 1;
+    for (k = 0; w && k < 3; k++)
+        ok &= xfb_vertex_is(w + 6 * k, pos[6 + 2 * k], pos[7 + 2 * k], attr[3 + k], 3 + k);
+    for (k = 0; w && k < 3; k++)
+        ok &= xfb_vertex_is(w + 18 + 6 * k, pos[2 * k], pos[2 * k + 1], attr[k], k);
+    check(w && ok, "transform feedback: two triangles around a pause, the second appended");
+    glUnmapBuffer(GL_TRANSFORM_FEEDBACK_BUFFER);
+
+    glDisableVertexAttribArray((GLuint)lp);
+    glDisableVertexAttribArray((GLuint)la);
+    glClearColor(0, 0, 0, 0);
+    glUseProgram(0);
+    glDeleteQueries(1, &q);
+    glDeleteBuffers(1, &b);
     glDeleteProgram(p);
 }
 
@@ -2144,6 +2241,7 @@ int main(void)
     test_frag_depth();
     test_instanced_ext();
     test_attachment_queries();
+    test_xfb();
     check(glGetError() == GL_NO_ERROR, "no GL error left over");
     aglDestroyContext(ctx);
     if ((ctx = aglCreateContextTags2(&e, OGLES2_CCT_BITMAP, (ULONG)bm, OGLES2_CCT_PISTORM_ES_VERSION, 30,

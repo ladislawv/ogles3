@@ -261,3 +261,13 @@ glBindVertexArrayOES
 glDrawArraysInstancedEXT
 glDrawElementsInstancedEXT
 glVertexAttribDivisorEXT
+glTransformFeedbackVaryings
+glGetTransformFeedbackVarying
+glBeginTransformFeedback
+glEndTransformFeedback
+glPauseTransformFeedback
+glResumeTransformFeedback
+glBindTransformFeedback
+glGenTransformFeedbacks
+glDeleteTransformFeedbacks
+glIsTransformFeedback

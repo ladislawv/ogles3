@@ -28,6 +28,7 @@
 #include "util/xmlconfig.h"
 #include "util/macros.h"
 #include "v3d_screen.h"
+#include "v3d_context.h" /* the bound vertex shader's transform feedback layout (capture_tf) */
 #include "compiler/v3d_compiler.h" /* the variant keys (-x) */
 #include "xf86drm.h"
 #include "v3dp_writer.h"
@@ -45,6 +46,7 @@
 #define glDeleteShader       _mesa_DeleteShader
 #define glDeleteProgram      _mesa_DeleteProgram
 #define glBindAttribLocation _mesa_BindAttribLocation
+#define glTransformFeedbackVaryings _mesa_TransformFeedbackVaryings
 #define V3DC_WRITER
 static void program_path(char *out, size_t size, const char *vs_path, const char *fs_path);
 static int write_program(GLuint p, const char *path, const char *vs_src, const char *fs_src);
@@ -521,6 +523,36 @@ static void bind_uniform_blocks(GLuint p)
  * the variants real draws use: triangles, lines and points into an RGBA8
  * target with depth on. The fake device runs nothing; the draws only make
  * the driver compute its keys and compile. */
+/* After a draw: the transform feedback layout the driver made for the
+ * bound vertex shader (v3d_set_transform_feedback_outputs, at the shader's
+ * creation), for v3dp_write; none if it has no varyings to feed back. */
+static void capture_tf(void)
+{
+    const struct v3d_uncompiled_shader *so = v3d_context(the_pipe)->prog.bind_vs;
+    struct v3dp_tf tf;
+    unsigned i;
+    if (!so || !so->num_tf_specs || so->num_tf_specs > ARRAY_SIZE(tf.specs) ||
+        so->num_tf_outputs > ARRAY_SIZE(tf.outputs)) {
+        v3dp_set_tf(NULL);
+        return;
+    }
+    memset(&tf, 0, sizeof(tf));
+    tf.num_specs = so->num_tf_specs;
+    /* Packed as the packet takes them, byte by byte (little-endian) into
+     * each uint16_t: the bytes, not the host's value of them (m68k). */
+    for (i = 0; i < so->num_tf_specs; i++) {
+        const uint8_t *s = (const uint8_t *)&so->tf_specs[i], *z = (const uint8_t *)&so->tf_specs_psiz[i];
+        tf.specs[i] = (uint16_t)(s[0] | s[1] << 8);
+        tf.specs_psiz[i] = (uint16_t)(z[0] | z[1] << 8);
+    }
+    tf.num_outputs = so->num_tf_outputs;
+    for (i = 0; i < so->num_tf_outputs; i++)
+        tf.outputs[i] = so->tf_outputs[i].slot_and_component;
+    for (i = 0; i < 4; i++)
+        tf.stride[i] = so->base.stream_output.stride[i];
+    v3dp_set_tf(&tf);
+}
+
 static int draw_key_states(GLuint p, int wide)
 {
     static const GLenum modes[] = { GL_TRIANGLES, GL_LINES, GL_POINTS };
@@ -580,6 +612,7 @@ static int draw_key_states(GLuint p, int wide)
             _mesa_BindFramebuffer(GL_FRAMEBUFFER, draw_fbo);
         }
     }
+    capture_tf();
     /* Submit the job (a no-op on the fake device) so jobs do not pile up.
      * Not glFinish: its fence needs a sync file the fake device cannot give. */
     _mesa_Flush();
@@ -594,6 +627,9 @@ static int draw_key_states(GLuint p, int wide)
     }
     return 1;
 }
+
+static int write_files(struct gl_shader_program *prog, GLuint p, const char *path, unsigned nsrc,
+                       const unsigned *stages, const char *const *sources);
 
 /* -o: <dir>/<vs>-<fs>.v3dp. */
 static void program_path(char *out, size_t size, const char *vs_path, const char *fs_path)
@@ -611,18 +647,44 @@ static int write_program(GLuint p, const char *path, const char *vs_src, const c
 {
     GET_CURRENT_CONTEXT(ctx);
     struct gl_shader_program *prog = _mesa_lookup_shader_program(ctx, p);
-    /* The bindings of a V3DGLSL_LINK_BOUND request are hashed as a third
-     * "source" (v3dp/FORMAT.md, PROGRAM). */
-    static const unsigned stages[3] = { MESA_SHADER_VERTEX, MESA_SHADER_FRAGMENT, V3DP_HASH_BINDINGS };
-    const char *sources[3];
-    unsigned nsrc = link_bindings ? 3 : 2;
-    int drawn;
+    /* The link state of a V3DGLSL_LINK_BOUND request is hashed after the
+     * shaders (v3dp/FORMAT.md, PROGRAM): its bindings as the stage "BIND",
+     * its transform feedback varyings as "XFBV" (format 2). */
+    unsigned stages[4] = { MESA_SHADER_VERTEX, MESA_SHADER_FRAGMENT };
+    const char *sources[4];
+    unsigned nsrc = 2;
+    const char *xfbv = xfbv_part(link_bindings);
+    char *bind = NULL;
+    int rc;
 
     if (!prog)
         return 0;
     sources[0] = vs_src;
     sources[1] = fs_src;
-    sources[2] = link_bindings;
+    if (link_bindings && link_bindings != (xfbv ? xfbv - (sizeof(XFBV_MARK) - 1) : NULL)) {
+        size_t n = xfbv ? (size_t)(xfbv - (sizeof(XFBV_MARK) - 1) - link_bindings) : strlen(link_bindings);
+        if (!(bind = malloc(n + 1)))
+            return 0;
+        memcpy(bind, link_bindings, n);
+        bind[n] = 0;
+        stages[nsrc] = V3DP_HASH_BINDINGS;
+        sources[nsrc++] = bind;
+    }
+    if (xfbv) {
+        stages[nsrc] = V3DP_HASH_XFBV;
+        sources[nsrc++] = xfbv;
+    }
+    rc = write_files(prog, p, path, nsrc, stages, sources);
+    free(bind);
+    return rc;
+}
+
+/* write_program's files, the program's sources and link state given. */
+static int write_files(struct gl_shader_program *prog, GLuint p, const char *path, unsigned nsrc,
+                       const unsigned *stages, const char *const *sources)
+{
+    int drawn;
+
     /* Draw-time variants (docs/GLES3_PLAN.md stage A item 5): one draw so
      * the driver has the program's shaders bound, then each key compiled
      * as it is (Mesa patch 0015), into the program's .v3dx. */
@@ -1060,6 +1122,11 @@ int main(int argc, char **argv)
             fclose(kf);
             variant_keys = kb;
             variant_keys_len = (size_t)kn;
+        } else if (!strcmp(argv[first], "-b")) { /* link state, as V3DGLSL_LINK_BOUND's */
+            if (!(link_bindings = load_text(argv[first + 1]))) {
+                fprintf(stderr, "v3dglslc: cannot read %s\n", argv[first + 1]);
+                return 20;
+            }
         } else
             break;
         first += 2;

@@ -20,14 +20,36 @@
 static const char *out_dir; /* -o: write .v3dp files here */
 #endif
 
-/* glBindAttribLocation's bindings for the next link (V3DGLSL_LINK_BOUND):
- * "<index> <name>\n" lines; NULL: none. */
+/* The link state of the next link (V3DGLSL_LINK_BOUND): glBindAttribLocation's
+ * bindings, "<index> <name>\n" lines; then, with transform feedback
+ * varyings, the line "XFBV" and the text the program's hash takes for them
+ * (v3dp/FORMAT.md, format 2): the buffer mode as four hex digits and "\n",
+ * then each varying's name and "\n" in the order given. NULL: none. */
 static const char *link_bindings;
+
+#define XFBV_MARK "XFBV\n"
+
+/* The transform feedback part of link state `b` (after its "XFBV" line), or NULL. */
+static const char *xfbv_part(const char *b)
+{
+    const char *at = b;
+    while (at && *at) {
+        if (!strncmp(at, XFBV_MARK, sizeof(XFBV_MARK) - 1))
+            return at + sizeof(XFBV_MARK) - 1;
+        at = strchr(at, '\n');
+        if (at)
+            at++;
+    }
+    return NULL;
+}
 
 static void apply_bindings(GLuint p, const char *b)
 {
     char name[256];
-    while (b && *b) {
+    const char *end = xfbv_part(b);
+    if (end)
+        end -= sizeof(XFBV_MARK) - 1;
+    while (b && *b && b != end) {
         unsigned long index = strtoul(b, (char **)&b, 10);
         size_t n = 0;
         while (*b == ' ')
@@ -43,6 +65,37 @@ static void apply_bindings(GLuint p, const char *b)
             glBindAttribLocation(p, (GLuint)index, name);
     }
 }
+
+#ifdef V3DC_WRITER
+/* glTransformFeedbackVaryings from link state `b`'s "XFBV" part. */
+static void apply_xfb(GLuint p, const char *b)
+{
+    const char *x = xfbv_part(b), *s;
+    char *copy, *at, **names;
+    unsigned long mode;
+    GLsizei n = 0;
+    if (!x)
+        return;
+    mode = strtoul(x, (char **)&x, 16);
+    if (*x == '\n')
+        x++;
+    for (s = x; *s; s++)
+        n += *s == '\n';
+    copy = strdup(x);
+    names = malloc(sizeof(*names) * (n ? n : 1));
+    if (copy && names) {
+        GLsizei k = 0;
+        for (at = copy; k < n && *at; k++) {
+            names[k] = at;
+            at = strchr(at, '\n');
+            *at++ = 0;
+        }
+        glTransformFeedbackVaryings(p, k, (const GLchar *const *)names, (GLenum)mode);
+    }
+    free(names);
+    free(copy);
+}
+#endif
 
 static char *load_text(const char *path)
 {
@@ -124,6 +177,9 @@ static int link_pair(const char *vs_label, const char *fs_label, const char *vs_
     glAttachShader(p, vs);
     glAttachShader(p, fs);
     apply_bindings(p, link_bindings);
+#ifdef V3DC_WRITER
+    apply_xfb(p, link_bindings);
+#endif
     glLinkProgram(p);
     glGetProgramiv(p, GL_LINK_STATUS, &ok);
     info[0] = 0;

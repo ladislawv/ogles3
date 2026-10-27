@@ -118,3 +118,13 @@ command glBindVertexArrayOES
 command glDrawArraysInstancedEXT
 command glDrawElementsInstancedEXT
 command glVertexAttribDivisorEXT
+command glTransformFeedbackVaryings
+command glGetTransformFeedbackVarying
+command glBeginTransformFeedback
+command glEndTransformFeedback
+command glPauseTransformFeedback
+command glResumeTransformFeedback
+command glBindTransformFeedback
+command glGenTransformFeedbacks
+command glDeleteTransformFeedbacks
+command glIsTransformFeedback

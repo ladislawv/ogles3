@@ -653,11 +653,14 @@ static int lookup_es3(struct OGLES2Context *ctx, GLenum pname, struct value *v)
     case GL_NUM_EXTENSIONS:
         v->i[0] = (GLint)ogles2_num_extensions(ctx);
         return 1;
-    /* Transform feedback (stage C) is never active yet. */
+    /* Transform feedback (xfb.c) */
     case GL_TRANSFORM_FEEDBACK_ACTIVE:
     case GL_TRANSFORM_FEEDBACK_PAUSED:
         v->kind = K_BOOL;
-        v->i[0] = 0;
+        v->i[0] = pname == GL_TRANSFORM_FEEDBACK_ACTIVE ? ogles2_xfb_active(ctx) : ogles2_xfb_paused(ctx);
+        return 1;
+    case GL_TRANSFORM_FEEDBACK_BINDING:
+        v->i[0] = (GLint)ogles2_xfb_bound_name(ctx);
         return 1;
     }
     for (k = 0; k < sizeof(es3_limits) / sizeof(es3_limits[0]); k++)

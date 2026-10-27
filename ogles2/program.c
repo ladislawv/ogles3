@@ -93,6 +93,7 @@ static const struct OGLES2Image builtin_smooth = {
     0,          /* in no program cache */
     0, 0, 0, {0, 0}, {0, 0}, 0, 0, /* format 1.0: no uniform blocks or interface */
     0, 0, 0, 0, 0, 0, 0, 0, 0,     /* no draw-time variants */
+    0,                             /* no transform feedback */
 };
 
 const struct OGLES2Image *ogles2_builtin_image(void)
@@ -262,6 +263,8 @@ static void free_program(struct OGLES2Context *ctx, struct OGLES2Program *p)
     unlink_program(ctx, p);
     if (p->info_log)
         FreeVec(p->info_log);
+    if (p->xfb_names)
+        FreeVec(p->xfb_names);
     FreeVec(p);
 }
 
@@ -270,9 +273,17 @@ static BOOL in_use(struct OGLES2Context *ctx, struct OGLES2Program *p)
 {
     struct OGLES2Context *m;
     for (m = ctx->share->first; m; m = m->share_next)
-        if (m->program == p)
+        if (m->program == p || ogles2_xfb_program_busy(m, p)) /* or an active transform feedback's */
             return TRUE;
     return FALSE;
+}
+
+/* A transform feedback object let go of p (xfb.c): freed if deleted and
+ * nothing else uses it. */
+void ogles2_program_unref(struct OGLES2Context *ctx, struct OGLES2Program *p)
+{
+    if (p && p->delete_pending && !in_use(ctx, p))
+        free_program(ctx, p);
 }
 
 /* aglDestroyContext (its jobs finished): its current program let go of; the
@@ -724,25 +735,90 @@ static char *aliased_bindings(const struct OGLES2Program *p)
     return t;
 }
 
+#define XFBV_MARK "XFBV\n"
+
+/* The transform feedback part of link state `t` (after its "XFBV" line), or 0. */
+static const char *xfbv_part(const char *t)
+{
+    const char *at = t;
+    while (at && *at) {
+        if (!strncmp(at, XFBV_MARK, 5))
+            return at + 5;
+        while (*at && *at != '\n')
+            at++;
+        if (*at)
+            at++;
+    }
+    return 0;
+}
+
+/* The link state the compiler applies before it links and the program hash
+ * covers (v3dp/v3dglsl_port.h's bindings; FORMAT.md): aliased bindings
+ * (aliased_bindings), then with transform feedback varyings the line "XFBV"
+ * and their text: the buffer mode as four lowercase hex digits and "\n",
+ * each name and "\n", in the order given. AllocVec'd; 0: none. */
+static char *link_state(const struct OGLES2Program *p)
+{
+    static const char digits[] = "0123456789abcdef";
+    char *b = aliased_bindings(p), *t;
+    ULONG lb, lx;
+    GLenum mode = p->xfb_mode ? p->xfb_mode : GL_INTERLEAVED_ATTRIBS;
+    int k;
+    if (!p->nxfb)
+        return b;
+    lb = b ? str_len(b) : 0;
+    lx = str_len(p->xfb_names);
+    if ((t = AllocVec(lb + 10 + lx + 1, MEMF_ANY))) {
+        if (b)
+            memcpy(t, b, lb);
+        memcpy(t + lb, XFBV_MARK, 5);
+        for (k = 0; k < 4; k++)
+            t[lb + 5 + k] = digits[(mode >> (12 - 4 * k)) & 15];
+        t[lb + 9] = '\n';
+        memcpy(t + lb + 10, p->xfb_names, lx + 1);
+    }
+    if (b)
+        FreeVec(b);
+    return t;
+}
+
 /* The program hash (v3dp/FORMAT.md, PROGRAM), as hex: per shader, vertex
  * first, its stage and length as little-endian 32-bit words, then its text;
- * then aliased bindings the same way, as the stage V3DP_HASH_BINDINGS. */
-static void program_hash(const struct OGLES2Program *p, const char *bindings, UBYTE out[32], char hex[65])
+ * then link state's (link_state) aliased bindings the same way, as the
+ * stage V3DP_HASH_BINDINGS, and its transform feedback text as the stage
+ * "XFBV". */
+static void program_hash(const struct OGLES2Program *p, const char *state, UBYTE out[32], char hex[65])
 {
     static const char digits[] = "0123456789abcdef";
     struct blake3 h;
-    int k;
+    const char *src[4], *x = xfbv_part(state);
+    ULONG stage[4], len[4];
+    int k, n = 2;
+    src[0] = p->vs->source;
+    stage[0] = 0;
+    src[1] = p->fs->source;
+    stage[1] = 4;
+    len[0] = str_len(src[0]);
+    len[1] = str_len(src[1]);
+    if (state && (len[n] = x ? (ULONG)(x - 5 - state) : str_len(state)) != 0) {
+        src[n] = state;
+        stage[n++] = 0x42494E44UL; /* V3DP_HASH_BINDINGS */
+    }
+    if (x) {
+        src[n] = x;
+        len[n] = str_len(x);
+        stage[n++] = 0x58464256UL; /* "XFBV" */
+    }
     blake3_init(&h);
-    for (k = 0; k < (bindings ? 3 : 2); k++) {
-        const char *src = k == 2 ? bindings : k ? p->fs->source : p->vs->source;
-        ULONG stage = k == 2 ? 0x42494E44UL /* V3DP_HASH_BINDINGS */ : k ? 4 : 0, len = str_len(src), i;
+    for (k = 0; k < n; k++) {
+        ULONG i;
         UBYTE w[8];
         for (i = 0; i < 4; i++) {
-            w[i] = (UBYTE)(stage >> (8 * i));
-            w[4 + i] = (UBYTE)(len >> (8 * i));
+            w[i] = (UBYTE)(stage[k] >> (8 * i));
+            w[4 + i] = (UBYTE)(len[k] >> (8 * i));
         }
         blake3_update(&h, w, 8);
-        blake3_update(&h, src, len);
+        blake3_update(&h, src[k], len[k]);
     }
     blake3_final(&h, out);
     for (k = 0; k < 32; k++) {
@@ -1357,6 +1433,10 @@ void ogles2_glLinkProgram(struct OGLES2Context *ctx, GLuint program)
         return;
     if (!(p = lookup(ctx, program, OGLES2_OBJ_PROGRAM)))
         return;
+    if (ogles2_xfb_program_busy(ctx, p)) { /* ES 3.0 2.15.2: an active transform feedback's */
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
     /* A program in use keeps its old image in the open job until relinked:
      * the job's records already point at its code (ogles2_image_free defers). */
     unlink_program(ctx, p);
@@ -1370,7 +1450,7 @@ void ogles2_glLinkProgram(struct OGLES2Context *ctx, GLuint program)
             set_log(p, "a compiled vertex shader and fragment shader must be attached", 0);
         return;
     }
-    bindings = aliased_bindings(p);
+    bindings = link_state(p);
     program_hash(p, bindings, hash, hex);
     for (im = ctx->share->images; im && memcmp(im->hash, hash, 32); im = im->next)
         ;
@@ -1480,6 +1560,10 @@ void ogles2_glUseProgram(struct OGLES2Context *ctx, GLuint program)
             return;
         }
     }
+    if (ogles2_xfb_drawing(ctx)) { /* ES 3.0 2.15.2: not while transform feedback is active and not paused */
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
     old = ctx->program;
     ctx->program = p;
     if (old && old != p && old->delete_pending && !in_use(ctx, old))
@@ -1582,10 +1666,118 @@ void ogles2_glGetProgramiv(struct OGLES2Context *ctx, GLuint program, GLenum pna
                 n = (GLint)str_len(im->ublocks[i].name) + 1;
         *params = n;
         break;
+    /* ES 3.0's transform feedback: as given (Mesa answers so), not as linked */
+    case GL_TRANSFORM_FEEDBACK_BUFFER_MODE:
+    case GL_TRANSFORM_FEEDBACK_VARYINGS:
+    case GL_TRANSFORM_FEEDBACK_VARYING_MAX_LENGTH:
+        if (!ogles2_es3(ctx)) {
+            ogles2_error(ctx, GL_INVALID_ENUM);
+            break;
+        }
+        if (pname == GL_TRANSFORM_FEEDBACK_BUFFER_MODE) {
+            *params = p->xfb_mode ? (GLint)p->xfb_mode : GL_INTERLEAVED_ATTRIBS;
+        } else if (pname == GL_TRANSFORM_FEEDBACK_VARYINGS) {
+            *params = p->nxfb;
+        } else {
+            const char *s = p->xfb_names;
+            n = 0;
+            while (s && *s) {
+                for (i = 0; s[i] != '\n'; i++)
+                    ;
+                if (i + 1 > n)
+                    n = i + 1;
+                s += i + 1;
+            }
+            *params = n;
+        }
+        break;
     default:
         ogles2_error(ctx, GL_INVALID_ENUM);
         break;
     }
+}
+
+/* ---- ES 3.0's transform feedback varyings (docs/GLES3_PLAN.md stage C item 1) ---- */
+
+void ogles2_glTransformFeedbackVaryings(struct OGLES2Context *ctx, GLuint program, GLsizei count,
+                                        const GLchar *const *varyings, GLenum bufferMode)
+{
+    struct OGLES2Program *p;
+    ULONG size = 1, at = 0;
+    GLsizei k;
+    char *t = 0;
+    if (!ogles2_es3_entry(ctx) || !(p = lookup(ctx, program, OGLES2_OBJ_PROGRAM)))
+        return;
+    if (bufferMode != GL_INTERLEAVED_ATTRIBS && bufferMode != GL_SEPARATE_ATTRIBS) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    if (count < 0 || (bufferMode == GL_SEPARATE_ATTRIBS && count > OGLES2_MAX_XFB_BUFFERS)) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    if (ogles2_xfb_program_busy(ctx, p)) { /* an active transform feedback's (ES 3.0 2.15.2) */
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
+    for (k = 0; k < count; k++) {
+        if (!varyings || !varyings[k]) {
+            ogles2_error(ctx, GL_INVALID_VALUE);
+            return;
+        }
+        size += str_len(varyings[k]) + 1;
+    }
+    if (count && !(t = AllocVec(size, MEMF_ANY))) {
+        ogles2_error(ctx, GL_OUT_OF_MEMORY);
+        return;
+    }
+    for (k = 0; k < count; k++) {
+        ULONG n = str_len(varyings[k]);
+        memcpy(t + at, varyings[k], n);
+        at += n;
+        t[at++] = '\n';
+    }
+    if (t)
+        t[at] = 0;
+    if (p->xfb_names)
+        FreeVec(p->xfb_names);
+    p->xfb_names = t;
+    p->nxfb = (UWORD)count;
+    p->xfb_mode = bufferMode;
+}
+
+void ogles2_glGetTransformFeedbackVarying(struct OGLES2Context *ctx, GLuint program, GLuint index, GLsizei bufSize,
+                                          GLsizei *length, GLsizei *size, GLenum *type, GLchar *name)
+{
+    struct OGLES2Program *p;
+    const struct OGLES2ImageXfbVar *v;
+    ULONG n;
+    if (!ogles2_es3_entry(ctx) || !(p = lookup(ctx, program, OGLES2_OBJ_PROGRAM)))
+        return;
+    if (!p->linked || !p->image || !p->image->xfb || index >= p->image->xfb->nvaryings) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    if (bufSize < 0) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    v = &p->image->xfb->varyings[index];
+    if (size)
+        *size = v->size;
+    if (type)
+        *type = v->type;
+    n = str_len(v->name);
+    if (bufSize > 0 && name) {
+        if (n > (ULONG)bufSize - 1)
+            n = (ULONG)bufSize - 1;
+        memcpy(name, v->name, n);
+        name[n] = 0;
+    } else {
+        n = 0;
+    }
+    if (length)
+        *length = (GLsizei)n;
 }
 
 /* ---- ES 3.0's uniform blocks (docs/GLES3_PLAN.md §5 item 6) ---- */
