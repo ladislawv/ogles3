@@ -142,7 +142,8 @@ static BOOL recipe_ok(ULONG t)
            t == OGLES2_U_UBO_ADDR || t == OGLES2_U_GET_UBO_SIZE ||
            t == OGLES2_U_LINE_WIDTH || t == OGLES2_U_AA_LINE_WIDTH ||
            t == OGLES2_U_SPILL_OFFSET || t == OGLES2_U_SPILL_SIZE_PER_THREAD ||
-           (t >= OGLES2_U_BLEND_CONSTANT_R && t <= OGLES2_U_BLEND_CONSTANT_R + 3) || t == OGLES2_U_CLIP_Z_COEFF;
+           (t >= OGLES2_U_BLEND_CONSTANT_R && t <= OGLES2_U_BLEND_CONSTANT_R + 3) || t == OGLES2_U_CLIP_Z_COEFF ||
+           t == OGLES2_U_IMAGE_TMU_CONFIG_P0 || (t >= OGLES2_U_IMAGE_WIDTH && t <= OGLES2_U_IMAGE_ARRAY_SIZE);
 }
 
 /* ES 3.1's types, a compute shader's only so far (compute.c writes them;
@@ -350,8 +351,13 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                 struct OGLES2Place *pl;
                 u[k].name = STR(u32(&s));
                 u[k].type = u32(&s);
-                u[k].array = (UWORD)u32(&s);
-                u[k].flags = (UBYTE)u32(&s);
+                u[k].array = u32(&s);
+                {
+                    ULONG fl = u32(&s);
+                    u[k].flags = (UBYTE)(fl & 7);
+                    if (format2 && (fl & 8)) /* an image (ES 3.1) */
+                        u[k].flags |= OGLES2_UNIFORM_IMAGE;
+                }
                 np = u32(&s);
                 if (np > 2)
                     FAIL("uniform with more than two storage places: ", u[k].name, np);
@@ -371,7 +377,13 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                 u[k].places = pl;
                 u[k].sampler[0] = u32(&s);
                 u[k].sampler[1] = u32(&s);
+                if ((u[k].flags & OGLES2_UNIFORM_IMAGE) &&
+                    ((u[k].sampler[0] != ~0UL && u[k].sampler[0] >= OGLES2_MAX_STAGE_IMAGES) ||
+                     (u[k].sampler[1] != ~0UL && u[k].sampler[1] >= OGLES2_MAX_STAGE_IMAGES)))
+                    FAIL("an image past the stage's images: ", u[k].name, u[k].sampler[1]);
                 u[k].block = -1;
+                if (u[k].array > 65535 && !format2) /* format 2: a buffer variable's, checked below */
+                    FAIL("an array too long: ", u[k].name, u[k].array);
                 if (format2) {
                     ULONG b = u32(&s), flags2;
                     u[k].offset = (LONG)u32(&s);
@@ -388,6 +400,8 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                         else if (flags2 & 4) /* an atomic counter: its ATOMIC_BUFFERS entry (ES 3.1) */
                             u[k].flags |= OGLES2_UNIFORM_ATOMIC;
                     }
+                    if (u[k].array > 65535 && !(u[k].flags & OGLES2_UNIFORM_BUFFER))
+                        FAIL("an array too long: ", u[k].name, u[k].array);
                 }
             }
             im->nuniforms = (UWORD)n;
@@ -534,6 +548,12 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                     v->uses_ubo = 1;
                 if (rt[j] == OGLES2_U_SSBO_OFFSET)
                     v->uses_storage = 1;
+                if (rt[j] == OGLES2_U_IMAGE_TMU_CONFIG_P0)
+                    v->uses_images = 1;
+                if ((rt[j] == OGLES2_U_IMAGE_TMU_CONFIG_P0 && (rd2[j] >> 24) >= OGLES2_MAX_STAGE_IMAGES) ||
+                    (rt[j] >= OGLES2_U_IMAGE_WIDTH && rt[j] <= OGLES2_U_IMAGE_ARRAY_SIZE &&
+                     rd2[j] >= OGLES2_MAX_STAGE_IMAGES))
+                    FAIL("an image past the stage's images", 0, rd2[j]);
                 if (rt[j] == OGLES2_U_UBO_ADDR && (rd2[j] >> 24) != 0)
                     v->uses_blocks = 1;
                 if (rt[j] == OGLES2_U_CLIP_Z_COEFF)
@@ -562,6 +582,8 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                     if (rt[j] == OGLES2_U_TMU_CONFIG_P0 || rt[j] == OGLES2_U_TMU_CONFIG_P1 ||
                         (rt[j] >= OGLES2_U_TEXTURE_WIDTH && rt[j] <= OGLES2_U_TEXTURE_ARRAY_SIZE) ||
                         rt[j] == OGLES2_U_UBO_ADDR || rt[j] == OGLES2_U_GET_UBO_SIZE || rt[j] == OGLES2_U_SPILL_OFFSET ||
+                        rt[j] == OGLES2_U_IMAGE_TMU_CONFIG_P0 ||
+                        (rt[j] >= OGLES2_U_IMAGE_WIDTH && rt[j] <= OGLES2_U_IMAGE_ARRAY_SIZE) ||
                         (rt[j] >= OGLES2_U_BLEND_CONSTANT_R && rt[j] <= OGLES2_U_BLEND_CONSTANT_R + 3))
                         v->no_textures = 0; /* nor the blend colour or the spill area: not in draw.c's key */
             }

@@ -1,0 +1,15 @@
+#version 310 es
+// ES 3.1's images (GLES3 plan stage D item 2): src's values into dst's red,
+// dst's width into its green; a store past dst's edge is dropped (robust
+// image access, Mesa patch 0017).
+layout(local_size_x = 4, local_size_y = 4) in;
+layout(binding = 1, r32ui) readonly uniform highp uimage2D src;
+layout(binding = 3, rgba8) writeonly uniform highp image2D dst;
+void main()
+{
+    ivec2 p = ivec2(gl_GlobalInvocationID.xy);
+    uint v = imageLoad(src, p).x;
+    ivec2 s = imageSize(dst);
+    imageStore(dst, p, vec4(float(v) / 255.0, float(s.x) / 255.0, 0.0, 1.0));
+    imageStore(dst, p + ivec2(100, 0), vec4(1.0));
+}

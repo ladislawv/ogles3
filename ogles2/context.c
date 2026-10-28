@@ -336,6 +336,7 @@ GLenum ogles2_glGetError(struct OGLES2Context *ctx)
  * extension GLES2 contexts have, as Mesa does, and their own. */
 #define EXT_ES2 1
 #define EXT_ES3 2
+#define EXT_ES31 4 /* ES 3.1 contexts only (they have the ES3 ones too) */
 #define EXT_ALL (EXT_ES2 | EXT_ES3)
 static const struct { const char *name; UBYTE in; } extensions[] = {
     {"GL_OES_element_index_uint", EXT_ALL}, {"GL_OES_compressed_ETC1_RGB8_texture", EXT_ALL},
@@ -360,12 +361,15 @@ static const struct { const char *name; UBYTE in; } extensions[] = {
     /* The compiler's (Mesa offers it in ES 3.0 contexts): gl_FragDepth's
      * layout is a hint the hardware has no use for. */
     {"GL_EXT_conservative_depth", EXT_ES3},
+    /* ES 3.1's image atomics (Mesa offers it in every ES 3.1 context;
+     * GLES3 plan stage D item 2) */
+    {"GL_OES_shader_image_atomic", EXT_ES31},
 };
 #define NUM_EXTENSIONS (sizeof(extensions) / sizeof(extensions[0]))
 
 static UBYTE ext_mask(const struct OGLES2Context *ctx)
 {
-    return ogles2_es3(ctx) ? EXT_ES3 : EXT_ES2;
+    return ogles2_es31(ctx) ? EXT_ES3 | EXT_ES31 : ogles2_es3(ctx) ? EXT_ES3 : EXT_ES2;
 }
 
 ULONG ogles2_num_extensions(const struct OGLES2Context *ctx)
@@ -380,9 +384,9 @@ ULONG ogles2_num_extensions(const struct OGLES2Context *ctx)
 /* GL_EXTENSIONS of a context version, built at its first query. */
 static const char *ext_string(const struct OGLES2Context *ctx)
 {
-    static char s[2][2048];
-    static BOOL made[2];
-    int v = ogles2_es3(ctx);
+    static char s[3][2048];
+    static BOOL made[3];
+    int v = ogles2_es31(ctx) ? 2 : ogles2_es3(ctx);
     if (!made[v]) {
         ObtainSemaphore(&OGLES2LibBase->lock);
         if (!made[v]) {

@@ -2345,6 +2345,60 @@ static void test_atomic_counters(void)
     glDeleteProgram(p);
 }
 
+/* ES 3.1's images (GLES3 plan stage D item 2): es31img reads src (unit 1,
+ * R32UI, x + 8y + 10) and writes dst (unit 3, RGBA8 8x8: red the value,
+ * green imageSize's width 8), its stores past the edge dropped; the image
+ * uniforms' units are layout(binding)'s, glUniform1i cannot change them. */
+static void test_images(void)
+{
+    GLuint p = compute_program("es31img"), t[2], fb, v[64];
+    GLubyte px[8 * 8 * 4];
+    GLint unit = -1, loc;
+    int i, ok = 1;
+    if (!p) {
+        check(0, "images: es31img links");
+        return;
+    }
+    loc = glGetUniformLocation(p, "dst");
+    if (loc >= 0)
+        glGetUniformiv(p, loc, &unit);
+    glUseProgram(p);
+    glUniform1i(loc, 0);
+    check(unit == 3 && glGetError() == GL_INVALID_OPERATION, "images: dst at its layout(binding) unit 3, glUniform1i refused");
+    for (i = 0; i < 64; i++)
+        v[i] = (GLuint)(i + 10);
+    glGenTextures(2, t);
+    glBindTexture(GL_TEXTURE_2D, t[0]);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_R32UI, 8, 8);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 8, 8, GL_RED_INTEGER, GL_UNSIGNED_INT, v);
+    glBindTexture(GL_TEXTURE_2D, t[1]);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, 8, 8);
+    glBindImageTexture(1, t[0], 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32UI);
+    glBindImageTexture(3, t[1], 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
+    glDispatchCompute(2, 2, 1);
+    glMemoryBarrier(GL_FRAMEBUFFER_BARRIER_BIT);
+    glGenFramebuffers(1, &fb);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, t[1], 0);
+    memset(px, 0, sizeof(px));
+    glReadPixels(0, 0, 8, 8, GL_RGBA, GL_UNSIGNED_BYTE, px);
+    for (i = 0; i < 64 && ok; i++) {
+        const GLubyte *q = px + i * 4;
+        if (q[0] != i + 10 || q[1] != 8 || q[2] != 0 || q[3] != 255) {
+            printf("     dst (%d, %d) is %d %d %d %d\n", i % 8, i / 8, q[0], q[1], q[2], q[3]);
+            ok = 0;
+        }
+    }
+    check(ok && glGetError() == GL_NO_ERROR, "images: a dispatch loads src and stores dst (8x8, its sizes)");
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDeleteFramebuffers(1, &fb);
+    glBindImageTexture(1, 0, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32UI);
+    glBindImageTexture(3, 0, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32UI);
+    glDeleteTextures(2, t);
+    glUseProgram(0);
+    glDeleteProgram(p);
+}
+
 /* ES 3.1's explicit uniform locations (GLES3 plan stage D item 6): es31loc
  * has tint at 7 and scale at 2 (the colour is tint * scale), an unused
  * uniform at 20 (not active: glUniform* there is ignored), nothing at 3
@@ -2916,6 +2970,8 @@ int main(void)
                 test_vao2(1);
             if (!skipped("uniform_locations"))
                 test_uniform_locations();
+            if (!skipped("images"))
+                test_images();
         }
     }
     check(glGetError() == GL_NO_ERROR, "no GL error left over");

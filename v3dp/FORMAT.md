@@ -282,7 +282,10 @@ and only when the state is there:
 So two programs of the same sources and different link state never share a file.
 
 **`UNIFORMS`**: a compute program's sampler words are its compute stage's index, then
-0xffffffff. Each uniform after its two sampler words: `i32` block (its index in
+0xffffffff. Flags bit 3 (ES 3.1, 2026-10-28): an image (`image2D`, ...); its sampler words are
+its image index in each stage (`QUNIFORM_IMAGE_TMU_CONFIG_P0`'s unit, the `IMAGE_WIDTH` to
+`_ARRAY_SIZE` recipes' data), its units `OPAQUE_UNITS`' (`layout(binding)`: GLSL ES 3.10 gives
+each image one; `glUniform*` cannot change them). Each uniform after its two sampler words: `i32` block (its index in
 `UNIFORM_BLOCKS`, -1 outside a block), `i32` offset in the block in bytes, `i32` array stride,
 `i32` matrix stride (-1 each outside a block; Mesa's `gl_uniform_storage` fields), `u32` flags2:
 bit 0 row-major; bit 1 (ES 3.1) a storage block's member, a buffer variable (its block an index

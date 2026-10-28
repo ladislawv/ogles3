@@ -661,6 +661,8 @@ struct tex_states
     UBYTE unit[2][OGLES2_MAX_STAGE_SAMPLERS], kind[2][OGLES2_MAX_STAGE_SAMPLERS]; /* textureSize's */
     ULONG ubo[2];   /* little-endian copy of each stage's constant buffer, if read */
     ULONG zero_ubo; /* what a uniform block without a buffer reads */
+    ULONG img[2][OGLES2_MAX_STAGE_IMAGES]; /* ES 3.1: each stage's images' texture states */
+    UBYTE iunit[2][OGLES2_MAX_STAGE_IMAGES]; /* and their image units */
 };
 
 /* The largest uniform block (GL_MAX_UNIFORM_BLOCK_SIZE). */
@@ -867,6 +869,37 @@ static BOOL texture_states(struct OGLES2Context *ctx, struct OGLES2Program *p,
     return TRUE;
 }
 
+/* ES 3.1: every image uniform of the program, when a variant of the draw
+ * reads images: its image index in each stage that uses it reads the image
+ * unit its layout(binding) gave it, which the draw may store into (the job
+ * then cleans its caches after the render, job_storage). */
+static BOOL image_states(struct OGLES2Context *ctx, struct OGLES2Program *p, const struct OGLES2Variant *const v[3],
+                         struct tex_states *ts)
+{
+    const struct OGLES2Image *im = p->image;
+    UWORD u, e;
+    int st;
+    if (!v[0]->uses_images && !v[1]->uses_images && !v[2]->uses_images)
+        return TRUE;
+    for (u = 0; u < im->nuniforms; u++) {
+        const struct OGLES2ImageUniform *un = &im->uniforms[u];
+        UWORD ne = un->array ? un->array : 1;
+        if (!(un->flags & OGLES2_UNIFORM_IMAGE))
+            continue;
+        for (st = 0; st < 2; st++)
+            for (e = 0; e < ne && un->sampler[st] + e < OGLES2_MAX_STAGE_IMAGES; e++) {
+                ULONG idx = un->sampler[st] + e;
+                UBYTE unit = unit_of(p, u, e);
+                ts->iunit[st][idx] = unit;
+                if (!(ts->img[st][idx] = ogles2_image_state(ctx, unit, 0)))
+                    return FALSE;
+                ogles2_image_written(ctx, unit, ctx->job_serial);
+            }
+    }
+    ctx->job_storage = TRUE;
+    return TRUE;
+}
+
 /* One shader's uniform stream from its recipe (plan section 8.6, Mesa's
  * v3d_write_uniforms); its address. One word more than the recipe: the
  * hardware prefetches the next uniform. */
@@ -930,6 +963,15 @@ static ULONG write_uniforms(struct OGLES2Context *ctx, const struct OGLES2Progra
             break;
         case OGLES2_U_TMU_CONFIG_P1:
             w = tst->smp[si][(d >> 24) & (OGLES2_MAX_STAGE_SAMPLERS - 1)] | (d & 0xffffff);
+            break;
+        case OGLES2_U_IMAGE_TMU_CONFIG_P0: /* Mesa's write_image_tmu_p0 (the loader checked the index) */
+            w = tst->img[si][d >> 24] | (d & 0xffffff);
+            break;
+        case OGLES2_U_IMAGE_WIDTH:
+        case OGLES2_U_IMAGE_HEIGHT:
+        case OGLES2_U_IMAGE_DEPTH:
+        case OGLES2_U_IMAGE_ARRAY_SIZE:
+            w = ogles2_image_size(ctx, tst->iunit[si][d], (int)(rtype[i] - OGLES2_U_IMAGE_WIDTH));
             break;
         case OGLES2_U_UBO_ADDR: /* unit 0 the constant buffer, the others uniform blocks */
             w = ((d >> 24) ? block_buffer(ctx, p, si, (d >> 24) - 1, tst, 0) : tst->ubo[si]) + (d & 0xffffff);
@@ -2411,7 +2453,7 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
     {
         const struct OGLES2Variant *vv[3];
         vv[0] = cs; vv[1] = vs; vv[2] = fs;
-        if (!ubo_copies(ctx, p, vv, &tst) || !spill_area(ctx, vv))
+        if (!ubo_copies(ctx, p, vv, &tst) || !spill_area(ctx, vv) || !image_states(ctx, p, vv, &tst))
             goto nomem;
     }
     if (!texture_states(ctx, p, &tst))

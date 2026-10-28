@@ -294,13 +294,13 @@ def dump(path, show_qpu):
                             " row_major" if flags2 & 1 else "")
                     elif (boff, astride, mstride, flags2) != (-1, -1, -1, 0):
                         raise Bad("block fields outside a block")
-                fl = [f for b, f in ((1, "sampler"), (2, "builtin"), (4, "hidden")) if flags & b]
+                fl = [f for b, f in ((1, "sampler"), (2, "builtin"), (4, "hidden"), (8, "image")) if flags & b]
                 print("  %-24s type 0x%04x%s %s %s%s%s" %
                       (string(strings, nm), gtype, "[%d]" % arr if arr else "", ",".join(fl),
                        " ".join(places),
                        " units %s" % " ".join("%s=%s" % (w, "-" if x == 0xffffffff else x)
                                               for w, x in zip(("vs/cs", "fs"), samp))
-                       if flags & 1 else "", block))
+                       if flags & 9 else "", block))
             r.done()
             nuniforms = n
         elif t == 5:

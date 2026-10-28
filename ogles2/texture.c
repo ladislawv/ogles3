@@ -121,6 +121,10 @@ struct OGLES2Texture
      * texture's). Dropped at every change (before_change); NULL: none. */
     struct OGLES2Texture *view;
     GLint view_base;                /* the level the view's level 0 is */
+    /* ES 3.1: the job whose draws store into it through an image unit, not
+     * finished yet (0: none), a job of img_share's members. */
+    ULONG img_serial;
+    struct OGLES2Share *img_share;
 };
 
 /* Both records fit their halves of rec. */
@@ -2827,10 +2831,27 @@ static BOOL load_box(struct OGLES2Texture *t, int k, int l, int x, int y, int w,
     return TRUE;
 }
 
+/* The job whose draws store into t through an image (ES 3.1) rendered and
+ * finished: what it wrote is in the GPU copy. */
+static void image_writes_done(struct OGLES2Texture *t)
+{
+    struct OGLES2Context *m;
+    ULONG s = t->img_serial;
+    t->img_serial = 0;
+    for (m = t->img_share ? t->img_share->first : 0; s && m; m = m->share_next) {
+        if (m->v3d && m->v3d->frame_active && m->job_serial == s)
+            ogles2_job_flush(m, FALSE);
+        if (m->pend && m->pend_serial == s)
+            ogles2_job_finish(m);
+    }
+}
+
 /* The RAM copies of every level the GPU drew into, read back. */
 static void sync(struct OGLES2Texture *t)
 {
     int k, l;
+    if (t->img_serial)
+        image_writes_done(t);
     for (k = 0; k < t->nf; k++) {
         struct OGLES2Face *f = &t->f[k];
         if (!f->rendered)
@@ -5192,6 +5213,150 @@ void ogles2_glGenerateMipmap(struct OGLES2Context *ctx, GLenum target)
     }
     if (ctx->v3d && !upload_all(t))
         ogles2_error(ctx, GL_OUT_OF_MEMORY);
+}
+
+/* ---- ES 3.1's images in shaders (stage D item 2) ---- */
+
+static struct OGLES2Texture *fallback(struct OGLES2TexState *ts);
+static void *claim32(V3DContext *v, ULONG size);
+
+/* The stored format of an image unit's format (ES 3.1 table 8.27) and its
+ * texel bytes; 0 for another. */
+static UBYTE image_hw_type(GLenum f, UBYTE *cpp)
+{
+    static const struct { GLenum f; UBYTE type, cpp; } map[] = {
+        { GL_RGBA32F, V3D_TEXTURE_DATA_FORMAT_RGBA32F, 16 },  { GL_RGBA16F, V3D_TEXTURE_DATA_FORMAT_RGBA16F, 8 },
+        { GL_R32F, V3D_TEXTURE_DATA_FORMAT_R32F, 4 },         { GL_RGBA8, V3D_TEXTURE_DATA_FORMAT_RGBA8, 4 },
+        { GL_RGBA8_SNORM, V3D_TEXTURE_DATA_FORMAT_RGBA8_SNORM, 4 },
+        { GL_RGBA32UI, V3D_TEXTURE_DATA_FORMAT_RGBA32UI, 16 }, { GL_RGBA16UI, V3D_TEXTURE_DATA_FORMAT_RGBA16UI, 8 },
+        { GL_RGBA8UI, V3D_TEXTURE_DATA_FORMAT_RGBA8UI, 4 },   { GL_R32UI, V3D_TEXTURE_DATA_FORMAT_R32UI, 4 },
+        { GL_RGBA32I, V3D_TEXTURE_DATA_FORMAT_RGBA32I, 16 },  { GL_RGBA16I, V3D_TEXTURE_DATA_FORMAT_RGBA16I, 8 },
+        { GL_RGBA8I, V3D_TEXTURE_DATA_FORMAT_RGBA8I, 4 },     { GL_R32I, V3D_TEXTURE_DATA_FORMAT_R32I, 4 },
+    };
+    unsigned k;
+    for (k = 0; k < sizeof(map) / sizeof(map[0]); k++)
+        if (map[k].f == f) {
+            *cpp = map[k].cpp;
+            return map[k].type;
+        }
+    *cpp = 0;
+    return 0;
+}
+
+/* Unit u's image when shaders can read and write it (ES 3.1 8.22: a
+ * texture, its level and layer there, a format of its texel size), else
+ * NULL. */
+static struct OGLES2ImageUnit *valid_image(struct OGLES2TexState *ts, int u)
+{
+    struct OGLES2ImageUnit *im;
+    struct OGLES2Texture *t;
+    UBYTE cpp;
+    if (!ts || !ts->images || u < 0 || u >= MAX_IMAGE_UNITS)
+        return 0;
+    im = &ts->images[u];
+    t = im->t;
+    if (!t || !t->immutable_levels || im->level >= t->immutable_levels || !image_hw_type(im->format, &cpp))
+        return 0;
+    if (!(t->f[0].defined & (1UL << im->level)))
+        return 0;
+    if (!im->layered && im->layer >= (t->target == GL_TEXTURE_3D ? (GLint)t->d[im->level] : faces(t)))
+        return 0;
+    if (!t->gpu && !upload_all(t))
+        return 0;
+    return t->gpu && cpp == t->cpp ? im : 0;
+}
+
+ULONG ogles2_image_state(struct OGLES2Context *ctx, int unit, void *dst)
+{
+    struct OGLES2TexState *ts = ts_get(ctx);
+    struct OGLES2ImageUnit *im = valid_image(ts, unit);
+    struct OGLES2Texture *t;
+    v3d_texture_shader_state *tsr;
+    V3DTexture *g;
+    ULONG *w, base;
+    UBYTE cpp;
+    int n, k;
+    if (!ts)
+        return 0;
+    /* No image: the fallback's texel, which nothing reads (its sizes are
+     * 0: the shader's bounds checks drop every access, Mesa patch 0017). */
+    if (im)
+        t = im->t;
+    else if (!(t = fallback(ts)))
+        return 0;
+    if (!t->gpu && !upload_all(t))
+        return 0;
+    if (!(tsr = dst ? (v3d_texture_shader_state *)dst : claim32(ctx->v3d, sizeof(*tsr))))
+        return 0;
+    t->used_serial = ctx->job_serial;
+    g = t->gpu;
+    memset(tsr, 0, sizeof(*tsr));
+    /* Mesa's v3d_create_image_view_texture_shader_state: the level alone,
+     * every layer or the one bound (a 3D texture's from level 0's slices,
+     * as v3d_layer_offset), the unit's format, no swizzle. */
+    base = (ULONG)V3D_ALIGN_UP((v3d_uintptr)g->texture_mem.hostptr, 256) + g->levels[0].offset;
+    n = faces(t);
+    if (im && !im->layered) {
+        base += (ULONG)im->layer * t->face_stride;
+        if (t->target != GL_TEXTURE_3D)
+            n = 1;
+    }
+    tsr->texture_base_pointer_rshift_6 = base >> 6;
+    tsr->base_level = im ? (ULONG)im->level : 0;
+    tsr->max_level = tsr->base_level;
+    tsr->image_width_lo = g->width & 0x3f;
+    tsr->image_width_hi = g->width >> 6;
+    tsr->image_height = g->height;
+    tsr->image_depth_lo = (ULONG)n & 0x3ff;
+    tsr->image_depth_hi = (ULONG)n >> 10;
+    tsr->array_stride_64_byte_aligned = faces(t) > 1 ? t->face_stride / 64 : 0;
+    tsr->texture_type = im ? image_hw_type(im->format, &cpp) : t->hw_type;
+    tsr->swizzle_r = v3d_SWIZZLE_RED;
+    tsr->swizzle_g = v3d_SWIZZLE_GREEN;
+    tsr->swizzle_b = v3d_SWIZZLE_BLUE;
+    tsr->swizzle_a = v3d_SWIZZLE_ALPHA;
+    if (g->tiling_format == V3D_MEMORY_FORMAT_UIF_XOR) {
+        tsr->level_0_is_strictly_uif = TRUE;
+        tsr->level_0_xor_enable = TRUE;
+        tsr->level_0_ubpad = g->ub_pad;
+        tsr->extended = TRUE;
+    }
+    w = (ULONG *)tsr;
+    for (k = 0; k < 5; k++)
+        w[k] = LE32(w[k]);
+    return (ULONG)tsr;
+}
+
+ULONG ogles2_image_size(struct OGLES2Context *ctx, int unit, int what)
+{
+    struct OGLES2ImageUnit *im = valid_image(ts_get(ctx), unit);
+    struct OGLES2Texture *t;
+    if (!im)
+        return 0;
+    t = im->t;
+    switch (what) { /* Mesa's get_image_size: the level's, an array's layers */
+    case 0: return t->f[0].w[im->level];
+    case 1: return t->f[0].h[im->level];
+    case 2: return t->target == GL_TEXTURE_3D ? t->d[im->level] : 1;
+    default: return (ULONG)faces(t);
+    }
+}
+
+void ogles2_image_written(struct OGLES2Context *ctx, int unit, ULONG serial)
+{
+    struct OGLES2ImageUnit *im = valid_image(ts_get(ctx), unit);
+    struct OGLES2Texture *t;
+    int k;
+    if (!im || im->access == GL_READ_ONLY)
+        return;
+    t = im->t;
+    for (k = 0; k < faces_at(t, im->level); k++)
+        if (im->layered || k == im->layer)
+            ogles2_texture_rendered(t, k, im->level);
+    if (serial) {
+        t->img_serial = serial;
+        t->img_share = ctx->share;
+    }
 }
 
 /* ---- for the draw path ---- */

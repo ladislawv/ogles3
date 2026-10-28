@@ -589,11 +589,12 @@ static int put_uniforms(struct buf *b, struct buf *strings, struct gl_shader_pro
         const struct gl_uniform_storage *u = &data->UniformStorage[i];
         const struct glsl_type *base = glsl_without_array(u->type);
         int sampler = glsl_type_is_sampler(base);
+        int image = glsl_type_is_image(base) && format2; /* ES 3.1: flags bit 3, its image index */
 
         put_u32(b, str_add(strings, u->name.string));
         put_u32(b, u->type->gl_type);
         put_u32(b, u->array_elements);
-        put_u32(b, (sampler ? 1u : 0u) | (u->builtin ? 2u : 0u) | (u->hidden ? 4u : 0u));
+        put_u32(b, (sampler ? 1u : 0u) | (u->builtin ? 2u : 0u) | (u->hidden ? 4u : 0u) | (image ? 8u : 0u));
         put_u32(b, u->num_driver_storage);
         for (j = 0; j < u->num_driver_storage; j++) {
             const struct gl_uniform_driver_storage *ds = &u->driver_storage[j];
@@ -625,12 +626,14 @@ static int put_uniforms(struct buf *b, struct buf *strings, struct gl_shader_pro
             put_u8(b, ds->format);
             put_u8(b, 0);
         }
-        /* The vertex and fragment stages' sampler index; a compute program's
-         * compute stage's in the first word (FORMAT.md, format 2). */
+        /* The vertex and fragment stages' sampler (or image) index; a
+         * compute program's compute stage's in the first word (FORMAT.md,
+         * format 2). */
         for (s = 0; s < 2; s++) {
             mesa_shader_stage st = prog->_LinkedShaders[MESA_SHADER_COMPUTE] ? (s ? MESA_SHADER_NONE : MESA_SHADER_COMPUTE)
                                                                          : stages_in_file[s];
-            put_u32(b, sampler && st != MESA_SHADER_NONE && u->opaque[st].active ? u->opaque[st].index : 0xffffffffu);
+            put_u32(b, (sampler || image) && st != MESA_SHADER_NONE && u->opaque[st].active ? u->opaque[st].index
+                                                                                          : 0xffffffffu);
         }
         /* Format 2: a uniform block member's place in its block (its
          * storage places are none: the block's buffer holds it); a storage
@@ -1069,17 +1072,14 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
         if (stages[i] == V3DP_HASH_XFBV || stages[i] == V3DP_HASH_SEPA)
             format2 = 1;
     /* ES 3.1's objects come with stage D (docs/GLES3_PLAN.md §7): storage
-     * blocks, atomic counters and compute programs so far; images not
-     * yet. */
+     * blocks, atomic counters, compute programs and images. */
     if (prog->data->NumShaderStorageBlocks || prog->data->NumAtomicBuffers ||
         prog->_LinkedShaders[MESA_SHADER_COMPUTE])
         format2 = 1;
     for (i = 0; i < NUM_FILE_STAGES; i++) {
         const struct gl_linked_shader *sh = prog->_LinkedShaders[stages_in_file[i]];
-        if (sh && sh->Program->info.num_images) {
-            fprintf(stderr, "v3dp: images are not supported yet\n");
-            return -1;
-        }
+        if (sh && sh->Program->info.num_images)
+            format2 = 1;
     }
     put_u8(&strings, 0);
 

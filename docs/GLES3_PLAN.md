@@ -244,9 +244,10 @@ Mesa's driver, so they could follow later as an extension
       `negative_api`, with `ports/deqp/run_pc.sh` and the PC compiling;
       (3) dropped (the update above); (4) stage C items 2 and 6 (done
       2026-10-27), then stage D, each with the dEQP groups of its own
-      features (under way: §7's "Compute" and "Then" notes, the last one
-      ending with where to go on: first the A1200 restarts dEQP-GLES31's
-      `draw_indirect.draw_arrays_indirect.first.first_1` causes); (5) stage
+      features (under way: §7's "Compute" and "Then" notes; items 1, 2 (4
+      `image_load_store` cases open) and 3 done, the A1200 restarts in
+      `draw_indirect.draw_arrays_indirect` parked; next items 4, 5, the
+      rest of 6, dEQP's `ssbo` and `program_interface_query`); (5) stage
       B's end without dEQP-GLES2 and the whole dEQP-GLES3 run at the end.
     - **Open points:** the `derivate.dfdx.texture.basic.float_mediump`
       failure seen once (12 pixels); a program's default variants can
@@ -2635,6 +2636,45 @@ larger location now fails to compile, as GLSL wants). `m8-5` 47 of 47, 181
 of 181; dEQP-GLES31 `uniform_location` 341 of 341 (19 not supported: ES
 3.2), `layout_binding` 84 passed, 20 failed (all images, item 2), 64 not
 supported (tessellation, and too few uniforms for some negative cases).
+**Then (2026-10-28): images (item 2), samplers in compute shaders.** The
+compiler binds a 1x1 RGBA8 texture at each image unit the program's stages
+read (`Program->sh.ImageUnits`) before its key-state draw or dispatch
+(`bind_images`; the code depends on none of it, the format qualifier is the
+shader's), and no longer refuses images; the file marks an image uniform
+(`UNIFORMS` flags bit 3, its sampler words its image index per stage, its
+units `OPAQUE_UNITS`'). The library: recipe types `IMAGE_TMU_CONFIG_P0` (8)
+and `IMAGE_WIDTH` to `_ARRAY_SIZE` (22-25) in draws and dispatches;
+`texture.c`'s `ogles2_image_state` makes the image's own texture state
+(Mesa's `v3d_create_image_view_texture_shader_state`: the unit's level
+alone, every layer or the bound one, the unit's format, no swizzle) and
+`ogles2_image_size` its sizes; a unit without a usable image (no texture,
+level or layer past it, another texel size: ES 3.1 8.22) reads the
+fallback with sizes 0, so the bounds checks (Mesa patch 0017) drop every
+access. A shader that may store marks the level rendered (the RAM copy is
+read back when needed); a draw's job is a storage job (cleaned after its
+render), and a texture records the job (`img_serial`), which `sync` renders
+and waits for before it reads back. Image uniforms are `K_IMAGE` in
+`program.c`: `glGetUniformiv` answers the unit, `glUniform*` is
+`GL_INVALID_OPERATION`. `GL_OES_shader_image_atomic` in ES 3.1 contexts
+(the compiler has it). Compute dispatches sample textures now (dEQP checks
+float images that way): `TMU_CONFIG_P0`/`P1` and `TEXTURE_*` from
+`ogles2_texture_state`, the records copied into the dispatch's stream
+memory, and the `.v3dw`'s compute variant when a sampler reads 32 bits; a
+compute link request (`V3DGLSL_LINK_COMPUTE`) now writes the `.v3dw` too
+(the library has no compute source to compile one from later). Uniform
+array sizes are 32 bits in the library (a buffer variable's array can pass
+65535: `compute.basic.*_large`). `m8_draw`'s `test_images` (`es31img.comp`:
+loads an R32UI image, stores RGBA8, `imageSize`, a store past the edge
+dropped, the unit queries). `m8-5` 47 of 47, 183 of 183; dEQP-GLES31
+`compute` 195 of 195, `layout_binding` 104 of 104 (64 not supported),
+`synchronization` 104 of 104, `image_load_store` 618 passed, 4 failed, 125
+not supported (texture buffers, `GL_EXT_texture_buffer`, ES 3.2). **Open:**
+the 4 are `{2d,cube}.atomic.exchange_r32f_{result,return_value}`: the
+values exchanged lose their low mantissa bits (4097 reads 4096, 16385
+16384, as through a half float), while the same cases of `2d_array` and
+`3d` pass. **Trap:** the A1200's program cache keeps a compute program's
+`.v3dp` from before a compiler change (no `.v3dw` then): delete
+`Stuff:amictld/work/ogles2-m8-3/cache/#?` after such a change.
 
 **Parked (2026-10-28), open:** further runs singly: `triangles.single_attribute`
 and `points.single_attribute` pass; `triangles.multiple_attributes` and

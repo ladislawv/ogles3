@@ -558,6 +558,33 @@ static void bind_storage_blocks(GLuint p)
     }
 }
 
+/* ES 3.1's images: a 1x1 RGBA8 texture at each image unit the program's
+ * stages read (Program->sh.ImageUnits, their layout(binding)s), bound with
+ * glBindImageTexture: the driver reads the bound images' state into the
+ * uniforms (unbound, a NULL resource). The code depends on none of it (the
+ * format qualifier is the shader's). */
+static void bind_images(GLuint p)
+{
+    GET_CURRENT_CONTEXT(ctx);
+    struct gl_shader_program *sp = _mesa_lookup_shader_program(ctx, p);
+    static GLuint tex;
+    unsigned s, i;
+    if (!sp)
+        return;
+    for (s = 0; s < MESA_SHADER_STAGES; s++) {
+        const struct gl_linked_shader *sh = sp->_LinkedShaders[s];
+        for (i = 0; sh && i < sh->Program->info.num_images; i++) {
+            if (!tex) {
+                _mesa_GenTextures(1, &tex);
+                _mesa_BindTexture(GL_TEXTURE_2D, tex);
+                _mesa_TexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, 1, 1);
+                _mesa_BindTexture(GL_TEXTURE_2D, 0);
+            }
+            _mesa_BindImageTexture(sh->Program->sh.ImageUnits[i], tex, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8);
+        }
+    }
+}
+
 /* A compute program's default variant (ES 3.1, docs/GLES3_PLAN.md stage D
  * item 1): one dispatch of one work group with its samplers, uniform and
  * storage blocks bound; the driver compiles the shader then
@@ -569,6 +596,7 @@ static int dispatch_key_state(GLuint p, int wide)
     bind_samplers(p, 0, wide);
     bind_uniform_blocks(p);
     bind_storage_blocks(p);
+    bind_images(p);
     _mesa_DispatchCompute(1, 1, 1);
     _mesa_Flush();
     bind_samplers(p, 1, 0);
@@ -588,15 +616,6 @@ static int key_states(GLuint p, int wide)
 {
     GET_CURRENT_CONTEXT(ctx);
     struct gl_shader_program *sp = _mesa_lookup_shader_program(ctx, p);
-    int s;
-    /* Images (ES 3.1) are refused before a draw or a dispatch: the driver
-     * would read their bindings, which nothing binds (v3dp_write refuses
-     * them too, docs/GLES3_PLAN.md stage D item 2). */
-    for (s = 0; sp && s < MESA_SHADER_STAGES; s++)
-        if (sp->_LinkedShaders[s] && sp->_LinkedShaders[s]->Program->info.num_images) {
-            fprintf(stderr, "v3dp: images are not supported yet\n");
-            return 0;
-        }
     if (sp && sp->_LinkedShaders[MESA_SHADER_COMPUTE])
         return dispatch_key_state(p, wide);
     return draw_key_states(p, wide);
@@ -649,6 +668,7 @@ static int draw_key_states(GLuint p, int wide)
     bind_samplers(p, 0, wide);
     bind_uniform_blocks(p);
     bind_storage_blocks(p); /* a fragment shader's (ES 3.1) */
+    bind_images(p);
     _mesa_GetProgramiv(p, GL_ACTIVE_ATTRIBUTES, &n);
     for (i = 0; i < n; i++) {
         char name[256];
@@ -970,7 +990,9 @@ static int handle(uint32_t op, const char *vs, const char *fs, const char *out_p
             return 3;
         }
         if (op == V3DGLSL_LINK_COMPUTE) {
-            write_mode = WRITE_PLAIN;
+            /* with its .v3dw when it samples: the library has no compute
+             * source to compile one from at a dispatch */
+            write_mode = WRITE_BOTH;
             return link_compute("compute shader", vs, out_path, log, log_size) ? 0 : 1;
         }
         {

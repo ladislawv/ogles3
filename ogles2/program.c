@@ -65,14 +65,14 @@ static const ULONG smooth_rdata[20] = {0, 0, 0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10,
 static const struct OGLES2Variant smooth_variants[3] = {
     {OGLES2_VARIANT_CS, 4, 1, 0, 0, 4, 0, 0, 0, {3}, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
      {0}, {0}, {0}, 0, {0}, 0, 0, builtin_coordinate, sizeof(builtin_coordinate), 0, 20, smooth_rtype,
-     smooth_rdata, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+     smooth_rdata, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {OGLES2_VARIANT_VS, 4, 1, 0, 0, 4, 0, 0, 0, {3, 4}, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
      {0}, {0}, {0}, 0, {0}, 0, 0, builtin_vertex_smooth, sizeof(builtin_vertex_smooth),
-     sizeof(builtin_coordinate), 20, smooth_rtype, smooth_rdata, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+     sizeof(builtin_coordinate), 20, smooth_rtype, smooth_rdata, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {OGLES2_VARIANT_FS, 4, 0, 0, 0, 0, 0, 0, 0, {0}, 0, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 0,
      {0}, {0}, {0}, 0, {0}, 0, 0, builtin_fragment_smooth, sizeof(builtin_fragment_smooth),
      sizeof(builtin_coordinate) + sizeof(builtin_vertex_smooth), 0, 0, 0, 0, 0, 0, 0, 0,
-     1 /* render target 0 */, 0, 0, 0, 0},
+     1 /* render target 0 */, 0, 0, 0, 0, 0},
 };
 
 static const struct OGLES2Image builtin_smooth = {
@@ -2027,7 +2027,7 @@ void ogles2_glGetActiveUniformsiv(struct OGLES2Context *ctx, GLuint program, GLs
         in_block = u->block >= 0; /* an atomic counter's offset and stride too (ES 3.1) */
         /* the default block's: -1 offsets and strides, as Mesa's */
         params[k] = pname == GL_UNIFORM_TYPE          ? (GLint)u->type
-                  : pname == GL_UNIFORM_SIZE          ? (u->array ? u->array : 1)
+                  : pname == GL_UNIFORM_SIZE          ? (GLint)(u->array ? u->array : 1)
                   : pname == GL_UNIFORM_NAME_LENGTH   ? (GLint)active_name_len(u) + 1
                   : pname == GL_UNIFORM_BLOCK_INDEX   ? (u->flags & OGLES2_UNIFORM_ATOMIC ? -1 : u->block)
                   : pname == GL_UNIFORM_OFFSET        ? (in_block ? u->offset : -1)
@@ -2355,6 +2355,7 @@ void ogles2_glGetActiveUniform(struct OGLES2Context *ctx, GLuint program, GLuint
 #define K_BOOL  2
 #define K_SAMPLER 3
 #define K_UINT  4 /* GLSL ES 3.00 */
+#define K_IMAGE 5 /* GLSL ES 3.10: its unit is layout(binding)'s, glUniform* cannot change it */
 
 /* Kind, components per column and columns of a GL uniform type; 0 if unknown. */
 static int type_shape(GLenum t, int *kind, int *comps, int *cols)
@@ -2396,6 +2397,11 @@ static int type_shape(GLenum t, int *kind, int *comps, int *cols)
     case GL_UNSIGNED_INT_SAMPLER_2D: case GL_UNSIGNED_INT_SAMPLER_3D: case GL_UNSIGNED_INT_SAMPLER_CUBE:
     case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
         *kind = K_SAMPLER; *comps = 1; return 1;
+    case GL_IMAGE_2D: case GL_IMAGE_3D: case GL_IMAGE_CUBE: case GL_IMAGE_2D_ARRAY:
+    case GL_INT_IMAGE_2D: case GL_INT_IMAGE_3D: case GL_INT_IMAGE_CUBE: case GL_INT_IMAGE_2D_ARRAY:
+    case GL_UNSIGNED_INT_IMAGE_2D: case GL_UNSIGNED_INT_IMAGE_3D: case GL_UNSIGNED_INT_IMAGE_CUBE:
+    case GL_UNSIGNED_INT_IMAGE_2D_ARRAY:
+        *kind = K_IMAGE; *comps = 1; return 1;
     default:              return 0;
     }
 }
@@ -2748,7 +2754,7 @@ static void get_uniform(struct OGLES2Context *ctx, GLuint program, GLint locatio
     u = &p->image->uniforms[p->loc_uniform[location]];
     if (!type_shape(u->type, &kind, &comps, &cols))
         return;
-    if (kind == K_SAMPLER) {
+    if (kind == K_SAMPLER || kind == K_IMAGE) {
         if (fv) *fv = (GLfloat)p->sampler_unit[location];
         if (iv) *iv = p->sampler_unit[location];
         return;

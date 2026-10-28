@@ -117,6 +117,7 @@ struct OGLES2PixelStore
  * TMU_CONFIG recipes' index). M7 step 2; plan 7.6. */
 #define OGLES2_MAX_TEXTURE_UNITS  48
 #define OGLES2_MAX_STAGE_SAMPLERS 16
+#define OGLES2_MAX_STAGE_IMAGES 32 /* ES 3.1: GL_MAX_*_IMAGE_UNIFORMS */
 #define OGLES2_MAX_VIEWPORT 4096 /* V3D_MAX_FRAMEBUFFER_SIZE on 4.2; GL_MAX_VIEWPORT_DIMS */
 
 /* glEnable capabilities, bits of OGLES2State.caps */
@@ -214,6 +215,7 @@ struct OGLES2Array
 #define OGLES2_U_VIEWPORT_Z_SCALE  5
 #define OGLES2_U_TMU_CONFIG_P0     6  /* data: texture index << 24 | config bits */
 #define OGLES2_U_TMU_CONFIG_P1     7
+#define OGLES2_U_IMAGE_TMU_CONFIG_P0 8 /* ES 3.1: data: image index << 24 | config bits */
 #define OGLES2_U_TEXTURE_WIDTH     10 /* textureSize (GLSL ES 3.00): the base level's size; data: */
 #define OGLES2_U_TEXTURE_HEIGHT    11 /* the texture index */
 #define OGLES2_U_TEXTURE_DEPTH     12
@@ -223,6 +225,10 @@ struct OGLES2Array
 #define OGLES2_U_GET_UBO_SIZE      21 /* data: the stage's uniform block index */
 #define OGLES2_U_LINE_WIDTH        26
 #define OGLES2_U_AA_LINE_WIDTH     27
+#define OGLES2_U_IMAGE_WIDTH       22 /* ES 3.1: imageSize; data: the image index */
+#define OGLES2_U_IMAGE_HEIGHT      23
+#define OGLES2_U_IMAGE_DEPTH       24
+#define OGLES2_U_IMAGE_ARRAY_SIZE  25
 #define OGLES2_U_SSBO_OFFSET       19 /* ES 3.1: storage buffer data's address; data: the stage's buffer */
 #define OGLES2_U_GET_SSBO_SIZE     20 /* its size in bytes */
 #define OGLES2_U_NUM_WORK_GROUPS   28 /* compute: the dispatch's work groups; data: the dimension */
@@ -288,6 +294,7 @@ struct OGLES2Variant
     const UBYTE *key;
     const UBYTE *input_slots;     /* fragment: prog data's 64 input slots (a vertex key's used outputs) */
     UBYTE uses_storage;           /* the recipe has OGLES2_U_SSBO_OFFSET (ES 3.1; v3dp.c) */
+    UBYTE uses_images;            /* the recipe has OGLES2_U_IMAGE_TMU_CONFIG_P0 (ES 3.1) */
 };
 #define OGLES2_VS_KEY_BYTES 88  /* struct v3d_vs_key as the file writes it */
 #define OGLES2_FS_KEY_BYTES 296 /* struct v3d_fs_key */
@@ -356,12 +363,13 @@ struct OGLES2Place
 #define OGLES2_UNIFORM_HIDDEN  4
 #define OGLES2_UNIFORM_BUFFER  8 /* ES 3.1: a storage block's member (GL_BUFFER_VARIABLE), no uniform */
 #define OGLES2_UNIFORM_ATOMIC  16 /* ES 3.1: an atomic counter (block: its atomic counter buffer), no location */
+#define OGLES2_UNIFORM_IMAGE   32 /* ES 3.1: an image (sampler: its image index), its unit layout(binding)'s */
 
 struct OGLES2ImageUniform
 {
     const char *name;     /* arrays without [0] (Mesa's naming) */
     GLenum type;          /* of one element */
-    UWORD array;          /* elements, 0 if not an array */
+    ULONG array;          /* elements, 0 if not an array (past 65535 a buffer variable's only) */
     UBYTE flags;          /* OGLES2_UNIFORM_* */
     UBYTE nplaces;
     const struct OGLES2Place *places;
@@ -949,6 +957,15 @@ static inline int ogles2_sampler_kind(GLenum type)
 /* textureSize's values for unit's texture of that kind: what 0 width, 1
  * height, 2 depth, 3 layers (texture.c). */
 ULONG ogles2_texture_size(struct OGLES2Context *ctx, int unit, int kind, int what);
+/* ES 3.1's images: image unit `unit`'s texture state, written at dst (32
+ * bytes, 32-byte aligned; NULL: into the job's state buffer), its address
+ * (0: out of memory); an unusable unit's reads the fallback (its sizes 0).
+ * The sizes imageSize reads (0 width, 1 height, 2 depth, 3 layers). A
+ * shader that may store there wrote it: the level is newer on the GPU
+ * (serial: the job that does it, not finished yet; 0 finished). */
+ULONG ogles2_image_state(struct OGLES2Context *ctx, int unit, void *dst);
+ULONG ogles2_image_size(struct OGLES2Context *ctx, int unit, int what);
+void ogles2_image_written(struct OGLES2Context *ctx, int unit, ULONG serial);
 /* draw.c: the texture a sampler of that kind on `unit` reads returns 32 bits. */
 BOOL ogles2_texture_wide(struct OGLES2Context *ctx, int unit, int kind);
 extern ULONG ogles2_wide_seen; /* such a texture was ever given an image */
