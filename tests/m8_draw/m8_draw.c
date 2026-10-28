@@ -2464,6 +2464,72 @@ static void test_ms_texture(void)
     glDeleteProgram(p);
 }
 
+/* ES 3.1's separable programs and program pipelines (GLES3 plan stage D
+ * item 5, the objects and validation): glCreateShaderProgramv's one-stage
+ * programs, their interfaces, a pipeline of them validated (and not with a
+ * mismatched fragment program), its queries, a draw with a one-stage
+ * program refused. */
+static void test_pipelines(void)
+{
+    static const char *vs = "#version 310 es\nin vec4 pos;\nout mediump vec4 v_col;\n"
+                            "void main() { v_col = pos; gl_Position = pos; }\n";
+    static const char *fs = "#version 310 es\nprecision mediump float;\nin vec4 v_col;\nout vec4 o;\n"
+                            "uniform vec4 tint;\nvoid main() { o = tint + v_col * 0.0; }\n";
+    static const char *fs_bad = "#version 310 es\nprecision mediump float;\nin vec4 v_other;\nout vec4 o;\n"
+                                "void main() { o = v_other; }\n";
+    GLuint pv = glCreateShaderProgramv(GL_VERTEX_SHADER, 1, &vs);
+    GLuint pf = glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, &fs);
+    GLuint pb = glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, &fs_bad);
+    GLuint pipe = 0;
+    GLint lv = 0, lf = 0, sep = 0, outs = -1, st = -1, vsn = 0, fsn = 0, bound = 0;
+    glGetProgramiv(pv, GL_LINK_STATUS, &lv);
+    glGetProgramiv(pf, GL_LINK_STATUS, &lf);
+    glGetProgramiv(pv, GL_PROGRAM_SEPARABLE, &sep);
+    glGetProgramInterfaceiv(pv, GL_PROGRAM_OUTPUT, GL_ACTIVE_RESOURCES, &outs);
+    check(glGetError() == GL_NO_ERROR && lv && lf && sep == GL_TRUE && outs == 2,
+          "pipelines: glCreateShaderProgramv links separable one-stage programs (v_col and gl_Position out)");
+    glGenProgramPipelines(1, &pipe);
+    check(!glIsProgramPipeline(pipe), "pipelines: a generated name is no object until bound");
+    glBindProgramPipeline(pipe);
+    glGetIntegerv(GL_PROGRAM_PIPELINE_BINDING, &bound);
+    glUseProgramStages(pipe, GL_VERTEX_SHADER_BIT, pv);
+    glUseProgramStages(pipe, GL_FRAGMENT_SHADER_BIT, pb);
+    glValidateProgramPipeline(pipe);
+    glGetProgramPipelineiv(pipe, GL_VALIDATE_STATUS, &st);
+    check(glIsProgramPipeline(pipe) && bound == (GLint)pipe && st == GL_FALSE && glGetError() == GL_NO_ERROR,
+          "pipelines: bound, and not valid with mismatched interfaces");
+    glUseProgramStages(pipe, GL_FRAGMENT_SHADER_BIT, pf);
+    glValidateProgramPipeline(pipe);
+    glGetProgramPipelineiv(pipe, GL_VALIDATE_STATUS, &st);
+    glGetProgramPipelineiv(pipe, GL_VERTEX_SHADER, &vsn);
+    glGetProgramPipelineiv(pipe, GL_FRAGMENT_SHADER, &fsn);
+    check(st == GL_TRUE && vsn == (GLint)pv && fsn == (GLint)pf && glGetError() == GL_NO_ERROR,
+          "pipelines: valid with matching interfaces, its stages' programs");
+    glUseProgramStages(pipe, GL_VERTEX_SHADER_BIT, 9999);
+    check(glGetError() == GL_INVALID_VALUE, "pipelines: no such program is GL_INVALID_VALUE");
+    {
+        GLint pos = glGetAttribLocation(pv, "pos");
+        glProgramUniform4f(pf, glGetUniformLocation(pf, "tint"), 0.0f, 1.0f, 0.5f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glVertexAttribPointer((GLuint)pos, 2, GL_FLOAT, GL_FALSE, 0, cover);
+        glEnableVertexAttribArray((GLuint)pos);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDisableVertexAttribArray((GLuint)pos);
+        check(pixel_is(32, 32, 0, 255, 128, 255, 2) && glGetError() == GL_NO_ERROR,
+              "pipelines: a draw with two programs, the fragment one's uniform set by glProgramUniform4f");
+    }
+    glBindProgramPipeline(0);
+    glUseProgram(pv);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    check(glGetError() == GL_INVALID_OPERATION, "pipelines: a draw with a vertex-only program is refused");
+    glUseProgram(0);
+    glDeleteProgramPipelines(1, &pipe);
+    check(!glIsProgramPipeline(pipe) && glGetError() == GL_NO_ERROR, "pipelines: deleted");
+    glDeleteProgram(pv);
+    glDeleteProgram(pf);
+    glDeleteProgram(pb);
+}
+
 /* ES 3.1's explicit uniform locations (GLES3 plan stage D item 6): es31loc
  * has tint at 7 and scale at 2 (the colour is tint * scale), an unused
  * uniform at 20 (not active: glUniform* there is ignored), nothing at 3
@@ -3039,6 +3105,8 @@ int main(void)
                 test_images();
             if (!skipped("ms_texture"))
                 test_ms_texture();
+            if (!skipped("pipelines"))
+                test_pipelines();
         }
     }
     check(glGetError() == GL_NO_ERROR, "no GL error left over");

@@ -2923,6 +2923,86 @@ stopped.
    read the clear's floats as integers). `m8_es31` 13 checks, `m8_draw`'s
    `test_vab` 3 (interleaved through one binding, stride 0, a binding's
    divisor).
+   **Separate shader objects (2026-10-28).**
+   - **Separable programs.** `glProgramParameteri(GL_PROGRAM_SEPARABLE)` (queried as
+     set, used at the next link) and `glCreateShaderProgramv` (Mesa's: the
+     program returned even when its shader did not compile, that log its
+     own). A separable program may link one stage. Its link state begins with
+     the line `SEPA` (`V3DGLSL_SEPA_MARK`), which the hash takes as FORMAT.md's
+     pseudo-stage `"SEPA"` after the rest; the compiler request
+     `V3DGLSL_LINK_SEPARABLE` (10: vertex and/or fragment, bindings optional;
+     the A1200's `v3dglslc-remote` forwards its bindings) links it with
+     `GL_PROGRAM_SEPARABLE`. The file's feature bit 0x10 (`V3DP_FEATURE_SEPARABLE`)
+     allows stages 0x01 or 0x10. A one-stage program's file has no
+     variants and no `.v3dw` (it draws nothing alone: a draw with it in use
+     is `GL_INVALID_OPERATION`); its `INTERFACE` is Mesa's resource list, so
+     a vertex program's outputs are there for `GL_PROGRAM_OUTPUT`.
+   - **Pipeline objects** (the context's own, `struct OGLES2Pipeline`, in
+     `program.c`): `glGen`/`Delete`/`Is`/`BindProgramPipeline` (a generated
+     name an object once bound or used), `glUseProgramStages` (Mesa's errors:
+     the program linked and separable as the parameter is now; a stage the
+     program lacks set to none), `glActiveShaderProgram` (`glUniform*`'s
+     program when none is in use), `glGetProgramPipelineiv`,
+     `glValidateProgramPipeline` and its log, with Mesa's
+     `_mesa_validate_program_pipeline` for ES 3.1's stages: a program active
+     for some of its stages, one not linked separable, an empty pipeline,
+     and the vertex outputs and fragment inputs not matching exactly
+     (`validate_io`: by location or by name, type, interpolation (none as
+     smooth), precision, no output left over; built-ins not counted).
+     Pipelines hold their programs as `glUseProgram` does (`in_use`).
+   - **Drawing with a pipeline** (no program in use) needs a valid pipeline
+     with a vertex and a fragment program (`ogles2_pipeline_program`). One
+     program for both draws as itself; two get a pair program, made at the
+     first draw: the vertex program's vertex shader and the fragment
+     program's fragment shader (images keep a separable program's sources)
+     linked as one separable program with the vertex program's link state,
+     so each stage compiles as in its own program and the draws use 1.x's
+     and stage A's paths (variants, `.v3dx`) unchanged. Before each draw it
+     takes each stage program's constant buffer (the same shader, the same
+     layout), its samplers' and images' units (by name, per location) and
+     its uniform blocks' bindings. A dispatch with a pipeline runs its
+     compute program. This is not the plan's per-pair `.v3dx` of two
+     programs' hashes: the pair is an ordinary program file. **Its limit
+     (2026-10-28):** one link merges the stages' uniforms: a uniform of the
+     same name in both is one (the fragment stage's folded into the vertex
+     stage's, its constant buffer then empty), and dEQP-GLES31's
+     `separate_shader.random` fails 30 of 128, every one with uniforms and
+     varyings ("pipeline rendering differs from equivalent monolithic
+     program"; none with constants or without varyings). **Next:** the plan's
+     design: the compiler links both programs separable and draws them through
+     a Mesa pipeline (`glUseProgramStages`), the variants into a file of the
+     pair; the library composes the draw's image from each stage's own
+     program (its constant buffer, uniforms, blocks; attributes and transform
+     feedback the vertex program's) and those variants.
+   - **A double free (fixed):** deleting a pipeline released each of its
+     slots (three stages and the active program), so a program in two of them
+     was freed twice once deleted; after some 70 to 120 of dEQP's
+     `separate_shader.random` cases exec raised a recoverable alert and the
+     A1200 reset (found with the watcher below: the case running each time,
+     another one each time).
+   - **Watching dEQP runs (2026-10-28):** `tools/amictl/deqp_watch.py` (used by
+     `ports/deqp/run_pc.sh`) runs the package's script with `PROGRESS=1`:
+     dEQP appends each case's start and end to `RAM:deqp-progress.txt`
+     (`ports/deqp/patches/0003-amiga-progress-file.patch`, through AmigaDOS:
+     libnix's `getenv` and `fopen("a")` wrote nothing) and the library logs to
+     `RAM:ogles2.log`. Every 15 s it asks the station whether it lives (a new
+     connection's greeting: its start counter, which a reset raises), reads
+     both files on from where it stopped (amictld 1.4's `GETFROM`, path,
+     offset and limit) and prints the cases done and their statuses, the last
+     one finished, the one running and for how long, and the library's new
+     lines that are not compile reports; it keeps both files as they come
+     (`live-progress.txt`, `live-ogles2.log`). No answer for 35 s, or a raised
+     start counter, is reported with the case running; `run_pc.sh` then exits
+     3. The station serves one client at a time, and runpkg's long `WAIT`
+     had made it look dead during runs: the watcher alone talks to it, with
+     short waits. `compile_bridge.py` connects again after 90 s without a
+     request: after a reset its keepalive did not end the dead link under WSL,
+     and every compile of the next hour failed "no bridge".
+   - **Also:** `GL_COMPUTE_WORK_GROUP_SIZE` (`glGetProgramiv`); buffer
+     variables listed as ES 3.1 7.3.1.1 says (Mesa's
+     `should_add_buffer_variable`: a top-level array by its element 0 only;
+     `GL_BUFFER_VARIABLE`'s count, indices and names, and a storage block's
+     active variables); `strchr` in the runtime.
 6. **GLSL ES 3.10 and queries:** explicit uniform locations and
    `layout(binding)` (from the file, §3), arrays of arrays,
    `glGetProgramInterfaceiv`, `glGetProgramResource*`, everything left of

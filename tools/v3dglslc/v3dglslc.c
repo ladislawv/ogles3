@@ -47,6 +47,7 @@
 #define glDeleteProgram      _mesa_DeleteProgram
 #define glBindAttribLocation _mesa_BindAttribLocation
 #define glTransformFeedbackVaryings _mesa_TransformFeedbackVaryings
+#define glProgramParameteri  _mesa_ProgramParameteri
 #define V3DC_WRITER
 static void program_path(char *out, size_t size, const char *vs_path, const char *fs_path);
 static int write_program(GLuint p, const char *path, const char *vs_src, const char *fs_src);
@@ -762,23 +763,30 @@ static int write_program(GLuint p, const char *path, const char *vs_src, const c
     /* The link state of a V3DGLSL_LINK_BOUND request is hashed after the
      * shaders (v3dp/FORMAT.md, PROGRAM): its bindings as the stage "BIND",
      * its transform feedback varyings as "XFBV" (format 2). */
-    unsigned stages[4] = { MESA_SHADER_VERTEX, MESA_SHADER_FRAGMENT };
-    const char *sources[4];
-    unsigned nsrc = 2;
+    unsigned stages[5];
+    const char *sources[5];
+    unsigned nsrc = 0;
     const char *xfbv = xfbv_part(link_bindings);
     char *bind = NULL;
     int rc;
 
     if (!prog)
         return 0;
-    /* ES 3.1: a compute program (fs_src NULL), its one source, no link state */
-    if (!fs_src) {
+    /* ES 3.1: a compute program, its one source, no link state */
+    if (prog->_LinkedShaders[MESA_SHADER_COMPUTE]) {
         stages[0] = MESA_SHADER_COMPUTE;
         sources[0] = vs_src;
         return write_files(prog, p, path, 1, stages, sources);
     }
-    sources[0] = vs_src;
-    sources[1] = fs_src;
+    /* both stages, or a separable program's one (ES 3.1) */
+    if (vs_src) {
+        stages[nsrc] = MESA_SHADER_VERTEX;
+        sources[nsrc++] = vs_src;
+    }
+    if (fs_src) {
+        stages[nsrc] = MESA_SHADER_FRAGMENT;
+        sources[nsrc++] = fs_src;
+    }
     if (link_bindings && link_bindings != (xfbv ? xfbv - (sizeof(XFBV_MARK) - 1) : NULL)) {
         size_t n = xfbv ? (size_t)(xfbv - (sizeof(XFBV_MARK) - 1) - link_bindings) : strlen(link_bindings);
         if (!(bind = malloc(n + 1)))
@@ -792,6 +800,10 @@ static int write_program(GLuint p, const char *path, const char *vs_src, const c
         stages[nsrc] = V3DP_HASH_XFBV;
         sources[nsrc++] = xfbv;
     }
+    if (link_separable) { /* FORMAT.md: "SEPA", the text 1 */
+        stages[nsrc] = V3DP_HASH_SEPA;
+        sources[nsrc++] = "1";
+    }
     rc = write_files(prog, p, path, nsrc, stages, sources);
     free(bind);
     return rc;
@@ -802,6 +814,17 @@ static int write_files(struct gl_shader_program *prog, GLuint p, const char *pat
                        const unsigned *stages, const char *const *sources)
 {
     int drawn;
+
+    /* A separable program of one stage (ES 3.1) draws nothing alone: its
+     * file holds no variants (a pipeline's draws get theirs, stage D item
+     * 5), and it has no .v3dw. */
+    if (!prog->_LinkedShaders[MESA_SHADER_VERTEX] != !prog->_LinkedShaders[MESA_SHADER_FRAGMENT]) {
+        if (write_mode == WRITE_WIDE || variant_keys || write_mode == WRITE_A2C)
+            return 0;
+        v3dp_capture_begin();
+        v3dp_capture_end();
+        return v3dp_write(path, prog, nsrc, stages, sources) == 0;
+    }
 
     /* Draw-time variants (docs/GLES3_PLAN.md stage A item 5): one draw so
      * the driver has the program's shaders bound, then each key compiled
@@ -1014,8 +1037,10 @@ static int handle(uint32_t op, const char *vs, const char *fs, const char *out_p
         }
     }
     if ((op != V3DGLSL_LINK && op != V3DGLSL_COMPILE && op != V3DGLSL_LINK32 && op != V3DGLSL_LINK_BOUND &&
-         op != V3DGLSL_LINK_A2C && op != V3DGLSL_COMPILE_VARIANT) ||
-        (op != V3DGLSL_COMPILE && (!vs || !fs || !out_path)) || (op == V3DGLSL_LINK_BOUND && !bindings) ||
+         op != V3DGLSL_LINK_A2C && op != V3DGLSL_COMPILE_VARIANT && op != V3DGLSL_LINK_SEPARABLE) ||
+        (op == V3DGLSL_LINK_SEPARABLE && ((!vs && !fs) || !out_path)) ||
+        (op != V3DGLSL_COMPILE && op != V3DGLSL_LINK_SEPARABLE && (!vs || !fs || !out_path)) ||
+        (op == V3DGLSL_LINK_BOUND && !bindings) ||
         (op == V3DGLSL_COMPILE_VARIANT && (!keys || !keys_len)) || (op == V3DGLSL_COMPILE && !vs == !fs)) {
         log_add(log, log_size, "the compiler does not understand this request", NULL);
         return 3;
@@ -1033,7 +1058,17 @@ static int handle(uint32_t op, const char *vs, const char *fs, const char *out_p
         return ok ? 0 : 1;
     }
     write_mode = op == V3DGLSL_LINK32 ? WRITE_WIDE : op == V3DGLSL_LINK_A2C ? WRITE_A2C : WRITE_PLAIN;
-    link_bindings = op == V3DGLSL_LINK_BOUND || op == V3DGLSL_COMPILE_VARIANT ? bindings : NULL;
+    link_bindings = op == V3DGLSL_LINK_BOUND || op == V3DGLSL_COMPILE_VARIANT || op == V3DGLSL_LINK_SEPARABLE
+                        ? bindings
+                        : NULL;
+    /* ES 3.1: a separable program (its link state's first line, or the op) */
+    link_separable = op == V3DGLSL_LINK_SEPARABLE;
+    if (link_bindings && !strncmp(link_bindings, V3DGLSL_SEPA_MARK, sizeof(V3DGLSL_SEPA_MARK) - 1)) {
+        link_separable = 1;
+        link_bindings += sizeof(V3DGLSL_SEPA_MARK) - 1;
+        if (!*link_bindings)
+            link_bindings = NULL;
+    }
     /* The draw-time variants: write_program compiles the keys. */
     if (op == V3DGLSL_COMPILE_VARIANT) {
         variant_keys = keys;
@@ -1042,6 +1077,7 @@ static int handle(uint32_t op, const char *vs, const char *fs, const char *out_p
     }
     result = link_pair("vertex shader", "fragment shader", vs, fs, out_path, log, log_size) ? 0 : 1;
     link_bindings = NULL;
+    link_separable = 0;
     variant_keys = NULL;
     variant_keys_len = 0;
     variant_layout_crc = 0;
@@ -1109,7 +1145,9 @@ static int serve_stdio(void)
             fprintf(stderr, "v3dglslc: unreadable request\n");
             return 20;
         }
-        k = handle(op, s[0], s[1], s[4], op == V3DGLSL_LINK_BOUND || op == V3DGLSL_COMPILE_VARIANT ? s[2] : NULL,
+        k = handle(op, s[0], s[1], s[4],
+                   op == V3DGLSL_LINK_BOUND || op == V3DGLSL_COMPILE_VARIANT || op == V3DGLSL_LINK_SEPARABLE ? s[2]
+                                                                                                              : NULL,
                    op == V3DGLSL_COMPILE_VARIANT ? (const uint8_t *)s[3] : NULL, n[3], crc, log, sizeof(log));
         fwrite("V3A1", 1, 4, out);
         write_u32(out, (uint32_t)k);
@@ -1176,7 +1214,8 @@ static int serve(void)
             } else {
                 /* An older sender's request ends before the fields its op
                  * does not read (v3dglsl_port.h). */
-                int bound = r->op == V3DGLSL_LINK_BOUND || r->op == V3DGLSL_COMPILE_VARIANT;
+                int bound = r->op == V3DGLSL_LINK_BOUND || r->op == V3DGLSL_COMPILE_VARIANT ||
+                            r->op == V3DGLSL_LINK_SEPARABLE;
                 int variant = r->op == V3DGLSL_COMPILE_VARIANT;
                 r->result = handle(r->op, r->vs, r->fs, r->out_path, bound ? r->bindings : NULL,
                                    variant ? r->keys : NULL, variant ? r->keys_len : 0,

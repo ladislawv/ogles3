@@ -174,6 +174,28 @@ int os_file_read(const char *path, struct buf *out)
     return out->failed ? AMS_NOMEM : AMS_OK;
 }
 
+int os_file_read_from(const char *path, unsigned long offset, unsigned long max, struct buf *out)
+{
+    char p[700], chunk[8192];
+    size_t n;
+    long size;
+    FILE *f;
+    host_path(path, p, sizeof(p));
+    f = fopen(p, "rb");
+    if (!f)
+        return AMS_NOTFOUND;
+    fseek(f, 0, SEEK_END);
+    size = ftell(f);
+    buf_u32(out, size < 0 ? 0 : (unsigned long)size);
+    if (size > 0 && offset < (unsigned long)size && fseek(f, (long)offset, SEEK_SET) == 0)
+        while (max && (n = fread(chunk, 1, max < sizeof(chunk) ? max : sizeof(chunk), f)) > 0) {
+            buf_put(out, chunk, n);
+            max -= n;
+        }
+    fclose(f);
+    return out->failed ? AMS_NOMEM : AMS_OK;
+}
+
 int os_file_write(const char *path, const void *data, unsigned long len)
 {
     char p[700], t[720];

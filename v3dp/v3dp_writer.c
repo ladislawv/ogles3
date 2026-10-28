@@ -1058,7 +1058,7 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
     blake3_hash hash;
     char commit[12];
     unsigned i, num_sections = 0, stage_mask = 0, nold = 0;
-    int rc = -1, format2 = prog->GLSL_Version >= 300;
+    int rc = -1, format2 = prog->GLSL_Version >= 300, separable = 0;
     size_t layout_end = 0;
     struct buf *old = NULL;
     char tmp[600];
@@ -1068,9 +1068,12 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
         fprintf(stderr, "v3dp: variant capture failed\n");
         return -1;
     }
-    for (i = 0; i < num_sources; i++)
+    for (i = 0; i < num_sources; i++) {
         if (stages[i] == V3DP_HASH_XFBV || stages[i] == V3DP_HASH_SEPA)
             format2 = 1;
+        if (stages[i] == V3DP_HASH_SEPA)
+            separable = 1;
+    }
     /* ES 3.1's objects come with stage D (docs/GLES3_PLAN.md §7): storage
      * blocks, atomic counters, compute programs and images. */
     if (prog->data->NumShaderStorageBlocks || prog->data->NumAtomicBuffers ||
@@ -1106,7 +1109,8 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
                           (prog->data->NumShaderStorageBlocks || prog->data->NumAtomicBuffers
                                ? V3DP_FEATURE_STORAGE : 0) |
                           (prog->data->NumAtomicBuffers ? V3DP_FEATURE_ATOMIC : 0) |
-                          (prog->_LinkedShaders[MESA_SHADER_COMPUTE] ? V3DP_FEATURE_COMPUTE : 0));
+                          (prog->_LinkedShaders[MESA_SHADER_COMPUTE] ? V3DP_FEATURE_COMPUTE : 0) |
+                          (separable ? V3DP_FEATURE_SEPARABLE : 0));
     put_section(&program, SEC_PROGRAM, &sec);
     num_sections++;
     buf_free(&sec);

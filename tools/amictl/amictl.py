@@ -36,7 +36,7 @@ import datetime, json, os, re, secrets, socket, struct, sys, time, zlib
 MAGIC = b"AMC1"
 CMD = {"HELLO": 1, "INFO": 2, "PUT": 3, "GET": 4, "LIST": 5, "DELETE": 6, "MAKEDIR": 7,
        "START": 8, "WAIT": 9, "ABORT": 10, "SHOT": 11, "GETENV": 12, "SETENV": 13,
-       "UNSETENV": 14, "REBOOT": 15, "RESTART": 16, "QUIT": 17}
+       "UNSETENV": 14, "REBOOT": 15, "RESTART": 16, "QUIT": 17, "GETFROM": 18}
 STATUS = {0: "ok", 1: "bad request", 2: "not authenticated", 3: "not found", 4: "I/O error",
           5: "out of memory", 6: "busy", 7: "unsupported", 8: "no such job", 9: "too big"}
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -111,6 +111,11 @@ class Station:
 
     def get(self, remote):
         return self.call("GET", remote, timeout=300)
+
+    def get_from(self, remote, offset, limit=256 * 1024):
+        """(file size, its bytes from offset, at most limit): amictld 1.4's GETFROM."""
+        body = self.call("GETFROM", "%s\n%d\n%d" % (remote, offset, limit))
+        return struct.unpack(">I", body[:4])[0], body[4:]
 
     def listdir(self, d):
         out = []

@@ -212,7 +212,7 @@ static int forward(struct V3DGLSLRequest *r)
     const char *name = 0, *p;
     char path[512], magic[4], *log = 0, *xfile = 0;
     ULONG dir = 0, xlen = 0, result, nlog, nfiles, i;
-    int bound = r->op == V3DGLSL_LINK_BOUND || r->op == V3DGLSL_COMPILE_VARIANT;
+    int bound = r->op == V3DGLSL_LINK_BOUND || r->op == V3DGLSL_COMPILE_VARIANT || r->op == V3DGLSL_LINK_SEPARABLE;
     int variant = r->op == V3DGLSL_COMPILE_VARIANT;
     int ok = 1;
 

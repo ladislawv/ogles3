@@ -333,3 +333,12 @@ glProgramUniformMatrix3x4fv
 glProgramUniformMatrix4x3fv
 glTexStorage2DMultisample
 glGetMultisamplefv
+glGenProgramPipelines
+glDeleteProgramPipelines
+glIsProgramPipeline
+glUseProgramStages
+glActiveShaderProgram
+glValidateProgramPipeline
+glGetProgramPipelineiv
+glGetProgramPipelineInfoLog
+glCreateShaderProgramv

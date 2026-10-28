@@ -39,6 +39,8 @@ unsigned long os_uptime_s(void);
 /* Files. Paths are AmigaDOS paths; relative ones are relative to the
  * server's work directory. */
 int os_file_read(const char *path, struct buf *out);  /* 0, or an ST_ code */
+/* The file's size (u32), then its bytes from offset, at most max (GETFROM). */
+int os_file_read_from(const char *path, unsigned long offset, unsigned long max, struct buf *out);
 int os_file_write(const char *path, const void *data, unsigned long len);
 int os_list(const char *dir, struct buf *out);
 int os_delete(const char *path);

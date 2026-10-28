@@ -478,6 +478,8 @@ struct OGLES2Image
      * blocks and each stage's map from its storage buffer i
      * (QUNIFORM_SSBO_OFFSET data i) to them, as the uniform blocks'. */
     BOOL compute;
+    BOOL separable;                   /* ES 3.1: GL_PROGRAM_SEPARABLE (stage D item 5) */
+    UBYTE stages;                     /* PROGRAM's: bit 0 vertex, bit 4 fragment, bit 5 compute */
     UWORD nsblocks;
     const struct OGLES2ImageBlock *sblocks;
     UBYTE stage_nsblocks[2];
@@ -514,6 +516,31 @@ struct OGLES2Shader
 };
 
 #define OGLES2_MAX_BINDINGS 64 /* glBindAttribLocation names a program keeps (dEQP binds 32) */
+/* ES 3.1's program pipeline object (program.c): a separable program for
+ * each stage (vertex, fragment, compute; NULL none), the program glUniform*
+ * sets when none is in use, and its last validation. */
+struct OGLES2Pipeline
+{
+    GLuint name;
+    BOOL bound_once;                  /* an object (glIsProgramPipeline) once bound or used */
+    struct OGLES2Program *stage[3];
+    struct OGLES2Program *active;
+    GLboolean validated;
+    char *info_log;                   /* AllocVec'd or NULL */
+    /* Its draws' program when the vertex and fragment stages are two
+     * programs (program.c's pair_program): their shaders linked as one, the
+     * images it was linked from, per location of it the stage and location
+     * of the sampler or image it takes its unit from (0xFFFFFFFF none), per
+     * uniform block of it the stage program's block (0xFFFF none), and the
+     * stage programs' constant buffer versions last copied. */
+    struct OGLES2Program *pair;
+    const struct OGLES2Image *pair_img[2];
+    struct OGLES2Program *pair_src[2];
+    ULONG *pair_loc;
+    UWORD *pair_blk;
+    ULONG pair_ver[2];
+};
+
 struct OGLES2Program
 {
     UBYTE kind;           /* OGLES2_OBJ_PROGRAM */
@@ -583,6 +610,7 @@ struct OGLES2Program
      * value, in effect from the next link or glProgramBinary (as Mesa). The
      * binary is the .v3dp file either way. */
     UBYTE binary_hint, binary_hint_pending;
+    UBYTE separable;                  /* ES 3.1's GL_PROGRAM_SEPARABLE, for the next link */
 };
 
 struct OGLES2Context;
@@ -750,6 +778,11 @@ struct OGLES2Context
     struct OGLES2Share *share;      /* the objects (alone in the group without OGLES2_CCT_SHARE_WITH) */
     struct OGLES2Context *share_next; /* the group's next member */
     struct OGLES2Program *program;  /* glUseProgram */
+    /* ES 3.1's program pipelines (stage D item 5): the context's own (not
+     * shared), by name; the bound one (NULL: none). */
+    struct OGLES2Pipeline **pipes;
+    GLuint npipes;
+    struct OGLES2Pipeline *pipe;
     struct OGLES2Draw *draw;        /* draw.c's per-context state, NULL until the first draw */
     struct OGLES2Compute *compute;  /* compute.c's, NULL until the first dispatch (ES 3.1) */
     struct OGLES2TexState *tex;     /* texture.c's, NULL until first used */
@@ -1071,6 +1104,15 @@ BOOL ogles2_image_compile_variants(struct OGLES2Context *ctx, struct OGLES2Image
 int ogles2_compile_shader(BOOL fragment, const char *src, char *log, ULONG log_size);
 /* ES 3.1's compute programs and shaders (V3DGLSL_LINK_COMPUTE, _COMPILE_COMPUTE). */
 BOOL ogles2_compile_compute(const char *cs, const char *path, char *log, ULONG log_size);
+/* ES 3.1: a separable program's .v3dp, its vertex or fragment shader (or
+ * both; the other NULL), with link state `bindings` (or NULL). */
+BOOL ogles2_pipeline_ready(struct OGLES2Context *ctx, BOOL compute); /* program.c: the bound pipeline */
+/* The program a draw (compute: a dispatch) with the bound pipeline runs, its
+ * state the stage programs'; NULL: none (an invalid pipeline, no memory, a
+ * link that failed: logged). */
+struct OGLES2Program *ogles2_pipeline_program(struct OGLES2Context *ctx, BOOL compute);
+BOOL ogles2_compile_separable(const char *vs, const char *fs, const char *bindings, const char *path, char *log,
+                              ULONG log_size);
 int ogles2_compile_compute_shader(const char *src, char *log, ULONG log_size);
 void ogles2_compiler_stop(void);
 /* buffer.c */

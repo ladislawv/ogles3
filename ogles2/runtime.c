@@ -123,6 +123,16 @@ char *strncat(char *dst, const char *src, size_t n)
     return dst;
 }
 
+char *strchr(const char *s, int c)
+{
+    for (;; s++) {
+        if (*s == (char)c)
+            return (char *)s;
+        if (!*s)
+            return 0;
+    }
+}
+
 int strncmp(const char *a, const char *b, size_t n)
 {
     for (; n; n--, a++, b++) {

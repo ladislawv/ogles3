@@ -319,9 +319,19 @@ static ULONG write_stream(struct OGLES2Context *ctx, struct OGLES2Compute *c, co
     return (ULONG)u;
 }
 
-static void dispatch(struct OGLES2Context *ctx, const ULONG *groups)
+/* The program a dispatch runs: the one in use, else the bound pipeline's
+ * compute program (ES 3.1); NULL or another: none. */
+static struct OGLES2Program *compute_program(struct OGLES2Context *ctx)
 {
     struct OGLES2Program *p = ctx->program;
+    if (!p && ctx->pipe)
+        p = ogles2_pipeline_program(ctx, TRUE);
+    return p && p->image && p->image->compute ? p : 0;
+}
+
+static void dispatch(struct OGLES2Context *ctx, const ULONG *groups)
+{
+    struct OGLES2Program *p = compute_program(ctx);
     const struct OGLES2Variant *v;
     const struct OGLES2Image *own;
     struct OGLES2Compute *c;
@@ -411,7 +421,7 @@ void ogles2_glDispatchCompute(struct OGLES2Context *ctx, GLuint num_groups_x, GL
         return;
     if (num_groups_x > MAX_WORK_GROUPS || num_groups_y > MAX_WORK_GROUPS || num_groups_z > MAX_WORK_GROUPS) {
         /* after the program's check (ES 3.1 17: both errors; dEQP checks the first) */
-        if (!ctx->program || !ctx->program->image || !ctx->program->image->compute)
+        if (!compute_program(ctx))
             ogles2_error(ctx, GL_INVALID_OPERATION);
         else
             ogles2_error(ctx, GL_INVALID_VALUE);
@@ -429,7 +439,7 @@ void ogles2_glDispatchComputeIndirect(struct OGLES2Context *ctx, GLintptr indire
     GLenum e;
     if (!ogles2_es31_entry(ctx))
         return;
-    if (!ctx->program || !ctx->program->image || !ctx->program->image->compute) {
+    if (!compute_program(ctx)) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }

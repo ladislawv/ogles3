@@ -268,8 +268,12 @@ binning shaders output the varyings fed back). Bit 1 (0x2, 2026-10-27, ES 3.1): 
 storage blocks, a `STORAGE_BLOCKS` section. Bit 2 (0x4, 2026-10-27, ES 3.1): a compute
 program, its stages bit 5 alone (Mesa's `MESA_SHADER_COMPUTE`), its variants of stage 5. Bit 3
 (0x8, 2026-10-27, ES 3.1): atomic counter buffers, an `ATOMIC_BUFFERS` section (with bit 1 and
-its `STORAGE_BLOCKS` section: Mesa makes them storage buffers). The other ES 3.1 objects (stage
-D: images, separable programs, explicit uniform locations) add theirs; a separable program may have one stage only (stage D).
+its `STORAGE_BLOCKS` section: Mesa makes them storage buffers). Bit 4 (0x10, 2026-10-28, ES
+3.1): a separable program (`GL_PROGRAM_SEPARABLE`; its hash ends with `"SEPA"`, below): its
+stages 0x11, or one stage alone, 0x01 or 0x10, and then no variants (it draws only with
+another program in a pipeline, whose draws link the two as one program of their own, so it
+has no `.v3dw` either). Images and explicit uniform locations need no bit: their sections and
+flags are format 2's.
 
 **The hash** covers the program's link state after the shaders and the bindings, each as a
 pseudo-stage written the way the bindings' `"BIND"` is (stage `u32`, length `u32`, text),

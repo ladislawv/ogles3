@@ -45,9 +45,19 @@ $X put $ES3/amictl/v3dglslc-remote $P/bin/v3dglslc-remote > /dev/null ||
 pgrep -f compile_bridge.py > /dev/null ||
     { echo "no compile_bridge.py running: start python3 tools/amictl/compile_bridge.py first"; exit 1; }
 job=$($X start -d $P bin/v3dglslc-remote WAIT NOFALLBACK COMPILER=$P/libs/v3dglslc)
-$X runpkg tests/a1200/out/ogles2-$PKG -t ${TIMEOUT:-3000} -a "CASES=$PATTERN NAME=$NAME${KEYS:+ $KEYS}" | tail -1
+# Watched (tools/amictl/deqp_watch.py): a line every 15 s with the cases
+# done, the last one finished, the one running and the library's new log
+# lines; no answer for 35 s or a restarted station said with the case that
+# was running. WATCH_EVERY changes the 15 s.
+python3 tools/amictl/deqp_watch.py tests/a1200/out/ogles2-$PKG "CASES=$PATTERN NAME=$NAME${KEYS:+ $KEYS}" \
+    --every ${WATCH_EVERY:-15} --timeout ${TIMEOUT:-21600}
+watched=$?
 d=$(ls -d tests/a1200/results/ogles2-$PKG-2* | tail -1)
 echo "$NAME ($d): $(grep -o 'StatusCode="[A-Za-z]*"' $d/results/$NAME.qpa 2>/dev/null |
     sed 's/StatusCode=//' | sort | uniq -c | tr '\n' ' ')"
+if [ $watched -eq 3 ]; then
+    echo "the A1200 hung or restarted: the case running is the last S line of $d/results/live-progress.txt"
+    exit 3
+fi
 $X abort $job > /dev/null
 $X wait $job 30 | tail -1

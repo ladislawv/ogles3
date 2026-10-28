@@ -175,8 +175,10 @@ static UBYTE matrix_columns(GLenum t)
 #define V3DP_FEATURE_TF 0x1 /* format 2's feature bits (v3dp_writer.h): transform feedback, */
 #define V3DP_FEATURE_STORAGE 0x2 /* shader storage blocks (ES 3.1), */
 #define V3DP_FEATURE_COMPUTE 0x4 /* a compute program (ES 3.1), */
-#define V3DP_FEATURE_ATOMIC 0x8 /* atomic counter buffers (ES 3.1) */
-#define V3DP_FEATURES (V3DP_FEATURE_TF | V3DP_FEATURE_STORAGE | V3DP_FEATURE_COMPUTE | V3DP_FEATURE_ATOMIC)
+#define V3DP_FEATURE_ATOMIC 0x8 /* atomic counter buffers (ES 3.1), */
+#define V3DP_FEATURE_SEPARABLE 0x10 /* a separable program, of one stage or two (ES 3.1) */
+#define V3DP_FEATURES                                                                                       \
+    (V3DP_FEATURE_TF | V3DP_FEATURE_STORAGE | V3DP_FEATURE_COMPUTE | V3DP_FEATURE_ATOMIC | V3DP_FEATURE_SEPARABLE)
 #define MAX_ATOMIC_BINDINGS 16 /* GL_MAX_ATOMIC_COUNTER_BUFFER_BINDINGS (state.c) */
 #define COMPUTE_STAGES 0x20 /* PROGRAM's stages: bit 5 */
 
@@ -282,6 +284,8 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             if (format2 && ((features = u32(&s)) & ~V3DP_FEATURES))
                 FAIL("the program uses features this library does not know", 0, ~0UL);
             im->compute = (features & V3DP_FEATURE_COMPUTE) != 0;
+            im->separable = (features & V3DP_FEATURE_SEPARABLE) != 0;
+            im->stages = (UBYTE)stages;
             break;
         case 3: { /* STAGE_PARAMS */
             ULONG stage = u32(&s), nvalues = u32(&s), nparams = u32(&s), si;
@@ -844,7 +848,8 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
         if (s.bad)
             FAIL("truncated section", 0, i);
     }
-    if (im->compute ? stages != COMPUTE_STAGES : stages != 0x11)
+    if (im->compute ? stages != COMPUTE_STAGES
+                    : stages != 0x11 && !(im->separable && (stages == 0x01 || stages == 0x10)))
         FAIL(im->compute ? "a compute program of other stages" : "not a vertex and fragment program", 0, ~0UL);
     if ((features & V3DP_FEATURE_STORAGE) && !im->v3dx && !im->sblocks)
         FAIL("storage blocks without their STORAGE_BLOCKS section", 0, ~0UL);
@@ -930,7 +935,8 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             vars[k].code_offset = off;
             off += vars[k].code_bytes;
         }
-        if (!off || v3d_mem_alloc(dev, m, off) < 0)
+        /* a separable program of one stage has none (ES 3.1): a block all the same */
+        if ((!off && !im->separable) || v3d_mem_alloc(dev, m, off ? off : 8) < 0)
             FAIL("out of GPU memory for the code", 0, ~0UL);
         im->code_mem = m;
         im->code_total = off;

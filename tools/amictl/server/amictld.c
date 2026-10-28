@@ -251,6 +251,15 @@ static int do_command(unsigned long cmd, char *arg, unsigned char *data, unsigne
         return os_file_write(arg, data, dlen);
     case AMC_GET:
         return *arg ? os_file_read(arg, out) : AMS_BADREQ;
+    case AMC_GETFROM: {
+        unsigned long max;
+        if (fields(arg, f, 3) != 3 || !*f[0])
+            return AMS_BADREQ;
+        max = strtoul(f[2], 0, 10);
+        if (max > AMICTL_MAX_OUT)
+            max = AMICTL_MAX_OUT;
+        return os_file_read_from(f[0], strtoul(f[1], 0, 10), max, out);
+    }
     case AMC_LIST:
         return os_list(arg, out);
     case AMC_DELETE:
@@ -327,7 +336,8 @@ static const char *cmd_name(unsigned long c)
 {
     static const char *names[] = {"?",     "HELLO",  "INFO",   "PUT",     "GET",    "LIST",
                                   "DELETE", "MAKEDIR", "START", "WAIT",    "ABORT",  "SHOT",
-                                  "GETENV", "SETENV", "UNSETENV", "REBOOT", "RESTART", "QUIT"};
+                                  "GETENV", "SETENV", "UNSETENV", "REBOOT", "RESTART", "QUIT",
+                                  "GETFROM"};
     return c < sizeof(names) / sizeof(names[0]) ? names[c] : "?";
 }
 

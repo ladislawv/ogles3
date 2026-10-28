@@ -259,6 +259,28 @@ int os_file_read(const char *path, struct buf *out)
     return out->failed ? AMS_NOMEM : AMS_OK;
 }
 
+/* A file another process writes may be held for a moment (the reader
+ * retries): shared access (MODE_OLDFILE), its size from the end's seek. */
+int os_file_read_from(const char *path, unsigned long offset, unsigned long max, struct buf *out)
+{
+    BPTR fh = Open((STRPTR)path, MODE_OLDFILE);
+    char chunk[4096];
+    LONG n, size;
+    if (!fh)
+        return AMS_NOTFOUND;
+    Seek(fh, 0, OFFSET_END);
+    size = Seek(fh, 0, OFFSET_BEGINNING);
+    buf_u32(out, size < 0 ? 0 : (unsigned long)size);
+    if (size > 0 && offset < (unsigned long)size && Seek(fh, (LONG)offset, OFFSET_BEGINNING) >= 0) {
+        while (max && (n = Read(fh, chunk, max < sizeof(chunk) ? (LONG)max : (LONG)sizeof(chunk))) > 0) {
+            buf_put(out, chunk, (unsigned long)n);
+            max -= (unsigned long)n;
+        }
+    }
+    Close(fh);
+    return out->failed ? AMS_NOMEM : AMS_OK;
+}
+
 int os_file_write(const char *path, const void *data, unsigned long len)
 {
     char tmp[300];

@@ -785,10 +785,10 @@ static int lookup_es3(struct OGLES2Context *ctx, GLenum pname, struct value *v)
     case GL_TRANSFORM_FEEDBACK_BINDING:
         v->i[0] = (GLint)ogles2_xfb_bound_name(ctx);
         return 1;
-    case GL_PROGRAM_PIPELINE_BINDING: /* ES 3.1: none bound yet (stage D item 5) */
+    case GL_PROGRAM_PIPELINE_BINDING: /* ES 3.1 (stage D item 5) */
         if (!ogles2_es31(ctx))
             return 0;
-        v->i[0] = 0;
+        v->i[0] = ctx->pipe ? (GLint)ctx->pipe->name : 0;
         return 1;
     }
     for (k = 0; k < sizeof(es3_limits) / sizeof(es3_limits[0]); k++)

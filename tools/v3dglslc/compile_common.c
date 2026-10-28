@@ -27,6 +27,12 @@ static const char *out_dir; /* -o: write .v3dp files here */
  * then each varying's name and "\n" in the order given. NULL: none. */
 static const char *link_bindings;
 
+/* The next link's program is separable (ES 3.1: GL_PROGRAM_SEPARABLE; its
+ * link state began with V3DGLSL_SEPA_MARK, or a V3DGLSL_LINK_SEPARABLE
+ * request): a vertex or fragment shader may be missing, and its hash ends
+ * with the pseudo-stage "SEPA" (v3dp/FORMAT.md). */
+static int link_separable;
+
 #define XFBV_MARK "XFBV\n"
 
 /* The transform feedback part of link state `b` (after its "XFBV" line), or NULL. */
@@ -167,17 +173,28 @@ static int link_pair(const char *vs_label, const char *fs_label, const char *vs_
     int vs_ok, fs_ok;
     char info[2048];
 
-    fprintf(stderr, "v3dglslc: ==== program %s + %s\n", vs_label, fs_label);
-    vs = compile_src(GL_VERTEX_SHADER, vs_label, vs_src, &vs_ok, log, log_size);
-    fs = compile_src(GL_FRAGMENT_SHADER, fs_label, fs_src, &fs_ok, log, log_size);
-    if (!vs_ok || !fs_ok) {
-        glDeleteShader(vs);
-        glDeleteShader(fs);
+    fprintf(stderr, "v3dglslc: ==== program %s + %s%s\n", vs_src ? vs_label : "-", fs_src ? fs_label : "-",
+            link_separable ? " (separable)" : "");
+    vs = fs = 0;
+    vs_ok = fs_ok = 1;
+    if (vs_src)
+        vs = compile_src(GL_VERTEX_SHADER, vs_label, vs_src, &vs_ok, log, log_size);
+    if (fs_src)
+        fs = compile_src(GL_FRAGMENT_SHADER, fs_label, fs_src, &fs_ok, log, log_size);
+    if (!vs_ok || !fs_ok || (!vs_src && !fs_src) || (!link_separable && (!vs_src || !fs_src))) {
+        if (vs)
+            glDeleteShader(vs);
+        if (fs)
+            glDeleteShader(fs);
         return 0;
     }
     p = glCreateProgram();
-    glAttachShader(p, vs);
-    glAttachShader(p, fs);
+    if (link_separable)
+        glProgramParameteri(p, GL_PROGRAM_SEPARABLE, GL_TRUE);
+    if (vs)
+        glAttachShader(p, vs);
+    if (fs)
+        glAttachShader(p, fs);
     apply_bindings(p, link_bindings);
 #ifdef V3DC_WRITER
     apply_xfb(p, link_bindings);
@@ -201,8 +218,10 @@ static int link_pair(const char *vs_label, const char *fs_label, const char *vs_
     (void)target;
 #endif
     glDeleteProgram(p);
-    glDeleteShader(vs);
-    glDeleteShader(fs);
+    if (vs)
+        glDeleteShader(vs);
+    if (fs)
+        glDeleteShader(fs);
     return ok;
 }
 

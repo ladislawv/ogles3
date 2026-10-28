@@ -87,6 +87,10 @@ def main():
         st.call("MAKEDIR", "WORK:t")
         st.put("WORK:t/blob.bin", blob)
         check(st.get("WORK:t/blob.bin") == blob, "PUT/GET 1 MB round trip")
+        size, part = st.get_from("WORK:t/blob.bin", 1000, 5000)
+        check(size == len(blob) and part == blob[1000:6000], "GETFROM: the size and 5000 bytes from 1000")
+        size, part = st.get_from("WORK:t/blob.bin", len(blob), 100)
+        check(size == len(blob) and part == b"", "GETFROM at the end: nothing")
         names = [n for k, s, n in st.listdir("WORK:t")]
         check(names == ["blob.bin"], "LIST shows the file and no .tmp left over (%s)" % names)
         st.call("DELETE", "WORK:t/blob.bin")

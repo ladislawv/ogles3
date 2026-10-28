@@ -132,7 +132,10 @@ def serve(host, port, token, comp):
     s.sendall(b"V3H1" + string(token.encode()))
     if recv_all(s, 4) != b"V3OK":
         raise ConnectionError("the A1200 refused the token")
-    s.settimeout(None)  # requests come when a program links
+    # Requests come when a program links. A link quiet for 90 s is made
+    # again (2026-10-28: after an A1200 reset the keepalive below did not end
+    # the dead link under WSL, and an hour's compiles failed "no bridge").
+    s.settimeout(90)
     # A reset A1200 leaves the link dead without a word: TCP keepalive ends
     # it within a minute, and the loop connects again.
     s.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
@@ -211,6 +214,8 @@ def main(argv):
             serve(cfg["host"], port, cfg["token"], comp)
         except KeyboardInterrupt:
             return 0
+        except socket.timeout:  # quiet for 90 s: connected again, without a word
+            time.sleep(1)
         except (OSError, ConnectionError) as e:
             print("%s %s; again in 5 s" % (time.strftime("%H:%M:%S"), e), flush=True)
             time.sleep(5)

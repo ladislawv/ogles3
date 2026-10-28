@@ -14,7 +14,7 @@
 
 #define AMICTL_PORT     6800
 #define AMICTL_MAGIC    0x414d4331UL /* "AMC1" */
-#define AMICTL_VERSION  "1.3"
+#define AMICTL_VERSION  "1.4"
 
 #define AMICTL_MAX_ARG  4096UL
 #define AMICTL_MAX_DATA (64UL * 1024 * 1024)
@@ -38,7 +38,10 @@ enum amictl_cmd {
     AMC_UNSETENV = 14,/* arg: name */
     AMC_REBOOT = 15,  /* reply first, reboot about 2 s later */
     AMC_RESTART = 16, /* arg: new binary (in the server's directory) -> reply, then restart */
-    AMC_QUIT = 17     /* reply, then the server exits */
+    AMC_QUIT = 17,    /* reply, then the server exits */
+    AMC_GETFROM = 18  /* 1.4: arg: path \n offset \n max bytes -> u32 file size, then the file's
+                         bytes from offset (at most max, at most AMICTL_MAX_OUT): a log read
+                         as it grows (tools/amictl/deqp_watch.py) */
 };
 
 enum amictl_status {

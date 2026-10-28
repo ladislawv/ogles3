@@ -56,6 +56,13 @@
                                 * stage D item 1. A compiler older than this answers 3. */
 #define V3DGLSL_COMPILE_COMPUTE 9 /* ES 3.1: as COMPILE, `vs` a compute shader. A compiler older than
                                    * this answers 3. */
+#define V3DGLSL_LINK_SEPARABLE 10 /* ES 3.1: as LINK_BOUND (`bindings` may be NULL), the program
+                                  * linked with GL_PROGRAM_SEPARABLE; vs or fs may be NULL (a program
+                                  * of one stage: no variants then, docs/GLES3_PLAN.md stage D item
+                                  * 5). `bindings` may begin with V3DGLSL_SEPA_MARK too (as a
+                                  * COMPILE_VARIANT's of a separable program must). A compiler older
+                                  * than this answers 3. */
+#define V3DGLSL_SEPA_MARK "SEPA\n" /* link state's first line: the program is separable */
 #define V3DGLSL_KEY_OUTPUTS_FROM_FS 0x100 /* in a vertex key's stage word: its used outputs are
                                            * the inputs of the fragment variant compiled just
                                            * before it in the same request (Mesa's

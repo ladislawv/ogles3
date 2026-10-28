@@ -2746,7 +2746,13 @@ static void draw_instances(struct OGLES2Context *ctx, GLenum mode, GLint first, 
     if (!ogles2_fb_ready(ctx)) /* GL_INVALID_FRAMEBUFFER_OPERATION */
         return;
     p = ctx->program;
-    if (p && p->image && p->image->compute) { /* ES 3.1 11.1.3.11: no vertex or fragment shader */
+    /* ES 3.1 11.1.3.11: no vertex or fragment shader (a compute program, a
+     * separable one of one stage) */
+    if (p && p->image && (p->image->compute || p->image->stages != 0x11)) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
+    if (!p && ctx->pipe && !(p = ogles2_pipeline_program(ctx, FALSE))) { /* ES 3.1: a program pipeline's */
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
@@ -2811,7 +2817,11 @@ static void draw_elements(struct OGLES2Context *ctx, GLenum mode, GLsizei count,
     if (!ogles2_fb_ready(ctx))
         return;
     p = ctx->program;
-    if (p && p->image && p->image->compute) { /* ES 3.1 11.1.3.11 */
+    if (p && p->image && (p->image->compute || p->image->stages != 0x11)) { /* ES 3.1 11.1.3.11 */
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
+    if (!p && ctx->pipe && !(p = ogles2_pipeline_program(ctx, FALSE))) { /* ES 3.1: a program pipeline's */
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }

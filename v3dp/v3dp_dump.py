@@ -17,7 +17,8 @@ FEATURE_TF = 0x1  # format 2: transform feedback (a TRANSFORM_FEEDBACK section)
 FEATURE_STORAGE = 0x2  # ES 3.1: shader storage blocks (a STORAGE_BLOCKS section)
 FEATURE_COMPUTE = 0x4  # ES 3.1: a compute program
 FEATURE_ATOMIC = 0x8  # ES 3.1: atomic counter buffers (an ATOMIC_BUFFERS section)
-FEATURES = FEATURE_TF | FEATURE_STORAGE | FEATURE_COMPUTE | FEATURE_ATOMIC
+FEATURE_SEPARABLE = 0x10  # ES 3.1: a separable program (one stage, or both)
+FEATURES = FEATURE_TF | FEATURE_STORAGE | FEATURE_COMPUTE | FEATURE_ATOMIC | FEATURE_SEPARABLE
 # Format 2 (ES3 programs) is written as major 0x8002 until release 2.1 (FORMAT.md).
 FORMAT2 = (2, 0x8002)
 PACKING = {0: "std140", 1: "shared", 2: "packed", 3: "std430"}
@@ -240,7 +241,8 @@ def dump(path, show_qpu):
                   (h, ", ".join(STAGES[s] for s in STAGES if mask & (1 << s)),
                    ", transform feedback" if features & FEATURE_TF else "",
                    ", storage blocks" if features & FEATURE_STORAGE else "") +
-                  (", atomic counters" if features & FEATURE_ATOMIC else ""))
+                  (", atomic counters" if features & FEATURE_ATOMIC else "") +
+                  (", separable" if features & FEATURE_SEPARABLE else ""))
         elif t == 2:
             print("STRINGS %d bytes" % len(payload))
         elif t == 3:

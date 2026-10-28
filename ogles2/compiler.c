@@ -326,6 +326,15 @@ BOOL ogles2_compile_compute(const char *cs, const char *path, char *log, ULONG l
     return request(V3DGLSL_LINK_COMPUTE, cs, 0, 0, path, log, log_size, &result, 0, 0, 0) && result == 0;
 }
 
+/* ES 3.1: a separable program (docs/GLES3_PLAN.md stage D item 5). A
+ * compiler older than V3DGLSL_LINK_SEPARABLE refuses the request (result 3). */
+BOOL ogles2_compile_separable(const char *vs, const char *fs, const char *bindings, const char *path, char *log,
+                              ULONG log_size)
+{
+    LONG result;
+    return request(V3DGLSL_LINK_SEPARABLE, vs, fs, bindings, path, log, log_size, &result, 0, 0, 0) && result == 0;
+}
+
 /* ES 3.1: as ogles2_compile_shader, a compute shader. */
 int ogles2_compile_compute_shader(const char *src, char *log, ULONG log_size)
 {

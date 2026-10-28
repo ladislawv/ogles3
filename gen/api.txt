@@ -90,3 +90,12 @@ command glProgramUniformMatrix3x4fv
 command glProgramUniformMatrix4x3fv
 command glTexStorage2DMultisample
 command glGetMultisamplefv
+command glGenProgramPipelines
+command glDeleteProgramPipelines
+command glIsProgramPipeline
+command glUseProgramStages
+command glActiveShaderProgram
+command glValidateProgramPipeline
+command glGetProgramPipelineiv
+command glGetProgramPipelineInfoLog
+command glCreateShaderProgramv
