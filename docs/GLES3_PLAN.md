@@ -2623,6 +2623,26 @@ test towards it until the A1200 restarts; then the cause. Then dEQP's
 NOFALLBACK`: without the bridge a compile fails) and does not start
 without a `compile_bridge.py` process (the bridge had died unnoticed at
 21:59, and the A1200's compiler then sat on one program for 20 minutes).
+**Parked (2026-10-28), open:** further runs singly: `triangles.single_attribute`
+and `points.single_attribute` pass; `triangles.multiple_attributes` and
+`first.first_1` restart the A1200, often but not every time, more often
+while the SD card is written (a background `Copy` on Stuff: is enough;
+the library's log on the FAT card `AMIGAPC:`, dEQP's in `RAM:`: it passed
+twice and crashed once). Not the cause: the depth and stencil save at a
+mid-frame flush (probe `Z`, below, still crashed), the library's log
+(nothing of the library's written, still crashed), the indirect command
+(direct `glDrawArrays` of the same layout in `m8_draw`'s `test_vao2`
+passes, under disk load too). The crashing cases' first attribute is 4
+floats a vertex read as a `vec2`, a second array 2 floats; dEQP draws 1,
+5 and 25 random triangles (many past the screen: clipped) into a 256x256
+window, its shader `glsDrawTest`'s (`gl_Position` z 1.0, `gl_PointSize`).
+No alert recorded: below AmigaOS (the GPU or Emu68). Next attempt: a test
+of exactly that (the window, the shader, random large triangles) to make
+it happen on demand, then narrow it. Meanwhile dEQP's `draw_indirect`
+runs leave out those cases. New for it: probe `Z` (`ENV:OGLES2/Probe`:
+depth and stencil not kept across a mid-frame flush); the sync-logging
+builds no longer write their log file inside a bitmap lock
+(`ogles2_log_hold`, `ogles2_display_lock`).
 `cmd/pistat` (the Pi's temperature, throttling and clocks, through the
 firmware only) ruled out heat and power: 51 C, no flags. **Trap:** a
 freeze after GPU work that comes back after warm resets needs a power

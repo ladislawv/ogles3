@@ -818,6 +818,7 @@ struct OGLES2Context
 #define OGLES2_PROBE_CPU_MIPMAP 256UL /* M: glGenerateMipmap on the CPU, not the TFU (texture.c) */
 #define OGLES2_PROBE_CPU_UPLOAD 512UL /* U: texture uploads tiled by the CPU, not the TFU (texture.c) */
 #define OGLES2_PROBE_CPU_COPY 1024UL /* K: glCopyTex* through the CPU, not drawn by the GPU (copy.c) */
+#define OGLES2_PROBE_NO_ZS_SAVE 2048UL /* Z: depth and stencil not kept across a mid-frame flush (job.c) */
 
 void ogles2_state_init(struct OGLES2Context *ctx);
 BOOL ogles2_state_dither(struct OGLES2Context *ctx); /* GL_DITHER enabled */
@@ -851,6 +852,7 @@ void ogles2_display_read(struct OGLES2Display *d, UWORD x, UWORD y, UWORD w, UWO
 void *ogles2_object(struct OGLES2Context *ctx, GLuint name, UBYTE kind); /* NULL if not that kind */
 void ogles2_objects_free(struct OGLES2Context *ctx); /* aglDestroyContext: programs, shaders, cache */
 void ogles2_draw_free(struct OGLES2Context *ctx);    /* aglDestroyContext, after the last job */
+void ogles2_log_hold(BOOL on); /* TRUE: no log file written until the matching FALSE (inside a bitmap lock) */
 void ogles2_compute_free(struct OGLES2Context *ctx); /* the same */
 const struct OGLES2Image *ogles2_builtin_image(void);
 /* texture.c */

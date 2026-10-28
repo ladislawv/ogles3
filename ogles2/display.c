@@ -480,6 +480,8 @@ BOOL ogles2_display_lock(struct OGLES2Display *d)
         return TRUE;
     d->lock = LockBitMapTags(d->bitmap, LBMI_BYTESPERROW, (ULONG)&d->bprow, LBMI_BASEADDRESS,
                              (ULONG)&d->base, TAG_DONE);
+    if (d->lock)
+        ogles2_log_hold(TRUE); /* no file I/O inside the bitmap lock */
     return d->lock != 0;
 }
 
@@ -510,6 +512,7 @@ void ogles2_display_unlock(struct OGLES2Display *d)
     if (d->lock) {
         UnLockBitMap(d->lock);
         d->lock = 0;
+        ogles2_log_hold(FALSE);
     }
 }
 

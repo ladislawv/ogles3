@@ -129,6 +129,8 @@ struct OGLES2Context *ogles2_aglCreateContext2(ULONG *errcode, struct TagItem *t
                     ctx->probe |= OGLES2_PROBE_SEMAPHORE;
                 else if (*p == 'T')
                     ctx->probe |= OGLES2_PROBE_TRACE;
+                else if (*p == 'Z')
+                    ctx->probe |= OGLES2_PROBE_NO_ZS_SAVE;
                 else if (*p == 'P')
                     ctx->probe |= OGLES2_PROBE_PERIODIC;
                 else if (*p == 'A')

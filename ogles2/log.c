@@ -39,6 +39,23 @@ static void put_char(register UBYTE c __asm("d0"), register struct line *l __asm
  * vector -36, aglDestroyContext, the OGLES2Log command) are reached only from
  * the application's own calls, never under Forbid(), so the process check is
  * all they need. */
+/* Held (ogles2_log_hold): no file written meanwhile, the lines wait in
+ * the ring. A sync build's write inside a bitmap lock (the job flush's,
+ * ogles2_display_lock) restarted the A1200 when the log was on its PFS3
+ * disk (dEQP-GLES31 draw_indirect, 2026-10-28). */
+static LONG hold;
+
+void ogles2_log_hold(BOOL on)
+{
+    Forbid();
+    hold += on ? 1 : -1;
+    Permit();
+#ifdef OGLES2_LOG_SYNC
+    if (!on && !hold && SysBase->TDNestCnt < 0 && SysBase->IDNestCnt < 0)
+        ogles2_log_flush();
+#endif
+}
+
 static BOOL caller_is_process(void)
 {
     struct Task *me = FindTask(0);
@@ -52,7 +69,7 @@ static BOOL caller_is_process(void)
  * this mode writes nothing there). */
 static BOOL can_flush_now(void)
 {
-    return caller_is_process() && SysBase->TDNestCnt < 0 && SysBase->IDNestCnt < 0;
+    return caller_is_process() && SysBase->TDNestCnt < 0 && SysBase->IDNestCnt < 0 && !hold;
 }
 #endif
 

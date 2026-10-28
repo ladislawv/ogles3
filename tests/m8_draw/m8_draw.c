@@ -2378,6 +2378,56 @@ static void test_uniform_locations(void)
     glDeleteProgram(p);
 }
 
+/* dEQP-GLES31's draw_indirect.*.multiple_attributes setup, which restarted
+ * the A1200 (2026-10-28): a vertex array object with two attributes from
+ * buffers of their own, es3inst's pos from 4 floats a vertex (read as its
+ * vec2) and col from 2 (read as (x, y, 0, 1)), first 1; drawn directly
+ * (vao2) or indirectly (vao2_indirect). Pixel (4, 4) is (255, 255, 0). */
+static void test_vao2(int indirect)
+{
+    static const GLfloat pos[16] = { 9, 9, 9, 1,   -1, -1, 0, 1,   0, -1, 0, 1,   -1, 0, 0, 1 };
+    static const GLfloat col[8] = { 0, 0,   1, 1,   1, 1,   1, 1 };
+    static const GLuint cmd[4] = { 3, 1, 1, 0 };
+    GLuint p = program("es3inst"), b[3], vao;
+    GLint lp, lc;
+    if (!p) {
+        check(0, "two attribute buffers: es3inst links");
+        return;
+    }
+    lp = glGetAttribLocation(p, "pos");
+    lc = glGetAttribLocation(p, "col");
+    glUseProgram(p);
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    glGenBuffers(3, b);
+    glBindBuffer(GL_ARRAY_BUFFER, b[0]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(pos), pos, GL_STATIC_DRAW);
+    glVertexAttribPointer((GLuint)lp, 4, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray((GLuint)lp);
+    glBindBuffer(GL_ARRAY_BUFFER, b[1]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(col), col, GL_STATIC_DRAW);
+    glVertexAttribPointer((GLuint)lc, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray((GLuint)lc);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    if (indirect) {
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, b[2]);
+        glBufferData(GL_DRAW_INDIRECT_BUFFER, sizeof(cmd), cmd, GL_STATIC_DRAW);
+        glDrawArraysIndirect(GL_TRIANGLES, 0);
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+    } else {
+        glDrawArrays(GL_TRIANGLES, 1, 3);
+    }
+    check(pixel_is(4, 4, 255, 255, 0, 255, 0) && pixel_is(40, 40, 0, 0, 0, 0, 0) && glGetError() == GL_NO_ERROR,
+          indirect ? "two attribute buffers in a vertex array object, glDrawArraysIndirect"
+                   : "two attribute buffers in a vertex array object, glDrawArrays first 1");
+    glBindVertexArray(0);
+    glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(3, b);
+    glUseProgram(0);
+    glDeleteProgram(p);
+}
+
 /* ES 3.1's indirect draws (GLES3 plan stage D item 3) with es3inst (the
  * triangle on the lower left of x + y < 0, instance i moved right by 32
  * pixels): glDrawArraysIndirect of 2 instances (green), then
@@ -2854,6 +2904,10 @@ int main(void)
                 test_fragment_storage();
             if (!skipped("indirect"))
                 test_indirect();
+            if (!skipped("vao2"))
+                test_vao2(0);
+            if (!skipped("vao2_indirect"))
+                test_vao2(1);
             if (!skipped("uniform_locations"))
                 test_uniform_locations();
         }
