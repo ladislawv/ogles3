@@ -1,0 +1,12 @@
+#version 310 es
+// A 32-bit float texture sampled in a compute shader (GLES3 plan stage D):
+// values past half-float precision (4097, 16385) must arrive whole, which
+// takes the program's 32-bit-sampler variant (.v3dw).
+layout(local_size_x = 4) in;
+uniform highp sampler2D tex;
+layout(binding = 0) buffer Out { highp vec4 v[4]; } o;
+void main()
+{
+    uint i = gl_GlobalInvocationID.x;
+    o.v[i] = texture(tex, vec2((float(i) + 0.5) / 4.0, 0.5));
+}

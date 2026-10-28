@@ -605,6 +605,10 @@ static void bind_images(GLuint p)
 static int dispatch_key_state(GLuint p, int wide)
 {
     GLint err;
+    /* The key-state textures (make_target's): without them texture 0 is
+     * bound, Mesa's fallback, and the .v3dw's samplers return 16 bits. */
+    if (!draw_fbo && !make_target())
+        return 0;
     _mesa_UseProgram(p);
     bind_samplers(p, 0, wide);
     bind_uniform_blocks(p);

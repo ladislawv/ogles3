@@ -525,7 +525,9 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             memcpy(key, kstart, klen);
             v->key = key;
             n = u32(&s);
-            if (n > 4096)
+            /* nrecipe's UWORD: a random storage layout's dispatch reads
+             * some 8000 (dEQP's ssbo.layout.random.all_shared_buffer.36) */
+            if (n > 0xffff)
                 FAIL("uniform recipe too long:", 0, n);
             rt = alloc(im, n * 8 + 8);
             if (!rt)

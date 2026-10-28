@@ -373,7 +373,7 @@ $(B)/v3dp/.stamp: $(wildcard tests/common/*.h) tools/v3dp_tests/emit.c v3dp/v3dp
 	    tools/v3dglslc/test/shaders/es3inst.* tools/v3dglslc/test/shaders/es3int.* \
 	    tools/v3dglslc/test/shaders/es3utex.* tools/v3dglslc/test/shaders/es3itex.* \
 	    tools/v3dglslc/test/shaders/es3rt.* tools/v3dglslc/test/shaders/es3xfb.* \
-	    tools/v3dglslc/test/shaders/es31cs.comp tools/v3dglslc/test/shaders/es31oob.comp tools/v3dglslc/test/shaders/es31ac.comp tools/v3dglslc/test/shaders/es31img.comp tools/v3dglslc/test/shaders/es31frag.* tools/v3dglslc/test/shaders/es31loc.* tools/v3dglslc/test/shaders/es31ms.* $(B)/v3dp/src/
+	    tools/v3dglslc/test/shaders/es31cs.comp tools/v3dglslc/test/shaders/es31oob.comp tools/v3dglslc/test/shaders/es31ac.comp tools/v3dglslc/test/shaders/es31img.comp tools/v3dglslc/test/shaders/es31tex32.comp tools/v3dglslc/test/shaders/es31xchg.comp tools/v3dglslc/test/shaders/es31frag.* tools/v3dglslc/test/shaders/es31loc.* tools/v3dglslc/test/shaders/es31ms.* $(B)/v3dp/src/
 	cd $(B)/v3dp/src && ../emit && for v in *.vert; do \
 	    $(V3DGLSLC) -o .. $$([ -f $${v%.vert}.link ] && echo -b $${v%.vert}.link) $$v $${v%.vert}.frag || exit 1; done && \
 	    for c in *.comp; do $(V3DGLSLC) -o .. $$c || exit 1; done

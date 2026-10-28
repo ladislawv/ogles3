@@ -17,7 +17,7 @@ PAIRS="tex.vert tex.frag light.vert light.frag skin.vert skin.frag tex.vert proc
        es3.vert es3.frag es3tex.vert es3tex.frag es3uni.vert es3uni.frag es3flat.vert es3flat.frag
        es3block.vert es3block.frag es3size.vert es3size.frag es3vid.vert es3vid.frag
        es3out.vert es3out.frag es3wide.vert es3wide.frag
-       es31frag.vert es31frag.frag es31loc.vert es31loc.frag es31ms.vert es31ms.frag es31cs.comp es31oob.comp es31ac.comp es31img.comp" # compute programs (ES 3.1): one file each
+       es31frag.vert es31frag.frag es31loc.vert es31loc.frag es31ms.vert es31ms.frag es31cs.comp es31oob.comp es31ac.comp es31img.comp es31tex32.comp es31xchg.comp" # compute programs (ES 3.1): one file each
 
 $OUT/host/v3dglslc -o host $PAIRS > host.txt 2>&1
 echo "host v3dglslc rc=$?"

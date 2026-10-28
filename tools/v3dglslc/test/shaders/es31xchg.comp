@@ -1,0 +1,12 @@
+#version 310 es
+#extension GL_OES_shader_image_atomic : require
+// imageAtomicExchange on an r32f image (GLES3 plan stage D): each
+// invocation puts 4096 i + 2 into texel i and stores the value it replaced.
+layout(local_size_x = 4) in;
+layout(r32f, binding = 0) coherent uniform highp image2D img;
+layout(std430, binding = 0) buffer Out { highp float r[4]; } o;
+void main()
+{
+    int i = int(gl_GlobalInvocationID.x);
+    o.r[i] = imageAtomicExchange(img, ivec2(i, 0), float(i) * 4096.0 + 2.0);
+}

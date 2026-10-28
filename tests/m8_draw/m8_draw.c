@@ -2399,6 +2399,87 @@ static void test_images(void)
     glDeleteProgram(p);
 }
 
+/* 32-bit floats past half-float precision in compute shaders (GLES3 plan
+ * stage D item 2): an R32F 4x1 texture of 1, 4097, 8193 and 16385, read by
+ * es31tex32's texture() (the 32-bit-sampler variant), then es31xchg's
+ * imageAtomicExchange puts 4096 i + 2 into texel i and stores the value it
+ * replaced; glReadPixels reads the texture back. */
+static void test_images_r32f(void)
+{
+    static const GLfloat init[4] = { 1.0f, 4097.0f, 8193.0f, 16385.0f };
+    GLuint ps = compute_program("es31tex32"), px = compute_program("es31xchg"), t, b, fb;
+    GLfloat back[4];
+    const GLfloat *d;
+    int i, ok;
+    if (!ps || !px) {
+        check(0, "images r32f: es31tex32 and es31xchg link");
+        return;
+    }
+    glGenTextures(1, &t);
+    glBindTexture(GL_TEXTURE_2D, t);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_R32F, 4, 1);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 4, 1, GL_RED, GL_FLOAT, init);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glGenBuffers(1, &b);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, b);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, 64, 0, GL_DYNAMIC_READ);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, b);
+    glUseProgram(ps);
+    glUniform1i(glGetUniformLocation(ps, "tex"), 0);
+    glDispatchCompute(1, 1, 1);
+    glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT);
+    d = (const GLfloat *)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, 64, GL_MAP_READ_BIT);
+    ok = d != 0;
+    for (i = 0; ok && i < 4; i++)
+        if (d[i * 4] != init[i]) {
+            printf("     sampled texel %d is 0x%08lx\n", i, (unsigned long)((const GLuint *)d)[i * 4]);
+            ok = 0;
+        }
+    if (d)
+        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+    check(ok && glGetError() == GL_NO_ERROR, "images r32f: texture() returns 4097 and 16385 whole");
+    glUseProgram(px);
+    glBindImageTexture(0, t, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32F);
+    glDispatchCompute(1, 1, 1);
+    glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT | GL_FRAMEBUFFER_BARRIER_BIT);
+    d = (const GLfloat *)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, 16, GL_MAP_READ_BIT);
+    ok = d != 0;
+    for (i = 0; ok && i < 4; i++)
+        if (d[i] != init[i]) {
+            printf("     exchange %d returned 0x%08lx\n", i, (unsigned long)((const GLuint *)d)[i]);
+            ok = 0;
+        }
+    if (d)
+        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+    check(ok && glGetError() == GL_NO_ERROR, "images r32f: imageAtomicExchange returns the old values whole");
+    glGenFramebuffers(1, &fb);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, t, 0);
+    memset(back, 0, sizeof(back));
+    for (i = 0; i < 4; i++) {
+        GLfloat rgba[4] = { 0, 0, 0, 0 };
+        glReadPixels(i, 0, 1, 1, GL_RGBA, GL_FLOAT, rgba);
+        back[i] = rgba[0];
+    }
+    ok = 1;
+    for (i = 0; i < 4; i++)
+        if (back[i] != (GLfloat)(i * 4096 + 2)) {
+            printf("     texel %d is %ld after the exchange\n", i, (long)back[i]);
+            ok = 0;
+        }
+    check(ok && glGetError() == GL_NO_ERROR, "images r32f: imageAtomicExchange stores 4098 and 12290 whole");
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDeleteFramebuffers(1, &fb);
+    glBindImageTexture(0, 0, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32F);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    glDeleteBuffers(1, &b);
+    glDeleteTextures(1, &t);
+    glUseProgram(0);
+    glDeleteProgram(ps);
+    glDeleteProgram(px);
+}
+
 /* ES 3.1's multisample textures (GLES3 plan stage D item 4): a 4x RGBA8
  * 16x16 texture, its queries and errors, cleared through a framebuffer
  * (a 4x job storing every sample) to (0.2, 0.4, 0.6), and es31ms reading
@@ -3103,6 +3184,8 @@ int main(void)
                 test_uniform_locations();
             if (!skipped("images"))
                 test_images();
+            if (!skipped("images_r32f"))
+                test_images_r32f();
             if (!skipped("ms_texture"))
                 test_ms_texture();
             if (!skipped("pipelines"))

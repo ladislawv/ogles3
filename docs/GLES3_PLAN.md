@@ -2670,11 +2670,20 @@ loads an R32UI image, stores RGBA8, `imageSize`, a store past the edge
 dropped, the unit queries). `m8-5` 47 of 47, 183 of 183; dEQP-GLES31
 `compute` 195 of 195, `layout_binding` 104 of 104 (64 not supported),
 `synchronization` 104 of 104, `image_load_store` 618 passed, 4 failed, 125
-not supported (texture buffers, `GL_EXT_texture_buffer`, ES 3.2). **Open:**
-the 4 are `{2d,cube}.atomic.exchange_r32f_{result,return_value}`: the
-values exchanged lose their low mantissa bits (4097 reads 4096, 16385
-16384, as through a half float), while the same cases of `2d_array` and
-`3d` pass. **Trap:** the A1200's program cache keeps a compute program's
+not supported (texture buffers, `GL_EXT_texture_buffer`, ES 3.2). The 4
+were `{2d,cube}.atomic.exchange_r32f_{result,return_value}`, whose values
+read back 4097 as 4096 and 16385 as 16384, as through a half float.
+**Fixed (2026-10-28):** the exchange was right, the readback was not:
+dEQP reads float images with a compute shader's `texture()`, and the
+compiler made its key-state textures (the RGBA32F ones that set
+`sampler_is_32b`) only for draws (`make_target`), so a compute program's
+key dispatch sampled texture 0, Mesa's fallback, and its `.v3dw` held the
+16-bit variant again (2D and cube samplers; the other kinds' textures are
+made on demand, so `2d_array` and `3d` passed). `dispatch_key_state` makes
+them first. `m8_draw`'s `test_images_r32f` (`es31tex32.comp`,
+`es31xchg.comp`: an R32F texture of 1, 4097, 8193, 16385 sampled whole,
+`imageAtomicExchange`'s returns and stores whole); `image_load_store` 622
+of 622. **Trap:** the A1200's program cache keeps a compute program's
 `.v3dp` from before a compiler change (no `.v3dw` then): delete
 `Stuff:amictld/work/ogles2-m8-3/cache/#?` after such a change.
 
@@ -3079,7 +3088,13 @@ stopped.
    `EXT_shader_implicit_conversions`), `srgb_texture_decode` (21:
    `EXT_texture_sRGB_decode`, `_R8`, `_RG8`). The watcher also prints the
    A1200's free memory (Avail) each report: 1.62 GB to 1.61 GB over the
-   two hours, no leak to speak of.
+   two hours, no leak to speak of. `ssbo` again: 2060 of 2061 (the 37
+   failures of unsized arrays of structures and random layouts gone with
+   the changes since), the last `layout.random.all_shared_buffer.36`,
+   refused "uniform recipe too long: 7983": the library's cap was 4096,
+   now `nrecipe`'s 65535 (a dispatch's stream grows to fit); its group 50
+   of 50. `image_load_store` 622 of 622 (above); `stencil_texturing` still
+   8 passed, 3 failed (uploaded D32F_S8 stencil).
 
 Done when: dEQP-GLES31 passes except documented deviations, as GLES2 and
 GLES3 do; `GL_VERSION` "OpenGL ES 3.1 ogles2.library 2.2"; **release 2.2**.
