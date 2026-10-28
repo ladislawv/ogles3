@@ -29,7 +29,7 @@ with the next step, for example:
 Contents
 --------
 Run-M1               the test script
-libs/ogles2.library  the library (logs every line at once)
+libs/ogles3.library  the library (logs every line at once)
 bin/m2_link          linking and uniforms
 bin/m2_texture       textures
 bin/m2_buffers       buffer objects
@@ -37,5 +37,5 @@ bin/m2_elements      glDrawElements, indexed uniform arrays
 bin/m1_draw          the triangle test
 bin/*.v3dp           the test programs' binaries
 shaders/             the test programs' GLSL
-bin/OGLES2Log        writes the library's log file on request
+bin/OGLES3Log        writes the library's log file on request
 notes-template.txt   copied to results/notes.txt at the end

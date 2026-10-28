@@ -11,7 +11,7 @@
  * buffer (CHUNK of VBUF): MiniGL truncates bigger ones.
  *
  * Built with GEARS_GL4ES (gears_gl4es, M6): the same desktop GL program on
- * gl4es over ogles2.library (ports/gl4es), its context through agl*.
+ * gl4es over ogles3.library (ports/gl4es), its context through agl*.
  */
 #ifdef GEARS_GL4ES
 #include <GL/gl.h>
@@ -108,14 +108,14 @@ int main(int argc, char **argv)
     {
         ULONG err = 0;
         if (a.fullscreen)
-            ctx = aglCreateContextTags2(&err, OGLES2_CCT_MODEID, pt_find_mode(), OGLES2_CCT_DEPTH, 24,
-                                        OGLES2_CCT_VSYNC, FALSE, TAG_DONE);
+            ctx = aglCreateContextTags2(&err, OGLES3_CCT_MODEID, pt_find_mode(), OGLES3_CCT_DEPTH, 24,
+                                        OGLES3_CCT_VSYNC, FALSE, TAG_DONE);
         else
-            ctx = aglCreateContextTags2(&err, a.window ? OGLES2_CCT_WINDOW : OGLES2_CCT_BITMAP,
-                                        a.window ? (ULONG)pt_win : (ULONG)pt_bm, OGLES2_CCT_DEPTH, 24,
-                                        OGLES2_CCT_VSYNC, FALSE, TAG_DONE);
+            ctx = aglCreateContextTags2(&err, a.window ? OGLES3_CCT_WINDOW : OGLES3_CCT_BITMAP,
+                                        a.window ? (ULONG)pt_win : (ULONG)pt_bm, OGLES3_CCT_DEPTH, 24,
+                                        OGLES3_CCT_VSYNC, FALSE, TAG_DONE);
         if (!ctx) {
-            printf("gl4es: no context (%lu); needs ogles2.library\n", (unsigned long)err);
+            printf("gl4es: no context (%lu); needs ogles3.library\n", (unsigned long)err);
             pt_close();
             return 20;
         }

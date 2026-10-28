@@ -12,24 +12,24 @@
 #include "ogles2_internal.h"
 
 
-static ULONG cap_bit(const struct OGLES2Context *ctx, GLenum cap)
+static ULONG cap_bit(const struct OGLES3Context *ctx, GLenum cap)
 {
     switch (cap) {
-    case GL_CULL_FACE:                return OGLES2_CAP_CULL_FACE;
-    case GL_BLEND:                    return OGLES2_CAP_BLEND;
-    case GL_DITHER:                   return OGLES2_CAP_DITHER;
-    case GL_STENCIL_TEST:             return OGLES2_CAP_STENCIL_TEST;
-    case GL_DEPTH_TEST:               return OGLES2_CAP_DEPTH_TEST;
-    case GL_SCISSOR_TEST:             return OGLES2_CAP_SCISSOR_TEST;
-    case GL_POLYGON_OFFSET_FILL:      return OGLES2_CAP_POLYGON_OFFSET_FILL;
-    case GL_SAMPLE_ALPHA_TO_COVERAGE: return OGLES2_CAP_SAMPLE_ALPHA_TO_COVERAGE;
-    case GL_SAMPLE_COVERAGE:          return OGLES2_CAP_SAMPLE_COVERAGE;
+    case GL_CULL_FACE:                return OGLES3_CAP_CULL_FACE;
+    case GL_BLEND:                    return OGLES3_CAP_BLEND;
+    case GL_DITHER:                   return OGLES3_CAP_DITHER;
+    case GL_STENCIL_TEST:             return OGLES3_CAP_STENCIL_TEST;
+    case GL_DEPTH_TEST:               return OGLES3_CAP_DEPTH_TEST;
+    case GL_SCISSOR_TEST:             return OGLES3_CAP_SCISSOR_TEST;
+    case GL_POLYGON_OFFSET_FILL:      return OGLES3_CAP_POLYGON_OFFSET_FILL;
+    case GL_SAMPLE_ALPHA_TO_COVERAGE: return OGLES3_CAP_SAMPLE_ALPHA_TO_COVERAGE;
+    case GL_SAMPLE_COVERAGE:          return OGLES3_CAP_SAMPLE_COVERAGE;
     /* ES 3.0: an index of the type's largest value restarts the primitive */
-    case GL_PRIMITIVE_RESTART_FIXED_INDEX: return ogles2_es3(ctx) ? OGLES2_CAP_PRIMITIVE_RESTART : 0;
+    case GL_PRIMITIVE_RESTART_FIXED_INDEX: return ogles2_es3(ctx) ? OGLES3_CAP_PRIMITIVE_RESTART : 0;
     /* ES 3.0: no fragments (draws and clears produce nothing; draw.c, frame.c) */
-    case GL_RASTERIZER_DISCARD: return ogles2_es3(ctx) ? OGLES2_CAP_RASTERIZER_DISCARD : 0;
+    case GL_RASTERIZER_DISCARD: return ogles2_es3(ctx) ? OGLES3_CAP_RASTERIZER_DISCARD : 0;
     /* ES 3.1: glSampleMaski's mask on the samples covered (draw.c) */
-    case GL_SAMPLE_MASK: return ogles2_es31(ctx) ? OGLES2_CAP_SAMPLE_MASK : 0;
+    case GL_SAMPLE_MASK: return ogles2_es31(ctx) ? OGLES3_CAP_SAMPLE_MASK : 0;
     default:                          return 0;
     }
 }
@@ -39,12 +39,12 @@ static GLfloat clamp01(GLfloat v)
     return v < 0.0f ? 0.0f : v > 1.0f ? 1.0f : v;
 }
 
-void ogles2_state_init(struct OGLES2Context *ctx)
+void ogles2_state_init(struct OGLES3Context *ctx)
 {
-    struct OGLES2State *s = &ctx->state;
+    struct OGLES3State *s = &ctx->state;
     int i;
 
-    s->caps = OGLES2_CAP_DITHER; /* the only capability enabled initially */
+    s->caps = OGLES3_CAP_DITHER; /* the only capability enabled initially */
     s->depth_mask = GL_TRUE;
     for (i = 0; i < 4; i++) {
         s->color_mask[i] = GL_TRUE;
@@ -64,7 +64,7 @@ void ogles2_state_init(struct OGLES2Context *ctx)
     s->sample_coverage_value = 1.0f;
     s->sample_coverage_invert = GL_FALSE;
     s->sample_mask = ~0U;
-    for (i = 0; i < OGLES2_MAX_VERTEX_ATTRIBS; i++) {
+    for (i = 0; i < OGLES3_MAX_VERTEX_ATTRIBS; i++) {
         s->attrib[i][0] = s->attrib[i][1] = s->attrib[i][2] = 0.0f;
         s->attrib[i][3] = 1.0f;
         ctx->array[i].size = 4;
@@ -92,14 +92,14 @@ void ogles2_state_init(struct OGLES2Context *ctx)
     ctx->unpack.alignment = ctx->pack.alignment = 4;
 }
 
-BOOL ogles2_state_dither(struct OGLES2Context *ctx)
+BOOL ogles2_state_dither(struct OGLES3Context *ctx)
 {
-    return (ctx->state.caps & OGLES2_CAP_DITHER) ? TRUE : FALSE;
+    return (ctx->state.caps & OGLES3_CAP_DITHER) ? TRUE : FALSE;
 }
 
 /* ---- capabilities ---- */
 
-static void set_cap(struct OGLES2Context *ctx, GLenum cap, int on)
+static void set_cap(struct OGLES3Context *ctx, GLenum cap, int on)
 {
     ULONG bit;
     if (!ogles2_context_valid(ctx) || ogles2_debug_cap(ctx, cap, on, 0)) /* KHR_debug's two */
@@ -118,17 +118,17 @@ static void set_cap(struct OGLES2Context *ctx, GLenum cap, int on)
     ctx->state_ver++;
 }
 
-void ogles2_glEnable(struct OGLES2Context *ctx, GLenum cap)
+void ogles2_glEnable(struct OGLES3Context *ctx, GLenum cap)
 {
     set_cap(ctx, cap, 1);
 }
 
-void ogles2_glDisable(struct OGLES2Context *ctx, GLenum cap)
+void ogles2_glDisable(struct OGLES3Context *ctx, GLenum cap)
 {
     set_cap(ctx, cap, 0);
 }
 
-GLboolean ogles2_glIsEnabled(struct OGLES2Context *ctx, GLenum cap)
+GLboolean ogles2_glIsEnabled(struct OGLES3Context *ctx, GLenum cap)
 {
     ULONG bit;
     GLboolean dbg;
@@ -146,7 +146,7 @@ GLboolean ogles2_glIsEnabled(struct OGLES2Context *ctx, GLenum cap)
 
 /* ---- masks, clear values, rasterisation parameters ---- */
 
-void ogles2_glDepthMask(struct OGLES2Context *ctx, GLboolean flag)
+void ogles2_glDepthMask(struct OGLES3Context *ctx, GLboolean flag)
 {
     if (ogles2_context_valid(ctx)) {
         ctx->state.depth_mask = flag ? GL_TRUE : GL_FALSE;
@@ -154,7 +154,7 @@ void ogles2_glDepthMask(struct OGLES2Context *ctx, GLboolean flag)
     }
 }
 
-void ogles2_glColorMask(struct OGLES2Context *ctx, GLboolean red, GLboolean green,
+void ogles2_glColorMask(struct OGLES3Context *ctx, GLboolean red, GLboolean green,
                         GLboolean blue, GLboolean alpha)
 {
     if (!ogles2_context_valid(ctx))
@@ -166,7 +166,7 @@ void ogles2_glColorMask(struct OGLES2Context *ctx, GLboolean red, GLboolean gree
     ctx->state_ver++;
 }
 
-void ogles2_glClearColor(struct OGLES2Context *ctx, GLfloat red, GLfloat green, GLfloat blue,
+void ogles2_glClearColor(struct OGLES3Context *ctx, GLfloat red, GLfloat green, GLfloat blue,
                          GLfloat alpha)
 {
     if (!ogles2_context_valid(ctx))
@@ -186,13 +186,13 @@ void ogles2_glClearColor(struct OGLES2Context *ctx, GLfloat red, GLfloat green, 
     ctx->state.clear_color[3] = clamp01(alpha);
 }
 
-void ogles2_glClearDepthf(struct OGLES2Context *ctx, GLfloat d)
+void ogles2_glClearDepthf(struct OGLES3Context *ctx, GLfloat d)
 {
     if (ogles2_context_valid(ctx))
         ctx->state.clear_depth = clamp01(d);
 }
 
-void ogles2_glLineWidth(struct OGLES2Context *ctx, GLfloat width)
+void ogles2_glLineWidth(struct OGLES3Context *ctx, GLfloat width)
 {
     if (!ogles2_context_valid(ctx))
         return;
@@ -204,7 +204,7 @@ void ogles2_glLineWidth(struct OGLES2Context *ctx, GLfloat width)
     ctx->state_ver++;
 }
 
-void ogles2_glDepthRangef(struct OGLES2Context *ctx, GLfloat n, GLfloat f)
+void ogles2_glDepthRangef(struct OGLES3Context *ctx, GLfloat n, GLfloat f)
 {
     if (!ogles2_context_valid(ctx))
         return;
@@ -216,7 +216,7 @@ void ogles2_glDepthRangef(struct OGLES2Context *ctx, GLfloat n, GLfloat f)
 /* EXT_clip_control (M7, docs/M7_EXTENSIONS_PLAN.md step 4): the window
  * origin (an upper-left one turns the picture upside down) and clip-space
  * z's range, -w..w or 0..w. draw.c applies them to the viewport. */
-void ogles2_glClipControlEXT(struct OGLES2Context *ctx, GLenum origin, GLenum depth)
+void ogles2_glClipControlEXT(struct OGLES3Context *ctx, GLenum origin, GLenum depth)
 {
     if (!ogles2_context_valid(ctx))
         return;
@@ -230,7 +230,7 @@ void ogles2_glClipControlEXT(struct OGLES2Context *ctx, GLenum origin, GLenum de
     ctx->state_ver++;
 }
 
-void ogles2_glPolygonOffset(struct OGLES2Context *ctx, GLfloat factor, GLfloat units)
+void ogles2_glPolygonOffset(struct OGLES3Context *ctx, GLfloat factor, GLfloat units)
 {
     if (!ogles2_context_valid(ctx))
         return;
@@ -239,7 +239,7 @@ void ogles2_glPolygonOffset(struct OGLES2Context *ctx, GLfloat factor, GLfloat u
     ctx->state_ver++;
 }
 
-void ogles2_glSampleCoverage(struct OGLES2Context *ctx, GLfloat value, GLboolean invert)
+void ogles2_glSampleCoverage(struct OGLES3Context *ctx, GLfloat value, GLboolean invert)
 {
     if (!ogles2_context_valid(ctx))
         return;
@@ -249,7 +249,7 @@ void ogles2_glSampleCoverage(struct OGLES2Context *ctx, GLfloat value, GLboolean
 }
 
 /* ES 3.1: the sample mask's word maskNumber (one word: 4 samples). */
-void ogles2_glSampleMaski(struct OGLES2Context *ctx, GLuint maskNumber, GLbitfield mask)
+void ogles2_glSampleMaski(struct OGLES3Context *ctx, GLuint maskNumber, GLbitfield mask)
 {
     if (!ogles2_es31_entry(ctx))
         return;
@@ -264,7 +264,7 @@ void ogles2_glSampleMaski(struct OGLES2Context *ctx, GLuint maskNumber, GLbitfie
 /* ES 3.1: sample i's position in the pixel, in the draw framebuffer (Mesa's
  * _mesa_GetMultisamplefv: one sample's index 0 without samples, the
  * centre); 4x MSAA's are Mesa's V3D ones (v3d_context.c). */
-void ogles2_glGetMultisamplefv(struct OGLES2Context *ctx, GLenum pname, GLuint index, GLfloat *val)
+void ogles2_glGetMultisamplefv(struct OGLES3Context *ctx, GLenum pname, GLuint index, GLfloat *val)
 {
     static const GLfloat pos4[4][2] = { { 0.375f, 0.125f }, { 0.875f, 0.375f }, { 0.125f, 0.625f },
                                         { 0.625f, 0.875f } };
@@ -290,7 +290,7 @@ void ogles2_glGetMultisamplefv(struct OGLES2Context *ctx, GLenum pname, GLuint i
  * buffer bindings (buffer.c): ES 3.1's sample mask word, compute limits and
  * image units (texture.c). -1: no such query (GL_INVALID_ENUM, set here);
  * 0: an error set; 1: *v. */
-int ogles2_indexed_query(struct OGLES2Context *ctx, GLenum pname, GLuint index, GLint64 *v)
+int ogles2_indexed_query(struct OGLES3Context *ctx, GLenum pname, GLuint index, GLint64 *v)
 {
     int r;
     if (ogles2_es31(ctx)) {
@@ -320,13 +320,13 @@ int ogles2_indexed_query(struct OGLES2Context *ctx, GLenum pname, GLuint index, 
 
 /* ---- current vertex attributes ---- */
 
-static void set_attrib(struct OGLES2Context *ctx, GLuint index, GLfloat x, GLfloat y, GLfloat z,
+static void set_attrib(struct OGLES3Context *ctx, GLuint index, GLfloat x, GLfloat y, GLfloat z,
                        GLfloat w)
 {
     GLfloat *a;
     if (!ogles2_context_valid(ctx))
         return;
-    if (index >= OGLES2_MAX_VERTEX_ATTRIBS) {
+    if (index >= OGLES3_MAX_VERTEX_ATTRIBS) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
@@ -339,12 +339,12 @@ static void set_attrib(struct OGLES2Context *ctx, GLuint index, GLfloat x, GLflo
 }
 
 /* ES 3.0's glVertexAttribI4*: an integer current value (kind 1 int, 2 unsigned). */
-static void set_attrib_int(struct OGLES2Context *ctx, GLuint index, UBYTE kind, const ULONG *v)
+static void set_attrib_int(struct OGLES3Context *ctx, GLuint index, UBYTE kind, const ULONG *v)
 {
     int k;
     if (!ogles2_es3_entry(ctx))
         return;
-    if (index >= OGLES2_MAX_VERTEX_ATTRIBS) {
+    if (index >= OGLES3_MAX_VERTEX_ATTRIBS) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
@@ -355,73 +355,73 @@ static void set_attrib_int(struct OGLES2Context *ctx, GLuint index, UBYTE kind, 
     ctx->state.attrib_kind[index] = kind;
 }
 
-void ogles2_glVertexAttribI4i(struct OGLES2Context *ctx, GLuint index, GLint x, GLint y, GLint z, GLint w)
+void ogles2_glVertexAttribI4i(struct OGLES3Context *ctx, GLuint index, GLint x, GLint y, GLint z, GLint w)
 {
     ULONG v[4];
     v[0] = (ULONG)x; v[1] = (ULONG)y; v[2] = (ULONG)z; v[3] = (ULONG)w;
     set_attrib_int(ctx, index, 1, v);
 }
 
-void ogles2_glVertexAttribI4ui(struct OGLES2Context *ctx, GLuint index, GLuint x, GLuint y, GLuint z, GLuint w)
+void ogles2_glVertexAttribI4ui(struct OGLES3Context *ctx, GLuint index, GLuint x, GLuint y, GLuint z, GLuint w)
 {
     ULONG v[4];
     v[0] = x; v[1] = y; v[2] = z; v[3] = w;
     set_attrib_int(ctx, index, 2, v);
 }
 
-void ogles2_glVertexAttribI4iv(struct OGLES2Context *ctx, GLuint index, const GLint *v)
+void ogles2_glVertexAttribI4iv(struct OGLES3Context *ctx, GLuint index, const GLint *v)
 {
     if (v)
         ogles2_glVertexAttribI4i(ctx, index, v[0], v[1], v[2], v[3]);
 }
 
-void ogles2_glVertexAttribI4uiv(struct OGLES2Context *ctx, GLuint index, const GLuint *v)
+void ogles2_glVertexAttribI4uiv(struct OGLES3Context *ctx, GLuint index, const GLuint *v)
 {
     if (v)
         ogles2_glVertexAttribI4ui(ctx, index, v[0], v[1], v[2], v[3]);
 }
 
-void ogles2_glVertexAttrib1f(struct OGLES2Context *ctx, GLuint index, GLfloat x)
+void ogles2_glVertexAttrib1f(struct OGLES3Context *ctx, GLuint index, GLfloat x)
 {
     set_attrib(ctx, index, x, 0.0f, 0.0f, 1.0f);
 }
 
-void ogles2_glVertexAttrib2f(struct OGLES2Context *ctx, GLuint index, GLfloat x, GLfloat y)
+void ogles2_glVertexAttrib2f(struct OGLES3Context *ctx, GLuint index, GLfloat x, GLfloat y)
 {
     set_attrib(ctx, index, x, y, 0.0f, 1.0f);
 }
 
-void ogles2_glVertexAttrib3f(struct OGLES2Context *ctx, GLuint index, GLfloat x, GLfloat y,
+void ogles2_glVertexAttrib3f(struct OGLES3Context *ctx, GLuint index, GLfloat x, GLfloat y,
                              GLfloat z)
 {
     set_attrib(ctx, index, x, y, z, 1.0f);
 }
 
-void ogles2_glVertexAttrib4f(struct OGLES2Context *ctx, GLuint index, GLfloat x, GLfloat y,
+void ogles2_glVertexAttrib4f(struct OGLES3Context *ctx, GLuint index, GLfloat x, GLfloat y,
                              GLfloat z, GLfloat w)
 {
     set_attrib(ctx, index, x, y, z, w);
 }
 
-void ogles2_glVertexAttrib1fv(struct OGLES2Context *ctx, GLuint index, const GLfloat *v)
+void ogles2_glVertexAttrib1fv(struct OGLES3Context *ctx, GLuint index, const GLfloat *v)
 {
     if (v)
         set_attrib(ctx, index, v[0], 0.0f, 0.0f, 1.0f);
 }
 
-void ogles2_glVertexAttrib2fv(struct OGLES2Context *ctx, GLuint index, const GLfloat *v)
+void ogles2_glVertexAttrib2fv(struct OGLES3Context *ctx, GLuint index, const GLfloat *v)
 {
     if (v)
         set_attrib(ctx, index, v[0], v[1], 0.0f, 1.0f);
 }
 
-void ogles2_glVertexAttrib3fv(struct OGLES2Context *ctx, GLuint index, const GLfloat *v)
+void ogles2_glVertexAttrib3fv(struct OGLES3Context *ctx, GLuint index, const GLfloat *v)
 {
     if (v)
         set_attrib(ctx, index, v[0], v[1], v[2], 1.0f);
 }
 
-void ogles2_glVertexAttrib4fv(struct OGLES2Context *ctx, GLuint index, const GLfloat *v)
+void ogles2_glVertexAttrib4fv(struct OGLES3Context *ctx, GLuint index, const GLfloat *v)
 {
     if (v)
         set_attrib(ctx, index, v[0], v[1], v[2], v[3]);
@@ -429,7 +429,7 @@ void ogles2_glVertexAttrib4fv(struct OGLES2Context *ctx, GLuint index, const GLf
 
 /* ---- culling, depth function, blending ---- */
 
-void ogles2_glCullFace(struct OGLES2Context *ctx, GLenum mode)
+void ogles2_glCullFace(struct OGLES3Context *ctx, GLenum mode)
 {
     if (!ogles2_context_valid(ctx))
         return;
@@ -441,7 +441,7 @@ void ogles2_glCullFace(struct OGLES2Context *ctx, GLenum mode)
     ctx->state_ver++;
 }
 
-void ogles2_glFrontFace(struct OGLES2Context *ctx, GLenum mode)
+void ogles2_glFrontFace(struct OGLES3Context *ctx, GLenum mode)
 {
     if (!ogles2_context_valid(ctx))
         return;
@@ -457,7 +457,7 @@ void ogles2_glFrontFace(struct OGLES2Context *ctx, GLenum mode)
  * (CFG_BITS' Direct3D wireframe and point-fill modes, as Mesa's
  * v3dx_emit.c). The hardware has one mode for both faces, so only
  * GL_FRONT_AND_BACK is taken (desktop GL 3.2 core's rule too). */
-void ogles2_glPolygonMode(struct OGLES2Context *ctx, GLenum face, GLenum mode)
+void ogles2_glPolygonMode(struct OGLES3Context *ctx, GLenum face, GLenum mode)
 {
     if (!ogles2_context_valid(ctx))
         return;
@@ -477,7 +477,7 @@ void ogles2_glPolygonMode(struct OGLES2Context *ctx, GLenum face, GLenum mode)
 /* AmigaOS 4's glProvokingVertex (EXT_provoking_vertex): the vertex a flat
  * varying takes its value from. GLSL ES 1.00 has no flat varyings, so it is
  * only state and CFG_BITS' Direct3D provoking-vertex bit. */
-void ogles2_glProvokingVertex(struct OGLES2Context *ctx, GLenum mode)
+void ogles2_glProvokingVertex(struct OGLES3Context *ctx, GLenum mode)
 {
     if (!ogles2_context_valid(ctx))
         return;
@@ -489,7 +489,7 @@ void ogles2_glProvokingVertex(struct OGLES2Context *ctx, GLenum mode)
     ctx->state_ver++;
 }
 
-void ogles2_glDepthFunc(struct OGLES2Context *ctx, GLenum func)
+void ogles2_glDepthFunc(struct OGLES3Context *ctx, GLenum func)
 {
     if (!ogles2_context_valid(ctx))
         return;
@@ -517,10 +517,10 @@ static int blend_factor_ok(GLenum f, int is_dst, BOOL es3)
     }
 }
 
-void ogles2_glBlendFuncSeparate(struct OGLES2Context *ctx, GLenum srcRGB, GLenum dstRGB,
+void ogles2_glBlendFuncSeparate(struct OGLES3Context *ctx, GLenum srcRGB, GLenum dstRGB,
                                 GLenum srcAlpha, GLenum dstAlpha)
 {
-    struct OGLES2State *s;
+    struct OGLES3State *s;
     if (!ogles2_context_valid(ctx))
         return;
     if (!blend_factor_ok(srcRGB, 0, FALSE) || !blend_factor_ok(dstRGB, 1, ogles2_es3(ctx)) ||
@@ -536,7 +536,7 @@ void ogles2_glBlendFuncSeparate(struct OGLES2Context *ctx, GLenum srcRGB, GLenum
     ctx->state_ver++;
 }
 
-void ogles2_glBlendFunc(struct OGLES2Context *ctx, GLenum sfactor, GLenum dfactor)
+void ogles2_glBlendFunc(struct OGLES3Context *ctx, GLenum sfactor, GLenum dfactor)
 {
     ogles2_glBlendFuncSeparate(ctx, sfactor, dfactor, sfactor, dfactor);
 }
@@ -547,7 +547,7 @@ static int blend_eq_ok(GLenum e)
            e == GL_MIN_EXT || e == GL_MAX_EXT; /* EXT_blend_minmax */
 }
 
-void ogles2_glBlendEquationSeparate(struct OGLES2Context *ctx, GLenum modeRGB, GLenum modeAlpha)
+void ogles2_glBlendEquationSeparate(struct OGLES3Context *ctx, GLenum modeRGB, GLenum modeAlpha)
 {
     if (!ogles2_context_valid(ctx))
         return;
@@ -560,12 +560,12 @@ void ogles2_glBlendEquationSeparate(struct OGLES2Context *ctx, GLenum modeRGB, G
     ctx->state_ver++;
 }
 
-void ogles2_glBlendEquation(struct OGLES2Context *ctx, GLenum mode)
+void ogles2_glBlendEquation(struct OGLES3Context *ctx, GLenum mode)
 {
     ogles2_glBlendEquationSeparate(ctx, mode, mode);
 }
 
-void ogles2_glBlendColor(struct OGLES2Context *ctx, GLfloat red, GLfloat green, GLfloat blue,
+void ogles2_glBlendColor(struct OGLES3Context *ctx, GLfloat red, GLfloat green, GLfloat blue,
                          GLfloat alpha)
 {
     GLfloat *c;
@@ -588,7 +588,7 @@ static int faces(GLenum face)
     return face == GL_FRONT ? 1 : face == GL_BACK ? 2 : face == GL_FRONT_AND_BACK ? 3 : 0;
 }
 
-void ogles2_glStencilFuncSeparate(struct OGLES2Context *ctx, GLenum face, GLenum func, GLint ref,
+void ogles2_glStencilFuncSeparate(struct OGLES3Context *ctx, GLenum face, GLenum func, GLint ref,
                                   GLuint mask)
 {
     int f, i;
@@ -607,12 +607,12 @@ void ogles2_glStencilFuncSeparate(struct OGLES2Context *ctx, GLenum face, GLenum
     ctx->state_ver++;
 }
 
-void ogles2_glStencilFunc(struct OGLES2Context *ctx, GLenum func, GLint ref, GLuint mask)
+void ogles2_glStencilFunc(struct OGLES3Context *ctx, GLenum func, GLint ref, GLuint mask)
 {
     ogles2_glStencilFuncSeparate(ctx, GL_FRONT_AND_BACK, func, ref, mask);
 }
 
-void ogles2_glStencilMaskSeparate(struct OGLES2Context *ctx, GLenum face, GLuint mask)
+void ogles2_glStencilMaskSeparate(struct OGLES3Context *ctx, GLenum face, GLuint mask)
 {
     int f, i;
     if (!ogles2_context_valid(ctx))
@@ -627,7 +627,7 @@ void ogles2_glStencilMaskSeparate(struct OGLES2Context *ctx, GLenum face, GLuint
     ctx->state_ver++;
 }
 
-void ogles2_glStencilMask(struct OGLES2Context *ctx, GLuint mask)
+void ogles2_glStencilMask(struct OGLES3Context *ctx, GLuint mask)
 {
     ogles2_glStencilMaskSeparate(ctx, GL_FRONT_AND_BACK, mask);
 }
@@ -643,7 +643,7 @@ static int stencil_op_ok(GLenum op)
     }
 }
 
-void ogles2_glStencilOpSeparate(struct OGLES2Context *ctx, GLenum face, GLenum sfail, GLenum dpfail,
+void ogles2_glStencilOpSeparate(struct OGLES3Context *ctx, GLenum face, GLenum sfail, GLenum dpfail,
                                 GLenum dppass)
 {
     int f, i;
@@ -663,12 +663,12 @@ void ogles2_glStencilOpSeparate(struct OGLES2Context *ctx, GLenum face, GLenum s
     ctx->state_ver++;
 }
 
-void ogles2_glStencilOp(struct OGLES2Context *ctx, GLenum fail, GLenum zfail, GLenum zpass)
+void ogles2_glStencilOp(struct OGLES3Context *ctx, GLenum fail, GLenum zfail, GLenum zpass)
 {
     ogles2_glStencilOpSeparate(ctx, GL_FRONT_AND_BACK, fail, zfail, zpass);
 }
 
-void ogles2_glClearStencil(struct OGLES2Context *ctx, GLint s)
+void ogles2_glClearStencil(struct OGLES3Context *ctx, GLint s)
 {
     if (ogles2_context_valid(ctx))
         ctx->state.clear_stencil = s;
@@ -764,7 +764,7 @@ static const struct { GLenum pname; GLint value; } es31_limits[] = {
     {GL_MAX_VERTEX_ATTRIB_STRIDE, 2048},
 };
 
-static int lookup_es3(struct OGLES2Context *ctx, GLenum pname, struct value *v)
+static int lookup_es3(struct OGLES3Context *ctx, GLenum pname, struct value *v)
 {
     ULONG k;
     v->kind = K_INT;
@@ -807,9 +807,9 @@ static int lookup_es3(struct OGLES2Context *ctx, GLenum pname, struct value *v)
     return 0;
 }
 
-static int lookup(struct OGLES2Context *ctx, GLenum pname, struct value *v)
+static int lookup(struct OGLES3Context *ctx, GLenum pname, struct value *v)
 {
-    const struct OGLES2State *s = &ctx->state;
+    const struct OGLES3State *s = &ctx->state;
     int k;
     ULONG bit = cap_bit(ctx, pname);
 
@@ -862,7 +862,7 @@ static int lookup(struct OGLES2Context *ctx, GLenum pname, struct value *v)
         v->kind = K_FLOAT; v->n = 1; v->f[0] = s->sample_coverage_value;
         return 1;
     case GL_MAX_VERTEX_ATTRIBS:
-        v->kind = K_INT; v->n = 1; v->i[0] = OGLES2_MAX_VERTEX_ATTRIBS;
+        v->kind = K_INT; v->n = 1; v->i[0] = OGLES3_MAX_VERTEX_ATTRIBS;
         return 1;
     /* GLES2's minimum, as Mesa's v3d driver reports on the same GPU (its
      * clipper works in 1/256 pixel, V3D_COORD_SHIFT is 6). dEQP's reference
@@ -895,7 +895,7 @@ static int lookup(struct OGLES2Context *ctx, GLenum pname, struct value *v)
             v->i[k] = ctx->scissor[k];
         return 1;
     case GL_MAX_VIEWPORT_DIMS:
-        v->kind = K_INT; v->n = 2; v->i[0] = v->i[1] = OGLES2_MAX_VIEWPORT;
+        v->kind = K_INT; v->n = 2; v->i[0] = v->i[1] = OGLES3_MAX_VIEWPORT;
         return 1;
     case GL_GENERATE_MIPMAP_HINT:
         v->kind = K_INT; v->n = 1; v->i[0] = (GLint)s->generate_mipmap_hint;
@@ -1072,7 +1072,7 @@ static int lookup(struct OGLES2Context *ctx, GLenum pname, struct value *v)
     }
 }
 
-static int query(struct OGLES2Context *ctx, GLenum pname, struct value *v, const char *fn)
+static int query(struct OGLES3Context *ctx, GLenum pname, struct value *v, const char *fn)
 {
     if (!ogles2_context_valid(ctx))
         return 0;
@@ -1096,7 +1096,7 @@ static GLint float_to_int(GLfloat f, int normalised)
     return (GLint)d;
 }
 
-void ogles2_glGetBooleanv(struct OGLES2Context *ctx, GLenum pname, GLboolean *data)
+void ogles2_glGetBooleanv(struct OGLES3Context *ctx, GLenum pname, GLboolean *data)
 {
     struct value v;
     int k;
@@ -1106,7 +1106,7 @@ void ogles2_glGetBooleanv(struct OGLES2Context *ctx, GLenum pname, GLboolean *da
         data[k] = (v.kind == K_FLOAT || v.kind == K_NFLOAT) ? (v.f[k] != 0.0f) : (v.i[k] != 0);
 }
 
-void ogles2_glGetIntegerv(struct OGLES2Context *ctx, GLenum pname, GLint *data)
+void ogles2_glGetIntegerv(struct OGLES3Context *ctx, GLenum pname, GLint *data)
 {
     struct value v;
     int k;
@@ -1117,7 +1117,7 @@ void ogles2_glGetIntegerv(struct OGLES2Context *ctx, GLenum pname, GLint *data)
                                                              : v.i[k];
 }
 
-void ogles2_glGetInteger64v(struct OGLES2Context *ctx, GLenum pname, GLint64 *data)
+void ogles2_glGetInteger64v(struct OGLES3Context *ctx, GLenum pname, GLint64 *data)
 {
     struct value v;
     int k;
@@ -1129,7 +1129,7 @@ void ogles2_glGetInteger64v(struct OGLES2Context *ctx, GLenum pname, GLint64 *da
                                                              : (GLint64)v.i[k];
 }
 
-void ogles2_glGetFloatv(struct OGLES2Context *ctx, GLenum pname, GLfloat *data)
+void ogles2_glGetFloatv(struct OGLES3Context *ctx, GLenum pname, GLfloat *data)
 {
     struct value v;
     int k;
@@ -1141,13 +1141,13 @@ void ogles2_glGetFloatv(struct OGLES2Context *ctx, GLenum pname, GLfloat *data)
                                                              : (GLfloat)v.i[k];
 }
 
-void ogles2_glGetVertexAttribfv(struct OGLES2Context *ctx, GLuint index, GLenum pname,
+void ogles2_glGetVertexAttribfv(struct OGLES3Context *ctx, GLuint index, GLenum pname,
                                 GLfloat *params)
 {
     int k;
     if (!ogles2_context_valid(ctx) || !params)
         return;
-    if (index >= OGLES2_MAX_VERTEX_ATTRIBS) {
+    if (index >= OGLES3_MAX_VERTEX_ATTRIBS) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }

@@ -31,8 +31,8 @@ with the next step, for example:
 Contents
 --------
 Run-M1               the test script
-libs/ogles2.library  the library (logs every line at once)
+libs/ogles3.library  the library (logs every line at once)
 bin/                 the eleven programs and their shader binaries (.v3dp)
 data/                the images two of the samples load
-bin/OGLES2Log        writes the library's log file on request
+bin/OGLES3Log        writes the library's log file on request
 notes-template.txt   copied to results/notes.txt at the end

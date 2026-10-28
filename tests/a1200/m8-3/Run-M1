@@ -26,7 +26,7 @@
 .ket }
 
 FailAt 21
-If NOT EXISTS libs/ogles2.library
+If NOT EXISTS libs/ogles3.library
   Echo "Please CD into the ogles2-m8-3 directory first,"
   Echo "then run:  Execute Run-M1"
   Quit 20
@@ -71,14 +71,14 @@ EndIf
 Echo ogles2 M8 run 3: $DEQPSEL >>M8R3:results/00-progress.txt
 Date >>M8R3:results/00-progress.txt
 Assign LIBS: M8R3:libs ADD
-Assign OGLES2Cache: M8R3:cache
+Assign OGLES3Cache: M8R3:cache
 Avail FLUSH >NIL:
-SetEnv OGLES2/LogFile M8R3:results/ogles2.log
+SetEnv OGLES3/LogFile M8R3:results/ogles2.log
 If {PROGRESS} EQ 1 VAL
   Delete RAM:deqp-progress.txt RAM:ogles2.log QUIET >NIL:
   Echo "R $DEQPNAME" >RAM:deqp-progress.txt
   SetEnv DEQP_PROGRESS RAM:deqp-progress.txt
-  SetEnv OGLES2/LogFile RAM:ogles2.log
+  SetEnv OGLES3/LogFile RAM:ogles2.log
 EndIf
 ; C++ with exceptions and deep test code: more stack than the Shell's.
 Stack 1048576
@@ -104,8 +104,8 @@ UnSet DEQPIMG
 UnSet DEQPSRC
 
 CD M8R3:
-UnSetEnv OGLES2/LogFile
-Assign OGLES2Cache:
+UnSetEnv OGLES3/LogFile
+Assign OGLES3Cache:
 Assign LIBS: M8R3:libs REMOVE
 If NOT EXISTS M8R3:results/notes.txt
   Copy M8R3:notes-template.txt M8R3:results/notes.txt

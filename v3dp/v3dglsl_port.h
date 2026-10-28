@@ -3,7 +3,7 @@
  *
  * The compiler is v3dglslc (tools/v3dglslc) started as a resident server:
  * "v3dglslc SERVER" adds the public port V3DGLSL_PORT_NAME and serves
- * requests until it gets V3DGLSL_QUIT. ogles2.library starts it on the
+ * requests until it gets V3DGLSL_QUIT. ogles3.library starts it on the
  * first program it has no binary for, and stops it when the library is
  * expunged. Each request carries both sources; the compiler writes the
  * program's .v3dp file (v3dp/FORMAT.md) where the request says, and the

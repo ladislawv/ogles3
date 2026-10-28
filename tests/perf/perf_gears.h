@@ -1,7 +1,7 @@
 /*
  * The M4 speed comparison (plan section 9, M4 exit: "the VBO path beats
  * MiniGL on an equivalent gears scene"): the scene of Brian Paul's gears
- * (glxgears, es2gears), shared by gears_gles2.c (ogles2.library) and
+ * (glxgears, es2gears), shared by gears_gles2.c (ogles3.library) and
  * gears_mgl.c (PiStorm3D's minigl.library), so both draw the same triangles
  * with the same lighting into the same kind of target.
  *

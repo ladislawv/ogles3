@@ -20,7 +20,7 @@
 #include <proto/dos.h>
 #include <proto/graphics.h>
 #include <proto/cybergraphics.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include "../common/smooth_shaders.h"
 
 struct GfxBase *GfxBase;
@@ -86,13 +86,13 @@ int main(int argc, char **argv)
     printf("ogles2 M4: one frame of %lu draws\n", draws);
     GfxBase = (struct GfxBase *)OpenLibrary((STRPTR) "graphics.library", 39);
     CyberGfxBase = OpenLibrary((STRPTR) "cybergraphics.library", 41);
-    if (!GfxBase || !CyberGfxBase || !OGLES2Open()) {
-        printf("needs graphics, cybergraphics 41 and %s\n", OGLES2NAME);
+    if (!GfxBase || !CyberGfxBase || !OGLES3Open()) {
+        printf("needs graphics, cybergraphics 41 and %s\n", OGLES3NAME);
         return 20;
     }
     bm = AllocBitMap(W, H, 32, BMF_MINPLANES | BMF_SPECIALFMT | SHIFT_PIXFMT(PIXFMT_BGRA32), 0);
     before = AvailMem(MEMF_ANY);
-    if (!bm || !(ctx = aglCreateContextTags2(&err, OGLES2_CCT_BITMAP, (ULONG)bm, TAG_DONE))) {
+    if (!bm || !(ctx = aglCreateContextTags2(&err, OGLES3_CCT_BITMAP, (ULONG)bm, TAG_DONE))) {
         printf("FAIL: create a bitmap context (error %lu)\n", (unsigned long)err);
         return 20;
     }
@@ -171,7 +171,7 @@ int main(int argc, char **argv)
     sprintf(msg, "destroy returns the memory (%ld bytes difference)", (long)after - (long)before);
     check(after + 16384 >= before, msg);
     FreeBitMap(bm);
-    OGLES2Close();
+    OGLES3Close();
     printf("%s: %d of %d checks passed\n", failures ? "FAILED" : "ALL PASSED", checks - failures, checks);
     return failures ? 10 : 0;
 }

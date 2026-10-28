@@ -7,7 +7,7 @@
  * sources an attribute from a buffer gets a GPU copy of the whole buffer
  * read with that attribute's layout (offset, size, type, stride), converted
  * once (byte-swapped, tightly packed at a 4-byte stride, as client arrays
- * are) and kept, up to OGLES2_BUFFER_COPIES layouts per buffer. A change of
+ * are) and kept, up to OGLES3_BUFFER_COPIES layouts per buffer. A change of
  * part of the data (glBufferSubData) re-converts only the elements it
  * touches in each copy the open job does not use; a copy the open job uses
  * is retired with the job instead (renaming, plan 7.3), so nothing waits.
@@ -26,7 +26,7 @@
 #include "v3d_frame.h"
 #include "v3d_hw.h"
 
-#define OGLES2_BUFFER_COPIES 8
+#define OGLES3_BUFFER_COPIES 8
 
 /* OES_mapbuffer (gl2ext.h) */
 #ifndef GL_WRITE_ONLY_OES
@@ -53,7 +53,7 @@ struct gpu_copy
                     GLint size, GLenum type); /* draw.c's, for partial updates */
 };
 
-struct OGLES2Buffer
+struct OGLES3Buffer
 {
     GLuint name;
     GLenum usage;
@@ -64,7 +64,7 @@ struct OGLES2Buffer
     BOOL mapped;             /* OES_mapbuffer: glMapBufferOES handed out the shadow */
     ULONG map_offset, map_length; /* the mapping (ES 3.0's glMapBufferRange; OES's: all of it) */
     GLbitfield map_access;   /* its GL_MAP_* bits (OES's: GL_MAP_WRITE_BIT) */
-    struct gpu_copy copy[OGLES2_BUFFER_COPIES];
+    struct gpu_copy copy[OGLES3_BUFFER_COPIES];
     /* The data as the GPU itself reads them (docs/GLES3_PLAN.md §5 item 1:
      * a uniform buffer; later transform feedback and storage): each 32-bit
      * word in the GPU's byte order (ogles2_buffer_words). */
@@ -80,7 +80,7 @@ struct OGLES2Buffer
      * appendix D.1.2): out of the name table, on the share group's list of
      * them, freed when nothing uses it any more (ogles2_buffer_release). */
     BOOL deleted;
-    struct OGLES2Buffer *next_orphan;
+    struct OGLES3Buffer *next_orphan;
 };
 
 #define MAX_UNIFORM_BINDINGS 108 /* GL_MAX_UNIFORM_BUFFER_BINDINGS (state.c) */
@@ -91,37 +91,37 @@ struct OGLES2Buffer
  * whole buffer (glBindBufferBase). */
 struct buf_range
 {
-    struct OGLES2Buffer *b;
+    struct OGLES3Buffer *b;
     ULONG offset, size;
 };
 
-struct OGLES2BufState
+struct OGLES3BufState
 {
-    struct OGLES2Share *sh;               /* the buffers: sh->buf, sh->nbuf (share.c) */
-    struct OGLES2Buffer *array, *element; /* GL_ARRAY_BUFFER, GL_ELEMENT_ARRAY_BUFFER */
+    struct OGLES3Share *sh;               /* the buffers: sh->buf, sh->nbuf (share.c) */
+    struct OGLES3Buffer *array, *element; /* GL_ARRAY_BUFFER, GL_ELEMENT_ARRAY_BUFFER */
     /* ES 3.0's targets (docs/GLES3_PLAN.md §5 item 2): bindings the data
      * calls take; the pixel buffers are read and written (texture.c,
      * frame.c), the uniform and transform feedback bindings held for
      * items 6 and stage C. */
-    struct OGLES2Buffer *copy_read, *copy_write, *pack, *unpack, *xfb, *uniform;
+    struct OGLES3Buffer *copy_read, *copy_write, *pack, *unpack, *xfb, *uniform;
     struct buf_range ubo[MAX_UNIFORM_BINDINGS]; /* (transform feedback's: xfb.c's objects) */
     /* ES 3.1's (docs/GLES3_PLAN.md §7): the indirect draw and dispatch
      * commands' buffers (items 1 and 3), the storage and atomic counter
      * buffers and their indexed bindings (item 2). */
-    struct OGLES2Buffer *draw_indirect, *dispatch_indirect, *storage, *atomic;
+    struct OGLES3Buffer *draw_indirect, *dispatch_indirect, *storage, *atomic;
     struct buf_range ssbo[MAX_SSBO_BINDINGS], acbo[MAX_ATOMIC_BINDINGS];
 };
 
-static struct OGLES2BufState *bs_get(struct OGLES2Context *ctx)
+static struct OGLES3BufState *bs_get(struct OGLES3Context *ctx)
 {
-    if (!ctx->buf && (ctx->buf = AllocVec(sizeof(struct OGLES2BufState), MEMF_ANY | MEMF_CLEAR)))
+    if (!ctx->buf && (ctx->buf = AllocVec(sizeof(struct OGLES3BufState), MEMF_ANY | MEMF_CLEAR)))
         ctx->buf->sh = ctx->share;
     return ctx->buf;
 }
 
 /* Frees a GPU copy now, or after the job that reads it: an open one, or one
  * still running, of any member of the share group. */
-static void drop_copy(struct OGLES2Context *ctx, struct gpu_copy *c)
+static void drop_copy(struct OGLES3Context *ctx, struct gpu_copy *c)
 {
     if (!c->mem.hostptr)
         return;
@@ -129,7 +129,7 @@ static void drop_copy(struct OGLES2Context *ctx, struct gpu_copy *c)
     memset(c, 0, sizeof(*c));
 }
 
-static void drop_words(struct OGLES2Context *ctx, struct OGLES2Buffer *b)
+static void drop_words(struct OGLES3Context *ctx, struct OGLES3Buffer *b)
 {
     if (!b->words.hostptr)
         return;
@@ -143,9 +143,9 @@ static void drop_words(struct OGLES2Context *ctx, struct OGLES2Buffer *b)
  * words are copied back into the shadow (docs/GLES3_PLAN.md §5 item 1).
  * Never while a draw builds its job: draws call it before (arrays_ok,
  * ogles2_buffer_indices). */
-static void gpu_written(struct OGLES2Context *ctx, struct OGLES2Buffer *b)
+static void gpu_written(struct OGLES3Context *ctx, struct OGLES3Buffer *b)
 {
-    struct OGLES2Context *user;
+    struct OGLES3Context *user;
     ULONG i, n, len;
     if (!b || (!b->xfb_job && !b->cs_written))
         return;
@@ -170,20 +170,20 @@ static void gpu_written(struct OGLES2Context *ctx, struct OGLES2Buffer *b)
     b->words_serial = b->serial; /* the words are the data still */
 }
 
-void ogles2_buffer_cpu(struct OGLES2Context *ctx, struct OGLES2Buffer *b)
+void ogles2_buffer_cpu(struct OGLES3Context *ctx, struct OGLES3Buffer *b)
 {
     gpu_written(ctx, b);
 }
 
-static void drop_copies(struct OGLES2Context *ctx, struct OGLES2Buffer *b)
+static void drop_copies(struct OGLES3Context *ctx, struct OGLES3Buffer *b)
 {
     int k;
-    for (k = 0; k < OGLES2_BUFFER_COPIES; k++)
+    for (k = 0; k < OGLES3_BUFFER_COPIES; k++)
         drop_copy(ctx, &b->copy[k]);
     drop_words(ctx, b);
 }
 
-static void free_buffer(struct OGLES2Context *ctx, struct OGLES2Buffer *b)
+static void free_buffer(struct OGLES3Context *ctx, struct OGLES3Buffer *b)
 {
     drop_copies(ctx, b);
     if (b->data)
@@ -193,10 +193,10 @@ static void free_buffer(struct OGLES2Context *ctx, struct OGLES2Buffer *b)
 
 /* aglDestroyContext (its jobs finished): the bindings; the buffers with the
  * share group's last member. */
-void ogles2_buffers_free(struct OGLES2Context *ctx)
+void ogles2_buffers_free(struct OGLES3Context *ctx)
 {
-    struct OGLES2BufState *bs = ctx->buf;
-    struct OGLES2Share *sh = ctx->share;
+    struct OGLES3BufState *bs = ctx->buf;
+    struct OGLES3Share *sh = ctx->share;
     GLuint i;
     if (sh && sh->members == 1) {
         for (i = 1; i < sh->nbuf; i++)
@@ -208,7 +208,7 @@ void ogles2_buffers_free(struct OGLES2Context *ctx)
         sh->nbuf = 0;
         ogles2_names_free(&sh->far_buf);
         while (sh->orphans) {
-            struct OGLES2Buffer *b = sh->orphans;
+            struct OGLES3Buffer *b = sh->orphans;
             sh->orphans = b->next_orphan;
             free_buffer(ctx, b);
         }
@@ -222,7 +222,7 @@ void ogles2_buffers_free(struct OGLES2Context *ctx)
 /* ---- names and binding ---- */
 
 /* The binding of `target` (ES 3.0's in ES3 contexts only); NULL: none. */
-static struct OGLES2Buffer **slot(struct OGLES2Context *ctx, struct OGLES2BufState *bs, GLenum target)
+static struct OGLES3Buffer **slot(struct OGLES3Context *ctx, struct OGLES3BufState *bs, GLenum target)
 {
     if (target == GL_ARRAY_BUFFER)
         return &bs->array;
@@ -250,7 +250,7 @@ static struct OGLES2Buffer **slot(struct OGLES2Context *ctx, struct OGLES2BufSta
 }
 
 /* GLES2's three usages; ES 3.0's _READ and _COPY ones too. */
-static BOOL valid_usage(struct OGLES2Context *ctx, GLenum usage)
+static BOOL valid_usage(struct OGLES3Context *ctx, GLenum usage)
 {
     if (usage == GL_STREAM_DRAW || usage == GL_STATIC_DRAW || usage == GL_DYNAMIC_DRAW)
         return TRUE;
@@ -261,10 +261,10 @@ static BOOL valid_usage(struct OGLES2Context *ctx, GLenum usage)
 /* Unbinds b from every binding of a context's (glDeleteBuffers), the bound
  * transform feedback object's too (ES 3.0 2.9.1: not those of objects not
  * bound). */
-static void unbind_all(struct OGLES2Context *ctx, struct OGLES2BufState *bs, struct OGLES2Buffer *b)
+static void unbind_all(struct OGLES3Context *ctx, struct OGLES3BufState *bs, struct OGLES3Buffer *b)
 {
-    struct OGLES2XfbBinding *x = ogles2_xfb_bindings(ctx);
-    struct OGLES2Buffer **one[12];
+    struct OGLES3XfbBinding *x = ogles2_xfb_bindings(ctx);
+    struct OGLES3Buffer **one[12];
     int i;
     one[0] = &bs->array;
     one[1] = &bs->element;
@@ -290,21 +290,21 @@ static void unbind_all(struct OGLES2Context *ctx, struct OGLES2BufState *bs, str
     for (i = 0; i < MAX_ATOMIC_BINDINGS; i++)
         if (bs->acbo[i].b == b)
             memset(&bs->acbo[i], 0, sizeof(bs->acbo[i]));
-    for (i = 0; x && i < OGLES2_MAX_XFB_BUFFERS; i++)
+    for (i = 0; x && i < OGLES3_MAX_XFB_BUFFERS; i++)
         if (x[i].b == b)
             memset(&x[i], 0, sizeof(x[i]));
 }
 
 /* Whether a member of ctx's share group uses b: its attribute arrays and
  * element binding, or one of its vertex array objects not bound. */
-static BOOL in_use(struct OGLES2Context *ctx, const struct OGLES2Buffer *b)
+static BOOL in_use(struct OGLES3Context *ctx, const struct OGLES3Buffer *b)
 {
-    struct OGLES2Context *m;
+    struct OGLES3Context *m;
     int a;
     for (m = ctx->share->first; m; m = m->share_next) {
         if (m->buf && m->buf->element == b)
             return TRUE;
-        for (a = 0; a < OGLES2_MAX_VERTEX_ATTRIBS; a++)
+        for (a = 0; a < OGLES3_MAX_VERTEX_ATTRIBS; a++)
             if (m->array[a].buffer == b || m->array[a].bbuffer == b) /* ES 3.1's bindings too */
                 return TRUE;
         if (ogles2_vao_uses_buffer(m, b) || ogles2_xfb_uses_buffer(m, b))
@@ -314,9 +314,9 @@ static BOOL in_use(struct OGLES2Context *ctx, const struct OGLES2Buffer *b)
 }
 
 /* A reference to b dropped: a deleted buffer nothing uses any more is freed. */
-void ogles2_buffer_release(struct OGLES2Context *ctx, struct OGLES2Buffer *b)
+void ogles2_buffer_release(struct OGLES3Context *ctx, struct OGLES3Buffer *b)
 {
-    struct OGLES2Buffer **at;
+    struct OGLES3Buffer **at;
     if (!b || !b->deleted || in_use(ctx, b))
         return;
     for (at = &ctx->share->orphans; *at; at = &(*at)->next_orphan)
@@ -327,10 +327,10 @@ void ogles2_buffer_release(struct OGLES2Context *ctx, struct OGLES2Buffer *b)
     free_buffer(ctx, b);
 }
 
-static BOOL table_room(struct OGLES2BufState *bs, GLuint name)
+static BOOL table_room(struct OGLES3BufState *bs, GLuint name)
 {
     GLuint nn, j;
-    struct OGLES2Buffer **tab;
+    struct OGLES3Buffer **tab;
     if (name < bs->sh->nbuf)
         return TRUE;
     nn = bs->sh->nbuf ? bs->sh->nbuf : 32;
@@ -347,11 +347,11 @@ static BOOL table_room(struct OGLES2BufState *bs, GLuint name)
     return TRUE;
 }
 
-static struct OGLES2Buffer *create(struct OGLES2BufState *bs, GLuint name)
+static struct OGLES3Buffer *create(struct OGLES3BufState *bs, GLuint name)
 {
-    struct OGLES2Buffer *b;
+    struct OGLES3Buffer *b;
     GLuint slot = ogles2_name_slot(&bs->sh->far_buf, name, TRUE);
-    if (slot == OGLES2_NO_SLOT || !table_room(bs, slot) ||
+    if (slot == OGLES3_NO_SLOT || !table_room(bs, slot) ||
         !(b = AllocVec(sizeof(*b), MEMF_ANY | MEMF_CLEAR))) {
         ogles2_name_forget(&bs->sh->far_buf, name);
         return 0;
@@ -362,27 +362,27 @@ static struct OGLES2Buffer *create(struct OGLES2BufState *bs, GLuint name)
     return b;
 }
 
-static struct OGLES2Buffer *by_name(struct OGLES2BufState *bs, GLuint name)
+static struct OGLES3Buffer *by_name(struct OGLES3BufState *bs, GLuint name)
 {
-    GLuint slot = name ? ogles2_name_slot(&bs->sh->far_buf, name, FALSE) : OGLES2_NO_SLOT;
+    GLuint slot = name ? ogles2_name_slot(&bs->sh->far_buf, name, FALSE) : OGLES3_NO_SLOT;
     return slot < bs->sh->nbuf ? bs->sh->buf[slot] : 0;
 }
 
 /* The buffer named `name` (not 0): glGenBuffers' names have one (ES 3.1's
  * glBindVertexBuffer, draw.c); NULL: a name it did not give, or deleted. */
-struct OGLES2Buffer *ogles2_buffer_get(struct OGLES2Context *ctx, GLuint name)
+struct OGLES3Buffer *ogles2_buffer_get(struct OGLES3Context *ctx, GLuint name)
 {
-    struct OGLES2BufState *bs = bs_get(ctx);
-    struct OGLES2Buffer *b;
+    struct OGLES3BufState *bs = bs_get(ctx);
+    struct OGLES3Buffer *b;
     if (!bs || !(b = by_name(bs, name)))
         return 0;
     b->bound_once = TRUE;
     return b;
 }
 
-void ogles2_glGenBuffers(struct OGLES2Context *ctx, GLsizei n, GLuint *buffers)
+void ogles2_glGenBuffers(struct OGLES3Context *ctx, GLsizei n, GLuint *buffers)
 {
-    struct OGLES2BufState *bs;
+    struct OGLES3BufState *bs;
     GLsizei k;
     GLuint i = 1;
     if (!ogles2_context_valid(ctx))
@@ -398,7 +398,7 @@ void ogles2_glGenBuffers(struct OGLES2Context *ctx, GLsizei n, GLuint *buffers)
     for (k = 0; k < n; k++) {
         while (i < bs->sh->nbuf && bs->sh->buf[i])
             i++;
-        if (i >= OGLES2_NEAR_NAMES || !create(bs, i)) {
+        if (i >= OGLES3_NEAR_NAMES || !create(bs, i)) {
             ogles2_error(ctx, GL_OUT_OF_MEMORY);
             return;
         }
@@ -407,13 +407,13 @@ void ogles2_glGenBuffers(struct OGLES2Context *ctx, GLsizei n, GLuint *buffers)
     }
 }
 
-void ogles2_glDeleteBuffers(struct OGLES2Context *ctx, GLsizei n, const GLuint *buffers)
+void ogles2_glDeleteBuffers(struct OGLES3Context *ctx, GLsizei n, const GLuint *buffers)
 {
     ogles2_labels_forget(ctx, GL_BUFFER_KHR, n, buffers); /* KHR_debug's labels of the names */
     if (ogles2_context_valid(ctx))
         ogles2_trace(ctx, "glDeleteBuffers", n, n > 0 && buffers ? buffers[0] : 0);
-    struct OGLES2BufState *bs;
-    struct OGLES2Context *m;
+    struct OGLES3BufState *bs;
+    struct OGLES3Context *m;
     GLsizei k;
     int a;
     if (!ogles2_context_valid(ctx))
@@ -425,7 +425,7 @@ void ogles2_glDeleteBuffers(struct OGLES2Context *ctx, GLsizei n, const GLuint *
     if (!(bs = bs_get(ctx)) || !buffers)
         return;
     for (k = 0; k < n; k++) {
-        struct OGLES2Buffer *b = by_name(bs, buffers[k]);
+        struct OGLES3Buffer *b = by_name(bs, buffers[k]);
         if (!b)
             continue;
         /* GLES 2.0 2.9: a deleted buffer is unbound wherever it is bound
@@ -434,10 +434,10 @@ void ogles2_glDeleteBuffers(struct OGLES2Context *ctx, GLsizei n, const GLuint *
          * ES 3.0 2.9.1: only the bound vertex array object's; the others
          * keep it (below). */
         for (m = ctx->share->first; m; m = m->share_next) {
-            struct OGLES2BufState *mbs = m->buf;
+            struct OGLES3BufState *mbs = m->buf;
             if (mbs)
                 unbind_all(m, mbs, b);
-            for (a = 0; a < OGLES2_MAX_VERTEX_ATTRIBS; a++) {
+            for (a = 0; a < OGLES3_MAX_VERTEX_ATTRIBS; a++) {
                 if (m->array[a].buffer == b) {
                     m->array[a].buffer = 0;
                     m->array[a].pointer = 0;
@@ -459,20 +459,20 @@ void ogles2_glDeleteBuffers(struct OGLES2Context *ctx, GLsizei n, const GLuint *
     }
 }
 
-GLboolean ogles2_glIsBuffer(struct OGLES2Context *ctx, GLuint buffer)
+GLboolean ogles2_glIsBuffer(struct OGLES3Context *ctx, GLuint buffer)
 {
-    struct OGLES2BufState *bs;
-    struct OGLES2Buffer *b;
+    struct OGLES3BufState *bs;
+    struct OGLES3Buffer *b;
     if (!ogles2_context_valid(ctx) || !(bs = bs_get(ctx)))
         return GL_FALSE;
     b = by_name(bs, buffer);
     return b && b->bound_once ? GL_TRUE : GL_FALSE;
 }
 
-void ogles2_glBindBuffer(struct OGLES2Context *ctx, GLenum target, GLuint buffer)
+void ogles2_glBindBuffer(struct OGLES3Context *ctx, GLenum target, GLuint buffer)
 {
-    struct OGLES2BufState *bs;
-    struct OGLES2Buffer *b = 0, **at;
+    struct OGLES3BufState *bs;
+    struct OGLES3Buffer *b = 0, **at;
     if (!ogles2_context_valid(ctx) || !(bs = bs_get(ctx)))
         return;
     if (!(at = slot(ctx, bs, target))) {
@@ -489,26 +489,26 @@ void ogles2_glBindBuffer(struct OGLES2Context *ctx, GLenum target, GLuint buffer
         b->bound_once = TRUE;
     }
     if (*at != b) {
-        struct OGLES2Buffer *old = *at;
+        struct OGLES3Buffer *old = *at;
         *at = b;
         ogles2_buffer_release(ctx, old); /* a vertex array object's deleted element buffer */
     }
 }
 
-static struct OGLES2Buffer *bound(struct OGLES2Context *ctx, struct OGLES2BufState *bs, GLenum target)
+static struct OGLES3Buffer *bound(struct OGLES3Context *ctx, struct OGLES3BufState *bs, GLenum target)
 {
-    struct OGLES2Buffer **at = slot(ctx, bs, target);
+    struct OGLES3Buffer **at = slot(ctx, bs, target);
     if (at)
         return *at;
     ogles2_error(ctx, GL_INVALID_ENUM);
     return 0;
 }
 
-static void buffer_data(struct OGLES2Context *ctx, GLenum target, GLsizeiptr size, const void *data,
+static void buffer_data(struct OGLES3Context *ctx, GLenum target, GLsizeiptr size, const void *data,
                          GLenum usage)
 {
-    struct OGLES2BufState *bs;
-    struct OGLES2Buffer *b;
+    struct OGLES3BufState *bs;
+    struct OGLES3Buffer *b;
     UBYTE *shadow = 0;
     if (!ogles2_context_valid(ctx) || !(bs = bs_get(ctx)))
         return;
@@ -558,7 +558,7 @@ static void buffer_data(struct OGLES2Context *ctx, GLenum target, GLsizeiptr siz
 }
 
 /* Timed for probe P (frame.c). */
-void ogles2_glBufferData(struct OGLES2Context *ctx, GLenum target, GLsizeiptr size, const void *data,
+void ogles2_glBufferData(struct OGLES3Context *ctx, GLenum target, GLsizeiptr size, const void *data,
                          GLenum usage)
 {
     ULONG t0 = ogles2_clock_us();
@@ -585,10 +585,10 @@ static void swap_words(ULONG *dst, const UBYTE *src, ULONG size, ULONG from, ULO
  * job does not read re-converts the elements those bytes touch, in place;
  * a copy the open job reads is retired with it and rebuilt at its next use.
  * The data serial has been bumped already. */
-static void patch_copies(struct OGLES2Context *ctx, struct OGLES2Buffer *b, ULONG off, ULONG len)
+static void patch_copies(struct OGLES3Context *ctx, struct OGLES3Buffer *b, ULONG off, ULONG len)
 {
     int k;
-    for (k = 0; k < OGLES2_BUFFER_COPIES; k++) {
+    for (k = 0; k < OGLES3_BUFFER_COPIES; k++) {
         struct gpu_copy *c = &b->copy[k];
         ULONG stride, i0, i1, n;
         if (!c->mem.hostptr)
@@ -624,11 +624,11 @@ static void patch_copies(struct OGLES2Context *ctx, struct OGLES2Buffer *b, ULON
     }
 }
 
-static void buffer_sub_data(struct OGLES2Context *ctx, GLenum target, GLintptr offset, GLsizeiptr size,
+static void buffer_sub_data(struct OGLES3Context *ctx, GLenum target, GLintptr offset, GLsizeiptr size,
                             const void *data)
 {
-    struct OGLES2BufState *bs;
-    struct OGLES2Buffer *b;
+    struct OGLES3BufState *bs;
+    struct OGLES3Buffer *b;
     if (!ogles2_context_valid(ctx) || !(bs = bs_get(ctx)))
         return;
     if (!slot(ctx, bs, target)) {
@@ -656,7 +656,7 @@ static void buffer_sub_data(struct OGLES2Context *ctx, GLenum target, GLintptr o
 }
 
 /* Timed for probe P (frame.c). */
-void ogles2_glBufferSubData(struct OGLES2Context *ctx, GLenum target, GLintptr offset, GLsizeiptr size,
+void ogles2_glBufferSubData(struct OGLES3Context *ctx, GLenum target, GLintptr offset, GLsizeiptr size,
                             const void *data)
 {
     ULONG t0 = ogles2_clock_us();
@@ -665,11 +665,11 @@ void ogles2_glBufferSubData(struct OGLES2Context *ctx, GLenum target, GLintptr o
         ctx->sum_bufdata += (double)(ULONG)(ogles2_clock_us() - t0);
 }
 
-void ogles2_glGetBufferParameteriv(struct OGLES2Context *ctx, GLenum target, GLenum pname,
+void ogles2_glGetBufferParameteriv(struct OGLES3Context *ctx, GLenum target, GLenum pname,
                                    GLint *params)
 {
-    struct OGLES2BufState *bs;
-    struct OGLES2Buffer *b;
+    struct OGLES3BufState *bs;
+    struct OGLES3Buffer *b;
     if (!ogles2_context_valid(ctx) || !params || !(bs = bs_get(ctx)))
         return;
     if (!slot(ctx, bs, target)) {
@@ -698,7 +698,7 @@ void ogles2_glGetBufferParameteriv(struct OGLES2Context *ctx, GLenum target, GLe
         ogles2_error(ctx, GL_INVALID_ENUM);
 }
 
-void ogles2_glGetBufferParameteri64v(struct OGLES2Context *ctx, GLenum target, GLenum pname, GLint64 *params)
+void ogles2_glGetBufferParameteri64v(struct OGLES3Context *ctx, GLenum target, GLenum pname, GLint64 *params)
 {
     GLint v = 0;
     if (!ogles2_es3_entry(ctx) || !params)
@@ -708,7 +708,7 @@ void ogles2_glGetBufferParameteri64v(struct OGLES2Context *ctx, GLenum target, G
 }
 
 /* AmigaOS 4's name for the same query (its OES_mapbuffer). */
-void ogles2_glGetBufferParameterivOES(struct OGLES2Context *ctx, GLenum target, GLenum pname,
+void ogles2_glGetBufferParameterivOES(struct OGLES3Context *ctx, GLenum target, GLenum pname,
                                       GLint *params)
 {
     ogles2_glGetBufferParameteriv(ctx, target, pname, params);
@@ -716,10 +716,10 @@ void ogles2_glGetBufferParameterivOES(struct OGLES2Context *ctx, GLenum target, 
 
 /* ---- OES_mapbuffer: the mapping is the shadow ---- */
 
-void *ogles2_glMapBufferOES(struct OGLES2Context *ctx, GLenum target, GLenum access)
+void *ogles2_glMapBufferOES(struct OGLES3Context *ctx, GLenum target, GLenum access)
 {
-    struct OGLES2BufState *bs;
-    struct OGLES2Buffer *b;
+    struct OGLES3BufState *bs;
+    struct OGLES3Buffer *b;
     if (!ogles2_context_valid(ctx) || !(bs = bs_get(ctx)))
         return 0;
     if (!slot(ctx, bs, target) || access != GL_WRITE_ONLY_OES) {
@@ -738,10 +738,10 @@ void *ogles2_glMapBufferOES(struct OGLES2Context *ctx, GLenum target, GLenum acc
     return b->data;
 }
 
-GLboolean ogles2_glUnmapBufferOES(struct OGLES2Context *ctx, GLenum target)
+GLboolean ogles2_glUnmapBufferOES(struct OGLES3Context *ctx, GLenum target)
 {
-    struct OGLES2BufState *bs;
-    struct OGLES2Buffer *b;
+    struct OGLES3BufState *bs;
+    struct OGLES3Buffer *b;
     if (!ogles2_context_valid(ctx) || !(bs = bs_get(ctx)))
         return GL_FALSE;
     if (!slot(ctx, bs, target)) {
@@ -765,11 +765,11 @@ GLboolean ogles2_glUnmapBufferOES(struct OGLES2Context *ctx, GLenum target)
  * wrote goes into the copies when it is unmapped (or flushed, with
  * GL_MAP_FLUSH_EXPLICIT_BIT). Unsynchronized and invalidating mappings are
  * the same. */
-void *ogles2_glMapBufferRange(struct OGLES2Context *ctx, GLenum target, GLintptr offset, GLsizeiptr length,
+void *ogles2_glMapBufferRange(struct OGLES3Context *ctx, GLenum target, GLintptr offset, GLsizeiptr length,
                               GLbitfield access)
 {
-    struct OGLES2BufState *bs;
-    struct OGLES2Buffer *b;
+    struct OGLES3BufState *bs;
+    struct OGLES3Buffer *b;
     if (!ogles2_es3_entry(ctx) || !(bs = bs_get(ctx)))
         return 0;
     if (!slot(ctx, bs, target)) {
@@ -810,10 +810,10 @@ void *ogles2_glMapBufferRange(struct OGLES2Context *ctx, GLenum target, GLintptr
     return b->data + offset;
 }
 
-void ogles2_glFlushMappedBufferRange(struct OGLES2Context *ctx, GLenum target, GLintptr offset, GLsizeiptr length)
+void ogles2_glFlushMappedBufferRange(struct OGLES3Context *ctx, GLenum target, GLintptr offset, GLsizeiptr length)
 {
-    struct OGLES2BufState *bs;
-    struct OGLES2Buffer *b;
+    struct OGLES3BufState *bs;
+    struct OGLES3Buffer *b;
     if (!ogles2_es3_entry(ctx) || !(bs = bs_get(ctx)))
         return;
     if (!slot(ctx, bs, target)) {
@@ -835,10 +835,10 @@ void ogles2_glFlushMappedBufferRange(struct OGLES2Context *ctx, GLenum target, G
 }
 
 /* ES 3.0's name; OES_mapbuffer's mapping too. */
-GLboolean ogles2_glUnmapBuffer(struct OGLES2Context *ctx, GLenum target)
+GLboolean ogles2_glUnmapBuffer(struct OGLES3Context *ctx, GLenum target)
 {
-    struct OGLES2BufState *bs;
-    struct OGLES2Buffer *b;
+    struct OGLES3BufState *bs;
+    struct OGLES3Buffer *b;
     if (!ogles2_es3_entry(ctx) || !(bs = bs_get(ctx)))
         return GL_FALSE;
     if (!slot(ctx, bs, target)) {
@@ -858,16 +858,16 @@ GLboolean ogles2_glUnmapBuffer(struct OGLES2Context *ctx, GLenum target)
     return GL_TRUE;
 }
 
-void ogles2_glGetBufferPointerv(struct OGLES2Context *ctx, GLenum target, GLenum pname, void **params)
+void ogles2_glGetBufferPointerv(struct OGLES3Context *ctx, GLenum target, GLenum pname, void **params)
 {
     if (ogles2_es3_entry(ctx))
         ogles2_glGetBufferPointervOES(ctx, target, pname, params);
 }
 
-void ogles2_glGetBufferPointervOES(struct OGLES2Context *ctx, GLenum target, GLenum pname, void **params)
+void ogles2_glGetBufferPointervOES(struct OGLES3Context *ctx, GLenum target, GLenum pname, void **params)
 {
-    struct OGLES2BufState *bs;
-    struct OGLES2Buffer *b;
+    struct OGLES3BufState *bs;
+    struct OGLES3Buffer *b;
     if (!ogles2_context_valid(ctx) || !params || !(bs = bs_get(ctx)))
         return;
     if (!slot(ctx, bs, target) || pname != GL_BUFFER_MAP_POINTER_OES) {
@@ -883,10 +883,10 @@ void ogles2_glGetBufferPointervOES(struct OGLES2Context *ctx, GLenum target, GLe
 
 /* ---- for the rest of the library ---- */
 
-BOOL ogles2_buffer_query(struct OGLES2Context *ctx, GLenum pname, GLint *v)
+BOOL ogles2_buffer_query(struct OGLES3Context *ctx, GLenum pname, GLint *v)
 {
-    struct OGLES2BufState *bs = bs_get(ctx);
-    struct OGLES2Buffer **at;
+    struct OGLES3BufState *bs = bs_get(ctx);
+    struct OGLES3Buffer **at;
     GLenum target;
     switch (pname) {
     case GL_ARRAY_BUFFER_BINDING:              target = GL_ARRAY_BUFFER; break;
@@ -916,14 +916,14 @@ BOOL ogles2_buffer_query(struct OGLES2Context *ctx, GLenum pname, GLint *v)
 /* ES 3.0's pixel buffers: with a buffer bound to GL_PIXEL_PACK_BUFFER
  * (`pack`) or GL_PIXEL_UNPACK_BUFFER, the address of the `bytes` at
  * `offset` in its data (an application's pixel pointer is that offset);
- * NULL with none bound, or for the library's own images (OGLES2PixelStore's
+ * NULL with none bound, or for the library's own images (OGLES3PixelStore's
  * own). *bad (GL_INVALID_OPERATION): past its end, or it is mapped. A pack
  * buffer's data change: its GPU copies start afresh. */
-UBYTE *ogles2_buffer_pixels(struct OGLES2Context *ctx, BOOL pack, ULONG offset, ULONG bytes, BOOL *bad)
+UBYTE *ogles2_buffer_pixels(struct OGLES3Context *ctx, BOOL pack, ULONG offset, ULONG bytes, BOOL *bad)
 {
     static UBYTE none; /* an empty buffer's address for an empty image */
-    struct OGLES2BufState *bs = ctx->buf;
-    struct OGLES2Buffer *b = bs ? (pack ? bs->pack : bs->unpack) : 0;
+    struct OGLES3BufState *bs = ctx->buf;
+    struct OGLES3Buffer *b = bs ? (pack ? bs->pack : bs->unpack) : 0;
     *bad = FALSE;
     if (!b || (pack ? ctx->pack.own : ctx->unpack.own))
         return 0;
@@ -948,7 +948,7 @@ UBYTE *ogles2_buffer_pixels(struct OGLES2Context *ctx, BOOL pack, ULONG offset, 
  * it, a new one (the old goes with that job, renaming as for the draws'
  * copies). The data cache clean before each submission (job.c) covers it.
  * Its address; 0 without data or memory. */
-ULONG ogles2_buffer_words(struct OGLES2Context *ctx, struct OGLES2Buffer *b)
+ULONG ogles2_buffer_words(struct OGLES3Context *ctx, struct OGLES3Buffer *b)
 {
     ULONG bytes = (b->size + 63) & ~63UL;
     if (!b->data || !b->size)
@@ -975,9 +975,9 @@ ULONG ogles2_buffer_words(struct OGLES2Context *ctx, struct OGLES2Buffer *b)
 /* Uniform buffer binding `index` as a draw reads it (§5 item 6): the GPU
  * address of its range's start and the range's bytes (*size); 0 with no
  * buffer there, an empty one, or a range starting past its end. */
-ULONG ogles2_buffer_uniform(struct OGLES2Context *ctx, ULONG index, ULONG *size)
+ULONG ogles2_buffer_uniform(struct OGLES3Context *ctx, ULONG index, ULONG *size)
 {
-    struct OGLES2BufState *bs = ctx->buf;
+    struct OGLES3BufState *bs = ctx->buf;
     struct buf_range *r;
     ULONG a;
     if (!bs || index >= MAX_UNIFORM_BINDINGS)
@@ -995,7 +995,7 @@ ULONG ogles2_buffer_uniform(struct OGLES2Context *ctx, ULONG index, ULONG *size)
  * (ES 3.1, compute.c): as ogles2_buffer_uniform; the dispatch is waited for,
  * so the buffer's shadow is then stale (gpu_written copies the words back
  * before the CPU or a draw next uses it). */
-static ULONG storage_range(struct OGLES2Context *ctx, struct buf_range *r, ULONG *size)
+static ULONG storage_range(struct OGLES3Context *ctx, struct buf_range *r, ULONG *size)
 {
     ULONG a;
     if (!r->b || r->offset >= r->b->size)
@@ -1010,9 +1010,9 @@ static ULONG storage_range(struct OGLES2Context *ctx, struct buf_range *r, ULONG
     return a + r->offset;
 }
 
-ULONG ogles2_buffer_storage(struct OGLES2Context *ctx, ULONG index, ULONG *size)
+ULONG ogles2_buffer_storage(struct OGLES3Context *ctx, ULONG index, ULONG *size)
 {
-    struct OGLES2BufState *bs = ctx->buf;
+    struct OGLES3BufState *bs = ctx->buf;
     if (!bs || index >= MAX_SSBO_BINDINGS)
         return 0;
     return storage_range(ctx, &bs->ssbo[index], size);
@@ -1020,9 +1020,9 @@ ULONG ogles2_buffer_storage(struct OGLES2Context *ctx, ULONG index, ULONG *size)
 
 /* Atomic counter buffer binding `index` (ES 3.1): a storage buffer to the
  * shader (Mesa lowers the counters to storage accesses), as above. */
-ULONG ogles2_buffer_atomic(struct OGLES2Context *ctx, ULONG index, ULONG *size)
+ULONG ogles2_buffer_atomic(struct OGLES3Context *ctx, ULONG index, ULONG *size)
 {
-    struct OGLES2BufState *bs = ctx->buf;
+    struct OGLES3BufState *bs = ctx->buf;
     if (!bs || index >= MAX_ATOMIC_BINDINGS)
         return 0;
     return storage_range(ctx, &bs->acbo[index], size);
@@ -1034,9 +1034,9 @@ ULONG ogles2_buffer_atomic(struct OGLES2Context *ctx, ULONG index, ULONG *size)
  * and copies them back (as transform feedback's, gpu_written). Not
  * gpu_written here: a draw is building the job (the GPU reads the words,
  * which are the newest data whoever wrote them). 0: no buffer or memory. */
-ULONG ogles2_buffer_storage_draw(struct OGLES2Context *ctx, BOOL atomic, ULONG index, ULONG *size)
+ULONG ogles2_buffer_storage_draw(struct OGLES3Context *ctx, BOOL atomic, ULONG index, ULONG *size)
 {
-    struct OGLES2BufState *bs = ctx->buf;
+    struct OGLES3BufState *bs = ctx->buf;
     struct buf_range *r;
     ULONG a;
     *size = 0;
@@ -1056,10 +1056,10 @@ ULONG ogles2_buffer_storage_draw(struct OGLES2Context *ctx, BOOL atomic, ULONG i
  * GL_DISPATCH_INDIRECT_BUFFER binding: 0, or the error (ES 3.1 17:
  * GL_INVALID_VALUE for an offset not a word's, GL_INVALID_OPERATION without
  * a buffer or past its end). */
-GLenum ogles2_buffer_dispatch_indirect(struct OGLES2Context *ctx, GLintptr offset, ULONG *groups)
+GLenum ogles2_buffer_dispatch_indirect(struct OGLES3Context *ctx, GLintptr offset, ULONG *groups)
 {
-    struct OGLES2BufState *bs = bs_get(ctx);
-    struct OGLES2Buffer *b = bs ? bs->dispatch_indirect : 0;
+    struct OGLES3BufState *bs = bs_get(ctx);
+    struct OGLES3Buffer *b = bs ? bs->dispatch_indirect : 0;
     if (offset < 0 || (offset & 3))
         return GL_INVALID_VALUE;
     if (!b || !b->data || (ULONG)offset > b->size || b->size - (ULONG)offset < 12)
@@ -1075,10 +1075,10 @@ GLenum ogles2_buffer_dispatch_indirect(struct OGLES2Context *ctx, GLintptr offse
  * GL_INVALID_VALUE for an offset not a word's, GL_INVALID_OPERATION past
  * its end; a negative offset is past it, dEQP-GLES31's signed32_wrap
  * case). */
-GLenum ogles2_buffer_draw_indirect(struct OGLES2Context *ctx, GLintptr offset, ULONG bytes, ULONG *words)
+GLenum ogles2_buffer_draw_indirect(struct OGLES3Context *ctx, GLintptr offset, ULONG bytes, ULONG *words)
 {
-    struct OGLES2BufState *bs = bs_get(ctx);
-    struct OGLES2Buffer *b = bs ? bs->draw_indirect : 0;
+    struct OGLES3BufState *bs = bs_get(ctx);
+    struct OGLES3Buffer *b = bs ? bs->draw_indirect : 0;
     /* no buffer before the alignment (Mesa checks the alignment first): a
      * client pointer, dEQP's negative.client_command_array, is aligned on
      * a PC, not always on the 68k; ES 3.1 orders neither */
@@ -1096,7 +1096,7 @@ GLenum ogles2_buffer_draw_indirect(struct OGLES2Context *ctx, GLintptr offset, U
 /* Transform feedback writes b in the open job (xfb.c): the address of its
  * words (made current with the shadow, ogles2_buffer_words), which the
  * shadow then waits for (gpu_written). 0: no data or memory. */
-ULONG ogles2_buffer_xfb(struct OGLES2Context *ctx, struct OGLES2Buffer *b)
+ULONG ogles2_buffer_xfb(struct OGLES3Context *ctx, struct OGLES3Buffer *b)
 {
     ULONG a = ogles2_buffer_words(ctx, b);
     if (a)
@@ -1110,8 +1110,8 @@ ULONG ogles2_buffer_xfb(struct OGLES2Context *ctx, struct OGLES2Buffer *b)
  * ES 3.1's storage and atomic counter buffers in 3.1 contexts): their
  * array, count and general binding; NULL for transform feedback's (the
  * bound object's, xfb.c) and every other target. */
-static struct buf_range *ranges(struct OGLES2Context *ctx, struct OGLES2BufState *bs, GLenum target, ULONG *n,
-                                struct OGLES2Buffer ***general)
+static struct buf_range *ranges(struct OGLES3Context *ctx, struct OGLES3BufState *bs, GLenum target, ULONG *n,
+                                struct OGLES3Buffer ***general)
 {
     switch (target) {
     case GL_UNIFORM_BUFFER:
@@ -1131,14 +1131,14 @@ static struct buf_range *ranges(struct OGLES2Context *ctx, struct OGLES2BufState
     }
 }
 
-static void bind_range(struct OGLES2Context *ctx, GLenum target, GLuint index, GLuint buffer, GLintptr offset,
+static void bind_range(struct OGLES3Context *ctx, GLenum target, GLuint index, GLuint buffer, GLintptr offset,
                        GLsizeiptr size, BOOL ranged)
 {
-    struct OGLES2BufState *bs;
-    struct OGLES2Buffer *b = 0, **general = 0;
+    struct OGLES3BufState *bs;
+    struct OGLES3Buffer *b = 0, **general = 0;
     struct buf_range *r;
-    struct OGLES2XfbBinding *x = 0;
-    ULONG n = OGLES2_MAX_XFB_BUFFERS, align;
+    struct OGLES3XfbBinding *x = 0;
+    ULONG n = OGLES3_MAX_XFB_BUFFERS, align;
     if (!ogles2_es3_entry(ctx) || !(bs = bs_get(ctx)))
         return;
     r = ranges(ctx, bs, target, &n, &general);
@@ -1146,7 +1146,7 @@ static void bind_range(struct OGLES2Context *ctx, GLenum target, GLuint index, G
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
-    if (index >= (r ? n : OGLES2_MAX_XFB_BUFFERS)) {
+    if (index >= (r ? n : OGLES3_MAX_XFB_BUFFERS)) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
@@ -1186,7 +1186,7 @@ static void bind_range(struct OGLES2Context *ctx, GLenum target, GLuint index, G
         r->size = ranged && b ? (ULONG)size : 0;
         *general = b;
     } else {
-        struct OGLES2Buffer *old = x[index].b;
+        struct OGLES3Buffer *old = x[index].b;
         x[index].b = b;
         x[index].offset = ranged && b ? (ULONG)offset : 0;
         x[index].size = ranged && b ? (ULONG)size : 0;
@@ -1195,13 +1195,13 @@ static void bind_range(struct OGLES2Context *ctx, GLenum target, GLuint index, G
     }
 }
 
-void ogles2_glBindBufferRange(struct OGLES2Context *ctx, GLenum target, GLuint index, GLuint buffer,
+void ogles2_glBindBufferRange(struct OGLES3Context *ctx, GLenum target, GLuint index, GLuint buffer,
                               GLintptr offset, GLsizeiptr size)
 {
     bind_range(ctx, target, index, buffer, offset, size, TRUE);
 }
 
-void ogles2_glBindBufferBase(struct OGLES2Context *ctx, GLenum target, GLuint index, GLuint buffer)
+void ogles2_glBindBufferBase(struct OGLES3Context *ctx, GLenum target, GLuint index, GLuint buffer)
 {
     bind_range(ctx, target, index, buffer, 0, 0, FALSE);
 }
@@ -1234,13 +1234,13 @@ static BOOL indexed_pname(GLenum pname, GLenum *target, int *what)
  * and transform feedback buffers, ES 3.1's storage and atomic counter ones.
  * -1: not such a query (others answer it: ogles2_indexed_query); 0: an
  * error set; 1: *v. */
-static int indexed(struct OGLES2Context *ctx, GLenum pname, GLuint index, GLint64 *v)
+static int indexed(struct OGLES3Context *ctx, GLenum pname, GLuint index, GLint64 *v)
 {
-    struct OGLES2BufState *bs;
-    struct OGLES2Buffer **general;
+    struct OGLES3BufState *bs;
+    struct OGLES3Buffer **general;
     const struct buf_range *r = 0;
-    const struct OGLES2Buffer *b;
-    ULONG offset, size, n = OGLES2_MAX_XFB_BUFFERS;
+    const struct OGLES3Buffer *b;
+    ULONG offset, size, n = OGLES3_MAX_XFB_BUFFERS;
     GLenum target;
     int what;
     if (!indexed_pname(pname, &target, &what))
@@ -1262,7 +1262,7 @@ static int indexed(struct OGLES2Context *ctx, GLenum pname, GLuint index, GLint6
         offset = r[index].offset;
         size = r[index].size;
     } else {
-        const struct OGLES2XfbBinding *x = ogles2_xfb_bindings(ctx); /* the bound object's */
+        const struct OGLES3XfbBinding *x = ogles2_xfb_bindings(ctx); /* the bound object's */
         b = x ? x[index].b : 0;
         offset = x ? x[index].offset : 0;
         size = x ? x[index].size : 0;
@@ -1271,7 +1271,7 @@ static int indexed(struct OGLES2Context *ctx, GLenum pname, GLuint index, GLint6
     return 1;
 }
 
-void ogles2_glGetIntegeri_v(struct OGLES2Context *ctx, GLenum target, GLuint index, GLint *data)
+void ogles2_glGetIntegeri_v(struct OGLES3Context *ctx, GLenum target, GLuint index, GLint *data)
 {
     GLint64 v;
     int r;
@@ -1285,7 +1285,7 @@ void ogles2_glGetIntegeri_v(struct OGLES2Context *ctx, GLenum target, GLuint ind
 
 /* ES 3.1's: the same indexed state as booleans (GL_IMAGE_BINDING_LAYERED's
  * kind; the rest converted as glGetBooleanv converts). */
-void ogles2_glGetBooleani_v(struct OGLES2Context *ctx, GLenum target, GLuint index, GLboolean *data)
+void ogles2_glGetBooleani_v(struct OGLES3Context *ctx, GLenum target, GLuint index, GLboolean *data)
 {
     GLint64 v;
     int r;
@@ -1297,7 +1297,7 @@ void ogles2_glGetBooleani_v(struct OGLES2Context *ctx, GLenum target, GLuint ind
         *data = v ? GL_TRUE : GL_FALSE;
 }
 
-void ogles2_glGetInteger64i_v(struct OGLES2Context *ctx, GLenum target, GLuint index, GLint64 *data)
+void ogles2_glGetInteger64i_v(struct OGLES3Context *ctx, GLenum target, GLuint index, GLint64 *data)
 {
     GLint64 v;
     int r;
@@ -1309,11 +1309,11 @@ void ogles2_glGetInteger64i_v(struct OGLES2Context *ctx, GLenum target, GLuint i
         *data = v;
 }
 
-void ogles2_glCopyBufferSubData(struct OGLES2Context *ctx, GLenum readTarget, GLenum writeTarget,
+void ogles2_glCopyBufferSubData(struct OGLES3Context *ctx, GLenum readTarget, GLenum writeTarget,
                                 GLintptr readOffset, GLintptr writeOffset, GLsizeiptr size)
 {
-    struct OGLES2BufState *bs;
-    struct OGLES2Buffer **rs, **ws, *r, *w;
+    struct OGLES3BufState *bs;
+    struct OGLES3Buffer **rs, **ws, *r, *w;
     if (!ogles2_es3_entry(ctx) || !(bs = bs_get(ctx)))
         return;
     if (!(rs = slot(ctx, bs, readTarget)) || !(ws = slot(ctx, bs, writeTarget))) {
@@ -1342,32 +1342,32 @@ void ogles2_glCopyBufferSubData(struct OGLES2Context *ctx, GLenum readTarget, GL
     patch_copies(ctx, w, (ULONG)writeOffset, (ULONG)size);
 }
 
-struct OGLES2Buffer *ogles2_buffer_element(struct OGLES2Context *ctx)
+struct OGLES3Buffer *ogles2_buffer_element(struct OGLES3Context *ctx)
 {
-    struct OGLES2BufState *bs = bs_get(ctx);
+    struct OGLES3BufState *bs = bs_get(ctx);
     return bs ? bs->element : 0;
 }
 
-void ogles2_buffer_set_element(struct OGLES2Context *ctx, struct OGLES2Buffer *b)
+void ogles2_buffer_set_element(struct OGLES3Context *ctx, struct OGLES3Buffer *b)
 {
-    struct OGLES2BufState *bs = bs_get(ctx);
+    struct OGLES3BufState *bs = bs_get(ctx);
     if (bs)
         bs->element = b;
 }
 
 /* The GL_ARRAY_BUFFER binding (glVertexAttribPointer captures it). */
-struct OGLES2Buffer *ogles2_buffer_array(struct OGLES2Context *ctx)
+struct OGLES3Buffer *ogles2_buffer_array(struct OGLES3Context *ctx)
 {
-    struct OGLES2BufState *bs = bs_get(ctx);
+    struct OGLES3BufState *bs = bs_get(ctx);
     return bs ? bs->array : 0;
 }
 
-GLuint ogles2_buffer_name(const struct OGLES2Buffer *b)
+GLuint ogles2_buffer_name(const struct OGLES3Buffer *b)
 {
     return b ? b->name : 0;
 }
 
-ULONG ogles2_buffer_size(const struct OGLES2Buffer *b)
+ULONG ogles2_buffer_size(const struct OGLES3Buffer *b)
 {
     return b ? b->size : 0;
 }
@@ -1375,9 +1375,9 @@ ULONG ogles2_buffer_size(const struct OGLES2Buffer *b)
 /* glDrawElements' indices in the GL_ELEMENT_ARRAY_BUFFER: `offset` bytes
  * into it, `bytes` long; NULL without an element buffer (the indices are
  * then the application's pointer) or with the range outside it (*bad). */
-const void *ogles2_buffer_indices(struct OGLES2Context *ctx, ULONG offset, ULONG bytes, BOOL *bad)
+const void *ogles2_buffer_indices(struct OGLES3Context *ctx, ULONG offset, ULONG bytes, BOOL *bad)
 {
-    struct OGLES2BufState *bs = bs_get(ctx);
+    struct OGLES3BufState *bs = bs_get(ctx);
     *bad = FALSE;
     if (!bs || !bs->element)
         return 0;
@@ -1394,7 +1394,7 @@ const void *ogles2_buffer_indices(struct OGLES2Context *ctx, ULONG offset, ULONG
  * from into the job's state buffer, as from a client array. NULL for a
  * GL_STATIC_DRAW buffer: draws read its kept GPU copies (ogles2_buffer_copy),
  * which would be made again, whole, after every change. */
-const UBYTE *ogles2_buffer_stream(const struct OGLES2Buffer *b)
+const UBYTE *ogles2_buffer_stream(const struct OGLES3Buffer *b)
 {
     return b->usage != GL_STATIC_DRAW && b->usage != GL_STATIC_READ && b->usage != GL_STATIC_COPY ? b->data : 0;
 }
@@ -1404,7 +1404,7 @@ const UBYTE *ogles2_buffer_stream(const struct OGLES2Buffer *b)
  * `convert` (draw.c's, as for client arrays) into tightly packed elements.
  * Returns its GPU address of vertex 0 and its stride; 0 if out of memory or
  * the buffer holds no complete element at `offset`. *vertices: how many. */
-ULONG ogles2_buffer_copy(struct OGLES2Context *ctx, struct OGLES2Buffer *b, ULONG offset, GLint size,
+ULONG ogles2_buffer_copy(struct OGLES3Context *ctx, struct OGLES3Buffer *b, ULONG offset, GLint size,
                          GLenum type, GLboolean normalized, GLsizei stride, ULONG elem_bytes, ULONG out_stride,
                          ULONG *dst_stride, ULONG *vertices,
                          void (*convert)(UBYTE *dst, ULONG dst_stride, const UBYTE *src,
@@ -1419,7 +1419,7 @@ ULONG ogles2_buffer_copy(struct OGLES2Context *ctx, struct OGLES2Buffer *b, ULON
      * at a time). The array's vertex 0 is element `skip` of the copy. */
     ULONG phase = offset % src_stride, skip = offset / src_stride;
     int k;
-    for (k = 0; k < OGLES2_BUFFER_COPIES; k++) {
+    for (k = 0; k < OGLES3_BUFFER_COPIES; k++) {
         c = &b->copy[k];
         if (c->serial == b->serial && c->mem.hostptr && c->offset == phase && c->size == size &&
             c->type == type && c->stride == stride && c->normalized == normalized) {

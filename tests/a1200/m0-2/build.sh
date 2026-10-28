@@ -9,7 +9,7 @@ B=${B:-$HOME/ogles2-build/m68k}
 make -C "$REPO" -j8 B="$B" > /dev/null
 make -C "$REPO" B="$B" vbcc > /dev/null
 mkdir -p "$PKG/libs" "$PKG/bin"
-cp "$B/ogles2.library" "$PKG/libs/"
-cp "$B/tests/smoke" "$B/tests/abi_layout" "$B/tests/abi_probe" "$B/cmd/OGLES2Log" "$PKG/bin/"
+cp "$B/ogles3.library" "$PKG/libs/"
+cp "$B/tests/smoke" "$B/tests/abi_layout" "$B/tests/abi_probe" "$B/cmd/OGLES3Log" "$PKG/bin/"
 cp "$B/vbcc/tests/smoke" "$PKG/bin/smoke_vbcc"
 cp "$B/vbcc/tests/abi_probe" "$PKG/bin/abi_probe_vbcc"

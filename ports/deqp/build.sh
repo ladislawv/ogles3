@@ -1,8 +1,8 @@
 #!/bin/bash
 # Builds dEQP-GLES2 (the drawElements GLES2 conformance tests of Khronos'
-# VK-GL-CTS) for AmigaOS 3 (68020+68881, libnix) on ogles2.library:
+# VK-GL-CTS) for AmigaOS 3 (68020+68881, libnix) on ogles3.library:
 # $B/deqp/deqp-gles2, with its data in $B/deqp/gles2. Run in WSL after
-# `make` (libogles2.a):
+# `make` (libogles3.a):
 #   bash ports/deqp/build.sh
 # MODULE=gles3 builds dEQP-GLES3 instead, into $B/deqp-gles3 (deqp-gles3 and
 # its data in gles3/), from a copy of its own: it needs an ES3 build of the
@@ -67,7 +67,7 @@ fetch zlib "$ZLIB_URL" "$ZLIB_SHA"
 fetch libpng "$PNG_URL" "$PNG_SHA"
 cp "$DEPS/libpng/scripts/pnglibconf.h.prebuilt" "$DEPS/libpng/pnglibconf.h"
 
-[ -f "$B/libogles2.a" ] || { echo "run make first (B=$B)"; exit 1; }
+[ -f "$B/libogles3.a" ] || { echo "run make first (B=$B)"; exit 1; }
 [ -x "$TC16/bin/m68k-amigaos-g++" ] || { echo "no GCC 16.2 in $TC16 (CONTRIBUTING.md)"; exit 1; }
 
 ROOT=$OUT/src
@@ -227,7 +227,7 @@ else
 fi
 
 "$TC16/bin/m68k-amigaos-g++" -mcpu=68020 -m68881 -noixemul -o "$OUT/deqp-$MODULE" "$OBJ"/*.o \
-    -L"$B" -logles2 -lm
+    -L"$B" -logles3 -lm
 rm -rf "$OUT/$MODULE"
 mkdir -p "$OUT/$MODULE"
 cp -r "$ROOT/data/$MODULE/data" "$ROOT/data/$MODULE/shaders" "$OUT/$MODULE/"

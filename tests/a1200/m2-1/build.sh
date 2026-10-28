@@ -9,10 +9,10 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 REPO=$(cd "$HERE/../../.." && pwd)
 B=${B:-$HOME/ogles2-build/m68k-sync}
 
-make -C "$REPO" -j8 B="$B" EXTRA_CFLAGS=-DOGLES2_LOG_SYNC > /dev/null
+make -C "$REPO" -j8 B="$B" EXTRA_CFLAGS=-DOGLES3_LOG_SYNC > /dev/null
 make -C "$REPO" B="$B" test-v3dp > /dev/null
 mkdir -p "$PKG/libs" "$PKG/bin" "$PKG/shaders"
-cp "$B/ogles2.library" "$PKG/libs/"
-cp "$B/tests/m1_draw" "$B/tests/m1_soak" "$B/tests/m2_link" "$B/cmd/OGLES2Log" "$PKG/bin/"
+cp "$B/ogles3.library" "$PKG/libs/"
+cp "$B/tests/m1_draw" "$B/tests/m1_soak" "$B/tests/m2_link" "$B/cmd/OGLES3Log" "$PKG/bin/"
 cp "$B"/v3dp/*.v3dp "$PKG/bin/"
 cp "$B"/v3dp/src/*.vert "$B"/v3dp/src/*.frag "$PKG/shaders/"

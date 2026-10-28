@@ -29,7 +29,7 @@
 #include <proto/graphics.h>
 #include <proto/cybergraphics.h>
 #include <proto/timer.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include "../common/smooth_shaders.h"
 
 struct IntuitionBase *IntuitionBase;
@@ -521,7 +521,7 @@ static void test_bitmap(void)
         return;
     }
     before = AvailMem(MEMF_ANY);
-    ctx = aglCreateContextTags2(&err, OGLES2_CCT_BITMAP, (ULONG)bm, OGLES2_CCT_DEPTH, 16, TAG_DONE);
+    ctx = aglCreateContextTags2(&err, OGLES3_CCT_BITMAP, (ULONG)bm, OGLES3_CCT_DEPTH, 16, TAG_DONE);
     check(ctx != 0, "create (BITMAP tag, 16-bit depth)", "bitmap");
     if (ctx) {
         InitRastPort(&r.own);
@@ -544,11 +544,11 @@ static void test_window(void)
     ULONG err = 0, w = 0, h = 0, before = AvailMem(MEMF_ANY);
     struct readback r;
     struct Window *win = 0;
-    void *ctx = aglCreateContextTags2(&err, OGLES2_CCT_DEPTH, 24, OGLES2_CCT_STENCIL, 8,
-                                      OGLES2_CCT_PISTORM_WIDTH, 320,
-                                      OGLES2_CCT_PISTORM_HEIGHT, 240, OGLES2_CCT_GET_WIDTH,
-                                      (ULONG)&w, OGLES2_CCT_GET_HEIGHT, (ULONG)&h,
-                                      OGLES2_CCT_PISTORM_GET_WINDOW, (ULONG)&win, TAG_DONE);
+    void *ctx = aglCreateContextTags2(&err, OGLES3_CCT_DEPTH, 24, OGLES3_CCT_STENCIL, 8,
+                                      OGLES3_CCT_PISTORM_WIDTH, 320,
+                                      OGLES3_CCT_PISTORM_HEIGHT, 240, OGLES3_CCT_GET_WIDTH,
+                                      (ULONG)&w, OGLES3_CCT_GET_HEIGHT, (ULONG)&h,
+                                      OGLES3_CCT_PISTORM_GET_WINDOW, (ULONG)&win, TAG_DONE);
     check(ctx != 0 && win != 0, "create (own window, 24-bit depth, 8-bit stencil)", "window");
     if (!ctx || !win) {
         if (ctx)
@@ -596,9 +596,9 @@ static void test_fullscreen(void)
         printf("SKIP: fullscreen: no 32-bit RTG mode of 320x240 to 800x600\n");
         return;
     }
-    ctx = aglCreateContextTags2(&err, OGLES2_CCT_MODEID, mode, OGLES2_CCT_DEPTH, 32,
-                                OGLES2_CCT_GET_WIDTH, (ULONG)&w, OGLES2_CCT_GET_HEIGHT, (ULONG)&h,
-                                OGLES2_CCT_PISTORM_GET_WINDOW, (ULONG)&win, TAG_DONE);
+    ctx = aglCreateContextTags2(&err, OGLES3_CCT_MODEID, mode, OGLES3_CCT_DEPTH, 32,
+                                OGLES3_CCT_GET_WIDTH, (ULONG)&w, OGLES3_CCT_GET_HEIGHT, (ULONG)&h,
+                                OGLES3_CCT_PISTORM_GET_WINDOW, (ULONG)&win, TAG_DONE);
     check(ctx != 0 && win != 0, "create (MODEID tag, 32-bit depth)", "fullscreen");
     if (!ctx || !win) {
         if (ctx)
@@ -628,8 +628,8 @@ int main(int argc, char **argv)
         return 20;
     }
     TimerBase = timer_req.tr_node.io_Device;
-    if (!OGLES2Open()) {
-        printf("cannot open %s %d\n", OGLES2NAME, OGLES2_VERSION);
+    if (!OGLES3Open()) {
+        printf("cannot open %s %d\n", OGLES3NAME, OGLES3_VERSION);
         return 20;
     }
     for (i = 1; i < argc; i++)
@@ -648,7 +648,7 @@ int main(int argc, char **argv)
         if (!any)
             break;
     }
-    OGLES2Close();
+    OGLES3Close();
     CloseDevice((struct IORequest *)&timer_req);
     CloseLibrary(CyberGfxBase);
     CloseLibrary((struct Library *)GfxBase);

@@ -3,8 +3,8 @@
  * include/drm-uapi/drm.h. Only compat/fake_drm.c decodes these numbers, so
  * any consistent encoding works; this is the BSD one.
  */
-#ifndef OGLES2_COMPAT_SYS_IOCCOM_H
-#define OGLES2_COMPAT_SYS_IOCCOM_H
+#ifndef OGLES3_COMPAT_SYS_IOCCOM_H
+#define OGLES3_COMPAT_SYS_IOCCOM_H
 
 #define IOCPARM_MASK 0x1fffUL
 #define IOC_VOID     0x20000000UL

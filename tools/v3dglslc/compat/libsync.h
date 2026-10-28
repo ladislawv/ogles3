@@ -3,8 +3,8 @@
  * fence on AmigaOS: the fake DRM device completes every job at once, so
  * every sync file is already signalled.
  */
-#ifndef OGLES2_COMPAT_LIBSYNC_H
-#define OGLES2_COMPAT_LIBSYNC_H
+#ifndef OGLES3_COMPAT_LIBSYNC_H
+#define OGLES3_COMPAT_LIBSYNC_H
 
 static inline int sync_wait(int fd, int timeout)
 {

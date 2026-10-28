@@ -4,7 +4,7 @@ ogles2 M6 run 2
 What this is
 ------------
 Quake III Arena (ioquake3, the MiniGL port's source) built on gl4es and
-ogles2.library instead of MiniGL. It plays the game's demo "four" as a
+ogles3.library instead of MiniGL. It plays the game's demo "four" as a
 timedemo (as fast as it can) at 640x480 on a screen of its own, twice:
 the first time gl4es's shaders are compiled (the screen may stay black for
 a minute), the second time they come from the cache. The game prints the
@@ -39,7 +39,7 @@ Contents
 --------
 Run-M1                    the test script
 Play-Quake                the game to play
-libs/ogles2.library       the library (logs every line at once)
+libs/ogles3.library       the library (logs every line at once)
 libs/v3dglslc             the shader compiler (started by the library)
 bin/quake3-gl4es          the game on gl4es
 bin/*.dll, home/baseq3/   the game's modules, built from the same source

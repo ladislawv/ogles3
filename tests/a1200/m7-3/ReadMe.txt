@@ -31,11 +31,11 @@ that hung:   Execute Run-M1 FROM=<the next step>
 Contents
 --------
 Run-M1               the test script
-libs/ogles2.library  the library (logs every line at once)
+libs/ogles3.library  the library (logs every line at once)
 bin/m7_clip          the clip control test
 bin/m1_draw, m4_depth, m5_fbo   the earlier tests
 compiler/v3dglslc    the shader compiler (m7_clip's program is compiled
                      on the Amiga, into cache/)
 bin/*.v3dp, *.v3dw   the other tests' compiled shaders
-bin/OGLES2Log        writes the library's log file on request
+bin/OGLES3Log        writes the library's log file on request
 notes-template.txt   copied to results/notes.txt at the end

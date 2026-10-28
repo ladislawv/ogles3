@@ -6,8 +6,8 @@
  * keeps Mesa's sources unchanged. Functions libnix lacks are implemented in
  * amiga_compat.c.
  */
-#ifndef OGLES2_AMIGA_COMPAT_H
-#define OGLES2_AMIGA_COMPAT_H
+#ifndef OGLES3_AMIGA_COMPAT_H
+#define OGLES3_AMIGA_COMPAT_H
 
 #include <stddef.h>
 #include <stdarg.h>

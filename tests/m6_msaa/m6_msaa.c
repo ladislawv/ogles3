@@ -1,5 +1,5 @@
 /*
- * M6 test: 4x MSAA on the default framebuffer (OGLES2_CCT_PISTORM_MSAA, plan
+ * M6 test: 4x MSAA on the default framebuffer (OGLES3_CCT_PISTORM_MSAA, plan
  * 7.2), on a hidden 256x128 bitmap with D24S8. Nothing to watch.
  *   usage: m6_msaa
  *   queries   GL_SAMPLE_BUFFERS 1, GL_SAMPLES 4; 0 and 0 in an FBO and
@@ -24,12 +24,12 @@
 #include <cybergraphx/cybergraphics.h>
 #include <proto/exec.h>
 #include <proto/graphics.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include "../common/smooth_shaders.h"
 #include "../common/tex_shaders.h"
 
-#ifndef OGLES2_CCT_PISTORM_MSAA
-#define OGLES2_CCT_PISTORM_MSAA (OGLES2_CCT_PISTORM_MIN + 5)
+#ifndef OGLES3_CCT_PISTORM_MSAA
+#define OGLES3_CCT_PISTORM_MSAA (OGLES3_CCT_PISTORM_MIN + 5)
 #endif
 
 struct GfxBase *GfxBase;
@@ -130,8 +130,8 @@ static int mixed_pixels(void)
 static void *context(struct BitMap *bm, ULONG msaa)
 {
     ULONG err = 0;
-    void *ctx = aglCreateContextTags2(&err, OGLES2_CCT_BITMAP, (ULONG)bm, OGLES2_CCT_DEPTH, 24,
-                                      OGLES2_CCT_STENCIL, 8, OGLES2_CCT_PISTORM_MSAA, msaa, TAG_DONE);
+    void *ctx = aglCreateContextTags2(&err, OGLES3_CCT_BITMAP, (ULONG)bm, OGLES3_CCT_DEPTH, 24,
+                                      OGLES3_CCT_STENCIL, 8, OGLES3_CCT_PISTORM_MSAA, msaa, TAG_DONE);
     if (ctx) {
         aglMakeCurrent(ctx);
         programs();
@@ -153,8 +153,8 @@ int main(void)
     char msg[160];
     printf("ogles2 M6: 4x MSAA on the default framebuffer\n");
     GfxBase = (struct GfxBase *)OpenLibrary((STRPTR) "graphics.library", 39);
-    if (!GfxBase || !OGLES2Open()) {
-        printf("needs graphics 39 and %s\n", OGLES2NAME);
+    if (!GfxBase || !OGLES3Open()) {
+        printf("needs graphics 39 and %s\n", OGLES3NAME);
         return 20;
     }
     bm = AllocBitMap(W, H, 32, BMF_MINPLANES | BMF_SPECIALFMT | SHIFT_PIXFMT(PIXFMT_BGRA32), 0);
@@ -316,7 +316,7 @@ int main(void)
     sprintf(msg, "destroy returns the memory (%ld bytes difference)", (long)after - (long)before);
     check(after + 32768 >= before, msg);
     FreeBitMap(bm);
-    OGLES2Close();
+    OGLES3Close();
     printf("%s: %d of %d checks passed\n", failures ? "FAILED" : "ALL PASSED", checks - failures, checks);
     return failures ? 10 : 0;
 }

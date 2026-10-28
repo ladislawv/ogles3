@@ -1,7 +1,7 @@
 Boing 2026
 ==========
 
-The Amiga's Boing Ball of 1984, remade forty-two years on for ogles2.library:
+The Amiga's Boing Ball of 1984, remade forty-two years on for ogles3.library:
 OpenGL ES 2.0 with programmable shaders, drawn by the Raspberry Pi 4's GPU
 (VideoCore VI, V3D 4.2) in a PiStorm under Emu68.
 
@@ -14,7 +14,7 @@ do at all: this needs shaders.
 
 Running it
 ----------
-Needs ogles2.library 1.3 (in LIBS:, or in libs/ beside the program) and a
+Needs ogles3.library 1.3 (in LIBS:, or in libs/ beside the program) and a
 32-bit RTG screen. The shaders come compiled (shaders/), so the shader
 compiler is not needed.
 

@@ -3,7 +3,7 @@
 the C header's layout: the header words, and that every slot is relocated to
 the function of the same name (ogles2_<entry>), in abi_order.txt's order.
 
-Usage: verify_table.py ogles2.library.debug [abi_order.txt]
+Usage: verify_table.py ogles3.library.debug [abi_order.txt]
 Reads the AmigaOS hunk file directly (HUNK_SYMBOL and HUNK_RELOC32).
 """
 import os, struct, sys

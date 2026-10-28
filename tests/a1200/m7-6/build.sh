@@ -12,13 +12,13 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 REPO=$(cd "$HERE/../../.." && pwd)
 if [ "${SYNC:-0}" = 1 ]; then
     B=${B:-$HOME/ogles2-build/m68k-sync}
-    make -C "$REPO" -j8 B="$B" EXTRA_CFLAGS=-DOGLES2_LOG_SYNC > /dev/null
+    make -C "$REPO" -j8 B="$B" EXTRA_CFLAGS=-DOGLES3_LOG_SYNC > /dev/null
 else
     B=${B:-$HOME/ogles2-build/m68k}
     make -C "$REPO" -j8 B="$B" > /dev/null
 fi
 make -C "$REPO" B="$B" test-v3dp > /dev/null
 mkdir -p "$PKG/libs" "$PKG/bin"
-cp "$B/ogles2.library" "$PKG/libs/"
-cp "$B/tests/m7_copy" "$B/cmd/OGLES2Log" "$PKG/bin/"
+cp "$B/ogles3.library" "$PKG/libs/"
+cp "$B/tests/m7_copy" "$B/cmd/OGLES3Log" "$PKG/bin/"
 cp "$B"/v3dp/*.v3dp "$B"/v3dp/*.v3dw "$PKG/bin/"

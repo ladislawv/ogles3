@@ -11,7 +11,7 @@
  *      clears only depth (the tile buffer loads them and stores them back),
  *      then read raw;
  *   4. GPU clear: all 256 values in every channel, read raw.
- * Run with ENV:OGLES2/Probe=C to log the packed clear words of every job.
+ * Run with ENV:OGLES3/Probe=C to log the packed clear words of every job.
  * About 10 s.
  */
 #include <stdio.h>
@@ -23,7 +23,7 @@
 #include <proto/dos.h>
 #include <proto/graphics.h>
 #include <proto/cybergraphics.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 
 struct GfxBase *GfxBase;
 struct Library *CyberGfxBase;
@@ -109,8 +109,8 @@ int main(void)
     printf("ogles2 M1 colour probe\n");
     GfxBase = (struct GfxBase *)OpenLibrary((STRPTR) "graphics.library", 39);
     CyberGfxBase = OpenLibrary((STRPTR) "cybergraphics.library", 41);
-    if (!GfxBase || !CyberGfxBase || !OGLES2Open()) {
-        printf("needs graphics 39, cybergraphics 41 and %s %d\n", OGLES2NAME, OGLES2_VERSION);
+    if (!GfxBase || !CyberGfxBase || !OGLES3Open()) {
+        printf("needs graphics 39, cybergraphics 41 and %s %d\n", OGLES3NAME, OGLES3_VERSION);
         return 20;
     }
     cpu_conversion();
@@ -149,7 +149,7 @@ int main(void)
     bad = report("readback", got, 3);
     printf("%s: readback (colour; alpha is not checked)\n", bad ? "FAIL" : "PASS");
 
-    ctx = aglCreateContextTags2(&err, OGLES2_CCT_BITMAP, (ULONG)bm, TAG_DONE);
+    ctx = aglCreateContextTags2(&err, OGLES3_CCT_BITMAP, (ULONG)bm, TAG_DONE);
     if (!ctx) {
         printf("FAIL: create (BITMAP tag), error %lu\n", (unsigned long)err);
         FreeBitMap(bm);
@@ -217,7 +217,7 @@ int main(void)
 
     aglDestroyContext(ctx);
     FreeBitMap(bm);
-    OGLES2Close();
+    OGLES3Close();
     CloseLibrary(CyberGfxBase);
     CloseLibrary((struct Library *)GfxBase);
     printf("done\n");

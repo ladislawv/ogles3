@@ -1,5 +1,5 @@
 /*
- * Boing 2026: the Amiga's 1984 Boing Ball, remade for ogles2.library.
+ * Boing 2026: the Amiga's 1984 Boing Ball, remade for ogles3.library.
  *
  * A glossy, per-pixel lit checkered ball bounces in a neon-gridded room:
  *   - a real-time soft shadow: a shadow map in a depth texture
@@ -8,7 +8,7 @@
  *     drawn mirrored) and the back wall's grid (traced in the shader);
  *   - bloom on the highlights and the neon (a bright pass at 1/4 size,
  *     two separable Gaussian blurs, added on top);
- *   - 4x MSAA on the window (OGLES2_CCT_PISTORM_MSAA);
+ *   - 4x MSAA on the window (OGLES3_CCT_PISTORM_MSAA);
  *   - the checkerboard computed per pixel and antialiased with fwidth
  *     (OES_standard_derivatives); squash and stretch; a synthesised "boing"
  *     on Paula.
@@ -44,7 +44,7 @@
 #include <proto/intuition.h>
 #include <proto/timer.h>
 #include <proto/graphics.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include "boing2026_shaders.h"
 
 struct IntuitionBase *IntuitionBase;
@@ -872,8 +872,8 @@ int main(void)
     }
     timer_open = TRUE;
     TimerBase = timer_req.tr_node.io_Device;
-    if (!OGLES2Open()) {
-        printf("needs %s 1.3 or newer: in LIBS:, or in this program's drawer or its libs/\n", OGLES2NAME);
+    if (!OGLES3Open()) {
+        printf("needs %s 1.3 or newer: in LIBS:, or in this program's drawer or its libs/\n", OGLES3NAME);
         goto out;
     }
     if (full) {
@@ -888,10 +888,10 @@ int main(void)
             if (!GetDisplayInfoData(NULL, (UBYTE *)&dims, sizeof(dims), DTAG_DIMS, id) || dims.MaxDepth < 24 ||
                 dims.Nominal.MaxX - dims.Nominal.MinX + 1 != w0 || dims.Nominal.MaxY - dims.Nominal.MinY + 1 != h0)
                 continue;
-            ctx = aglCreateContextTags2(&err, OGLES2_CCT_MODEID, id, OGLES2_CCT_PISTORM_GET_WINDOW, (ULONG)&iw,
-                                        OGLES2_CCT_DEPTH, 0, OGLES2_CCT_STENCIL, 0, OGLES2_CCT_PISTORM_MSAA,
-                                        msaa ? 4 : 0, OGLES2_CCT_VSYNC, vsync, OGLES2_CCT_GET_WIDTH, (ULONG)&width,
-                                        OGLES2_CCT_GET_HEIGHT, (ULONG)&height, TAG_DONE);
+            ctx = aglCreateContextTags2(&err, OGLES3_CCT_MODEID, id, OGLES3_CCT_PISTORM_GET_WINDOW, (ULONG)&iw,
+                                        OGLES3_CCT_DEPTH, 0, OGLES3_CCT_STENCIL, 0, OGLES3_CCT_PISTORM_MSAA,
+                                        msaa ? 4 : 0, OGLES3_CCT_VSYNC, vsync, OGLES3_CCT_GET_WIDTH, (ULONG)&width,
+                                        OGLES3_CCT_GET_HEIGHT, (ULONG)&height, TAG_DONE);
         }
         if (!ctx || !iw) {
             printf("no %dx%d screen mode that ogles2 can draw into (it needs a 32-bit one)\n", w0, h0);
@@ -909,9 +909,9 @@ int main(void)
             printf("cannot open a window\n");
             goto out;
         }
-        ctx = aglCreateContextTags2(&err, OGLES2_CCT_WINDOW, (ULONG)win, OGLES2_CCT_DEPTH, 0, OGLES2_CCT_STENCIL, 0,
-                                    OGLES2_CCT_PISTORM_MSAA, msaa ? 4 : 0, OGLES2_CCT_VSYNC, vsync,
-                                    OGLES2_CCT_GET_WIDTH, (ULONG)&width, OGLES2_CCT_GET_HEIGHT, (ULONG)&height,
+        ctx = aglCreateContextTags2(&err, OGLES3_CCT_WINDOW, (ULONG)win, OGLES3_CCT_DEPTH, 0, OGLES3_CCT_STENCIL, 0,
+                                    OGLES3_CCT_PISTORM_MSAA, msaa ? 4 : 0, OGLES3_CCT_VSYNC, vsync,
+                                    OGLES3_CCT_GET_WIDTH, (ULONG)&width, OGLES3_CCT_GET_HEIGHT, (ULONG)&height,
                                     TAG_DONE);
         if (!ctx) {
             printf("aglCreateContextTags2 failed (error %lu)\n", (unsigned long)err);
@@ -1293,7 +1293,7 @@ out:
     }
     if (win)
         CloseWindow(win);
-    OGLES2Close();
+    OGLES3Close();
     if (timer_open)
         CloseDevice((struct IORequest *)&timer_req);
     if (GfxBase)

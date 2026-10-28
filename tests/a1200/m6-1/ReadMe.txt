@@ -5,7 +5,7 @@ What this is
 ------------
 gl4es on the A1200: a library that turns desktop OpenGL (the kind MiniGL
 programs use: glBegin, display lists, fixed-function lighting) into
-OpenGL ES 2.0 for ogles2.library. It writes its own shaders while the
+OpenGL ES 2.0 for ogles3.library. It writes its own shaders while the
 program runs, so this package brings ogles2's shader compiler; the first
 run compiles them (up to a minute), later runs find them in cache/.
 
@@ -38,8 +38,8 @@ with the next step, for example:
 Contents
 --------
 Run-M1               the test script
-libs/ogles2.library  the library (logs every line at once)
+libs/ogles3.library  the library (logs every line at once)
 libs/v3dglslc        the shader compiler (started by the library)
 bin/gears_gl4es      the gears on gl4es
-bin/OGLES2Log        writes the library's log file on request
+bin/OGLES3Log        writes the library's log file on request
 notes-template.txt   copied to results/notes.txt at the end

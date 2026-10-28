@@ -24,22 +24,22 @@
  */
 #include "ogles2_internal.h"
 
-BOOL ogles2_copy_gpu(struct OGLES2Context *ctx, struct OGLES2Texture *t, int k, int level, GLint xoffset,
+BOOL ogles2_copy_gpu(struct OGLES3Context *ctx, struct OGLES3Texture *t, int k, int level, GLint xoffset,
                      GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height)
 {
-    struct OGLES2Framebuffer *saved = ctx->draw_fb, *fb;
-    struct OGLES2Texture *src = 0;
-    struct OGLES2TexParams params;
-    struct OGLES2Surface surf;
-    struct OGLES2RtFormat rf;
+    struct OGLES3Framebuffer *saved = ctx->draw_fb, *fb;
+    struct OGLES3Texture *src = 0;
+    struct OGLES3TexParams params;
+    struct OGLES3Surface surf;
+    struct OGLES3RtFormat rf;
     LONG x0, y0, x1, y1, cw, ch;
     GLfloat tc[4];
     BOOL ok;
 
     /* the copy's program writes 16-bit floats: targets the tile buffer
      * blends (8-bit and 16F), as 1.x's */
-    if (!ctx->v3d || (ctx->probe & OGLES2_PROBE_CPU_COPY) || !ogles2_texture_rt(t, k, level, &rf) ||
-        (rf.kind != OGLES2_RT_UNORM && rf.kind != OGLES2_RT_F16))
+    if (!ctx->v3d || (ctx->probe & OGLES3_PROBE_CPU_COPY) || !ogles2_texture_rt(t, k, level, &rf) ||
+        (rf.kind != OGLES3_RT_UNORM && rf.kind != OGLES3_RT_F16))
         return FALSE;
     ogles2_fb_update(ctx);
     /* Only what lies inside the framebuffer: the rest of the region gives
@@ -65,7 +65,7 @@ BOOL ogles2_copy_gpu(struct OGLES2Context *ctx, struct OGLES2Texture *t, int k, 
         tc[2] = (GLfloat)x1 / sw;
         tc[3] = (GLfloat)y1 / sh;
     } else {
-        struct OGLES2Display *d = &ctx->display;
+        struct OGLES3Display *d = &ctx->display;
         if (!d->bitmap)
             return FALSE;
         ogles2_job_flush(ctx, FALSE);

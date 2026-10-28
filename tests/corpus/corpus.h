@@ -4,7 +4,7 @@
  * fixed number of frames at a fixed time step, and captures one frame.
  *
  * Two backends with the same interface:
- *   corpus_amiga.c  ogles2.library through agl, in its own window
+ *   corpus_amiga.c  ogles3.library through agl, in its own window
  *   corpus_host.c   Mesa (llvmpipe) through EGL into a framebuffer object:
  *                   the reference images, and the programs' exact shader
  *                   sources for the offline compiler (corpus_shaders.txt,

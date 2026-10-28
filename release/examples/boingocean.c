@@ -1,5 +1,5 @@
 /*
- * ogles2.library example 3: Boing Ocean. The Amiga Boing ball floating on a
+ * ogles3.library example 3: Boing Ocean. The Amiga Boing ball floating on a
  * ray-marched ocean, drawn entirely by one fragment shader.
  *
  * Shows a heavy shader on ogles2 and how to make it affordable:
@@ -24,10 +24,10 @@
  * FRAMES quits after n frames and prints the average frame rate.
  * FULLSCREEN opens a 32-bit screen of WIDTH x HEIGHT (640 x 480 by default)
  * that ogles2 draws straight into, with no window to blit into; input then
- * comes from the screen's backdrop window (OGLES2_CCT_PISTORM_GET_WINDOW).
+ * comes from the screen's backdrop window (OGLES3_CCT_PISTORM_GET_WINDOW).
  *
  * Build (see the Makefile):
- *   m68k-amigaos-gcc -O2 -fno-builtin -I../include boingocean.c -L../lib -logles2 -lm881 -o boingocean
+ *   m68k-amigaos-gcc -O2 -fno-builtin -I../include boingocean.c -L../lib -logles3 -lm881 -o boingocean
  *
  * MIT License. The water's wave model and sky are afl_ext's "Very fast
  * procedural ocean" (https://www.shadertoy.com/view/MdXyzX, MIT License,
@@ -45,7 +45,7 @@
 #include <proto/intuition.h>
 #include <proto/timer.h>
 #include <proto/graphics.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include "boingocean_shaders.h"
 
 struct IntuitionBase *IntuitionBase;
@@ -367,9 +367,9 @@ int main(void)
     }
     timer_open = TRUE;
     TimerBase = timer_req.tr_node.io_Device;
-    if (!OGLES2Open()) {
+    if (!OGLES3Open()) {
         printf("needs %s 1.3 or newer: in LIBS:, or in this program's drawer or its libs/\n"
-               "(an older one that another program is using cannot be replaced)\n", OGLES2NAME);
+               "(an older one that another program is using cannot be replaced)\n", OGLES3NAME);
         goto out;
     }
     if (full) {
@@ -388,9 +388,9 @@ int main(void)
             if (!GetDisplayInfoData(NULL, (UBYTE *)&dims, sizeof(dims), DTAG_DIMS, id) || dims.MaxDepth < 24 ||
                 dims.Nominal.MaxX - dims.Nominal.MinX + 1 != w0 || dims.Nominal.MaxY - dims.Nominal.MinY + 1 != h0)
                 continue;
-            ctx = aglCreateContextTags2(&err, OGLES2_CCT_MODEID, id, OGLES2_CCT_PISTORM_GET_WINDOW, (ULONG)&iw,
-                                        OGLES2_CCT_DEPTH, 0, OGLES2_CCT_STENCIL, 0, OGLES2_CCT_GET_WIDTH,
-                                        (ULONG)&width, OGLES2_CCT_GET_HEIGHT, (ULONG)&height, TAG_DONE);
+            ctx = aglCreateContextTags2(&err, OGLES3_CCT_MODEID, id, OGLES3_CCT_PISTORM_GET_WINDOW, (ULONG)&iw,
+                                        OGLES3_CCT_DEPTH, 0, OGLES3_CCT_STENCIL, 0, OGLES3_CCT_GET_WIDTH,
+                                        (ULONG)&width, OGLES3_CCT_GET_HEIGHT, (ULONG)&height, TAG_DONE);
         }
         if (!ctx || !iw) {
             printf("no %dx%d screen mode that ogles2 can draw into (it needs a 32-bit one)\n", w0, h0);
@@ -412,8 +412,8 @@ int main(void)
         goto out;
     }
     /* No depth or stencil buffer: the shader does all the depth there is. */
-    ctx = aglCreateContextTags2(&err, OGLES2_CCT_WINDOW, (ULONG)win, OGLES2_CCT_DEPTH, 0, OGLES2_CCT_STENCIL, 0,
-                                OGLES2_CCT_GET_WIDTH, (ULONG)&width, OGLES2_CCT_GET_HEIGHT, (ULONG)&height,
+    ctx = aglCreateContextTags2(&err, OGLES3_CCT_WINDOW, (ULONG)win, OGLES3_CCT_DEPTH, 0, OGLES3_CCT_STENCIL, 0,
+                                OGLES3_CCT_GET_WIDTH, (ULONG)&width, OGLES3_CCT_GET_HEIGHT, (ULONG)&height,
                                 TAG_DONE);
     if (!ctx) {
         printf("aglCreateContextTags2 failed (error %lu)\n", (unsigned long)err);
@@ -470,8 +470,8 @@ int main(void)
         } else if (in.resized) {
             /* The surface takes the window's new inner size, the render
              * target the new fraction of it. */
-            aglSetParamsTags2(OGLES2_CCT_WINDOW, (ULONG)win, OGLES2_CCT_GET_WIDTH, (ULONG)&width,
-                              OGLES2_CCT_GET_HEIGHT, (ULONG)&height, TAG_DONE);
+            aglSetParamsTags2(OGLES3_CCT_WINDOW, (ULONG)win, OGLES3_CCT_GET_WIDTH, (ULONG)&width,
+                              OGLES3_CCT_GET_HEIGHT, (ULONG)&height, TAG_DONE);
             if (!make_target(width, height, in.div))
                 break;
             in.resized = FALSE;
@@ -573,7 +573,7 @@ out:
     }
     if (win)
         CloseWindow(win);
-    OGLES2Close();
+    OGLES3Close();
     if (timer_open)
         CloseDevice((struct IORequest *)&timer_req);
     if (GfxBase)

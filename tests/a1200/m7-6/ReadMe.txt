@@ -31,8 +31,8 @@ that hung:   Execute Run-M1 FROM=<the next step>
 Contents
 --------
 Run-M1               the test script
-libs/ogles2.library  the library
+libs/ogles3.library  the library
 bin/m7_copy          the copy test
 bin/*.v3dp, *.v3dw   the test's compiled shaders
-bin/OGLES2Log        writes the library's log file on request
+bin/OGLES3Log        writes the library's log file on request
 notes-template.txt   copied to results/notes.txt at the end

@@ -10,7 +10,7 @@ that the restart comes when asked for and can be narrowed down. It may
 restart the machine: save your work first. Normally it runs remotely
 (amictl); it works by hand too.
 
-Before running it, make sure no ogles2.library is installed in LIBS: (it
+Before running it, make sure no ogles3.library is installed in LIBS: (it
 would be used instead of the package's): results/00-libs.txt lists what
 LIBS: has.
 

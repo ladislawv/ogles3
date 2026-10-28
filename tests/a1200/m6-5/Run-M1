@@ -1,5 +1,5 @@
 ; Run-M1 - ogles2 M6 run 5: Quake III Arena with ioquake3's GLES2 renderer
-; on ogles2.library directly (no gl4es). See ReadMe.txt.
+; on ogles3.library directly (no gl4es). See ReadMe.txt.
 ;   CD to this directory, then:   Execute Run-M1
 ;   With the game elsewhere:       Execute Run-M1 Q3DATA=<the directory with baseq3>
 ;   The whole demo (1260 frames):  Execute Run-M1 FRAMES=0
@@ -30,7 +30,7 @@
 .ket }
 
 FailAt 21
-If NOT EXISTS libs/ogles2.library
+If NOT EXISTS libs/ogles3.library
   Echo "Please CD into the ogles2-m6-5 directory first,"
   Echo "then run:  Execute Run-M1"
   Quit 20
@@ -50,9 +50,9 @@ EndIf
 Echo "ogles2 M6 run 5" >>M6R5:results/00-progress.txt
 Date >>M6R5:results/00-progress.txt
 Assign LIBS: M6R5:libs ADD
-Assign OGLES2Cache: M6R5:cache
+Assign OGLES3Cache: M6R5:cache
 Avail FLUSH >NIL:
-SetEnv OGLES2/LogFile M6R5:results/ogles2.log
+SetEnv OGLES3/LogFile M6R5:results/ogles2.log
 Delete M6R5:home/baseq3/screenshots ALL QUIET >NIL:
 ; The modules load from the current directory.
 CD M6R5:bin
@@ -62,7 +62,7 @@ Echo "  ioquake3's GLES2 renderer (its shaders come compiled in cache/). The"
 Echo "  demo plays as fast as it can and the game quits."
 ; Probes T and P (ogles2_internal.h): the deletes and the context's end
 ; step by step, and the timing every 256 frames.
-SetEnv OGLES2/Probe TP
+SetEnv OGLES3/Probe TP
 ; Silent by default, as the earlier timedemo figures (MiniGL's too).
 Set Q3SND "+set s_initsound 0"
 If {SOUND} EQ 1 VAL
@@ -79,9 +79,9 @@ Set Q3LOG "+set logfile 2"
 If {SPEEDS} EQ 1 VAL
   Set Q3LOG "+set logfile 1 +set com_speeds 1"
 EndIf
-; 4x antialiasing: ogles2.library's, for the game (ENV:OGLES2/MSAA).
+; 4x antialiasing: ogles3.library's, for the game (ENV:OGLES3/MSAA).
 If {MSAA} EQ 1 VAL
-  SetEnv OGLES2/MSAA 4
+  SetEnv OGLES3/MSAA 4
 EndIf
 ; A size of its own: ioquake3's custom mode (r_mode -1), as Play-Quake.
 Set Q3MODE "+set r_mode 3"
@@ -98,17 +98,17 @@ Else
   Echo "  It stops after {FRAMES} frames."
   M6R5:bin/quake3-gl2 +set fs_basepath "{Q3DATA}" +set fs_homepath M6R5:home +set r_fullscreen 1 $Q3MODE +set r_swapInterval {VSYNC} $Q3SND $Q3LOG +set com_maxfps {MAXFPS} +set nextdemo quit +timedemo {TIMEDEMO} +demo four +wait {FRAMES} +screenshot +wait 5 +quit >M6R5:results/1-timedemo.txt
 EndIf
-UnSetEnv OGLES2/Probe
+UnSetEnv OGLES3/Probe
 UnSet Q3MODE
 UnSet Q3SND
 UnSet Q3LOG
 UnSetEnv QUAKE3_GL_PROFILE
-UnSetEnv OGLES2/MSAA
+UnSetEnv OGLES3/MSAA
 Echo "timedemo done" >>M6R5:results/00-progress.txt
 
 CD M6R5:
-UnSetEnv OGLES2/LogFile
-Assign OGLES2Cache:
+UnSetEnv OGLES3/LogFile
+Assign OGLES3Cache:
 Assign LIBS: M6R5:libs REMOVE
 If NOT EXISTS M6R5:results/notes.txt
   Copy M6R5:notes-template.txt M6R5:results/notes.txt

@@ -22,8 +22,8 @@
 #include <string.h>
 #include "variant_key.h"
 
-#define FS_IN (4 + OGLES2_VK_FS_BYTES + 28 + 1) /* num_inputs, after the common prog data and uses_pid */
-#define FS_SLOTS (4 + OGLES2_VK_FS_BYTES + 28 + 12)
+#define FS_IN (4 + OGLES3_VK_FS_BYTES + 28 + 1) /* num_inputs, after the common prog data and uses_pid */
+#define FS_SLOTS (4 + OGLES3_VK_FS_BYTES + 28 + 12)
 
 struct variant {
     unsigned stage;
@@ -109,7 +109,7 @@ static int stage_a_state(const UBYTE *k)
 
 static int prim_of(const UBYTE *k)
 {
-    return k[12] ? OGLES2_VK_POINTS : k[13] ? OGLES2_VK_LINES : OGLES2_VK_TRIANGLES;
+    return k[12] ? OGLES3_VK_POINTS : k[13] ? OGLES3_VK_LINES : OGLES3_VK_TRIANGLES;
 }
 
 /* The plain fragment variant of the same primitive and colour buffers. */
@@ -127,7 +127,7 @@ static void one(const char *dir, const char *name)
 {
     struct file plain, wide, a2c;
     const struct file *files[3];
-    UBYTE want[OGLES2_VK_FS_BYTES], vwant[OGLES2_VK_VS_BYTES], base[OGLES2_VK_VS_BYTES];
+    UBYTE want[OGLES3_VK_FS_BYTES], vwant[OGLES3_VK_VS_BYTES], base[OGLES3_VK_VS_BYTES];
     int i, j, k, pairs = 0, skipped = 0, before = failures;
     if (!load(&plain, dir, name, "v3dp")) {
         printf("FAIL: %s: no %s/%s.v3dp\n", name, dir, name);
@@ -151,12 +151,12 @@ static void one(const char *dir, const char *name)
                 continue;
             }
             ogles2_vk_fs_want(want, kk, prim_of(kk), kk[22], ogles2_vk_bits(kk), j == 2);
-            check(!memcmp(want, kk, OGLES2_VK_FS_BYTES), name, "a fragment key computed from itself is Mesa's");
+            check(!memcmp(want, kk, OGLES3_VK_FS_BYTES), name, "a fragment key computed from itself is Mesa's");
             check(ogles2_vk_fs_fits(kk, want), name, "a fragment key fits itself");
             if (j == 0 || !(m = plain_mate(&plain, kk)))
                 continue;
             ogles2_vk_fs_want(want, key(m), prim_of(kk), kk[22], ogles2_vk_bits(kk), j == 2);
-            check(!memcmp(want, kk, OGLES2_VK_FS_BYTES), name,
+            check(!memcmp(want, kk, OGLES3_VK_FS_BYTES), name,
                   j == 2 ? "the .v3da's key from the plain one and alpha to coverage"
                          : "the .v3dw's key from the plain one and its 32-bit samplers");
             if (j == 1) {
@@ -185,7 +185,7 @@ static void one(const char *dir, const char *name)
             base[12] = 0;
             memset(base + 16, 0, 64);
             ogles2_vk_vs_want(vwant, base, f[FS_IN], f + FS_SLOTS, ogles2_vk_bits(vk));
-            check(!memcmp(vwant, vk, OGLES2_VK_VS_BYTES), name,
+            check(!memcmp(vwant, vk, OGLES3_VK_VS_BYTES), name,
                   "the vertex key from the fragment variant's inputs is Mesa's");
             check(ogles2_vk_vs_fits(vk, vwant), name, "a vertex key fits itself");
             pairs++;

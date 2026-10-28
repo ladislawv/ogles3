@@ -1,5 +1,5 @@
-#ifndef OGLES2_VARIANT_KEY_H
-#define OGLES2_VARIANT_KEY_H
+#ifndef OGLES3_VARIANT_KEY_H
+#define OGLES3_VARIANT_KEY_H
 /* The draw-time variants' keys (docs/GLES3_PLAN.md stage A item 5;
  * variant_key.c): the key an OpenGL ES 3 program's draw needs, computed as
  * Mesa's v3d_update_compiled_fs and _vs do, and whether a variant's key
@@ -13,16 +13,16 @@ typedef short BOOL;
 #include <exec/types.h>
 #endif
 
-#define OGLES2_VK_FS_BYTES 296 /* OGLES2_FS_KEY_BYTES */
-#define OGLES2_VK_VS_BYTES 88  /* OGLES2_VS_KEY_BYTES */
+#define OGLES3_VK_FS_BYTES 296 /* OGLES3_FS_KEY_BYTES */
+#define OGLES3_VK_VS_BYTES 88  /* OGLES3_VS_KEY_BYTES */
 
 /* The rasterizer's primitive class (Mesa's is_points, is_lines). */
-#define OGLES2_VK_TRIANGLES 0
-#define OGLES2_VK_POINTS    1
-#define OGLES2_VK_LINES     2
+#define OGLES3_VK_TRIANGLES 0
+#define OGLES3_VK_POINTS    1
+#define OGLES3_VK_LINES     2
 
 /* The fragment key's sample_alpha_to_coverage byte. */
-#define OGLES2_VK_FS_A2C 17
+#define OGLES3_VK_FS_A2C 17
 
 /* Both keys start with sampler_is_32b, a little-endian u32. */
 ULONG ogles2_vk_bits(const UBYTE *key);
@@ -41,7 +41,7 @@ void ogles2_vk_fs_want(UBYTE *want, const UBYTE *base, int prim, UBYTE cbufs, UL
  * target the tile buffer cannot blend software blending, each drawn
  * target's format, swizzle and blend state (Mesa's enums, as its key
  * holds them). */
-struct OGLES2VkTargets
+struct OGLES3VkTargets
 {
     UBYTE f32;           /* f32_color_rb */
     UBYTE soft;          /* software_blend */
@@ -51,7 +51,7 @@ struct OGLES2VkTargets
     UBYTE swz[4][4];     /* PIPE_SWIZZLE_* */
     ULONG blend[4][6];   /* rgb func, src and dst factors; alpha's (pipe enums) */
 };
-void ogles2_vk_fs_targets(UBYTE *want, const struct OGLES2VkTargets *t);
+void ogles2_vk_fs_targets(UBYTE *want, const struct OGLES3VkTargets *t);
 /* A fragment key's f32_color_rb: the targets it writes 32 bits a channel. */
 UBYTE ogles2_vk_fs_f32(const UBYTE *key);
 /* A fragment variant serves the draw: its key has the computed fields, its

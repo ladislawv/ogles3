@@ -196,7 +196,7 @@ static void reset_if_stopped(void);
 
 BOOL ogles2_device_open(void)
 {
-    ObtainSemaphore(&OGLES2LibBase->lock);
+    ObtainSemaphore(&OGLES3LibBase->lock);
     warn_if_minigl_open();
     if (!gpu_lock) {
         gpu_lock = v3d_gpu_lock_get();
@@ -234,7 +234,7 @@ BOOL ogles2_device_open(void)
             state = ret;
         }
     }
-    ReleaseSemaphore(&OGLES2LibBase->lock);
+    ReleaseSemaphore(&OGLES3LibBase->lock);
     return state == 1;
 }
 
@@ -284,12 +284,12 @@ V3DContext *ogles2_device_context_new(UWORD w, UWORD h, int depth_bits, BOOL msa
         return 0;
     /* v3d_context_init reads the depth format and MSAA from globals (a
      * MiniGL-era setting): set and use them under the library lock. */
-    ObtainSemaphore(&OGLES2LibBase->lock);
+    ObtainSemaphore(&OGLES3LibBase->lock);
     g_v3d_requested_zbuffer_bits = depth_bits == 16 ? 16 : 32;
     g_v3d_requested_msaa = msaa ? 1 : 0;
     ret = v3d_context_init(v, &device, w, h);
     g_v3d_requested_msaa = 0;
-    ReleaseSemaphore(&OGLES2LibBase->lock);
+    ReleaseSemaphore(&OGLES3LibBase->lock);
     if (ret != 0) {
         ogles2_log("device: v3d_context_init(%ldx%ld) failed (%ld): out of memory", (ULONG)w,
                    (ULONG)h, (LONG)ret);

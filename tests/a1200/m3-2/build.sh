@@ -1,9 +1,9 @@
 #!/bin/bash
 # Fills the ogles2-m3-2 package directory ($1): the on-target compiler
 # (plan 8.4, M3), with compile status at glCompileShader and shader records;
-# the last steps run again on the warm cache, where no compile may happen. The package has the compiler (libs/v3dglslc) and no .v3dp
+# the last steps run again on the warm cache, where no compile may happen. The package has the compiler (libs/v3dglslc3) and no .v3dp
 # files at all: every program is compiled on the Amiga, into a cache
-# directory of the package (OGLES2Cache:) that the results keep, so the PC
+# directory of the package (OGLES3Cache:) that the results keep, so the PC
 # can compare the binaries with the offline compiler's. Called by
 # ../build_package.sh. Run-M1 is written here, one step per program.
 set -eu
@@ -14,15 +14,15 @@ BS=${BS:-$HOME/ogles2-build/m68k-sync}
 B=${B:-$HOME/ogles2-build/m68k}
 V=${V:-$HOME/ogles2-build/v3dglslc}
 
-make -C "$REPO" -j8 B="$BS" EXTRA_CFLAGS=-DOGLES2_LOG_SYNC > /dev/null
+make -C "$REPO" -j8 B="$BS" EXTRA_CFLAGS=-DOGLES3_LOG_SYNC > /dev/null
 make -C "$REPO" -j8 B="$B" > /dev/null
 make -C "$REPO" B="$B" test-v3dp > /dev/null # the test programs' sources and offline binaries
 B="$B" bash "$REPO/tests/corpus/build_corpus.sh" > /dev/null 2>&1 || { echo "build_corpus.sh failed"; exit 1; }
 C=$B/corpus
 mkdir -p "$PKG/libs" "$PKG/bin" "$PKG/data" "$PKG/shaders"
-cp "$BS/ogles2.library" "$PKG/libs/"
-cp "$V/v3dglslc.stripped" "$PKG/libs/v3dglslc"
-cp "$BS/cmd/OGLES2Log" "$BS/tests/m2_link" "$BS/tests/m2_elements" "$BS/tests/m2_texture" \
+cp "$BS/ogles3.library" "$PKG/libs/"
+cp "$V/v3dglslc.stripped" "$PKG/libs/v3dglslc3"
+cp "$BS/cmd/OGLES3Log" "$BS/tests/m2_link" "$BS/tests/m2_elements" "$BS/tests/m2_texture" \
    "$BS/tests/m1_draw" "$PKG/bin/"
 cp "$B"/v3dp/src/*.vert "$B"/v3dp/src/*.frag "$PKG/shaders/"
 cp "$C"/data/*.tga "$PKG/data/"
@@ -54,14 +54,14 @@ cat <<'EOF'
 ;   CD to this directory, then:   Execute Run-M1
 ;   After a reboot in the middle:  Execute Run-M1 FROM=<step>
 ; Nothing is installed: libs/ is added to LIBS: for the run and removed at the
-; end; OGLES2Cache: points at cache/ for the run. Output goes to results/.
+; end; OGLES3Cache: points at cache/ for the run. Output goes to results/.
 .key FROM/K
 .def FROM 1
 .bra {
 .ket }
 
 FailAt 21
-If NOT EXISTS libs/ogles2.library
+If NOT EXISTS libs/ogles3.library
   Echo "Please CD into the ogles2-m3-2 directory first,"
   Echo "then run:  Execute Run-M1"
   Quit 20
@@ -81,11 +81,11 @@ EndIf
 Echo "ogles2 M3 run 2, starting at step {FROM}" >>M3R2:results/00-progress.txt
 Date >>M3R2:results/00-progress.txt
 Assign LIBS: M3R2:libs ADD
-Assign OGLES2Cache: M3R2:cache
-; Expunge libraries nobody has open: an ogles2.library left in memory by an
+Assign OGLES3Cache: M3R2:cache
+; Expunge libraries nobody has open: an ogles3.library left in memory by an
 ; earlier run would otherwise be used instead of this package's.
 Avail FLUSH >NIL:
-SetEnv OGLES2/LogFile M3R2:results/ogles2.log
+SetEnv OGLES3/LogFile M3R2:results/ogles2.log
 SetEnv CORPUS_FRAMES 60
 
 If NOT {FROM} GT 1 VAL
@@ -159,7 +159,7 @@ cat <<'EOF'
 UnSetEnv CORPUS_FRAMES
 UnSetEnv CORPUS_SHOT
 UnSetEnv CORPUS_OUT
-UnSetEnv OGLES2/LogFile
+UnSetEnv OGLES3/LogFile
 ; What the compiler wrote, for the comparison with the offline compiler.
 Copy M3R2:cache M3R2:results/cache ALL QUIET
 List M3R2:cache >M3R2:results/cache-list.txt
@@ -168,7 +168,7 @@ Assign LIBS: M3R2:libs REMOVE
 Avail FLUSH >NIL:
 Wait 2
 Status >M3R2:results/status-after.txt
-Assign OGLES2Cache:
+Assign OGLES3Cache:
 If NOT EXISTS M3R2:results/notes.txt
   Copy M3R2:notes-template.txt M3R2:results/notes.txt
 EndIf

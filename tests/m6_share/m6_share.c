@@ -1,5 +1,5 @@
 /*
- * M6 test: objects shared between contexts (OGLES2_CCT_SHARE_WITH, GLES 2.0
+ * M6 test: objects shared between contexts (OGLES3_CCT_SHARE_WITH, GLES 2.0
  * appendix C) and several contexts in one program with CPU/GPU overlap
  * (job.c: a framebuffer object's render left running while another context
  * of the task draws). Three hidden 64x64 bitmaps: A, B sharing with A, and
@@ -22,7 +22,7 @@
 #include <proto/exec.h>
 #include <proto/graphics.h>
 #include <proto/cybergraphics.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include "../common/smooth_shaders.h"
 #include "../common/tex_shaders.h"
 
@@ -143,8 +143,8 @@ int main(void)
     printf("ogles2 M6: shared objects, several contexts\n");
     GfxBase = (struct GfxBase *)OpenLibrary((STRPTR) "graphics.library", 39);
     CyberGfxBase = OpenLibrary((STRPTR) "cybergraphics.library", 41);
-    if (!GfxBase || !CyberGfxBase || !OGLES2Open()) {
-        printf("needs graphics, cybergraphics 41 and %s\n", OGLES2NAME);
+    if (!GfxBase || !CyberGfxBase || !OGLES3Open()) {
+        printf("needs graphics, cybergraphics 41 and %s\n", OGLES3NAME);
         return 20;
     }
     bma = AllocBitMap(W, H, 32, BMF_MINPLANES | BMF_SPECIALFMT | SHIFT_PIXFMT(PIXFMT_BGRA32), 0);
@@ -162,17 +162,17 @@ int main(void)
     rpc.BitMap = bmc;
     before = AvailMem(MEMF_ANY);
 
-    a = aglCreateContextTags2(&err, OGLES2_CCT_BITMAP, (ULONG)bma, TAG_DONE);
+    a = aglCreateContextTags2(&err, OGLES3_CCT_BITMAP, (ULONG)bma, TAG_DONE);
     check(a != 0, "context A");
     if (!a)
         return 20;
-    bad = aglCreateContextTags2(&err, OGLES2_CCT_BITMAP, (ULONG)bmc, OGLES2_CCT_SHARE_WITH, (ULONG)&rpc, TAG_DONE);
-    sprintf(msg, "OGLES2_CCT_SHARE_WITH something else: no context, error %lu (%d)", (unsigned long)err,
-            OGLES2_CCE_BAD_TAGS);
-    check(!bad && err == OGLES2_CCE_BAD_TAGS, msg);
-    b = aglCreateContextTags2(&err, OGLES2_CCT_BITMAP, (ULONG)bmb, OGLES2_CCT_SHARE_WITH, (ULONG)a, TAG_DONE);
+    bad = aglCreateContextTags2(&err, OGLES3_CCT_BITMAP, (ULONG)bmc, OGLES3_CCT_SHARE_WITH, (ULONG)&rpc, TAG_DONE);
+    sprintf(msg, "OGLES3_CCT_SHARE_WITH something else: no context, error %lu (%d)", (unsigned long)err,
+            OGLES3_CCE_BAD_TAGS);
+    check(!bad && err == OGLES3_CCE_BAD_TAGS, msg);
+    b = aglCreateContextTags2(&err, OGLES3_CCT_BITMAP, (ULONG)bmb, OGLES3_CCT_SHARE_WITH, (ULONG)a, TAG_DONE);
     check(b != 0, "context B, sharing with A");
-    c = aglCreateContextTags2(&err, OGLES2_CCT_BITMAP, (ULONG)bmc, TAG_DONE);
+    c = aglCreateContextTags2(&err, OGLES3_CCT_BITMAP, (ULONG)bmc, TAG_DONE);
     check(c != 0, "context C, alone");
     if (!b || !c)
         return 20;
@@ -333,7 +333,7 @@ int main(void)
     FreeBitMap(bma);
     FreeBitMap(bmb);
     FreeBitMap(bmc);
-    OGLES2Close();
+    OGLES3Close();
     CloseLibrary(CyberGfxBase);
     CloseLibrary((struct Library *)GfxBase);
     printf("%s: %d of %d checks passed\n", failures ? "FAILED" : "ALL PASSED", checks - failures, checks);

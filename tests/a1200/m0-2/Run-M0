@@ -1,10 +1,10 @@
-; Run-M0 - first ogles2.library test on the A1200. See ReadMe.txt.
+; Run-M0 - first ogles3.library test on the A1200. See ReadMe.txt.
 ;   CD to this directory, then:   Execute Run-M0
 ; Nothing is installed: libs/ is added to LIBS: for the run and removed
 ; again at the end. Output goes to results/.
 
 FailAt 21
-If NOT EXISTS libs/ogles2.library
+If NOT EXISTS libs/ogles3.library
   Echo "Please CD into the ogles2-m0-2 directory first,"
   Echo "then run:  Execute Run-M0"
   Quit 20
@@ -21,7 +21,7 @@ Avail >>M0RUN:results/01-system.txt
 
 ; Use this directory's library for the run, and log into results/.
 Assign LIBS: M0RUN:libs ADD
-SetEnv OGLES2/LogFile M0RUN:results/ogles2.log
+SetEnv OGLES3/LogFile M0RUN:results/ogles2.log
 
 Echo "Step 1 of 5: dispatch table layout"
 M0RUN:bin/abi_layout >M0RUN:results/abi_layout.txt
@@ -39,9 +39,9 @@ M0RUN:bin/abi_probe_vbcc >M0RUN:results/abi_probe_vbcc.txt
 M0RUN:bin/smoke_vbcc >M0RUN:results/smoke_vbcc.txt
 Echo "step 3 done" >>M0RUN:results/00-progress.txt
 
-Echo "Step 4 of 5: smoke test again (library already in memory), then OGLES2Log"
+Echo "Step 4 of 5: smoke test again (library already in memory), then OGLES3Log"
 M0RUN:bin/smoke >M0RUN:results/smoke_2.txt
-M0RUN:bin/OGLES2Log >M0RUN:results/ogles2log.txt
+M0RUN:bin/OGLES3Log >M0RUN:results/ogles2log.txt
 Echo "== after step 4" >>M0RUN:results/memory.txt
 Avail FAST >>M0RUN:results/memory.txt
 Echo "step 4 done" >>M0RUN:results/00-progress.txt
@@ -53,7 +53,7 @@ Avail FAST >>M0RUN:results/memory.txt
 M0RUN:bin/smoke GONE >M0RUN:results/expunge.txt
 Echo "step 5 done" >>M0RUN:results/00-progress.txt
 
-UnSetEnv OGLES2/LogFile
+UnSetEnv OGLES3/LogFile
 Assign LIBS: M0RUN:libs REMOVE
 If NOT EXISTS M0RUN:results/notes.txt
   Copy M0RUN:notes-template.txt M0RUN:results/notes.txt

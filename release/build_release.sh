@@ -10,7 +10,7 @@
 # MiniGL SDK (SDL links it for its desktop-GL path) and two examples built
 # from the SDK as assembled; it unpacks over the SDK archive.
 #
-# It builds the library, the import libraries (GCC and vbcc) and OGLES2Log,
+# It builds the library, the import libraries (GCC and vbcc) and OGLES3Log,
 # compiles the examples' shaders with the offline compiler (host v3dglslc)
 # and the examples themselves with the SDK's own Makefile, from the SDK as
 # assembled, so the SDK is what is tested. The on-target compiler
@@ -37,11 +37,11 @@ for a in "$@"; do
     esac
 done
 
-VER=$(sed -n 's/^#define OGLES2_LIB_VERSION *\([0-9]*\).*/\1/p' "$REPO/ogles2/ogles2_internal.h")
-REV=$(sed -n 's/^#define OGLES2_LIB_REVISION *\([0-9]*\).*/\1/p' "$REPO/ogles2/ogles2_internal.h")
+VER=$(sed -n 's/^#define OGLES3_LIB_VERSION *\([0-9]*\).*/\1/p' "$REPO/ogles2/ogles2_internal.h")
+REV=$(sed -n 's/^#define OGLES3_LIB_REVISION *\([0-9]*\).*/\1/p' "$REPO/ogles2/ogles2_internal.h")
 VERSION=$VER.$REV
-# the archives' name: the release (OGLES2_RELEASE), which may be newer than the library's version.revision
-RELEASE=$(sed -n 's/^#define OGLES2_RELEASE *"\([^"]*\)".*/\1/p' "$REPO/ogles2/ogles2_internal.h")
+# the archives' name: the release (OGLES3_RELEASE), which may be newer than the library's version.revision
+RELEASE=$(sed -n 's/^#define OGLES3_RELEASE *"\([^"]*\)".*/\1/p' "$REPO/ogles2/ogles2_internal.h")
 RELEASE=${RELEASE:-$VERSION}
 R=$OUT/ogles2
 echo "ogles2 $RELEASE (library $VERSION) -> $R"
@@ -54,12 +54,12 @@ make -C "$REPO" B="$B" vbcc > /dev/null
     exit 1
 }
 # The compiler's $VER is the library's version (build_m68k.sh), which
-# Install-ogles2 compares the installed compiler with.
+# Install-ogles3 compares the installed compiler with.
 LC_ALL=C grep -aq "\$VER: v3dglslc $VERSION " "$V/v3dglslc.stripped" ||
     { echo "$V/v3dglslc.stripped is not v3dglslc $VERSION: build_m68k.sh again"; exit 1; }
-[ "$(grep -c "Version >NIL: LIBS:" "$HERE/Install-ogles2")" = \
-  "$(grep -cE "Version >NIL: LIBS:(ogles2.library|v3dglslc) $VER $REV FILE" "$HERE/Install-ogles2")" ] ||
-    { echo "Install-ogles2 compares LIBS: with another version than $VER $REV"; exit 1; }
+[ "$(grep -c "Version >NIL: LIBS:" "$HERE/Install-ogles3")" = \
+  "$(grep -cE "Version >NIL: LIBS:(ogles3.library|v3dglslc) $VER $REV FILE" "$HERE/Install-ogles3")" ] ||
+    { echo "Install-ogles3 compares LIBS: with another version than $VER $REV"; exit 1; }
 
 rm -rf "$R" "$OUT/ogles2-$RELEASE.lha" "$OUT/work"
 mkdir -p "$R"/{Libs,C,Examples,SDK/include,SDK/lib,SDK/doc,SDK/examples,licences/Mesa} "$OUT/work"
@@ -72,11 +72,11 @@ text() { # source destination
 
 # ---- the user's part
 text "$HERE/ReadMe" "$R/ReadMe"
-text "$HERE/Install-ogles2" "$R/Install-ogles2"
-cp "$B/ogles2.library" "$R/Libs/"
+text "$HERE/Install-ogles3" "$R/Install-ogles3"
+cp "$B/ogles3.library" "$R/Libs/"
 cp "$V/v3dglslc.stripped" "$R/Libs/v3dglslc"
-cp "$B/cmd/OGLES2Log" "$R/C/"
-$TC/bin/m68k-amigaos-strip "$R/C/OGLES2Log"
+cp "$B/cmd/OGLES3Log" "$R/C/"
+$TC/bin/m68k-amigaos-strip "$R/C/OGLES3Log"
 
 # ---- licences (LICENSE and the Khronos/third-party notices may hold UTF-8)
 sed 's/\r$//' "$REPO/LICENSE" > "$R/LICENSE"
@@ -84,7 +84,7 @@ for f in "$REPO"/licences/*; do sed 's/\r$//' "$f" > "$R/licences/$(basename "$f
 cp "$MESA/docs/license.rst" "$R/licences/Mesa/license.txt"
 for l in MIT Apache-2.0 BSL-1.0; do cp "$MESA/licenses/$l" "$R/licences/Mesa/$l.txt"; done
 cat > "$R/licences/Mesa/ReadMe" <<'EOF'
-LIBS:v3dglslc is Mesa's GLSL compiler and V3D back end (Mesa 74b6971 with the
+LIBS:v3dglslc3 is Mesa's GLSL compiler and V3D back end (Mesa 74b6971 with the
 patches in the ogles2 source, tools/v3dglslc/patches). The Mesa files it is
 built from are MIT (MIT.txt; license.txt is Mesa's own summary); header-only
 parts of Mesa's util library carry Apache-2.0 or BSL-1.0 alternatives, whose
@@ -95,11 +95,11 @@ EOF
 cp -r "$REPO/include/." "$R/SDK/include/"
 cp -r "$B/gen/include/." "$R/SDK/include/"
 find "$R/SDK/include" -type f -name '*.h' -exec sed -i 's/\r$//' {} +
-cp "$B/libogles2.a" "$R/SDK/lib/"
-cp "$B/vbcc/ogles2.lib" "$R/SDK/lib/"
+cp "$B/libogles3.a" "$R/SDK/lib/"
+cp "$B/vbcc/ogles3.lib" "$R/SDK/lib/"
 # Autodoc: a form feed before each entry
-sed 's/\r$//' "$HERE/ogles2.doc" | awk 'NR > 1 && /^ogles2\.library\/[^ ]+ +ogles2\.library\// {printf "\f"} {print}' \
-    > "$R/SDK/doc/ogles2.doc"
+sed 's/\r$//' "$HERE/ogles3.doc" | awk 'NR > 1 && /^ogles2\.library\/[^ ]+ +ogles2\.library\// {printf "\f"} {print}' \
+    > "$R/SDK/doc/ogles3.doc"
 text "$HERE/GettingStarted.txt" "$R/SDK/doc/GettingStarted.txt"
 for f in Makefile triangle.c triangle_shaders.h cube.c cube_shaders.h boingocean.c boingocean_shaders.h; do
     text "$HERE/examples/$f" "$R/SDK/examples/$f"

@@ -11,7 +11,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #pragma GCC diagnostic ignored "-Wunused-function" /* perf_target.h's gears helpers */
 #include "perf_target.h"
 
@@ -173,12 +173,12 @@ int main(int argc, char **argv)
     a.window = 1;
     if (frames < 1)
         frames = 120;
-    if (!pt_open(&a, "rtt_churn: a render target a frame") || !OGLES2Open()) {
-        printf("needs a window and %s\n", OGLES2NAME);
+    if (!pt_open(&a, "rtt_churn: a render target a frame") || !OGLES3Open()) {
+        printf("needs a window and %s\n", OGLES3NAME);
         pt_close();
         return 20;
     }
-    ctx = aglCreateContextTags2(&err, OGLES2_CCT_WINDOW, (ULONG)pt_win, OGLES2_CCT_VSYNC, FALSE, TAG_DONE);
+    ctx = aglCreateContextTags2(&err, OGLES3_CCT_WINDOW, (ULONG)pt_win, OGLES3_CCT_VSYNC, FALSE, TAG_DONE);
     if (!ctx) {
         printf("aglCreateContext2 failed (%lu)\n", (unsigned long)err);
         goto out;
@@ -205,7 +205,7 @@ int main(int argc, char **argv)
 out:
     if (ctx)
         aglDestroyContext(ctx);
-    OGLES2Close();
+    OGLES3Close();
     pt_close();
     return 0;
 }

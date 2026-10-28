@@ -22,7 +22,7 @@
 #include <proto/dos.h>
 #include <proto/graphics.h>
 #include <proto/timer.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include <GLES2/gl2ext.h>
 #include "../common/smooth_shaders.h"
 #include "../common/tex_shaders.h"
@@ -384,8 +384,8 @@ static void run_bench(void)
 {
     ULONG e = 0;
     LONG w = 0, h = 0;
-    void *ctx = aglCreateContextTags2(&e, OGLES2_CCT_PISTORM_WIDTH, 640, OGLES2_CCT_PISTORM_HEIGHT, 480,
-                                      OGLES2_CCT_GET_WIDTH, (ULONG)&w, OGLES2_CCT_GET_HEIGHT, (ULONG)&h, TAG_DONE);
+    void *ctx = aglCreateContextTags2(&e, OGLES3_CCT_PISTORM_WIDTH, 640, OGLES3_CCT_PISTORM_HEIGHT, 480,
+                                      OGLES3_CCT_GET_WIDTH, (ULONG)&w, OGLES3_CCT_GET_HEIGHT, (ULONG)&h, TAG_DONE);
     double a, b;
     GLuint t;
     if (!ctx) {
@@ -432,8 +432,8 @@ int main(int argc, char **argv)
         return 20;
     }
     TimerBase = timer_req.tr_node.io_Device;
-    if (!OGLES2Open()) {
-        printf("needs %s\n", OGLES2NAME);
+    if (!OGLES3Open()) {
+        printf("needs %s\n", OGLES3NAME);
         CloseDevice((struct IORequest *)&timer_req);
         CloseLibrary((struct Library *)GfxBase);
         return 20;
@@ -441,7 +441,7 @@ int main(int argc, char **argv)
     if (do_bitmap) {
         struct BitMap *bm = AllocBitMap(320, 240, 32, BMF_MINPLANES | BMF_SPECIALFMT | SHIFT_PIXFMT(PIXFMT_BGRA32), 0);
         ULONG e = 0;
-        void *ctx = bm ? aglCreateContextTags2(&e, OGLES2_CCT_BITMAP, (ULONG)bm, TAG_DONE) : 0;
+        void *ctx = bm ? aglCreateContextTags2(&e, OGLES3_CCT_BITMAP, (ULONG)bm, TAG_DONE) : 0;
         if (ctx) {
             run_checks(ctx, "bitmap", 320, 240);
             aglDestroyContext(ctx);
@@ -454,8 +454,8 @@ int main(int argc, char **argv)
     if (do_window) {
         ULONG e = 0;
         LONG w = 0, h = 0;
-        void *ctx = aglCreateContextTags2(&e, OGLES2_CCT_PISTORM_WIDTH, 320, OGLES2_CCT_PISTORM_HEIGHT, 240,
-                                          OGLES2_CCT_GET_WIDTH, (ULONG)&w, OGLES2_CCT_GET_HEIGHT, (ULONG)&h, TAG_DONE);
+        void *ctx = aglCreateContextTags2(&e, OGLES3_CCT_PISTORM_WIDTH, 320, OGLES3_CCT_PISTORM_HEIGHT, 240,
+                                          OGLES3_CCT_GET_WIDTH, (ULONG)&w, OGLES3_CCT_GET_HEIGHT, (ULONG)&h, TAG_DONE);
         if (ctx) {
             run_checks(ctx, "window", (int)w, (int)h);
             Delay(50);
@@ -466,7 +466,7 @@ int main(int argc, char **argv)
     }
     if (do_bench)
         run_bench();
-    OGLES2Close();
+    OGLES3Close();
     CloseDevice((struct IORequest *)&timer_req);
     CloseLibrary((struct Library *)GfxBase);
     if (failures)

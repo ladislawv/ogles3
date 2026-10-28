@@ -13,7 +13,7 @@ CC     ?= m68k-amigaos-gcc
 SDK    ?= ..
 CFLAGS ?= -O2 -m68040 -mhard-float -mcrt=clib2 -fbbb=abcfhilmnprsz0 -D__AMIGAOS3__ -Wall
 MGL     = -I$(SDK)/MiniGL/minigl-shared-library/include
-GLLIBS  = -L$(SDK)/lib -logles2 -L$(SDK)/MiniGL/lib -lminigl -ldebug -lamiga -lm881
+GLLIBS  = -L$(SDK)/lib -logles3 -L$(SDK)/MiniGL/lib -lminigl -ldebug -lamiga -lm881
 
 all: sdl2_sprites sdl3_gles2
 

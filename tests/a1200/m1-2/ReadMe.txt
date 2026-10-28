@@ -9,7 +9,7 @@ of a compiler bug in converting fractions to whole numbers (now worked
 around). Run 2 repeats the test with that fixed; each colour now stays
 on screen for a moment, so you can see it.
 
-The first time ogles2.library uses the GPU to produce pixels: it clears
+The first time ogles3.library uses the GPU to produce pixels: it clears
 the picture to a colour on the GPU and shows it, in the four places a
 program can draw into:
   - an application's bitmap (nothing is shown; the program checks the
@@ -50,8 +50,8 @@ the library got.
 Contents
 --------
 Run-M1               the test script
-libs/ogles2.library  the library (logs every line at once)
+libs/ogles3.library  the library (logs every line at once)
 bin/m1_clear         clears and presents, then checks the pixels
 bin/smoke            the M0 smoke test, as a regression check
-bin/OGLES2Log        writes the library's log file on request
+bin/OGLES3Log        writes the library's log file on request
 notes-template.txt   copied to results/notes.txt at the end

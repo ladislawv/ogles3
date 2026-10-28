@@ -24,7 +24,7 @@
 #include <dos/dos.h>
 #include <proto/exec.h>
 #include <proto/dos.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include <GLES3/gl31.h>
 
 /* RAM:deqp-progress.txt as dEQP's progress patch writes it ("S case",
@@ -136,17 +136,17 @@ int main(int argc, char **argv)
         else n = atoi(argv[i]);
     }
     stage("start");
-    if (!OGLES2Open()) {
-        printf("needs %s\n", OGLES2NAME);
+    if (!OGLES3Open()) {
+        printf("needs %s\n", OGLES3NAME);
         return 20;
     }
     stage("library opened");
-    ctx = aglCreateContextTags2(&err, OGLES2_CCT_PISTORM_WIDTH, 256UL, OGLES2_CCT_PISTORM_HEIGHT, 256UL,
-                                OGLES2_CCT_DEPTH, 24UL, OGLES2_CCT_STENCIL, 8UL, OGLES2_CCT_VSYNC, (ULONG)FALSE,
-                                OGLES2_CCT_PISTORM_ES_VERSION, 31UL, TAG_DONE);
+    ctx = aglCreateContextTags2(&err, OGLES3_CCT_PISTORM_WIDTH, 256UL, OGLES3_CCT_PISTORM_HEIGHT, 256UL,
+                                OGLES3_CCT_DEPTH, 24UL, OGLES3_CCT_STENCIL, 8UL, OGLES3_CCT_VSYNC, (ULONG)FALSE,
+                                OGLES3_CCT_PISTORM_ES_VERSION, 31UL, TAG_DONE);
     if (!ctx) {
         printf("FAIL: no ES 3.1 window context (error %lu)\n", (unsigned long)err);
-        OGLES2Close();
+        OGLES3Close();
         return 20;
     }
     stage("context made");
@@ -156,7 +156,7 @@ int main(int argc, char **argv)
     stage("program linked");
     if (!p || !(pixels = malloc(256 * 256 * 4))) {
         aglDestroyContext(ctx);
-        OGLES2Close();
+        OGLES3Close();
         return 20;
     }
     printf("m8_indirect: %d iterations,%s%s%s%s%s\n", n, direct ? " direct" : " indirect",
@@ -233,7 +233,7 @@ int main(int argc, char **argv)
     glDeleteProgram(p);
     free(pixels);
     aglDestroyContext(ctx);
-    OGLES2Close();
+    OGLES3Close();
     printf("PASSED: %d iterations\n", i);
     return 0;
 }

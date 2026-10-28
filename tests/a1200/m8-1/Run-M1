@@ -10,7 +10,7 @@
 .ket }
 
 FailAt 21
-If NOT EXISTS libs-es3/ogles2.library
+If NOT EXISTS libs-es3/ogles3.library
   Echo "Please CD into the ogles2-m8-1 directory first,"
   Echo "then run:  Execute Run-M1"
   Quit 20
@@ -27,12 +27,12 @@ If EXISTS M8R1:cache
 EndIf
 MakeDir M8R1:cache
 Copy M8R1:oldcache/#? M8R1:cache/ QUIET
-Assign OGLES2Cache: M8R1:cache
+Assign OGLES3Cache: M8R1:cache
 Echo "ogles2 M8 run 1, starting at step {FROM}" >>M8R1:results/00-progress.txt
 Date >>M8R1:results/00-progress.txt
 ; An ogles2 installed in LIBS: would win over the package's (added after it).
-List LIBS:ogles2#? LIBS:v3dglslc >M8R1:results/00-libs.txt
-SetEnv OGLES2/LogFile M8R1:results/ogles2.log
+List LIBS:ogles3#? LIBS:v3dglslc3 >M8R1:results/00-libs.txt
+SetEnv OGLES3/LogFile M8R1:results/ogles2.log
 ; m8_es3 and m8_draw read their shaders from shaders/ here.
 CD M8R1:bin
 
@@ -100,8 +100,8 @@ Avail FLUSH >NIL:
 Assign LIBS: M8R1:libs-es3n REMOVE
 
 CD M8R1:
-UnSetEnv OGLES2/LogFile
-Assign OGLES2Cache:
+UnSetEnv OGLES3/LogFile
+Assign OGLES3Cache:
 If NOT EXISTS M8R1:results/notes.txt
   Copy M8R1:notes-template.txt M8R1:results/notes.txt
 EndIf

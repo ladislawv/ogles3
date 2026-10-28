@@ -13,19 +13,19 @@ REPO=$(cd "$HERE/../../.." && pwd)
 BS=${BS:-$HOME/ogles2-build/m68k-sync}
 B3=${B3:-$(dirname "$BS")/m68k-es3-sync}
 
-make -C "$REPO" -j8 B="$BS" EXTRA_CFLAGS=-DOGLES2_LOG_SYNC > /dev/null
-make -C "$REPO" -j8 B="$B3" EXTRA_CFLAGS=-DOGLES2_LOG_SYNC ES3=1 > /dev/null
+make -C "$REPO" -j8 B="$BS" EXTRA_CFLAGS=-DOGLES3_LOG_SYNC > /dev/null
+make -C "$REPO" -j8 B="$B3" EXTRA_CFLAGS=-DOGLES3_LOG_SYNC ES3=1 > /dev/null
 # The test programs' files (format 2 for the GLSL ES 3.00 ones), named by
 # their hash: m8_es3 and m8_draw link them from PROGDIR: without a compiler.
 make -C "$REPO" B="$B3" test-v3dp > /dev/null
 mkdir -p "$PKG/libs-release" "$PKG/libs-es3" "$PKG/libs-es3n" "$PKG/bin/shaders"
-cp "$BS/ogles2.library" "$PKG/libs-release/"
-cp "$B3/ogles2.library" "$PKG/libs-es3/"
+cp "$BS/ogles3.library" "$PKG/libs-release/"
+cp "$B3/ogles3.library" "$PKG/libs-es3/"
 # The ES3 library with the on-target compiler (m8_draw's draw-time
 # variants are compiled into cache/), and without it (they come from there).
-cp "${V:-$HOME/ogles2-build/v3dglslc}/v3dglslc.stripped" "$PKG/libs-es3/v3dglslc"
-cp "$B3/ogles2.library" "$PKG/libs-es3n/"
-cp "$BS/tests/m8_es3" "$BS/tests/m8_draw" "$BS/tests/smoke" "$BS/cmd/OGLES2Log" "$PKG/bin/"
+cp "${V:-$HOME/ogles2-build/v3dglslc}/v3dglslc.stripped" "$PKG/libs-es3/v3dglslc3"
+cp "$B3/ogles3.library" "$PKG/libs-es3n/"
+cp "$BS/tests/m8_es3" "$BS/tests/m8_draw" "$BS/tests/smoke" "$BS/cmd/OGLES3Log" "$PKG/bin/"
 cp "$B3"/v3dp/*.v3dp "$B3"/v3dp/*.v3dw "$PKG/bin/"
 for f in "$REPO"/tools/v3dglslc/test/shaders/*; do
     sed 's/\r$//' "$f" > "$PKG/bin/shaders/$(basename "$f")"

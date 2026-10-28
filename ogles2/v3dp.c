@@ -1,7 +1,7 @@
 /*
  * The .v3dp reader (v3dp/FORMAT.md, version 1.0): a program binary from the
  * offline compiler (v3dglslc, S1) or the on-target one (S2) becomes a
- * struct OGLES2Image, with its code copied once into GPU memory.
+ * struct OGLES3Image, with its code copied once into GPU memory.
  *
  * Every field is read explicitly, little-endian, with bounds checks; a file
  * the runtime cannot honour is refused with a reason rather than drawn
@@ -22,7 +22,7 @@ static const char *const validated_commits[] = {"74b69717c52b"};
 
 /* ---- allocations: one list per image ---- */
 
-static APTR alloc(struct OGLES2Image *im, ULONG size)
+static APTR alloc(struct OGLES3Image *im, ULONG size)
 {
     APTR *b = AllocVec(size + 8, MEMF_ANY | MEMF_CLEAR);
     if (!b)
@@ -32,7 +32,7 @@ static APTR alloc(struct OGLES2Image *im, ULONG size)
     return (UBYTE *)b + 8;
 }
 
-static void free_blocks(struct OGLES2Image *im)
+static void free_blocks(struct OGLES3Image *im)
 {
     APTR *b = im->blocks, *next;
     while (b) {
@@ -137,13 +137,13 @@ static const char *str_at(const char *strings, ULONG len, ULONG off)
 
 static BOOL recipe_ok(ULONG t)
 {
-    return t <= OGLES2_U_VIEWPORT_Z_SCALE || t == OGLES2_U_TMU_CONFIG_P0 || t == OGLES2_U_TMU_CONFIG_P1 ||
-           (t >= OGLES2_U_TEXTURE_WIDTH && t <= OGLES2_U_TEXTURE_ARRAY_SIZE) ||
-           t == OGLES2_U_UBO_ADDR || t == OGLES2_U_GET_UBO_SIZE ||
-           t == OGLES2_U_LINE_WIDTH || t == OGLES2_U_AA_LINE_WIDTH ||
-           t == OGLES2_U_SPILL_OFFSET || t == OGLES2_U_SPILL_SIZE_PER_THREAD ||
-           (t >= OGLES2_U_BLEND_CONSTANT_R && t <= OGLES2_U_BLEND_CONSTANT_R + 3) || t == OGLES2_U_CLIP_Z_COEFF ||
-           t == OGLES2_U_IMAGE_TMU_CONFIG_P0 || (t >= OGLES2_U_IMAGE_WIDTH && t <= OGLES2_U_IMAGE_ARRAY_SIZE);
+    return t <= OGLES3_U_VIEWPORT_Z_SCALE || t == OGLES3_U_TMU_CONFIG_P0 || t == OGLES3_U_TMU_CONFIG_P1 ||
+           (t >= OGLES3_U_TEXTURE_WIDTH && t <= OGLES3_U_TEXTURE_ARRAY_SIZE) ||
+           t == OGLES3_U_UBO_ADDR || t == OGLES3_U_GET_UBO_SIZE ||
+           t == OGLES3_U_LINE_WIDTH || t == OGLES3_U_AA_LINE_WIDTH ||
+           t == OGLES3_U_SPILL_OFFSET || t == OGLES3_U_SPILL_SIZE_PER_THREAD ||
+           (t >= OGLES3_U_BLEND_CONSTANT_R && t <= OGLES3_U_BLEND_CONSTANT_R + 3) || t == OGLES3_U_CLIP_Z_COEFF ||
+           t == OGLES3_U_IMAGE_TMU_CONFIG_P0 || (t >= OGLES3_U_IMAGE_WIDTH && t <= OGLES3_U_IMAGE_ARRAY_SIZE);
 }
 
 /* ES 3.1's types, a compute shader's only so far (compute.c writes them;
@@ -151,8 +151,8 @@ static BOOL recipe_ok(ULONG t)
  * memory. */
 static BOOL compute_recipe_ok(ULONG t)
 {
-    return t == OGLES2_U_SSBO_OFFSET || t == OGLES2_U_GET_SSBO_SIZE || t == OGLES2_U_NUM_WORK_GROUPS ||
-           t == OGLES2_U_SHARED_OFFSET;
+    return t == OGLES3_U_SSBO_OFFSET || t == OGLES3_U_GET_SSBO_SIZE || t == OGLES3_U_NUM_WORK_GROUPS ||
+           t == OGLES3_U_SHARED_OFFSET;
 }
 
 /* The columns of a matrix attribute (matCxR has C, each in a slot of its
@@ -183,7 +183,7 @@ static UBYTE matrix_columns(GLenum t)
 #define COMPUTE_STAGES 0x20 /* PROGRAM's stages: bit 5 */
 
 /* The common prog data (FORMAT.md "Common key and prog data"), 28 bytes. */
-static void read_common_prog_data(struct rd *r, struct OGLES2Variant *v)
+static void read_common_prog_data(struct rd *r, struct OGLES3Variant *v)
 {
     v->spill_size = u32(r);
     skip(r, 4 * 4);              /* tmu_spills, tmu_fills, tmu_count, qpu_read_stalls */
@@ -195,14 +195,14 @@ static void read_common_prog_data(struct rd *r, struct OGLES2Variant *v)
 
 #define COMMON_KEY_BYTES (4 + 6 + 2) /* sampler_is_32b, six bools, pad */
 
-struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, ULONG whylen)
+struct OGLES3Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, ULONG whylen)
 {
-    struct OGLES2Image *im = 0;
+    struct OGLES3Image *im = 0;
     struct rd r, s;
     ULONG nsections, i, k, stages = 0;
     const char *strings = 0;
     ULONG strings_len = 0;
-    struct OGLES2Variant *vars = 0;
+    struct OGLES3Variant *vars = 0;
     ULONG nvars = 0, major;
     /* The section index: up to MAX_SECTIONS, allocated (a .v3dx may have
      * that many); freed at the end either way. */
@@ -290,7 +290,7 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
         case 3: { /* STAGE_PARAMS */
             ULONG stage = u32(&s), nvalues = u32(&s), nparams = u32(&s), si;
             ULONG *tmpl;
-            struct OGLES2StateVar *sv;
+            struct OGLES3StateVar *sv;
             if (stage != 0 && stage != 4 && stage != 5)
                 FAIL("STAGE_PARAMS for an unknown stage", 0, stage);
             si = stage == 4; /* a compute program's one stage in slot 0 */
@@ -321,8 +321,8 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                 (void)name;
                 (void)size;
                 if (kind == 2) {
-                    if (st != OGLES2_STATE_DEPTH_RANGE && st != OGLES2_STATE_FB_WPOS_Y_TRANSFORM &&
-                        st != OGLES2_STATE_FB_PNTC_Y_TRANSFORM)
+                    if (st != OGLES3_STATE_DEPTH_RANGE && st != OGLES3_STATE_FB_WPOS_Y_TRANSFORM &&
+                        st != OGLES3_STATE_FB_PNTC_Y_TRANSFORM)
                         FAIL("state variable not implemented: ", STR(name), st);
                     if (off + 4 > nvalues)
                         FAIL("state variable outside the constant buffer", 0, ~0UL);
@@ -344,7 +344,7 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
         }
         case 4: { /* UNIFORMS */
             ULONG n = u32(&s);
-            struct OGLES2ImageUniform *u;
+            struct OGLES3ImageUniform *u;
             if (n > 1024)
                 FAIL("too many uniforms:", 0, n);
             u = alloc(im, (n + 1) * sizeof(*u));
@@ -352,7 +352,7 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                 FAIL("out of memory", 0, ~0UL);
             for (k = 0; k < n; k++) {
                 ULONG np, j;
-                struct OGLES2Place *pl;
+                struct OGLES3Place *pl;
                 u[k].name = STR(u32(&s));
                 u[k].type = u32(&s);
                 u[k].array = u32(&s);
@@ -360,7 +360,7 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                     ULONG fl = u32(&s);
                     u[k].flags = (UBYTE)(fl & 7);
                     if (format2 && (fl & 8)) /* an image (ES 3.1) */
-                        u[k].flags |= OGLES2_UNIFORM_IMAGE;
+                        u[k].flags |= OGLES3_UNIFORM_IMAGE;
                 }
                 np = u32(&s);
                 if (np > 2)
@@ -381,9 +381,9 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                 u[k].places = pl;
                 u[k].sampler[0] = u32(&s);
                 u[k].sampler[1] = u32(&s);
-                if ((u[k].flags & OGLES2_UNIFORM_IMAGE) &&
-                    ((u[k].sampler[0] != ~0UL && u[k].sampler[0] >= OGLES2_MAX_STAGE_IMAGES) ||
-                     (u[k].sampler[1] != ~0UL && u[k].sampler[1] >= OGLES2_MAX_STAGE_IMAGES)))
+                if ((u[k].flags & OGLES3_UNIFORM_IMAGE) &&
+                    ((u[k].sampler[0] != ~0UL && u[k].sampler[0] >= OGLES3_MAX_STAGE_IMAGES) ||
+                     (u[k].sampler[1] != ~0UL && u[k].sampler[1] >= OGLES3_MAX_STAGE_IMAGES)))
                     FAIL("an image past the stage's images: ", u[k].name, u[k].sampler[1]);
                 u[k].block = -1;
                 if (u[k].array > 65535 && !format2) /* format 2: a buffer variable's, checked below */
@@ -400,11 +400,11 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                             FAIL("a uniform block member that is not one: ", u[k].name, b);
                         u[k].block = (WORD)b;
                         if (flags2 & 2) /* a storage block's: a buffer variable (ES 3.1) */
-                            u[k].flags |= OGLES2_UNIFORM_BUFFER;
+                            u[k].flags |= OGLES3_UNIFORM_BUFFER;
                         else if (flags2 & 4) /* an atomic counter: its ATOMIC_BUFFERS entry (ES 3.1) */
-                            u[k].flags |= OGLES2_UNIFORM_ATOMIC;
+                            u[k].flags |= OGLES3_UNIFORM_ATOMIC;
                     }
-                    if (u[k].array > 65535 && !(u[k].flags & OGLES2_UNIFORM_BUFFER))
+                    if (u[k].array > 65535 && !(u[k].flags & OGLES3_UNIFORM_BUFFER))
                         FAIL("an array too long: ", u[k].name, u[k].array);
                 }
             }
@@ -414,8 +414,8 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
         }
         case 5: { /* ATTRIBUTES */
             ULONG n = u32(&s);
-            struct OGLES2ImageAttrib *a;
-            if (n > OGLES2_MAX_IMAGE_ATTRIBS)
+            struct OGLES3ImageAttrib *a;
+            if (n > OGLES3_MAX_IMAGE_ATTRIBS)
                 FAIL("too many attributes:", 0, n);
             a = alloc(im, (n + 1) * sizeof(*a));
             if (!a)
@@ -432,7 +432,7 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                 /* Format 2, bit 30: a location of its own (layout(location)). */
                 a[k].location = 0xff;
                 if (format2 && (loc & 0x40000000UL)) {
-                    if ((loc & 0xff) + a[k].columns > OGLES2_MAX_VERTEX_ATTRIBS)
+                    if ((loc & 0xff) + a[k].columns > OGLES3_MAX_VERTEX_ATTRIBS)
                         FAIL("an attribute location past the last: ", a[k].name, loc & 0xff);
                     a[k].location = (UBYTE)(loc & 0xff);
                 }
@@ -442,20 +442,20 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             break;
         }
         case 6: { /* VARIANT */
-            struct OGLES2Variant *v = &vars[im->nvariants];
+            struct OGLES3Variant *v = &vars[im->nvariants];
             ULONG n, j, codelen, klen;
             ULONG *rt, *rd2;
             const UBYTE *kstart;
             UBYTE *key;
             v->stage = (UBYTE)u32(&s);
             kstart = s.p;
-            if (v->stage == OGLES2_VARIANT_VS || v->stage == OGLES2_VARIANT_CS) {
+            if (v->stage == OGLES3_VARIANT_VS || v->stage == OGLES3_VARIANT_CS) {
                 skip(&s, COMMON_KEY_BYTES);
                 skip(&s, 4 + 64 + 4);             /* num_used_outputs+pad, used_outputs, va_swap_rb_mask */
                 (void)u8(&s);                     /* is_coord (the stage says it) */
                 v->per_vertex_point_size = u8(&s);
                 skip(&s, 2);                      /* clamp_color, pad */
-                klen = OGLES2_VS_KEY_BYTES;
+                klen = OGLES3_VS_KEY_BYTES;
                 if (!s.bad && (ULONG)(s.p - kstart) != klen)
                     FAIL("a vertex key of another size:", 0, (ULONG)(s.p - kstart));
                 read_common_prog_data(&s, v);
@@ -471,7 +471,7 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                 v->vpm_input_size = u32(&s);
                 v->vpm_output_size = u32(&s);
                 skip(&s, 64 * 4);                 /* driver_location_map */
-            } else if (v->stage == OGLES2_VARIANT_FS) {
+            } else if (v->stage == OGLES3_VARIANT_FS) {
                 skip(&s, COMMON_KEY_BYTES);
                 v->is_points = u8(&s);
                 v->is_lines = u8(&s);
@@ -479,7 +479,7 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                 v->cbufs = u8(&s);
                 skip(&s, 6 + 3);                  /* the other key bytes, pad */
                 skip(&s, 8 * 8 + 8 * 24 + 4 + 4); /* colour formats, blend, logicop, sprite mask */
-                klen = OGLES2_FS_KEY_BYTES;
+                klen = OGLES3_FS_KEY_BYTES;
                 if (!s.bad && (ULONG)(s.p - kstart) != klen)
                     FAIL("a fragment key of another size:", 0, (ULONG)(s.p - kstart));
                 read_common_prog_data(&s, v);
@@ -506,7 +506,7 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                     v->noperspective_flags[j] = u32(&s);
                 for (j = 0; j < 3; j++)
                     v->centroid_flags[j] = u32(&s);
-            } else if (v->stage == OGLES2_VARIANT_COMPUTE) {
+            } else if (v->stage == OGLES3_VARIANT_COMPUTE) {
                 skip(&s, COMMON_KEY_BYTES);       /* the key: the common one (FORMAT.md) */
                 klen = COMMON_KEY_BYTES;
                 read_common_prog_data(&s, v);
@@ -537,9 +537,9 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                 rt[j] = u32(&s);
                 /* storage buffers (atomic counters too) also in a fragment
                  * shader (ES 3.1; GL_MAX_VERTEX_SHADER_STORAGE_BLOCKS 0) */
-                if (!recipe_ok(rt[j]) && !(v->stage == OGLES2_VARIANT_COMPUTE && compute_recipe_ok(rt[j])) &&
-                    !(v->stage == OGLES2_VARIANT_FS &&
-                      (rt[j] == OGLES2_U_SSBO_OFFSET || rt[j] == OGLES2_U_GET_SSBO_SIZE)))
+                if (!recipe_ok(rt[j]) && !(v->stage == OGLES3_VARIANT_COMPUTE && compute_recipe_ok(rt[j])) &&
+                    !(v->stage == OGLES3_VARIANT_FS &&
+                      (rt[j] == OGLES3_U_SSBO_OFFSET || rt[j] == OGLES3_U_GET_SSBO_SIZE)))
                     FAIL("uniform recipe type not implemented yet:", 0, rt[j]);
             }
             for (j = 0; j < n; j++) {
@@ -548,21 +548,21 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                  * indexed uniform arrays); others are uniform blocks of
                  * format 2's programs (checked against the stage's map
                  * below). */
-                if (rt[j] == OGLES2_U_UBO_ADDR && (rd2[j] >> 24) != 0 && !format2)
+                if (rt[j] == OGLES3_U_UBO_ADDR && (rd2[j] >> 24) != 0 && !format2)
                     FAIL("a uniform block other than the default one", 0, rd2[j] >> 24);
-                if (rt[j] == OGLES2_U_UBO_ADDR)
+                if (rt[j] == OGLES3_U_UBO_ADDR)
                     v->uses_ubo = 1;
-                if (rt[j] == OGLES2_U_SSBO_OFFSET)
+                if (rt[j] == OGLES3_U_SSBO_OFFSET)
                     v->uses_storage = 1;
-                if (rt[j] == OGLES2_U_IMAGE_TMU_CONFIG_P0)
+                if (rt[j] == OGLES3_U_IMAGE_TMU_CONFIG_P0)
                     v->uses_images = 1;
-                if ((rt[j] == OGLES2_U_IMAGE_TMU_CONFIG_P0 && (rd2[j] >> 24) >= OGLES2_MAX_STAGE_IMAGES) ||
-                    (rt[j] >= OGLES2_U_IMAGE_WIDTH && rt[j] <= OGLES2_U_IMAGE_ARRAY_SIZE &&
-                     rd2[j] >= OGLES2_MAX_STAGE_IMAGES))
+                if ((rt[j] == OGLES3_U_IMAGE_TMU_CONFIG_P0 && (rd2[j] >> 24) >= OGLES3_MAX_STAGE_IMAGES) ||
+                    (rt[j] >= OGLES3_U_IMAGE_WIDTH && rt[j] <= OGLES3_U_IMAGE_ARRAY_SIZE &&
+                     rd2[j] >= OGLES3_MAX_STAGE_IMAGES))
                     FAIL("an image past the stage's images", 0, rd2[j]);
-                if (rt[j] == OGLES2_U_UBO_ADDR && (rd2[j] >> 24) != 0)
+                if (rt[j] == OGLES3_U_UBO_ADDR && (rd2[j] >> 24) != 0)
                     v->uses_blocks = 1;
-                if (rt[j] == OGLES2_U_CLIP_Z_COEFF)
+                if (rt[j] == OGLES3_U_CLIP_Z_COEFF)
                     im->clip_z_coeff = TRUE;
             }
             v->nrecipe = (UWORD)n;
@@ -573,7 +573,7 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                 if (!ui)
                     FAIL("out of memory", 0, ~0UL);
                 for (j = 0; j < n; j++) {
-                    if (rt[j] == OGLES2_U_UNIFORM && rd2[j] < 65536) {
+                    if (rt[j] == OGLES3_U_UNIFORM && rd2[j] < 65536) {
                         ui[j] = (UWORD)rd2[j];
                     } else {
                         ui[j] = 0;
@@ -585,12 +585,12 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                 v->nspecial = ns;
                 v->no_textures = 1;
                 for (j = 0; j < n; j++)
-                    if (rt[j] == OGLES2_U_TMU_CONFIG_P0 || rt[j] == OGLES2_U_TMU_CONFIG_P1 ||
-                        (rt[j] >= OGLES2_U_TEXTURE_WIDTH && rt[j] <= OGLES2_U_TEXTURE_ARRAY_SIZE) ||
-                        rt[j] == OGLES2_U_UBO_ADDR || rt[j] == OGLES2_U_GET_UBO_SIZE || rt[j] == OGLES2_U_SPILL_OFFSET ||
-                        rt[j] == OGLES2_U_IMAGE_TMU_CONFIG_P0 ||
-                        (rt[j] >= OGLES2_U_IMAGE_WIDTH && rt[j] <= OGLES2_U_IMAGE_ARRAY_SIZE) ||
-                        (rt[j] >= OGLES2_U_BLEND_CONSTANT_R && rt[j] <= OGLES2_U_BLEND_CONSTANT_R + 3))
+                    if (rt[j] == OGLES3_U_TMU_CONFIG_P0 || rt[j] == OGLES3_U_TMU_CONFIG_P1 ||
+                        (rt[j] >= OGLES3_U_TEXTURE_WIDTH && rt[j] <= OGLES3_U_TEXTURE_ARRAY_SIZE) ||
+                        rt[j] == OGLES3_U_UBO_ADDR || rt[j] == OGLES3_U_GET_UBO_SIZE || rt[j] == OGLES3_U_SPILL_OFFSET ||
+                        rt[j] == OGLES3_U_IMAGE_TMU_CONFIG_P0 ||
+                        (rt[j] >= OGLES3_U_IMAGE_WIDTH && rt[j] <= OGLES3_U_IMAGE_ARRAY_SIZE) ||
+                        (rt[j] >= OGLES3_U_BLEND_CONSTANT_R && rt[j] <= OGLES3_U_BLEND_CONSTANT_R + 3))
                         v->no_textures = 0; /* nor the blend colour or the spill area: not in draw.c's key */
             }
             codelen = u32(&s);
@@ -606,7 +606,7 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
         }
         case 7: { /* UNIFORM_BLOCKS (format 2) */
             ULONG n, nmaps, j;
-            struct OGLES2ImageBlock *b;
+            struct OGLES3ImageBlock *b;
             if (!format2)
                 break;
             n = u32(&s);
@@ -654,7 +654,7 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
         }
         case 11: { /* STORAGE_BLOCKS (format 2, feature bit 1; ES 3.1): as UNIFORM_BLOCKS */
             ULONG n, nmaps, j;
-            struct OGLES2ImageBlock *b;
+            struct OGLES3ImageBlock *b;
             if (!format2 || !(features & V3DP_FEATURE_STORAGE))
                 FAIL("a STORAGE_BLOCKS section without its feature bit", 0, ~0UL);
             n = u32(&s);
@@ -712,7 +712,7 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
         }
         case 12: { /* ATOMIC_BUFFERS (format 2, feature bit 3; ES 3.1) */
             ULONG n, j;
-            struct OGLES2ImageAtomic *a;
+            struct OGLES3ImageAtomic *a;
             if (!format2 || !(features & V3DP_FEATURE_ATOMIC))
                 FAIL("an ATOMIC_BUFFERS section without its feature bit", 0, ~0UL);
             n = u32(&s);
@@ -776,8 +776,8 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                 FAIL("uniform locations:", 0, n);
             for (j = 0; j < n; j++) {
                 x = u32(&s);
-                r[j] = x == 0xffffffffUL ? OGLES2_LOC_NONE : x == 0xfffffffeUL ? OGLES2_LOC_INACTIVE
-                     : x < 0xfffe ? (UWORD)x : OGLES2_LOC_NONE;
+                r[j] = x == 0xffffffffUL ? OGLES3_LOC_NONE : x == 0xfffffffeUL ? OGLES3_LOC_INACTIVE
+                     : x < 0xfffe ? (UWORD)x : OGLES3_LOC_NONE;
             }
             im->nremap = (UWORD)n;
             im->remap = r;
@@ -789,7 +789,7 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             break;
         case 8: { /* INTERFACE (format 2) */
             ULONG n;
-            struct OGLES2ImageVar *v;
+            struct OGLES3ImageVar *v;
             if (!format2)
                 break;
             n = u32(&s);
@@ -817,8 +817,8 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             break;
         }
         case 10: { /* TRANSFORM_FEEDBACK (format 2, feature bit 0) */
-            struct OGLES2ImageXfb *x;
-            struct OGLES2ImageXfbVar *v;
+            struct OGLES3ImageXfb *x;
+            struct OGLES3ImageXfbVar *v;
             ULONG n, nvar;
             if (!format2 || !(features & V3DP_FEATURE_TF))
                 FAIL("a TRANSFORM_FEEDBACK section without its feature bit", 0, ~0UL);
@@ -888,18 +888,18 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
     if (im->interface_types && types_n != im->ninterface)
         FAIL("interface types for another interface", 0, types_n);
     for (k = 0; k < im->nremap; k++)
-        if (im->remap[k] < OGLES2_LOC_INACTIVE && im->remap[k] >= im->nuniforms)
+        if (im->remap[k] < OGLES3_LOC_INACTIVE && im->remap[k] >= im->nuniforms)
             FAIL("a uniform location of no uniform", 0, im->remap[k]);
     /* Block members: uniforms of the image, in a block of their kind. */
     for (k = 0; k < im->nuniforms; k++) {
-        const struct OGLES2ImageUniform *u = &im->uniforms[k];
-        if (u->block >= 0 && u->block >= ((u->flags & OGLES2_UNIFORM_BUFFER)   ? im->nsblocks
-                                          : (u->flags & OGLES2_UNIFORM_ATOMIC) ? im->nabuffers
+        const struct OGLES3ImageUniform *u = &im->uniforms[k];
+        if (u->block >= 0 && u->block >= ((u->flags & OGLES3_UNIFORM_BUFFER)   ? im->nsblocks
+                                          : (u->flags & OGLES3_UNIFORM_ATOMIC) ? im->nabuffers
                                                                                : im->nublocks))
             FAIL("a block member of a block the program does not have: ", u->name, (ULONG)u->block);
     }
     for (k = 0; k < (ULONG)im->nublocks + im->nsblocks; k++) {
-        const struct OGLES2ImageBlock *b = k < im->nublocks ? &im->ublocks[k] : &im->sblocks[k - im->nublocks];
+        const struct OGLES3ImageBlock *b = k < im->nublocks ? &im->ublocks[k] : &im->sblocks[k - im->nublocks];
         ULONG j;
         for (j = 0; j < b->nmembers; j++)
             if (b->members[j] >= im->nuniforms)
@@ -908,17 +908,17 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
     /* Uniform blocks the variants read must be the stage's (its map; a
      * .v3dx's are checked against its program's when it is taken). */
     for (k = 0; k < im->nvariants && !im->v3dx; k++) {
-        const struct OGLES2Variant *v = &vars[k];
-        ULONG j, si = v->stage == OGLES2_VARIANT_FS;
+        const struct OGLES3Variant *v = &vars[k];
+        ULONG j, si = v->stage == OGLES3_VARIANT_FS;
         for (j = 0; j < v->nrecipe; j++) {
-            if ((v->rtype[j] == OGLES2_U_UBO_ADDR && (v->rdata[j] >> 24) > im->stage_nblocks[si]) ||
-                (v->rtype[j] == OGLES2_U_GET_UBO_SIZE && v->rdata[j] >= im->stage_nblocks[si]))
+            if ((v->rtype[j] == OGLES3_U_UBO_ADDR && (v->rdata[j] >> 24) > im->stage_nblocks[si]) ||
+                (v->rtype[j] == OGLES3_U_GET_UBO_SIZE && v->rdata[j] >= im->stage_nblocks[si]))
                 FAIL("a variant reads a uniform block its stage does not have", 0, v->rdata[j]);
-            if ((v->rtype[j] == OGLES2_U_SSBO_OFFSET || v->rtype[j] == OGLES2_U_GET_SSBO_SIZE) &&
+            if ((v->rtype[j] == OGLES3_U_SSBO_OFFSET || v->rtype[j] == OGLES3_U_GET_SSBO_SIZE) &&
                 v->rdata[j] >= im->stage_nsblocks[si])
                 FAIL("a variant reads a storage block its stage does not have", 0, v->rdata[j]);
         }
-        if (im->compute != (v->stage == OGLES2_VARIANT_COMPUTE))
+        if (im->compute != (v->stage == OGLES3_VARIANT_COMPUTE))
             FAIL("a variant of a stage the program does not have", 0, v->stage);
     }
     im->variants = vars;
@@ -970,17 +970,17 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             FAIL("out of memory", 0, ~0UL);
         memcpy(copy, strings, strings_len);
         for (k = 0; k < im->nattribs; k++)
-            ((struct OGLES2ImageAttrib *)im->attribs)[k].name += d;
+            ((struct OGLES3ImageAttrib *)im->attribs)[k].name += d;
         for (k = 0; k < im->nuniforms; k++)
-            ((struct OGLES2ImageUniform *)im->uniforms)[k].name += d;
+            ((struct OGLES3ImageUniform *)im->uniforms)[k].name += d;
         for (k = 0; k < im->nublocks; k++)
-            ((struct OGLES2ImageBlock *)im->ublocks)[k].name += d;
+            ((struct OGLES3ImageBlock *)im->ublocks)[k].name += d;
         for (k = 0; k < im->nsblocks; k++)
-            ((struct OGLES2ImageBlock *)im->sblocks)[k].name += d;
+            ((struct OGLES3ImageBlock *)im->sblocks)[k].name += d;
         for (k = 0; k < im->ninterface; k++)
-            ((struct OGLES2ImageVar *)im->interface)[k].name += d;
+            ((struct OGLES3ImageVar *)im->interface)[k].name += d;
         for (k = 0; im->xfb && k < im->xfb->nvaryings; k++)
-            ((struct OGLES2ImageXfbVar *)im->xfb->varyings)[k].name += d;
+            ((struct OGLES3ImageXfbVar *)im->xfb->varyings)[k].name += d;
     }
     im->name = "program binary";
     FreeVec(sec_start);
@@ -998,7 +998,7 @@ fail:
     return 0;
 }
 
-void ogles2_image_free(struct OGLES2Image *im, struct OGLES2Context *ctx)
+void ogles2_image_free(struct OGLES3Image *im, struct OGLES3Context *ctx)
 {
     if (!im)
         return;
@@ -1032,10 +1032,10 @@ void ogles2_image_free(struct OGLES2Image *im, struct OGLES2Context *ctx)
  * when the program has such a variant). A fragment shader with no variant
  * for those targets: the one for target 0 (EXT_draw_buffers: v3dglslc
  * makes the others only for programs that write gl_FragData[1] or up). */
-const struct OGLES2Variant *ogles2_image_variant(const struct OGLES2Image *im, UBYTE stage, UBYTE cbufs,
+const struct OGLES3Variant *ogles2_image_variant(const struct OGLES3Image *im, UBYTE stage, UBYTE cbufs,
                                                  GLenum mode)
 {
-    const struct OGLES2Variant *v, *any = 0, *rt0 = 0;
+    const struct OGLES3Variant *v, *any = 0, *rt0 = 0;
     BOOL points = mode == GL_POINTS;
     BOOL lines = mode == GL_LINES || mode == GL_LINE_LOOP || mode == GL_LINE_STRIP;
     UWORD i;
@@ -1043,7 +1043,7 @@ const struct OGLES2Variant *ogles2_image_variant(const struct OGLES2Image *im, U
         v = &im->variants[i];
         if (v->stage != stage)
             continue;
-        if (stage == OGLES2_VARIANT_FS) {
+        if (stage == OGLES3_VARIANT_FS) {
             if (v->is_points == points && v->is_lines == lines) {
                 UBYTE vc = v->cbufs ? v->cbufs : 1;
                 if (vc == cbufs)
@@ -1069,7 +1069,7 @@ const struct OGLES2Variant *ogles2_image_variant(const struct OGLES2Image *im, U
  * interface and units a's then b's (b's indices moved past a's). No
  * variants: they are the pair's, compiled through a Mesa pipeline of the two
  * (V3DGLSL_LINK_PIPELINE) into its .v3dx, which program.c borrows. */
-static UWORD *moved(struct OGLES2Image *im, const UWORD *from, ULONG n, ULONG by, BOOL atomic_kept)
+static UWORD *moved(struct OGLES3Image *im, const UWORD *from, ULONG n, ULONG by, BOOL atomic_kept)
 {
     UWORD *to = alloc(im, n * 2 + 2);
     ULONG k;
@@ -1080,7 +1080,7 @@ static UWORD *moved(struct OGLES2Image *im, const UWORD *from, ULONG n, ULONG by
     return to;
 }
 
-static BOOL blocks_moved(struct OGLES2Image *im, struct OGLES2ImageBlock *to, const struct OGLES2ImageBlock *from,
+static BOOL blocks_moved(struct OGLES3Image *im, struct OGLES3ImageBlock *to, const struct OGLES3ImageBlock *from,
                          ULONG n, ULONG by)
 {
     ULONG k;
@@ -1092,7 +1092,7 @@ static BOOL blocks_moved(struct OGLES2Image *im, struct OGLES2ImageBlock *to, co
     return TRUE;
 }
 
-static char *dup_str(struct OGLES2Image *im, const char *a, const char *b)
+static char *dup_str(struct OGLES3Image *im, const char *a, const char *b)
 {
     ULONG la = 0, lb = 0;
     char *t;
@@ -1111,15 +1111,15 @@ static char *dup_str(struct OGLES2Image *im, const char *a, const char *b)
     return t;
 }
 
-struct OGLES2Image *ogles2_v3dp_compose(const struct OGLES2Image *a, const struct OGLES2Image *b,
+struct OGLES3Image *ogles2_v3dp_compose(const struct OGLES3Image *a, const struct OGLES3Image *b,
                                         const UBYTE hash[32], const char *pipe_line)
 {
-    struct OGLES2Image *im = AllocVec(sizeof(*im), MEMF_ANY | MEMF_CLEAR);
-    struct OGLES2ImageUniform *u;
-    struct OGLES2ImageBlock *ub, *sb;
-    struct OGLES2ImageAtomic *ab;
-    struct OGLES2StateVar *sv;
-    struct OGLES2ImageVar *iv;
+    struct OGLES3Image *im = AllocVec(sizeof(*im), MEMF_ANY | MEMF_CLEAR);
+    struct OGLES3ImageUniform *u;
+    struct OGLES3ImageBlock *ub, *sb;
+    struct OGLES3ImageAtomic *ab;
+    struct OGLES3StateVar *sv;
+    struct OGLES3ImageVar *iv;
     ULONG k, na, nb;
     if (!im)
         return 0;
@@ -1136,11 +1136,11 @@ struct OGLES2Image *ogles2_v3dp_compose(const struct OGLES2Image *a, const struc
     for (k = 0; k < a->nuniforms; k++)
         u[k] = a->uniforms[k];
     for (k = 0; k < b->nuniforms; k++) {
-        struct OGLES2ImageUniform *v = &u[a->nuniforms + k];
+        struct OGLES3ImageUniform *v = &u[a->nuniforms + k];
         *v = b->uniforms[k];
         if (v->block >= 0)
-            v->block = (WORD)(v->block + ((v->flags & OGLES2_UNIFORM_BUFFER)   ? a->nsblocks
-                                          : (v->flags & OGLES2_UNIFORM_ATOMIC) ? a->nabuffers
+            v->block = (WORD)(v->block + ((v->flags & OGLES3_UNIFORM_BUFFER)   ? a->nsblocks
+                                          : (v->flags & OGLES3_UNIFORM_ATOMIC) ? a->nabuffers
                                                                                : a->nublocks));
     }
     im->uniforms = u;

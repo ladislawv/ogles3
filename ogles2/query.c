@@ -23,7 +23,7 @@
 #include "v3d_commands.h"
 #include "v3d_hw.h"
 
-struct OGLES2Query
+struct OGLES3Query
 {
     GLuint name;
     GLenum target;              /* 0 until first begun */
@@ -34,21 +34,21 @@ struct OGLES2Query
     ULONG primitives;           /* GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN's, counted on the CPU (xfb.c) */
 };
 
-struct OGLES2QueryState
+struct OGLES3QueryState
 {
-    struct OGLES2Query **tab;   /* by name (glGenQueries'), slot 0 unused */
+    struct OGLES3Query **tab;   /* by name (glGenQueries'), slot 0 unused */
     GLuint ntab;
-    struct OGLES2Query *occlusion, *xfb; /* the active one of each kind */
+    struct OGLES3Query *occlusion, *xfb; /* the active one of each kind */
 };
 
-static struct OGLES2QueryState *qs_get(struct OGLES2Context *ctx)
+static struct OGLES3QueryState *qs_get(struct OGLES3Context *ctx)
 {
     if (!ctx->query)
-        ctx->query = AllocVec(sizeof(struct OGLES2QueryState), MEMF_ANY | MEMF_CLEAR);
+        ctx->query = AllocVec(sizeof(struct OGLES3QueryState), MEMF_ANY | MEMF_CLEAR);
     return ctx->query;
 }
 
-static struct OGLES2Query *by_name(struct OGLES2QueryState *qs, GLuint name)
+static struct OGLES3Query *by_name(struct OGLES3QueryState *qs, GLuint name)
 {
     return qs && name && name < qs->ntab ? qs->tab[name] : 0;
 }
@@ -59,7 +59,7 @@ static BOOL occlusion_target(GLenum t)
 }
 
 /* The open job's binning list points the draws that follow at `addr`. */
-static void emit_counter(struct OGLES2Context *ctx, ULONG addr)
+static void emit_counter(struct OGLES3Context *ctx, ULONG addr)
 {
     V3DContext *v = ctx->v3d;
     if (!v || !v->frame_active)
@@ -70,15 +70,15 @@ static void emit_counter(struct OGLES2Context *ctx, ULONG addr)
 
 /* The library's own draws (clears drawn as quads, copies) count no samples:
  * the counter off for them (`pause`), then back. */
-void ogles2_query_pause(struct OGLES2Context *ctx, BOOL pause)
+void ogles2_query_pause(struct OGLES3Context *ctx, BOOL pause)
 {
     if (ctx->oq_addr)
         emit_counter(ctx, pause ? 0 : ctx->oq_addr);
 }
 
-void ogles2_glGenQueries(struct OGLES2Context *ctx, GLsizei n, GLuint *ids)
+void ogles2_glGenQueries(struct OGLES3Context *ctx, GLsizei n, GLuint *ids)
 {
-    struct OGLES2QueryState *qs;
+    struct OGLES3QueryState *qs;
     GLsizei k;
     GLuint i = 1, nn, j;
     if (!ogles2_es3_entry(ctx))
@@ -92,12 +92,12 @@ void ogles2_glGenQueries(struct OGLES2Context *ctx, GLsizei n, GLuint *ids)
         return;
     }
     for (k = 0; k < n; k++) {
-        struct OGLES2Query *q, **tab;
+        struct OGLES3Query *q, **tab;
         while (i < qs->ntab && qs->tab[i])
             i++;
         if (i >= qs->ntab) {
             nn = qs->ntab ? qs->ntab * 2 : 32;
-            if (i >= OGLES2_NEAR_NAMES || !(tab = AllocVec(nn * sizeof(*tab), MEMF_ANY | MEMF_CLEAR))) {
+            if (i >= OGLES3_NEAR_NAMES || !(tab = AllocVec(nn * sizeof(*tab), MEMF_ANY | MEMF_CLEAR))) {
                 ogles2_error(ctx, GL_OUT_OF_MEMORY);
                 return;
             }
@@ -119,20 +119,20 @@ void ogles2_glGenQueries(struct OGLES2Context *ctx, GLsizei n, GLuint *ids)
     }
 }
 
-static void free_query(struct OGLES2Context *ctx, struct OGLES2Query *q)
+static void free_query(struct OGLES3Context *ctx, struct OGLES3Query *q)
 {
     if (q->counter.hostptr)
         ogles2_share_defer_free(ctx, q->serial, &q->counter);
     FreeVec(q);
 }
 
-static void end(struct OGLES2Context *ctx, struct OGLES2QueryState *qs, struct OGLES2Query *q);
+static void end(struct OGLES3Context *ctx, struct OGLES3QueryState *qs, struct OGLES3Query *q);
 
 /* ES 3.0 2.13: deleting an active query ends it. */
-void ogles2_glDeleteQueries(struct OGLES2Context *ctx, GLsizei n, const GLuint *ids)
+void ogles2_glDeleteQueries(struct OGLES3Context *ctx, GLsizei n, const GLuint *ids)
 {
     ogles2_labels_forget(ctx, GL_QUERY_KHR, n, ids); /* KHR_debug's labels of the names */
-    struct OGLES2QueryState *qs;
+    struct OGLES3QueryState *qs;
     GLsizei k;
     if (!ogles2_es3_entry(ctx))
         return;
@@ -143,7 +143,7 @@ void ogles2_glDeleteQueries(struct OGLES2Context *ctx, GLsizei n, const GLuint *
     if (!(qs = ctx->query) || !ids)
         return;
     for (k = 0; k < n; k++) {
-        struct OGLES2Query *q = by_name(qs, ids[k]);
+        struct OGLES3Query *q = by_name(qs, ids[k]);
         if (!q)
             continue;
         if (q->active)
@@ -153,19 +153,19 @@ void ogles2_glDeleteQueries(struct OGLES2Context *ctx, GLsizei n, const GLuint *
     }
 }
 
-GLboolean ogles2_glIsQuery(struct OGLES2Context *ctx, GLuint id)
+GLboolean ogles2_glIsQuery(struct OGLES3Context *ctx, GLuint id)
 {
-    struct OGLES2Query *q;
+    struct OGLES3Query *q;
     if (!ogles2_es3_entry(ctx))
         return GL_FALSE;
     q = by_name(ctx->query, id);
     return q && q->target ? GL_TRUE : GL_FALSE; /* exists once begun */
 }
 
-void ogles2_glBeginQuery(struct OGLES2Context *ctx, GLenum target, GLuint id)
+void ogles2_glBeginQuery(struct OGLES3Context *ctx, GLenum target, GLuint id)
 {
-    struct OGLES2QueryState *qs;
-    struct OGLES2Query *q;
+    struct OGLES3QueryState *qs;
+    struct OGLES3Query *q;
     if (!ogles2_es3_entry(ctx))
         return;
     if (!occlusion_target(target) && target != GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN) {
@@ -207,7 +207,7 @@ void ogles2_glBeginQuery(struct OGLES2Context *ctx, GLenum target, GLuint id)
     emit_counter(ctx, ctx->oq_addr);
 }
 
-static void end(struct OGLES2Context *ctx, struct OGLES2QueryState *qs, struct OGLES2Query *q)
+static void end(struct OGLES3Context *ctx, struct OGLES3QueryState *qs, struct OGLES3Query *q)
 {
     q->active = FALSE;
     if (q == qs->xfb) {
@@ -221,10 +221,10 @@ static void end(struct OGLES2Context *ctx, struct OGLES2QueryState *qs, struct O
     q->serial = ctx->v3d && ctx->v3d->frame_active ? ctx->job_serial : ctx->pend ? ctx->pend_serial : 0;
 }
 
-void ogles2_glEndQuery(struct OGLES2Context *ctx, GLenum target)
+void ogles2_glEndQuery(struct OGLES3Context *ctx, GLenum target)
 {
-    struct OGLES2QueryState *qs;
-    struct OGLES2Query *q;
+    struct OGLES3QueryState *qs;
+    struct OGLES3Query *q;
     if (!ogles2_es3_entry(ctx))
         return;
     if (!occlusion_target(target) && target != GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN) {
@@ -240,10 +240,10 @@ void ogles2_glEndQuery(struct OGLES2Context *ctx, GLenum target)
     end(ctx, qs, q);
 }
 
-void ogles2_glGetQueryiv(struct OGLES2Context *ctx, GLenum target, GLenum pname, GLint *params)
+void ogles2_glGetQueryiv(struct OGLES3Context *ctx, GLenum target, GLenum pname, GLint *params)
 {
-    struct OGLES2QueryState *qs;
-    struct OGLES2Query *q;
+    struct OGLES3QueryState *qs;
+    struct OGLES3Query *q;
     if (!ogles2_es3_entry(ctx))
         return;
     if ((!occlusion_target(target) && target != GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN) ||
@@ -261,9 +261,9 @@ void ogles2_glGetQueryiv(struct OGLES2Context *ctx, GLenum target, GLenum pname,
  * of another member open still: FALSE); else only the context's own open
  * job submitted, as Mesa flushes even for a check
  * (v3d_query_pipe.c:234-240). */
-static BOOL rendered(struct OGLES2Context *ctx, struct OGLES2Query *q, BOOL wait)
+static BOOL rendered(struct OGLES3Context *ctx, struct OGLES3Query *q, BOOL wait)
 {
-    struct OGLES2Context *user;
+    struct OGLES3Context *user;
     if (!q->serial || !(user = ogles2_job_user(ctx, q->serial)))
         return TRUE;
     if (user->v3d && user->v3d->frame_active && user->job_serial == q->serial) {
@@ -276,9 +276,9 @@ static BOOL rendered(struct OGLES2Context *ctx, struct OGLES2Query *q, BOOL wait
     return !ogles2_job_uses(ctx, q->serial);
 }
 
-void ogles2_glGetQueryObjectuiv(struct OGLES2Context *ctx, GLuint id, GLenum pname, GLuint *params)
+void ogles2_glGetQueryObjectuiv(struct OGLES3Context *ctx, GLuint id, GLenum pname, GLuint *params)
 {
-    struct OGLES2Query *q;
+    struct OGLES3Query *q;
     ULONG len = 4, v;
     if (!ogles2_es3_entry(ctx))
         return;
@@ -312,16 +312,16 @@ void ogles2_glGetQueryObjectuiv(struct OGLES2Context *ctx, GLuint id, GLenum pna
 }
 
 /* A draw fed back `primitives` (xfb.c): the active query of them counts them. */
-void ogles2_query_xfb_add(struct OGLES2Context *ctx, ULONG primitives)
+void ogles2_query_xfb_add(struct OGLES3Context *ctx, ULONG primitives)
 {
     if (ctx->query && ctx->query->xfb)
         ctx->query->xfb->primitives += primitives;
 }
 
 /* aglDestroyContext (its jobs finished). */
-void ogles2_queries_free(struct OGLES2Context *ctx)
+void ogles2_queries_free(struct OGLES3Context *ctx)
 {
-    struct OGLES2QueryState *qs = ctx->query;
+    struct OGLES3QueryState *qs = ctx->query;
     GLuint i;
     if (!qs)
         return;

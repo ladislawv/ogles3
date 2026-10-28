@@ -6,7 +6,7 @@
  *   5 vsync off: the screen's own bitmap (single buffer, as fast as it goes)
  *   6 vsync switched on (aglSetParams2): two screen buffers, ChangeScreenBuffer
  *   7 vsync switched off again: the single buffer back
- *   8 a new context with OGLES2_CCT_VSYNC TRUE from the start
+ *   8 a new context with OGLES3_CCT_VSYNC TRUE from the start
  * Watch for a torn bar; the frame rates are printed.
  *   usage: m6_vsync
  */
@@ -20,7 +20,7 @@
 #include <proto/graphics.h>
 #include <proto/cybergraphics.h>
 #include <proto/timer.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include "../common/smooth_shaders.h"
 
 struct GfxBase *GfxBase;
@@ -131,7 +131,7 @@ static ULONG find_mode(void)
 static void *open_ctx(ULONG mode, BOOL vsync)
 {
     ULONG err = 0;
-    void *ctx = aglCreateContextTags2(&err, OGLES2_CCT_MODEID, mode, OGLES2_CCT_VSYNC, (ULONG)vsync, TAG_DONE);
+    void *ctx = aglCreateContextTags2(&err, OGLES3_CCT_MODEID, mode, OGLES3_CCT_VSYNC, (ULONG)vsync, TAG_DONE);
     if (!ctx) {
         printf("FAIL: fullscreen context (vsync %d): error %lu\n", (int)vsync, (unsigned long)err);
         return 0;
@@ -151,9 +151,9 @@ int main(void)
     printf("ogles2 M6: presentation with GL (watch the white bar)\n");
     GfxBase = (struct GfxBase *)OpenLibrary((STRPTR) "graphics.library", 39);
     CyberGfxBase = OpenLibrary((STRPTR) "cybergraphics.library", 41);
-    if (!GfxBase || !CyberGfxBase || !OGLES2Open() ||
+    if (!GfxBase || !CyberGfxBase || !OGLES3Open() ||
         OpenDevice((STRPTR)TIMERNAME, UNIT_ECLOCK, &treq.tr_node, 0)) {
-        printf("needs graphics 39, cybergraphics 41, timer.device and %s\n", OGLES2NAME);
+        printf("needs graphics 39, cybergraphics 41, timer.device and %s\n", OGLES3NAME);
         return 20;
     }
     TimerBase = treq.tr_node.io_Device;
@@ -165,9 +165,9 @@ int main(void)
     printf("screen mode 0x%08lx\n", (unsigned long)mode);
     if ((ctx = open_ctx(mode, FALSE)) != 0) {
         way_run(5, "5 ogles2, vsync off");
-        aglSetParamsTags2(OGLES2_CCT_VSYNC, TRUE, TAG_DONE);
+        aglSetParamsTags2(OGLES3_CCT_VSYNC, TRUE, TAG_DONE);
         way_run(6, "6 ogles2, vsync switched on");
-        aglSetParamsTags2(OGLES2_CCT_VSYNC, FALSE, TAG_DONE);
+        aglSetParamsTags2(OGLES3_CCT_VSYNC, FALSE, TAG_DONE);
         way_run(7, "7 ogles2, vsync switched off again");
         glDeleteProgram(smooth);
         aglDestroyContext(ctx);
@@ -178,7 +178,7 @@ int main(void)
         aglDestroyContext(ctx);
     }
     CloseDevice(&treq.tr_node);
-    OGLES2Close();
+    OGLES3Close();
     CloseLibrary(CyberGfxBase);
     CloseLibrary((struct Library *)GfxBase);
     printf("done\n");

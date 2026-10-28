@@ -37,9 +37,9 @@ with the next step, for example:
 Contents
 --------
 Run-M1               the test script
-libs/ogles2.library  the library (logs every line at once)
+libs/ogles3.library  the library (logs every line at once)
 bin/m1_hwprobe       the four probes
 bin/m1_soak          10,000 frames
 bin/m1_draw          the step 2 test, as a regression check
-bin/OGLES2Log        writes the library's log file on request
+bin/OGLES3Log        writes the library's log file on request
 notes-template.txt   copied to results/notes.txt at the end

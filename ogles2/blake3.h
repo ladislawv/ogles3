@@ -1,5 +1,5 @@
-#ifndef OGLES2_BLAKE3_H
-#define OGLES2_BLAKE3_H
+#ifndef OGLES3_BLAKE3_H
+#define OGLES3_BLAKE3_H
 /* BLAKE3 hash, 32-byte output (blake3.c). */
 #ifdef BLAKE3_HOST_TEST
 typedef unsigned int ULONG;

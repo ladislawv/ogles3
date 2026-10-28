@@ -1,19 +1,19 @@
 /*
  * sdl3_gles2: SDL3 for the window and input, your own OpenGL ES 2.0 for the
- * drawing: an ES 2.0 context from SDL (which selects ogles2.library), a
+ * drawing: an ES 2.0 context from SDL (which selects ogles3.library), a
  * shader program, a vertex buffer, a spinning triangle, vsync.
  *   usage: sdl3_gles2 [seconds]     (Esc or the close gadget quits)
  * Prints the frame rate at the end. The shaders are compiled at run time:
- * the first run needs the shader compiler (LIBS:v3dglslc) and caches them in
- * OGLES2Cache: (or T:). The GL functions come from <proto/ogles2.h> and
- * libogles2.a; portable code may look them up with SDL_GL_GetProcAddress.
+ * the first run needs the shader compiler (LIBS:v3dglslc3) and caches them in
+ * OGLES3Cache: (or T:). The GL functions come from <proto/ogles3.h> and
+ * libogles3.a; portable code may look them up with SDL_GL_GetProcAddress.
  *
  * MIT licence (the ogles2 project's LICENSE).
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL3/SDL.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 
 long __stack = 65536; /* clib2: the program's stack */
 static const char version[] __attribute__((used)) = "$VER: sdl3_gles2 1.0 (16.10.2026)";
@@ -73,7 +73,7 @@ int main(int argc, char **argv)
         printf("SDL_Init: %s\n", SDL_GetError());
         return 20;
     }
-    /* OpenGL ES 2.0: the request that selects ogles2.library (anything else
+    /* OpenGL ES 2.0: the request that selects ogles3.library (anything else
      * goes to minigl.library). No depth or stencil buffer: none needed. */
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);

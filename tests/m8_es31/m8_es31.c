@@ -20,7 +20,7 @@
 #include <string.h>
 #include <exec/memory.h>
 #include <proto/exec.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include <GLES3/gl31.h>
 
 static int failures, checks;
@@ -41,7 +41,7 @@ static int prefix(const GLubyte *s, const char *p)
 static void *context(ULONG version, ULONG *err)
 {
     *err = 99;
-    return aglCreateContextTags2(err, OGLES2_CCT_PISTORM_STATE_ONLY, TRUE, OGLES2_CCT_PISTORM_ES_VERSION, version,
+    return aglCreateContextTags2(err, OGLES3_CCT_PISTORM_STATE_ONLY, TRUE, OGLES3_CCT_PISTORM_ES_VERSION, version,
                                  TAG_DONE);
 }
 
@@ -426,26 +426,26 @@ int main(int argc, char **argv)
         else if (!strcmp(argv[a], "LIMITS"))
             limits = 1;
     }
-    if (!OGLES2Open()) {
-        printf("FAIL: no %s\n", OGLES2NAME);
+    if (!OGLES3Open()) {
+        printf("FAIL: no %s\n", OGLES3NAME);
         return 20;
     }
     if (limits) {
         if (!(c31 = context(31, &err))) {
             printf("ERROR: no ES 3.1 context (error %lu): a library built with ES31=1 is needed\n", (unsigned long)err);
-            OGLES2Close();
+            OGLES3Close();
             return 20;
         }
         aglMakeCurrent(c31);
         print_limits();
         aglDestroyContext(c31);
-        OGLES2Close();
+        OGLES3Close();
         return 0;
     }
     printf("m8_es31: OpenGL ES 3.1 contexts\n");
     c31 = context(31, &err);
     if (!es31) {
-        check(!c31 && err == OGLES2_CCE_UNSUPPORTED, "ES 3.1 refused (a build without ES31=1)");
+        check(!c31 && err == OGLES3_CCE_UNSUPPORTED, "ES 3.1 refused (a build without ES31=1)");
         if (c31)
             aglDestroyContext(c31);
     } else if (!c31) {
@@ -475,7 +475,7 @@ int main(int argc, char **argv)
         in_es30();
         aglDestroyContext(c30);
     }
-    OGLES2Close();
+    OGLES3Close();
     printf("%s: %d of %d\n", failures ? "FAILED" : "PASSED", checks - failures, checks);
     return failures ? 10 : 0;
 }

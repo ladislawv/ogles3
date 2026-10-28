@@ -1,8 +1,8 @@
-#ifndef CLIB_OGLES2_PROTOS_H
-#define CLIB_OGLES2_PROTOS_H
+#ifndef CLIB_OGLES3_PROTOS_H
+#define CLIB_OGLES3_PROTOS_H
 /*
  * Import-library functions that are not generated from the dispatch table.
- * <proto/ogles2.h> (generated) includes this and adds the agl* functions
+ * <proto/ogles3.h> (generated) includes this and adds the agl* functions
  * and the GL wrappers.
  */
 #include <exec/types.h>
@@ -12,14 +12,19 @@
 extern "C" {
 #endif
 
-/* Open ogles2.library and fetch its dispatch table: the installed one (in
- * memory, or LIBS:), else PROGDIR:libs/ogles2.library, else
- * PROGDIR:ogles2.library, the first that is new enough and of this dispatch
+/* Open ogles3.library and fetch its dispatch table: the installed one (in
+ * memory, or LIBS:), else PROGDIR:libs/ogles3.library, else
+ * PROGDIR:ogles3.library, the first that is new enough and of this dispatch
  * ABI. One in memory that is not is expunged first if no program has it open
  * (exec keeps one library of a name); one in use cannot be replaced. FALSE
  * if there is none. */
-BOOL OGLES2Open(void);
-void OGLES2Close(void);
+BOOL OGLES3Open(void);
+void OGLES3Close(void);
+#ifndef OGLES3_NO_OGLES2_NAMES /* ogles2.library 1.x's names (<libraries/ogles3.h>) */
+#define OGLES2Open  OGLES3Open
+#define OGLES2Close OGLES3Close
+#define OGLES2Base  OGLES3Base
+#endif
 
 /* GL entry points by name, callable without a context argument (SDL, gl4es).
  * NULL for unknown names. Never calls the library. */

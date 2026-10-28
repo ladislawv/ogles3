@@ -24,7 +24,7 @@
 #include <proto/intuition.h>
 #include <proto/graphics.h>
 #include <proto/cybergraphics.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include "../common/tex_shaders.h"
 
 struct IntuitionBase *IntuitionBase;
@@ -595,8 +595,8 @@ int main(int argc, char **argv)
     IntuitionBase = (struct IntuitionBase *)OpenLibrary((STRPTR) "intuition.library", 39);
     GfxBase = (struct GfxBase *)OpenLibrary((STRPTR) "graphics.library", 39);
     CyberGfxBase = OpenLibrary((STRPTR) "cybergraphics.library", 41);
-    if (!IntuitionBase || !GfxBase || !CyberGfxBase || !OGLES2Open()) {
-        printf("needs intuition, graphics, cybergraphics 41 and %s\n", OGLES2NAME);
+    if (!IntuitionBase || !GfxBase || !CyberGfxBase || !OGLES3Open()) {
+        printf("needs intuition, graphics, cybergraphics 41 and %s\n", OGLES3NAME);
         return 20;
     }
     rb = &r;
@@ -604,7 +604,7 @@ int main(int argc, char **argv)
         struct BitMap *bm = AllocBitMap(256, 128, 32, BMF_MINPLANES | BMF_SPECIALFMT | SHIFT_PIXFMT(PIXFMT_BGRA32), 0);
         kind = "bitmap";
         before = AvailMem(MEMF_ANY);
-        if (bm && (ctx = aglCreateContextTags2(&err, OGLES2_CCT_BITMAP, (ULONG)bm, OGLES2_CCT_DEPTH, 16,
+        if (bm && (ctx = aglCreateContextTags2(&err, OGLES3_CCT_BITMAP, (ULONG)bm, OGLES3_CCT_DEPTH, 16,
                                                TAG_DONE))) {
             aglMakeCurrent(ctx);
             InitRastPort(&r.own);
@@ -627,9 +627,9 @@ int main(int argc, char **argv)
         ULONG w = 0, h = 0;
         kind = "window";
         before = AvailMem(MEMF_ANY);
-        ctx = aglCreateContextTags2(&err, OGLES2_CCT_DEPTH, 16, OGLES2_CCT_PISTORM_WIDTH, 320, OGLES2_CCT_PISTORM_HEIGHT, 240,
-                                    OGLES2_CCT_GET_WIDTH, (ULONG)&w, OGLES2_CCT_GET_HEIGHT, (ULONG)&h,
-                                    OGLES2_CCT_PISTORM_GET_WINDOW, (ULONG)&win, TAG_DONE);
+        ctx = aglCreateContextTags2(&err, OGLES3_CCT_DEPTH, 16, OGLES3_CCT_PISTORM_WIDTH, 320, OGLES3_CCT_PISTORM_HEIGHT, 240,
+                                    OGLES3_CCT_GET_WIDTH, (ULONG)&w, OGLES3_CCT_GET_HEIGHT, (ULONG)&h,
+                                    OGLES3_CCT_PISTORM_GET_WINDOW, (ULONG)&win, TAG_DONE);
         if (ctx && win) {
             aglMakeCurrent(ctx);
             r.rp = win->RPort;
@@ -644,7 +644,7 @@ int main(int argc, char **argv)
             check(0, "create a window context");
         }
     }
-    OGLES2Close();
+    OGLES3Close();
     CloseLibrary(CyberGfxBase);
     CloseLibrary((struct Library *)GfxBase);
     CloseLibrary((struct Library *)IntuitionBase);

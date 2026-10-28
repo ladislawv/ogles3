@@ -67,7 +67,7 @@ static int write_files(struct gl_shader_program *prog, GLuint p, const char *pat
 int fake_drm_open(void);
 
 /* The build's stamp (build_m68k.sh: its time and the commits), which
- * ogles2.library reads from the file's tail to tell compilers apart
+ * ogles3.library reads from the file's tail to tell compilers apart
  * (ogles2_compiler_id: a size alone matched two different builds). Writable,
  * so it goes into the data hunk, which follows the 18 MB of code and its
  * relocations, a few kilobytes from the end of the file. */
@@ -78,14 +78,14 @@ __attribute__((used)) char v3dglslc_stamp[] = "$V3DGLSLC-STAMP:" V3DGLSLC_STAMP 
 
 /* The release's version, for AmigaDOS' Version command: the library's
  * version.revision and date (ogles2/ogles2_internal.h), which build_m68k.sh
- * and build_host.sh pass. Install-ogles2 replaces an older LIBS:v3dglslc, or
+ * and build_host.sh pass. Install-ogles3 replaces an older LIBS:v3dglslc3, or
  * one without it (1.x), whenever it installs the library (docs/GLES3_PLAN.md
  * section 3). Beside the stamp in the data hunk, so the file's tail still
  * holds that. */
 #ifndef V3DGLSLC_VER
 #define V3DGLSLC_VER "0.0 (unversioned)"
 #endif
-__attribute__((used)) char v3dglslc_ver[] = "$VER: v3dglslc " V3DGLSLC_VER " PiStorm V3D 4.2";
+__attribute__((used)) char v3dglslc_ver[] = "$VER: v3dglslc3 " V3DGLSLC_VER " PiStorm V3D 4.2";
 
 #ifdef __amigaos__
 void os_amiga_set_option(const char *name, const char *value);
@@ -131,7 +131,7 @@ static GLuint mrt_fbo[3];
 /* What write_program writes (v3dp/FORMAT.md): the variants of the default
  * key states (.v3dp); and, for a program with samplers, those of the same
  * draws with every sampler returning 32 bits (float and depth textures),
- * which ogles2.library loads only when a draw needs them (.v3dw, the same
+ * which ogles3.library loads only when a draw needs them (.v3dw, the same
  * file format). The command line writes both; a server request one. */
 #define WRITE_BOTH 0
 #define WRITE_PLAIN 1
@@ -970,7 +970,7 @@ static int write_files(struct gl_shader_program *prog, GLuint p, const char *pat
 
 /* -L: the ES 3.0 and 3.1 limits as Mesa's context answers them, after the
  * limits main() sets: GLSL's gl_Max* constants and the compiler's and
- * linker's checks come from the same ctx->Const, so ogles2.library's queries
+ * linker's checks come from the same ctx->Const, so ogles3.library's queries
  * must answer these values (docs/GLES3_PLAN.md, Appendix B.1). One line
  * each: the enum's name and its values. */
 static int print_limits(void)
@@ -1240,7 +1240,7 @@ static int serve_stdio(void)
 
 #ifdef __amigaos__
 /* A request goes back to its sender; one without a reply port (a QUIT sent
- * from ogles2.library's expunge, which cannot wait) is ours to free. */
+ * from ogles3.library's expunge, which cannot wait) is ours to free. */
 static void done(struct V3DGLSLRequest *r)
 {
     if (r->msg.mn_ReplyPort)
@@ -1421,11 +1421,11 @@ int main(int argc, char **argv)
         return 20;
     }
     the_pipe = st->pipe;
-    /* ogles2.library's limits, which its GL queries report too (GLSL's
+    /* ogles3.library's limits, which its GL queries report too (GLSL's
      * gl_Max* constants must equal them: dEQP-GLES2 builtin_variable): four
-     * draw buffers (EXT_draw_buffers, M7 step 5; OGLES2_MAX_DRAW_BUFFERS), 16
-     * texture units in each stage (OGLES2_MAX_STAGE_SAMPLERS; the driver
-     * offers 24) and 48 in all (OGLES2_MAX_TEXTURE_UNITS: ES 3.1's minimum,
+     * draw buffers (EXT_draw_buffers, M7 step 5; OGLES3_MAX_DRAW_BUFFERS), 16
+     * texture units in each stage (OGLES3_MAX_STAGE_SAMPLERS; the driver
+     * offers 24) and 48 in all (OGLES3_MAX_TEXTURE_UNITS: ES 3.1's minimum,
      * in every context version, so a GLSL ES 1.00 program's file is the same
      * in both, docs/GLES3_PLAN.md §2; the driver offers 96). */
     {
@@ -1435,7 +1435,7 @@ int main(int argc, char **argv)
         ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxTextureImageUnits = 16;
         ctx->Const.Program[MESA_SHADER_COMPUTE].MaxTextureImageUnits = 16;
         ctx->Const.MaxCombinedTextureImageUnits = 48;
-        /* Not GLSL's, but kept equal so -L lists exactly what ogles2.library
+        /* Not GLSL's, but kept equal so -L lists exactly what ogles3.library
          * answers: indices up to 2^24 - 1 (ES 3.0's minimum; the draws rebase
          * indices on the CPU), no server-side wait (glWaitSync waits for
          * nothing the CPU must), an LOD bias up to 15 (texture.c's

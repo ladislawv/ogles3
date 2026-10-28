@@ -29,7 +29,7 @@ with the next step, for example:
 Contents
 --------
 Run-M1               the test script
-libs/ogles2.library  the library (logs every line at once)
+libs/ogles3.library  the library (logs every line at once)
 bin/m5_fbo           framebuffer objects
 bin/m4_stress        a big frame
 bin/m4_depth         depth and stencil across a mid-frame flush
@@ -43,5 +43,5 @@ bin/m6_share         objects shared between contexts
 bin/m6_tasks         a share group used from two tasks
 bin/*.v3dp           the test programs' binaries
 shaders/             the test programs' GLSL
-bin/OGLES2Log        writes the library's log file on request
+bin/OGLES3Log        writes the library's log file on request
 notes-template.txt   copied to results/notes.txt at the end

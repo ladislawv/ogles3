@@ -1,11 +1,11 @@
 /*
- * The gears speed comparison, ogles2.library side (perf_gears.h).
+ * The gears speed comparison, ogles3.library side (perf_gears.h).
  *   usage: gears_gles2 [BITMAP|WINDOW|FULLSCREEN] [SECONDS=5] [TEETH=1] [PATH=VBO|ARRAYS]
  * VBO: each gear's vertices in a buffer object, uploaded once; ARRAYS: from
  * client memory, converted for the GPU every draw. One glDrawArrays per gear,
  * the lighting in the vertex shader (tests/common/lit_shaders.h).
  */
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include "perf_target.h"
 #include "../common/lit_shaders.h"
 
@@ -134,19 +134,19 @@ int main(int argc, char **argv)
         return 20;
     }
     sprintf(title, "ogles2 %s: %d triangles", a.path, pg_triangles());
-    if (!pt_open(&a, title) || !OGLES2Open()) {
-        printf("needs a window or bitmap and %s\n", OGLES2NAME);
+    if (!pt_open(&a, title) || !OGLES3Open()) {
+        printf("needs a window or bitmap and %s\n", OGLES3NAME);
         pt_close();
         return 20;
     }
     if (a.fullscreen) {
         ULONG mode = pt_find_mode();
-        ctx = aglCreateContextTags2(&err, OGLES2_CCT_MODEID, mode, OGLES2_CCT_DEPTH, 24, OGLES2_CCT_VSYNC,
+        ctx = aglCreateContextTags2(&err, OGLES3_CCT_MODEID, mode, OGLES3_CCT_DEPTH, 24, OGLES3_CCT_VSYNC,
                                     FALSE, TAG_DONE);
     } else {
-        ctx = aglCreateContextTags2(&err, a.window ? OGLES2_CCT_WINDOW : OGLES2_CCT_BITMAP,
-                                    a.window ? (ULONG)pt_win : (ULONG)pt_bm, OGLES2_CCT_DEPTH, 24,
-                                    OGLES2_CCT_VSYNC, FALSE, TAG_DONE);
+        ctx = aglCreateContextTags2(&err, a.window ? OGLES3_CCT_WINDOW : OGLES3_CCT_BITMAP,
+                                    a.window ? (ULONG)pt_win : (ULONG)pt_bm, OGLES3_CCT_DEPTH, 24,
+                                    OGLES3_CCT_VSYNC, FALSE, TAG_DONE);
     }
     if (!ctx) {
         printf("aglCreateContext2 failed (%lu)\n", (unsigned long)err);
@@ -203,7 +203,7 @@ int main(int argc, char **argv)
 out:
     if (ctx)
         aglDestroyContext(ctx);
-    OGLES2Close();
+    OGLES3Close();
     pt_close();
     return ok ? 0 : 10;
 }

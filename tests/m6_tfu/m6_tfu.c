@@ -2,7 +2,7 @@
  * M6 test: the TFU (texture formatting unit) for glGenerateMipmap and for
  * uploads, on a hidden 256x128 bitmap. Run it as it is (the TFU makes the
  * levels and tiles whole uploads of 128x128 and up) and with
- * ENV:OGLES2/Probe MU (the CPU does both): both pass, and the timings
+ * ENV:OGLES3/Probe MU (the CPU does both): both pass, and the timings
  * compare them. Nothing to watch.
  *   usage: m6_tfu
  *   upload   256x256 RGBA8 noise: the first glGenerateMipmap lays the chain
@@ -28,7 +28,7 @@
 #include <proto/exec.h>
 #include <proto/graphics.h>
 #include <proto/timer.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include "../common/smooth_shaders.h"
 #include "../common/tex_shaders.h"
 
@@ -567,14 +567,14 @@ int main(void)
     char msg[120];
     printf("ogles2 M6: glGenerateMipmap with the TFU\n");
     GfxBase = (struct GfxBase *)OpenLibrary((STRPTR) "graphics.library", 39);
-    if (!GfxBase || !OGLES2Open() || OpenDevice((STRPTR)TIMERNAME, UNIT_ECLOCK, &treq.tr_node, 0)) {
-        printf("needs graphics 39, timer.device and %s\n", OGLES2NAME);
+    if (!GfxBase || !OGLES3Open() || OpenDevice((STRPTR)TIMERNAME, UNIT_ECLOCK, &treq.tr_node, 0)) {
+        printf("needs graphics 39, timer.device and %s\n", OGLES3NAME);
         return 20;
     }
     TimerBase = treq.tr_node.io_Device;
     bm = AllocBitMap(W, H, 32, BMF_MINPLANES | BMF_SPECIALFMT | SHIFT_PIXFMT(PIXFMT_BGRA32), 0);
     before = AvailMem(MEMF_ANY);
-    if (!bm || !(ctx = aglCreateContextTags2(&err, OGLES2_CCT_BITMAP, (ULONG)bm, TAG_DONE))) {
+    if (!bm || !(ctx = aglCreateContextTags2(&err, OGLES3_CCT_BITMAP, (ULONG)bm, TAG_DONE))) {
         printf("FAIL: create a bitmap context (error %lu)\n", (unsigned long)err);
         return 20;
     }
@@ -604,7 +604,7 @@ int main(void)
     check(after + 32768 >= before, msg);
     FreeBitMap(bm);
     CloseDevice(&treq.tr_node);
-    OGLES2Close();
+    OGLES3Close();
     printf("%s: %d of %d checks passed\n", failures ? "FAILED" : "ALL PASSED", checks - failures, checks);
     return failures ? 10 : 0;
 }

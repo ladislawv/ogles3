@@ -1,7 +1,7 @@
 #ifndef __gl3ext_h_
 #define __gl3ext_h_
 /*
- * ogles2.library: <GLES3/gl3ext.h>, a placeholder (MIT, this project's).
+ * ogles3.library: <GLES3/gl3ext.h>, a placeholder (MIT, this project's).
  *
  * Khronos' own gl3ext.h was empty and is no longer published: the OpenGL ES
  * 3.x extensions are declared in <GLES2/gl2ext.h>, which this file includes

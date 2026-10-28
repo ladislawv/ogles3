@@ -38,10 +38,10 @@ static void set_bits(UBYTE *k, ULONG bits)
 
 void ogles2_vk_fs_want(UBYTE *want, const UBYTE *base, int prim, UBYTE cbufs, ULONG bits, BOOL a2c)
 {
-    memcpy(want, base, OGLES2_VK_FS_BYTES);
+    memcpy(want, base, OGLES3_VK_FS_BYTES);
     set_bits(want, bits);
-    want[FK_POINTS] = prim == OGLES2_VK_POINTS;
-    want[FK_LINES] = prim == OGLES2_VK_LINES;
+    want[FK_POINTS] = prim == OGLES3_VK_POINTS;
+    want[FK_LINES] = prim == OGLES3_VK_LINES;
     if (a2c) { /* as Mesa's for a multisampled job with alpha to coverage */
         want[FK_MSAA] = want[FK_MSAA + 1] = 1;
         want[FK_IGNORE_MASK] = 0;
@@ -64,7 +64,7 @@ static void put_u32(UBYTE *k, ULONG v)
     k[3] = (UBYTE)(v >> 24);
 }
 
-void ogles2_vk_fs_targets(UBYTE *want, const struct OGLES2VkTargets *t)
+void ogles2_vk_fs_targets(UBYTE *want, const struct OGLES3VkTargets *t)
 {
     int i, j;
     want[FK_SOFTWARE_BLEND] = t->soft;
@@ -98,7 +98,7 @@ BOOL ogles2_vk_fs_fits(const UBYTE *k, const UBYTE *want)
 
 void ogles2_vk_vs_want(UBYTE *want, const UBYTE *base, UBYTE num_inputs, const UBYTE *slots, ULONG bits)
 {
-    memcpy(want, base, OGLES2_VK_VS_BYTES);
+    memcpy(want, base, OGLES3_VK_VS_BYTES);
     set_bits(want, bits);
     if (slots) {
         want[VK_NUM_OUTPUTS] = num_inputs;

@@ -54,7 +54,7 @@ struct message
     char *text;
 };
 
-struct OGLES2Debug
+struct OGLES3Debug
 {
     BOOL output, synchronous;
     GLDEBUGPROCKHR callback;
@@ -66,18 +66,18 @@ struct OGLES2Debug
     ULONG depth;                    /* GL_DEBUG_GROUP_STACK_DEPTH */
 };
 
-struct OGLES2Label
+struct OGLES3Label
 {
-    struct OGLES2Label *next;
+    struct OGLES3Label *next;
     GLenum identifier;
     ULONG name;                     /* a sync object's address */
-    struct OGLES2Context *owner;    /* a container object's context, else NULL */
+    struct OGLES3Context *owner;    /* a container object's context, else NULL */
     char *text;
 };
 
-static struct OGLES2Debug *dbg_get(struct OGLES2Context *ctx)
+static struct OGLES3Debug *dbg_get(struct OGLES3Context *ctx)
 {
-    if (!ctx->dbg && (ctx->dbg = AllocVec(sizeof(struct OGLES2Debug), MEMF_ANY | MEMF_CLEAR)) != 0)
+    if (!ctx->dbg && (ctx->dbg = AllocVec(sizeof(struct OGLES3Debug), MEMF_ANY | MEMF_CLEAR)) != 0)
         ctx->dbg->depth = 1;
     if (!ctx->dbg)
         ogles2_error(ctx, GL_OUT_OF_MEMORY);
@@ -93,10 +93,10 @@ static void free_controls(struct group *g)
     }
 }
 
-void ogles2_debug_free(struct OGLES2Context *ctx)
+void ogles2_debug_free(struct OGLES3Context *ctx)
 {
-    struct OGLES2Debug *d = ctx->dbg;
-    struct OGLES2Label **at;
+    struct OGLES3Debug *d = ctx->dbg;
+    struct OGLES3Label **at;
     ULONG k;
     if (d) {
         for (k = 0; k < d->count; k++)
@@ -111,7 +111,7 @@ void ogles2_debug_free(struct OGLES2Context *ctx)
     }
     /* the context's own objects' labels */
     for (at = ctx->share ? &ctx->share->labels : 0; at && *at;) {
-        struct OGLES2Label *l = *at;
+        struct OGLES3Label *l = *at;
         if (l->owner == ctx) {
             *at = l->next;
             FreeVec(l->text);
@@ -122,10 +122,10 @@ void ogles2_debug_free(struct OGLES2Context *ctx)
     }
 }
 
-void ogles2_labels_free(struct OGLES2Share *sh)
+void ogles2_labels_free(struct OGLES3Share *sh)
 {
     while (sh->labels) {
-        struct OGLES2Label *l = sh->labels;
+        struct OGLES3Label *l = sh->labels;
         sh->labels = l->next;
         FreeVec(l->text);
         FreeVec(l);
@@ -155,7 +155,7 @@ static BOOL is_severity(GLenum e)
            e == GL_DEBUG_SEVERITY_LOW_KHR || e == GL_DEBUG_SEVERITY_NOTIFICATION_KHR;
 }
 
-static BOOL enabled(const struct OGLES2Debug *d, GLenum source, GLenum type, GLuint id, GLenum severity)
+static BOOL enabled(const struct OGLES3Debug *d, GLenum source, GLenum type, GLuint id, GLenum severity)
 {
     LONG g;
     for (g = (LONG)d->depth - 1; g >= 0; g--) {
@@ -180,10 +180,10 @@ static BOOL enabled(const struct OGLES2Debug *d, GLenum source, GLenum type, GLu
 
 /* A message (`length` characters at `text`, below MESSAGE_MAX) to the
  * callback or the log, when debug output is on and its filters let it. */
-static void emit(struct OGLES2Context *ctx, GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+static void emit(struct OGLES3Context *ctx, GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
                  const char *text)
 {
-    struct OGLES2Debug *d = ctx->dbg;
+    struct OGLES3Debug *d = ctx->dbg;
     struct message *m;
     if (!d || !d->output || d->calling || !enabled(d, source, type, id, severity))
         return;
@@ -211,7 +211,7 @@ static void emit(struct OGLES2Context *ctx, GLenum source, GLenum type, GLuint i
     d->count++;
 }
 
-void ogles2_debug_error(struct OGLES2Context *ctx, GLenum error)
+void ogles2_debug_error(struct OGLES3Context *ctx, GLenum error)
 {
     const char *t;
     if (!ctx->dbg || !ctx->dbg->output)
@@ -232,7 +232,7 @@ void ogles2_debug_error(struct OGLES2Context *ctx, GLenum error)
 
 /* A message's length (negative: up to the NUL); -1 (GL_INVALID_VALUE set)
  * when it reaches the limit. */
-static GLsizei message_length(struct OGLES2Context *ctx, GLsizei length, const GLchar *buf)
+static GLsizei message_length(struct OGLES3Context *ctx, GLsizei length, const GLchar *buf)
 {
     if (length < 0)
         length = buf ? (GLsizei)strlen(buf) : 0;
@@ -243,10 +243,10 @@ static GLsizei message_length(struct OGLES2Context *ctx, GLsizei length, const G
     return length;
 }
 
-void ogles2_glDebugMessageControlKHR(struct OGLES2Context *ctx, GLenum source, GLenum type, GLenum severity,
+void ogles2_glDebugMessageControlKHR(struct OGLES3Context *ctx, GLenum source, GLenum type, GLenum severity,
                                      GLsizei count, const GLuint *ids, GLboolean enable)
 {
-    struct OGLES2Debug *d;
+    struct OGLES3Debug *d;
     struct group *g;
     struct control *c;
     if (!ogles2_context_valid(ctx))
@@ -287,7 +287,7 @@ void ogles2_glDebugMessageControlKHR(struct OGLES2Context *ctx, GLenum source, G
     g->controls = c;
 }
 
-void ogles2_glDebugMessageInsertKHR(struct OGLES2Context *ctx, GLenum source, GLenum type, GLuint id,
+void ogles2_glDebugMessageInsertKHR(struct OGLES3Context *ctx, GLenum source, GLenum type, GLuint id,
                                     GLenum severity, GLsizei length, const GLchar *buf)
 {
     if (!ogles2_context_valid(ctx))
@@ -302,20 +302,20 @@ void ogles2_glDebugMessageInsertKHR(struct OGLES2Context *ctx, GLenum source, GL
     emit(ctx, source, type, id, severity, length, buf ? buf : "");
 }
 
-void ogles2_glDebugMessageCallbackKHR(struct OGLES2Context *ctx, GLDEBUGPROCKHR callback, const void *userParam)
+void ogles2_glDebugMessageCallbackKHR(struct OGLES3Context *ctx, GLDEBUGPROCKHR callback, const void *userParam)
 {
-    struct OGLES2Debug *d;
+    struct OGLES3Debug *d;
     if (!ogles2_context_valid(ctx) || !(d = dbg_get(ctx)))
         return;
     d->callback = callback;
     d->user = userParam;
 }
 
-GLuint ogles2_glGetDebugMessageLogKHR(struct OGLES2Context *ctx, GLuint count, GLsizei bufSize, GLenum *sources,
+GLuint ogles2_glGetDebugMessageLogKHR(struct OGLES3Context *ctx, GLuint count, GLsizei bufSize, GLenum *sources,
                                       GLenum *types, GLuint *ids, GLenum *severities, GLsizei *lengths,
                                       GLchar *messageLog)
 {
-    struct OGLES2Debug *d;
+    struct OGLES3Debug *d;
     GLuint n = 0;
     if (!ogles2_context_valid(ctx))
         return 0;
@@ -353,10 +353,10 @@ GLuint ogles2_glGetDebugMessageLogKHR(struct OGLES2Context *ctx, GLuint count, G
     return n;
 }
 
-void ogles2_glPushDebugGroupKHR(struct OGLES2Context *ctx, GLenum source, GLuint id, GLsizei length,
+void ogles2_glPushDebugGroupKHR(struct OGLES3Context *ctx, GLenum source, GLuint id, GLsizei length,
                                 const GLchar *message)
 {
-    struct OGLES2Debug *d;
+    struct OGLES3Debug *d;
     struct group *g;
     if (!ogles2_context_valid(ctx))
         return;
@@ -386,9 +386,9 @@ void ogles2_glPushDebugGroupKHR(struct OGLES2Context *ctx, GLenum source, GLuint
     d->depth++;
 }
 
-void ogles2_glPopDebugGroupKHR(struct OGLES2Context *ctx)
+void ogles2_glPopDebugGroupKHR(struct OGLES3Context *ctx)
 {
-    struct OGLES2Debug *d;
+    struct OGLES3Debug *d;
     struct group g;
     if (!ogles2_context_valid(ctx))
         return;
@@ -403,7 +403,7 @@ void ogles2_glPopDebugGroupKHR(struct OGLES2Context *ctx)
     FreeVec(g.message);
 }
 
-void ogles2_glGetPointervKHR(struct OGLES2Context *ctx, GLenum pname, void **params)
+void ogles2_glGetPointervKHR(struct OGLES3Context *ctx, GLenum pname, void **params)
 {
     if (!ogles2_context_valid(ctx) || !params)
         return;
@@ -416,9 +416,9 @@ void ogles2_glGetPointervKHR(struct OGLES2Context *ctx, GLenum pname, void **par
 
 /* GL_DEBUG_OUTPUT and GL_DEBUG_OUTPUT_SYNCHRONOUS: on 1, off 0, a query
  * -1 (*state); FALSE for another capability. */
-BOOL ogles2_debug_cap(struct OGLES2Context *ctx, GLenum cap, int on, GLboolean *state)
+BOOL ogles2_debug_cap(struct OGLES3Context *ctx, GLenum cap, int on, GLboolean *state)
 {
-    struct OGLES2Debug *d;
+    struct OGLES3Debug *d;
     BOOL *flag;
     if (cap != GL_DEBUG_OUTPUT_KHR && cap != GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR)
         return FALSE;
@@ -434,9 +434,9 @@ BOOL ogles2_debug_cap(struct OGLES2Context *ctx, GLenum cap, int on, GLboolean *
 }
 
 /* glGet*'s debug state and limits; FALSE for another pname. */
-BOOL ogles2_debug_query(struct OGLES2Context *ctx, GLenum pname, GLint *v, BOOL *boolean)
+BOOL ogles2_debug_query(struct OGLES3Context *ctx, GLenum pname, GLint *v, BOOL *boolean)
 {
-    const struct OGLES2Debug *d = ctx->dbg;
+    const struct OGLES3Debug *d = ctx->dbg;
     GLboolean b = GL_FALSE;
     *boolean = FALSE;
     switch (pname) {
@@ -463,7 +463,7 @@ BOOL ogles2_debug_query(struct OGLES2Context *ctx, GLenum pname, GLint *v, BOOL 
 /* The object `name` of `identifier` exists: 1; -1 GL_INVALID_ENUM (not an
  * identifier of this context's version), 0 GL_INVALID_VALUE. *own: a
  * container object, the context's own. */
-static int object_exists(struct OGLES2Context *ctx, GLenum identifier, GLuint name, BOOL *own)
+static int object_exists(struct OGLES3Context *ctx, GLenum identifier, GLuint name, BOOL *own)
 {
     BOOL es3 = ogles2_es3(ctx);
     *own = FALSE;
@@ -486,20 +486,20 @@ static int object_exists(struct OGLES2Context *ctx, GLenum identifier, GLuint na
     }
 }
 
-static struct OGLES2Label **label_at(struct OGLES2Context *ctx, GLenum identifier, ULONG name, BOOL own)
+static struct OGLES3Label **label_at(struct OGLES3Context *ctx, GLenum identifier, ULONG name, BOOL own)
 {
-    struct OGLES2Label **at;
+    struct OGLES3Label **at;
     for (at = &ctx->share->labels; *at; at = &(*at)->next)
         if ((*at)->identifier == identifier && (*at)->name == name && (*at)->owner == (own ? ctx : 0))
             return at;
     return at;
 }
 
-void ogles2_label_forget(struct OGLES2Context *ctx, GLenum identifier, ULONG name)
+void ogles2_label_forget(struct OGLES3Context *ctx, GLenum identifier, ULONG name)
 {
     BOOL own = identifier == GL_FRAMEBUFFER || identifier == GL_VERTEX_ARRAY_KHR || identifier == GL_QUERY_KHR ||
                identifier == GL_TRANSFORM_FEEDBACK || identifier == GL_PROGRAM_PIPELINE_KHR;
-    struct OGLES2Label **at, *l;
+    struct OGLES3Label **at, *l;
     if (!ctx || !ctx->share || !ctx->share->labels)
         return;
     at = label_at(ctx, identifier, name, own);
@@ -510,7 +510,7 @@ void ogles2_label_forget(struct OGLES2Context *ctx, GLenum identifier, ULONG nam
     }
 }
 
-void ogles2_labels_forget(struct OGLES2Context *ctx, GLenum identifier, GLsizei n, const GLuint *names)
+void ogles2_labels_forget(struct OGLES3Context *ctx, GLenum identifier, GLsizei n, const GLuint *names)
 {
     GLsizei k;
     if (ctx && ctx->share && ctx->share->labels && names)
@@ -518,10 +518,10 @@ void ogles2_labels_forget(struct OGLES2Context *ctx, GLenum identifier, GLsizei 
             ogles2_label_forget(ctx, identifier, names[k]);
 }
 
-static void set_label(struct OGLES2Context *ctx, GLenum identifier, ULONG name, BOOL own, GLsizei length,
+static void set_label(struct OGLES3Context *ctx, GLenum identifier, ULONG name, BOOL own, GLsizei length,
                       const GLchar *label)
 {
-    struct OGLES2Label **at, *l;
+    struct OGLES3Label **at, *l;
     if (label) {
         if (length < 0)
             length = (GLsizei)strlen(label);
@@ -553,10 +553,10 @@ static void set_label(struct OGLES2Context *ctx, GLenum identifier, ULONG name, 
     ctx->share->labels = l;
 }
 
-static void get_label(struct OGLES2Context *ctx, GLenum identifier, ULONG name, BOOL own, GLsizei bufSize,
+static void get_label(struct OGLES3Context *ctx, GLenum identifier, ULONG name, BOOL own, GLsizei bufSize,
                       GLsizei *length, GLchar *label)
 {
-    const struct OGLES2Label *l = *label_at(ctx, identifier, name, own);
+    const struct OGLES3Label *l = *label_at(ctx, identifier, name, own);
     GLsizei n = l ? (GLsizei)strlen(l->text) : 0;
     if (label) {
         if (bufSize <= 0) {
@@ -573,7 +573,7 @@ static void get_label(struct OGLES2Context *ctx, GLenum identifier, ULONG name, 
         *length = n;
 }
 
-void ogles2_glObjectLabelKHR(struct OGLES2Context *ctx, GLenum identifier, GLuint name, GLsizei length,
+void ogles2_glObjectLabelKHR(struct OGLES3Context *ctx, GLenum identifier, GLuint name, GLsizei length,
                              const GLchar *label)
 {
     BOOL own;
@@ -587,7 +587,7 @@ void ogles2_glObjectLabelKHR(struct OGLES2Context *ctx, GLenum identifier, GLuin
     set_label(ctx, identifier, name, own, length, label);
 }
 
-void ogles2_glGetObjectLabelKHR(struct OGLES2Context *ctx, GLenum identifier, GLuint name, GLsizei bufSize,
+void ogles2_glGetObjectLabelKHR(struct OGLES3Context *ctx, GLenum identifier, GLuint name, GLsizei bufSize,
                                 GLsizei *length, GLchar *label)
 {
     BOOL own;
@@ -605,7 +605,7 @@ void ogles2_glGetObjectLabelKHR(struct OGLES2Context *ctx, GLenum identifier, GL
     get_label(ctx, identifier, name, own, bufSize, length, label);
 }
 
-void ogles2_glObjectPtrLabelKHR(struct OGLES2Context *ctx, const void *ptr, GLsizei length, const GLchar *label)
+void ogles2_glObjectPtrLabelKHR(struct OGLES3Context *ctx, const void *ptr, GLsizei length, const GLchar *label)
 {
     if (!ogles2_context_valid(ctx))
         return;
@@ -616,7 +616,7 @@ void ogles2_glObjectPtrLabelKHR(struct OGLES2Context *ctx, const void *ptr, GLsi
     set_label(ctx, GL_SYNC_FENCE, (ULONG)ptr, FALSE, length, label);
 }
 
-void ogles2_glGetObjectPtrLabelKHR(struct OGLES2Context *ctx, const void *ptr, GLsizei bufSize, GLsizei *length,
+void ogles2_glGetObjectPtrLabelKHR(struct OGLES3Context *ctx, const void *ptr, GLsizei bufSize, GLsizei *length,
                                    GLchar *label)
 {
     if (!ogles2_context_valid(ctx))

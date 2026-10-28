@@ -3,8 +3,8 @@
  * stderr like the BSD versions (err/errx do not exit here: a library must not
  * end the program; they log and return).
  */
-#ifndef OGLES2_COMPAT_ERR_H
-#define OGLES2_COMPAT_ERR_H
+#ifndef OGLES3_COMPAT_ERR_H
+#define OGLES3_COMPAT_ERR_H
 
 #include <stdarg.h>
 #include <stdio.h>

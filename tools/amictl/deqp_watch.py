@@ -32,7 +32,7 @@ import amictl
 
 PROGRESS = "RAM:deqp-progress.txt"
 LOG = "RAM:ogles2.log"
-QUIET_LOG = re.compile(r"^\s*\d+ (compiler: |glLinkProgram: |draw: OGLES2Cache)")
+QUIET_LOG = re.compile(r"^\s*\d+ (compiler: |glLinkProgram: |draw: OGLES3Cache)")
 
 
 class Link:

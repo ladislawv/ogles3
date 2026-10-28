@@ -5,7 +5,7 @@
  *   usage: m2_link [NOGPU] [DIR]   (DIR: the prefix of shaders/, e.g. work:)
  *
  * The programs' GLSL is read from shaders/ in the current directory, their
- * binaries (<hash>.v3dp, make test-v3dp) come from PROGDIR: or OGLES2Cache:.
+ * binaries (<hash>.v3dp, make test-v3dp) come from PROGDIR: or OGLES3Cache:.
  *   smooth  tests/common/smooth_shaders.h (written out as shaders/smooth.*)
  *   light   mat3, vec3 arrays and an int (tools/v3dglslc/test/shaders)
  *   state, tex  samplers (TMU_CONFIG recipes), state variables
@@ -19,7 +19,7 @@
 #include <exec/memory.h>
 #include <proto/exec.h>
 #include <proto/dos.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include "../common/smooth_shaders.h"
 
 static int failures, checks;
@@ -191,7 +191,7 @@ static void test_links(const char *name)
     glDeleteProgram(p);
 }
 
-/* OGLES2_CCT_DEBUG_SHADER_LOG (the context has it): a linked program's
+/* OGLES3_CCT_DEBUG_SHADER_LOG (the context has it): a linked program's
  * info log describes its variants. */
 static void test_debug_log(void)
 {
@@ -202,12 +202,12 @@ static void test_debug_log(void)
     glGetProgramInfoLog(p, sizeof(log), 0, log);
     check(ok && strstr(log, "fragment, points: ") && strstr(log, " instructions, ") &&
               strstr(log, "binning"),
-          "OGLES2_CCT_DEBUG_SHADER_LOG: the link log lists the variants");
+          "OGLES3_CCT_DEBUG_SHADER_LOG: the link log lists the variants");
     glDeleteProgram(p);
 }
 
 /* A program no binary exists for: compiled on the Amiga when the compiler
- * is installed (LIBS:v3dglslc, plan 8.4), else a link failure that leaves
+ * is installed (LIBS:v3dglslc3, plan 8.4), else a link failure that leaves
  * its sources in T:ogles2_missing_shaders.txt. */
 static void test_missing(void)
 {
@@ -216,7 +216,7 @@ static void test_missing(void)
     char vs[600];
     GLuint p;
     BOOL compiler;
-    l = Lock((STRPTR) "LIBS:v3dglslc", ACCESS_READ);
+    l = Lock((STRPTR) "LIBS:v3dglslc3", ACCESS_READ);
     compiler = l != 0;
     if (l)
         UnLock(l);
@@ -224,7 +224,7 @@ static void test_missing(void)
     DeleteFile((STRPTR) "T:ogles2_missing_shaders.txt");
     p = link("smooth+comment", vs, smooth_fs, &ok);
     if (compiler) {
-        check(ok, "a program without a binary is compiled on the Amiga (LIBS:v3dglslc)");
+        check(ok, "a program without a binary is compiled on the Amiga (LIBS:v3dglslc3)");
     } else {
         check(!ok, "a program without a binary fails to link");
         l = Lock((STRPTR) "T:ogles2_missing_shaders.txt", ACCESS_READ);
@@ -279,12 +279,12 @@ int main(int argc, char **argv)
         if (strcmp(argv[i], "NOGPU"))
             dir = argv[i];
     printf("ogles2 M2: linking from program binaries, uniforms\n");
-    if (!OGLES2Open()) {
-        printf("cannot open %s\n", OGLES2NAME);
+    if (!OGLES3Open()) {
+        printf("cannot open %s\n", OGLES3NAME);
         return 20;
     }
-    ctx = aglCreateContextTags2(&err, OGLES2_CCT_PISTORM_STATE_ONLY, TRUE,
-                                OGLES2_CCT_DEBUG_SHADER_LOG, TRUE, TAG_DONE);
+    ctx = aglCreateContextTags2(&err, OGLES3_CCT_PISTORM_STATE_ONLY, TRUE,
+                                OGLES3_CCT_DEBUG_SHADER_LOG, TRUE, TAG_DONE);
     if (!ctx) {
         printf("FAIL: create a state-only context (error %lu)\n", (unsigned long)err);
         return 20;
@@ -306,7 +306,7 @@ int main(int argc, char **argv)
     test_missing();
     check(glGetError() == GL_NO_ERROR, "no GL error left over");
     aglDestroyContext(ctx);
-    OGLES2Close();
+    OGLES3Close();
     printf("%s: %d of %d checks passed\n", failures ? "FAILED" : "ALL PASSED", checks - failures, checks);
     return failures ? 10 : 0;
 }

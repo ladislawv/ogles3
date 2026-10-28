@@ -9,7 +9,7 @@
 .ket }
 
 FailAt 21
-If NOT EXISTS libs/ogles2.library
+If NOT EXISTS libs/ogles3.library
   Echo "Please CD into the ogles2-m6-10 directory first,"
   Echo "then run:  Execute Run-M1"
   Quit 20
@@ -23,7 +23,7 @@ Echo "ogles2 M6 run 10, starting at step {FROM}" >>M6R10:results/00-progress.txt
 Date >>M6R10:results/00-progress.txt
 Assign LIBS: M6R10:libs ADD
 Avail FLUSH >NIL:
-SetEnv OGLES2/LogFile M6R10:results/ogles2.log
+SetEnv OGLES3/LogFile M6R10:results/ogles2.log
 
 If NOT {FROM} GT 1 VAL
   Echo "Step 1 of 3: 4x MSAA (nothing to see)"
@@ -39,19 +39,19 @@ If NOT {FROM} GT 2 VAL
   Echo "step 2 done" >>M6R10:results/00-progress.txt
 EndIf
 
-; ENV:OGLES2/MSAA=4: every context these tests make is multisampled. Exact
+; ENV:OGLES3/MSAA=4: every context these tests make is multisampled. Exact
 ; pixel checks on edges may differ there (antialiased); the rest must pass.
 If NOT {FROM} GT 3 VAL
   Echo "Step 3 of 3: the same with every context multisampled (nothing to see)"
-  SetEnv OGLES2/MSAA 4
+  SetEnv OGLES3/MSAA 4
   M6R10:bin/m1_draw BITMAP QUICK >M6R10:results/3-draw-msaa.txt
   M6R10:bin/m2_texture BITMAP QUICK >M6R10:results/3-texture-msaa.txt
   M6R10:bin/m5_fbo >M6R10:results/3-fbo-msaa.txt
-  UnSetEnv OGLES2/MSAA
+  UnSetEnv OGLES3/MSAA
   Echo "step 3 done" >>M6R10:results/00-progress.txt
 EndIf
 
-UnSetEnv OGLES2/LogFile
+UnSetEnv OGLES3/LogFile
 Assign LIBS: M6R10:libs REMOVE
 Avail FLUSH >NIL:
 If NOT EXISTS M6R10:results/notes.txt

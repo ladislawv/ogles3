@@ -1,10 +1,10 @@
-ogles2 M6 run 4: SDL3 on ogles2.library
+ogles2 M6 run 4: SDL3 on ogles3.library
 =======================================
 
 What this tests
 ---------------
 SDL3 for AmigaOS 3 (Steffen Haeuser's SDL3_68k, from Aminet's SDL_68k) with
-a new OpenGL ES 2.0 backend on ogles2.library (ports/sdl3): a program that
+a new OpenGL ES 2.0 backend on ogles3.library (ports/sdl3): a program that
 asks SDL for an OpenGL ES 2 context gets one from ogles2, and SDL's GLES2
 renderer (its hardware 2D drawing) runs on it. Desktop OpenGL in SDL still
 goes to minigl.library, as before.
@@ -30,6 +30,6 @@ Reboot and continue with the next step, for example:
 Contents
 --------
 Run-M1                 the test script
-libs/ogles2.library    the library (logs every line at once)
+libs/ogles3.library    the library (logs every line at once)
 libs/v3dglslc          the shader compiler (started by the library)
 bin/                   the SDL3 test programs, icon.png, sample.png

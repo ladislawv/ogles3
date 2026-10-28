@@ -3,17 +3,17 @@
  * vid_OpenDisplay / vid_OpenWindow / vid_AdoptWindow / vid_AdoptBitMap
  * (gl/src/context.c), written for ogles2's tags:
  *
- *   OGLES2_CCT_MODEID     fullscreen: our own screen in that mode, plus a
+ *   OGLES3_CCT_MODEID     fullscreen: our own screen in that mode, plus a
  *                         borderless backdrop window for input
- *   OGLES2_CCT_WINDOW     the application's window: we render into an
+ *   OGLES3_CCT_WINDOW     the application's window: we render into an
  *                         offscreen 32-bit bitmap and ClipBlit it on swap;
  *                         a window that is its private screen's whole size
  *                         (SDL's fullscreen) we render straight into, as
  *                         into a screen of our own (window_is_screen)
- *   OGLES2_CCT_BITMAP     the application's bitmap: we render into it, the
+ *   OGLES3_CCT_BITMAP     the application's bitmap: we render into it, the
  *                         application presents it
  *   none of them          our own window on the default public screen,
- *                         OGLES2_CCT_PISTORM_WIDTH x _HEIGHT (default 640x480)
+ *                         OGLES3_CCT_PISTORM_WIDTH x _HEIGHT (default 640x480)
  *
  * The render target is locked only for one frame (cybergraphics.library:
  * "DON'T lock the bitmap longer than for one frame. DON'T use any library
@@ -39,7 +39,7 @@
 #include <proto/graphics.h>
 #include <proto/cybergraphics.h>
 #include <proto/utility.h>
-#include <libraries/ogles2.h>
+#include <libraries/ogles3.h>
 #include "ogles2_internal.h"
 
 #define NO_MODE ((ULONG)INVALID_ID)
@@ -52,7 +52,7 @@ struct Library *CyberGfxBase;
 BOOL ogles2_display_libs_open(void)
 {
     BOOL ok;
-    ObtainSemaphore(&OGLES2LibBase->lock);
+    ObtainSemaphore(&OGLES3LibBase->lock);
     if (!IntuitionBase)
         IntuitionBase = (struct IntuitionBase *)OpenLibrary((STRPTR) "intuition.library", 39);
     if (!GfxBase)
@@ -60,7 +60,7 @@ BOOL ogles2_display_libs_open(void)
     if (!CyberGfxBase)
         CyberGfxBase = OpenLibrary((STRPTR) "cybergraphics.library", 41);
     ok = IntuitionBase && GfxBase && CyberGfxBase;
-    ReleaseSemaphore(&OGLES2LibBase->lock);
+    ReleaseSemaphore(&OGLES3LibBase->lock);
     if (!ok)
         ogles2_log("display: needs intuition 39, graphics 39 and cybergraphics 41 "
                    "(have 0x%08lx 0x%08lx 0x%08lx)", (ULONG)IntuitionBase, (ULONG)GfxBase,
@@ -102,7 +102,7 @@ static int store_swap_for(ULONG pixfmt, int *rb_swap)
 
 /* Probe the render bitmap once (lock, read, unlock): 4 bytes per pixel in a
  * layout the tile store can write. */
-static BOOL probe_bitmap(struct OGLES2Display *d)
+static BOOL probe_bitmap(struct OGLES3Display *d)
 {
     ULONG pixfmt = 0, bprow = 0, base = 0;
     APTR lock = LockBitMapTags(d->bitmap, LBMI_PIXFMT, (ULONG)&pixfmt, LBMI_BYTESPERROW,
@@ -145,7 +145,7 @@ static void blank_pointer(struct Window *w)
         SetPointer(w, blank, 1, 1, 0, 0);
 }
 
-static BOOL open_fullscreen(struct OGLES2Display *d, ULONG mode)
+static BOOL open_fullscreen(struct OGLES3Display *d, ULONG mode)
 {
     ULONG err = 0, tries[3];
     int n = 0, i;
@@ -226,7 +226,7 @@ static BOOL is_public_screen(struct Screen *s)
  * be 32-bit BGRA or RGBA, else the copy converts as before. Whatever opens
  * over the window later (a requester) is drawn over by the next frame, as
  * on a screen of our own; nothing but the program's own windows can open
- * on a private screen. ENV:OGLES2/WindowCopy 1 keeps the copy. */
+ * on a private screen. ENV:OGLES3/WindowCopy 1 keeps the copy. */
 static BOOL window_is_screen(struct Window *w)
 {
     struct Screen *s = w->WScreen;
@@ -241,13 +241,13 @@ static BOOL window_is_screen(struct Window *w)
     if (!GetCyberMapAttr(bm, CYBRMATTR_ISCYBERGFX) ||
         !store_swap_for(GetCyberMapAttr(bm, CYBRMATTR_PIXFMT), &swap))
         return FALSE;
-    if (GetVar((STRPTR) "OGLES2/WindowCopy", (STRPTR)var, sizeof(var), GVF_GLOBAL_ONLY) > 0 &&
+    if (GetVar((STRPTR) "OGLES3/WindowCopy", (STRPTR)var, sizeof(var), GVF_GLOBAL_ONLY) > 0 &&
         var[0] == '1')
         return FALSE;
     return !is_public_screen(s);
 }
 
-static BOOL open_window_target(struct OGLES2Display *d, struct Window *w)
+static BOOL open_window_target(struct OGLES3Display *d, struct Window *w)
 {
     d->window = w;
     d->screen = w->WScreen;
@@ -269,7 +269,7 @@ static BOOL open_window_target(struct OGLES2Display *d, struct Window *w)
     return TRUE;
 }
 
-static BOOL open_own_window(struct OGLES2Display *d)
+static BOOL open_own_window(struct OGLES3Display *d)
 {
     struct Window *w;
     struct Screen *pub = LockPubScreen(0);
@@ -290,11 +290,11 @@ static BOOL open_own_window(struct OGLES2Display *d)
 
 /* aglSetBitmap: an application-bitmap display renders into another bitmap
  * from the next frame (its size may differ). Unlocked: between jobs. */
-BOOL ogles2_display_set_bitmap(struct OGLES2Display *d, struct BitMap *bitmap)
+BOOL ogles2_display_set_bitmap(struct OGLES3Display *d, struct BitMap *bitmap)
 {
-    struct OGLES2Display old = *d;
+    struct OGLES3Display old = *d;
     if (!bitmap || !d->bitmap || d->window || d->own_screen || d->own_bitmap) {
-        ogles2_log("aglSetBitmap: %s", (ULONG)(bitmap ? "the context was not created with OGLES2_CCT_BITMAP"
+        ogles2_log("aglSetBitmap: %s", (ULONG)(bitmap ? "the context was not created with OGLES3_CCT_BITMAP"
                                                       : "no bitmap"));
         return FALSE;
     }
@@ -310,7 +310,7 @@ BOOL ogles2_display_set_bitmap(struct OGLES2Display *d, struct BitMap *bitmap)
     return TRUE;
 }
 
-/* aglSetParams2(OGLES2_CCT_WINDOW): a window-mode display renders into
+/* aglSetParams2(OGLES3_CCT_WINDOW): a window-mode display renders into
  * another window, or into the same one at its new size, from the next frame
  * (SDL does this when it recreates or resizes its window). A new offscreen
  * bitmap of the window's inner size, or the screen's bitmap for a window
@@ -318,12 +318,12 @@ BOOL ogles2_display_set_bitmap(struct OGLES2Display *d, struct BitMap *bitmap)
  * as before. The old bitmap is not freed: the caller frees it
  * (ogles2_display_drop) or goes back to the old display. Between jobs (the
  * caller finishes the running one). */
-BOOL ogles2_display_set_window(struct OGLES2Display *d, struct Window *w)
+BOOL ogles2_display_set_window(struct OGLES3Display *d, struct Window *w)
 {
-    struct OGLES2Display old = *d;
+    struct OGLES3Display old = *d;
     if (!w || !d->window || d->own_window || d->own_screen || !(d->own_bitmap || d->direct)) {
-        ogles2_log("aglSetParams2: OGLES2_CCT_WINDOW: %s",
-                   (ULONG)(w ? "the context was not created with OGLES2_CCT_WINDOW" : "no window"));
+        ogles2_log("aglSetParams2: OGLES3_CCT_WINDOW: %s",
+                   (ULONG)(w ? "the context was not created with OGLES3_CCT_WINDOW" : "no window"));
         return FALSE;
     }
     if (w == d->window && (UWORD)(w->Width - w->BorderLeft - w->BorderRight) == d->width &&
@@ -345,7 +345,7 @@ BOOL ogles2_display_set_window(struct OGLES2Display *d, struct Window *w)
 }
 
 /* The offscreen bitmap of a display left behind (ogles2_display_set_window). */
-void ogles2_display_drop(struct OGLES2Display *d)
+void ogles2_display_drop(struct OGLES3Display *d)
 {
     if (d->own_bitmap && d->bitmap)
         FreeBitMap(d->bitmap);
@@ -374,7 +374,7 @@ void ogles2_display_drop(struct OGLES2Display *d)
  * 0-2 at 10). */
 #define REFRESH_WAIT_PRI 10
 
-void ogles2_display_wait_refresh(struct OGLES2Display *d)
+void ogles2_display_wait_refresh(struct OGLES3Display *d)
 {
     struct Task *me = FindTask(0);
     if (!d->boosted && me->tc_Node.ln_Pri < REFRESH_WAIT_PRI) {
@@ -389,7 +389,7 @@ void ogles2_display_wait_refresh(struct OGLES2Display *d)
 }
 
 /* The frame submitted: the task's own priority again. */
-void ogles2_display_wait_done(struct OGLES2Display *d)
+void ogles2_display_wait_done(struct OGLES3Display *d)
 {
     if (d->boosted) {
         SetTaskPri(d->boosted, d->boost_pri);
@@ -398,12 +398,12 @@ void ogles2_display_wait_done(struct OGLES2Display *d)
 }
 
 /* aglSetParams2's VSYNC. */
-void ogles2_display_set_vsync(struct OGLES2Display *d, BOOL on)
+void ogles2_display_set_vsync(struct OGLES3Display *d, BOOL on)
 {
     d->vsync = on;
 }
 
-void ogles2_display_close(struct OGLES2Display *d)
+void ogles2_display_close(struct OGLES3Display *d)
 {
     ogles2_display_unlock(d);
     ogles2_display_wait_done(d);
@@ -420,26 +420,26 @@ void ogles2_display_close(struct OGLES2Display *d)
     memset(d, 0, sizeof(*d));
 }
 
-BOOL ogles2_display_open(struct OGLES2Display *d, struct TagItem *tags, ULONG *why)
+BOOL ogles2_display_open(struct OGLES3Display *d, struct TagItem *tags, ULONG *why)
 {
-    struct Window *window = (struct Window *)GetTagData(OGLES2_CCT_WINDOW, 0, tags);
-    struct BitMap *bitmap = (struct BitMap *)GetTagData(OGLES2_CCT_BITMAP, 0, tags);
-    ULONG mode = GetTagData(OGLES2_CCT_MODEID, NO_MODE, tags);
+    struct Window *window = (struct Window *)GetTagData(OGLES3_CCT_WINDOW, 0, tags);
+    struct BitMap *bitmap = (struct BitMap *)GetTagData(OGLES3_CCT_BITMAP, 0, tags);
+    ULONG mode = GetTagData(OGLES3_CCT_MODEID, NO_MODE, tags);
     BOOL ok;
 
     memset(d, 0, sizeof(*d));
     if (mode == NO_MODE)
-        mode = GetTagData(OGLES2_CCT_CONTEXT_FOR_MODEID, NO_MODE, tags);
-    d->width = (UWORD)GetTagData(OGLES2_CCT_PISTORM_WIDTH, 0, tags);
-    d->height = (UWORD)GetTagData(OGLES2_CCT_PISTORM_HEIGHT, 0, tags);
-    d->vsync = GetTagData(OGLES2_CCT_VSYNC, FALSE, tags) ? TRUE : FALSE;
-    *why = OGLES2_CCE_NO_DISPLAY;
+        mode = GetTagData(OGLES3_CCT_CONTEXT_FOR_MODEID, NO_MODE, tags);
+    d->width = (UWORD)GetTagData(OGLES3_CCT_PISTORM_WIDTH, 0, tags);
+    d->height = (UWORD)GetTagData(OGLES3_CCT_PISTORM_HEIGHT, 0, tags);
+    d->vsync = GetTagData(OGLES3_CCT_VSYNC, FALSE, tags) ? TRUE : FALSE;
+    *why = OGLES3_CCE_NO_DISPLAY;
 
     if (!ogles2_display_libs_open())
         return FALSE;
     if ((window != 0) + (bitmap != 0) + (mode != NO_MODE) > 1) {
         ogles2_log("display: more than one of WINDOW, BITMAP and MODEID given");
-        *why = OGLES2_CCE_BAD_TAGS;
+        *why = OGLES3_CCE_BAD_TAGS;
         return FALSE;
     }
     if (bitmap) {
@@ -470,11 +470,11 @@ BOOL ogles2_display_open(struct OGLES2Display *d, struct TagItem *tags, ULONG *w
                                                 window ? "application window" :
                                                 d->own_screen ? "fullscreen" : "own window"),
                (ULONG)d->width, (ULONG)d->height, (ULONG)(d->rb_swap ? "BGRA" : "RGBA"));
-    *why = OGLES2_CCE_OK;
+    *why = OGLES3_CCE_OK;
     return TRUE;
 }
 
-BOOL ogles2_display_lock(struct OGLES2Display *d)
+BOOL ogles2_display_lock(struct OGLES3Display *d)
 {
     if (d->lock)
         return TRUE;
@@ -495,7 +495,7 @@ BOOL ogles2_display_lock(struct OGLES2Display *d)
  * a device writing memory). A fullscreen screen (ours, or the one a window
  * is all of) is read by the display, not the CPU: ogles2_display_read
  * invalidates what it reads. */
-void ogles2_display_dma(struct OGLES2Display *d, BOOL after)
+void ogles2_display_dma(struct OGLES3Display *d, BOOL after)
 {
     ULONG len;
     if (!d->lock || d->own_screen || d->direct)
@@ -507,7 +507,7 @@ void ogles2_display_dma(struct OGLES2Display *d, BOOL after)
         CachePreDMA((APTR)d->base, &len, 0);
 }
 
-void ogles2_display_unlock(struct OGLES2Display *d)
+void ogles2_display_unlock(struct OGLES3Display *d)
 {
     if (d->lock) {
         UnLockBitMap(d->lock);
@@ -516,7 +516,7 @@ void ogles2_display_unlock(struct OGLES2Display *d)
     }
 }
 
-void ogles2_display_read(struct OGLES2Display *d, UWORD x, UWORD y, UWORD w, UWORD h, UBYTE *dst,
+void ogles2_display_read(struct OGLES3Display *d, UWORD x, UWORD y, UWORD w, UWORD h, UBYTE *dst,
                          ULONG stride)
 {
     struct RastPort rp;
@@ -538,7 +538,7 @@ void ogles2_display_read(struct OGLES2Display *d, UWORD x, UWORD y, UWORD w, UWO
  * (glBlitFramebuffer into the default framebuffer, blit.c): the frame's
  * render has finished; the next job loads them (the data cache is cleaned
  * before every render, job.c). */
-void ogles2_display_write(struct OGLES2Display *d, UWORD x, UWORD y, UWORD w, UWORD h, const UBYTE *src,
+void ogles2_display_write(struct OGLES3Display *d, UWORD x, UWORD y, UWORD w, UWORD h, const UBYTE *src,
                           ULONG stride)
 {
     struct RastPort rp;
@@ -551,7 +551,7 @@ void ogles2_display_write(struct OGLES2Display *d, UWORD x, UWORD y, UWORD w, UW
 }
 
 /* After the frame's render has finished and the bitmap is unlocked. */
-void ogles2_display_present(struct OGLES2Display *d)
+void ogles2_display_present(struct OGLES3Display *d)
 {
     struct Window *w = d->window;
     if (!w || !d->own_bitmap)

@@ -9,7 +9,7 @@
 .ket }
 
 FailAt 21
-If NOT EXISTS libs/ogles2.library
+If NOT EXISTS libs/ogles3.library
   Echo "Please CD into the ogles2-m7-6 directory first,"
   Echo "then run:  Execute Run-M1"
   Quit 20
@@ -23,7 +23,7 @@ Echo "ogles2 M7 run 6, starting at step {FROM}" >>M7R6:results/00-progress.txt
 Date >>M7R6:results/00-progress.txt
 Assign LIBS: M7R6:libs ADD
 Avail FLUSH >NIL:
-SetEnv OGLES2/LogFile M7R6:results/ogles2.log
+SetEnv OGLES3/LogFile M7R6:results/ogles2.log
 
 If NOT {FROM} GT 1 VAL
   Echo "Step 1 of 4: copies from a hidden bitmap and a framebuffer object (nothing to see)"
@@ -46,13 +46,13 @@ EndIf
 ; Probe K: the copies through the CPU, as before, for the comparison.
 If NOT {FROM} GT 4 VAL
   Echo "Step 4 of 4: the same, the copy through the CPU: moving rectangles, a strip at the bottom"
-  SetEnv OGLES2/Probe K
+  SetEnv OGLES3/Probe K
   M7R6:bin/m7_copy BENCH >M7R6:results/4-bench-cpu.txt
-  UnSetEnv OGLES2/Probe
+  UnSetEnv OGLES3/Probe
   Echo "step 4 done" >>M7R6:results/00-progress.txt
 EndIf
 
-UnSetEnv OGLES2/LogFile
+UnSetEnv OGLES3/LogFile
 Assign LIBS: M7R6:libs REMOVE
 Avail FLUSH >NIL:
 If NOT EXISTS M7R6:results/notes.txt

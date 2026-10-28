@@ -1,4 +1,4 @@
-# ogles2.library, libogles2.a and their tests. Run in WSL:  make [-j]
+# ogles3.library, libogles3.a and their tests. Run in WSL:  make [-j]
 # Output goes to $(B) (default ~/ogles2-build/m68k), outside the source tree.
 #
 # Toolchain: GCC 6.5.0b + clib2 headers (plan section 2.3), the compiler
@@ -18,21 +18,19 @@ PYTHON ?= python3
 # conversion, so (int)255.5f became 256 (found on the A1200 in M1 run 1;
 # tools/check_fpconv.py, plan section 2.3). The other letters are the default.
 CPU    := -mcpu=68020 -m68881 -fbbb=abcfhilmnprsz0
-# EXTRA_CFLAGS=-DOGLES2_LOG_SYNC: write every log line at once (hardware bring-up:
+# EXTRA_CFLAGS=-DOGLES3_LOG_SYNC: write every log line at once (hardware bring-up:
 # a hang loses nothing). Use its own B, e.g. B=~/ogles2-build/m68k-sync.
 CFLAGS := -std=gnu99 -O2 -Wall -Wextra -Wno-unused-parameter -fno-strict-aliasing $(CPU) -mcrt=clib2 \
           $(EXTRA_CFLAGS)
-# ES3=1: a test build whose contexts accept OGLES2_CCT_PISTORM_ES_VERSION 30
-# (OpenGL ES 3.0 while it is being built: no release offers part of one,
-# docs/GLES3_PLAN.md §3). Use its own B, e.g. B=~/ogles3-build/m68k-es3.
+# The release (ogles3.library 1.0): OpenGL ES 3.1 contexts, for 30 and 31
+# alike and when no version is asked for; 20 gives OpenGL ES 2.0.
+# ES3=1: a test build whose highest is OpenGL ES 3.0 (dEQP-GLES3 runs), its
+# own B, e.g. B=~/ogles3-build/m68k-es3. ES31=1 is the release's contexts
+# (stage D's test builds had it; kept for their B, ~/ogles3-build/m68k-es31).
 ifeq ($(ES3),1)
-CFLAGS += -DOGLES2_ES3_CONTEXTS
-endif
-# ES31=1: a test build whose contexts are OpenGL ES 3.1 for 30 and 31 alike
-# (stage D, docs/GLES3_PLAN.md §7, while it is being built), e.g.
-# B=~/ogles3-build/m68k-es31; ES3=1 builds keep giving ES 3.0 contexts.
-ifeq ($(ES31),1)
-CFLAGS += -DOGLES2_ES3_CONTEXTS -DOGLES2_ES31_CONTEXTS
+CFLAGS += -DOGLES3_ES3_CONTEXTS
+else
+CFLAGS += -DOGLES3_ES3_CONTEXTS -DOGLES3_ES31_CONTEXTS
 endif
 INC    := -Iinclude -I$(B)/gen/include -Iogles2 -I$(B)/gen/ogles2
 # Library objects must not pull C library or startup code.
@@ -57,7 +55,7 @@ LIB_SRC   := ogles2/library.c ogles2/log.c ogles2/context.c ogles2/device.c ogle
 # Library files that use v3dcore directly
 V3D_USERS := device job draw v3dp texture buffer fbo share sync query xfb compute
 GEN_LIB   := $(B)/gen/ogles2/dispatch_table.c $(B)/gen/ogles2/stubs.c
-CLIENT_SRC := client/ogles2_open.c client/agl.c
+CLIENT_SRC := client/ogles3_open.c client/agl.c
 GEN_CLIENT := $(B)/gen/client/agl_gen.c $(B)/gen/client/procaddr.c
 
 LIB_OBJ    := $(B)/obj/ogles2/start.o $(patsubst %.c,$(B)/obj/%.o,$(LIB_SRC)) \
@@ -66,9 +64,9 @@ CLIENT_OBJ := $(patsubst %.c,$(B)/obj/%.o,$(CLIENT_SRC)) $(B)/obj/client/lvo.o \
               $(B)/obj/gen/agl_gen.o $(B)/obj/gen/procaddr.o
 
 .PHONY: all gen clean vbcc
-all: $(B)/fpcheck.ok $(B)/libv3dcore.a $(B)/ogles2.library $(B)/libogles2.a $(B)/tests/abi_layout $(B)/tests/smoke \
+all: $(B)/fpcheck.ok $(B)/libv3dcore.a $(B)/ogles3.library $(B)/libogles3.a $(B)/tests/abi_layout $(B)/tests/smoke \
      $(B)/tests/abi_probe $(B)/tests/m1_clear $(B)/tests/m1_probe $(B)/tests/m1_draw $(B)/tests/m1_hwprobe $(B)/tests/m1_soak $(B)/tests/m2_link $(B)/tests/m2_texture $(B)/tests/m2_elements $(B)/tests/m2_buffers $(B)/tests/m4_stress $(B)/tests/m4_depth $(B)/tests/m4_setbitmap $(B)/tests/gears_gles2 $(B)/tests/cachetime $(B)/tests/emuspeed $(B)/tests/m5_fbo \
-     $(B)/tests/rtt_churn $(B)/tests/m6_share $(B)/tests/m6_tasks $(B)/tests/m6_ext $(B)/tests/m6_tfu $(B)/tests/m6_flip $(B)/tests/m6_vsync $(B)/tests/m6_msaa $(B)/tests/m7_points $(B)/tests/m7_s3tc $(B)/tests/m7_clip $(B)/tests/m7_mrt $(B)/tests/m7_half $(B)/tests/m7_copy $(B)/tests/m8_es3 $(B)/tests/m8_draw $(B)/tests/m8_es31 $(B)/tests/m8_indirect $(B)/cmd/OGLES2Log $(B)/amictl/amictld \
+     $(B)/tests/rtt_churn $(B)/tests/m6_share $(B)/tests/m6_tasks $(B)/tests/m6_ext $(B)/tests/m6_tfu $(B)/tests/m6_flip $(B)/tests/m6_vsync $(B)/tests/m6_msaa $(B)/tests/m7_points $(B)/tests/m7_s3tc $(B)/tests/m7_clip $(B)/tests/m7_mrt $(B)/tests/m7_half $(B)/tests/m7_copy $(B)/tests/m8_es3 $(B)/tests/m8_draw $(B)/tests/m8_es31 $(B)/tests/m8_indirect $(B)/cmd/OGLES3Log $(B)/amictl/amictld \
      $(B)/amictl/v3dglslc-remote
 
 # ---- generated code (plan section 6.6). Re-run when the inputs or the set of
@@ -118,10 +116,10 @@ $(B)/obj/gen/%.o: $(B)/gen/ogles2/%.c $(GEN_STAMP) Makefile
 	$(CC) $(CFLAGS) $(INC) -c $< -o $@
 
 # start.o first: the file's first code is "return -1" (start.s).
-$(B)/ogles2.library.debug: $(LIB_OBJ) $(B)/libv3dcore.a
-	$(CC) $(LIBLINK) -Wl,-Map,$(B)/ogles2.library.map -o $@ $(LIB_OBJ) $(B)/libv3dcore.a -lgcc
+$(B)/ogles3.library.debug: $(LIB_OBJ) $(B)/libv3dcore.a
+	$(CC) $(LIBLINK) -Wl,-Map,$(B)/ogles3.library.map -o $@ $(LIB_OBJ) $(B)/libv3dcore.a -lgcc
 # The linked table, checked slot by slot against abi_order.txt before stripping.
-$(B)/ogles2.library: $(B)/ogles2.library.debug gen/verify_table.py gen/abi_order.txt
+$(B)/ogles3.library: $(B)/ogles3.library.debug gen/verify_table.py gen/abi_order.txt
 	$(PYTHON) gen/verify_table.py $< gen/abi_order.txt
 	$(STRIP) -o $@ $<
 
@@ -135,7 +133,7 @@ $(B)/obj/client/lvo.o: client/lvo.s
 $(B)/obj/gen/%.o: $(B)/gen/client/%.c $(GEN_STAMP) Makefile
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(INC) -c $< -o $@
-$(B)/libogles2.a: $(CLIENT_OBJ)
+$(B)/libogles3.a: $(CLIENT_OBJ)
 	rm -f $@
 	$(AR) rcs $@ $^
 
@@ -143,90 +141,90 @@ $(B)/libogles2.a: $(CLIENT_OBJ)
 $(B)/tests/abi_layout: $(B)/gen/tests/abi_layout.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(INC) $< -o $@
-$(B)/tests/smoke: tests/smoke/smoke.c $(B)/libogles2.a
+$(B)/tests/smoke: tests/smoke/smoke.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
 
-$(B)/tests/abi_probe: tests/abi_probe/abi_probe.c $(B)/libogles2.a
+$(B)/tests/abi_probe: tests/abi_probe/abi_probe.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
-$(B)/tests/m1_clear: tests/m1_clear/m1_clear.c $(B)/libogles2.a
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
+$(B)/tests/m1_clear: tests/m1_clear/m1_clear.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
-$(B)/tests/m1_probe: tests/m1_probe/m1_probe.c $(B)/libogles2.a
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
+$(B)/tests/m1_probe: tests/m1_probe/m1_probe.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
-$(B)/tests/m1_hwprobe: tests/m1_hwprobe/m1_hwprobe.c $(B)/libogles2.a
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
+$(B)/tests/m1_hwprobe: tests/m1_hwprobe/m1_hwprobe.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
-$(B)/tests/m2_link: tests/m2_link/m2_link.c $(B)/libogles2.a
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
+$(B)/tests/m2_link: tests/m2_link/m2_link.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
-$(B)/tests/m2_elements: tests/m2_elements/m2_elements.c $(B)/libogles2.a
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
+$(B)/tests/m2_elements: tests/m2_elements/m2_elements.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
-$(B)/tests/m2_buffers: tests/m2_buffers/m2_buffers.c $(B)/libogles2.a
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
+$(B)/tests/m2_buffers: tests/m2_buffers/m2_buffers.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
-$(B)/tests/m4_stress: tests/m4_stress/m4_stress.c $(B)/libogles2.a
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
+$(B)/tests/m4_stress: tests/m4_stress/m4_stress.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
-$(B)/tests/m4_depth: tests/m4_depth/m4_depth.c $(B)/libogles2.a
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
+$(B)/tests/m4_depth: tests/m4_depth/m4_depth.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
 $(B)/tests/cachetime: tests/perf/cachetime.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -fno-builtin $< -o $@
 $(B)/tests/emuspeed: tests/perf/emuspeed.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $< -o $@
-$(B)/tests/m5_fbo: tests/m5_fbo/m5_fbo.c $(B)/libogles2.a
+$(B)/tests/m5_fbo: tests/m5_fbo/m5_fbo.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
-$(B)/tests/m6_share: tests/m6_share/m6_share.c $(B)/libogles2.a
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
+$(B)/tests/m6_share: tests/m6_share/m6_share.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
-$(B)/tests/m6_tasks: tests/m6_share/m6_tasks.c $(B)/libogles2.a
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
+$(B)/tests/m6_tasks: tests/m6_share/m6_tasks.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
-$(B)/tests/m6_ext: tests/m6_ext/m6_ext.c tests/common/ext_shaders.h $(B)/libogles2.a
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
+$(B)/tests/m6_ext: tests/m6_ext/m6_ext.c tests/common/ext_shaders.h $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
 $(B)/tests/m6_msaa: tests/m6_msaa/m6_msaa.c tests/common/smooth_shaders.h tests/common/tex_shaders.h \
-                    $(B)/libogles2.a
+                    $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
-$(B)/tests/m7_points: tests/m7_points/m7_points.c $(B)/libogles2.a
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
+$(B)/tests/m7_points: tests/m7_points/m7_points.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
-$(B)/tests/m7_s3tc: tests/m7_s3tc/m7_s3tc.c tests/common/tex_shaders.h $(B)/libogles2.a
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
+$(B)/tests/m7_s3tc: tests/m7_s3tc/m7_s3tc.c tests/common/tex_shaders.h $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
-$(B)/tests/m7_clip: tests/m7_clip/m7_clip.c $(B)/libogles2.a
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
+$(B)/tests/m7_clip: tests/m7_clip/m7_clip.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
-$(B)/tests/m7_mrt: tests/m7_mrt/m7_mrt.c $(B)/libogles2.a
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
+$(B)/tests/m7_mrt: tests/m7_mrt/m7_mrt.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
-$(B)/tests/m7_half: tests/m7_half/m7_half.c $(B)/libogles2.a
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
+$(B)/tests/m7_half: tests/m7_half/m7_half.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
-$(B)/tests/m7_copy: tests/m7_copy/m7_copy.c tests/common/smooth_shaders.h tests/common/tex_shaders.h $(B)/libogles2.a
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
+$(B)/tests/m7_copy: tests/m7_copy/m7_copy.c tests/common/smooth_shaders.h tests/common/tex_shaders.h $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
-$(B)/tests/m8_es3: tests/m8_es3/m8_es3.c $(B)/libogles2.a
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
+$(B)/tests/m8_es3: tests/m8_es3/m8_es3.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
-$(B)/tests/m8_draw: tests/m8_draw/m8_draw.c $(B)/libogles2.a
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
+$(B)/tests/m8_draw: tests/m8_draw/m8_draw.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
-$(B)/tests/m8_es31: tests/m8_es31/m8_es31.c $(B)/libogles2.a
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
+$(B)/tests/m8_es31: tests/m8_es31/m8_es31.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
-$(B)/tests/m8_indirect: tests/m8_indirect/m8_indirect.c $(B)/libogles2.a
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
+$(B)/tests/m8_indirect: tests/m8_indirect/m8_indirect.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
-# The GLES3 headers with <proto/ogles2.h> in every order (docs/GLES3_PLAN.md
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
+# The GLES3 headers with <proto/ogles3.h> in every order (docs/GLES3_PLAN.md
 # §3): GCC 6.5 and GCC 16 with -Werror, vbcc without a message but its
 # warnings inside Khronos' headers (gl2ext.h's GL_MESA_sampler_objects repeats
 # ES 3.0's sampler typedefs, which vbcc's C99 mode warns about).
@@ -247,32 +245,32 @@ es3-header-probe: $(GEN_STAMP)
 $(B)/tests/m6_flip: tests/m6_flip/m6_flip.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(INC) $< -o $@
-$(B)/tests/m6_vsync: tests/m6_flip/m6_vsync.c tests/common/smooth_shaders.h $(B)/libogles2.a
+$(B)/tests/m6_vsync: tests/m6_flip/m6_vsync.c tests/common/smooth_shaders.h $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
 $(B)/tests/m6_tfu: tests/m6_tfu/m6_tfu.c tests/common/smooth_shaders.h tests/common/tex_shaders.h \
-                   $(B)/libogles2.a
+                   $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
-$(B)/tests/m4_setbitmap: tests/m4_setbitmap/m4_setbitmap.c $(B)/libogles2.a
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
+$(B)/tests/m4_setbitmap: tests/m4_setbitmap/m4_setbitmap.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
 $(B)/tests/gears_gles2: tests/perf/gears_gles2.c tests/perf/perf_gears.h tests/perf/perf_target.h \
-                       tests/common/lit_shaders.h $(B)/libogles2.a
+                       tests/common/lit_shaders.h $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -fno-builtin $(INC) $< -L$(B) -logles2 -lm881 -o $@
-$(B)/tests/rtt_churn: tests/perf/rtt_churn.c tests/perf/perf_gears.h tests/perf/perf_target.h $(B)/libogles2.a
+	$(CC) $(CFLAGS) -fno-builtin $(INC) $< -L$(B) -logles3 -lm881 -o $@
+$(B)/tests/rtt_churn: tests/perf/rtt_churn.c tests/perf/perf_gears.h tests/perf/perf_target.h $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -fno-builtin $(INC) $< -L$(B) -logles2 -lm881 -o $@
+	$(CC) $(CFLAGS) -fno-builtin $(INC) $< -L$(B) -logles3 -lm881 -o $@
 
 # ---- gl4es (desktop OpenGL on GLES2, M6): ports/gl4es builds libgl4es.a from
 # gl4es's sources (cloned into GL4ES_SRC); gears_gl4es is gears_mgl.c on it.
 GL4ES_SRC ?= $(HOME)/gl4es
 .PHONY: gl4es
-gl4es: $(B)/libogles2.a $(GEN_STAMP)
+gl4es: $(B)/libogles3.a $(GEN_STAMP)
 	B=$(B) GL4ES_SRC=$(GL4ES_SRC) bash ports/gl4es/build.sh
 	@mkdir -p $(B)/tests
-	$(CC) $(CFLAGS) -fno-builtin -DGEARS_GL4ES -I$(GL4ES_SRC)/include -Iports/gl4es/include $(INC) 	    tests/perf/gears_mgl.c -L$(B)/gl4es -L$(B) -lgl4es -logles2 -lm881 -o $(B)/tests/gears_gl4es
+	$(CC) $(CFLAGS) -fno-builtin -DGEARS_GL4ES -I$(GL4ES_SRC)/include -Iports/gl4es/include $(INC) 	    tests/perf/gears_mgl.c -L$(B)/gl4es -L$(B) -lgl4es -logles3 -lm881 -o $(B)/tests/gears_gl4es
 
 # ---- the MiniGL side of the speed comparison (tests/perf): needs the SDK
 # directory of PiStorm3D 29.1 (Aminet util/libs/PiStorm3D.lha, SDK/).
@@ -284,15 +282,15 @@ $(B)/tests/gears_mgl: tests/perf/gears_mgl.c tests/perf/perf_gears.h tests/perf/
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -fno-builtin -Wno-sign-compare -I$(MGL_SDK)/minigl-shared-library/include $< -L$(MGL_SDK)/lib -lminigl -lm881 -o $@
 
-$(B)/tests/m2_texture: tests/m2_texture/m2_texture.c $(B)/libogles2.a
+$(B)/tests/m2_texture: tests/m2_texture/m2_texture.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
-$(B)/tests/m1_soak: tests/m1_soak/m1_soak.c $(B)/libogles2.a
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
+$(B)/tests/m1_soak: tests/m1_soak/m1_soak.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -fno-builtin $(INC) $< -L$(B) -logles2 -lm881 -o $@
-$(B)/tests/m1_draw: tests/m1_draw/m1_draw.c $(B)/libogles2.a
+	$(CC) $(CFLAGS) -fno-builtin $(INC) $< -L$(B) -logles3 -lm881 -o $@
+$(B)/tests/m1_draw: tests/m1_draw/m1_draw.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
 
 # ---- vbcc clients (plan section 6.3): libogles2 built with vbcc, and the
 # smoke test and ABI probe built with it, against the same GCC library.
@@ -302,10 +300,10 @@ NDK    ?= $(TC)/m68k-amigaos/ndk-include
 VC     := PATH=$(VBCC)/bin:$$PATH VBCC=$(VBCC) $(VBCC)/bin/vc +aos68k
 VCFLAGS := -c99 -cpu=68020 -fpu=68881 -O1 -Iinclude -I$(B)/gen/include -I$(NDK)
 VB     := $(B)/vbcc
-VCLIENT_OBJ := $(VB)/obj/ogles2_open.o $(VB)/obj/agl.o $(VB)/obj/agl_gen.o $(VB)/obj/procaddr.o \
+VCLIENT_OBJ := $(VB)/obj/ogles3_open.o $(VB)/obj/agl.o $(VB)/obj/agl_gen.o $(VB)/obj/procaddr.o \
                $(VB)/obj/lvo_vasm.o
 
-vbcc: $(VB)/ogles2.lib $(VB)/tests/smoke $(VB)/tests/abi_probe
+vbcc: $(VB)/ogles3.lib $(VB)/tests/smoke $(VB)/tests/abi_probe
 $(VB)/obj/%.o: client/%.c $(GEN_STAMP)
 	@mkdir -p $(dir $@)
 	$(VC) $(VCFLAGS) -c $< -o $@
@@ -316,14 +314,14 @@ $(VB)/obj/lvo_vasm.o: client/lvo_vasm.s
 	@mkdir -p $(dir $@)
 	$(VBCC)/bin/vasmm68k_mot -quiet -Fhunk -m68020 $< -o $@
 # An AmigaOS link library: the hunk objects one after another.
-$(VB)/ogles2.lib: $(VCLIENT_OBJ)
+$(VB)/ogles3.lib: $(VCLIENT_OBJ)
 	cat $^ > $@
-$(VB)/tests/smoke: tests/smoke/smoke.c $(VB)/ogles2.lib
+$(VB)/tests/smoke: tests/smoke/smoke.c $(VB)/ogles3.lib
 	@mkdir -p $(dir $@)
-	$(VC) $(VCFLAGS) $< $(VB)/ogles2.lib -lamiga -lm881 -o $@
-$(VB)/tests/abi_probe: tests/abi_probe/abi_probe.c $(VB)/ogles2.lib
+	$(VC) $(VCFLAGS) $< $(VB)/ogles3.lib -lamiga -lm881 -o $@
+$(VB)/tests/abi_probe: tests/abi_probe/abi_probe.c $(VB)/ogles3.lib
 	@mkdir -p $(dir $@)
-	$(VC) $(VCFLAGS) $< $(VB)/ogles2.lib -lamiga -lm881 -o $@
+	$(VC) $(VCFLAGS) $< $(VB)/ogles3.lib -lamiga -lm881 -o $@
 
 # ---- remote test station (tools/amictl, plan section 10.1)
 AMICTL_SRC := tools/amictl/server/amictld.c tools/amictl/server/amictl_proto.h tools/amictl/server/os.h
@@ -413,9 +411,9 @@ blake3-test:
 	$(B)/host/blake3_test
 
 # ---- commands
-$(B)/cmd/OGLES2Log: cmd/OGLES2Log.c $(B)/libogles2.a
+$(B)/cmd/OGLES3Log: cmd/OGLES3Log.c $(B)/libogles3.a
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles3 -o $@
 
 # The Pi's temperature, throttling and clocks (the test station; no library)
 $(B)/cmd/pistat: cmd/pistat.c v3dcore/hw/devicetree_protos.h

@@ -68,7 +68,7 @@ static void supertiles(V3DContext *v, ULONG w, ULONG h, ULONG sw, ULONG sh, ULON
 
 static void *grow_binning(v3d_static_buffer *buf, v3d_uintptr size)
 {
-    struct OGLES2Context *ctx = buf->grow_data;
+    struct OGLES3Context *ctx = buf->grow_data;
     V3DContext *v = ctx->v3d;
     V3DDevice *dev = ogles2_device();
     v3d_mem m;
@@ -123,7 +123,7 @@ struct zs_save
     UBYTE buffer, format;  /* v3d_ZSTENCIL/v3d_Z, V3D_OUTPUT_IMAGE_FORMAT_* */
 };
 
-static struct zs_save *zs_get(struct OGLES2Context *ctx)
+static struct zs_save *zs_get(struct OGLES3Context *ctx)
 {
     struct zs_save *z = ctx->zs_save;
     V3DContext *v = ctx->v3d;
@@ -139,7 +139,7 @@ static struct zs_save *zs_get(struct OGLES2Context *ctx)
     }
     if (!(z = AllocVec(sizeof(*z), MEMF_ANY | MEMF_CLEAR)))
         return 0;
-    cpp = ctx->depth_format == OGLES2_DEPTH_16 ? 2 : 4;
+    cpp = ctx->depth_format == OGLES3_DEPTH_16 ? 2 : 4;
     ub_w = 2 * v3d_utile_width((int)cpp);
     ub_h = 2 * v3d_utile_height((int)cpp);
     pw = ((ULONG)v->width * (ctx->msaa ? 2 : 1) + 4 * ub_w - 1) / (4 * ub_w) * (4 * ub_w);
@@ -153,9 +153,9 @@ static struct zs_save *zs_get(struct OGLES2Context *ctx)
     z->h = v->height;
     z->msaa = ctx->msaa;
     z->height_in_ub = ph / ub_h;
-    z->buffer = ctx->depth_format == OGLES2_DEPTH_24 ? v3d_ZSTENCIL : v3d_Z;
-    z->format = ctx->depth_format == OGLES2_DEPTH_16 ? V3D_OUTPUT_IMAGE_FORMAT_D16
-              : ctx->depth_format == OGLES2_DEPTH_24 ? V3D_OUTPUT_IMAGE_FORMAT_D24S8
+    z->buffer = ctx->depth_format == OGLES3_DEPTH_24 ? v3d_ZSTENCIL : v3d_Z;
+    z->format = ctx->depth_format == OGLES3_DEPTH_16 ? V3D_OUTPUT_IMAGE_FORMAT_D16
+              : ctx->depth_format == OGLES3_DEPTH_24 ? V3D_OUTPUT_IMAGE_FORMAT_D24S8
                                                      : V3D_OUTPUT_IMAGE_FORMAT_D32F;
     ctx->zs_save = z;
     return z;
@@ -165,7 +165,7 @@ static struct zs_save *zs_get(struct OGLES2Context *ctx)
  * as a texture view of their saved image, its size the framebuffer's;
  * FALSE: none saved (nothing drawn or cleared since the frame began), or
  * all four samples of 4x MSAA. */
-BOOL ogles2_job_zs_view(struct OGLES2Context *ctx, V3DTexture *t)
+BOOL ogles2_job_zs_view(struct OGLES3Context *ctx, V3DTexture *t)
 {
     struct zs_save *z = ctx->zs_save;
     ULONG cpp, ub_w, ub_h, pw, ph;
@@ -190,7 +190,7 @@ BOOL ogles2_job_zs_view(struct OGLES2Context *ctx, V3DTexture *t)
     return TRUE;
 }
 
-void ogles2_job_free(struct OGLES2Context *ctx)
+void ogles2_job_free(struct OGLES3Context *ctx)
 {
     struct zs_save *z = ctx->zs_save;
     if (z) {
@@ -202,10 +202,10 @@ void ogles2_job_free(struct OGLES2Context *ctx)
 }
 
 /* Starts the job's binning list if none is open. */
-void ogles2_job_begin(struct OGLES2Context *ctx)
+void ogles2_job_begin(struct OGLES3Context *ctx)
 {
     V3DContext *v = ctx->v3d;
-    struct OGLES2Target tg;
+    struct OGLES3Target tg;
     UWORD w = v->width, h = v->height;
     UBYTE nrt = 1, bpp = V3D_INTERNAL_BPP_32, tw, th;
     BOOL bad = FALSE;
@@ -284,11 +284,11 @@ void ogles2_job_begin(struct OGLES2Context *ctx)
     v->frame_active = TRUE;
     /* Unique across contexts: a shared object's "last used by job N" names
      * one job of one member (share.c). */
-    ObtainSemaphore(&OGLES2LibBase->lock);
-    if (!++OGLES2LibBase->serial)
-        ++OGLES2LibBase->serial; /* 0: never used */
-    ctx->job_serial = OGLES2LibBase->serial;
-    ReleaseSemaphore(&OGLES2LibBase->lock);
+    ObtainSemaphore(&OGLES3LibBase->lock);
+    if (!++OGLES3LibBase->serial)
+        ++OGLES3LibBase->serial; /* 0: never used */
+    ctx->job_serial = OGLES3LibBase->serial;
+    ReleaseSemaphore(&OGLES3LibBase->lock);
     v->ez_state = V3D_EZ_UNDECIDED;
     v->first_ez_state = V3D_EZ_UNDECIDED;
     v->pending_clear_color = FALSE;
@@ -322,7 +322,7 @@ static GLfloat bitsf(ULONG u)
  * (Mesa snapshots them the same way), not at the flush: the colour of the
  * targets `rts` (glClear: every one) from cv (floats' bits, or with is_int
  * integers), depth and stencil. */
-void ogles2_job_clear(struct OGLES2Context *ctx, GLbitfield mask, UBYTE rts, const ULONG *cv, BOOL is_int,
+void ogles2_job_clear(struct OGLES3Context *ctx, GLbitfield mask, UBYTE rts, const ULONG *cv, BOOL is_int,
                       GLfloat depth, GLint stencil)
 {
     V3DContext *v = ctx->v3d;
@@ -364,10 +364,10 @@ void ogles2_job_clear(struct OGLES2Context *ctx, GLbitfield mask, UBYTE rts, con
 }
 
 /* Builds the tile list and the render list. The display must be locked. */
-static void build_render(struct OGLES2Context *ctx, struct zs_save *store_zs)
+static void build_render(struct OGLES3Context *ctx, struct zs_save *store_zs)
 {
     V3DContext *v = ctx->v3d;
-    struct OGLES2Display *d = &ctx->display;
+    struct OGLES3Display *d = &ctx->display;
     v3d_u8 s = v->build_slot;
     UWORD width = v->width, height = v->height;
     ULONG tilesX = v->frame.tilesX, tilesY = v->frame.tilesY;
@@ -375,11 +375,11 @@ static void build_render(struct OGLES2Context *ctx, struct zs_save *store_zs)
     UBYTE clear_color = v->pending_clear_color;
     UBYTE ez = v->first_ez_state;
     UBYTE ez_off = (ez == V3D_EZ_DISABLED) || (width & 1) || (height & 1); /* GFXH-1918 */
-    UBYTE depth_type = ctx->depth_format == OGLES2_DEPTH_16 ? V3D_INTERNAL_TYPE_DEPTH16
-                     : ctx->depth_format == OGLES2_DEPTH_24 ? V3D_INTERNAL_TYPE_DEPTH24
+    UBYTE depth_type = ctx->depth_format == OGLES3_DEPTH_16 ? V3D_INTERNAL_TYPE_DEPTH16
+                     : ctx->depth_format == OGLES3_DEPTH_24 ? V3D_INTERNAL_TYPE_DEPTH24
                                                             : V3D_INTERNAL_TYPE_DEPTH32F;
     ULONG argb, abgr;
-    UBYTE flip_y = (ctx->probe & OGLES2_PROBE_FLIP_Y) ? TRUE : FALSE;
+    UBYTE flip_y = (ctx->probe & OGLES3_PROBE_FLIP_Y) ? TRUE : FALSE;
     /* 4x MSAA: the colour stored resolved (the four samples averaged), the
      * colour loaded into every sample; depth kept across a flush with all
      * four (Mesa v3dx_rcl.c's decimate modes). */
@@ -401,7 +401,7 @@ static void build_render(struct OGLES2Context *ctx, struct zs_save *store_zs)
     v->current_buf = &v->binning_buf[s];
     SetBuffer(v, &v->binning_buf[s]);
     ogles2_xfb_job_end(ctx); /* after transform feedback: its counts, the specs off */
-    if (ctx->probe & OGLES2_PROBE_SEMAPHORE)
+    if (ctx->probe & OGLES3_PROBE_SEMAPHORE)
         DoCommand(v, v3d_OP_INCREMENT_SEMAPHORE);
     DoCommand(v, v3d_OP_FLUSH);
 
@@ -430,10 +430,10 @@ static void build_render(struct OGLES2Context *ctx, struct zs_save *store_zs)
      * per channel, so there is nothing finer to dither from, and Mesa never
      * sets the store's dither mode. PiStorm3D dithered when GL_DITHER was on;
      * on the A1200 that store turned 0xff into 0x00 and 0xbf into 0xc0 (M1
-     * run 2). Probe D (ENV:OGLES2/Probe) brings it back, for that probe only.
+     * run 2). Probe D (ENV:OGLES3/Probe) brings it back, for that probe only.
      * Dithering matters for 16-bit targets (plan 7.7), which come later. */
     StoreTileBufferGeneral(v, v3d_RENDER_TARGET_0, V3D_MEMORY_FORMAT_RASTER, flip_y,
-                           (ctx->probe & OGLES2_PROBE_STORE_DITHER) ? V3D_DITHER_MODE_RGBA : V3D_DITHER_MODE_NONE,
+                           (ctx->probe & OGLES3_PROBE_STORE_DITHER) ? V3D_DITHER_MODE_RGBA : V3D_DITHER_MODE_NONE,
                            msaa ? V3D_DECIMATE_MODE_4X : V3D_DECIMATE_MODE_SAMPLE_0,
                            V3D_OUTPUT_IMAGE_FORMAT_RGBA8, FALSE, FALSE,
                            d->rb_swap, d->bprow, flip_y ? height : 0, d->base);
@@ -453,7 +453,7 @@ static void build_render(struct OGLES2Context *ctx, struct zs_save *store_zs)
     /* Render list. */
     v->current_buf = &v->render_buf[s];
     SetBuffer(v, &v->render_buf[s]);
-    if (ctx->probe & OGLES2_PROBE_SEMAPHORE)
+    if (ctx->probe & OGLES3_PROBE_SEMAPHORE)
         DoCommand(v, v3d_OP_WAIT_ON_SEMAPHORE);
     TileRenderingModeCFGCommon(v, 1, width, height, v3d_RENDER_TARGET_MAXIMUM_32BPP, msaa, FALSE,
                                ez == V3D_EZ_GT_GE ? v3d_EARLY_Z_DIRECTION_GT_GE
@@ -467,7 +467,7 @@ static void build_render(struct OGLES2Context *ctx, struct zs_save *store_zs)
     argb = v->clear_color_value;
     abgr = (argb & 0xFF00FF00UL) | ((argb & 0x00FF0000UL) >> 16) | ((argb & 0x000000FFUL) << 16);
     TileRenderingModeCFGClearColorsPart1(v, 0, abgr);
-    if (ctx->probe & OGLES2_PROBE_LOG_CLEAR)
+    if (ctx->probe & OGLES3_PROBE_LOG_CLEAR)
         ogles2_log("job: frame %lu, clear %s, ARGB %08lx, packet ABGR %08lx", ctx->frames,
                    clear_color ? "colour" : "no colour", argb, abgr);
     TileRenderingModeCFGColor(v, 1, V3D_INTERNAL_BPP_32, V3D_INTERNAL_TYPE_8, 0);
@@ -583,22 +583,22 @@ static ULONG clamp_int(ULONG v, int bits, BOOL sgn)
 /* Target rt's clear value in its internal type (Mesa's v3d_tlb_clear): the
  * format's clamps first (fixed point to [0, 1], integers to their range),
  * then 8-bit, 16F, 16-bit integer or 32-bit channels. */
-static void pack_clear(struct OGLES2Context *ctx, const struct OGLES2RtFormat *rf, int rt, ULONG *c)
+static void pack_clear(struct OGLES3Context *ctx, const struct OGLES3RtFormat *rf, int rt, ULONG *c)
 {
     const ULONG *v = ctx->job_clear_rt[rt].v;
     BOOL is_int = ctx->job_clear_rt[rt].is_int;
-    BOOL integer = rf->kind == OGLES2_RT_INT || rf->kind == OGLES2_RT_UINT;
+    BOOL integer = rf->kind == OGLES3_RT_INT || rf->kind == OGLES3_RT_UINT;
     ULONG u[4];
     GLfloat f[4];
     int k;
     for (k = 0; k < 4; k++) {
         f[k] = is_int ? (GLfloat)(LONG)v[k] : bitsf(v[k]);
-        if (rf->kind == OGLES2_RT_UNORM)
+        if (rf->kind == OGLES3_RT_UNORM)
             f[k] = f[k] < 0.0f ? 0.0f : f[k] > 1.0f ? 1.0f : f[k];
         u[k] = is_int ? v[k] : (ULONG)(LONG)f[k];
         if (integer)
             u[k] = clamp_int(u[k], rf->out == V3D_OUTPUT_IMAGE_FORMAT_RGB10A2UI ? (k == 3 ? 2 : 10) : rf->bits,
-                             rf->kind == OGLES2_RT_INT);
+                             rf->kind == OGLES3_RT_INT);
     }
     c[0] = c[1] = c[2] = c[3] = 0;
     switch (rf->type) {
@@ -637,7 +637,7 @@ static void pack_clear(struct OGLES2Context *ctx, const struct OGLES2RtFormat *r
  * i), all cleared alike. Multisampled renderbuffers: 4x mode, every image
  * loaded and stored with all four samples (Mesa's decimate mode for a
  * surface of more than one sample). */
-static void build_render_fbo(struct OGLES2Context *ctx, const struct OGLES2Target *tg, ULONG ta)
+static void build_render_fbo(struct OGLES3Context *ctx, const struct OGLES3Target *tg, ULONG ta)
 {
     V3DContext *v = ctx->v3d;
     v3d_u8 s = v->build_slot;
@@ -651,19 +651,19 @@ static void build_render_fbo(struct OGLES2Context *ctx, const struct OGLES2Targe
     UBYTE ez_off = (ez == V3D_EZ_DISABLED) || (width & 1) || (height & 1); /* GFXH-1918 */
     /* EXT_discard_framebuffer: not stored by this job, not loaded from before it. */
     UBYTE no_store = ctx->job_discard, no_load = ctx->job_noload;
-    BOOL store_c = tg->colors && !(no_store & OGLES2_DISCARD_COLOR);
-    BOOL store_z = tg->has_z && !(no_store & OGLES2_DISCARD_DEPTH &&
-                                  (!tg->packed_zs || (no_store & OGLES2_DISCARD_STENCIL) || !ctx->fb_stencil_bits));
-    BOOL store_s = tg->has_s && !(no_store & OGLES2_DISCARD_STENCIL);
+    BOOL store_c = tg->colors && !(no_store & OGLES3_DISCARD_COLOR);
+    BOOL store_z = tg->has_z && !(no_store & OGLES3_DISCARD_DEPTH &&
+                                  (!tg->packed_zs || (no_store & OGLES3_DISCARD_STENCIL) || !ctx->fb_stencil_bits));
+    BOOL store_s = tg->has_s && !(no_store & OGLES3_DISCARD_STENCIL);
     /* Mesa: the early Z/S clear only without a Z/S load or store. */
     UBYTE early_zs_clear = !(tg->has_z || tg->has_s);
     UBYTE dm = tg->msaa ? V3D_DECIMATE_MODE_ALL_SAMPLES : V3D_DECIMATE_MODE_SAMPLE_0;
-    const struct OGLES2Surface *c, *z = &tg->z, *st = &tg->s;
+    const struct OGLES3Surface *c, *z = &tg->z, *st = &tg->s;
 
     v->current_buf = &v->binning_buf[s];
     SetBuffer(v, &v->binning_buf[s]);
     ogles2_xfb_job_end(ctx); /* after transform feedback: its counts, the specs off */
-    if (ctx->probe & OGLES2_PROBE_SEMAPHORE)
+    if (ctx->probe & OGLES3_PROBE_SEMAPHORE)
         DoCommand(v, v3d_OP_INCREMENT_SEMAPHORE);
     DoCommand(v, v3d_OP_FLUSH);
 
@@ -672,7 +672,7 @@ static void build_render_fbo(struct OGLES2Context *ctx, const struct OGLES2Targe
     SetBuffer(v, &v->tile_list_buf[s]);
     start = CurrentBufferAddress(v);
     DoCommand(v, v3d_OP_TILE_COORDINATES_IMPLICIT);
-    if (!(no_load & OGLES2_DISCARD_COLOR))
+    if (!(no_load & OGLES3_DISCARD_COLOR))
         for (rt = 0; rt < tg->nrt; rt++)
             if ((tg->colors & (1 << rt)) && !(clear_color && (ctx->job_clear_targets & (1 << rt)))) {
                 c = &tg->color[rt];
@@ -680,11 +680,11 @@ static void build_render_fbo(struct OGLES2Context *ctx, const struct OGLES2Targe
                                       c->force_alpha1, FALSE, FALSE, c->ub, 0, c->addr);
             }
     if (!clear_zs) {
-        if (tg->has_z && !((no_load & OGLES2_DISCARD_DEPTH) &&
-                           (!tg->packed_zs || (no_load & OGLES2_DISCARD_STENCIL) || !ctx->fb_stencil_bits)))
+        if (tg->has_z && !((no_load & OGLES3_DISCARD_DEPTH) &&
+                           (!tg->packed_zs || (no_load & OGLES3_DISCARD_STENCIL) || !ctx->fb_stencil_bits)))
             LoadTileBufferGeneral(v, tg->packed_zs ? v3d_ZSTENCIL : v3d_Z, z->mem_format, FALSE, dm, z->format,
                                   FALSE, FALSE, FALSE, z->ub, 0, z->addr);
-        if (tg->has_s && !(no_load & OGLES2_DISCARD_STENCIL))
+        if (tg->has_s && !(no_load & OGLES3_DISCARD_STENCIL))
             LoadTileBufferGeneral(v, v3d_STENCIL, st->mem_format, FALSE, dm, st->format, FALSE, FALSE, FALSE,
                                   st->ub, 0, st->addr);
     }
@@ -716,7 +716,7 @@ static void build_render_fbo(struct OGLES2Context *ctx, const struct OGLES2Targe
     /* Render list. */
     v->current_buf = &v->render_buf[s];
     SetBuffer(v, &v->render_buf[s]);
-    if (ctx->probe & OGLES2_PROBE_SEMAPHORE)
+    if (ctx->probe & OGLES3_PROBE_SEMAPHORE)
         DoCommand(v, v3d_OP_WAIT_ON_SEMAPHORE);
     TileRenderingModeCFGCommon(v, tg->nrt, width, height, tg->bpp, tg->msaa, FALSE,
                                ez == V3D_EZ_GT_GE ? v3d_EARLY_Z_DIRECTION_GT_GE
@@ -729,10 +729,10 @@ static void build_render_fbo(struct OGLES2Context *ctx, const struct OGLES2Targe
      * writes 32-bit floats or integers to the 32F and integer ones (the
      * key's f32_color_rb, draw.c), 16-bit floats to the rest. */
     for (rt = 0; rt < tg->nrt; rt++) {
-        static const struct OGLES2RtFormat plain = { V3D_OUTPUT_IMAGE_FORMAT_RGBA8, V3D_INTERNAL_TYPE_8,
-                                                     V3D_INTERNAL_BPP_32, 0, OGLES2_RT_UNORM, 4, 8, 0,
+        static const struct OGLES3RtFormat plain = { V3D_OUTPUT_IMAGE_FORMAT_RGBA8, V3D_INTERNAL_TYPE_8,
+                                                     V3D_INTERNAL_BPP_32, 0, OGLES3_RT_UNORM, 4, 8, 0,
                                                      { 0, 1, 2, 3 }, 84 };
-        const struct OGLES2RtFormat *rf = (tg->colors & (1 << rt)) ? &tg->rt[rt] : &plain;
+        const struct OGLES3RtFormat *rf = (tg->colors & (1 << rt)) ? &tg->rt[rt] : &plain;
         ULONG cc[4], pad = 0;
         c = &tg->color[rt];
         rt_bpp[rt] = rf->bpp;
@@ -786,7 +786,7 @@ static void build_render_fbo(struct OGLES2Context *ctx, const struct OGLES2Targe
  * the render with everything else (clean_all). An exec cache call costs
  * about 41 us (M6): one less per framebuffer-object job. Depth and stencil
  * images are never read by the CPU. */
-static void target_dma(const struct OGLES2Target *tg, BOOL after)
+static void target_dma(const struct OGLES3Target *tg, BOOL after)
 {
     (void)tg;
     (void)after;
@@ -806,7 +806,7 @@ static void clean_all(void)
 
 /* After a render: a GPU that did not finish reset, the CPU cache over what
  * it wrote, the locks released, the retire list, the colour image marked. */
-static void after_render(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb, const struct OGLES2Target *tg,
+static void after_render(struct OGLES3Context *ctx, struct OGLES3Framebuffer *fb, const struct OGLES3Target *tg,
                          v3d_wait_result wr, BOOL holds_lock)
 {
     V3DContext *v = ctx->v3d;
@@ -851,7 +851,7 @@ static void after_render(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb
 
 /* The render this context left running: waited for (unless another
  * submitter already saw it finish: take_gpu), then what follows a render. */
-void ogles2_job_finish(struct OGLES2Context *ctx)
+void ogles2_job_finish(struct OGLES3Context *ctx)
 {
     v3d_wait_result wr = v3d_wait_result_success;
     BOOL done;
@@ -859,12 +859,12 @@ void ogles2_job_finish(struct OGLES2Context *ctx)
     if (!ctx->pend)
         return;
     ctx->pend = FALSE;
-    ObtainSemaphore(&OGLES2LibBase->lock);
+    ObtainSemaphore(&OGLES3LibBase->lock);
     done = ctx->pend_done;
     ctx->pend_done = FALSE;
-    if (OGLES2LibBase->pend_ctx == ctx)
-        OGLES2LibBase->pend_ctx = 0;
-    ReleaseSemaphore(&OGLES2LibBase->lock);
+    if (OGLES3LibBase->pend_ctx == ctx)
+        OGLES3LibBase->pend_ctx = 0;
+    ReleaseSemaphore(&OGLES3LibBase->lock);
     if (!done) {
         /* Nothing was submitted after it (take_gpu would have marked it
          * done), so the count is one past ours at most: no wrap-around
@@ -884,7 +884,7 @@ void ogles2_job_finish(struct OGLES2Context *ctx)
  * any number of contexts and programs (M6, plan 7.1 phase 2 within ogles2):
  * the submission lock is given up once the render is submitted, and the
  * next submitter waits for that render on the GPU (take_gpu). */
-static BOOL may_defer(struct OGLES2Context *ctx, BOOL object)
+static BOOL may_defer(struct OGLES3Context *ctx, BOOL object)
 {
     if (ctx->job_storage) /* its caches are cleaned after it, under the lock (after_render) */
         return FALSE;
@@ -900,17 +900,17 @@ static BOOL may_defer(struct OGLES2Context *ctx, BOOL object)
  * does the rest at its next flush. Nobody holds the lock while it builds
  * its next frame, so programs take turns at the GPU and none waits for
  * another's CPU work (programs whose tasks wait for each other included). */
-static void take_gpu(struct OGLES2Context *ctx)
+static void take_gpu(struct OGLES3Context *ctx)
 {
-    struct OGLES2Context *p;
+    struct OGLES3Context *p;
     struct Task *t;
     UBYTE frame;
     v3d_wait_result wr;
-    ObtainSemaphore(&OGLES2LibBase->lock);
-    p = OGLES2LibBase->pend_ctx;
-    t = OGLES2LibBase->pend_task;
-    frame = OGLES2LibBase->pend_frame;
-    ReleaseSemaphore(&OGLES2LibBase->lock);
+    ObtainSemaphore(&OGLES3LibBase->lock);
+    p = OGLES3LibBase->pend_ctx;
+    t = OGLES3LibBase->pend_task;
+    frame = OGLES3LibBase->pend_frame;
+    ReleaseSemaphore(&OGLES3LibBase->lock);
     if (!p || p == ctx)
         return;
     if (t == FindTask(0)) {
@@ -920,16 +920,16 @@ static void take_gpu(struct OGLES2Context *ctx)
     wr = v3d_wait_render_timeout(frame);
     if (wr != v3d_wait_result_success)
         ogles2_device_reset("another program's render it did not finish");
-    ObtainSemaphore(&OGLES2LibBase->lock);
-    if (OGLES2LibBase->pend_ctx == p) { /* still not finished by its owner */
+    ObtainSemaphore(&OGLES3LibBase->lock);
+    if (OGLES3LibBase->pend_ctx == p) { /* still not finished by its owner */
         p->pend_done = TRUE;
-        OGLES2LibBase->pend_ctx = 0;
+        OGLES3LibBase->pend_ctx = 0;
     }
-    ReleaseSemaphore(&OGLES2LibBase->lock);
+    ReleaseSemaphore(&OGLES3LibBase->lock);
 }
 
 /* compute.c's dispatches, with the submission lock held. */
-void ogles2_job_take_gpu(struct OGLES2Context *ctx)
+void ogles2_job_take_gpu(struct OGLES3Context *ctx)
 {
     take_gpu(ctx);
 }
@@ -943,7 +943,7 @@ static BOOL any_overflow(V3DContext *v)
 
 /* Renders the open job into the default framebuffer and waits for it.
  * Returns FALSE if the frame was dropped (the reason is logged). */
-BOOL ogles2_job_flush(struct OGLES2Context *ctx, BOOL frame_end)
+BOOL ogles2_job_flush(struct OGLES3Context *ctx, BOOL frame_end)
 {
     V3DContext *v = ctx->v3d;
     V3DDevice *dev = ogles2_device();
@@ -951,8 +951,8 @@ BOOL ogles2_job_flush(struct OGLES2Context *ctx, BOOL frame_end)
     v3d_u8 s = v->build_slot;
     v3d_wait_result wb = v3d_wait_result_success, wr = v3d_wait_result_success;
     const char *drop = 0;
-    struct OGLES2Framebuffer *fb = ctx->job_fb;
-    struct OGLES2Target tg;
+    struct OGLES3Framebuffer *fb = ctx->job_fb;
+    struct OGLES3Target tg;
     ULONG ta = (ULONG)v->tile_alloc_mem.hostptr, ta_size = (ULONG)v->tile_alloc_mem.size;
     ULONG ts = (ULONG)v->tile_state_mem.hostptr;
 
@@ -975,8 +975,8 @@ BOOL ogles2_job_flush(struct OGLES2Context *ctx, BOOL frame_end)
      * but a colour clear between two read-backs must hand them on (dEQP-GLES2
      * multisample.stencil lost its stencil there). */
     if (!fb && !frame_end && (v->draw_state_configured || ctx->zs_saved || v->pending_clear_depth) &&
-        !(ctx->job_discard & (OGLES2_DISCARD_DEPTH | OGLES2_DISCARD_STENCIL)) &&
-        !(ctx->probe & OGLES2_PROBE_NO_ZS_SAVE))
+        !(ctx->job_discard & (OGLES3_DISCARD_DEPTH | OGLES3_DISCARD_STENCIL)) &&
+        !(ctx->probe & OGLES3_PROBE_NO_ZS_SAVE))
         store_zs = zs_get(ctx); /* NULL without depth and stencil, or memory */
     if (v->frame_corrupted) {
         drop = fb ? "no memory for the framebuffer object's tile pools, or a draw's uniform stream went stale"
@@ -1021,7 +1021,7 @@ BOOL ogles2_job_flush(struct OGLES2Context *ctx, BOOL frame_end)
     ctx->sum_list += (double)(ULONG)(t1 - t0);
     clean_all(); /* the target's lines and v3d_context_flush_for_dma's buffers */
     v3d_invalidate_caches();
-    if (ctx->probe & OGLES2_PROBE_SEMAPHORE) {
+    if (ctx->probe & OGLES3_PROBE_SEMAPHORE) {
         /* Probe S: both lists go to the GPU at once; the render list waits
          * for the binner's semaphore. Out-of-memory service stays in the
          * binning wait. */
@@ -1069,11 +1069,11 @@ BOOL ogles2_job_flush(struct OGLES2Context *ctx, BOOL frame_end)
             ctx->pend_serial = ctx->job_serial;
             ctx->pend_fb = fb;
             ctx->pend_done = FALSE;
-            ObtainSemaphore(&OGLES2LibBase->lock);
-            OGLES2LibBase->pend_ctx = ctx;
-            OGLES2LibBase->pend_task = FindTask(0);
-            OGLES2LibBase->pend_frame = frame_no;
-            ReleaseSemaphore(&OGLES2LibBase->lock);
+            ObtainSemaphore(&OGLES3LibBase->lock);
+            OGLES3LibBase->pend_ctx = ctx;
+            OGLES3LibBase->pend_task = FindTask(0);
+            OGLES3LibBase->pend_frame = frame_no;
+            ReleaseSemaphore(&OGLES3LibBase->lock);
             /* The lock goes now, not at the program's next flush: the next
              * submitter, of any program, waits for this render on the GPU
              * (take_gpu). */
@@ -1146,13 +1146,13 @@ out:
     return wr == v3d_wait_result_success;
 }
 
-BOOL ogles2_job_has_draws(struct OGLES2Context *ctx)
+BOOL ogles2_job_has_draws(struct OGLES3Context *ctx)
 {
     return ctx->v3d && ctx->v3d->frame_active && ctx->v3d->draw_state_configured;
 }
 
 /* aglDestroyContext: forget an open job (nothing was submitted). */
-void ogles2_job_discard(struct OGLES2Context *ctx)
+void ogles2_job_discard(struct OGLES3Context *ctx)
 {
     ogles2_job_finish(ctx);
     if (ctx->v3d)

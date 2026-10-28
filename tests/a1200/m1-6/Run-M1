@@ -9,7 +9,7 @@
 .ket }
 
 FailAt 21
-If NOT EXISTS libs/ogles2.library
+If NOT EXISTS libs/ogles3.library
   Echo "Please CD into the ogles2-m1-6 directory first,"
   Echo "then run:  Execute Run-M1"
   Quit 20
@@ -22,10 +22,10 @@ EndIf
 Echo "ogles2 M1 run 6, starting at step {FROM}" >>M1R6:results/00-progress.txt
 Date >>M1R6:results/00-progress.txt
 Assign LIBS: M1R6:libs ADD
-; Expunge libraries nobody has open: an ogles2.library left in memory by an
+; Expunge libraries nobody has open: an ogles3.library left in memory by an
 ; earlier run would otherwise be used instead of this package's.
 Avail FLUSH >NIL:
-SetEnv OGLES2/LogFile M1R6:results/ogles2.log
+SetEnv OGLES3/LogFile M1R6:results/ogles2.log
 
 If NOT {FROM} GT 1 VAL
   Echo "Step 1 of 4: step 1 again, clears on a hidden bitmap (nothing to see)"
@@ -56,7 +56,7 @@ If NOT {FROM} GT 4 VAL
   Echo "step 4 done" >>M1R6:results/00-progress.txt
 EndIf
 
-UnSetEnv OGLES2/LogFile
+UnSetEnv OGLES3/LogFile
 Assign LIBS: M1R6:libs REMOVE
 If NOT EXISTS M1R6:results/notes.txt
   Copy M1R6:notes-template.txt M1R6:results/notes.txt

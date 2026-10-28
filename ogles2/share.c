@@ -1,10 +1,10 @@
 /*
- * Share groups (OGLES2_CCT_SHARE_WITH; GLES 2.0 appendix C; plan 13, M6).
+ * Share groups (OGLES3_CCT_SHARE_WITH; GLES 2.0 appendix C; plan 13, M6).
  *
  * Every context belongs to a group, alone in it unless it was created to
  * share with another. The group holds the name tables of the objects GLES2
  * shares: textures, buffers, shaders and programs (with the program cache's
- * images) and renderbuffers (struct OGLES2Share). Framebuffers, the default
+ * images) and renderbuffers (struct OGLES3Share). Framebuffers, the default
  * textures and every binding stay the context's own.
  *
  * What a job not rendered yet may read is looked for in every member's jobs:
@@ -30,16 +30,16 @@
 #include "v3d_context.h"
 
 /* Every member takes the group's semaphore while there are two or more. */
-static void set_locks(struct OGLES2Share *sh)
+static void set_locks(struct OGLES3Share *sh)
 {
-    struct OGLES2Context *m;
+    struct OGLES3Context *m;
     for (m = sh->first; m; m = m->share_next)
         m->share_lock = sh->members > 1 ? &sh->lock : 0;
 }
 
-BOOL ogles2_share_join(struct OGLES2Context *ctx, struct OGLES2Context *with)
+BOOL ogles2_share_join(struct OGLES3Context *ctx, struct OGLES3Context *with)
 {
-    struct OGLES2Share *sh;
+    struct OGLES3Share *sh;
     if (with) {
         sh = with->share;
         ObtainSemaphore(&sh->lock); /* the members' calls walk the member list */
@@ -64,10 +64,10 @@ BOOL ogles2_share_join(struct OGLES2Context *ctx, struct OGLES2Context *with)
 
 /* The caller holds the group's semaphore when it has other members
  * (aglDestroyContext). */
-BOOL ogles2_share_leave(struct OGLES2Context *ctx)
+BOOL ogles2_share_leave(struct OGLES3Context *ctx)
 {
-    struct OGLES2Share *sh = ctx->share;
-    struct OGLES2Context **pp;
+    struct OGLES3Share *sh = ctx->share;
+    struct OGLES3Context **pp;
     if (!sh)
         return TRUE;
     for (pp = &sh->first; *pp; pp = &(*pp)->share_next)
@@ -88,9 +88,9 @@ BOOL ogles2_share_leave(struct OGLES2Context *ctx)
     return TRUE;
 }
 
-struct OGLES2Context *ogles2_job_user(struct OGLES2Context *ctx, ULONG serial)
+struct OGLES3Context *ogles2_job_user(struct OGLES3Context *ctx, ULONG serial)
 {
-    struct OGLES2Context *m;
+    struct OGLES3Context *m;
     if (!serial)
         return 0;
     m = ctx->share ? ctx->share->first : ctx;
@@ -100,9 +100,9 @@ struct OGLES2Context *ogles2_job_user(struct OGLES2Context *ctx, ULONG serial)
     return 0;
 }
 
-void ogles2_share_defer_free(struct OGLES2Context *ctx, ULONG serial, struct v3d_mem *m)
+void ogles2_share_defer_free(struct OGLES3Context *ctx, ULONG serial, struct v3d_mem *m)
 {
-    struct OGLES2Context *user;
+    struct OGLES3Context *user;
     if (!m->hostptr)
         return;
     if ((user = ogles2_job_user(ctx, serial)) && user->v3d)
@@ -116,21 +116,21 @@ void ogles2_share_defer_free(struct OGLES2Context *ctx, ULONG serial, struct v3d
  * A table of objects by name is an array: the object named n is at n. A
  * program may bind a name it never generated (GLES 2.0 4.4.1), and dEQP
  * binds random 32-bit ones: a table that grew to such a name took hundreds
- * of megabytes, or failed. A name from OGLES2_NEAR_NAMES on gets a slot of
+ * of megabytes, or failed. A name from OGLES3_NEAR_NAMES on gets a slot of
  * its own past them instead, found through the table's short list. The
  * objects keep their names; loops over a table see every slot. */
-GLuint ogles2_name_slot(struct OGLES2FarName **far, GLuint name, BOOL create)
+GLuint ogles2_name_slot(struct OGLES3FarName **far, GLuint name, BOOL create)
 {
-    struct OGLES2FarName *f;
-    GLuint slot = OGLES2_NEAR_NAMES;
+    struct OGLES3FarName *f;
+    GLuint slot = OGLES3_NEAR_NAMES;
     BOOL taken;
-    if (name < OGLES2_NEAR_NAMES)
+    if (name < OGLES3_NEAR_NAMES)
         return name;
     for (f = *far; f; f = f->next)
         if (f->name == name)
             return f->slot;
     if (!create)
-        return OGLES2_NO_SLOT;
+        return OGLES3_NO_SLOT;
     do { /* the lowest far slot no name holds */
         taken = FALSE;
         for (f = *far; f; f = f->next)
@@ -140,7 +140,7 @@ GLuint ogles2_name_slot(struct OGLES2FarName **far, GLuint name, BOOL create)
             }
     } while (taken);
     if (!(f = AllocVec(sizeof(*f), MEMF_ANY)))
-        return OGLES2_NO_SLOT;
+        return OGLES3_NO_SLOT;
     f->name = name;
     f->slot = slot;
     f->next = *far;
@@ -148,9 +148,9 @@ GLuint ogles2_name_slot(struct OGLES2FarName **far, GLuint name, BOOL create)
     return slot;
 }
 
-void ogles2_name_forget(struct OGLES2FarName **far, GLuint name)
+void ogles2_name_forget(struct OGLES3FarName **far, GLuint name)
 {
-    struct OGLES2FarName **p, *f;
+    struct OGLES3FarName **p, *f;
     for (p = far; (f = *p); p = &f->next)
         if (f->name == name) {
             *p = f->next;
@@ -159,9 +159,9 @@ void ogles2_name_forget(struct OGLES2FarName **far, GLuint name)
         }
 }
 
-void ogles2_names_free(struct OGLES2FarName **far)
+void ogles2_names_free(struct OGLES3FarName **far)
 {
-    struct OGLES2FarName *f;
+    struct OGLES3FarName *f;
     while ((f = *far)) {
         *far = f->next;
         FreeVec(f);

@@ -38,7 +38,7 @@ with the next step, for example:
 Contents
 --------
 Run-M1               the test script
-libs/ogles2.library  the library (logs every line at once)
+libs/ogles3.library  the library (logs every line at once)
 libs/v3dglslc        the shader compiler, started by the library
 bin/                 the test programs and the eleven corpus programs
 shaders/             GLSL sources two tests read

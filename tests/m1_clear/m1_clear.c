@@ -26,7 +26,7 @@
 #include <proto/graphics.h>
 #include <proto/cybergraphics.h>
 #include <proto/timer.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 
 struct IntuitionBase *IntuitionBase;
 struct GfxBase *GfxBase;
@@ -165,10 +165,10 @@ static void test_own_window(void)
     ULONG err = 0, w = 0, h = 0, before = AvailMem(MEMF_ANY);
     struct readback r;
     struct Window *win = 0;
-    void *ctx = aglCreateContextTags2(&err, OGLES2_CCT_DEPTH, 16, OGLES2_CCT_PISTORM_WIDTH, 320,
-                                      OGLES2_CCT_PISTORM_HEIGHT, 240, OGLES2_CCT_GET_WIDTH,
-                                      (ULONG)&w, OGLES2_CCT_GET_HEIGHT, (ULONG)&h,
-                                      OGLES2_CCT_PISTORM_GET_WINDOW, (ULONG)&win, TAG_DONE);
+    void *ctx = aglCreateContextTags2(&err, OGLES3_CCT_DEPTH, 16, OGLES3_CCT_PISTORM_WIDTH, 320,
+                                      OGLES3_CCT_PISTORM_HEIGHT, 240, OGLES3_CCT_GET_WIDTH,
+                                      (ULONG)&w, OGLES3_CCT_GET_HEIGHT, (ULONG)&h,
+                                      OGLES3_CCT_PISTORM_GET_WINDOW, (ULONG)&win, TAG_DONE);
     check(ctx != 0, "create (own window)", "own window");
     if (!ctx) {
         printf("     error %lu\n", (unsigned long)err);
@@ -205,7 +205,7 @@ static void test_adopted_window(void)
         return;
     }
     before = AvailMem(MEMF_ANY); /* after our own window: only the context is measured */
-    ctx = aglCreateContextTags2(&err, OGLES2_CCT_WINDOW, (ULONG)win, OGLES2_CCT_DEPTH, 24,
+    ctx = aglCreateContextTags2(&err, OGLES3_CCT_WINDOW, (ULONG)win, OGLES3_CCT_DEPTH, 24,
                                 TAG_DONE);
     check(ctx != 0, "create (WINDOW tag)", "application window");
     if (ctx) {
@@ -234,7 +234,7 @@ static void test_bitmap(void)
         return;
     }
     before = AvailMem(MEMF_ANY); /* after our own bitmap: only the context is measured */
-    ctx = aglCreateContextTags2(&err, OGLES2_CCT_BITMAP, (ULONG)bm, TAG_DONE);
+    ctx = aglCreateContextTags2(&err, OGLES3_CCT_BITMAP, (ULONG)bm, TAG_DONE);
     check(ctx != 0, "create (BITMAP tag)", "application bitmap");
     if (ctx) {
         InitRastPort(&r.own);
@@ -284,9 +284,9 @@ static void test_fullscreen(void)
     }
     printf("     fullscreen: mode 0x%08lx\n", (unsigned long)mode);
     win = 0;
-    ctx = aglCreateContextTags2(&err, OGLES2_CCT_MODEID, mode, OGLES2_CCT_DEPTH, 32,
-                                OGLES2_CCT_GET_WIDTH, (ULONG)&w, OGLES2_CCT_GET_HEIGHT, (ULONG)&h,
-                                OGLES2_CCT_PISTORM_GET_WINDOW, (ULONG)&win, TAG_DONE);
+    ctx = aglCreateContextTags2(&err, OGLES3_CCT_MODEID, mode, OGLES3_CCT_DEPTH, 32,
+                                OGLES3_CCT_GET_WIDTH, (ULONG)&w, OGLES3_CCT_GET_HEIGHT, (ULONG)&h,
+                                OGLES3_CCT_PISTORM_GET_WINDOW, (ULONG)&win, TAG_DONE);
     check(ctx != 0, "create (MODEID tag)", "fullscreen");
     if (!ctx) {
         printf("     error %lu\n", (unsigned long)err);
@@ -348,8 +348,8 @@ static void test_screen_window(void)
     printf("     screen window: mode 0x%08lx, %ldx%ld\n", (unsigned long)mode, (long)scr->Width,
            (long)scr->Height);
     before = AvailMem(MEMF_ANY);
-    ctx = aglCreateContextTags2(&err, OGLES2_CCT_WINDOW, (ULONG)win, OGLES2_CCT_DEPTH, 24,
-                                OGLES2_CCT_GET_WIDTH, (ULONG)&w, OGLES2_CCT_GET_HEIGHT, (ULONG)&h,
+    ctx = aglCreateContextTags2(&err, OGLES3_CCT_WINDOW, (ULONG)win, OGLES3_CCT_DEPTH, 24,
+                                OGLES3_CCT_GET_WIDTH, (ULONG)&w, OGLES3_CCT_GET_HEIGHT, (ULONG)&h,
                                 TAG_DONE);
     check(ctx != 0, "create (WINDOW tag)", "screen window");
     if (!ctx) {
@@ -385,8 +385,8 @@ static void test_screen_window(void)
     } else {
         struct readback rs;
         w = h = 0;
-        aglSetParamsTags2(OGLES2_CCT_WINDOW, (ULONG)small, OGLES2_CCT_GET_WIDTH, (ULONG)&w,
-                          OGLES2_CCT_GET_HEIGHT, (ULONG)&h, TAG_DONE);
+        aglSetParamsTags2(OGLES3_CCT_WINDOW, (ULONG)small, OGLES3_CCT_GET_WIDTH, (ULONG)&w,
+                          OGLES3_CCT_GET_HEIGHT, (ULONG)&h, TAG_DONE);
         sprintf(msg, "aglSetParams2 to a 320x200 window on it (%lux%lu)", (unsigned long)w,
                 (unsigned long)h);
         check(w == 320 && h == 200, msg, "screen window");
@@ -401,8 +401,8 @@ static void test_screen_window(void)
         rs.h = 200;
         sprintf(msg, "the small window shows the clear to ff0000");
         check(shows(&rs, 0xFF0000, &got), msg, "screen window");
-        aglSetParamsTags2(OGLES2_CCT_WINDOW, (ULONG)win, OGLES2_CCT_GET_WIDTH, (ULONG)&w,
-                          OGLES2_CCT_GET_HEIGHT, (ULONG)&h, TAG_DONE);
+        aglSetParamsTags2(OGLES3_CCT_WINDOW, (ULONG)win, OGLES3_CCT_GET_WIDTH, (ULONG)&w,
+                          OGLES3_CCT_GET_HEIGHT, (ULONG)&h, TAG_DONE);
         CloseWindow(small);
         sprintf(msg, "back to the whole-screen window (%lux%lu)", (unsigned long)w, (unsigned long)h);
         check(w == (ULONG)scr->Width && h == (ULONG)scr->Height, msg, "screen window");
@@ -434,8 +434,8 @@ int main(int argc, char **argv)
         return 20;
     }
     TimerBase = timer_req.tr_node.io_Device;
-    if (!OGLES2Open()) {
-        printf("cannot open %s %d\n", OGLES2NAME, OGLES2_VERSION);
+    if (!OGLES3Open()) {
+        printf("cannot open %s %d\n", OGLES3NAME, OGLES3_VERSION);
         return 20;
     }
     printf("     GL_RENDERER (first context decides): see the log\n");
@@ -454,7 +454,7 @@ int main(int argc, char **argv)
         if (all)
             break;
     }
-    OGLES2Close();
+    OGLES3Close();
     CloseDevice((struct IORequest *)&timer_req);
     CloseLibrary(CyberGfxBase);
     CloseLibrary((struct Library *)GfxBase);

@@ -7,16 +7,16 @@
 #include <utility/tagitem.h>
 #include <proto/exec.h>
 #include <proto/utility.h>
-#include <libraries/ogles2.h>
+#include <libraries/ogles3.h>
 #include "ogles2_internal.h"
 
 /* A state-only (test) context has no surface: frame entries do nothing. */
-static BOOL has_surface(struct OGLES2Context *ctx)
+static BOOL has_surface(struct OGLES3Context *ctx)
 {
     return ogles2_context_valid(ctx) && ctx->v3d;
 }
 
-void ogles2_aglSwapBuffers(struct OGLES2Context *ctx)
+void ogles2_aglSwapBuffers(struct OGLES3Context *ctx)
 {
     ULONG t0, t1;
     if (!has_surface(ctx))
@@ -35,7 +35,7 @@ void ogles2_aglSwapBuffers(struct OGLES2Context *ctx)
         ctx->sum_frame += (double)(ULONG)(t1 - ctx->t_last_swap);
     ctx->t_last_swap = t1;
     /* Probe P: the last 256 frames, to see a program slow down over time. */
-    if ((ctx->probe & OGLES2_PROBE_PERIODIC) && !(ctx->n_swaps & 255)) {
+    if ((ctx->probe & OGLES3_PROBE_PERIODIC) && !(ctx->n_swaps & 255)) {
         ULONG jobs = ctx->n_jobs - ctx->p_jobs;
         if (!jobs)
             jobs = 1;
@@ -75,13 +75,13 @@ void ogles2_aglSwapBuffers(struct OGLES2Context *ctx)
     }
 }
 
-void ogles2_glFlush(struct OGLES2Context *ctx)
+void ogles2_glFlush(struct OGLES3Context *ctx)
 {
     if (has_surface(ctx))
         ogles2_job_flush(ctx, FALSE);
 }
 
-void ogles2_glFinish(struct OGLES2Context *ctx)
+void ogles2_glFinish(struct OGLES3Context *ctx)
 {
     if (has_surface(ctx)) {
         ogles2_job_flush(ctx, FALSE);
@@ -120,39 +120,39 @@ static BOOL read_type(BOOL es3, GLenum t)
 /* The implementation read format and type of the current read buffer
  * (state.c's GL_IMPLEMENTATION_COLOR_READ_*): RGBA/UNSIGNED_BYTE but for
  * ES 3.0's float and integer buffers and RGB10_A2. */
-void ogles2_read_format(struct OGLES2Context *ctx, GLenum *format, GLenum *type)
+void ogles2_read_format(struct OGLES3Context *ctx, GLenum *format, GLenum *type)
 {
-    struct OGLES2RtFormat rf;
+    struct OGLES3RtFormat rf;
     BOOL ok;
     *format = GL_RGBA;
     *type = GL_UNSIGNED_BYTE;
     if (!ogles2_es3(ctx) || !ctx->read_fb)
         return;
     {
-        struct OGLES2Framebuffer *saved = ogles2_fbo_read_begin(ctx);
+        struct OGLES3Framebuffer *saved = ogles2_fbo_read_begin(ctx);
         ok = ogles2_fbo_read_format(ctx, &rf);
         ogles2_fbo_read_end(ctx, saved);
     }
     if (!ok)
         return;
-    if (rf.kind == OGLES2_RT_F16 || rf.kind == OGLES2_RT_F32) {
+    if (rf.kind == OGLES3_RT_F16 || rf.kind == OGLES3_RT_F32) {
         *type = GL_FLOAT;
-    } else if (rf.kind == OGLES2_RT_INT || rf.kind == OGLES2_RT_UINT) {
+    } else if (rf.kind == OGLES3_RT_INT || rf.kind == OGLES3_RT_UINT) {
         *format = GL_RGBA_INTEGER;
-        *type = rf.kind == OGLES2_RT_INT ? GL_INT : GL_UNSIGNED_INT;
+        *type = rf.kind == OGLES3_RT_INT ? GL_INT : GL_UNSIGNED_INT;
     } else if (rf.bits == 10) { /* RGB10_A2 */
         *type = GL_UNSIGNED_INT_2_10_10_10_REV;
     }
 }
 
-static void read_pixels(struct OGLES2Context *ctx, GLint x, GLint y, GLsizei width, GLsizei height,
+static void read_pixels(struct OGLES3Context *ctx, GLint x, GLint y, GLsizei width, GLsizei height,
                         GLenum format, GLenum type, void *pixels);
 
 /* ES 3.0: from the read framebuffer (fbo.c, ogles2_fbo_read_begin). */
-void ogles2_glReadPixels(struct OGLES2Context *ctx, GLint x, GLint y, GLsizei width, GLsizei height,
+void ogles2_glReadPixels(struct OGLES3Context *ctx, GLint x, GLint y, GLsizei width, GLsizei height,
                          GLenum format, GLenum type, void *pixels)
 {
-    struct OGLES2Framebuffer *saved;
+    struct OGLES3Framebuffer *saved;
     if (!ogles2_context_valid(ctx))
         return;
     saved = ogles2_fbo_read_begin(ctx);
@@ -160,7 +160,7 @@ void ogles2_glReadPixels(struct OGLES2Context *ctx, GLint x, GLint y, GLsizei wi
     ogles2_fbo_read_end(ctx, saved);
 }
 
-static void read_pixels(struct OGLES2Context *ctx, GLint x, GLint y, GLsizei width, GLsizei height,
+static void read_pixels(struct OGLES3Context *ctx, GLint x, GLint y, GLsizei width, GLsizei height,
                         GLenum format, GLenum type, void *pixels)
 {
     LONG x0, y0, x1, y1;
@@ -298,7 +298,7 @@ static void read_pixels(struct OGLES2Context *ctx, GLint x, GLint y, GLsizei wid
         FreeVec(rgba);
 }
 
-void ogles2_glHint(struct OGLES2Context *ctx, GLenum target, GLenum mode)
+void ogles2_glHint(struct OGLES3Context *ctx, GLenum target, GLenum mode)
 {
     if (!ogles2_context_valid(ctx))
         return;
@@ -322,10 +322,10 @@ void ogles2_glHint(struct OGLES2Context *ctx, GLenum target, GLenum mode)
  * were loaded (kept from a mid-frame flush, or a framebuffer object's) they
  * hold nothing before a job's first draw, so clearing only one there is
  * still exact. */
-static BOOL clear_partial(struct OGLES2Context *ctx, GLbitfield mask)
+static BOOL clear_partial(struct OGLES3Context *ctx, GLbitfield mask)
 {
-    const struct OGLES2State *s = &ctx->state;
-    return ((s->caps & OGLES2_CAP_SCISSOR_TEST) &&
+    const struct OGLES3State *s = &ctx->state;
+    return ((s->caps & OGLES3_CAP_SCISSOR_TEST) &&
             (ctx->scissor[0] > 0 || ctx->scissor[1] > 0 ||
              ctx->scissor[0] + ctx->scissor[2] < (GLint)ctx->fb_w ||
              ctx->scissor[1] + ctx->scissor[3] < (GLint)ctx->fb_h)) ||
@@ -345,7 +345,7 @@ static BOOL clear_partial(struct OGLES2Context *ctx, GLbitfield mask)
  * this job, is drawn as a rectangle instead (ogles2_draw_clear), but for
  * 32-bit float and integer targets, which its program cannot write: the
  * CPU fills their box once the jobs drawing into them have rendered. */
-static void clear(struct OGLES2Context *ctx, GLbitfield mask, UBYTE rts, const ULONG *cv, BOOL is_int,
+static void clear(struct OGLES3Context *ctx, GLbitfield mask, UBYTE rts, const ULONG *cv, BOOL is_int,
                   GLfloat depth, GLint stencil)
 {
     GLfloat color[4];
@@ -355,7 +355,7 @@ static void clear(struct OGLES2Context *ctx, GLbitfield mask, UBYTE rts, const U
         return;
     /* GL_RASTERIZER_DISCARD (ES 3.0 4.2.3) discards clears too, as Mesa does
      * (main/clear.c). */
-    if (ctx->state.caps & OGLES2_CAP_RASTERIZER_DISCARD)
+    if (ctx->state.caps & OGLES3_CAP_RASTERIZER_DISCARD)
         return;
     /* EXT_draw_buffers: colour clears the draw buffers, none with GL_NONE. */
     rts &= ctx->fb_draw_mask;
@@ -375,12 +375,12 @@ static void clear(struct OGLES2Context *ctx, GLbitfield mask, UBYTE rts, const U
          * built-in clears for several targets would write it too, at the
          * wrong width (draw.c) */
         if ((mask & GL_COLOR_BUFFER_BIT) && (rts & (1 << k)) && ctx->fb_soft_blend &&
-            ctx->fb_rt[k].kind != OGLES2_RT_NONE)
+            ctx->fb_rt[k].kind != OGLES3_RT_NONE)
             cpu |= (UBYTE)(1 << k);
     }
     if (cpu) {
         LONG x0 = 0, y0 = 0, x1 = ctx->fb_w, y1 = ctx->fb_h;
-        if (ctx->state.caps & OGLES2_CAP_SCISSOR_TEST) {
+        if (ctx->state.caps & OGLES3_CAP_SCISSOR_TEST) {
             if (ctx->scissor[0] > x0) x0 = ctx->scissor[0];
             if (ctx->scissor[1] > y0) y0 = ctx->scissor[1];
             if (ctx->scissor[0] + ctx->scissor[2] < x1) x1 = ctx->scissor[0] + ctx->scissor[2];
@@ -402,7 +402,7 @@ static void clear(struct OGLES2Context *ctx, GLbitfield mask, UBYTE rts, const U
         ogles2_draw_clear(ctx, mask, rts, color, depth, stencil);
 }
 
-void ogles2_glClear(struct OGLES2Context *ctx, GLbitfield mask)
+void ogles2_glClear(struct OGLES3Context *ctx, GLbitfield mask)
 {
     ULONG cv[4];
     int k;
@@ -424,13 +424,13 @@ void ogles2_glClear(struct OGLES2Context *ctx, GLbitfield mask)
  * signed or unsigned integers, raw), the depth (clamped to [0, 1]), the
  * stencil, or both; GL_INVALID_ENUM for a buffer the entry does not take,
  * GL_INVALID_VALUE for a draw buffer out of range (depth and stencil: 0). */
-static BOOL clear_buffer_ok(struct OGLES2Context *ctx, GLenum buffer, GLint drawbuffer, BOOL ok_buffer)
+static BOOL clear_buffer_ok(struct OGLES3Context *ctx, GLenum buffer, GLint drawbuffer, BOOL ok_buffer)
 {
     if (!ok_buffer) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return FALSE;
     }
-    if (buffer == GL_COLOR ? drawbuffer < 0 || drawbuffer >= OGLES2_MAX_DRAW_BUFFERS : drawbuffer != 0) {
+    if (buffer == GL_COLOR ? drawbuffer < 0 || drawbuffer >= OGLES3_MAX_DRAW_BUFFERS : drawbuffer != 0) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return FALSE;
     }
@@ -442,7 +442,7 @@ static GLfloat clamp_depth(GLfloat d)
     return d < 0.0f ? 0.0f : d > 1.0f ? 1.0f : d;
 }
 
-void ogles2_glClearBufferiv(struct OGLES2Context *ctx, GLenum buffer, GLint drawbuffer, const GLint *value)
+void ogles2_glClearBufferiv(struct OGLES3Context *ctx, GLenum buffer, GLint drawbuffer, const GLint *value)
 {
     if (!ogles2_es3_entry(ctx) ||
         !clear_buffer_ok(ctx, buffer, drawbuffer, buffer == GL_COLOR || buffer == GL_STENCIL) || !value)
@@ -453,14 +453,14 @@ void ogles2_glClearBufferiv(struct OGLES2Context *ctx, GLenum buffer, GLint draw
         clear(ctx, GL_STENCIL_BUFFER_BIT, 0, 0, FALSE, 0.0f, value[0]);
 }
 
-void ogles2_glClearBufferuiv(struct OGLES2Context *ctx, GLenum buffer, GLint drawbuffer, const GLuint *value)
+void ogles2_glClearBufferuiv(struct OGLES3Context *ctx, GLenum buffer, GLint drawbuffer, const GLuint *value)
 {
     if (!ogles2_es3_entry(ctx) || !clear_buffer_ok(ctx, buffer, drawbuffer, buffer == GL_COLOR) || !value)
         return;
     clear(ctx, GL_COLOR_BUFFER_BIT, (UBYTE)(1 << drawbuffer), (const ULONG *)value, TRUE, 0.0f, 0);
 }
 
-void ogles2_glClearBufferfv(struct OGLES2Context *ctx, GLenum buffer, GLint drawbuffer, const GLfloat *value)
+void ogles2_glClearBufferfv(struct OGLES3Context *ctx, GLenum buffer, GLint drawbuffer, const GLfloat *value)
 {
     if (!ogles2_es3_entry(ctx) ||
         !clear_buffer_ok(ctx, buffer, drawbuffer, buffer == GL_COLOR || buffer == GL_DEPTH) || !value)
@@ -471,7 +471,7 @@ void ogles2_glClearBufferfv(struct OGLES2Context *ctx, GLenum buffer, GLint draw
         clear(ctx, GL_DEPTH_BUFFER_BIT, 0, 0, FALSE, clamp_depth(value[0]), 0);
 }
 
-void ogles2_glClearBufferfi(struct OGLES2Context *ctx, GLenum buffer, GLint drawbuffer, GLfloat depth,
+void ogles2_glClearBufferfi(struct OGLES3Context *ctx, GLenum buffer, GLint drawbuffer, GLfloat depth,
                             GLint stencil)
 {
     if (!ogles2_es3_entry(ctx) || !clear_buffer_ok(ctx, buffer, drawbuffer, buffer == GL_DEPTH_STENCIL))
@@ -479,7 +479,7 @@ void ogles2_glClearBufferfi(struct OGLES2Context *ctx, GLenum buffer, GLint draw
     clear(ctx, GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, 0, 0, FALSE, clamp_depth(depth), stencil);
 }
 
-void ogles2_glViewport(struct OGLES2Context *ctx, GLint x, GLint y, GLsizei width, GLsizei height)
+void ogles2_glViewport(struct OGLES3Context *ctx, GLint x, GLint y, GLsizei width, GLsizei height)
 {
     if (!ogles2_context_valid(ctx))
         return;
@@ -490,12 +490,12 @@ void ogles2_glViewport(struct OGLES2Context *ctx, GLint x, GLint y, GLsizei widt
     /* Clamped to the implementation maximum (GL_MAX_VIEWPORT_DIMS). */
     ctx->viewport[0] = x;
     ctx->viewport[1] = y;
-    ctx->viewport[2] = width > OGLES2_MAX_VIEWPORT ? OGLES2_MAX_VIEWPORT : width;
-    ctx->viewport[3] = height > OGLES2_MAX_VIEWPORT ? OGLES2_MAX_VIEWPORT : height;
+    ctx->viewport[2] = width > OGLES3_MAX_VIEWPORT ? OGLES3_MAX_VIEWPORT : width;
+    ctx->viewport[3] = height > OGLES3_MAX_VIEWPORT ? OGLES3_MAX_VIEWPORT : height;
     ctx->state_ver++;
 }
 
-void ogles2_glScissor(struct OGLES2Context *ctx, GLint x, GLint y, GLsizei width, GLsizei height)
+void ogles2_glScissor(struct OGLES3Context *ctx, GLint x, GLint y, GLsizei width, GLsizei height)
 {
     if (!ogles2_context_valid(ctx))
         return;
@@ -510,13 +510,13 @@ void ogles2_glScissor(struct OGLES2Context *ctx, GLint x, GLint y, GLsizei width
     ctx->state_ver++;
 }
 
-/* Retarget a bitmap context (OGLES2_CCT_BITMAP): the open frame is rendered
+/* Retarget a bitmap context (OGLES3_CCT_BITMAP): the open frame is rendered
  * into the old bitmap first; from then on the context renders into the new
  * one, its default framebuffer resized to it. As after an EGL surface
  * resize, the viewport and scissor stay as the application set them. */
-void ogles2_aglSetBitmap(struct OGLES2Context *ctx, struct BitMap *bitmap)
+void ogles2_aglSetBitmap(struct OGLES3Context *ctx, struct BitMap *bitmap)
 {
-    struct OGLES2Display old;
+    struct OGLES3Display old;
     if (!has_surface(ctx))
         return;
     if (bitmap == ctx->display.bitmap)
@@ -539,11 +539,11 @@ void ogles2_aglSetBitmap(struct OGLES2Context *ctx, struct BitMap *bitmap)
     ogles2_log("aglSetBitmap: bitmap 0x%08lx, %ldx%ld", (ULONG)bitmap, ctx->width, ctx->height);
 }
 
-/* aglSetParams2(OGLES2_CCT_WINDOW): another window, or the same one
+/* aglSetParams2(OGLES3_CCT_WINDOW): another window, or the same one
  * resized; the default framebuffer follows its size, as aglSetBitmap. */
-static void set_window(struct OGLES2Context *ctx, struct Window *w)
+static void set_window(struct OGLES3Context *ctx, struct Window *w)
 {
-    struct OGLES2Display old;
+    struct OGLES3Display old;
     if (!has_surface(ctx))
         return;
     ogles2_job_flush(ctx, TRUE);
@@ -571,28 +571,28 @@ static void set_window(struct OGLES2Context *ctx, struct Window *w)
                (ULONG)(ctx->display.direct ? ", all of its screen (no copy)" : ""));
 }
 
-void ogles2_aglSetParams2(struct OGLES2Context *ctx, struct TagItem *tags)
+void ogles2_aglSetParams2(struct OGLES3Context *ctx, struct TagItem *tags)
 {
     struct TagItem *state = tags, *t;
     if (!ogles2_context_valid(ctx))
         return;
     while ((t = NextTagItem(&state))) {
         switch (t->ti_Tag) {
-        case OGLES2_CCT_VSYNC:
+        case OGLES3_CCT_VSYNC:
             ogles2_display_set_vsync(&ctx->display, t->ti_Data ? TRUE : FALSE);
             break;
-        case OGLES2_CCT_WINDOW:
+        case OGLES3_CCT_WINDOW:
             set_window(ctx, (struct Window *)t->ti_Data);
             break;
-        case OGLES2_CCT_GET_WIDTH:
+        case OGLES3_CCT_GET_WIDTH:
             if (t->ti_Data)
                 *(ULONG *)t->ti_Data = ctx->width;
             break;
-        case OGLES2_CCT_GET_HEIGHT:
+        case OGLES3_CCT_GET_HEIGHT:
             if (t->ti_Data)
                 *(ULONG *)t->ti_Data = ctx->height;
             break;
-        case OGLES2_CCT_PISTORM_GET_WINDOW:
+        case OGLES3_CCT_PISTORM_GET_WINDOW:
             if (t->ti_Data)
                 *(struct Window **)t->ti_Data =
                     ctx->display.input_window ? ctx->display.input_window : ctx->display.window;

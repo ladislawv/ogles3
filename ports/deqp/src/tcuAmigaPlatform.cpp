@@ -31,12 +31,12 @@
 #include <exec/types.h>
 #include <dos/dos.h>
 #include <proto/exec.h>
-#include <libraries/ogles2.h>
+#include <libraries/ogles3.h>
 
-/* libogles2.a (built by the library's own toolchain; plain C calls). */
+/* libogles3.a (built by the library's own toolchain; plain C calls). */
 extern "C" {
-BOOL OGLES2Open(void);
-void OGLES2Close(void);
+BOOL OGLES3Open(void);
+void OGLES3Close(void);
 void *aglCreateContextTags2(ULONG *errcode, ...);
 void aglSetParamsTags2(ULONG tag1, ...);
 void aglDestroyContext(void *context);
@@ -72,7 +72,7 @@ static long missingFunction(void)
     if (!s_missingSaid[N])
     {
         s_missingSaid[N] = true;
-        printf("ogles2.library: %s is not implemented yet (called as a no-op)\n", s_missing[N]);
+        printf("ogles3.library: %s is not implemented yet (called as a no-op)\n", s_missing[N]);
         fflush(stdout);
     }
     return 0;
@@ -156,15 +156,15 @@ RenderContext::RenderContext(const glu::RenderConfig &config) : m_type(config.ty
 {
     const glu::ApiType api = config.type.getAPI();
     if (api != glu::ApiType::es(2, 0) && api != glu::ApiType::es(3, 0) && api != glu::ApiType::es(3, 1))
-        throw tcu::NotSupportedError("ogles2.library: OpenGL ES 2.0, 3.0 and 3.1 only");
+        throw tcu::NotSupportedError("ogles3.library: OpenGL ES 2.0, 3.0 and 3.1 only");
     if (config.componentType == glu::RenderConfig::COMPONENT_TYPE_FLOAT)
-        throw tcu::NotSupportedError("ogles2.library: no floating-point default framebuffer");
+        throw tcu::NotSupportedError("ogles3.library: no floating-point default framebuffer");
     if (!fits(config.redBits, 8) || !fits(config.greenBits, 8) || !fits(config.blueBits, 8) ||
         !fits(config.alphaBits, 8) || !fits(config.depthBits, 24) || !fits(config.stencilBits, 8))
-        throw tcu::NotSupportedError("ogles2.library: the default framebuffer is RGBA8, depth 24, stencil 8");
+        throw tcu::NotSupportedError("ogles3.library: the default framebuffer is RGBA8, depth 24, stencil 8");
     const int samples = config.numSamples == glu::RenderConfig::DONT_CARE ? 0 : config.numSamples;
     if (samples != 0 && samples != 4)
-        throw tcu::NotSupportedError("ogles2.library: 0 or 4 samples");
+        throw tcu::NotSupportedError("ogles3.library: 0 or 4 samples");
 
     const int width  = glu::getValueOrDefault(config, &glu::RenderConfig::width, 256);
     const int height = glu::getValueOrDefault(config, &glu::RenderConfig::height, 256);
@@ -172,12 +172,12 @@ RenderContext::RenderContext(const glu::RenderConfig &config) : m_type(config.ty
     const bool es3   = api == glu::ApiType::es(3, 0) || es31;
     ULONG err        = 0;
     m_ctx            = aglCreateContextTags2(
-        &err, OGLES2_CCT_PISTORM_WIDTH, (ULONG)width, OGLES2_CCT_PISTORM_HEIGHT, (ULONG)height, OGLES2_CCT_DEPTH,
-        24UL, OGLES2_CCT_STENCIL, 8UL, OGLES2_CCT_VSYNC, (ULONG)FALSE, OGLES2_CCT_PISTORM_MSAA,
-        (ULONG)(samples ? 4 : 0), OGLES2_CCT_PISTORM_ES_VERSION, es31 ? 31UL : es3 ? 30UL : 20UL, TAG_DONE);
-    if (!m_ctx && err == OGLES2_CCE_UNSUPPORTED && es3)
-        throw tcu::NotSupportedError(es31 ? "ogles2.library: no OpenGL ES 3.1 contexts in this build"
-                                          : "ogles2.library: no OpenGL ES 3.0 contexts in this build");
+        &err, OGLES3_CCT_PISTORM_WIDTH, (ULONG)width, OGLES3_CCT_PISTORM_HEIGHT, (ULONG)height, OGLES3_CCT_DEPTH,
+        24UL, OGLES3_CCT_STENCIL, 8UL, OGLES3_CCT_VSYNC, (ULONG)FALSE, OGLES3_CCT_PISTORM_MSAA,
+        (ULONG)(samples ? 4 : 0), OGLES3_CCT_PISTORM_ES_VERSION, es31 ? 31UL : es3 ? 30UL : 20UL, TAG_DONE);
+    if (!m_ctx && err == OGLES3_CCE_UNSUPPORTED && es3)
+        throw tcu::NotSupportedError(es31 ? "ogles3.library: no OpenGL ES 3.1 contexts in this build"
+                                          : "ogles3.library: no OpenGL ES 3.0 contexts in this build");
     if (!m_ctx)
         throw tcu::ResourceError("aglCreateContextTags2 failed, error " + de::toString((unsigned long)err));
     aglMakeCurrent(m_ctx);
@@ -195,8 +195,8 @@ RenderContext::RenderContext(const glu::RenderConfig &config) : m_type(config.ty
         {
             aglDestroyContext(m_ctx);
             m_ctx = nullptr;
-            throw tcu::NotSupportedError(es31 ? "ogles2.library: no OpenGL ES 3.1 context (an ES31 build is needed)"
-                                              : "ogles2.library: no OpenGL ES 3.0 contexts before 2.0");
+            throw tcu::NotSupportedError(es31 ? "ogles3.library: no OpenGL ES 3.1 context (an ES31 build is needed)"
+                                              : "ogles3.library: no OpenGL ES 3.0 contexts before 2.0");
         }
         if (es31)
             glw::initES31(&m_gl, &loader);
@@ -210,7 +210,7 @@ RenderContext::RenderContext(const glu::RenderConfig &config) : m_type(config.ty
     if (es3 && !listed && s_numMissing)
     {
         listed = true;
-        printf("ogles2.library: %d functions of the ES 3.0 table not implemented yet:", s_numMissing);
+        printf("ogles3.library: %d functions of the ES 3.0 table not implemented yet:", s_numMissing);
         for (int i = 0; i < s_numMissing; i++)
             printf(" %s", s_missing[i]);
         printf("\n");
@@ -218,7 +218,7 @@ RenderContext::RenderContext(const glu::RenderConfig &config) : m_type(config.ty
     }
 
     ULONG w = 0, h = 0;
-    aglSetParamsTags2(OGLES2_CCT_GET_WIDTH, (ULONG)&w, OGLES2_CCT_GET_HEIGHT, (ULONG)&h, TAG_DONE);
+    aglSetParamsTags2(OGLES3_CCT_GET_WIDTH, (ULONG)&w, OGLES3_CCT_GET_HEIGHT, (ULONG)&h, TAG_DONE);
     int r = 0, g = 0, b = 0, a = 0, d = 0, s = 0, n = 0;
     m_gl.getIntegerv(GL_RED_BITS, &r);
     m_gl.getIntegerv(GL_GREEN_BITS, &g);
@@ -239,14 +239,14 @@ RenderContext::~RenderContext(void)
 class ContextFactory : public glu::ContextFactory
 {
 public:
-    ContextFactory(void) : glu::ContextFactory("ogles2", "ogles2.library context in a window")
+    ContextFactory(void) : glu::ContextFactory("ogles2", "ogles3.library context in a window")
     {
     }
     glu::RenderContext *createContext(const glu::RenderConfig &config, const tcu::CommandLine &,
                                       const glu::RenderContext *sharedContext) const override
     {
         if (sharedContext)
-            throw tcu::NotSupportedError("ogles2.library: shared contexts are not offered to dEQP");
+            throw tcu::NotSupportedError("ogles3.library: shared contexts are not offered to dEQP");
         return new RenderContext(config);
     }
 };
@@ -256,13 +256,13 @@ class Platform : public tcu::Platform, private glu::Platform
 public:
     Platform(void)
     {
-        if (!OGLES2Open())
-            throw tcu::ResourceError("ogles2.library (1.2 or newer) did not open");
+        if (!OGLES3Open())
+            throw tcu::ResourceError("ogles3.library (1.2 or newer) did not open");
         m_contextFactoryRegistry.registerFactory(new ContextFactory());
     }
     ~Platform(void) override
     {
-        OGLES2Close();
+        OGLES3Close();
     }
     bool processEvents(void) override
     {

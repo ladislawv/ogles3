@@ -1,11 +1,11 @@
 /*
  * sdl2_sprites: SDL2's 2D API drawn by the GPU through SDL's GLES2 renderer
- * on ogles2.library. A texture made in memory, 64 copies rotated, scaled and
+ * on ogles3.library. A texture made in memory, 64 copies rotated, scaled and
  * blended each frame. No GL code: the renderer does it.
  *   usage: sdl2_sprites [seconds]     (Esc or the close gadget quits)
  * Prints the frame rate at the end. The renderer writes its shaders at run
- * time: the first run needs the shader compiler (LIBS:v3dglslc) and caches
- * them in OGLES2Cache: (or T:).
+ * time: the first run needs the shader compiler (LIBS:v3dglslc3) and caches
+ * them in OGLES3Cache: (or T:).
  *
  * MIT licence (the ogles2 project's LICENSE).
  */

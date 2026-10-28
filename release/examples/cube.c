@@ -1,16 +1,16 @@
 /*
- * ogles2.library example 2: a textured cube turning in a window, with a
+ * ogles3.library example 2: a textured cube turning in a window, with a
  * depth buffer.
  *
- * Shows what the triangle does not: a depth buffer (OGLES2_CCT_DEPTH), an
+ * Shows what the triangle does not: a depth buffer (OGLES3_CCT_DEPTH), an
  * index buffer, a texture with mipmaps made by glGenerateMipmap, a matrix
  * uniform, and a window the user may resize: at IDCMP_NEWSIZE the program
- * gives ogles2 the window again (aglSetParams2 with OGLES2_CCT_WINDOW), which
+ * gives ogles2 the window again (aglSetParams2 with OGLES3_CCT_WINDOW), which
  * resizes the surface, and sets the viewport to the new size.
  * Close the window, press Esc or Ctrl-C to quit.
  *
  * Build (see the Makefile):
- *   m68k-amigaos-gcc -O2 -fno-builtin -I../include cube.c -L../lib -logles2 -lm881 -o cube
+ *   m68k-amigaos-gcc -O2 -fno-builtin -I../include cube.c -L../lib -logles3 -lm881 -o cube
  */
 #include <stdio.h>
 #include <math.h>
@@ -19,7 +19,7 @@
 #include <dos/dos.h>
 #include <proto/exec.h>
 #include <proto/intuition.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include "cube_shaders.h"
 
 struct IntuitionBase *IntuitionBase;
@@ -167,9 +167,9 @@ int main(void)
         printf("needs intuition.library 39\n");
         return 20;
     }
-    if (!OGLES2Open()) {
+    if (!OGLES3Open()) {
         printf("needs %s 1.3 or newer: in LIBS:, or in this program's drawer or its libs/\n"
-               "(an older one that another program is using cannot be replaced)\n", OGLES2NAME);
+               "(an older one that another program is using cannot be replaced)\n", OGLES3NAME);
         goto out;
     }
     win = OpenWindowTags(NULL, WA_Title, (ULONG) "ogles2: cube", WA_InnerWidth, 400, WA_InnerHeight, 300,
@@ -181,8 +181,8 @@ int main(void)
         printf("cannot open a window\n");
         goto out;
     }
-    ctx = aglCreateContextTags2(&err, OGLES2_CCT_WINDOW, (ULONG)win, OGLES2_CCT_DEPTH, 24, OGLES2_CCT_STENCIL, 0,
-                                OGLES2_CCT_GET_WIDTH, (ULONG)&width, OGLES2_CCT_GET_HEIGHT, (ULONG)&height,
+    ctx = aglCreateContextTags2(&err, OGLES3_CCT_WINDOW, (ULONG)win, OGLES3_CCT_DEPTH, 24, OGLES3_CCT_STENCIL, 0,
+                                OGLES3_CCT_GET_WIDTH, (ULONG)&width, OGLES3_CCT_GET_HEIGHT, (ULONG)&height,
                                 TAG_DONE);
     if (!ctx) {
         printf("aglCreateContextTags2 failed (error %lu)\n", (unsigned long)err);
@@ -221,8 +221,8 @@ int main(void)
         if (resized) {
             /* The surface takes the window's new inner size; the viewport
              * is the program's to set. */
-            aglSetParamsTags2(OGLES2_CCT_WINDOW, (ULONG)win, OGLES2_CCT_GET_WIDTH, (ULONG)&width,
-                              OGLES2_CCT_GET_HEIGHT, (ULONG)&height, TAG_DONE);
+            aglSetParamsTags2(OGLES3_CCT_WINDOW, (ULONG)win, OGLES3_CCT_GET_WIDTH, (ULONG)&width,
+                              OGLES3_CCT_GET_HEIGHT, (ULONG)&height, TAG_DONE);
             glViewport(0, 0, width, height);
             resized = FALSE;
         }
@@ -242,7 +242,7 @@ out:
         aglDestroyContext(ctx);
     if (win)
         CloseWindow(win);
-    OGLES2Close();
+    OGLES3Close();
     CloseLibrary((struct Library *)IntuitionBase);
     return rc;
 }

@@ -9,7 +9,7 @@
 .ket }
 
 FailAt 21
-If NOT EXISTS libs/ogles2.library
+If NOT EXISTS libs/ogles3.library
   Echo "Please CD into the ogles2-m1-3 directory first,"
   Echo "then run:  Execute Run-M1"
   Quit 20
@@ -22,7 +22,7 @@ EndIf
 Echo "ogles2 M1 run 3, starting at step {FROM}" >>M1R3:results/00-progress.txt
 Date >>M1R3:results/00-progress.txt
 Assign LIBS: M1R3:libs ADD
-SetEnv OGLES2/LogFile M1R3:results/ogles2.log
+SetEnv OGLES3/LogFile M1R3:results/ogles2.log
 
 If NOT {FROM} GT 1 VAL
   Echo "Step 1 of 6: smoke test (nothing to see)"
@@ -64,13 +64,13 @@ If NOT {FROM} GT 6 VAL
   Echo "Step 6 of 6: a hardware probe on the hidden bitmap (nothing to see)."
   Echo "  Its colour checks are EXPECTED to fail: it records what the GPU does"
   Echo "  when asked to dither, the setting that broke the colours in run 2."
-  SetEnv OGLES2/StoreDither 1
+  SetEnv OGLES3/StoreDither 1
   M1R3:bin/m1_clear BITMAP >M1R3:results/6-dither-probe.txt
-  UnSetEnv OGLES2/StoreDither
+  UnSetEnv OGLES3/StoreDither
   Echo "step 6 done" >>M1R3:results/00-progress.txt
 EndIf
 
-UnSetEnv OGLES2/LogFile
+UnSetEnv OGLES3/LogFile
 Assign LIBS: M1R3:libs REMOVE
 If NOT EXISTS M1R3:results/notes.txt
   Copy M1R3:notes-template.txt M1R3:results/notes.txt

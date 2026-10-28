@@ -1,24 +1,24 @@
 TABLE OF CONTENTS
 
-ogles2.library/--background--
-ogles2.library/--shaders--
-ogles2.library/--deviations--
-ogles2.library/OGLES2Open
-ogles2.library/OGLES2Close
-ogles2.library/aglCreateContext2
-ogles2.library/aglDestroyContext
-ogles2.library/aglMakeCurrent
-ogles2.library/aglSwapBuffers
-ogles2.library/aglSetParams2
-ogles2.library/aglSetBitmap
-ogles2.library/aglGetProcAddress
-ogles2.library/--background--                   ogles2.library/--background--
+ogles3.library/--background--
+ogles3.library/--shaders--
+ogles3.library/--deviations--
+ogles3.library/OGLES3Open
+ogles3.library/OGLES3Close
+ogles3.library/aglCreateContext2
+ogles3.library/aglDestroyContext
+ogles3.library/aglMakeCurrent
+ogles3.library/aglSwapBuffers
+ogles3.library/aglSetParams2
+ogles3.library/aglSetBitmap
+ogles3.library/aglGetProcAddress
+ogles3.library/--background--                   ogles3.library/--background--
 
    PURPOSE
        OpenGL ES 2.0 for AmigaOS 3.x on a PiStorm with a Raspberry Pi 4
        (or CM4) running Emu68: the GLES2 functions are drawn by the Pi's
        GPU (Broadcom V3D 4.2). The API is source-compatible with AmigaOS 4's
-       ogles2.library: the GLES2 functions with their standard names, and
+       ogles3.library: the GLES2 functions with their standard names, and
        the agl* context calls described here.
 
    REQUIREMENTS
@@ -30,45 +30,45 @@ ogles2.library/--background--                   ogles2.library/--background--
        GettingStarted.txt (beside this file) walks through a first
        program, building, shaders, shipping and debugging.
 
-       A program includes <proto/ogles2.h> and links the import library:
-       libogles2.a (GCC) or ogles2.lib (vbcc). It calls OGLES2Open() before
+       A program includes <proto/ogles3.h> and links the import library:
+       libogles3.a (GCC) or ogles3.lib (vbcc). It calls OGLES3Open() before
        anything else; the GL functions and agl* calls then go to
-       ogles2.library through its dispatch table, with the current context
+       ogles3.library through its dispatch table, with the current context
        (aglMakeCurrent) passed for the program.
 
-           #include <proto/ogles2.h>
+           #include <proto/ogles3.h>
 
-           if (OGLES2Open()) {
+           if (OGLES3Open()) {
                ULONG err;
-               void *ctx = aglCreateContextTags2(&err, OGLES2_CCT_DEPTH, 24,
+               void *ctx = aglCreateContextTags2(&err, OGLES3_CCT_DEPTH, 24,
                                                  TAG_DONE);
                if (ctx) {
                    aglMakeCurrent(ctx);
                    ... GLES2 calls, aglSwapBuffers() once per frame ...
                    aglDestroyContext(ctx);
                }
-               OGLES2Close();
+               OGLES3Close();
            }
 
        GCC (bebbo's amiga-gcc, clib2):
            m68k-amigaos-gcc -mcrt=clib2 -m68020 -m68881 -Iinclude prog.c
-               -Llib -logles2 -lm881 -o prog
+               -Llib -logles3 -lm881 -o prog
        vbcc:
-           vc +aos68k -cpu=68020 -fpu=68881 -Iinclude prog.c lib/ogles2.lib
+           vc +aos68k -cpu=68020 -fpu=68881 -Iinclude prog.c lib/ogles3.lib
                -lamiga -lm881 -o prog
 
        With clib2 and -m68881, link maths with -lm881, not -lm.
 
-       The current context of <proto/ogles2.h>'s calls belongs to the
+       The current context of <proto/ogles3.h>'s calls belongs to the
        program (one per import library). A program that renders from a
-       second task calls that task's functions through OGLES2Dispatch with
-       the context as first argument (see <libraries/ogles2_dispatch.h>).
+       second task calls that task's functions through OGLES3Dispatch with
+       the context as first argument (see <libraries/ogles3_dispatch.h>).
 
    WHERE THE LIBRARY IS FOUND
-       OGLES2Open() opens the installed library (in memory, or LIBS:),
-       else PROGDIR:libs/ogles2.library, else PROGDIR:ogles2.library. A
+       OGLES3Open() opens the installed library (in memory, or LIBS:),
+       else PROGDIR:libs/ogles3.library, else PROGDIR:ogles3.library. A
        program may therefore bring the library in its own drawer for
-       systems where it is not installed; see OGLES2Open().
+       systems where it is not installed; see OGLES3Open().
 
    EXTENSIONS
        GL_EXTENSIONS lists: OES_element_index_uint,
@@ -94,12 +94,12 @@ ogles2.library/--background--                   ogles2.library/--background--
        framebuffer. Half-float RGB and 32-bit float textures are not
        colour-renderable.
 
-       Their functions are reached through <proto/ogles2.h> by name, or
+       Their functions are reached through <proto/ogles3.h> by name, or
        through aglGetProcAddress(). AmigaOS 4's extras glPolygonMode,
        glProvokingVertex and glGetBufferParameterivOES are there too, and
        GLES 3.0's glDrawRangeElements through aglGetProcAddress().
        Enumerants missing from <GLES2/gl2ext.h> are in
-       <libraries/ogles2.h>.
+       <libraries/ogles3.h>.
 
    COPIES
        glCopyTexImage2D and glCopyTexSubImage2D are drawn by the GPU into
@@ -115,10 +115,10 @@ ogles2.library/--background--                   ogles2.library/--background--
        glGetIntegerv answers the rest.
 
    ENVIRONMENT
-       OGLES2/LogFile  the log's file (default T:ogles2.log). OGLES2Log
+       OGLES3/LogFile  the log's file (default T:ogles2.log). OGLES3Log
                        (C/) writes the buffered log while a program runs.
-       OGLES2/MSAA     4 or 0: 4x multisampling for contexts created
-                       without OGLES2_CCT_PISTORM_MSAA.
+       OGLES3/MSAA     4 or 0: 4x multisampling for contexts created
+                       without OGLES3_CCT_PISTORM_MSAA.
 
    CONFORMANCE
        The Khronos dEQP-GLES2 must-pass list (17,165 cases) on an A1200:
@@ -131,7 +131,7 @@ ogles2.library/--background--                   ogles2.library/--background--
        Steffen "MagicSN" Haeuser and Mesa's V3D compiler; the ReadMe has
        the full credits.
 
-ogles2.library/--shaders--                         ogles2.library/--shaders--
+ogles3.library/--shaders--                         ogles3.library/--shaders--
 
    PROGRAMS AND BINARIES
        The GPU runs machine code that Mesa's V3D compiler produces. The
@@ -143,10 +143,10 @@ ogles2.library/--shaders--                         ogles2.library/--shaders--
        2. PROGDIR:shaders/<hash>.v3dp, then PROGDIR:<hash>.v3dp: a binary
           the program ships in a shaders/ drawer beside itself, or beside
           itself;
-       3. OGLES2Cache:<hash>.v3dp (when that assign exists), else
+       3. OGLES3Cache:<hash>.v3dp (when that assign exists), else
           T:<hash>.v3dp: binaries compiled before;
-       4. the compiler, if found: LIBS:v3dglslc, else PROGDIR:libs/v3dglslc,
-          else PROGDIR:v3dglslc. It compiles the program into the cache of
+       4. the compiler, if found: LIBS:v3dglslc3, else PROGDIR:libs/v3dglslc3,
+          else PROGDIR:v3dglslc3. It compiles the program into the cache of
           step 3 (about 0.2 s per program; its first start takes about a
           second);
        5. otherwise the link fails: the info log names the program's hash,
@@ -158,7 +158,7 @@ ogles2.library/--shaders--                         ogles2.library/--shaders--
        compile them on a PC with the offline compiler (the source
        distribution's tools/v3dglslc, v3dp/split_shaders.py and
        v3dp/v3dp_hashname.py name them), or run the program once with the
-       compiler installed and take the files from OGLES2Cache:. Any change
+       compiler installed and take the files from OGLES3Cache:. Any change
        to a shader's text, a space included, gives another hash.
 
        glCompileShader compiles in the compiler's front end and reports
@@ -169,21 +169,21 @@ ogles2.library/--shaders--                         ogles2.library/--shaders--
        that ships its binaries and runs where a compiler may be installed
        should ship these records too, in the same shaders/ drawer:
        glCompileShader looks in PROGDIR:shaders/, then in the cache. Take
-       them from OGLES2Cache: with the binaries, or write them on a PC with
+       them from OGLES3Cache: with the binaries, or write them on a PC with
        the source distribution's v3dp/v3ds_record.py.
 
        glGetProgramBinaryOES returns the .v3dp file
        (GL_PROGRAM_BINARY_V3DP_PISTORM); glProgramBinaryOES takes one.
 
    CACHE
-       Make a drawer and assign OGLES2Cache: to it (the installer offers
+       Make a drawer and assign OGLES3Cache: to it (the installer offers
        this) to keep compiled programs across reboots; without it they go
        to T:, and are compiled again after the next reboot.
 
-ogles2.library/--deviations--                   ogles2.library/--deviations--
+ogles3.library/--deviations--                   ogles3.library/--deviations--
 
-   Where ogles2.library differs from the GLES 2.0 specification or from
-   AmigaOS 4's ogles2.library:
+   Where ogles3.library differs from the GLES 2.0 specification or from
+   AmigaOS 4's ogles3.library:
 
    - Cube maps are always filtered seamlessly across face edges (the
      hardware does this, as GLES 3 requires); GLES 2 filters each face
@@ -196,42 +196,42 @@ ogles2.library/--deviations--                   ogles2.library/--deviations--
    - glPolygonMode takes GL_FRONT_AND_BACK only: the hardware has one mode
      for both faces.
    - Framebuffer objects are not multisampled; only the default
-     framebuffer is (OGLES2_CCT_PISTORM_MSAA).
+     framebuffer is (OGLES3_CCT_PISTORM_MSAA).
    - Textures of 32-bit float formats are sampled with nearest filtering.
    - Without the compiler, glCompileShader cannot check a shader: it
      reports GL_COMPILE_STATUS TRUE, and errors appear at link time.
-   - Context tags accepted but not acted on: OGLES2_CCT_RESIZE_VIEWPORT,
-     OGLES2_CCT_SHADER_COMPAT_PATCH, OGLES2_CCT_SINGLE_GET_ERROR_MODE,
-     OGLES2_CCT_DETECT_UNINITIALIZED_GLSL_VARS and the three SPIRV tags
+   - Context tags accepted but not acted on: OGLES3_CCT_RESIZE_VIEWPORT,
+     OGLES3_CCT_SHADER_COMPAT_PATCH, OGLES3_CCT_SINGLE_GET_ERROR_MODE,
+     OGLES3_CCT_DETECT_UNINITIALIZED_GLSL_VARS and the three SPIRV tags
      (each is logged once). The tag VALUES differ from AmigaOS 4's: the
      names are the same, so source compiles unchanged, but binaries do
      not mix.
 
-ogles2.library/OGLES2Open                           ogles2.library/OGLES2Open
+ogles3.library/OGLES3Open                           ogles3.library/OGLES3Open
 
    NAME
-       OGLES2Open -- open ogles2.library for this program (import library)
+       OGLES3Open -- open ogles3.library for this program (import library)
 
    SYNOPSIS
-       success = OGLES2Open()
+       success = OGLES3Open()
 
-       BOOL OGLES2Open(void);
+       BOOL OGLES3Open(void);
 
    FUNCTION
-       Opens ogles2.library and fetches its dispatch table. It tries, in
+       Opens ogles3.library and fetches its dispatch table. It tries, in
        order, and takes the first that opens, is at least version
-       OGLES2_VERSION (default 1) and has this import library's dispatch
+       OGLES3_VERSION (default 1) and has this import library's dispatch
        ABI:
-           ogles2.library            (in memory, or LIBS:)
-           PROGDIR:libs/ogles2.library
-           PROGDIR:ogles2.library
+           ogles3.library            (in memory, or LIBS:)
+           PROGDIR:libs/ogles3.library
+           PROGDIR:ogles3.library
        One that is too old or of another ABI is closed and the next one
        tried, so a program may bring a newer library than the system has.
-       AmigaOS keeps one ogles2.library in memory, and an OpenLibrary of
-       any path returns that one; so OGLES2Open expunges one that would not
+       AmigaOS keeps one ogles3.library in memory, and an OpenLibrary of
+       any path returns that one; so OGLES3Open expunges one that would not
        do before it tries the next file, if no other program has it open.
        While another program uses an older one, it cannot be replaced, and
-       OGLES2Open fails.
+       OGLES3Open fails.
        Calling it again after success does nothing and returns TRUE.
 
    RESULT
@@ -239,30 +239,30 @@ ogles2.library/OGLES2Open                           ogles2.library/OGLES2Open
                  found or usable; no other function may be called then.
 
    NOTES
-       Sets OGLES2Base. Define OGLES2_VERSION on the compile line to require
+       Sets OGLES3Base. Define OGLES3_VERSION on the compile line to require
        a newer library.
 
    SEE ALSO
-       OGLES2Close()
+       OGLES3Close()
 
-ogles2.library/OGLES2Close                         ogles2.library/OGLES2Close
+ogles3.library/OGLES3Close                         ogles3.library/OGLES3Close
 
    NAME
-       OGLES2Close -- close ogles2.library (import library)
+       OGLES3Close -- close ogles3.library (import library)
 
    SYNOPSIS
-       OGLES2Close()
+       OGLES3Close()
 
-       void OGLES2Close(void);
+       void OGLES3Close(void);
 
    FUNCTION
-       Closes the library opened by OGLES2Open(). Safe to call when it was
+       Closes the library opened by OGLES3Open(). Safe to call when it was
        not opened. Destroy the program's contexts first.
 
    SEE ALSO
-       OGLES2Open()
+       OGLES3Open()
 
-ogles2.library/aglCreateContext2               ogles2.library/aglCreateContext2
+ogles3.library/aglCreateContext2               ogles3.library/aglCreateContext2
 
    NAME
        aglCreateContext2 -- create a rendering context
@@ -279,54 +279,54 @@ ogles2.library/aglCreateContext2               ogles2.library/aglCreateContext2
 
    FUNCTION
        Creates a GLES2 context and its default framebuffer. Where it draws:
-           OGLES2_CCT_WINDOW (struct Window *): into the program's window;
+           OGLES3_CCT_WINDOW (struct Window *): into the program's window;
                each aglSwapBuffers() copies the frame into the window's
                inner area. The window should be on a 32-bit RTG screen.
                A borderless window at 0,0 of its screen's size, on a
                32-bit custom screen that is not public, is drawn into
                directly, without the copy, as a full screen
-               (ENV:OGLES2/WindowCopy 1: the copy always). Close the
+               (ENV:OGLES3/WindowCopy 1: the copy always). Close the
                window only after aglDestroyContext().
-           OGLES2_CCT_MODEID (ULONG): a full screen of its own in this
-               display mode (OGLES2_CCT_CONTEXT_FOR_MODEID is the same),
+           OGLES3_CCT_MODEID (ULONG): a full screen of its own in this
+               display mode (OGLES3_CCT_CONTEXT_FOR_MODEID is the same),
                with a backdrop window for input
-               (OGLES2_CCT_PISTORM_GET_WINDOW).
-           OGLES2_CCT_BITMAP (struct BitMap *): into the program's bitmap.
+               (OGLES3_CCT_PISTORM_GET_WINDOW).
+           OGLES3_CCT_BITMAP (struct BitMap *): into the program's bitmap.
            none of these: a window of its own on the default public screen,
-               640 x 480 or OGLES2_CCT_PISTORM_WIDTH/_HEIGHT. That window
+               640 x 480 or OGLES3_CCT_PISTORM_WIDTH/_HEIGHT. That window
                has no close gadget and no IDCMP.
 
        Other tags:
-           OGLES2_CCT_DEPTH (ULONG): depth bits, 0 (default: none); 1 to
+           OGLES3_CCT_DEPTH (ULONG): depth bits, 0 (default: none); 1 to
                16 give a 16-bit depth buffer, more a 32-bit float one.
-           OGLES2_CCT_STENCIL (ULONG): stencil bits, 0 (default: none);
+           OGLES3_CCT_STENCIL (ULONG): stencil bits, 0 (default: none);
                any other value gives 8 stencil and 24 depth bits.
-           OGLES2_CCT_VSYNC (BOOL): aglSwapBuffers() waits for the
+           OGLES3_CCT_VSYNC (BOOL): aglSwapBuffers() waits for the
                vertical blank.
-           OGLES2_CCT_SHARE_WITH (void *): share textures, buffers, shaders,
+           OGLES3_CCT_SHARE_WITH (void *): share textures, buffers, shaders,
                programs and renderbuffers with this context's group. The
                group's contexts may be used from several tasks.
-           OGLES2_CCT_DEBUG_SHADER_LOG (BOOL): link logs describe each
+           OGLES3_CCT_DEBUG_SHADER_LOG (BOOL): link logs describe each
                compiled variant (instructions, threads, spills).
-           OGLES2_CCT_PISTORM_MSAA (ULONG): 0 or 4 samples per pixel for
-               the default framebuffer; without the tag, ENV:OGLES2/MSAA.
-           OGLES2_CCT_GET_WIDTH, OGLES2_CCT_GET_HEIGHT (ULONG *): receive
+           OGLES3_CCT_PISTORM_MSAA (ULONG): 0 or 4 samples per pixel for
+               the default framebuffer; without the tag, ENV:OGLES3/MSAA.
+           OGLES3_CCT_GET_WIDTH, OGLES3_CCT_GET_HEIGHT (ULONG *): receive
                the surface size.
-           OGLES2_CCT_PISTORM_GET_WINDOW (struct Window **): receives the
+           OGLES3_CCT_PISTORM_GET_WINDOW (struct Window **): receives the
                window that gets input (yours, ogles2's own, or the
                fullscreen backdrop window); NULL for a bitmap.
 
        The viewport and scissor start at the surface's size.
 
    INPUTS
-       errcode - where to store an OGLES2_CCE_* code, or NULL.
-       tags    - tag list, see above and <libraries/ogles2.h>.
+       errcode - where to store an OGLES3_CCE_* code, or NULL.
+       tags    - tag list, see above and <libraries/ogles3.h>.
 
    RESULT
        context - the new context, or NULL; *errcode says why:
-           OGLES2_CCE_NOMEM, OGLES2_CCE_NO_GPU (no usable V3D),
-           OGLES2_CCE_BAD_TAGS, OGLES2_CCE_NO_DISPLAY (the window, screen
-           or bitmap is unusable, e.g. not 32-bit), OGLES2_CCE_UNSUPPORTED.
+           OGLES3_CCE_NOMEM, OGLES3_CCE_NO_GPU (no usable V3D),
+           OGLES3_CCE_BAD_TAGS, OGLES3_CCE_NO_DISPLAY (the window, screen
+           or bitmap is unusable, e.g. not 32-bit), OGLES3_CCE_UNSUPPORTED.
 
    NOTES
        aglCreateContext() and aglCreateContextTags() (AmigaOS 4's
@@ -334,9 +334,9 @@ ogles2.library/aglCreateContext2               ogles2.library/aglCreateContext2
 
    SEE ALSO
        aglDestroyContext(), aglMakeCurrent(), aglSetParams2(),
-       <libraries/ogles2.h>
+       <libraries/ogles3.h>
 
-ogles2.library/aglDestroyContext               ogles2.library/aglDestroyContext
+ogles3.library/aglDestroyContext               ogles3.library/aglDestroyContext
 
    NAME
        aglDestroyContext -- free a context
@@ -356,7 +356,7 @@ ogles2.library/aglDestroyContext               ogles2.library/aglDestroyContext
    SEE ALSO
        aglCreateContext2()
 
-ogles2.library/aglMakeCurrent                     ogles2.library/aglMakeCurrent
+ogles3.library/aglMakeCurrent                     ogles3.library/aglMakeCurrent
 
    NAME
        aglMakeCurrent -- choose the context GL calls go to
@@ -367,13 +367,13 @@ ogles2.library/aglMakeCurrent                     ogles2.library/aglMakeCurrent
        void aglMakeCurrent(void *context);
 
    FUNCTION
-       Makes context the one that <proto/ogles2.h>'s GL calls and
+       Makes context the one that <proto/ogles3.h>'s GL calls and
        aglSwapBuffers() use, for this program.
 
    SEE ALSO
        aglCreateContext2()
 
-ogles2.library/aglSwapBuffers                     ogles2.library/aglSwapBuffers
+ogles3.library/aglSwapBuffers                     ogles3.library/aglSwapBuffers
 
    NAME
        aglSwapBuffers -- show the frame drawn
@@ -387,12 +387,12 @@ ogles2.library/aglSwapBuffers                     ogles2.library/aglSwapBuffers
        Ends the current context's frame: the GPU renders it, and it is
        shown in the window, on the screen or in the bitmap. The CPU goes on
        with the next frame while the GPU renders this one. With
-       OGLES2_CCT_VSYNC, waits for the vertical blank first.
+       OGLES3_CCT_VSYNC, waits for the vertical blank first.
 
    SEE ALSO
        aglSetParams2()
 
-ogles2.library/aglSetParams2                       ogles2.library/aglSetParams2
+ogles3.library/aglSetParams2                       ogles3.library/aglSetParams2
 
    NAME
        aglSetParams2 -- change or query the current context
@@ -409,22 +409,22 @@ ogles2.library/aglSetParams2                       ogles2.library/aglSetParams2
 
    FUNCTION
        Tags:
-           OGLES2_CCT_WINDOW (struct Window *): a context created with
-               OGLES2_CCT_WINDOW renders into this window from the next
+           OGLES3_CCT_WINDOW (struct Window *): a context created with
+               OGLES3_CCT_WINDOW renders into this window from the next
                frame: another window, or the same one after IDCMP_NEWSIZE.
                The default framebuffer takes the window's inner size; the
                viewport and scissor stay as the program set them.
-           OGLES2_CCT_VSYNC (BOOL): wait for the vertical blank or not.
-           OGLES2_CCT_GET_WIDTH, OGLES2_CCT_GET_HEIGHT (ULONG *): receive
+           OGLES3_CCT_VSYNC (BOOL): wait for the vertical blank or not.
+           OGLES3_CCT_GET_WIDTH, OGLES3_CCT_GET_HEIGHT (ULONG *): receive
                the surface size.
-           OGLES2_CCT_PISTORM_GET_WINDOW (struct Window **): see
+           OGLES3_CCT_PISTORM_GET_WINDOW (struct Window **): see
                aglCreateContext2().
 
    EXAMPLE
        After IDCMP_NEWSIZE:
-           aglSetParamsTags2(OGLES2_CCT_WINDOW, (ULONG)win,
-                             OGLES2_CCT_GET_WIDTH, (ULONG)&w,
-                             OGLES2_CCT_GET_HEIGHT, (ULONG)&h, TAG_DONE);
+           aglSetParamsTags2(OGLES3_CCT_WINDOW, (ULONG)win,
+                             OGLES3_CCT_GET_WIDTH, (ULONG)&w,
+                             OGLES3_CCT_GET_HEIGHT, (ULONG)&h, TAG_DONE);
            glViewport(0, 0, w, h);
 
    NOTES
@@ -433,7 +433,7 @@ ogles2.library/aglSetParams2                       ogles2.library/aglSetParams2
    SEE ALSO
        aglCreateContext2(), aglSetBitmap()
 
-ogles2.library/aglSetBitmap                         ogles2.library/aglSetBitmap
+ogles3.library/aglSetBitmap                         ogles3.library/aglSetBitmap
 
    NAME
        aglSetBitmap -- render into another bitmap
@@ -444,7 +444,7 @@ ogles2.library/aglSetBitmap                         ogles2.library/aglSetBitmap
        void aglSetBitmap(struct BitMap *bitmap);
 
    FUNCTION
-       For a context created with OGLES2_CCT_BITMAP: the open frame is
+       For a context created with OGLES3_CCT_BITMAP: the open frame is
        rendered into the old bitmap, then the context renders into the new
        one, its default framebuffer resized to it. The viewport and
        scissor stay as the program set them.
@@ -452,7 +452,7 @@ ogles2.library/aglSetBitmap                         ogles2.library/aglSetBitmap
    SEE ALSO
        aglCreateContext2()
 
-ogles2.library/aglGetProcAddress             ogles2.library/aglGetProcAddress
+ogles3.library/aglGetProcAddress             ogles3.library/aglGetProcAddress
 
    NAME
        aglGetProcAddress -- a GL function by name (import library)

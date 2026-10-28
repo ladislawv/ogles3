@@ -1,4 +1,4 @@
-| ogles2.library starts here. Run as a program by mistake, it returns -1
+| ogles3.library starts here. Run as a program by mistake, it returns -1
 | (a library is not an executable); exec finds the library through the
 | resident tag (ROMTag in library.c) instead.
 	.text

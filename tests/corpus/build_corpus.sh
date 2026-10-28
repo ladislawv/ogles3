@@ -82,7 +82,7 @@ echo "$PROGRAMS" | while read -r name src fw shot; do
         files="$src $BOOK/Common/esShader.c $BOOK/Common/esShapes.c $BOOK/Common/esTransform.c $HERE/esutil_corpus.c"
         incs="-I$BOOK/Common"
     fi
-    $AMIGA_CC $incs -I$HERE $files $HERE/corpus.c $HERE/corpus_amiga.c -L$B -logles2 -lm881 -o "$OUT/amiga/$name"
+    $AMIGA_CC $incs -I$HERE $files $HERE/corpus.c $HERE/corpus_amiga.c -L$B -logles3 -lm881 -o "$OUT/amiga/$name"
     $HOST_CC $incs -I$HERE $files $HERE/corpus.c $HERE/corpus_host.c -lEGL -lGLESv2 -lm -o "$OUT/host/$name"
     (cd "$OUT/data" && CORPUS_FRAMES=$FRAMES CORPUS_SHOT=$shot CORPUS_OUT="$OUT/ref/$name.ppm" \
         CORPUS_SHADERS="$OUT/shaders.txt" "$OUT/host/$name" > "$OUT/ref/$name.txt" 2>&1) ||

@@ -1,24 +1,24 @@
-; Install-ogles2 - installs ogles2.library 1.3 (release 1.3.2). See ReadMe.
-; From a Shell, in this drawer:   Execute Install-ogles2
+; Install-ogles3 - installs ogles3.library 1.3 (release 1.3.2). See ReadMe.
+; From a Shell, in this drawer:   Execute Install-ogles3
 ; It asks before each step; with ALL it does every step without asking:
-;                                 Execute Install-ogles2 ALL
+;                                 Execute Install-ogles3 ALL
 .key ALL/S
 .bra {
 .ket }
 
 FailAt 21
-If NOT EXISTS Libs/ogles2.library
+If NOT EXISTS Libs/ogles3.library
   Echo "Please CD into the drawer of this archive first, then:"
-  Echo "  Execute Install-ogles2"
+  Echo "  Execute Install-ogles3"
   Quit 20
 EndIf
 
-Echo "ogles2.library 1.3 (release 1.3.2): OpenGL ES 2.0 for PiStorm (Raspberry Pi 4)"
+Echo "ogles3.library 1.3 (release 1.3.2): OpenGL ES 2.0 for PiStorm (Raspberry Pi 4)"
 Echo ""
 
 ; ---- the library
 If "{ALL}" EQ ""
-  Ask "Copy ogles2.library to LIBS:? (y/n)"
+  Ask "Copy ogles3.library to LIBS:? (y/n)"
   If NOT WARN
     Skip compiler
   EndIf
@@ -27,28 +27,28 @@ EndIf
 ; file), so each copy is checked with Version, which answers 5 for an older
 ; version and 20 for none. The numbers are this library's (build_release.sh
 ; checks them).
-Copy Libs/ogles2.library LIBS: CLONE
-Version >NIL: LIBS:ogles2.library 1 3 FILE
+Copy Libs/ogles3.library LIBS: CLONE
+Version >NIL: LIBS:ogles3.library 1 3 FILE
 If WARN
-  Echo "Could not copy ogles2.library to LIBS:."
+  Echo "Could not copy ogles3.library to LIBS:."
   Quit 20
 EndIf
 ; an older version still in memory is replaced at its next opening
 Avail FLUSH >NIL:
-Echo "  LIBS:ogles2.library installed."
+Echo "  LIBS:ogles3.library installed."
 ; An installed compiler older than this library, or one without a version
 ; string (1.3.1's and before), is replaced with it: the library uses
-; LIBS:v3dglslc first.
-If EXISTS LIBS:v3dglslc
-  Version >NIL: LIBS:v3dglslc 1 3 FILE
+; LIBS:v3dglslc3 first.
+If EXISTS LIBS:v3dglslc3
+  Version >NIL: LIBS:v3dglslc3 1 3 FILE
   If WARN
     Copy Libs/v3dglslc LIBS: CLONE
-    Version >NIL: LIBS:v3dglslc 1 3 FILE
+    Version >NIL: LIBS:v3dglslc3 1 3 FILE
     If WARN
-      Echo "Could not replace the older LIBS:v3dglslc (19 MB free? write-protected?)."
+      Echo "Could not replace the older LIBS:v3dglslc3 (19 MB free? write-protected?)."
       Quit 20
     EndIf
-    Echo "  LIBS:v3dglslc replaced: the one installed was older."
+    Echo "  LIBS:v3dglslc3 replaced: the one installed was older."
     Skip cache
   EndIf
 EndIf
@@ -67,65 +67,65 @@ If "{ALL}" EQ ""
   EndIf
 EndIf
 Copy Libs/v3dglslc LIBS: CLONE
-Version >NIL: LIBS:v3dglslc 1 3 FILE
+Version >NIL: LIBS:v3dglslc3 1 3 FILE
 If WARN
   Echo "Could not copy v3dglslc to LIBS: (19 MB free? write-protected?)."
   Quit 20
 EndIf
-Echo "  LIBS:v3dglslc installed."
+Echo "  LIBS:v3dglslc3 installed."
 
 ; ---- the cache of compiled shaders
 Lab cache
 Echo ""
-Echo "Compiled shaders can be kept across reboots in SYS:OGLES2Cache, with"
-Echo "the assign OGLES2Cache: made in S:User-Startup. Without it they are"
+Echo "Compiled shaders can be kept across reboots in SYS:OGLES3Cache, with"
+Echo "the assign OGLES3Cache: made in S:User-Startup. Without it they are"
 Echo "kept in T: until the next reboot."
 If "{ALL}" EQ ""
-  Ask "Make SYS:OGLES2Cache and the assign? (y/n)"
+  Ask "Make SYS:OGLES3Cache and the assign? (y/n)"
   If NOT WARN
     Skip log
   EndIf
 EndIf
-If NOT EXISTS SYS:OGLES2Cache
-  MakeDir SYS:OGLES2Cache
+If NOT EXISTS SYS:OGLES3Cache
+  MakeDir SYS:OGLES3Cache
   If ERROR
-    Echo "Could not make SYS:OGLES2Cache."
+    Echo "Could not make SYS:OGLES3Cache."
     Quit 20
   EndIf
 EndIf
-Assign OGLES2Cache: SYS:OGLES2Cache
+Assign OGLES3Cache: SYS:OGLES3Cache
 If EXISTS S:User-Startup
-  Search S:User-Startup "OGLES2Cache:" QUIET >NIL:
+  Search S:User-Startup "OGLES3Cache:" QUIET >NIL:
   If WARN
     Echo ";BEGIN ogles2" >>S:User-Startup
-    Echo "Assign OGLES2Cache: SYS:OGLES2Cache" >>S:User-Startup
+    Echo "Assign OGLES3Cache: SYS:OGLES3Cache" >>S:User-Startup
     Echo ";END ogles2" >>S:User-Startup
     Echo "  Added to S:User-Startup."
   Else
-    Echo "  S:User-Startup already assigns OGLES2Cache:."
+    Echo "  S:User-Startup already assigns OGLES3Cache:."
   EndIf
 Else
   Echo ";BEGIN ogles2" >S:User-Startup
-  Echo "Assign OGLES2Cache: SYS:OGLES2Cache" >>S:User-Startup
+  Echo "Assign OGLES3Cache: SYS:OGLES3Cache" >>S:User-Startup
   Echo ";END ogles2" >>S:User-Startup
   Echo "  S:User-Startup made."
 EndIf
 
-; ---- OGLES2Log
+; ---- OGLES3Log
 Lab log
 Echo ""
 If "{ALL}" EQ ""
-  Ask "Copy OGLES2Log (writes the library's log) to C:? (y/n)"
+  Ask "Copy OGLES3Log (writes the library's log) to C:? (y/n)"
   If NOT WARN
     Skip done
   EndIf
 EndIf
-Copy C/OGLES2Log C: CLONE
+Copy C/OGLES3Log C: CLONE
 If ERROR
-  Echo "Could not copy OGLES2Log to C:."
+  Echo "Could not copy OGLES3Log to C:."
   Quit 20
 EndIf
-Echo "  C:OGLES2Log installed."
+Echo "  C:OGLES3Log installed."
 
 Lab done
 Echo ""

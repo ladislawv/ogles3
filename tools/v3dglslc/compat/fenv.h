@@ -7,8 +7,8 @@
  * there is nothing to hold: these do nothing and report success.
  * Rounding is round-to-nearest, the 68881 default; only that mode is offered.
  */
-#ifndef OGLES2_COMPAT_FENV_H
-#define OGLES2_COMPAT_FENV_H
+#ifndef OGLES3_COMPAT_FENV_H
+#define OGLES3_COMPAT_FENV_H
 
 typedef unsigned long fenv_t;
 typedef unsigned long fexcept_t;

@@ -1,5 +1,5 @@
 /*
- * M4 test: aglSetBitmap retargets a bitmap context (OGLES2_CCT_BITMAP).
+ * M4 test: aglSetBitmap retargets a bitmap context (OGLES3_CCT_BITMAP).
  *   usage: m4_setbitmap
  * On hidden bitmaps A (256x128), B (160x96) and A2 (256x128), one D16
  * context:
@@ -20,7 +20,7 @@
 #include <proto/exec.h>
 #include <proto/graphics.h>
 #include <proto/cybergraphics.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include "../common/smooth_shaders.h"
 
 struct GfxBase *GfxBase;
@@ -60,7 +60,7 @@ static int filled(struct BitMap *bm, UWORD w, UWORD h, unsigned long c)
 static void size_of(ULONG *w, ULONG *h)
 {
     *w = *h = 0;
-    aglSetParamsTags2(OGLES2_CCT_GET_WIDTH, (ULONG)w, OGLES2_CCT_GET_HEIGHT, (ULONG)h, TAG_DONE);
+    aglSetParamsTags2(OGLES3_CCT_GET_WIDTH, (ULONG)w, OGLES3_CCT_GET_HEIGHT, (ULONG)h, TAG_DONE);
 }
 
 static void clear(float r, float g, float b)
@@ -116,8 +116,8 @@ int main(void)
     printf("ogles2 M4: aglSetBitmap\n");
     GfxBase = (struct GfxBase *)OpenLibrary((STRPTR) "graphics.library", 39);
     CyberGfxBase = OpenLibrary((STRPTR) "cybergraphics.library", 41);
-    if (!GfxBase || !CyberGfxBase || !OGLES2Open()) {
-        printf("needs graphics, cybergraphics 41 and %s\n", OGLES2NAME);
+    if (!GfxBase || !CyberGfxBase || !OGLES3Open()) {
+        printf("needs graphics, cybergraphics 41 and %s\n", OGLES3NAME);
         return 20;
     }
     before = AvailMem(MEMF_ANY);
@@ -126,7 +126,7 @@ int main(void)
     a2 = alloc32(256, 128);
     planar = AllocBitMap(64, 64, 4, BMF_CLEAR, 0);
     if (!a || !b || !a2 || !planar ||
-        !(ctx = aglCreateContextTags2(&err, OGLES2_CCT_BITMAP, (ULONG)a, OGLES2_CCT_DEPTH, 16, TAG_DONE))) {
+        !(ctx = aglCreateContextTags2(&err, OGLES3_CCT_BITMAP, (ULONG)a, OGLES3_CCT_DEPTH, 16, TAG_DONE))) {
         printf("FAIL: create the bitmaps and a bitmap context (error %lu)\n", (unsigned long)err);
         return 20;
     }
@@ -215,7 +215,7 @@ int main(void)
     sprintf(msg, "destroy returns the memory (%ld bytes difference)", (long)after - (long)before);
     check(after + 16384 >= before, msg);
 
-    OGLES2Close();
+    OGLES3Close();
     printf("%s: %d of %d checks passed\n", failures ? "FAILED" : "ALL PASSED", checks - failures, checks);
     return failures ? 10 : 0;
 }

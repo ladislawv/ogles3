@@ -4,7 +4,7 @@ ogles2 M6 run 5
 What this is
 ------------
 Quake III Arena with ioquake3's modern renderer (renderergl2, written for
-OpenGL ES 2.0) on ogles2.library directly, without gl4es in between. The
+OpenGL ES 2.0) on ogles3.library directly, without gl4es in between. The
 game engine and its modules are the same as in run 2 (Cowcat's Amiga
 port); only the renderer differs. It plays the demo "four" as a timedemo,
 full screen 640x480, then quits.
@@ -42,10 +42,10 @@ Contents
 --------
 Run-M1               the test script
 Play-Quake           Quake III to play (not timed): Execute Play-Quake
-libs/ogles2.library  the library (logs every line at once)
+libs/ogles3.library  the library (logs every line at once)
 libs/v3dglslc        the shader compiler
 bin/quake3-gl2       Quake III with the GLES2 renderer (ports/ioq3-gl2)
 bin/*.dll            the game modules (also in home/baseq3)
-bin/OGLES2Log        writes the library's log file on request
+bin/OGLES3Log        writes the library's log file on request
 cache/               the compiled shaders for 640x480 and 1920x1080
 notes-template.txt   copied to results/notes.txt at the end

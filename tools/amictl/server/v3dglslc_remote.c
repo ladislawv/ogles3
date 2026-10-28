@@ -1,5 +1,5 @@
 /*
- * v3dglslc-remote: ogles2.library's shader compiler on the PC
+ * v3dglslc-remote: ogles3.library's shader compiler on the PC
  * (docs/GLES3_PLAN.md, "Compiling on the PC"). It owns the compiler's public
  * port (v3dp/v3dglsl_port.h), so the library sends its requests here instead
  * of starting "v3dglslc SERVER"; tools/amictl/compile_bridge.py connects on
@@ -17,7 +17,7 @@
  * be. Ctrl-C ends it. WAIT: while a local server has the port, wait for it
  * to leave (it does at the next expunge) instead of ending.
  *
- *   v3dglslc-remote [PORT=6802] [TOKEN=//amictld.token] [COMPILER=LIBS:v3dglslc] [WAIT] [NOFALLBACK]
+ *   v3dglslc-remote [PORT=6802] [TOKEN=//amictld.token] [COMPILER=LIBS:v3dglslc3] [WAIT] [NOFALLBACK]
  *
  * TOKEN's default is amictld's, from a package's directory in amictld's
  * work/. Frames (big-endian u32s; a string is its length, 0xffffffff for
@@ -55,7 +55,7 @@ extern void __stkinit(void);
 void *__x_stkinit = (void *)__stkinit; /* libnix's swapstack start-up module */
 
 static char token[80];
-static const char *compiler = "LIBS:v3dglslc";
+static const char *compiler = "LIBS:v3dglslc3";
 static int ls = -1, cs = -1; /* listening; the bridge's */
 static struct MsgPort *port;
 static unsigned long served, refused;
@@ -394,7 +394,7 @@ int main(int argc, char **argv)
         else if (!strcmp(argv[i], "NOFALLBACK"))
             no_fallback = 1;
         else {
-            printf("usage: v3dglslc-remote [PORT=6802] [TOKEN=//amictld.token] [COMPILER=LIBS:v3dglslc] [WAIT] "
+            printf("usage: v3dglslc-remote [PORT=6802] [TOKEN=//amictld.token] [COMPILER=LIBS:v3dglslc3] [WAIT] "
                    "[NOFALLBACK]\n");
             return 10;
         }

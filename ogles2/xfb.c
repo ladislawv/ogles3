@@ -30,66 +30,66 @@
 #include "v3d_clbuf.h"
 #include "v3d_hw.h"
 
-struct OGLES2Xfb
+struct OGLES3Xfb
 {
     GLuint name;
     BOOL bound_once;                  /* it exists once bound (glIsTransformFeedback) */
     BOOL active, paused;
     GLenum mode;                      /* glBeginTransformFeedback's primitive mode */
-    struct OGLES2Program *program;    /* the program it began with (active only) */
-    ULONG written[OGLES2_MAX_XFB_BUFFERS]; /* vertices written into each buffer since it began */
-    struct OGLES2XfbBinding bind[OGLES2_MAX_XFB_BUFFERS];
+    struct OGLES3Program *program;    /* the program it began with (active only) */
+    ULONG written[OGLES3_MAX_XFB_BUFFERS]; /* vertices written into each buffer since it began */
+    struct OGLES3XfbBinding bind[OGLES3_MAX_XFB_BUFFERS];
 };
 
-struct OGLES2XfbState
+struct OGLES3XfbState
 {
-    struct OGLES2Xfb **tab;           /* by name (glGenTransformFeedbacks'), slot 0 unused */
+    struct OGLES3Xfb **tab;           /* by name (glGenTransformFeedbacks'), slot 0 unused */
     GLuint ntab;
-    struct OGLES2Xfb zero;            /* object 0, the default */
-    struct OGLES2Xfb *bound;          /* never NULL once made: &zero or a named one */
+    struct OGLES3Xfb zero;            /* object 0, the default */
+    struct OGLES3Xfb *bound;          /* never NULL once made: &zero or a named one */
     v3d_mem counts;                   /* PRIMITIVE_COUNTS_FEEDBACK's words (never read) */
     BOOL specs_on;                    /* the open job's last specs packet enabled feedback */
 };
 
-static struct OGLES2XfbState *xs_get(struct OGLES2Context *ctx)
+static struct OGLES3XfbState *xs_get(struct OGLES3Context *ctx)
 {
-    if (!ctx->xfb && (ctx->xfb = AllocVec(sizeof(struct OGLES2XfbState), MEMF_ANY | MEMF_CLEAR)))
+    if (!ctx->xfb && (ctx->xfb = AllocVec(sizeof(struct OGLES3XfbState), MEMF_ANY | MEMF_CLEAR)))
         ctx->xfb->bound = &ctx->xfb->zero;
     return ctx->xfb;
 }
 
-static struct OGLES2Xfb *by_name(struct OGLES2XfbState *xs, GLuint name)
+static struct OGLES3Xfb *by_name(struct OGLES3XfbState *xs, GLuint name)
 {
     return name && name < xs->ntab ? xs->tab[name] : 0;
 }
 
 /* The bound object, or NULL if none was ever made (object 0, inactive). */
-static const struct OGLES2Xfb *cur(const struct OGLES2Context *ctx)
+static const struct OGLES3Xfb *cur(const struct OGLES3Context *ctx)
 {
     return ctx->xfb ? ctx->xfb->bound : 0;
 }
 
-struct OGLES2XfbBinding *ogles2_xfb_bindings(struct OGLES2Context *ctx)
+struct OGLES3XfbBinding *ogles2_xfb_bindings(struct OGLES3Context *ctx)
 {
-    struct OGLES2XfbState *xs = xs_get(ctx);
+    struct OGLES3XfbState *xs = xs_get(ctx);
     return xs ? xs->bound->bind : 0;
 }
 
-BOOL ogles2_xfb_active(const struct OGLES2Context *ctx)
+BOOL ogles2_xfb_active(const struct OGLES3Context *ctx)
 {
-    const struct OGLES2Xfb *o = cur(ctx);
+    const struct OGLES3Xfb *o = cur(ctx);
     return o && o->active;
 }
 
-BOOL ogles2_xfb_drawing(const struct OGLES2Context *ctx)
+BOOL ogles2_xfb_drawing(const struct OGLES3Context *ctx)
 {
-    const struct OGLES2Xfb *o = cur(ctx);
+    const struct OGLES3Xfb *o = cur(ctx);
     return o && o->active && !o->paused;
 }
 
-BOOL ogles2_xfb_program_busy(const struct OGLES2Context *ctx, const struct OGLES2Program *p)
+BOOL ogles2_xfb_program_busy(const struct OGLES3Context *ctx, const struct OGLES3Program *p)
 {
-    const struct OGLES2XfbState *xs = ctx->xfb;
+    const struct OGLES3XfbState *xs = ctx->xfb;
     GLuint i;
     if (!xs)
         return FALSE;
@@ -101,18 +101,18 @@ BOOL ogles2_xfb_program_busy(const struct OGLES2Context *ctx, const struct OGLES
     return FALSE;
 }
 
-static BOOL holds(const struct OGLES2Xfb *o, const struct OGLES2Buffer *b)
+static BOOL holds(const struct OGLES3Xfb *o, const struct OGLES3Buffer *b)
 {
     int k;
-    for (k = 0; k < OGLES2_MAX_XFB_BUFFERS; k++)
+    for (k = 0; k < OGLES3_MAX_XFB_BUFFERS; k++)
         if (o->bind[k].b == b)
             return TRUE;
     return FALSE;
 }
 
-BOOL ogles2_xfb_uses_buffer(const struct OGLES2Context *ctx, const struct OGLES2Buffer *b)
+BOOL ogles2_xfb_uses_buffer(const struct OGLES3Context *ctx, const struct OGLES3Buffer *b)
 {
-    const struct OGLES2XfbState *xs = ctx->xfb;
+    const struct OGLES3XfbState *xs = ctx->xfb;
     GLuint i;
     if (!xs)
         return FALSE;
@@ -125,30 +125,30 @@ BOOL ogles2_xfb_uses_buffer(const struct OGLES2Context *ctx, const struct OGLES2
 }
 
 /* An object's references go (deleted, or the context freed). */
-static void drop_refs(struct OGLES2Context *ctx, struct OGLES2Xfb *o)
+static void drop_refs(struct OGLES3Context *ctx, struct OGLES3Xfb *o)
 {
-    struct OGLES2Program *p = o->program;
+    struct OGLES3Program *p = o->program;
     int k;
     o->active = o->paused = FALSE;
     o->program = 0;
     ogles2_program_unref(ctx, p);
     /* each buffer once, after every reference went: one bound at two
      * indices was freed twice (as draw.c's vab_refresh) */
-    for (k = 0; k < OGLES2_MAX_XFB_BUFFERS; k++) {
-        struct OGLES2Buffer *b = o->bind[k].b;
+    for (k = 0; k < OGLES3_MAX_XFB_BUFFERS; k++) {
+        struct OGLES3Buffer *b = o->bind[k].b;
         int j;
         if (!b)
             continue;
-        for (j = k; j < OGLES2_MAX_XFB_BUFFERS; j++)
+        for (j = k; j < OGLES3_MAX_XFB_BUFFERS; j++)
             if (o->bind[j].b == b)
                 o->bind[j].b = 0;
         ogles2_buffer_release(ctx, b);
     }
 }
 
-void ogles2_xfbs_free(struct OGLES2Context *ctx)
+void ogles2_xfbs_free(struct OGLES3Context *ctx)
 {
-    struct OGLES2XfbState *xs = ctx->xfb;
+    struct OGLES3XfbState *xs = ctx->xfb;
     GLuint i;
     if (!xs)
         return;
@@ -168,9 +168,9 @@ void ogles2_xfbs_free(struct OGLES2Context *ctx)
 
 /* ---- the objects ---- */
 
-void ogles2_glGenTransformFeedbacks(struct OGLES2Context *ctx, GLsizei n, GLuint *ids)
+void ogles2_glGenTransformFeedbacks(struct OGLES3Context *ctx, GLsizei n, GLuint *ids)
 {
-    struct OGLES2XfbState *xs;
+    struct OGLES3XfbState *xs;
     GLsizei k;
     GLuint i = 1, nn, j;
     if (!ogles2_es3_entry(ctx))
@@ -184,12 +184,12 @@ void ogles2_glGenTransformFeedbacks(struct OGLES2Context *ctx, GLsizei n, GLuint
         return;
     }
     for (k = 0; k < n; k++) {
-        struct OGLES2Xfb *o, **tab;
+        struct OGLES3Xfb *o, **tab;
         while (i < xs->ntab && xs->tab[i])
             i++;
         if (i >= xs->ntab) { /* the table grows */
             nn = xs->ntab ? xs->ntab * 2 : 32;
-            if (i >= OGLES2_NEAR_NAMES || !(tab = AllocVec(nn * sizeof(*tab), MEMF_ANY | MEMF_CLEAR))) {
+            if (i >= OGLES3_NEAR_NAMES || !(tab = AllocVec(nn * sizeof(*tab), MEMF_ANY | MEMF_CLEAR))) {
                 ogles2_error(ctx, GL_OUT_OF_MEMORY);
                 return;
             }
@@ -211,10 +211,10 @@ void ogles2_glGenTransformFeedbacks(struct OGLES2Context *ctx, GLsizei n, GLuint
     }
 }
 
-void ogles2_glDeleteTransformFeedbacks(struct OGLES2Context *ctx, GLsizei n, const GLuint *ids)
+void ogles2_glDeleteTransformFeedbacks(struct OGLES3Context *ctx, GLsizei n, const GLuint *ids)
 {
     ogles2_labels_forget(ctx, GL_TRANSFORM_FEEDBACK, n, ids); /* KHR_debug's labels of the names */
-    struct OGLES2XfbState *xs;
+    struct OGLES3XfbState *xs;
     GLsizei k;
     if (!ogles2_es3_entry(ctx))
         return;
@@ -226,14 +226,14 @@ void ogles2_glDeleteTransformFeedbacks(struct OGLES2Context *ctx, GLsizei n, con
         return;
     /* ES 3.0 2.15.1: an active object is not deleted (none of them is) */
     for (k = 0; k < n; k++) {
-        struct OGLES2Xfb *o = by_name(xs, ids[k]);
+        struct OGLES3Xfb *o = by_name(xs, ids[k]);
         if (o && o->active) {
             ogles2_error(ctx, GL_INVALID_OPERATION);
             return;
         }
     }
     for (k = 0; k < n; k++) {
-        struct OGLES2Xfb *o = by_name(xs, ids[k]);
+        struct OGLES3Xfb *o = by_name(xs, ids[k]);
         if (!o)
             continue;
         if (xs->bound == o)
@@ -244,19 +244,19 @@ void ogles2_glDeleteTransformFeedbacks(struct OGLES2Context *ctx, GLsizei n, con
     }
 }
 
-GLboolean ogles2_glIsTransformFeedback(struct OGLES2Context *ctx, GLuint id)
+GLboolean ogles2_glIsTransformFeedback(struct OGLES3Context *ctx, GLuint id)
 {
-    struct OGLES2Xfb *o;
+    struct OGLES3Xfb *o;
     if (!ogles2_es3_entry(ctx) || !ctx->xfb)
         return GL_FALSE;
     o = by_name(ctx->xfb, id);
     return o && o->bound_once ? GL_TRUE : GL_FALSE;
 }
 
-void ogles2_glBindTransformFeedback(struct OGLES2Context *ctx, GLenum target, GLuint id)
+void ogles2_glBindTransformFeedback(struct OGLES3Context *ctx, GLenum target, GLuint id)
 {
-    struct OGLES2XfbState *xs;
-    struct OGLES2Xfb *o;
+    struct OGLES3XfbState *xs;
+    struct OGLES3Xfb *o;
     if (!ogles2_es3_entry(ctx))
         return;
     if (target != GL_TRANSFORM_FEEDBACK) {
@@ -281,21 +281,21 @@ void ogles2_glBindTransformFeedback(struct OGLES2Context *ctx, GLenum target, GL
 /* ---- feedback begun, paused, resumed, ended ---- */
 
 /* The buffers program p's varyings go to: bit k for buffer k. */
-static ULONG used_buffers(const struct OGLES2Program *p)
+static ULONG used_buffers(const struct OGLES3Program *p)
 {
-    const struct OGLES2ImageXfb *x = p && p->image ? p->image->xfb : 0;
+    const struct OGLES3ImageXfb *x = p && p->image ? p->image->xfb : 0;
     ULONG m = 0;
     int k;
-    for (k = 0; x && k < OGLES2_MAX_XFB_BUFFERS; k++)
+    for (k = 0; x && k < OGLES3_MAX_XFB_BUFFERS; k++)
         if (x->stride[k])
             m |= 1UL << k;
     return m;
 }
 
-void ogles2_glBeginTransformFeedback(struct OGLES2Context *ctx, GLenum primitiveMode)
+void ogles2_glBeginTransformFeedback(struct OGLES3Context *ctx, GLenum primitiveMode)
 {
-    struct OGLES2XfbState *xs;
-    struct OGLES2Xfb *o;
+    struct OGLES3XfbState *xs;
+    struct OGLES3Xfb *o;
     ULONG m;
     int k;
     if (!ogles2_es3_entry(ctx))
@@ -316,7 +316,7 @@ void ogles2_glBeginTransformFeedback(struct OGLES2Context *ctx, GLenum primitive
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
-    for (k = 0; k < OGLES2_MAX_XFB_BUFFERS; k++)
+    for (k = 0; k < OGLES3_MAX_XFB_BUFFERS; k++)
         if ((m & (1UL << k)) && !o->bind[k].b) {
             ogles2_error(ctx, GL_INVALID_OPERATION);
             return;
@@ -328,10 +328,10 @@ void ogles2_glBeginTransformFeedback(struct OGLES2Context *ctx, GLenum primitive
     memset(o->written, 0, sizeof(o->written));
 }
 
-void ogles2_glEndTransformFeedback(struct OGLES2Context *ctx)
+void ogles2_glEndTransformFeedback(struct OGLES3Context *ctx)
 {
-    struct OGLES2Xfb *o;
-    struct OGLES2Program *p;
+    struct OGLES3Xfb *o;
+    struct OGLES3Program *p;
     if (!ogles2_es3_entry(ctx))
         return;
     if (!ctx->xfb || !(o = ctx->xfb->bound)->active) {
@@ -344,9 +344,9 @@ void ogles2_glEndTransformFeedback(struct OGLES2Context *ctx)
     ogles2_program_unref(ctx, p); /* deleted while feedback ran */
 }
 
-void ogles2_glPauseTransformFeedback(struct OGLES2Context *ctx)
+void ogles2_glPauseTransformFeedback(struct OGLES3Context *ctx)
 {
-    struct OGLES2Xfb *o;
+    struct OGLES3Xfb *o;
     if (!ogles2_es3_entry(ctx))
         return;
     if (!ctx->xfb || !(o = ctx->xfb->bound)->active || o->paused) {
@@ -356,9 +356,9 @@ void ogles2_glPauseTransformFeedback(struct OGLES2Context *ctx)
     o->paused = TRUE;
 }
 
-void ogles2_glResumeTransformFeedback(struct OGLES2Context *ctx)
+void ogles2_glResumeTransformFeedback(struct OGLES3Context *ctx)
 {
-    struct OGLES2Xfb *o;
+    struct OGLES3Xfb *o;
     if (!ogles2_es3_entry(ctx))
         return;
     /* ES 3.0 2.15.2: and with the program it began with in use */
@@ -370,15 +370,15 @@ void ogles2_glResumeTransformFeedback(struct OGLES2Context *ctx)
 }
 
 /* GL_TRANSFORM_FEEDBACK_BINDING, _ACTIVE, _PAUSED (state.c) */
-GLuint ogles2_xfb_bound_name(const struct OGLES2Context *ctx)
+GLuint ogles2_xfb_bound_name(const struct OGLES3Context *ctx)
 {
-    const struct OGLES2Xfb *o = cur(ctx);
+    const struct OGLES3Xfb *o = cur(ctx);
     return o ? o->name : 0;
 }
 
-BOOL ogles2_xfb_paused(const struct OGLES2Context *ctx)
+BOOL ogles2_xfb_paused(const struct OGLES3Context *ctx)
 {
-    const struct OGLES2Xfb *o = cur(ctx);
+    const struct OGLES3Xfb *o = cur(ctx);
     return o && o->active && o->paused;
 }
 
@@ -392,7 +392,7 @@ static ULONG verts(GLenum mode, GLsizei count)
 }
 
 /* Binding k's room in bytes. */
-static ULONG room(const struct OGLES2XfbBinding *r)
+static ULONG room(const struct OGLES3XfbBinding *r)
 {
     ULONG size = r->b ? ogles2_buffer_size(r->b) : 0; /* deleted since it began: none */
     if (r->offset >= size)
@@ -400,10 +400,10 @@ static ULONG room(const struct OGLES2XfbBinding *r)
     return r->size && r->size < size - r->offset ? r->size : size - r->offset;
 }
 
-BOOL ogles2_xfb_draw_ok(struct OGLES2Context *ctx, GLenum mode, GLsizei count, GLsizei instances)
+BOOL ogles2_xfb_draw_ok(struct OGLES3Context *ctx, GLenum mode, GLsizei count, GLsizei instances)
 {
-    struct OGLES2Xfb *o;
-    const struct OGLES2ImageXfb *x;
+    struct OGLES3Xfb *o;
+    const struct OGLES3ImageXfb *x;
     ULONG n;
     int k;
     if (!ogles2_xfb_drawing(ctx))
@@ -416,7 +416,7 @@ BOOL ogles2_xfb_draw_ok(struct OGLES2Context *ctx, GLenum mode, GLsizei count, G
         return FALSE;
     }
     n = verts(mode, count) * (ULONG)(instances > 0 ? instances : 0);
-    for (k = 0; k < OGLES2_MAX_XFB_BUFFERS; k++)
+    for (k = 0; k < OGLES3_MAX_XFB_BUFFERS; k++)
         if (x->stride[k] && (o->written[k] + n) * x->stride[k] * 4 > room(&o->bind[k])) {
             ogles2_error(ctx, GL_INVALID_OPERATION);
             return FALSE;
@@ -436,12 +436,12 @@ static void put32(UBYTE *p, ULONG w)
  * feedback on, its specs (those for points of a vertex shader that writes
  * gl_PointSize with `psiz`) and each buffer's address and room; else
  * feedback off again if a draw of the job turned it on. TRUE: it feeds back. */
-BOOL ogles2_xfb_before_draw(struct OGLES2Context *ctx, GLenum mode, BOOL psiz)
+BOOL ogles2_xfb_before_draw(struct OGLES3Context *ctx, GLenum mode, BOOL psiz)
 {
     V3DContext *v = ctx->v3d;
-    struct OGLES2XfbState *xs = ctx->xfb;
-    struct OGLES2Xfb *o;
-    const struct OGLES2ImageXfb *x;
+    struct OGLES3XfbState *xs = ctx->xfb;
+    struct OGLES3Xfb *o;
+    const struct OGLES3ImageXfb *x;
     UBYTE *p;
     int k;
     if (!ogles2_xfb_drawing(ctx)) {
@@ -462,8 +462,8 @@ BOOL ogles2_xfb_before_draw(struct OGLES2Context *ctx, GLenum mode, BOOL psiz)
         p[2 + 2 * k] = (UBYTE)s;
         p[3 + 2 * k] = (UBYTE)(s >> 8);
     }
-    for (k = 0; k < OGLES2_MAX_XFB_BUFFERS; k++) {
-        const struct OGLES2XfbBinding *r = &o->bind[k];
+    for (k = 0; k < OGLES3_MAX_XFB_BUFFERS; k++) {
+        const struct OGLES3XfbBinding *r = &o->bind[k];
         ULONG done = o->written[k] * x->stride[k] * 4, words, addr;
         if (!x->stride[k])
             continue;
@@ -481,14 +481,14 @@ BOOL ogles2_xfb_before_draw(struct OGLES2Context *ctx, GLenum mode, BOOL psiz)
 
 /* After the primitives of a draw that fed back: the flush Mesa emits (else
  * the GPU may hang at the next specs), the vertices written counted. */
-void ogles2_xfb_after_draw(struct OGLES2Context *ctx, GLenum mode, GLsizei count, GLsizei instances)
+void ogles2_xfb_after_draw(struct OGLES3Context *ctx, GLenum mode, GLsizei count, GLsizei instances)
 {
-    struct OGLES2Xfb *o = ctx->xfb->bound;
-    const struct OGLES2ImageXfb *x = o->program->image->xfb;
+    struct OGLES3Xfb *o = ctx->xfb->bound;
+    const struct OGLES3ImageXfb *x = o->program->image->xfb;
     ULONG n = verts(mode, count) * (ULONG)instances;
     int k;
     DoCommand(ctx->v3d, v3d_OP_TRANSFORM_FEEDBACK_FLUSH_AND_COUNT);
-    for (k = 0; k < OGLES2_MAX_XFB_BUFFERS; k++)
+    for (k = 0; k < OGLES3_MAX_XFB_BUFFERS; k++)
         if (x->stride[k])
             o->written[k] += n;
     ogles2_query_xfb_add(ctx, n / (mode == GL_TRIANGLES ? 3 : mode == GL_LINES ? 2 : 1));
@@ -498,9 +498,9 @@ void ogles2_xfb_after_draw(struct OGLES2Context *ctx, GLenum mode, GLsizei count
  * feedback, the primitive counts stored (where nothing reads them) and the
  * specs off, so the feedback block finishes before the next job begins
  * (Mesa's v3dx_job.c, SWVC5-718). */
-void ogles2_xfb_job_end(struct OGLES2Context *ctx)
+void ogles2_xfb_job_end(struct OGLES3Context *ctx)
 {
-    struct OGLES2XfbState *xs = ctx->xfb;
+    struct OGLES3XfbState *xs = ctx->xfb;
     UBYTE *p;
     if (!ctx->job_xfb)
         return;

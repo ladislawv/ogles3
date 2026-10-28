@@ -10,10 +10,10 @@
 #include <dos/var.h>
 #include <proto/dos.h>
 #include <string.h>
-#include <libraries/ogles2.h>
+#include <libraries/ogles3.h>
 #include "ogles2_internal.h"
 
-void ogles2_error(struct OGLES2Context *ctx, GLenum error)
+void ogles2_error(struct OGLES3Context *ctx, GLenum error)
 {
     if (ctx && ctx->dbg) /* KHR_debug: each error a message, the first kept or not */
         ogles2_debug_error(ctx, error);
@@ -25,88 +25,88 @@ void ogles2_error(struct OGLES2Context *ctx, GLenum error)
 static BOOL known_tag(Tag t)
 {
     switch (t) {
-    case OGLES2_CCT_WINDOW:
-    case OGLES2_CCT_BITMAP:
-    case OGLES2_CCT_MODEID:
-    case OGLES2_CCT_CONTEXT_FOR_MODEID:
-    case OGLES2_CCT_DEPTH:
-    case OGLES2_CCT_STENCIL:
-    case OGLES2_CCT_VSYNC:
-    case OGLES2_CCT_GET_WIDTH:
-    case OGLES2_CCT_GET_HEIGHT:
-    case OGLES2_CCT_PISTORM_STATE_ONLY:
-    case OGLES2_CCT_PISTORM_WIDTH:
-    case OGLES2_CCT_PISTORM_HEIGHT:
-    case OGLES2_CCT_PISTORM_GET_WINDOW:
-    case OGLES2_CCT_PISTORM_MSAA:
-    case OGLES2_CCT_DEBUG_SHADER_LOG:
-    case OGLES2_CCT_SHARE_WITH:
-    case OGLES2_CCT_PISTORM_ES_VERSION:
+    case OGLES3_CCT_WINDOW:
+    case OGLES3_CCT_BITMAP:
+    case OGLES3_CCT_MODEID:
+    case OGLES3_CCT_CONTEXT_FOR_MODEID:
+    case OGLES3_CCT_DEPTH:
+    case OGLES3_CCT_STENCIL:
+    case OGLES3_CCT_VSYNC:
+    case OGLES3_CCT_GET_WIDTH:
+    case OGLES3_CCT_GET_HEIGHT:
+    case OGLES3_CCT_PISTORM_STATE_ONLY:
+    case OGLES3_CCT_PISTORM_WIDTH:
+    case OGLES3_CCT_PISTORM_HEIGHT:
+    case OGLES3_CCT_PISTORM_GET_WINDOW:
+    case OGLES3_CCT_PISTORM_MSAA:
+    case OGLES3_CCT_DEBUG_SHADER_LOG:
+    case OGLES3_CCT_SHARE_WITH:
+    case OGLES3_CCT_PISTORM_ES_VERSION:
         return TRUE;
     default:
         return FALSE;
     }
 }
 
-struct OGLES2Context *ogles2_aglCreateContext2(ULONG *errcode, struct TagItem *tags)
+struct OGLES3Context *ogles2_aglCreateContext2(ULONG *errcode, struct TagItem *tags)
 {
-    struct OGLES2Context *ctx;
+    struct OGLES3Context *ctx;
     struct TagItem *state = tags, *t;
-    BOOL state_only = GetTagData(OGLES2_CCT_PISTORM_STATE_ONLY, FALSE, tags) ? TRUE : FALSE;
-    ULONG depth = GetTagData(OGLES2_CCT_DEPTH, 0, tags);
-    ULONG stencil = GetTagData(OGLES2_CCT_STENCIL, 0, tags);
-    BOOL debug_shader_log = GetTagData(OGLES2_CCT_DEBUG_SHADER_LOG, FALSE, tags) ? TRUE : FALSE;
-    struct OGLES2Context *with = (struct OGLES2Context *)GetTagData(OGLES2_CCT_SHARE_WITH, 0, tags);
-    ULONG asked = GetTagData(OGLES2_CCT_PISTORM_ES_VERSION, 20, tags);
+    BOOL state_only = GetTagData(OGLES3_CCT_PISTORM_STATE_ONLY, FALSE, tags) ? TRUE : FALSE;
+    ULONG depth = GetTagData(OGLES3_CCT_DEPTH, 0, tags);
+    ULONG stencil = GetTagData(OGLES3_CCT_STENCIL, 0, tags);
+    BOOL debug_shader_log = GetTagData(OGLES3_CCT_DEBUG_SHADER_LOG, FALSE, tags) ? TRUE : FALSE;
+    struct OGLES3Context *with = (struct OGLES3Context *)GetTagData(OGLES3_CCT_SHARE_WITH, 0, tags);
+    ULONG asked = GetTagData(OGLES3_CCT_PISTORM_ES_VERSION, OGLES3_ES_MAX, tags); /* none asked: the highest */
     UBYTE version;
-    ULONG why = OGLES2_CCE_OK;
+    ULONG why = OGLES3_CCE_OK;
 
-    /* The version (docs/GLES3_PLAN.md §3): 20, or for 30 and 31 the highest
-     * ES 3.x the library has, if that is at least the one asked for. ES 3.0
-     * only in test builds while it is incomplete (Makefile, ES3=1). */
+    /* The version (docs/GLES3_PLAN.md §3): 20, or for 30 and 31 (and when
+     * none is asked for) the highest ES 3.x the library has, if that is at
+     * least the one asked for (Makefile: 3.1, 3.0 in ES3=1 test builds). */
     if (asked != 20 && asked != 30 && asked != 31) {
-        ogles2_log("aglCreateContext2: OGLES2_CCT_PISTORM_ES_VERSION %ld is no OpenGL ES version", asked);
-        why = OGLES2_CCE_BAD_TAGS;
+        ogles2_log("aglCreateContext2: OGLES3_CCT_PISTORM_ES_VERSION %ld is no OpenGL ES version", asked);
+        why = OGLES3_CCE_BAD_TAGS;
         goto fail;
     }
-    version = asked == 20 ? 20 : OGLES2_ES_MAX;
+    version = asked == 20 ? 20 : OGLES3_ES_MAX;
     if (version < asked) {
         ogles2_log("aglCreateContext2: OpenGL ES %ld.%ld is not supported", asked / 10, asked % 10);
-        why = OGLES2_CCE_UNSUPPORTED;
+        why = OGLES3_CCE_UNSUPPORTED;
         goto fail;
     }
     if (with && !ogles2_context_valid(with)) {
-        ogles2_log("aglCreateContext2: OGLES2_CCT_SHARE_WITH 0x%08lx is not a context", (ULONG)with);
-        why = OGLES2_CCE_BAD_TAGS;
+        ogles2_log("aglCreateContext2: OGLES3_CCT_SHARE_WITH 0x%08lx is not a context", (ULONG)with);
+        why = OGLES3_CCE_BAD_TAGS;
         goto fail;
     }
     /* The group's contexts are of one version (this library's rule: a GLES2
      * member would see objects it cannot use). */
     if (with && with->es_version != version) {
-        ogles2_log("aglCreateContext2: OGLES2_CCT_SHARE_WITH 0x%08lx is an OpenGL ES %ld.%ld context", (ULONG)with,
+        ogles2_log("aglCreateContext2: OGLES3_CCT_SHARE_WITH 0x%08lx is an OpenGL ES %ld.%ld context", (ULONG)with,
                    (ULONG)with->es_version / 10, (ULONG)with->es_version % 10);
-        why = OGLES2_CCE_BAD_TAGS;
+        why = OGLES3_CCE_BAD_TAGS;
         goto fail;
     }
     /* Opened even for a state-only context, so GL_RENDERER is real when a
      * GPU exists. */
     if (!ogles2_device_open() && !state_only) {
-        why = OGLES2_CCE_NO_GPU;
+        why = OGLES3_CCE_NO_GPU;
         goto fail;
     }
     ctx = AllocVec(sizeof(*ctx), MEMF_ANY | MEMF_CLEAR);
     if (!ctx) {
-        why = OGLES2_CCE_NOMEM;
+        why = OGLES3_CCE_NOMEM;
         goto fail;
     }
-    ctx->magic = OGLES2_CONTEXT_MAGIC;
+    ctx->magic = OGLES3_CONTEXT_MAGIC;
     ctx->es_version = version;
     ctx->debug_shader_log = debug_shader_log;
     ctx->error = GL_NO_ERROR;
     ogles2_state_init(ctx);
     /* The objects: with's group, or one of its own (share.c). */
     if (!ogles2_share_join(ctx, with)) {
-        why = OGLES2_CCE_NOMEM;
+        why = OGLES3_CCE_NOMEM;
         goto fail_ctx;
     }
 
@@ -118,35 +118,35 @@ struct OGLES2Context *ogles2_aglCreateContext2(ULONG *errcode, struct TagItem *t
     if (!state_only) {
         int v3d_depth;
         char var[16];
-        if (GetVar((STRPTR) "OGLES2/Probe", (STRPTR)var, sizeof(var), GVF_GLOBAL_ONLY) > 0) {
+        if (GetVar((STRPTR) "OGLES3/Probe", (STRPTR)var, sizeof(var), GVF_GLOBAL_ONLY) > 0) {
             const char *p;
             for (p = var; *p; p++) {
                 if (*p == 'D')
-                    ctx->probe |= OGLES2_PROBE_STORE_DITHER;
+                    ctx->probe |= OGLES3_PROBE_STORE_DITHER;
                 else if (*p == 'C')
-                    ctx->probe |= OGLES2_PROBE_LOG_CLEAR;
+                    ctx->probe |= OGLES3_PROBE_LOG_CLEAR;
                 else if (*p == 'Y')
-                    ctx->probe |= OGLES2_PROBE_FLIP_Y;
+                    ctx->probe |= OGLES3_PROBE_FLIP_Y;
                 else if (*p == 'S')
-                    ctx->probe |= OGLES2_PROBE_SEMAPHORE;
+                    ctx->probe |= OGLES3_PROBE_SEMAPHORE;
                 else if (*p == 'T')
-                    ctx->probe |= OGLES2_PROBE_TRACE;
+                    ctx->probe |= OGLES3_PROBE_TRACE;
                 else if (*p == 'Z')
-                    ctx->probe |= OGLES2_PROBE_NO_ZS_SAVE;
+                    ctx->probe |= OGLES3_PROBE_NO_ZS_SAVE;
                 else if (*p == 'P')
-                    ctx->probe |= OGLES2_PROBE_PERIODIC;
+                    ctx->probe |= OGLES3_PROBE_PERIODIC;
                 else if (*p == 'A')
-                    ctx->probe |= OGLES2_PROBE_ADDR;
+                    ctx->probe |= OGLES3_PROBE_ADDR;
                 else if (*p == 'M')
-                    ctx->probe |= OGLES2_PROBE_CPU_MIPMAP;
+                    ctx->probe |= OGLES3_PROBE_CPU_MIPMAP;
                 else if (*p == 'U')
-                    ctx->probe |= OGLES2_PROBE_CPU_UPLOAD;
+                    ctx->probe |= OGLES3_PROBE_CPU_UPLOAD;
                 else if (*p == 'K')
-                    ctx->probe |= OGLES2_PROBE_CPU_COPY;
+                    ctx->probe |= OGLES3_PROBE_CPU_COPY;
             }
-            ogles2_log("aglCreateContext2: probes \"%s\" (ENV:OGLES2/Probe)", var);
-            if ((ctx->probe & OGLES2_PROBE_ADDR) &&
-                GetVar((STRPTR) "OGLES2/ProbeAddr", (STRPTR)var, sizeof(var), GVF_GLOBAL_ONLY) > 0) {
+            ogles2_log("aglCreateContext2: probes \"%s\" (ENV:OGLES3/Probe)", var);
+            if ((ctx->probe & OGLES3_PROBE_ADDR) &&
+                GetVar((STRPTR) "OGLES3/ProbeAddr", (STRPTR)var, sizeof(var), GVF_GLOBAL_ONLY) > 0) {
                 const char *p;
                 for (p = var; *p; p++) {
                     int dgt = *p >= '0' && *p <= '9' ? *p - '0'
@@ -171,35 +171,35 @@ struct OGLES2Context *ogles2_aglCreateContext2(ULONG *errcode, struct TagItem *t
         if (stencil) {
             ctx->depth_bits = 24;
             ctx->stencil_bits = 8;
-            ctx->depth_format = OGLES2_DEPTH_24;
+            ctx->depth_format = OGLES3_DEPTH_24;
             v3d_depth = 32;
         } else if (depth == 0) {
             ctx->depth_bits = 0;
-            ctx->depth_format = OGLES2_DEPTH_16;
+            ctx->depth_format = OGLES3_DEPTH_16;
             v3d_depth = 16; /* the smallest pools; depth is never used */
         } else if (depth <= 16) {
             ctx->depth_bits = 16;
-            ctx->depth_format = OGLES2_DEPTH_16;
+            ctx->depth_format = OGLES3_DEPTH_16;
             v3d_depth = 16;
         } else {
             ctx->depth_bits = 32;
-            ctx->depth_format = OGLES2_DEPTH_32F;
+            ctx->depth_format = OGLES3_DEPTH_32F;
             v3d_depth = 32;
         }
-        /* 4x MSAA (plan 7.2): the tag, else ENV:OGLES2/MSAA. */
-        if ((t = FindTagItem(OGLES2_CCT_PISTORM_MSAA, tags)) != 0)
+        /* 4x MSAA (plan 7.2): the tag, else ENV:OGLES3/MSAA. */
+        if ((t = FindTagItem(OGLES3_CCT_PISTORM_MSAA, tags)) != 0)
             ctx->msaa = t->ti_Data >= 2;
-        else if (GetVar((STRPTR) "OGLES2/MSAA", (STRPTR)var, sizeof(var), GVF_GLOBAL_ONLY) > 0)
+        else if (GetVar((STRPTR) "OGLES3/MSAA", (STRPTR)var, sizeof(var), GVF_GLOBAL_ONLY) > 0)
             ctx->msaa = var[0] >= '2' && var[0] <= '9';
         ctx->v3d = ogles2_device_context_new((UWORD)ctx->width, (UWORD)ctx->height, v3d_depth, ctx->msaa);
         if (!ctx->v3d) {
             ogles2_display_close(&ctx->display);
-            why = OGLES2_CCE_NOMEM;
+            why = OGLES3_CCE_NOMEM;
             goto fail_ctx;
         }
-        ObtainSemaphore(&OGLES2LibBase->lock);
-        OGLES2LibBase->contexts++;
-        ReleaseSemaphore(&OGLES2LibBase->lock);
+        ObtainSemaphore(&OGLES3LibBase->lock);
+        OGLES3LibBase->contexts++;
+        ReleaseSemaphore(&OGLES3LibBase->lock);
     }
     ctx->default_draw_buffer = GL_BACK; /* EXT_draw_buffers */
     ctx->draw_rts = 0xFF;               /* draws write every draw buffer (draw.c) */
@@ -207,11 +207,11 @@ struct OGLES2Context *ogles2_aglCreateContext2(ULONG *errcode, struct TagItem *t
     ctx->viewport[2] = ctx->scissor[2] = (GLint)ctx->width;
     ctx->viewport[3] = ctx->scissor[3] = (GLint)ctx->height;
 
-    if ((t = FindTagItem(OGLES2_CCT_GET_WIDTH, tags)) && t->ti_Data)
+    if ((t = FindTagItem(OGLES3_CCT_GET_WIDTH, tags)) && t->ti_Data)
         *(ULONG *)t->ti_Data = ctx->width;
-    if ((t = FindTagItem(OGLES2_CCT_GET_HEIGHT, tags)) && t->ti_Data)
+    if ((t = FindTagItem(OGLES3_CCT_GET_HEIGHT, tags)) && t->ti_Data)
         *(ULONG *)t->ti_Data = ctx->height;
-    if ((t = FindTagItem(OGLES2_CCT_PISTORM_GET_WINDOW, tags)) && t->ti_Data)
+    if ((t = FindTagItem(OGLES3_CCT_PISTORM_GET_WINDOW, tags)) && t->ti_Data)
         *(struct Window **)t->ti_Data =
             ctx->display.input_window ? ctx->display.input_window : ctx->display.window;
     ogles2_log("aglCreateContext2: context 0x%08lx, OpenGL ES %ld.%ld, %ldx%ld%s", (ULONG)ctx,
@@ -221,7 +221,7 @@ struct OGLES2Context *ogles2_aglCreateContext2(ULONG *errcode, struct TagItem *t
         ogles2_log("aglCreateContext2: context 0x%08lx shares objects with 0x%08lx (%ld in the group)",
                    (ULONG)ctx, (ULONG)with, ctx->share->members);
     if (errcode)
-        *errcode = OGLES2_CCE_OK;
+        *errcode = OGLES3_CCE_OK;
     return ctx;
 
 fail_ctx:
@@ -235,7 +235,7 @@ fail:
     return 0;
 }
 
-void ogles2_aglDestroyContext(struct OGLES2Context *ctx)
+void ogles2_aglDestroyContext(struct OGLES3Context *ctx)
 {
     struct SignalSemaphore *group;
     if (!ogles2_context_valid(ctx))
@@ -270,11 +270,11 @@ void ogles2_aglDestroyContext(struct OGLES2Context *ctx)
     if (group)
         ReleaseSemaphore(group);
     if (ctx->v3d) {
-        ObtainSemaphore(&OGLES2LibBase->lock);
-        OGLES2LibBase->contexts--;
-        if (OGLES2LibBase->pend_ctx == ctx) /* ogles2_job_discard waited for it */
-            OGLES2LibBase->pend_ctx = 0;
-        ReleaseSemaphore(&OGLES2LibBase->lock);
+        ObtainSemaphore(&OGLES3LibBase->lock);
+        OGLES3LibBase->contexts--;
+        if (OGLES3LibBase->pend_ctx == ctx) /* ogles2_job_discard waited for it */
+            OGLES3LibBase->pend_ctx = 0;
+        ReleaseSemaphore(&OGLES3LibBase->lock);
     }
     ogles2_device_context_free(ctx->v3d);
     ogles2_display_close(&ctx->display);
@@ -300,14 +300,14 @@ void ogles2_aglDestroyContext(struct OGLES2Context *ctx)
                    "%lu ms in glTex(Sub)Image2D",
                    ctx->n_draws / ctx->n_swaps, (ULONG)(ctx->sum_draw / ctx->n_swaps),
                    (ULONG)(ctx->sum_bufdata / 1000), (ULONG)(ctx->sum_teximage / 1000));
-        if (ctx->probe & OGLES2_PROBE_PERIODIC)
+        if (ctx->probe & OGLES3_PROBE_PERIODIC)
             ogles2_log("timing: per frame in draws: %lu us checks, %lu shaders, %lu textures, %lu uniforms, "
                        "%lu vertex data, %lu record, %lu indices, %lu binning list",
                        (ULONG)(ctx->stage[0] / ctx->n_swaps), (ULONG)(ctx->stage[1] / ctx->n_swaps),
                        (ULONG)(ctx->stage[2] / ctx->n_swaps), (ULONG)(ctx->stage[3] / ctx->n_swaps),
                        (ULONG)(ctx->stage[4] / ctx->n_swaps), (ULONG)(ctx->stage[5] / ctx->n_swaps),
                        (ULONG)(ctx->stage[6] / ctx->n_swaps), (ULONG)(ctx->stage[7] / ctx->n_swaps));
-        if ((ctx->probe & OGLES2_PROBE_PERIODIC) && ctx->n_draws)
+        if ((ctx->probe & OGLES3_PROBE_PERIODIC) && ctx->n_draws)
             ogles2_log("timing: per draw %lu uniform stream words, %lu bytes of vertex data, %lu indices",
                        (ULONG)(ctx->n_uwords / ctx->n_draws), (ULONG)(ctx->n_vbytes / ctx->n_draws),
                        (ULONG)(ctx->n_indices / ctx->n_draws));
@@ -317,13 +317,13 @@ void ogles2_aglDestroyContext(struct OGLES2Context *ctx)
     ogles2_log_flush(); /* the caller is the application: DOS calls are fine */
 }
 
-void ogles2_aglMakeCurrent(struct OGLES2Context *ctx)
+void ogles2_aglMakeCurrent(struct OGLES3Context *ctx)
 {
     /* The current context lives in the client (plan section 6.2). */
     (void)ctx;
 }
 
-GLenum ogles2_glGetError(struct OGLES2Context *ctx)
+GLenum ogles2_glGetError(struct OGLES3Context *ctx)
 {
     GLenum e;
     if (!ogles2_context_valid(ctx))
@@ -370,12 +370,12 @@ static const struct { const char *name; UBYTE in; } extensions[] = {
 };
 #define NUM_EXTENSIONS (sizeof(extensions) / sizeof(extensions[0]))
 
-static UBYTE ext_mask(const struct OGLES2Context *ctx)
+static UBYTE ext_mask(const struct OGLES3Context *ctx)
 {
     return ogles2_es31(ctx) ? EXT_ES3 | EXT_ES31 : ogles2_es3(ctx) ? EXT_ES3 : EXT_ES2;
 }
 
-ULONG ogles2_num_extensions(const struct OGLES2Context *ctx)
+ULONG ogles2_num_extensions(const struct OGLES3Context *ctx)
 {
     ULONG k, n = 0;
     for (k = 0; k < NUM_EXTENSIONS; k++)
@@ -385,13 +385,13 @@ ULONG ogles2_num_extensions(const struct OGLES2Context *ctx)
 }
 
 /* GL_EXTENSIONS of a context version, built at its first query. */
-static const char *ext_string(const struct OGLES2Context *ctx)
+static const char *ext_string(const struct OGLES3Context *ctx)
 {
     static char s[3][2048];
     static BOOL made[3];
     int v = ogles2_es31(ctx) ? 2 : ogles2_es3(ctx);
     if (!made[v]) {
-        ObtainSemaphore(&OGLES2LibBase->lock);
+        ObtainSemaphore(&OGLES3LibBase->lock);
         if (!made[v]) {
             ULONG k, len = 0, n;
             for (k = 0; k < NUM_EXTENSIONS; k++) {
@@ -410,22 +410,22 @@ static const char *ext_string(const struct OGLES2Context *ctx)
             s[v][len] = 0;
             made[v] = TRUE;
         }
-        ReleaseSemaphore(&OGLES2LibBase->lock);
+        ReleaseSemaphore(&OGLES3LibBase->lock);
     }
     return s[v];
 }
 
 #define STR_(x) #x
 #define STR(x) STR_(x)
-#define LIB_VERSION_TEXT "ogles2.library " STR(OGLES2_LIB_VERSION) "." STR(OGLES2_LIB_REVISION)
+#define LIB_VERSION_TEXT "ogles3.library " STR(OGLES3_LIB_VERSION) "." STR(OGLES3_LIB_REVISION)
 
-const GLubyte *ogles2_glGetString(struct OGLES2Context *ctx, GLenum name)
+const GLubyte *ogles2_glGetString(struct OGLES3Context *ctx, GLenum name)
 {
     if (!ogles2_context_valid(ctx))
         return 0;
     switch (name) {
     case GL_VENDOR:
-        return (const GLubyte *)"ogles2.library";
+        return (const GLubyte *)"ogles3.library";
     case GL_RENDERER:
         return (const GLubyte *)ogles2_device_renderer();
     case GL_VERSION: /* must begin "OpenGL ES 2.0", "3.0" or "3.1" (plan section 7.10) */
@@ -443,7 +443,7 @@ const GLubyte *ogles2_glGetString(struct OGLES2Context *ctx, GLenum name)
     }
 }
 
-const GLubyte *ogles2_glGetStringi(struct OGLES2Context *ctx, GLenum name, GLuint index)
+const GLubyte *ogles2_glGetStringi(struct OGLES3Context *ctx, GLenum name, GLuint index)
 {
     ULONG k;
     if (!ogles2_es3_entry(ctx))
@@ -462,7 +462,7 @@ const GLubyte *ogles2_glGetStringi(struct OGLES2Context *ctx, GLenum name, GLuin
 /* Generated stubs (stubs.c) call this for entries not written yet. Each name
  * is logged once; the stubs pass string literals, so the pointer identifies
  * the entry. */
-void ogles2_unimplemented(struct OGLES2Context *ctx, const char *name)
+void ogles2_unimplemented(struct OGLES3Context *ctx, const char *name)
 {
     static const char *seen[64];
     static ULONG nseen;

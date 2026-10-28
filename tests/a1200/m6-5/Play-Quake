@@ -23,7 +23,7 @@
 .ket }
 
 FailAt 21
-If NOT EXISTS libs/ogles2.library
+If NOT EXISTS libs/ogles3.library
   Echo "Please CD into the ogles2-m6-5 directory first,"
   Echo "then run:  Execute Play-Quake"
   Quit 20
@@ -38,12 +38,12 @@ If NOT EXISTS M6R5:cache
   MakeDir M6R5:cache
 EndIf
 Assign LIBS: M6R5:libs ADD
-Assign OGLES2Cache: M6R5:cache
+Assign OGLES3Cache: M6R5:cache
 ; The modules load from the current directory.
 CD M6R5:bin
-; 4x antialiasing: ogles2.library's, for this game (ENV:OGLES2/MSAA).
+; 4x antialiasing: ogles3.library's, for this game (ENV:OGLES3/MSAA).
 If {MSAA} EQ 1 VAL
-  SetEnv OGLES2/MSAA 4
+  SetEnv OGLES3/MSAA 4
 EndIf
 ; A size of its own: ioquake3's custom mode (r_mode -1).
 Set Q3MODE "+set r_mode 3"
@@ -52,8 +52,8 @@ If {WIDTH} GT 0 VAL
 EndIf
 M6R5:bin/quake3-gl2 +set fs_basepath "{Q3DATA}" +set fs_homepath M6R5:home +set r_fullscreen 1 $Q3MODE +set r_swapInterval {VSYNC} +set cg_drawFPS 1
 UnSet Q3MODE
-UnSetEnv OGLES2/MSAA
+UnSetEnv OGLES3/MSAA
 CD M6R5:
-Assign OGLES2Cache:
+Assign OGLES3Cache:
 Assign LIBS: M6R5:libs REMOVE
 Assign M6R5:

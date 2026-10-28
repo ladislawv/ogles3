@@ -4,7 +4,7 @@ ogles2 M6 run 7
 What this is
 ------------
 glmark2, the usual OpenGL ES 2.0 benchmark, compiled for the Amiga
-(68020 + 68881) and drawn by ogles2.library. It runs glmark2's standard
+(68020 + 68881) and drawn by ogles3.library. It runs glmark2's standard
 list of 33 scenes in an 800x600 window on the Workbench screen and prints
 a score for each, and a total at the end.
 
@@ -35,10 +35,10 @@ by line, so its last lines show how far it got.
 Contents
 --------
 Run-M1               the test script
-libs/ogles2.library  the library (logs every line at once)
+libs/ogles3.library  the library (logs every line at once)
 libs/v3dglslc        the shader compiler
 bin/glmark2-es2      glmark2 2023.01 (ports/glmark2)
 bin/data/            glmark2's models, shaders and textures
-bin/OGLES2Log        writes the library's log file on request
+bin/OGLES3Log        writes the library's log file on request
 cache/               the compiled shaders, filled as the scenes run
 notes-template.txt   copied to results/notes.txt at the end

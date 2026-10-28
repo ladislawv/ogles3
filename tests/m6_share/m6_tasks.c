@@ -1,7 +1,7 @@
 /*
  * M6 test: contexts used from two tasks. The client's current context is
- * the program's (libogles2.a), so the second task calls through
- * OGLES2Dispatch with its context. Hidden 64x64 bitmaps; nothing to watch.
+ * the program's (libogles3.a), so the second task calls through
+ * OGLES3Dispatch with its context. Hidden 64x64 bitmaps; nothing to watch.
  *   usage: m6_tasks
  *   shared   a child task changes a texture shared with the main task's
  *            context (and makes and deletes textures, growing the name
@@ -22,7 +22,7 @@
 #include <proto/dos.h>
 #include <proto/graphics.h>
 #include <proto/cybergraphics.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include "../common/tex_shaders.h"
 
 struct GfxBase *GfxBase;
@@ -62,7 +62,7 @@ static unsigned long colour(int k)
 }
 
 /* ---- the child task: only exec and the dispatch table (no C library) ---- */
-#define D(fn) OGLES2Dispatch->GL##fn
+#define D(fn) OGLES3Dispatch->GL##fn
 
 static struct {
     struct Task *parent;
@@ -166,8 +166,8 @@ int main(void)
     printf("ogles2 M6: contexts used from two tasks\n");
     GfxBase = (struct GfxBase *)OpenLibrary((STRPTR) "graphics.library", 39);
     CyberGfxBase = OpenLibrary((STRPTR) "cybergraphics.library", 41);
-    if (!GfxBase || !CyberGfxBase || !OGLES2Open()) {
-        printf("needs graphics, cybergraphics 41 and %s\n", OGLES2NAME);
+    if (!GfxBase || !CyberGfxBase || !OGLES3Open()) {
+        printf("needs graphics, cybergraphics 41 and %s\n", OGLES3NAME);
         return 20;
     }
     bma = AllocBitMap(W, H, 32, BMF_MINPLANES | BMF_SPECIALFMT | SHIFT_PIXFMT(PIXFMT_BGRA32), 0);
@@ -178,9 +178,9 @@ int main(void)
     InitRastPort(&rpa);
     rpa.BitMap = bma;
     before = AvailMem(MEMF_ANY);
-    a = aglCreateContextTags2(&err, OGLES2_CCT_BITMAP, (ULONG)bma, TAG_DONE);
-    b = aglCreateContextTags2(&err, OGLES2_CCT_BITMAP, (ULONG)bmb, OGLES2_CCT_SHARE_WITH, (ULONG)a, TAG_DONE);
-    c = aglCreateContextTags2(&err, OGLES2_CCT_BITMAP, (ULONG)bmc, TAG_DONE);
+    a = aglCreateContextTags2(&err, OGLES3_CCT_BITMAP, (ULONG)bma, TAG_DONE);
+    b = aglCreateContextTags2(&err, OGLES3_CCT_BITMAP, (ULONG)bmb, OGLES3_CCT_SHARE_WITH, (ULONG)a, TAG_DONE);
+    c = aglCreateContextTags2(&err, OGLES3_CCT_BITMAP, (ULONG)bmc, TAG_DONE);
     check(a && b && c, "contexts A, B sharing with A (the child's), C (the child's own)");
     if (!a || !b || !c)
         return 20;
@@ -288,7 +288,7 @@ int main(void)
     FreeBitMap(bma);
     FreeBitMap(bmb);
     FreeBitMap(bmc);
-    OGLES2Close();
+    OGLES3Close();
     CloseLibrary(CyberGfxBase);
     CloseLibrary((struct Library *)GfxBase);
     printf("%s: %d of %d checks passed\n", failures ? "FAILED" : "ALL PASSED", checks - failures, checks);

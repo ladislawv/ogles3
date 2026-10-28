@@ -35,8 +35,8 @@ static void put_char(register UBYTE c __asm("d0"), register struct line *l __asm
         l->text[l->len++] = (char)c;
 }
 
-/* DOS I/O needs a process. The explicit flush points (OGLES2Close through
- * vector -36, aglDestroyContext, the OGLES2Log command) are reached only from
+/* DOS I/O needs a process. The explicit flush points (OGLES3Close through
+ * vector -36, aglDestroyContext, the OGLES3Log command) are reached only from
  * the application's own calls, never under Forbid(), so the process check is
  * all they need. */
 /* Held (ogles2_log_hold): no file written meanwhile, the lines wait in
@@ -50,7 +50,7 @@ void ogles2_log_hold(BOOL on)
     Forbid();
     hold += on ? 1 : -1;
     Permit();
-#ifdef OGLES2_LOG_SYNC
+#ifdef OGLES3_LOG_SYNC
     if (!on && !hold && SysBase->TDNestCnt < 0 && SysBase->IDNestCnt < 0)
         ogles2_log_flush();
 #endif
@@ -62,7 +62,7 @@ static BOOL caller_is_process(void)
     return DOSBase && me->tc_Node.ln_Type == NT_PROCESS;
 }
 
-#ifdef OGLES2_LOG_SYNC
+#ifdef OGLES3_LOG_SYNC
 /* A line can also be logged inside the library's Open/Close vectors, which
  * exec calls under Forbid(): the per-line flush checks the nest counters
  * (-1 outside Forbid/Disable on AmigaOS; vamos does not maintain them, so
@@ -90,9 +90,9 @@ static void put_bounded(register UBYTE c __asm("d0"), register struct fmt_buf *b
 /* RawDoFmt into buf (size bytes with the NUL); 32-bit arguments as for
  * ogles2_log. Returns the length written. */
 /* Probe T: one line per call (n < 0: a step, no count). */
-void ogles2_trace(struct OGLES2Context *ctx, const char *what, LONG n, ULONG first)
+void ogles2_trace(struct OGLES3Context *ctx, const char *what, LONG n, ULONG first)
 {
-    if (!(ctx->probe & OGLES2_PROBE_TRACE))
+    if (!(ctx->probe & OGLES3_PROBE_TRACE))
         return;
     if (n < 0)
         ogles2_log("trace: %s", (ULONG)what);
@@ -162,7 +162,7 @@ void ogles2_log(const char *fmt, ...)
     ring_put(l.text, l.len);
     Permit();
 
-#ifdef OGLES2_LOG_SYNC
+#ifdef OGLES3_LOG_SYNC
     if (can_flush_now())
         ogles2_log_flush();
 #endif
@@ -201,7 +201,7 @@ BOOL ogles2_log_flush(void)
     }
 
     if (n) {
-        if (GetVar((STRPTR) "OGLES2/LogFile", (STRPTR)path, sizeof(path), GVF_GLOBAL_ONLY) <= 0)
+        if (GetVar((STRPTR) "OGLES3/LogFile", (STRPTR)path, sizeof(path), GVF_GLOBAL_ONLY) <= 0)
             CopyMem(DEFAULT_PATH, path, sizeof(DEFAULT_PATH));
         fh = Open((STRPTR)path, MODE_READWRITE);
         if (fh) {

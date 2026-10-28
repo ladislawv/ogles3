@@ -20,7 +20,7 @@
 #include <string.h>
 #include <exec/memory.h>
 #include <proto/exec.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include <GLES3/gl3.h>
 
 static int failures, checks;
@@ -41,8 +41,8 @@ static int prefix(const GLubyte *s, const char *p)
 static void *context(ULONG version, ULONG *err, void *share)
 {
     *err = 99;
-    return aglCreateContextTags2(err, OGLES2_CCT_PISTORM_STATE_ONLY, TRUE, OGLES2_CCT_PISTORM_ES_VERSION, version,
-                                 share ? OGLES2_CCT_SHARE_WITH : TAG_IGNORE, (ULONG)share, TAG_DONE);
+    return aglCreateContextTags2(err, OGLES3_CCT_PISTORM_STATE_ONLY, TRUE, OGLES3_CCT_PISTORM_ES_VERSION, version,
+                                 share ? OGLES3_CCT_SHARE_WITH : TAG_IGNORE, (ULONG)share, TAG_DONE);
 }
 
 static GLint get_int(GLenum pname)
@@ -464,8 +464,8 @@ int main(int argc, char **argv)
         else if (!strcmp(argv[k], "NOGPU"))
             nogpu = 1;
     }
-    if (!OGLES2Open()) {
-        printf("FAIL: OGLES2Open\n");
+    if (!OGLES3Open()) {
+        printf("FAIL: OGLES3Open\n");
         return 10;
     }
     if (limits) {
@@ -473,39 +473,57 @@ int main(int argc, char **argv)
         if (!c3) {
             printf("ERROR: no ES 3.0 context (error %lu): a library built with ES3=1 is needed\n",
                    (unsigned long)err);
-            OGLES2Close();
+            OGLES3Close();
             return 10;
         }
         aglMakeCurrent(c3);
         print_limits();
         aglDestroyContext(c3);
-        OGLES2Close();
+        OGLES3Close();
         return 0;
     }
-    printf("m8_es3: OpenGL ES 3.0 contexts (library %ld.%ld, %s build)\n", (long)OGLES2Base->lib_Version,
-           (long)OGLES2Base->lib_Revision, es3 ? "an ES3" : "a release");
+    printf("m8_es3: OpenGL ES 3.0 contexts (library %ld.%ld, %s build)\n", (long)OGLES3Base->lib_Version,
+           (long)OGLES3Base->lib_Revision, es3 ? "an ES3" : "a release");
 
     /* The tag's values. */
     c = context(25, &err, 0);
-    check(!c && err == OGLES2_CCE_BAD_TAGS, "version 25: OGLES2_CCE_BAD_TAGS");
+    check(!c && err == OGLES3_CCE_BAD_TAGS, "version 25: OGLES3_CCE_BAD_TAGS");
     c = context(31, &err, 0);
-    check(!c && err == OGLES2_CCE_UNSUPPORTED, "version 31: OGLES2_CCE_UNSUPPORTED (no ES 3.1 yet)");
+    if (es3) {
+        check(!c && err == OGLES3_CCE_UNSUPPORTED, "version 31: OGLES3_CCE_UNSUPPORTED (an ES3=1 build)");
+    } else {
+        /* the release: ES 3.1 (m8_es31 tests it); the ES 3.0 part below is
+         * the ES3=1 build's */
+        if (c)
+            aglMakeCurrent(c);
+        check(c && err == OGLES3_CCE_OK && prefix(glGetString(GL_VERSION), "OpenGL ES 3.1 ogles3.library "),
+              "version 31: an ES 3.1 context (the release)");
+        if (c)
+            aglDestroyContext(c);
+    }
     c3 = context(30, &err, 0);
-    if (es3)
-        check(c3 && err == OGLES2_CCE_OK, "version 30: an ES 3.0 context");
-    else
-        check(!c3 && err == OGLES2_CCE_UNSUPPORTED, "version 30: OGLES2_CCE_UNSUPPORTED (not a test build)");
+    if (es3) {
+        check(c3 && err == OGLES3_CCE_OK, "version 30: an ES 3.0 context");
+    } else {
+        if (c3)
+            aglMakeCurrent(c3);
+        check(c3 && err == OGLES3_CCE_OK && prefix(glGetString(GL_VERSION), "OpenGL ES 3.1 "),
+              "version 30: ES 3.1 given (the release's highest)");
+        if (c3)
+            aglDestroyContext(c3);
+        c3 = 0;
+    }
     c2 = context(20, &err, 0);
-    check(c2 && err == OGLES2_CCE_OK, "version 20: an ES 2.0 context");
+    check(c2 && err == OGLES3_CCE_OK, "version 20: an ES 2.0 context");
     if (!c2) {
-        OGLES2Close();
+        OGLES3Close();
         return 10;
     }
 
     /* The GLES2 context: as 1.x, with 48 combined units; the ES3 entries and
      * queries refused. */
     aglMakeCurrent(c2);
-    check(prefix(glGetString(GL_VERSION), "OpenGL ES 2.0 ogles2.library "), "ES 2.0: GL_VERSION");
+    check(prefix(glGetString(GL_VERSION), "OpenGL ES 2.0 ogles3.library "), "ES 2.0: GL_VERSION");
     check(prefix(glGetString(GL_SHADING_LANGUAGE_VERSION), "OpenGL ES GLSL ES 1.00"), "ES 2.0: GLSL ES 1.00");
     check(get_int(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS) == 48 && glGetError() == GL_NO_ERROR,
           "ES 2.0: 48 combined texture units");
@@ -582,16 +600,16 @@ int main(int argc, char **argv)
     if (c3) {
         /* Contexts share objects only with their own version. */
         c = context(30, &err, c2);
-        check(!c && err == OGLES2_CCE_BAD_TAGS, "an ES 3.0 context cannot share with an ES 2.0 one");
+        check(!c && err == OGLES3_CCE_BAD_TAGS, "an ES 3.0 context cannot share with an ES 2.0 one");
         c = context(20, &err, c3);
-        check(!c && err == OGLES2_CCE_BAD_TAGS, "an ES 2.0 context cannot share with an ES 3.0 one");
+        check(!c && err == OGLES3_CCE_BAD_TAGS, "an ES 2.0 context cannot share with an ES 3.0 one");
         c = context(30, &err, c3);
-        check(c && err == OGLES2_CCE_OK, "two ES 3.0 contexts share objects");
+        check(c && err == OGLES3_CCE_OK, "two ES 3.0 contexts share objects");
         if (c)
             aglDestroyContext(c);
 
         aglMakeCurrent(c3);
-        check(prefix(glGetString(GL_VERSION), "OpenGL ES 3.0 ogles2.library "), "ES 3.0: GL_VERSION");
+        check(prefix(glGetString(GL_VERSION), "OpenGL ES 3.0 ogles3.library "), "ES 3.0: GL_VERSION");
         check(prefix(glGetString(GL_SHADING_LANGUAGE_VERSION), "OpenGL ES GLSL ES 3.00"), "ES 3.0: GLSL ES 3.00");
         check(get_int(GL_MAJOR_VERSION) == 3 && get_int(GL_MINOR_VERSION) == 0 && glGetError() == GL_NO_ERROR,
               "ES 3.0: GL_MAJOR_VERSION 3, GL_MINOR_VERSION 0");
@@ -933,7 +951,7 @@ int main(int argc, char **argv)
         aglDestroyContext(c3);
     }
     aglDestroyContext(c2);
-    OGLES2Close();
+    OGLES3Close();
     printf("%s: %d of %d\n", failures ? "FAILED" : "PASSED", checks - failures, checks);
     return failures ? 10 : 0;
 }

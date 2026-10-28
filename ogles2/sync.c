@@ -13,32 +13,32 @@
 #include "ogles2_internal.h"
 #include "v3d_context.h"
 
-struct OGLES2Sync
+struct OGLES3Sync
 {
-    struct OGLES2Sync *next;
+    struct OGLES3Sync *next;
     ULONG serial;   /* the job it waits for; 0: signalled */
 };
 
 /* sync as one of the group's, or NULL. */
-static struct OGLES2Sync *find(struct OGLES2Context *ctx, GLsync sync)
+static struct OGLES3Sync *find(struct OGLES3Context *ctx, GLsync sync)
 {
-    struct OGLES2Sync *s;
+    struct OGLES3Sync *s;
     for (s = ctx->share->syncs; s; s = s->next)
         if ((GLsync)s == sync)
             return s;
     return 0;
 }
 
-static BOOL signalled(struct OGLES2Context *ctx, struct OGLES2Sync *s)
+static BOOL signalled(struct OGLES3Context *ctx, struct OGLES3Sync *s)
 {
     if (s->serial && !ogles2_job_uses(ctx, s->serial))
         s->serial = 0;
     return !s->serial;
 }
 
-GLsync ogles2_glFenceSync(struct OGLES2Context *ctx, GLenum condition, GLbitfield flags)
+GLsync ogles2_glFenceSync(struct OGLES3Context *ctx, GLenum condition, GLbitfield flags)
 {
-    struct OGLES2Sync *s;
+    struct OGLES3Sync *s;
     if (!ogles2_es3_entry(ctx))
         return 0;
     if (condition != GL_SYNC_GPU_COMMANDS_COMPLETE) {
@@ -60,18 +60,18 @@ GLsync ogles2_glFenceSync(struct OGLES2Context *ctx, GLenum condition, GLbitfiel
     return (GLsync)s;
 }
 
-GLboolean ogles2_glIsSync(struct OGLES2Context *ctx, GLsync sync)
+GLboolean ogles2_glIsSync(struct OGLES3Context *ctx, GLsync sync)
 {
     if (!ogles2_es3_entry(ctx))
         return GL_FALSE;
     return sync && find(ctx, sync) ? GL_TRUE : GL_FALSE;
 }
 
-void ogles2_glDeleteSync(struct OGLES2Context *ctx, GLsync sync)
+void ogles2_glDeleteSync(struct OGLES3Context *ctx, GLsync sync)
 {
     if (ctx && ctx->share && ctx->share->labels)
         ogles2_label_forget(ctx, GL_SYNC_FENCE, (ULONG)sync); /* KHR_debug's label */
-    struct OGLES2Sync **p, *s;
+    struct OGLES3Sync **p, *s;
     if (!ogles2_es3_entry(ctx) || !sync)
         return;
     for (p = &ctx->share->syncs; (s = *p); p = &s->next)
@@ -87,9 +87,9 @@ void ogles2_glDeleteSync(struct OGLES2Context *ctx, GLsync sync)
  * (also without GL_SYNC_FLUSH_COMMANDS_BIT: the wait would never end), a
  * render of the group's waited for. Another member's open job is not
  * flushed from here: FALSE. */
-static BOOL wait_for(struct OGLES2Context *ctx, struct OGLES2Sync *s)
+static BOOL wait_for(struct OGLES3Context *ctx, struct OGLES3Sync *s)
 {
-    struct OGLES2Context *user = ogles2_job_user(ctx, s->serial);
+    struct OGLES3Context *user = ogles2_job_user(ctx, s->serial);
     if (!user)
         return TRUE;
     if (user->v3d && user->v3d->frame_active && user->job_serial == s->serial) {
@@ -101,9 +101,9 @@ static BOOL wait_for(struct OGLES2Context *ctx, struct OGLES2Sync *s)
     return signalled(ctx, s);
 }
 
-GLenum ogles2_glClientWaitSync(struct OGLES2Context *ctx, GLsync sync, GLbitfield flags, GLuint64 timeout)
+GLenum ogles2_glClientWaitSync(struct OGLES3Context *ctx, GLsync sync, GLbitfield flags, GLuint64 timeout)
 {
-    struct OGLES2Sync *s;
+    struct OGLES3Sync *s;
     if (!ogles2_es3_entry(ctx))
         return GL_WAIT_FAILED;
     if (!(s = find(ctx, sync))) {
@@ -128,7 +128,7 @@ GLenum ogles2_glClientWaitSync(struct OGLES2Context *ctx, GLsync sync, GLbitfiel
 }
 
 /* The GPU runs the jobs in order: a server-side wait has nothing to wait for. */
-void ogles2_glWaitSync(struct OGLES2Context *ctx, GLsync sync, GLbitfield flags, GLuint64 timeout)
+void ogles2_glWaitSync(struct OGLES3Context *ctx, GLsync sync, GLbitfield flags, GLuint64 timeout)
 {
     if (!ogles2_es3_entry(ctx))
         return;
@@ -136,10 +136,10 @@ void ogles2_glWaitSync(struct OGLES2Context *ctx, GLsync sync, GLbitfield flags,
         ogles2_error(ctx, GL_INVALID_VALUE);
 }
 
-void ogles2_glGetSynciv(struct OGLES2Context *ctx, GLsync sync, GLenum pname, GLsizei bufSize, GLsizei *length,
+void ogles2_glGetSynciv(struct OGLES3Context *ctx, GLsync sync, GLenum pname, GLsizei bufSize, GLsizei *length,
                         GLint *values)
 {
-    struct OGLES2Sync *s;
+    struct OGLES3Sync *s;
     GLint v;
     if (!ogles2_es3_entry(ctx))
         return;
@@ -167,10 +167,10 @@ void ogles2_glGetSynciv(struct OGLES2Context *ctx, GLsync sync, GLenum pname, GL
 }
 
 /* aglDestroyContext: the group's with its last member. */
-void ogles2_syncs_free(struct OGLES2Context *ctx)
+void ogles2_syncs_free(struct OGLES3Context *ctx)
 {
-    struct OGLES2Share *sh = ctx->share;
-    struct OGLES2Sync *s;
+    struct OGLES3Share *sh = ctx->share;
+    struct OGLES3Sync *s;
     if (!sh || sh->members != 1)
         return;
     while ((s = sh->syncs)) {

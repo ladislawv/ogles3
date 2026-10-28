@@ -11,12 +11,12 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 REPO=$(cd "$HERE/../../.." && pwd)
 B31S=${B31S:-$(dirname "${BS:-$HOME/ogles2-build/m68k-sync}")/m68k-es31-sync}
 
-make -C "$REPO" -j8 B="$B31S" EXTRA_CFLAGS=-DOGLES2_LOG_SYNC ES31=1 > /dev/null
+make -C "$REPO" -j8 B="$B31S" EXTRA_CFLAGS=-DOGLES3_LOG_SYNC ES31=1 > /dev/null
 make -C "$REPO" B="$B31S" test-v3dp > /dev/null
 mkdir -p "$PKG/libs" "$PKG/bin/shaders"
-cp "$B31S/ogles2.library" "$PKG/libs/"
-cp "${V:-$HOME/ogles2-build/v3dglslc}/v3dglslc.stripped" "$PKG/libs/v3dglslc"
-cp "$B31S/tests/m8_es31" "$B31S/tests/m8_draw" "$B31S/cmd/OGLES2Log" "$PKG/bin/"
+cp "$B31S/ogles3.library" "$PKG/libs/"
+cp "${V:-$HOME/ogles2-build/v3dglslc}/v3dglslc.stripped" "$PKG/libs/v3dglslc3"
+cp "$B31S/tests/m8_es31" "$B31S/tests/m8_draw" "$B31S/cmd/OGLES3Log" "$PKG/bin/"
 cp "$B31S"/v3dp/*.v3dp "$B31S"/v3dp/*.v3dw "$PKG/bin/"
 for f in "$REPO"/tools/v3dglslc/test/shaders/*; do
     sed 's/\r$//' "$f" > "$PKG/bin/shaders/$(basename "$f")"

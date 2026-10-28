@@ -11,7 +11,7 @@
  *
  * Spike version: one pool, created on first use and deleted at exit, so
  * nothing leaks when a test program ends. Not task-safe (the compiler is
- * single-threaded). The real module takes its memory from ogles2.library
+ * single-threaded). The real module takes its memory from ogles3.library
  * through a call table instead (plan section 8.4).
  */
 #include <errno.h>

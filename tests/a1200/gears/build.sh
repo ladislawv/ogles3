@@ -10,5 +10,5 @@ B=${B:-$HOME/ogles2-build/m68k}
 make -C "$REPO" -j8 B="$B" > /dev/null
 B="$B" bash "$REPO/tests/corpus/build_corpus.sh" > /dev/null 2>&1 || { echo "build_corpus.sh failed"; exit 1; }
 mkdir -p "$PKG/libs" "$PKG/bin"
-cp "$B/ogles2.library" "$PKG/libs/"
+cp "$B/ogles3.library" "$PKG/libs/"
 cp "$B/corpus/amiga/es2gears" "$B"/corpus/v3dp/*.v3dp "$PKG/bin/"

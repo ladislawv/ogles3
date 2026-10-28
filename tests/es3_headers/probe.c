@@ -1,5 +1,5 @@
 /*
- * The headers' probe (docs/GLES3_PLAN.md §3): <proto/ogles2.h> with the
+ * The headers' probe (docs/GLES3_PLAN.md §3): <proto/ogles3.h> with the
  * GLES2 and GLES3 headers included before or after it compiles cleanly, and
  * the ES 3.x entries reach the table. `make es3-header-probe` compiles it
  * once per ORDER with -Werror (GCC 6.5, GCC 16 and vbcc where present):
@@ -11,22 +11,22 @@
  */
 #if ORDER == 1
 #include <GLES3/gl3.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #elif ORDER == 2
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include <GLES3/gl3.h>
 #elif ORDER == 3
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include <GLES3/gl31.h>
 #elif ORDER == 4
 #include <GLES2/gl2.h>
 #include <GLES3/gl31.h>
 #include <GLES3/gl3ext.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #elif ORDER == 5
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include <GLES3/gl3.h>
 #include <GLES3/gl3ext.h>
 #else

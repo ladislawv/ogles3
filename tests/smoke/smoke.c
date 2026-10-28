@@ -1,10 +1,10 @@
 /*
- * M0 smoke test: opens ogles2.library through libogles2.a, checks the
+ * M0 smoke test: opens ogles3.library through libogles3.a, checks the
  * dispatch table, creates a context, calls a few real entries and one stub,
  * looks entries up by name, and checks that open/close cycles leak nothing.
  *   usage: smoke [NOGPU]    (prints PASS/FAIL lines, returns 0 or 10)
  *          smoke GONE       (after Avail FLUSH: the library is no longer loaded)
- * The context is state-only (OGLES2_CCT_PISTORM_STATE_ONLY: no surface), so
+ * The context is state-only (OGLES3_CCT_PISTORM_STATE_ONLY: no surface), so
  * the test opens no windows. NOGPU accepts a machine without a V3D (the vamos
  * emulator): GL_RENDERER is then not checked.
  */
@@ -13,7 +13,7 @@
 #include <exec/memory.h>
 #include <exec/execbase.h>
 #include <proto/exec.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 
 static int failures;
 static int allow_no_gpu;
@@ -37,27 +37,27 @@ static int session(int verbose)
     void *ctx;
     GLenum (*get_error)(void);
 
-    if (!OGLES2Open()) {
-        check(0, "OGLES2Open");
+    if (!OGLES3Open()) {
+        check(0, "OGLES3Open");
         return 0;
     }
     if (verbose) {
-        check(1, "OGLES2Open");
+        check(1, "OGLES3Open");
         printf("     library %ld.%ld, ABI %lu, table %lu bytes (%d entries)\n",
-               (long)OGLES2Base->lib_Version, (long)OGLES2Base->lib_Revision,
-               (unsigned long)OGLES2Dispatch->abiVersion, (unsigned long)OGLES2Dispatch->structSize,
-               OGLES2_DISPATCH_ENTRIES);
-        check(OGLES2Dispatch->structSize == sizeof(struct OGLES2Dispatch), "table size matches header");
+               (long)OGLES3Base->lib_Version, (long)OGLES3Base->lib_Revision,
+               (unsigned long)OGLES3Dispatch->abiVersion, (unsigned long)OGLES3Dispatch->structSize,
+               OGLES3_DISPATCH_ENTRIES);
+        check(OGLES3Dispatch->structSize == sizeof(struct OGLES3Dispatch), "table size matches header");
     }
 
-    ctx = aglCreateContextTags2(&err, OGLES2_CCT_DEPTH, 16, OGLES2_CCT_STENCIL, 8,
-                                OGLES2_CCT_PISTORM_STATE_ONLY, TRUE, TAG_DONE);
+    ctx = aglCreateContextTags2(&err, OGLES3_CCT_DEPTH, 16, OGLES3_CCT_STENCIL, 8,
+                                OGLES3_CCT_PISTORM_STATE_ONLY, TRUE, TAG_DONE);
     if (verbose)
-        check(ctx && err == OGLES2_CCE_OK, "aglCreateContextTags2");
+        check(ctx && err == OGLES3_CCE_OK, "aglCreateContextTags2");
     if (!ctx) {
         if (verbose)
             printf("     error code %lu\n", (unsigned long)err);
-        OGLES2Close();
+        OGLES3Close();
         return 1;
     }
     aglMakeCurrent(ctx);
@@ -72,9 +72,11 @@ static int session(int verbose)
             check(prefix(glGetString(GL_RENDERER), "V3D 4.2.") &&
                   strstr((const char *)glGetString(GL_RENDERER), "QPUs") != 0,
                   "GL_RENDERER reports the V3D identity, QPU count and VPM size");
-        check(prefix(glGetString(GL_VERSION), "OpenGL ES 2.0"), "GL_VERSION starts \"OpenGL ES 2.0\"");
-        check(prefix(glGetString(GL_SHADING_LANGUAGE_VERSION), "OpenGL ES GLSL ES 1.00"),
-              "GL_SHADING_LANGUAGE_VERSION starts \"OpenGL ES GLSL ES 1.00\"");
+        /* ogles3.library: a context asked for no version is the highest, 3.1 */
+        check(prefix(glGetString(GL_VERSION), "OpenGL ES 3.1 ogles3.library "),
+              "GL_VERSION starts \"OpenGL ES 3.1 ogles3.library\"");
+        check(prefix(glGetString(GL_SHADING_LANGUAGE_VERSION), "OpenGL ES GLSL ES 3.10"),
+              "GL_SHADING_LANGUAGE_VERSION starts \"OpenGL ES GLSL ES 3.10\"");
         check(glGetError() == GL_NO_ERROR, "no error after valid calls");
 
         check(glGetString(0x1234) == 0 && glGetError() == GL_INVALID_ENUM,
@@ -96,8 +98,8 @@ static int session(int verbose)
 
     aglDestroyContext(ctx);
     if (verbose)
-        check(OGLES2CurrentContext == 0, "aglDestroyContext clears the current context");
-    OGLES2Close();
+        check(OGLES3CurrentContext == 0, "aglDestroyContext clears the current context");
+    OGLES3Close();
     return 1;
 }
 
@@ -111,15 +113,15 @@ int main(int argc, char **argv)
          * at exec's library list only; opening it would load it again. */
         struct Library *l;
         Forbid();
-        l = (struct Library *)FindName(&SysBase->LibList, (STRPTR)OGLES2NAME);
+        l = (struct Library *)FindName(&SysBase->LibList, (STRPTR)OGLES3NAME);
         Permit();
-        check(l == 0, "ogles2.library left memory (expunged)");
+        check(l == 0, "ogles3.library left memory (expunged)");
         return failures ? 10 : 0;
     }
     allow_no_gpu = argc > 1 && !strcmp(argv[1], "NOGPU");
     printf("ogles2 smoke test (M0)\n");
     if (!session(1)) {
-        printf("cannot open %s %d: is it in LIBS:?\n", OGLES2NAME, OGLES2_VERSION);
+        printf("cannot open %s %d: is it in LIBS:?\n", OGLES3NAME, OGLES3_VERSION);
         return 20;
     }
     /* The GPU submission lock (plan section 7.1) is created with the device

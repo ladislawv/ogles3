@@ -4,8 +4,8 @@
  * runs nothing (shader compilation only). Mesa's drm-shim
  * (src/broadcom/drm-shim/v3d_noop.c) is the model.
  */
-#ifndef OGLES2_COMPAT_XF86DRM_H
-#define OGLES2_COMPAT_XF86DRM_H
+#ifndef OGLES3_COMPAT_XF86DRM_H
+#define OGLES3_COMPAT_XF86DRM_H
 
 #include <stdint.h>
 

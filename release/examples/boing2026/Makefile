@@ -8,13 +8,13 @@
 # it, or the shader compiler: the release ships them, with the shaders'
 # records (.v3ds), which keep an installed compiler from starting. "make
 # shaders" makes all three with the offline compiler of the ogles2 source
-# (OGLES2, V3DGLSLC) into build/v3dp.
+# (OGLES3, V3DGLSLC) into build/v3dp.
 
 SDK      ?= ../..
 CC       ?= m68k-amigaos-gcc
 # -fbbb=...: bebbo's optimiser without "e" (it breaks float-to-int rounding).
 CFLAGS   ?= -O2 -m68020 -m68881 -mcrt=clib2 -fno-builtin -fbbb=abcfhilmnprsz0 -Wall
-OGLES2   ?= /mnt/c/GitHub/ogles2
+OGLES3   ?= /mnt/c/GitHub/ogles2
 V3DGLSLC ?= $(HOME)/ogles2-build/v3dglslc/host/v3dglslc
 
 SHADERS  := shaders/ball.vert shaders/ball.frag shaders/room.vert shaders/room.frag \
@@ -27,7 +27,7 @@ PAIRS    := ball.vert ball.frag room.vert room.frag screen.vert blur.frag \
 all: boing2026
 
 boing2026: boing2026.c boing2026_shaders.h
-	$(CC) $(CFLAGS) -I$(SDK)/include boing2026.c -L$(SDK)/lib -logles2 -lm881 -o $@
+	$(CC) $(CFLAGS) -I$(SDK)/include boing2026.c -L$(SDK)/lib -logles3 -lm881 -o $@
 
 header: $(SHADERS) tools/embed_shaders.py
 	python3 -I tools/embed_shaders.py boing2026_shaders.h $(SHADERS)
@@ -35,8 +35,8 @@ header: $(SHADERS) tools/embed_shaders.py
 shaders: $(SHADERS)
 	rm -rf build/v3dp && mkdir -p build/v3dp
 	cd shaders && $(V3DGLSLC) -o ../build/v3dp $(PAIRS)
-	python3 -I $(OGLES2)/v3dp/v3dp_hashname.py build/v3dp/*
-	python3 -I $(OGLES2)/v3dp/v3ds_record.py build/v3dp $(SHADERS)
+	python3 -I $(OGLES3)/v3dp/v3dp_hashname.py build/v3dp/*
+	python3 -I $(OGLES3)/v3dp/v3ds_record.py build/v3dp $(SHADERS)
 
 clean:
 	rm -rf boing2026 build

@@ -4,7 +4,7 @@ ogles2 M4 run 2
 What this is
 ------------
 A speed comparison: the same three gears (Brian Paul's "gears" demo)
-drawn by ogles2.library and by PiStorm3D 29.1's minigl.library, with the
+drawn by ogles3.library and by PiStorm3D 29.1's minigl.library, with the
 same triangles, the same lighting and the same 640x480 size. Each run
 lasts 5 seconds and prints its frames per second.
 
@@ -39,7 +39,7 @@ with the next step, for example:
 Contents
 --------
 Run-M2               the test script
-libs/ogles2.library  the library
+libs/ogles3.library  the library
 libs/minigl.library  PiStorm3D 29.1 (Aminet util/libs/PiStorm3D.lha)
 bin/gears_gles2      the gears on ogles2 (vertex buffers or client arrays)
 bin/gears_mgl        the gears on MiniGL (immediate mode, vertex arrays

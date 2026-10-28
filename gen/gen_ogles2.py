@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate ogles2.library's dispatch table and everything that must agree
+"""Generate ogles3.library's dispatch table and everything that must agree
 with it (plan section 6.6), from one source:
 
   khronos/gl.xml + api.txt   the GL entry points
@@ -14,8 +14,8 @@ missing entry is an error. Entries are never reordered or removed: a line
 "-name" retires an entry, which keeps its slot as a reserved NULL pointer.
 
 Writes, under DIR:
-  include/libraries/ogles2_dispatch.h  struct OGLES2Dispatch
-  include/proto/ogles2.h               client wrappers (static inline + macro)
+  include/libraries/ogles3_dispatch.h  struct OGLES3Dispatch
+  include/proto/ogles3.h               client wrappers (static inline + macro)
   ogles2/ogles2_api.h                  prototypes of the library's ogles2_* functions
   ogles2/dispatch_table.c              the table, with designated initialisers
   ogles2/stubs.c                       stubs for entries --impl-dir does not define
@@ -43,7 +43,7 @@ class Entry:
     @property
     def field(self):
         # GL fields are spelt "GLViewport": not "glViewport", which the client's
-        # "#define glViewport OGLES2_glViewport" would rewrite, and not
+        # "#define glViewport OGLES3_glViewport" would rewrite, and not
         # "Viewport", which can be an AmigaOS macro (<proto/exec.h> defines
         # Enable() and Disable()). minigl's table uses the same spelling.
         return "GL" + self.name[2:] if self.kind == "gl" else self.name
@@ -51,7 +51,7 @@ class Entry:
     def lib_params(self):
         p = [d for d, _ in self.params]
         if self.ctx in ("ctx", "arg"):
-            p = ["struct OGLES2Context *ctx"] + p
+            p = ["struct OGLES3Context *ctx"] + p
         return ", ".join(p) if p else "void"
 
     def call_args(self, ctx_expr):
@@ -155,7 +155,7 @@ def resolve_order(entries, path, append):
                      "at the end" % (len(missing), ", ".join(missing[:4])))
         with open(path, "a", newline="\n") as f:
             if not order:
-                f.write("# ogles2.library dispatch table order, after the 16-byte header.\n"
+                f.write("# ogles3.library dispatch table order, after the 16-byte header.\n"
                         "# APPEND-ONLY: never reorder or delete; retire an entry as -name.\n")
             for n in missing:
                 f.write(n + "\n")
@@ -189,19 +189,19 @@ def default_return(ret):
 
 
 def gen_dispatch_h(table):
-    lines = [HEADER, "#ifndef LIBRARIES_OGLES2_DISPATCH_H\n#define LIBRARIES_OGLES2_DISPATCH_H\n\n",
+    lines = [HEADER, "#ifndef LIBRARIES_OGLES3_DISPATCH_H\n#define LIBRARIES_OGLES3_DISPATCH_H\n\n",
              "#include <exec/types.h>\n#include <utility/tagitem.h>\n",
              "#ifndef GL_GLES_PROTOTYPES\n#define GL_GLES_PROTOTYPES 0\n#endif\n",
              "#include <GLES2/gl2.h>\n",
              "#include <GLES2/gl2ext.h> /* KHR_debug's GLDEBUGPROCKHR (prototypes only with GL_GLEXT_PROTOTYPES) */\n\n",
              "#ifdef __cplusplus\nextern \"C\" {\n#endif\n\n",
-             "struct OGLES2Context; /* opaque */\nstruct BitMap;\n\n",
-             "#define OGLES2_DISPATCH_ABI_VERSION %d\n" % ABI_VERSION,
-             "#define OGLES2_DISPATCH_ENTRIES %d\n" % len(table),
-             "#define OGLES2_BACKEND_PISTORM_V3D42 1\n\n",
-             "struct OGLES2Dispatch\n{\n",
-             "    ULONG abiVersion;   /* equal to OGLES2_DISPATCH_ABI_VERSION */\n",
-             "    ULONG structSize;   /* at least sizeof(struct OGLES2Dispatch) */\n",
+             "struct OGLES3Context; /* opaque */\nstruct BitMap;\n\n",
+             "#define OGLES3_DISPATCH_ABI_VERSION %d\n" % ABI_VERSION,
+             "#define OGLES3_DISPATCH_ENTRIES %d\n" % len(table),
+             "#define OGLES3_BACKEND_PISTORM_V3D42 1\n\n",
+             "struct OGLES3Dispatch\n{\n",
+             "    ULONG abiVersion;   /* equal to OGLES3_DISPATCH_ABI_VERSION */\n",
+             "    ULONG structSize;   /* at least sizeof(struct OGLES3Dispatch) */\n",
              "    ULONG backendFlags;\n    ULONG reserved;\n"]
     for i, e in enumerate(table):
         if isinstance(e, str):
@@ -215,19 +215,19 @@ def gen_dispatch_h(table):
 def gen_proto_h(table):
     gl = [e for e in table if not isinstance(e, str) and e.kind == "gl"]
     agl = [e for e in table if not isinstance(e, str) and e.kind == "agl"]
-    L = [HEADER, "#ifndef PROTO_OGLES2_H\n#define PROTO_OGLES2_H\n\n",
-         "#include <exec/types.h>\n#include <libraries/ogles2.h>\n",
-         "#include <libraries/ogles2_dispatch.h>\n#include <clib/ogles2_protos.h>\n\n",
+    L = [HEADER, "#ifndef PROTO_OGLES3_H\n#define PROTO_OGLES3_H\n\n",
+         "#include <exec/types.h>\n#include <libraries/ogles3.h>\n",
+         "#include <libraries/ogles3_dispatch.h>\n#include <clib/ogles3_protos.h>\n\n",
          "#ifdef __cplusplus\nextern \"C\" {\n#endif\n\n",
          "/* GCC, vbcc in C99 mode, C++: inline wrappers; other compilers: static. */\n",
-         "#if defined(__GNUC__)\n#define OGLES2_INLINE static __inline__\n",
+         "#if defined(__GNUC__)\n#define OGLES3_INLINE static __inline__\n",
          "#elif defined(__cplusplus) || (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L)\n",
-         "#define OGLES2_INLINE static inline\n#else\n#define OGLES2_INLINE static\n#endif\n\n",
-         "/* In libogles2.a: one copy per program image (plan section 6.2). */\n",
-         "extern const struct OGLES2Dispatch *OGLES2Dispatch;\n",
-         "extern struct OGLES2Context *OGLES2CurrentContext;\n\n"]
+         "#define OGLES3_INLINE static inline\n#else\n#define OGLES3_INLINE static\n#endif\n\n",
+         "/* In libogles3.a: one copy per program image (plan section 6.2). */\n",
+         "extern const struct OGLES3Dispatch *OGLES3Dispatch;\n",
+         "extern struct OGLES3Context *OGLES3CurrentContext;\n\n"]
     for e in agl:
-        ret = "void *" if e.ret.startswith("struct OGLES2Context") else e.ret + " "
+        ret = "void *" if e.ret.startswith("struct OGLES3Context") else e.ret + " "
         args = [d for d, _ in e.params]
         if e.ctx == "arg":
             args = ["void *context"] + args
@@ -238,8 +238,8 @@ def gen_proto_h(table):
         # like a gl.xml parameter (x, count, index...) cannot break the header.
         decls = [re.sub(r"(\w+)(\s*(?:\[[^\]]*\])?)$", r"\1_\2", d) for d, _ in e.params]
         args = ", ".join(n + "_" for _, n in e.params)
-        call = "OGLES2Dispatch->%s(OGLES2CurrentContext%s)" % (e.field, ", " + args if args else "")
-        L.append("OGLES2_INLINE %s OGLES2_%s(%s)\n{ %s%s; }\n#define %s OGLES2_%s\n"
+        call = "OGLES3Dispatch->%s(OGLES3CurrentContext%s)" % (e.field, ", " + args if args else "")
+        L.append("OGLES3_INLINE %s OGLES3_%s(%s)\n{ %s%s; }\n#define %s OGLES3_%s\n"
                  % (e.ret, e.name, ", ".join(decls) if decls else "void",
                     "" if e.ret == "void" else "return ", call, e.name, e.name))
     # A Khronos header included after this one (<GLES3/gl3.h> after a
@@ -254,14 +254,14 @@ def gen_proto_h(table):
 
 
 def gen_api_h(table):
-    L = [HEADER, "#ifndef OGLES2_API_H\n#define OGLES2_API_H\n\n",
-         "#include <libraries/ogles2_dispatch.h>\n\n",
+    L = [HEADER, "#ifndef OGLES3_API_H\n#define OGLES3_API_H\n\n",
+         "#include <libraries/ogles3_dispatch.h>\n\n",
          "/* Every table entry, as the library defines it. */\n"]
     for e in table:
         if not isinstance(e, str):
             L.append("%s ogles2_%s(%s);\n" % (e.ret, e.name, e.lib_params()))
     L.append("\n/* stubs.c: records GL_INVALID_OPERATION on ctx and logs the name once. */\n"
-             "void ogles2_unimplemented(struct OGLES2Context *ctx, const char *name);\n\n#endif\n")
+             "void ogles2_unimplemented(struct OGLES3Context *ctx, const char *name);\n\n#endif\n")
     return "".join(L)
 
 
@@ -287,13 +287,13 @@ def wrapped(e):
 
 def gen_table_c(table):
     L = [HEADER, '#include <proto/exec.h>\n#include "ogles2_internal.h"\n\n',
-         "_Static_assert(sizeof(struct OGLES2Dispatch) == 16 + 4 * %d, \"table size\");\n\n"
+         "_Static_assert(sizeof(struct OGLES3Dispatch) == 16 + 4 * %d, \"table size\");\n\n"
          % len(table),
          "/* Every entry that takes the context runs under its share group's\n"
          " * semaphore while the group has two members or more (ogles2/share.c).\n"
          " * Both calls are tail calls: alone, the wrapper tests and jumps. */\n"]
-    L.append("_Static_assert(__builtin_offsetof(struct OGLES2Context, share_lock) == 4, \"share_lock at 4\");\n"
-             "_Static_assert(OGLES2_CONTEXT_MAGIC == 0x474c4532UL, \"the wrappers' magic\");\n\n")
+    L.append("_Static_assert(__builtin_offsetof(struct OGLES3Context, share_lock) == 4, \"share_lock at 4\");\n"
+             "_Static_assert(OGLES3_CONTEXT_MAGIC == 0x474c4532UL, \"the wrappers' magic\");\n\n")
     for e in table:
         if isinstance(e, str) or not wrapped(e):
             continue
@@ -316,10 +316,10 @@ def gen_table_c(table):
                  '        "\\tcmp.l #0x474c4532,(%%a0)\\n\\tjne 1f\\n\\ttst.l 4(%%a0)\\n\\tjne 2f\\n"\n'
                  '        "1:\\tjmp _ogles2_%s\\n2:\\tjmp _ogles2_sl_%s\\n");\n\n'
                  % (e.name, e.name, e.name, e.name))
-    L += ["const struct OGLES2Dispatch ogles2_dispatch_table = {\n",
-          "    .abiVersion = OGLES2_DISPATCH_ABI_VERSION,\n",
-          "    .structSize = sizeof(struct OGLES2Dispatch),\n",
-          "    .backendFlags = OGLES2_BACKEND_PISTORM_V3D42,\n",
+    L += ["const struct OGLES3Dispatch ogles2_dispatch_table = {\n",
+          "    .abiVersion = OGLES3_DISPATCH_ABI_VERSION,\n",
+          "    .structSize = sizeof(struct OGLES3Dispatch),\n",
+          "    .backendFlags = OGLES3_BACKEND_PISTORM_V3D42,\n",
           "    .reserved = 0,\n"]
     for e in table:
         if not isinstance(e, str):
@@ -343,17 +343,17 @@ def gen_stubs_c(table, done):
 
 
 def gen_agl_c(table):
-    L = [HEADER, "#include <proto/ogles2.h>\n\n"]
+    L = [HEADER, "#include <proto/ogles3.h>\n\n"]
     for e in table:
         if isinstance(e, str) or e.kind != "agl" or e.client != "gen":
             continue
         if e.ctx == "arg":
             sys.exit("agl.txt: %s takes the context as argument; its client wrapper must be hand"
                      % e.name)
-        ret = "void *" if e.ret.startswith("struct OGLES2Context") else e.ret + " "
+        ret = "void *" if e.ret.startswith("struct OGLES3Context") else e.ret + " "
         args = ", ".join(d for d, _ in e.params) or "void"
-        body = "OGLES2Dispatch->%s(%s)" % (e.field, e.call_args("OGLES2CurrentContext"))
-        guard = "    if (!OGLES2Dispatch)\n        return%s;\n" % ("" if e.ret == "void" else " 0")
+        body = "OGLES3Dispatch->%s(%s)" % (e.field, e.call_args("OGLES3CurrentContext"))
+        guard = "    if (!OGLES3Dispatch)\n        return%s;\n" % ("" if e.ret == "void" else " 0")
         L.append("%s%s(%s)\n{\n%s    %s%s;\n}\n\n" % (ret, e.name, args, guard,
                                                     "" if e.ret == "void" else "return ", body))
     return "".join(L)
@@ -362,12 +362,12 @@ def gen_agl_c(table):
 def gen_procaddr_c(table):
     gl = sorted((e for e in table if not isinstance(e, str) and e.kind == "gl"),
                 key=lambda e: e.name.encode())
-    L = [HEADER, "#include <string.h>\n#include <proto/ogles2.h>\n\n",
+    L = [HEADER, "#include <string.h>\n#include <proto/ogles3.h>\n\n",
          "/* Context-free thunks for callers that look GL functions up by name\n"
          " * (SDL, gl4es): plan section 6.5. */\n"]
     for e in gl:
         args = ", ".join(n for _, n in e.params)
-        call = "OGLES2Dispatch->%s(OGLES2CurrentContext%s)" % (e.field, ", " + args if args else "")
+        call = "OGLES3Dispatch->%s(OGLES3CurrentContext%s)" % (e.field, ", " + args if args else "")
         L.append("static %s thunk_%s(%s)\n{ %s%s; }\n" % (
             e.ret, e.name, ", ".join(d for d, _ in e.params) or "void",
             "" if e.ret == "void" else "return ", call))
@@ -389,15 +389,15 @@ def gen_abi_layout_c(table):
     # __builtin_offsetof, not offsetof: clib2's offsetof is the pointer-cast
     # macro, which GCC does not accept as a constant, so a typedef-array check
     # built on it silently became a run-time array and could never fail.
-    L = [HEADER, "#include <stdio.h>\n#include <libraries/ogles2_dispatch.h>\n\n",
+    L = [HEADER, "#include <stdio.h>\n#include <libraries/ogles3_dispatch.h>\n\n",
          "#define CHECK(name, expr) _Static_assert(expr, #name)\n",
-         "#define OFS(field) __builtin_offsetof(struct OGLES2Dispatch, field)\n",
-         "CHECK(abi_version, OGLES2_DISPATCH_ABI_VERSION == %d);\n" % ABI_VERSION,
+         "#define OFS(field) __builtin_offsetof(struct OGLES3Dispatch, field)\n",
+         "CHECK(abi_version, OGLES3_DISPATCH_ABI_VERSION == %d);\n" % ABI_VERSION,
          "CHECK(header, OFS(reserved) == 12);\n"]
     for i, e in enumerate(table):
         f = ("retired_%d" % i) if isinstance(e, str) else e.field
         L.append("CHECK(slot_%d_%s, OFS(%s) == %d);\n" % (i, f, f, 16 + 4 * i))
-    L.append("CHECK(size, sizeof(struct OGLES2Dispatch) == %d);\n\n" % (16 + 4 * len(table)))
+    L.append("CHECK(size, sizeof(struct OGLES3Dispatch) == %d);\n\n" % (16 + 4 * len(table)))
     L.append("int main(void)\n{\n    printf(\"PASS: ABI %d, %d entries, %d bytes\\n\");\n"
              "    return 0;\n}\n" % (ABI_VERSION, len(table), 16 + 4 * len(table)))
     return "".join(L)
@@ -419,8 +419,8 @@ def main():
         sys.exit("%s defines ogles2_ functions that are not table entries: %s"
                  % (a.impl_dir, ", ".join(sorted(unknown))))
 
-    write(a.out, "include/libraries/ogles2_dispatch.h", gen_dispatch_h(table))
-    write(a.out, "include/proto/ogles2.h", gen_proto_h(table))
+    write(a.out, "include/libraries/ogles3_dispatch.h", gen_dispatch_h(table))
+    write(a.out, "include/proto/ogles3.h", gen_proto_h(table))
     write(a.out, "ogles2/ogles2_api.h", gen_api_h(table))
     write(a.out, "ogles2/dispatch_table.c", gen_table_c(table))
     stubs, nstubs = gen_stubs_c(table, done)

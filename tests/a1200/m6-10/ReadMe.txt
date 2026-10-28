@@ -6,7 +6,7 @@ What this is
 A test of 4x antialiasing (MSAA): the GPU takes four samples per pixel,
 so the edges of shapes come out smooth instead of stepped. Programs can
 ask for it, and it can be switched on for any program from the Shell:
-       SetEnv OGLES2/MSAA 4
+       SetEnv OGLES3/MSAA 4
 
 The run checks the antialiasing itself, then runs the earlier drawing,
 texture and framebuffer tests as before, and once more with antialiasing
@@ -35,9 +35,9 @@ that hung:   Execute Run-M1 FROM=<the next step>
 Contents
 --------
 Run-M1               the test script
-libs/ogles2.library  the library (logs every line at once)
+libs/ogles3.library  the library (logs every line at once)
 bin/m6_msaa          the antialiasing test
 bin/m1_draw, m2_texture, m5_fbo   the earlier tests
 bin/*.v3dp, *.v3dw   the tests' compiled shaders
-bin/OGLES2Log        writes the library's log file on request
+bin/OGLES3Log        writes the library's log file on request
 notes-template.txt   copied to results/notes.txt at the end

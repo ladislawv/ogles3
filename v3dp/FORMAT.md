@@ -9,7 +9,7 @@ A `.v3dp` file holds one linked GLES2 program compiled for V3D 4.2: every compil
 variant (QPU code, uniform recipe, the shader properties the draw path needs) and the program
 tables the runtime needs to implement `glUniform*`, `glGetUniformLocation`, samplers and
 attributes. It is written by the offline compiler (S1, `v3dglslc` on the PC) and by the
-on-target compiler module (S2), and read by `ogles2.library` (plan sections 8.2 to 8.4).
+on-target compiler module (S2), and read by `ogles3.library` (plan sections 8.2 to 8.4).
 
 **Rule zero: both compilers must produce the same bytes.** The writer serializes every field
 explicitly; nothing is a memory image of a host struct (the hosts differ in byte order and in
@@ -188,7 +188,7 @@ with samplers has a second file of the same format, `<24 hex digits>.v3dw` besid
 `.v3dp`: the same draws with every sampler bound to an RGBA32F texture, so its fragment
 variants have every sampler's bit set in `sampler_is_32b` (the TMU returns 32 bits a
 channel, which float and depth textures need, and which reads 8-bit textures correctly too).
-`ogles2.library` uses its fragment variants for draws that sample such a texture; its other
+`ogles3.library` uses its fragment variants for draws that sample such a texture; its other
 variants may be missing (`v3dglslc` captures what the driver compiles for those draws). The
 offline compiler writes it next to the `.v3dp`; the on-target compiler writes it on request
 (`V3DGLSL_LINK32`, `v3dp/v3dglsl_port.h`), when a draw first needs it.
@@ -197,7 +197,7 @@ offline compiler writes it next to the `.v3dp`; the on-target compiler writes it
 program can have a third file of the same format, `<24 hex digits>.v3da`: the same draws with
 the fragment key's `msaa` and `sample_alpha_to_coverage` set (`tools/v3dglslc/patches/0014`;
 V3D has no fixed-function alpha to coverage, so the fragment shader turns alpha into the
-sample mask). `ogles2.library` uses its fragment variants for draws into a 4x MSAA default
+sample mask). `ogles3.library` uses its fragment variants for draws into a 4x MSAA default
 framebuffer with `GL_SAMPLE_ALPHA_TO_COVERAGE` enabled. Only the on-target compiler writes it,
 on request (`V3DGLSL_LINK_A2C`), when a draw first needs it; it is looked for in `PROGDIR:`
 and the cache first, as the `.v3dw` is.

@@ -5,7 +5,7 @@ What this is
 ------------
 dEQP-GLES31, the OpenGL ES 3.1 conformance tests of Khronos' test suite
 (VK-GL-CTS), compiled for the Amiga (68020 + 68881) and run on a test
-build of ogles2.library that offers OpenGL ES 3.1 contexts (not yet
+build of ogles3.library that offers OpenGL ES 3.1 contexts (not yet
 complete: most groups are expected to fail for now). It draws in a small
 256x256 window on the Workbench screen, one test after another, and
 checks each result itself: nothing needs watching.
@@ -36,8 +36,8 @@ What is in it
 -------------
 bin/deqp-gles31       the tests (ports/deqp in the ogles2 sources)
 bin/gles31/           their data: shader test files, a few images
-bin/OGLES2Log        shows the library's log
-libs/                ogles2.library (an OpenGL ES 3 test build) and the
+bin/OGLES3Log        shows the library's log
+libs/                ogles3.library (an OpenGL ES 3 test build) and the
                      shader compiler, used from here for the run only
 cache/               compiled shaders
 caselists/           the official list of tests, a file per group

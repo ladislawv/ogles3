@@ -1,6 +1,6 @@
 /*
  * ABI probe (plan section 6.3): built with GCC and with vbcc, against the
- * same GCC-built ogles2.library. Every awkward argument and return type
+ * same GCC-built ogles3.library. Every awkward argument and return type
  * crosses the table and is read back:
  *   GLboolean arguments (1 byte) alone, four in a row, and mixed with floats;
  *   float arguments, alone and after an integer;
@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <proto/exec.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 
 static int failures, checks;
 
@@ -50,17 +50,17 @@ int main(int argc, char **argv)
 #elif defined(__GNUC__)
     printf("abi_probe built with GCC %d.%d\n", __GNUC__, __GNUC_MINOR__);
 #endif
-    if (!OGLES2Open()) {
-        printf("FAIL: OGLES2Open\n");
+    if (!OGLES3Open()) {
+        printf("FAIL: OGLES3Open\n");
         return 20;
     }
     /* varargs: five tags must arrive intact */
-    ctx = aglCreateContextTags2(&err, OGLES2_CCT_DEPTH, 16UL, OGLES2_CCT_STENCIL, 8UL,
-                                OGLES2_CCT_VSYNC, 0UL, OGLES2_CCT_PISTORM_STATE_ONLY, TRUE,
+    ctx = aglCreateContextTags2(&err, OGLES3_CCT_DEPTH, 16UL, OGLES3_CCT_STENCIL, 8UL,
+                                OGLES3_CCT_VSYNC, 0UL, OGLES3_CCT_PISTORM_STATE_ONLY, TRUE,
                                 TAG_DONE);
-    check(ctx != 0 && err == OGLES2_CCE_OK, "aglCreateContextTags2 (varargs)");
+    check(ctx != 0 && err == OGLES3_CCE_OK, "aglCreateContextTags2 (varargs)");
     if (!ctx) {
-        OGLES2Close();
+        OGLES3Close();
         return 20;
     }
     aglMakeCurrent(ctx);
@@ -165,7 +165,7 @@ int main(int argc, char **argv)
 
     check(glGetError() == GL_NO_ERROR, "no stray error at the end");
     aglDestroyContext(ctx);
-    OGLES2Close();
+    OGLES3Close();
     printf("%s: %d of %d checks passed\n", failures ? "FAILED" : "ALL PASSED", checks - failures,
            checks);
     return failures ? 10 : 0;

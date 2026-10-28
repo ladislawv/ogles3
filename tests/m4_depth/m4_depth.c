@@ -18,7 +18,7 @@
 #include <proto/exec.h>
 #include <proto/graphics.h>
 #include <proto/cybergraphics.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include "../common/smooth_shaders.h"
 
 struct GfxBase *GfxBase;
@@ -88,8 +88,8 @@ static void run(int depth, int stencil)
     unsigned long a, b;
     char msg[160];
 
-    if (!bm || !(ctx = aglCreateContextTags2(&err, OGLES2_CCT_BITMAP, (ULONG)bm, OGLES2_CCT_DEPTH, depth,
-                                             OGLES2_CCT_STENCIL, stencil, TAG_DONE))) {
+    if (!bm || !(ctx = aglCreateContextTags2(&err, OGLES3_CCT_BITMAP, (ULONG)bm, OGLES3_CCT_DEPTH, depth,
+                                             OGLES3_CCT_STENCIL, stencil, TAG_DONE))) {
         check(0, "create a bitmap context");
         return;
     }
@@ -184,15 +184,15 @@ int main(void)
     printf("ogles2 M4: depth and stencil across a mid-frame flush\n");
     GfxBase = (struct GfxBase *)OpenLibrary((STRPTR) "graphics.library", 39);
     CyberGfxBase = OpenLibrary((STRPTR) "cybergraphics.library", 41);
-    if (!GfxBase || !CyberGfxBase || !OGLES2Open()) {
-        printf("needs graphics, cybergraphics 41 and %s\n", OGLES2NAME);
+    if (!GfxBase || !CyberGfxBase || !OGLES3Open()) {
+        printf("needs graphics, cybergraphics 41 and %s\n", OGLES3NAME);
         return 20;
     }
     kind = "D16";
     run(16, 0);
     kind = "D24S8";
     run(24, 8);
-    OGLES2Close();
+    OGLES3Close();
     printf("%s: %d of %d checks passed\n", failures ? "FAILED" : "ALL PASSED", checks - failures, checks);
     return failures ? 10 : 0;
 }

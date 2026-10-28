@@ -33,8 +33,8 @@ by line. To go on after the step that hung:   Execute Run-M1 FROM=<the next step
 Contents
 --------
   Run-M1               the script
-  libs/ogles2.library  the library (it writes every log line at once)
+  libs/ogles3.library  the library (it writes every log line at once)
   libs/v3dglslc        the shader compiler (SDL writes its shaders at run time)
-  bin/                 m1_clear, SDL2's tests, screens, OGLES2Log
+  bin/                 m1_clear, SDL2's tests, screens, OGLES3Log
   bin3/                SDL3's tests
   cache/               compiled shaders, made by the run

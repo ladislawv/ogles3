@@ -25,7 +25,7 @@
 /* Where the compiler is looked for: installed, then beside the program
  * that uses the library (its drawer's libs/, then the drawer itself), so a
  * program can bring it when it is not installed. */
-static const char *const compiler_where[] = {"LIBS:v3dglslc", "PROGDIR:libs/v3dglslc", "PROGDIR:v3dglslc"};
+static const char *const compiler_where[] = {"LIBS:v3dglslc3", "PROGDIR:libs/v3dglslc3", "PROGDIR:v3dglslc3"};
 static char compiler_path[256]; /* the one found, as an absolute path ("" until then) */
 #define COMPILER_STACK (4UL * 1024 * 1024) /* what the A1200 spike runs used */
 #define START_TICKS    (60 * 50)           /* the first start reads 19 MB */
@@ -51,14 +51,14 @@ static BOOL assign_exists(const char *name)
 
 BOOL ogles2_cache_assigned(void)
 {
-    return assign_exists("OGLES2Cache");
+    return assign_exists("OGLES3Cache");
 }
 
-/* Where compiled programs go: OGLES2Cache: if assigned (kept), else T:
+/* Where compiled programs go: OGLES3Cache: if assigned (kept), else T:
  * (until the next reboot). */
 const char *ogles2_cache_dir(void)
 {
-    return ogles2_cache_assigned() ? "OGLES2Cache:" : "T:";
+    return ogles2_cache_assigned() ? "OGLES3Cache:" : "T:";
 }
 
 /* The compiler (compiler_where's first): its size and build stamp, hashed
@@ -236,9 +236,9 @@ static BOOL request(ULONG op, const char *vs, const char *fs, const char *bindin
 
     DateStamp(&t0);
     /* Two programs may start it at once; the second server leaves again. */
-    ObtainSemaphore(&OGLES2LibBase->compiler_lock);
+    ObtainSemaphore(&OGLES3LibBase->compiler_lock);
     sent = send(&r) || (start_server() && send(&r));
-    ReleaseSemaphore(&OGLES2LibBase->compiler_lock);
+    ReleaseSemaphore(&OGLES3LibBase->compiler_lock);
     if (!sent) {
         DeleteMsgPort(reply);
         return FALSE;
@@ -379,7 +379,7 @@ void ogles2_compiler_stop(void)
         FreeVec(r);
 }
 
-void ogles2_glReleaseShaderCompiler(struct OGLES2Context *ctx)
+void ogles2_glReleaseShaderCompiler(struct OGLES3Context *ctx)
 {
     if (ogles2_context_valid(ctx))
         ogles2_compiler_stop(); /* started again by the next program without a binary */

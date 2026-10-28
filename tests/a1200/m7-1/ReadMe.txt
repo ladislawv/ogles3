@@ -5,7 +5,7 @@ What this is
 ------------
 dEQP-GLES2, the OpenGL ES 2.0 conformance tests of Khronos' test suite
 (VK-GL-CTS), compiled for the Amiga (68020 + 68881) and run on
-ogles2.library. It draws in a small 256x256 window on the Workbench
+ogles3.library. It draws in a small 256x256 window on the Workbench
 screen, one test after another, and checks each result itself: nothing
 needs watching.
 
@@ -35,8 +35,8 @@ What is in it
 -------------
 bin/deqp-gles2       the tests (ports/deqp in the ogles2 sources)
 bin/gles2/           their data: shader test files, a few images
-bin/OGLES2Log        shows the library's log
-libs/                ogles2.library and the shader compiler, used from
+bin/OGLES3Log        shows the library's log
+libs/                ogles3.library and the shader compiler, used from
                      here for the run only
 cache/               compiled shaders
 caselists/           the official list of tests, a file per group

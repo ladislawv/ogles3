@@ -128,11 +128,11 @@ def main():
               "SHOT: 4x3 test image written as PNG")
 
         # environment
-        st.call("SETENV", "OGLES2/StoreDither", b"1")
-        check(st.call("GETENV", "OGLES2/StoreDither") == b"1", "SETENV/GETENV")
-        st.call("UNSETENV", "OGLES2/StoreDither")
+        st.call("SETENV", "OGLES3/StoreDither", b"1")
+        check(st.call("GETENV", "OGLES3/StoreDither") == b"1", "SETENV/GETENV")
+        st.call("UNSETENV", "OGLES3/StoreDither")
         try:
-            st.call("GETENV", "OGLES2/StoreDither")
+            st.call("GETENV", "OGLES3/StoreDither")
             check(False, "UNSETENV")
         except amictl.StationError:
             check(True, "UNSETENV")

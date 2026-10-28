@@ -1,9 +1,9 @@
-ogles2.library 1.3 (release 1.3.2) for AmigaOS 3.x on PiStorm
+ogles3.library 1.3 (release 1.3.2) for AmigaOS 3.x on PiStorm
 =============================================
 
 OpenGL ES 2.0 for 68k AmigaOS, drawn by the Raspberry Pi 4's GPU (Broadcom
 V3D 4.2) through PiStorm and Emu68. The API is source-compatible with
-AmigaOS 4's ogles2.library: the GLES2 functions plus the agl* context calls.
+AmigaOS 4's ogles3.library: the GLES2 functions plus the agl* context calls.
 
 Requirements
 ------------
@@ -14,10 +14,10 @@ Requirements
 
 What is in this archive
 -----------------------
-  Install-ogles2      the installer (an AmigaDOS script, see below)
-  Libs/ogles2.library the library
+  Install-ogles3      the installer (an AmigaDOS script, see below)
+  Libs/ogles3.library the library
   Libs/v3dglslc       the shader compiler (Mesa's V3D compiler, 19 MB)
-  C/OGLES2Log         writes the library's log while a program runs
+  C/OGLES3Log         writes the library's log while a program runs
   Examples/           two small programs with their compiled shaders
   SDK/                headers, import libraries, documentation and the
                       examples' sources, for programmers (only in
@@ -28,36 +28,36 @@ Installing
 ----------
 From a Shell, in this drawer:
 
-    Execute Install-ogles2
+    Execute Install-ogles3
 
 It asks before each step:
-- copies ogles2.library to LIBS:, and replaces a LIBS:v3dglslc older than
+- copies ogles3.library to LIBS:, and replaces a LIBS:v3dglslc3 older than
   it (any from 1.3.1 or before) without asking, since the library uses
   that one first;
 - copies the shader compiler v3dglslc to LIBS: (optional, see "Shaders");
-- makes the drawer SYS:OGLES2Cache and adds "Assign OGLES2Cache:
-  SYS:OGLES2Cache" to S:User-Startup, so compiled shaders are kept across
+- makes the drawer SYS:OGLES3Cache and adds "Assign OGLES3Cache:
+  SYS:OGLES3Cache" to S:User-Startup, so compiled shaders are kept across
   reboots (optional; without it they are kept in T: until the next reboot);
-- copies OGLES2Log to C: (optional).
-"Execute Install-ogles2 ALL" does all four without asking.
+- copies OGLES3Log to C: (optional).
+"Execute Install-ogles3 ALL" does all four without asking.
 
-To remove it: delete LIBS:ogles2.library, LIBS:v3dglslc, C:OGLES2Log and
-SYS:OGLES2Cache, and the lines between ";BEGIN ogles2" and ";END ogles2"
+To remove it: delete LIBS:ogles3.library, LIBS:v3dglslc3, C:OGLES3Log and
+SYS:OGLES3Cache, and the lines between ";BEGIN ogles2" and ";END ogles2"
 in S:User-Startup.
 
 Using it without installing
 ---------------------------
-A program finds ogles2.library and the compiler in its own drawer when they
+A program finds ogles3.library and the compiler in its own drawer when they
 are not installed: the library in LIBS:, else PROGDIR:libs/, else beside the
-program; the compiler likewise (LIBS:v3dglslc, PROGDIR:libs/v3dglslc,
-PROGDIR:v3dglslc). So a program can be shipped with a libs/ drawer holding
-ogles2.library (and v3dglslc, if it needs to compile shaders). This works
+program; the compiler likewise (LIBS:v3dglslc3, PROGDIR:libs/v3dglslc3,
+PROGDIR:v3dglslc3). So a program can be shipped with a libs/ drawer holding
+ogles3.library (and v3dglslc, if it needs to compile shaders). This works
 for programs built with this SDK's import library (version 1.3 or newer).
 A program's own copy also replaces an installed one that is too old for
 it, unless another program is using the old one at that moment (AmigaOS
-keeps one ogles2.library in memory for all programs).
+keeps one ogles3.library in memory for all programs).
 
-To try the examples this way: copy Libs/ogles2.library into Examples/libs/
+To try the examples this way: copy Libs/ogles3.library into Examples/libs/
 and run Examples/triangle, Examples/cube or Examples/boingocean.
 
 Shaders
@@ -65,9 +65,9 @@ Shaders
 The GPU runs machine code compiled from each program's GLSL. ogles2 finds
 a program's compiled form ("binary", a .v3dp file named by a hash of the
 GLSL text) in the program's shaders/ drawer, beside the program, or in
-OGLES2Cache: (or T:). When there is
+OGLES3Cache: (or T:). When there is
 none, the compiler v3dglslc compiles it (about 0.2 s per program; its first
-start takes about a second) and the result goes into OGLES2Cache:, so the
+start takes about a second) and the result goes into OGLES3Cache:, so the
 next run needs no compiler.
 
 Programs that ship their binaries (as the examples do) run without the
@@ -97,7 +97,7 @@ Examples/shaders/: they run without the compiler.
 Logging
 -------
 The library logs to T:ogles2.log, or to the file named in the environment
-variable OGLES2/LogFile (SetEnv OGLES2/LogFile RAM:ogles2.log). OGLES2Log
+variable OGLES3/LogFile (SetEnv OGLES3/LogFile RAM:ogles2.log). OGLES3Log
 writes the buffered log while a program still runs. A program that fails
 usually says why there.
 
@@ -109,13 +109,13 @@ cross compiler). SDL2 and SDL3 with an ogles2 backend are a separate
 archive, ogles2-1.3.2-sdl.lha or .zip, which unpacks over the SDK (its
 ReadMe-SDL). It holds:
 
-SDK/include    <proto/ogles2.h> (GLES2 and agl*), <libraries/ogles2.h>
+SDK/include    <proto/ogles3.h> (GLES2 and agl*), <libraries/ogles3.h>
                (tags, errors, extra enumerants), the dispatch table, and
                Khronos' GLES2/ and KHR/ headers
-SDK/lib        libogles2.a (GCC) and ogles2.lib (vbcc), the import library
+SDK/lib        libogles3.a (GCC) and ogles3.lib (vbcc), the import library
 SDK/doc        GettingStarted.txt: writing, building, debugging and shipping
                a program, and a prompt for working with an AI assistant;
-               ogles2.doc: the agl* calls, shaders and binaries, extensions
+               ogles3.doc: the agl* calls, shaders and binaries, extensions
                and deviations from GLES2 and from AmigaOS 4's library
 SDK/examples   the examples' sources and a Makefile (GCC and vbcc)
 
@@ -128,14 +128,14 @@ Conformance
 The Khronos dEQP-GLES2 must-pass list (17,165 cases), run on an A1200:
 all pass except 25 cube-map cases (the GPU always filters cube maps
 seamlessly, as GLES 3 requires) and 6 timing and quality warnings. The
-SDK's ogles2.doc lists the deviations.
+SDK's ogles3.doc lists the deviations.
 
 Licence
 -------
-ogles2.library incorporates PiStorm3D's V3D backend and is distributed
+ogles3.library incorporates PiStorm3D's V3D backend and is distributed
 under the Hyperion MiniGL Open Source License (licences/
 License_MiniGL_Library.txt): for AmigaOS only, with the source published.
-The import library, headers, examples and OGLES2Log are MIT. v3dglslc is
+The import library, headers, examples and OGLES3Log are MIT. v3dglslc is
 Mesa (MIT; licences/Mesa/). LICENSE lists every part.
 
 Credits

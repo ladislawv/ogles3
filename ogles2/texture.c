@@ -19,7 +19,7 @@
  * an image depth of 6 and that stride.
  *
  * Render to texture (plan 7.7, fbo.c): a level a framebuffer object's job
- * drew into is newer on the GPU than its RAM copy (OGLES2Face.rendered);
+ * drew into is newer on the GPU than its RAM copy (OGLES3Face.rendered);
  * the copy is read back (sync) before anything works from it.
  *
  * Licence: this file adapts PiStorm3D's code, so it is under the Hyperion
@@ -45,7 +45,7 @@ extern v3d_u32 g_v3d_cl_generation; /* v3d_frame.c: bumped whenever a control li
  * (Mesa's separate stencil), as the renderbuffer's (fbo.c), a layer per
  * face (bytes apart); `stale`: levels to fill again from the faces' stencil
  * copies (given since). */
-struct OGLES2S8
+struct OGLES3S8
 {
     v3d_mem mem[MAX_LEVELS];
     ULONG base[MAX_LEVELS], ub[MAX_LEVELS], bytes[MAX_LEVELS];
@@ -54,7 +54,7 @@ struct OGLES2S8
 };
 
 /* The images of one face (a 2D texture has one). */
-struct OGLES2Face
+struct OGLES3Face
 {
     UWORD w[MAX_LEVELS], h[MAX_LEVELS];
     ULONG defined;                  /* levels given (bit per level) */
@@ -73,15 +73,15 @@ struct OGLES2Face
     GLenum ifmt[MAX_LEVELS];        /* the internal format as given (ES 3.1's GL_TEXTURE_INTERNAL_FORMAT) */
 };
 
-struct OGLES2Texture
+struct OGLES3Texture
 {
     GLuint name;
     GLenum target;                  /* 0 until first bound */
-    struct OGLES2SamplerParams s;   /* what a sampler object bound to its unit replaces */
+    struct OGLES3SamplerParams s;   /* what a sampler object bound to its unit replaces */
     GLfloat lod_bias;               /* EXT_texture_lod_bias (a texture parameter, as AmigaOS 4's) */
     GLint base_level, max_level;
     ULONG pver;                     /* bumped by every parameter change: the records' check */
-    struct OGLES2Face *f;           /* 2D: f[0]; a cube map: +X, -X, +Y, -Y, +Z, -Z (in f6); a 2D
+    struct OGLES3Face *f;           /* 2D: f[0]; a cube map: +X, -X, +Y, -Y, +Z, -Z (in f6); a 2D
                                      * array's layers, a 3D texture's slices (f6, or allocated) */
     V3DTexture *gpu;                /* NULL until level 0 exists (a cube map: of all faces) */
     UBYTE hw_type, cpp, swizzle[4]; /* the stored format (storage_of), set with gpu */
@@ -97,7 +97,7 @@ struct OGLES2Texture
     APTR st_mem;                    /* the GPU copy they point at */
     ULONG st_pver;                  /* the parameters they were made from */
     ULONG st_tex, st_smp;
-    struct OGLES2Context *st_ctx;   /* whose job's state buffer they are in (not st_own) */
+    struct OGLES3Context *st_ctx;   /* whose job's state buffer they are in (not st_own) */
     BOOL st_own;                    /* they are in rec */
     v3d_mem rec;                    /* 64 bytes: texture state at 0, sampler state at 32; goes
                                      * with the GPU copy (freed, or deferred when renamed) */
@@ -118,24 +118,24 @@ struct OGLES2Texture
     GLenum ds_mode;                 /* ES 3.1's GL_DEPTH_STENCIL_TEXTURE_MODE: GL_DEPTH_COMPONENT or
                                      * GL_STENCIL_INDEX (stencil texturing, stage D item 4) */
     ULONG st_sver;                  /* the records' sampler object's version (0: none) */
-    struct OGLES2Face f6[6];
+    struct OGLES3Face f6[6];
     UWORD nf;                       /* faces f has room for */
     UWORD d[MAX_LEVELS];            /* a 2D array's layers, a 3D texture's depth, by level (ES 3.0;
                                      * a 3D level's slices are faces 0 to d - 1) */
     UBYTE immutable_levels;         /* ES 3.0's glTexStorage*: its levels (0: mutable) */
     BOOL es3_rules;                 /* its images were given in an ES3 context: ES 3.0's depth sampling */
-    struct OGLES2S8 *s8;            /* DEPTH32F_STENCIL8: the stencil, made at its first use as a
+    struct OGLES3S8 *s8;            /* DEPTH32F_STENCIL8: the stencil, made at its first use as a
                                      * job's (ogles2_texture_s8_surface); NULL: none */
     /* ES 3.0 3.8.13: a mutable texture complete from its base level but not
      * from level 0 is sampled through a texture of the library's own whose
      * level 0 is that base level (based_view; its RAM copies are this
      * texture's). Dropped at every change (before_change); NULL: none. */
-    struct OGLES2Texture *view;
+    struct OGLES3Texture *view;
     GLint view_base;                /* the level the view's level 0 is */
     /* ES 3.1: the job whose draws store into it through an image unit, not
      * finished yet (0: none), a job of img_share's members. */
     ULONG img_serial;
-    struct OGLES2Share *img_share;
+    struct OGLES3Share *img_share;
 };
 
 /* Both records fit their halves of rec. */
@@ -149,60 +149,60 @@ typedef char ogles2_rec_fits[sizeof(v3d_texture_shader_state) <= 32 && sizeof(v3
 /* ES 3.1's image units (glBindImageTexture, stage D item 2): a texture's
  * level, all its layers or one, the access and the format shaders see. */
 #define MAX_IMAGE_UNITS 256 /* GL_MAX_IMAGE_UNITS (v3dglslc -L) */
-struct OGLES2ImageUnit
+struct OGLES3ImageUnit
 {
-    struct OGLES2Texture *t;        /* NULL: none */
+    struct OGLES3Texture *t;        /* NULL: none */
     GLint level, layer;
     GLboolean layered;
     GLenum access, format;
 };
 
-struct OGLES2TexState
+struct OGLES3TexState
 {
-    struct OGLES2Share *sh;         /* the named textures: sh->tex, sh->ntex (share.c) */
-    struct OGLES2Texture default2d, defaultcube, defaultrect; /* name 0: the context's own */
-    struct OGLES2Texture default3d, defaultarray; /* ES 3.0 */
-    struct OGLES2Texture default2dms; /* ES 3.1 */
-    struct OGLES2Texture *unit2d[OGLES2_MAX_TEXTURE_UNITS], *unitcube[OGLES2_MAX_TEXTURE_UNITS];
-    struct OGLES2Texture *unitrect[OGLES2_MAX_TEXTURE_UNITS]; /* ARB_texture_rectangle */
-    struct OGLES2Texture *unit3d[OGLES2_MAX_TEXTURE_UNITS], *unitarray[OGLES2_MAX_TEXTURE_UNITS]; /* ES 3.0 */
-    struct OGLES2Texture *unit2dms[OGLES2_MAX_TEXTURE_UNITS]; /* ES 3.1's GL_TEXTURE_2D_MULTISAMPLE */
-    struct OGLES2ImageUnit *images; /* ES 3.1's glBindImageTexture units (NULL until first bound) */
-    struct OGLES2Texture fallback;  /* 1x1 (0,0,0,1): what an incomplete texture samples */
-    struct OGLES2Texture fallback_int; /* the same in RGBA8UI, for an integer sampler (ES 3.0) */
+    struct OGLES3Share *sh;         /* the named textures: sh->tex, sh->ntex (share.c) */
+    struct OGLES3Texture default2d, defaultcube, defaultrect; /* name 0: the context's own */
+    struct OGLES3Texture default3d, defaultarray; /* ES 3.0 */
+    struct OGLES3Texture default2dms; /* ES 3.1 */
+    struct OGLES3Texture *unit2d[OGLES3_MAX_TEXTURE_UNITS], *unitcube[OGLES3_MAX_TEXTURE_UNITS];
+    struct OGLES3Texture *unitrect[OGLES3_MAX_TEXTURE_UNITS]; /* ARB_texture_rectangle */
+    struct OGLES3Texture *unit3d[OGLES3_MAX_TEXTURE_UNITS], *unitarray[OGLES3_MAX_TEXTURE_UNITS]; /* ES 3.0 */
+    struct OGLES3Texture *unit2dms[OGLES3_MAX_TEXTURE_UNITS]; /* ES 3.1's GL_TEXTURE_2D_MULTISAMPLE */
+    struct OGLES3ImageUnit *images; /* ES 3.1's glBindImageTexture units (NULL until first bound) */
+    struct OGLES3Texture fallback;  /* 1x1 (0,0,0,1): what an incomplete texture samples */
+    struct OGLES3Texture fallback_int; /* the same in RGBA8UI, for an integer sampler (ES 3.0) */
     UBYTE active;
     BOOL warned_flush;
     BOOL logged_tfu;                /* glGenerateMipmap's first TFU job logged */
-    struct OGLES2Texture *scratch;  /* glCopyTex* from the default framebuffer (copy.c) */
-    struct OGLES2Sampler *unitsmp[OGLES2_MAX_TEXTURE_UNITS]; /* ES 3.0: glBindSampler's (NULL: none) */
-    struct OGLES2Sampler *copy_smp; /* unit 0's, set aside while a copy draws (ogles2_texture_unit0) */
+    struct OGLES3Texture *scratch;  /* glCopyTex* from the default framebuffer (copy.c) */
+    struct OGLES3Sampler *unitsmp[OGLES3_MAX_TEXTURE_UNITS]; /* ES 3.0: glBindSampler's (NULL: none) */
+    struct OGLES3Sampler *copy_smp; /* unit 0's, set aside while a copy draws (ogles2_texture_unit0) */
     BOOL copying;
 };
 
 /* ES 3.0's sampler objects (stage B item 7): bound to a unit, sampled with
  * instead of the unit's texture's parameters. */
-struct OGLES2Sampler
+struct OGLES3Sampler
 {
     GLuint name;
-    struct OGLES2SamplerParams s;
+    struct OGLES3SamplerParams s;
     ULONG ver;                      /* its parameters' version, unique across samplers (smp_serial):
                                      * the texture records' check (st_sver) */
 };
 
 static ULONG smp_serial; /* the sampler versions given out */
 
-static void sync(struct OGLES2Texture *t);
+static void sync(struct OGLES3Texture *t);
 static BOOL sized_storage(GLenum ifmt, GLenum *format, GLenum *type);
 static BOOL es3_sized(GLenum ifmt);
-static void rect_defaults(struct OGLES2Texture *t);
-static void put_level(struct OGLES2Face *f, int level, UBYTE *img, GLsizei width, GLsizei height, GLenum format,
+static void rect_defaults(struct OGLES3Texture *t);
+static void put_level(struct OGLES3Face *f, int level, UBYTE *img, GLsizei width, GLsizei height, GLenum format,
                       GLenum type, BOOL given, GLenum sized, BOOL sized_given, GLenum ifmt);
-static void drop_level(struct OGLES2Face *f, int level);
+static void drop_level(struct OGLES3Face *f, int level);
 static BOOL face_target(GLenum target);
 static int int_components(GLenum format);
 
 /* A texture's and a new sampler object's sampling parameters. */
-static void smp_defaults(struct OGLES2SamplerParams *sp)
+static void smp_defaults(struct OGLES3SamplerParams *sp)
 {
     sp->min_filter = GL_NEAREST_MIPMAP_LINEAR;
     sp->mag_filter = GL_LINEAR;
@@ -214,7 +214,7 @@ static void smp_defaults(struct OGLES2SamplerParams *sp)
     sp->compare_func = GL_LEQUAL;
 }
 
-static void init_object(struct OGLES2Texture *t, GLuint name, GLenum target)
+static void init_object(struct OGLES3Texture *t, GLuint name, GLenum target)
 {
     memset(t, 0, sizeof(*t));
     t->f = t->f6;
@@ -233,7 +233,7 @@ static void init_object(struct OGLES2Texture *t, GLuint name, GLenum target)
 
 /* ARB_texture_rectangle's defaults: a linear minification filter (no
  * mipmaps) and clamped wraps. Also when a new name is first bound there. */
-static void rect_defaults(struct OGLES2Texture *t)
+static void rect_defaults(struct OGLES3Texture *t)
 {
     if (t->target != GL_TEXTURE_RECTANGLE)
         return;
@@ -243,11 +243,11 @@ static void rect_defaults(struct OGLES2Texture *t)
 
 static BOOL cpu_uploads; /* probe U of the context last seen here (a test switch): store_tfu */
 
-static struct OGLES2TexState *ts_get(struct OGLES2Context *ctx)
+static struct OGLES3TexState *ts_get(struct OGLES3Context *ctx)
 {
-    struct OGLES2TexState *ts = ctx->tex;
+    struct OGLES3TexState *ts = ctx->tex;
     int i;
-    cpu_uploads = (ctx->probe & OGLES2_PROBE_CPU_UPLOAD) != 0;
+    cpu_uploads = (ctx->probe & OGLES3_PROBE_CPU_UPLOAD) != 0;
     if (ts)
         return ts;
     if (!(ts = AllocVec(sizeof(*ts), MEMF_ANY | MEMF_CLEAR)))
@@ -259,7 +259,7 @@ static struct OGLES2TexState *ts_get(struct OGLES2Context *ctx)
     init_object(&ts->default3d, 0, GL_TEXTURE_3D);
     init_object(&ts->defaultarray, 0, GL_TEXTURE_2D_ARRAY);
     init_object(&ts->default2dms, 0, GL_TEXTURE_2D_MULTISAMPLE);
-    for (i = 0; i < OGLES2_MAX_TEXTURE_UNITS; i++) {
+    for (i = 0; i < OGLES3_MAX_TEXTURE_UNITS; i++) {
         ts->unit2d[i] = &ts->default2d;
         ts->unitcube[i] = &ts->defaultcube;
         ts->unitrect[i] = &ts->defaultrect;
@@ -273,7 +273,7 @@ static struct OGLES2TexState *ts_get(struct OGLES2Context *ctx)
 
 /* No job uses the GPU copy any more (before_change renamed it or rendered
  * the job): the copy and the records' block. */
-static void free_gpu(struct OGLES2Texture *t)
+static void free_gpu(struct OGLES3Texture *t)
 {
     if (t->gpu) {
         if (t->gpu->texture_mem.hostptr)
@@ -286,13 +286,13 @@ static void free_gpu(struct OGLES2Texture *t)
     t->st_own = FALSE;
 }
 
-static void free_levels(struct OGLES2Texture *t);
+static void free_levels(struct OGLES3Texture *t);
 
 /* The base level's view (no job uses its GPU copy any more): its RAM
  * copies are the texture's, kept. */
-static void free_view(struct OGLES2Texture *t)
+static void free_view(struct OGLES3Texture *t)
 {
-    struct OGLES2Texture *v = t->view;
+    struct OGLES3Texture *v = t->view;
     int k, l;
     if (!v)
         return;
@@ -306,7 +306,7 @@ static void free_view(struct OGLES2Texture *t)
     FreeVec(v);
 }
 
-static void free_levels(struct OGLES2Texture *t)
+static void free_levels(struct OGLES3Texture *t)
 {
     int k, l;
     free_view(t);
@@ -339,10 +339,10 @@ static void free_levels(struct OGLES2Texture *t)
 
 /* aglDestroyContext (its jobs finished): the context's own textures; the
  * named ones with the share group's last member. */
-void ogles2_textures_free(struct OGLES2Context *ctx)
+void ogles2_textures_free(struct OGLES3Context *ctx)
 {
-    struct OGLES2TexState *ts = ctx->tex;
-    struct OGLES2Share *sh = ctx->share;
+    struct OGLES3TexState *ts = ctx->tex;
+    struct OGLES3Share *sh = ctx->share;
     GLuint i;
     if (sh && sh->members == 1) {
         for (i = 1; i < sh->ntex; i++)
@@ -387,10 +387,10 @@ void ogles2_textures_free(struct OGLES2Context *ctx)
  * from the RAM copies at its next upload or draw. Only when the job's
  * retire list is nearly full is the job rendered first instead, which
  * costs a wait and the frame's depth and stencil (plan 7.2). */
-static void before_change(struct OGLES2Context *ctx, struct OGLES2TexState *ts,
-                          struct OGLES2Texture *t)
+static void before_change(struct OGLES3Context *ctx, struct OGLES3TexState *ts,
+                          struct OGLES3Texture *t)
 {
-    struct OGLES2Context *m, *user;
+    struct OGLES3Context *m, *user;
     V3DContext *v;
     /* Its base level's view is made again at its next draw. */
     if (t->view) {
@@ -440,10 +440,10 @@ static void before_change(struct OGLES2Context *ctx, struct OGLES2TexState *ts,
 /* ---- names and binding ---- */
 
 /* Makes `name` a valid index of the name table. */
-static BOOL table_room(struct OGLES2TexState *ts, GLuint name)
+static BOOL table_room(struct OGLES3TexState *ts, GLuint name)
 {
     GLuint nn, j;
-    struct OGLES2Texture **tab;
+    struct OGLES3Texture **tab;
     if (name < ts->sh->ntex)
         return TRUE;
     nn = ts->sh->ntex ? ts->sh->ntex : 32;
@@ -461,11 +461,11 @@ static BOOL table_room(struct OGLES2TexState *ts, GLuint name)
 }
 
 /* A new texture object named `name` (no object has it). */
-static struct OGLES2Texture *create(struct OGLES2TexState *ts, GLuint name)
+static struct OGLES3Texture *create(struct OGLES3TexState *ts, GLuint name)
 {
-    struct OGLES2Texture *t;
+    struct OGLES3Texture *t;
     GLuint slot = ogles2_name_slot(&ts->sh->far_tex, name, TRUE);
-    if (slot == OGLES2_NO_SLOT || !table_room(ts, slot) ||
+    if (slot == OGLES3_NO_SLOT || !table_room(ts, slot) ||
         !(t = AllocVec(sizeof(*t), MEMF_ANY | MEMF_CLEAR))) {
         ogles2_name_forget(&ts->sh->far_tex, name);
         return 0;
@@ -475,9 +475,9 @@ static struct OGLES2Texture *create(struct OGLES2TexState *ts, GLuint name)
     return t;
 }
 
-void ogles2_glGenTextures(struct OGLES2Context *ctx, GLsizei n, GLuint *textures)
+void ogles2_glGenTextures(struct OGLES3Context *ctx, GLsizei n, GLuint *textures)
 {
-    struct OGLES2TexState *ts;
+    struct OGLES3TexState *ts;
     GLsizei k;
     GLuint i = 1;
     if (!ogles2_context_valid(ctx))
@@ -493,7 +493,7 @@ void ogles2_glGenTextures(struct OGLES2Context *ctx, GLsizei n, GLuint *textures
     for (k = 0; k < n; k++) {
         while (i < ts->sh->ntex && ts->sh->tex[i])
             i++;
-        if (i >= OGLES2_NEAR_NAMES || !create(ts, i)) {
+        if (i >= OGLES3_NEAR_NAMES || !create(ts, i)) {
             ogles2_error(ctx, GL_OUT_OF_MEMORY);
             return;
         }
@@ -502,14 +502,14 @@ void ogles2_glGenTextures(struct OGLES2Context *ctx, GLsizei n, GLuint *textures
     }
 }
 
-static struct OGLES2Texture *by_name(struct OGLES2TexState *ts, GLuint name)
+static struct OGLES3Texture *by_name(struct OGLES3TexState *ts, GLuint name)
 {
-    GLuint slot = name ? ogles2_name_slot(&ts->sh->far_tex, name, FALSE) : OGLES2_NO_SLOT;
+    GLuint slot = name ? ogles2_name_slot(&ts->sh->far_tex, name, FALSE) : OGLES3_NO_SLOT;
     return slot < ts->sh->ntex ? ts->sh->tex[slot] : 0;
 }
 
 /* A deleted texture's memory goes (its name already has). */
-static void destroy(struct OGLES2Context *ctx, struct OGLES2TexState *ts, struct OGLES2Texture *t)
+static void destroy(struct OGLES3Context *ctx, struct OGLES3TexState *ts, struct OGLES3Texture *t)
 {
     int u;
     for (u = 0; u < t->nf; u++)
@@ -522,7 +522,7 @@ static void destroy(struct OGLES2Context *ctx, struct OGLES2TexState *ts, struct
 /* ---- ES 3.1's image units ---- */
 
 /* A deleted texture leaves the image units it was bound to (ES 3.1 8.22). */
-static void image_units_forget(struct OGLES2TexState *ts, const struct OGLES2Texture *t)
+static void image_units_forget(struct OGLES3TexState *ts, const struct OGLES3Texture *t)
 {
     int u;
     for (u = 0; ts->images && u < MAX_IMAGE_UNITS; u++)
@@ -545,7 +545,7 @@ static BOOL image_format(GLenum f)
 
 /* The units, made at the first use: each unbound, level 0, not layered,
  * GL_READ_ONLY and GL_R32UI (ES 3.1 table 20.34's initial values). */
-static struct OGLES2ImageUnit *image_units(struct OGLES2TexState *ts)
+static struct OGLES3ImageUnit *image_units(struct OGLES3TexState *ts)
 {
     int u;
     if (!ts->images && (ts->images = AllocVec(MAX_IMAGE_UNITS * sizeof(*ts->images), MEMF_ANY | MEMF_CLEAR)))
@@ -556,12 +556,12 @@ static struct OGLES2ImageUnit *image_units(struct OGLES2TexState *ts)
     return ts->images;
 }
 
-void ogles2_glBindImageTexture(struct OGLES2Context *ctx, GLuint unit, GLuint texture, GLint level,
+void ogles2_glBindImageTexture(struct OGLES3Context *ctx, GLuint unit, GLuint texture, GLint level,
                                GLboolean layered, GLint layer, GLenum access, GLenum format)
 {
-    struct OGLES2TexState *ts;
-    struct OGLES2ImageUnit *im;
-    struct OGLES2Texture *t = 0;
+    struct OGLES3TexState *ts;
+    struct OGLES3ImageUnit *im;
+    struct OGLES3Texture *t = 0;
     if (!ogles2_es31_entry(ctx) || !(ts = ts_get(ctx)))
         return;
     /* Mesa's order (shaderimage.c, validate_bind_image_texture) */
@@ -602,10 +602,10 @@ void ogles2_glBindImageTexture(struct OGLES2Context *ctx, GLuint unit, GLuint te
 
 /* glGetIntegeri_v and glGetBooleani_v's GL_IMAGE_BINDING_* (state.c asks):
  * -1 another query, 0 an error set, 1 *v. */
-int ogles2_image_query(struct OGLES2Context *ctx, GLenum pname, GLuint index, GLint64 *v)
+int ogles2_image_query(struct OGLES3Context *ctx, GLenum pname, GLuint index, GLint64 *v)
 {
-    struct OGLES2TexState *ts;
-    const struct OGLES2ImageUnit *im;
+    struct OGLES3TexState *ts;
+    const struct OGLES3ImageUnit *im;
     if (pname != GL_IMAGE_BINDING_NAME && pname != GL_IMAGE_BINDING_LEVEL && pname != GL_IMAGE_BINDING_LAYERED &&
         pname != GL_IMAGE_BINDING_LAYER && pname != GL_IMAGE_BINDING_ACCESS && pname != GL_IMAGE_BINDING_FORMAT)
         return -1;
@@ -627,11 +627,11 @@ int ogles2_image_query(struct OGLES2Context *ctx, GLenum pname, GLuint index, GL
     return 1;
 }
 
-void ogles2_glDeleteTextures(struct OGLES2Context *ctx, GLsizei n, const GLuint *textures)
+void ogles2_glDeleteTextures(struct OGLES3Context *ctx, GLsizei n, const GLuint *textures)
 {
     ogles2_labels_forget(ctx, GL_TEXTURE, n, textures); /* KHR_debug's labels of the names */
-    struct OGLES2TexState *ts;
-    struct OGLES2Context *m;
+    struct OGLES3TexState *ts;
+    struct OGLES3Context *m;
     GLsizei k;
     int u;
     if (!ogles2_context_valid(ctx))
@@ -644,7 +644,7 @@ void ogles2_glDeleteTextures(struct OGLES2Context *ctx, GLsizei n, const GLuint 
         return;
     ogles2_trace(ctx, "glDeleteTextures", n, n ? textures[0] : 0);
     for (k = 0; k < n; k++) {
-        struct OGLES2Texture *t = by_name(ts, textures[k]);
+        struct OGLES3Texture *t = by_name(ts, textures[k]);
         if (!t)
             continue;
         /* Detached from this context's bound framebuffer (its job drawing
@@ -652,10 +652,10 @@ void ogles2_glDeleteTextures(struct OGLES2Context *ctx, GLsizei n, const GLuint 
          * 4.4.3). Every member of the share group unbinds it. */
         ogles2_fbo_texture_deleted(ctx, t);
         for (m = ctx->share->first; m; m = m->share_next) {
-            struct OGLES2TexState *mts = m->tex;
+            struct OGLES3TexState *mts = m->tex;
             if (!mts)
                 continue;
-            for (u = 0; u < OGLES2_MAX_TEXTURE_UNITS; u++) { /* deleting unbinds (GLES 2.0 3.7.13) */
+            for (u = 0; u < OGLES3_MAX_TEXTURE_UNITS; u++) { /* deleting unbinds (GLES 2.0 3.7.13) */
                 if (mts->unit2d[u] == t)
                     mts->unit2d[u] = &mts->default2d;
                 if (mts->unitcube[u] == t)
@@ -683,14 +683,14 @@ void ogles2_glDeleteTextures(struct OGLES2Context *ctx, GLsizei n, const GLuint 
 /* fbo.c: an attachment point refers to t, or no longer does. An orphan goes
  * with its last attachment; at aglDestroyContext (`now`: the jobs are
  * finished) without waiting for jobs. */
-void ogles2_texture_attach(struct OGLES2Texture *t)
+void ogles2_texture_attach(struct OGLES3Texture *t)
 {
     t->fbo_refs++;
 }
 
-void ogles2_texture_detach(struct OGLES2Context *ctx, struct OGLES2Texture *t, BOOL now)
+void ogles2_texture_detach(struct OGLES3Context *ctx, struct OGLES3Texture *t, BOOL now)
 {
-    struct OGLES2TexState *ts;
+    struct OGLES3TexState *ts;
     if (t->fbo_refs)
         t->fbo_refs--;
     if (t->fbo_refs || !t->orphan)
@@ -703,32 +703,32 @@ void ogles2_texture_detach(struct OGLES2Context *ctx, struct OGLES2Texture *t, B
     destroy(ctx, ts, t);
 }
 
-GLboolean ogles2_glIsTexture(struct OGLES2Context *ctx, GLuint texture)
+GLboolean ogles2_glIsTexture(struct OGLES3Context *ctx, GLuint texture)
 {
-    struct OGLES2TexState *ts;
-    struct OGLES2Texture *t;
+    struct OGLES3TexState *ts;
+    struct OGLES3Texture *t;
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
         return GL_FALSE;
     t = by_name(ts, texture);
     return t && t->target ? GL_TRUE : GL_FALSE;
 }
 
-void ogles2_glActiveTexture(struct OGLES2Context *ctx, GLenum texture)
+void ogles2_glActiveTexture(struct OGLES3Context *ctx, GLenum texture)
 {
-    struct OGLES2TexState *ts;
+    struct OGLES3TexState *ts;
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
         return;
-    if (texture < GL_TEXTURE0 || texture >= GL_TEXTURE0 + OGLES2_MAX_TEXTURE_UNITS) {
+    if (texture < GL_TEXTURE0 || texture >= GL_TEXTURE0 + OGLES3_MAX_TEXTURE_UNITS) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
     ts->active = (UBYTE)(texture - GL_TEXTURE0);
 }
 
-void ogles2_glBindTexture(struct OGLES2Context *ctx, GLenum target, GLuint texture)
+void ogles2_glBindTexture(struct OGLES3Context *ctx, GLenum target, GLuint texture)
 {
-    struct OGLES2TexState *ts;
-    struct OGLES2Texture *t;
+    struct OGLES3TexState *ts;
+    struct OGLES3Texture *t;
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
         return;
     if (target != GL_TEXTURE_2D && target != GL_TEXTURE_CUBE_MAP && target != GL_TEXTURE_RECTANGLE &&
@@ -775,7 +775,7 @@ void ogles2_glBindTexture(struct OGLES2Context *ctx, GLenum target, GLuint textu
 
 /* ---- parameters ---- */
 
-static struct OGLES2Texture *bound(struct OGLES2Context *ctx, struct OGLES2TexState *ts, GLenum target)
+static struct OGLES3Texture *bound(struct OGLES3Context *ctx, struct OGLES3TexState *ts, GLenum target)
 {
     if (target == GL_TEXTURE_2D)
         return ts->unit2d[ts->active];
@@ -793,15 +793,15 @@ static struct OGLES2Texture *bound(struct OGLES2Context *ctx, struct OGLES2TexSt
     return 0;
 }
 
-/* Unit `unit`'s texture of a sampler kind (OGLES2_TEX_*, not NONE). */
-static struct OGLES2Texture *unit_texture(struct OGLES2TexState *ts, int kind, int unit)
+/* Unit `unit`'s texture of a sampler kind (OGLES3_TEX_*, not NONE). */
+static struct OGLES3Texture *unit_texture(struct OGLES3TexState *ts, int kind, int unit)
 {
-    kind &= ~OGLES2_TEX_INT;
-    return kind == OGLES2_TEX_CUBE    ? ts->unitcube[unit]
-         : kind == OGLES2_TEX_RECT    ? ts->unitrect[unit]
-         : kind == OGLES2_TEX_3D      ? ts->unit3d[unit]
-         : kind == OGLES2_TEX_ARRAY   ? ts->unitarray[unit]
-         : kind == OGLES2_TEX_2DMS    ? ts->unit2dms[unit] : ts->unit2d[unit];
+    kind &= ~OGLES3_TEX_INT;
+    return kind == OGLES3_TEX_CUBE    ? ts->unitcube[unit]
+         : kind == OGLES3_TEX_RECT    ? ts->unitrect[unit]
+         : kind == OGLES3_TEX_3D      ? ts->unit3d[unit]
+         : kind == OGLES3_TEX_ARRAY   ? ts->unitarray[unit]
+         : kind == OGLES3_TEX_2DMS    ? ts->unit2dms[unit] : ts->unit2d[unit];
 }
 
 /* The largest anisotropy (the sampler's 2, 4, 8 or 16) and LOD bias (its
@@ -813,7 +813,7 @@ static struct OGLES2Texture *unit_texture(struct OGLES2TexState *ts, int kind, i
  * given as `i` (gl*Parameteri*) or `f` (gl*Parameterf*): enums read i, the
  * float parameters f (GL converts either way). GL_NO_ERROR, or the error
  * (GL_INVALID_ENUM for a pname that is none). */
-static GLenum smp_param(struct OGLES2Context *ctx, struct OGLES2SamplerParams *sp, GLenum pname, GLint i,
+static GLenum smp_param(struct OGLES3Context *ctx, struct OGLES3SamplerParams *sp, GLenum pname, GLint i,
                         GLfloat f)
 {
     GLenum e = (GLenum)i;
@@ -872,7 +872,7 @@ static GLenum smp_param(struct OGLES2Context *ctx, struct OGLES2SamplerParams *s
 }
 
 /* A sampler parameter's value, as a float; FALSE if pname is none. */
-static BOOL smp_get(struct OGLES2Context *ctx, const struct OGLES2SamplerParams *sp, GLenum pname, GLfloat *v)
+static BOOL smp_get(struct OGLES3Context *ctx, const struct OGLES3SamplerParams *sp, GLenum pname, GLfloat *v)
 {
     switch (pname) {
     case GL_TEXTURE_MIN_FILTER:          *v = (GLfloat)sp->min_filter; return TRUE;
@@ -903,10 +903,10 @@ static BOOL exact_param(GLenum pname)
 }
 
 /* A texture parameter given as `i` or `f` (as smp_param's). */
-static void tex_param(struct OGLES2Context *ctx, GLenum target, GLenum pname, GLint i, GLfloat f)
+static void tex_param(struct OGLES3Context *ctx, GLenum target, GLenum pname, GLint i, GLfloat f)
 {
-    struct OGLES2TexState *ts;
-    struct OGLES2Texture *t;
+    struct OGLES3TexState *ts;
+    struct OGLES3Texture *t;
     GLenum e = (GLenum)i, err;
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)) || !(t = bound(ctx, ts, target)))
         return;
@@ -987,24 +987,24 @@ static GLint round_param(GLfloat f)
     return f < 0.0f ? -(GLint)(0.5f - f) : (GLint)(f + 0.5f);
 }
 
-void ogles2_glTexParameteri(struct OGLES2Context *ctx, GLenum target, GLenum pname, GLint param)
+void ogles2_glTexParameteri(struct OGLES3Context *ctx, GLenum target, GLenum pname, GLint param)
 {
     tex_param(ctx, target, pname, param, (GLfloat)param);
 }
 
-void ogles2_glTexParameterf(struct OGLES2Context *ctx, GLenum target, GLenum pname, GLfloat param)
+void ogles2_glTexParameterf(struct OGLES3Context *ctx, GLenum target, GLenum pname, GLfloat param)
 {
     tex_param(ctx, target, pname, round_param(param), param);
 }
 
-void ogles2_glTexParameteriv(struct OGLES2Context *ctx, GLenum target, GLenum pname,
+void ogles2_glTexParameteriv(struct OGLES3Context *ctx, GLenum target, GLenum pname,
                              const GLint *params)
 {
     if (params)
         tex_param(ctx, target, pname, params[0], (GLfloat)params[0]);
 }
 
-void ogles2_glTexParameterfv(struct OGLES2Context *ctx, GLenum target, GLenum pname,
+void ogles2_glTexParameterfv(struct OGLES3Context *ctx, GLenum target, GLenum pname,
                              const GLfloat *params)
 {
     if (params)
@@ -1012,10 +1012,10 @@ void ogles2_glTexParameterfv(struct OGLES2Context *ctx, GLenum target, GLenum pn
 }
 
 /* A parameter's value, as a float; FALSE (GL_INVALID_ENUM set) if pname is none. */
-static BOOL get_param(struct OGLES2Context *ctx, GLenum target, GLenum pname, GLfloat *v)
+static BOOL get_param(struct OGLES3Context *ctx, GLenum target, GLenum pname, GLfloat *v)
 {
-    struct OGLES2TexState *ts;
-    struct OGLES2Texture *t;
+    struct OGLES3TexState *ts;
+    struct OGLES3Texture *t;
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)) || !(t = bound(ctx, ts, target)))
         return FALSE;
     if (target == GL_TEXTURE_2D_MULTISAMPLE && smp_get(ctx, &t->s, pname, v))
@@ -1053,7 +1053,7 @@ static BOOL get_param(struct OGLES2Context *ctx, GLenum target, GLenum pname, GL
     return FALSE;
 }
 
-void ogles2_glGetTexParameteriv(struct OGLES2Context *ctx, GLenum target, GLenum pname,
+void ogles2_glGetTexParameteriv(struct OGLES3Context *ctx, GLenum target, GLenum pname,
                                 GLint *params)
 {
     GLfloat v;
@@ -1061,7 +1061,7 @@ void ogles2_glGetTexParameteriv(struct OGLES2Context *ctx, GLenum target, GLenum
         *params = exact_param(pname) ? (GLint)(ULONG)v : round_param(v);
 }
 
-void ogles2_glGetTexParameterfv(struct OGLES2Context *ctx, GLenum target, GLenum pname,
+void ogles2_glGetTexParameterfv(struct OGLES3Context *ctx, GLenum target, GLenum pname,
                                 GLfloat *params)
 {
     GLfloat v;
@@ -1164,11 +1164,11 @@ static GLenum unsized_as_sized(GLenum format, GLenum type)
  * level's size, format and components (ES 3.1 8.10.3); a level not
  * defined answers the initial values (0, GL_NONE, internal format
  * GL_RGBA, fixed sample locations TRUE). FALSE: an error set. */
-static BOOL level_param(struct OGLES2Context *ctx, GLenum target, GLint level, GLenum pname, GLint *v)
+static BOOL level_param(struct OGLES3Context *ctx, GLenum target, GLint level, GLenum pname, GLint *v)
 {
-    struct OGLES2TexState *ts;
-    struct OGLES2Texture *t;
-    const struct OGLES2Face *f;
+    struct OGLES3TexState *ts;
+    struct OGLES3Texture *t;
+    const struct OGLES3Face *f;
     const struct level_fmt *lf = 0;
     GLenum bind = face_target(target) ? GL_TEXTURE_CUBE_MAP : target, ifmt;
     BOOL defined;
@@ -1229,7 +1229,7 @@ static BOOL level_param(struct OGLES2Context *ctx, GLenum target, GLint level, G
     return TRUE;
 }
 
-void ogles2_glGetTexLevelParameteriv(struct OGLES2Context *ctx, GLenum target, GLint level, GLenum pname,
+void ogles2_glGetTexLevelParameteriv(struct OGLES3Context *ctx, GLenum target, GLint level, GLenum pname,
                                      GLint *params)
 {
     GLint v;
@@ -1237,7 +1237,7 @@ void ogles2_glGetTexLevelParameteriv(struct OGLES2Context *ctx, GLenum target, G
         *params = v;
 }
 
-void ogles2_glGetTexLevelParameterfv(struct OGLES2Context *ctx, GLenum target, GLint level, GLenum pname,
+void ogles2_glGetTexLevelParameterfv(struct OGLES3Context *ctx, GLenum target, GLint level, GLenum pname,
                                      GLfloat *params)
 {
     GLint v;
@@ -1245,7 +1245,7 @@ void ogles2_glGetTexLevelParameterfv(struct OGLES2Context *ctx, GLenum target, G
         *params = (GLfloat)v;
 }
 
-void ogles2_glPixelStorei(struct OGLES2Context *ctx, GLenum pname, GLint param)
+void ogles2_glPixelStorei(struct OGLES3Context *ctx, GLenum pname, GLint param)
 {
     GLint *v;
     if (!ogles2_context_valid(ctx))
@@ -1282,9 +1282,9 @@ void ogles2_glPixelStorei(struct OGLES2Context *ctx, GLenum pname, GLint param)
 }
 
 /* glGet* for the texture state (state.c asks). */
-BOOL ogles2_texture_query(struct OGLES2Context *ctx, GLenum pname, GLint *v)
+BOOL ogles2_texture_query(struct OGLES3Context *ctx, GLenum pname, GLint *v)
 {
-    struct OGLES2TexState *ts = ts_get(ctx);
+    struct OGLES3TexState *ts = ts_get(ctx);
     switch (pname) {
     case GL_ACTIVE_TEXTURE:       *v = (GLint)(GL_TEXTURE0 + (ts ? ts->active : 0)); return TRUE;
     case GL_TEXTURE_BINDING_2D:   *v = ts ? (GLint)ts->unit2d[ts->active]->name : 0; return TRUE;
@@ -1329,12 +1329,12 @@ BOOL ogles2_texture_query(struct OGLES2Context *ctx, GLenum pname, GLint *v)
         return TRUE;
     case GL_MAX_TEXTURE_SIZE:
     case GL_MAX_CUBE_MAP_TEXTURE_SIZE: *v = MAX_SIZE; return TRUE;
-    case GL_MAX_TEXTURE_IMAGE_UNITS: *v = OGLES2_MAX_STAGE_SAMPLERS; return TRUE;
-    case GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS: *v = OGLES2_MAX_TEXTURE_UNITS; return TRUE;
+    case GL_MAX_TEXTURE_IMAGE_UNITS: *v = OGLES3_MAX_STAGE_SAMPLERS; return TRUE;
+    case GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS: *v = OGLES3_MAX_TEXTURE_UNITS; return TRUE;
     /* Vertex texture fetch: the draws bind the units of both stages' samplers
      * (draw.c texture_states); dEQP-GLES2's texture.vertex tests sample in
      * the vertex shader (M7). Units are shared between the stages. */
-    case GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS: *v = OGLES2_MAX_STAGE_SAMPLERS; return TRUE;
+    case GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS: *v = OGLES3_MAX_STAGE_SAMPLERS; return TRUE;
     case GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT: *v = (GLint)MAX_ANISOTROPY; return TRUE;
     case GL_MAX_TEXTURE_LOD_BIAS: *v = (GLint)MAX_LOD_BIAS; return TRUE;
     default:                      return FALSE;
@@ -1435,7 +1435,7 @@ static ULONG copy_bytes(int cls)
     return cls == CLASS_FLOAT ? 16 : 4;
 }
 
-static int level_class(const struct OGLES2Face *f, int l)
+static int level_class(const struct OGLES3Face *f, int l)
 {
     return class_of(f->format[l], f->type[l]);
 }
@@ -1454,7 +1454,7 @@ static ULONG wide_class(GLenum format, GLenum type)
 
 /* A level's texels return 32 bits (wide_class), but for the packed floats
  * given as floats (16-bit returns, Mesa's table). */
-static BOOL level_wide(const struct OGLES2Face *f, int l)
+static BOOL level_wide(const struct OGLES3Face *f, int l)
 {
     return wide_class(f->format[l], f->type[l]) && f->sized[l] != GL_R11F_G11F_B10F && f->sized[l] != GL_RGB9_E5;
 }
@@ -1484,7 +1484,7 @@ static int components(GLenum format)
 /* ES 3.0's formats and types in a GLES2 context: GL_RED and GL_RG
  * (EXT_texture_rg is not offered there), signed bytes, the packed 32-bit
  * types, float depth. */
-static BOOL rg_refused(struct OGLES2Context *ctx, GLenum format, GLenum type)
+static BOOL rg_refused(struct OGLES3Context *ctx, GLenum format, GLenum type)
 {
     if (!ogles2_es3(ctx) &&
         (format == GL_RED || format == GL_RG || int_components(format) || type == GL_BYTE ||
@@ -1803,7 +1803,7 @@ static void convert_depth(UBYTE *dst, ULONG dst_stride, const UBYTE *src, GLenum
  * of a w x h box at (x, y) of face f's level l, `row` bytes a source row,
  * into the face's stencil copy; the level's S8 image is filled from the
  * copies at its next use (ogles2_texture_s8_surface). FALSE: no memory. */
-static BOOL keep_stencil(struct OGLES2Texture *t, struct OGLES2Face *f, int l, const UBYTE *src, ULONG row,
+static BOOL keep_stencil(struct OGLES3Texture *t, struct OGLES3Face *f, int l, const UBYTE *src, ULONG row,
                          int x, int y, int w, int h)
 {
     int i, j;
@@ -2004,11 +2004,11 @@ static void convert(UBYTE *dst, ULONG dst_stride, const UBYTE *src, GLenum forma
 
 /* The application's image as glPixelStorei's unpack state reads it (ES
  * 3.0 3.7.1): its first texel, and its row and image strides. */
-static const UBYTE *unpack_image(struct OGLES2Context *ctx, const void *pixels, GLenum format, GLenum type, int w,
+static const UBYTE *unpack_image(struct OGLES3Context *ctx, const void *pixels, GLenum format, GLenum type, int w,
                                  int h, ULONG *row, ULONG *image)
 {
     GLenum err;
-    const struct OGLES2PixelStore *u = &ctx->unpack;
+    const struct OGLES3PixelStore *u = &ctx->unpack;
     ULONG bpp = (ULONG)pixel_size(format, type, &err), a = (ULONG)u->alignment;
     *row = ((ULONG)(u->row_length ? u->row_length : w) * bpp + a - 1) / a * a;
     *image = *row * (ULONG)(u->image_height ? u->image_height : h);
@@ -2019,7 +2019,7 @@ static const UBYTE *unpack_image(struct OGLES2Context *ctx, const void *pixels, 
 /* Tight images (the library's own: copies, decoded ETC1) through
  * glTexImage2D: the application's unpack state (and pixel buffer) set
  * aside, saved in *s. */
-static void unpack_tight(struct OGLES2Context *ctx, struct OGLES2PixelStore *s)
+static void unpack_tight(struct OGLES3Context *ctx, struct OGLES3PixelStore *s)
 {
     *s = ctx->unpack;
     memset(&ctx->unpack, 0, sizeof(ctx->unpack));
@@ -2045,7 +2045,7 @@ static ULONG datum_bytes(GLenum type)
  * it, the image `bytes` long from there, a multiple of `align` (ES 3.0
  * 3.7.1: the type's datum). FALSE: GL_INVALID_OPERATION set (past its end,
  * mapped, or not aligned). */
-static BOOL unpack_source(struct OGLES2Context *ctx, const void **pixels, ULONG bytes, ULONG align)
+static BOOL unpack_source(struct OGLES3Context *ctx, const void **pixels, ULONG bytes, ULONG align)
 {
     BOOL bad;
     const UBYTE *p = ogles2_buffer_pixels(ctx, FALSE, (ULONG)*pixels, bytes, &bad);
@@ -2060,7 +2060,7 @@ static BOOL unpack_source(struct OGLES2Context *ctx, const void **pixels, ULONG 
 
 /* The bytes an application's w x h x d image takes from its start, as the
  * unpack state reads it (unpack_image). */
-static ULONG unpack_bytes(struct OGLES2Context *ctx, GLenum format, GLenum type, int w, int h, int d)
+static ULONG unpack_bytes(struct OGLES3Context *ctx, GLenum format, GLenum type, int w, int h, int d)
 {
     ULONG row, image, start;
     GLenum err;
@@ -2073,7 +2073,7 @@ static ULONG unpack_bytes(struct OGLES2Context *ctx, GLenum format, GLenum type,
 
 /* ES 3.0's GL_HALF_FLOAT (0x140B) as OES_texture_half_float's
  * GL_HALF_FLOAT_OES (0x8D61), which the library keeps the levels in. */
-static GLenum half_type(struct OGLES2Context *ctx, GLenum type)
+static GLenum half_type(struct OGLES3Context *ctx, GLenum type)
 {
     return type == GL_HALF_FLOAT && ogles2_es3(ctx) ? GL_HALF_FLOAT_OES : type;
 }
@@ -2144,7 +2144,7 @@ static int level_count(int w, int h)
 
 /* Level `l` of a face has the size the mip chain of its level 0 gives it,
  * and its RAM copy is of level 0's class (the stored format is level 0's). */
-static BOOL consistent(const struct OGLES2Face *f, int l)
+static BOOL consistent(const struct OGLES3Face *f, int l)
 {
     int w = f->w[0] >> l, h = f->h[0] >> l;
     /* The same format and type as level 0 (GLES 2.0 3.7.10), not just the
@@ -2156,27 +2156,27 @@ static BOOL consistent(const struct OGLES2Face *f, int l)
 }
 
 /* A 2D array or a 3D texture (ES 3.0): its faces are layers, or slices. */
-static BOOL layered(const struct OGLES2Texture *t)
+static BOOL layered(const struct OGLES3Texture *t)
 {
     return t->target == GL_TEXTURE_2D_ARRAY || t->target == GL_TEXTURE_3D;
 }
 
 /* The faces of level 0: a cube map's six, an array's layers, a 3D
  * texture's slices. */
-static int faces(const struct OGLES2Texture *t)
+static int faces(const struct OGLES3Texture *t)
 {
     return t->target == GL_TEXTURE_CUBE_MAP ? 6 : layered(t) ? t->d[0] : 1;
 }
 
 /* The faces level l has: a 3D texture's slices halve with its levels, a 2D
  * array's layers are each level's own (complete: those of level 0). */
-static int faces_at(const struct OGLES2Texture *t, int l)
+static int faces_at(const struct OGLES3Texture *t, int l)
 {
     return layered(t) ? t->d[l] : faces(t);
 }
 
 /* Level l has the depth (an array: the layers) the chain from level 0 gives it. */
-static BOOL depth_ok(const struct OGLES2Texture *t, int l)
+static BOOL depth_ok(const struct OGLES3Texture *t, int l)
 {
     int d;
     if (!layered(t))
@@ -2186,7 +2186,7 @@ static BOOL depth_ok(const struct OGLES2Texture *t, int l)
 }
 
 /* The levels of a full chain from level 0 (a 3D texture's depth halves too). */
-static int chain_levels(const struct OGLES2Texture *t)
+static int chain_levels(const struct OGLES3Texture *t)
 {
     int n = level_count(t->f[0].w[0], t->f[0].h[0]), d = t->d[0], m = 1;
     if (t->target != GL_TEXTURE_3D)
@@ -2200,9 +2200,9 @@ static int chain_levels(const struct OGLES2Texture *t)
 
 /* Level b exists; a cube map's on all six faces, square and of one size
  * (GLES 2.0 3.7.10, "cube complete"; ES 3.0's at the base level). */
-static BOOL level_ok(const struct OGLES2Texture *t, int b)
+static BOOL level_ok(const struct OGLES3Texture *t, int b)
 {
-    const struct OGLES2Face *f0 = &t->f[0];
+    const struct OGLES3Face *f0 = &t->f[0];
     ULONG bit = 1UL << b;
     int k;
     if (!(f0->defined & bit) || !f0->w[b] || !f0->h[b])
@@ -2215,7 +2215,7 @@ static BOOL level_ok(const struct OGLES2Texture *t, int b)
     return t->target != GL_TEXTURE_CUBE_MAP || f0->w[b] == f0->h[b];
 }
 
-static BOOL base_ok(const struct OGLES2Texture *t)
+static BOOL base_ok(const struct OGLES3Texture *t)
 {
     return level_ok(t, 0);
 }
@@ -2230,7 +2230,7 @@ static BOOL mipmapped(GLenum min_filter)
  * when a later base level is sampled), and the levels sampled, base_level
  * up to max_level or the 1x1 level (a mipmapping filter) or base_level
  * alone, consistent on every face and in the GPU copy: *first and *last. */
-static BOOL complete(const struct OGLES2Texture *t, GLenum min_filter, GLenum mag_filter, int *first, int *last)
+static BOOL complete(const struct OGLES3Texture *t, GLenum min_filter, GLenum mag_filter, int *first, int *last)
 {
     int n, l, k, b = t->base_level, e;
     if (!t->gpu || !base_ok(t))
@@ -2269,7 +2269,7 @@ static BOOL complete(const struct OGLES2Texture *t, GLenum min_filter, GLenum ma
  * which need not be of level 0's chain (nor level 0 exist). The level such
  * a texture is sampled from as its level 0 (based_view): its base level
  * when level 0's chain does not hold it, else 0. */
-static int chain_base(const struct OGLES2Texture *t)
+static int chain_base(const struct OGLES3Texture *t)
 {
     int b = t->base_level, k;
     if (!t->es3_rules || t->immutable_levels || b <= 0 || b >= MAX_LEVELS || !level_ok(t, b))
@@ -2286,7 +2286,7 @@ static int chain_base(const struct OGLES2Texture *t)
 /* A face's view of the GPU texture: face 0 is the texture itself; face k
  * the same layout `k` face strides further on (the upload functions only
  * write through texture_mem). */
-static V3DTexture *face_gpu(struct OGLES2Texture *t, int k, int l, V3DTexture *tmp)
+static V3DTexture *face_gpu(struct OGLES3Texture *t, int k, int l, V3DTexture *tmp)
 {
     if (!k)
         return t->gpu;
@@ -2303,7 +2303,7 @@ static V3DTexture *face_gpu(struct OGLES2Texture *t, int k, int l, V3DTexture *t
 
 /* The hardware format for level 0's format and type (Mesa's
  * v3dx_format_table.c, the formats GLES2's state tracker picks). */
-static void storage_of(struct OGLES2Texture *t)
+static void storage_of(struct OGLES3Texture *t)
 {
     GLenum f = t->f[0].format[0], ty = t->f[0].type[0], sz = t->f[0].sized[0];
     UBYTE R = v3d_SWIZZLE_RED, G = v3d_SWIZZLE_GREEN, B = v3d_SWIZZLE_BLUE, A = v3d_SWIZZLE_ALPHA;
@@ -2453,7 +2453,7 @@ static void storage_of(struct OGLES2Texture *t)
  * in a loop of its own, a texel read as one long (R in the top byte): a
  * switch per texel cost 50 ms a megapixel on the A1200. The copy's rows and
  * `d` are word aligned (AllocVec, widths in whole texels). */
-static void pack(const struct OGLES2Texture *t, const UBYTE *s, UBYTE *d, ULONG n)
+static void pack(const struct OGLES3Texture *t, const UBYTE *s, UBYTE *d, ULONG n)
 {
     const ULONG *p = (const ULONG *)s;
     ULONG i, c;
@@ -2553,7 +2553,7 @@ static void put_le32(UBYTE *d, ULONG v)
 
 /* n texels of a FLOAT or DEPTH RAM copy into the stored format, little-endian.
  * Luminance and alpha formats store red or alpha, as pack does. */
-static void pack_wide(const struct OGLES2Texture *t, const UBYTE *src, UBYTE *d, ULONG n)
+static void pack_wide(const struct OGLES3Texture *t, const UBYTE *src, UBYTE *d, ULONG n)
 {
     ULONG i;
     BOOL alpha = t->swizzle[3] == v3d_SWIZZLE_RED; /* an ALPHA format: its one channel is alpha */
@@ -2661,7 +2661,7 @@ static void pack_wide(const struct OGLES2Texture *t, const UBYTE *src, UBYTE *d,
 }
 
 /* The inverse of pack_wide for depth (what a framebuffer object's job drew). */
-static void unpack_depth(const struct OGLES2Texture *t, const UBYTE *s, ULONG *d, ULONG n)
+static void unpack_depth(const struct OGLES3Texture *t, const UBYTE *s, ULONG *d, ULONG n)
 {
     ULONG i;
     for (i = 0; i < n; i++)
@@ -2675,7 +2675,7 @@ static void unpack_depth(const struct OGLES2Texture *t, const UBYTE *s, ULONG *d
 }
 
 /* The inverse of pack: n texels of the stored format into RGBA8. */
-static void unpack(const struct OGLES2Texture *t, const UBYTE *s, UBYTE *d, ULONG n)
+static void unpack(const struct OGLES3Texture *t, const UBYTE *s, UBYTE *d, ULONG n)
 {
     ULONG i;
     UWORD v;
@@ -2742,7 +2742,7 @@ static GLfloat small_to_float(ULONG v, int bits)
  * texels of the stored format into the FLOAT class's RGBA floats or
  * integer words, the components the format lacks as the RAM copy keeps
  * them ((r, 0, 0, 1) for R, (r, g, 0, 1) for RG, alpha 1 for RGB). */
-static void unpack_wide(const struct OGLES2Texture *t, const UBYTE *s, UBYTE *dst, ULONG n)
+static void unpack_wide(const struct OGLES3Texture *t, const UBYTE *s, UBYTE *dst, ULONG n)
 {
     ULONG i;
     int c;
@@ -2854,7 +2854,7 @@ static void unpack_wide(const struct OGLES2Texture *t, const UBYTE *s, UBYTE *ds
 /* A box of face k, level l from the GPU's copy, as the RAM copy holds it:
  * RGBA8 rows, depth words (a depth texture a job drew into), or the FLOAT
  * class's floats or integer words (unpack_wide). */
-static BOOL load_box(struct OGLES2Texture *t, int k, int l, int x, int y, int w, int h, UBYTE *rgba,
+static BOOL load_box(struct OGLES3Texture *t, int k, int l, int x, int y, int w, int h, UBYTE *rgba,
                      ULONG stride)
 {
     V3DTexture tmp;
@@ -2880,9 +2880,9 @@ static BOOL load_box(struct OGLES2Texture *t, int k, int l, int x, int y, int w,
 
 /* The job whose draws store into t through an image (ES 3.1) rendered and
  * finished: what it wrote is in the GPU copy. */
-static void image_writes_done(struct OGLES2Texture *t)
+static void image_writes_done(struct OGLES3Texture *t)
 {
-    struct OGLES2Context *m;
+    struct OGLES3Context *m;
     ULONG s = t->img_serial;
     t->img_serial = 0;
     for (m = t->img_share ? t->img_share->first : 0; s && m; m = m->share_next) {
@@ -2894,13 +2894,13 @@ static void image_writes_done(struct OGLES2Texture *t)
 }
 
 /* The RAM copies of every level the GPU drew into, read back. */
-static void sync(struct OGLES2Texture *t)
+static void sync(struct OGLES3Texture *t)
 {
     int k, l;
     if (t->img_serial)
         image_writes_done(t);
     for (k = 0; k < t->nf; k++) {
-        struct OGLES2Face *f = &t->f[k];
+        struct OGLES3Face *f = &t->f[k];
         if (!f->rendered)
             continue;
         for (l = 0; l < MAX_LEVELS; l++)
@@ -2925,7 +2925,7 @@ static void sync(struct OGLES2Texture *t)
 #define TFU_UPLOAD_MIN_TEXELS       (128UL * 128UL)
 #define TFU_UPLOAD_MIN_TEXELS_RGBA8 (512UL * 512UL)
 #define TFU_LOCK_TIMEOUT_MS 5000 /* job.c's GPU_LOCK_TIMEOUT_MS */
-static BOOL store_tfu(struct OGLES2Texture *t, int k, int l, const UBYTE *raster, ULONG row, int w, int h)
+static BOOL store_tfu(struct OGLES3Texture *t, int k, int l, const UBYTE *raster, ULONG row, int w, int h)
 {
     V3DTexture tmp, *g;
     ULONG len;
@@ -2957,7 +2957,7 @@ static BOOL store_tfu(struct OGLES2Texture *t, int k, int l, const UBYTE *raster
 /* A box of level l of face k, from the RAM copy `src` (`w` texels a row, of
  * level 0's class: complete() saw to it). S3TC: the box on block bounds,
  * `src` its blocks, stored as they are (the TFU takes no BC format). */
-static void store_box(struct OGLES2Texture *t, int k, int l, const UBYTE *src, int x, int y, int w,
+static void store_box(struct OGLES3Texture *t, int k, int l, const UBYTE *src, int x, int y, int w,
                       int h)
 {
     V3DTexture tmp;
@@ -2990,7 +2990,7 @@ static void store_box(struct OGLES2Texture *t, int k, int l, const UBYTE *src, i
     FreeVec(packed);
 }
 
-static void upload_level(struct OGLES2Texture *t, int k, int l)
+static void upload_level(struct OGLES3Texture *t, int k, int l)
 {
     store_box(t, k, l, t->f[k].shadow[l], 0, 0, t->f[k].w[l], t->f[k].h[l]);
 }
@@ -2999,7 +2999,7 @@ static void upload_level(struct OGLES2Texture *t, int k, int l)
  * layout v3d_texture_alloc(_mipchain) made, `face_stride` apart (Mesa: the
  * tree's end aligned to 64 bytes; a page here, so each face's level 0 keeps
  * the alignment UIF XOR needs). */
-static BOOL cube_memory(struct OGLES2Texture *t)
+static BOOL cube_memory(struct OGLES3Texture *t)
 {
     V3DTexture *g = t->gpu;
     v3d_mem m;
@@ -3020,7 +3020,7 @@ static BOOL cube_memory(struct OGLES2Texture *t)
  * face_stride is level 0's slice size: the texture state's array stride. */
 #define UIF_PAGE 4096 /* v3d_texture.c's V3D_UIFCFG_PAGE_SIZE */
 #define PAGE_CACHE_MINUS_1_5_UB_ROWS 26 /* and V3D_PAGE_CACHE_MINUS_1_5_UB_ROWS */
-static BOOL volume_memory(struct OGLES2Texture *t)
+static BOOL volume_memory(struct OGLES3Texture *t)
 {
     V3DTexture *g = t->gpu;
     v3d_mem m;
@@ -3052,10 +3052,10 @@ static BOOL volume_memory(struct OGLES2Texture *t)
 }
 
 /* (Re)creates the GPU texture for the levels given and uploads them. */
-static BOOL upload_all(struct OGLES2Texture *t)
+static BOOL upload_all(struct OGLES3Texture *t)
 {
     V3DDevice *dev = ogles2_device();
-    const struct OGLES2Face *f0 = &t->f[0];
+    const struct OGLES3Face *f0 = &t->f[0];
     int l, k, n = 1;
     sync(t);
     free_gpu(t);
@@ -3109,7 +3109,7 @@ static BOOL face_target(GLenum target)
 /* The bound texture an image call's target names, and the face (*k);
  * 0 with GL_INVALID_ENUM set for another target. A rectangle texture
  * (ARB_texture_rectangle) has level 0 only: GL_INVALID_VALUE otherwise. */
-static struct OGLES2Texture *image_texture(struct OGLES2Context *ctx, struct OGLES2TexState *ts, GLenum target,
+static struct OGLES3Texture *image_texture(struct OGLES3Context *ctx, struct OGLES3TexState *ts, GLenum target,
                                            GLint level, int *k)
 {
     *k = 0;
@@ -3132,26 +3132,26 @@ static struct OGLES2Texture *image_texture(struct OGLES2Context *ctx, struct OGL
 
 /* ---- for framebuffer objects (fbo.c) ---- */
 
-struct OGLES2Texture *ogles2_texture_get(struct OGLES2Context *ctx, GLuint name)
+struct OGLES3Texture *ogles2_texture_get(struct OGLES3Context *ctx, GLuint name)
 {
-    struct OGLES2TexState *ts = ts_get(ctx);
+    struct OGLES3TexState *ts = ts_get(ctx);
     return ts ? by_name(ts, name) : 0;
 }
 
-GLuint ogles2_texture_name(const struct OGLES2Texture *t)
+GLuint ogles2_texture_name(const struct OGLES3Texture *t)
 {
     return t->name;
 }
 
-GLenum ogles2_texture_target(const struct OGLES2Texture *t)
+GLenum ogles2_texture_target(const struct OGLES3Texture *t)
 {
     return t->target;
 }
 
-BOOL ogles2_texture_image(const struct OGLES2Texture *t, int k, int l, UWORD *w, UWORD *h,
+BOOL ogles2_texture_image(const struct OGLES3Texture *t, int k, int l, UWORD *w, UWORD *h,
                           GLenum *format, GLenum *type)
 {
-    const struct OGLES2Face *f;
+    const struct OGLES3Face *f;
     if (k < 0 || k >= t->nf || l < 0 || l >= MAX_LEVELS || !(t->f[k].defined & (1UL << l)))
         return FALSE; /* faces: a cube map's, a 2D array's layers, a 3D texture's slices */
     f = &t->f[k];
@@ -3177,43 +3177,43 @@ static const struct rt_desc {
     UBYTE type, bpp, kind, comps, swz, bits;
     UWORD pipe;
 } rt_table[37] = {
-    /* SRGB8ALPHA8 */ { V3D_INTERNAL_TYPE_16F, V3D_INTERNAL_BPP_64, OGLES2_RT_UNORM, 4, SWZ_XYZW, 8, 346 },
-    /* SRGB */        { 0, 0, OGLES2_RT_NONE, 0, 0, 0, 0 },
-    /* RGB10A2UI */   { V3D_INTERNAL_TYPE_16UI, V3D_INTERNAL_BPP_64, OGLES2_RT_UINT, 4, SWZ_XYZW, 10, 112 },
-    /* RGB10A2 */     { V3D_INTERNAL_TYPE_16F, V3D_INTERNAL_BPP_64, OGLES2_RT_UNORM, 4, SWZ_XYZW, 10, 114 },
-    /* ABGR1555 */    { V3D_INTERNAL_TYPE_8, V3D_INTERNAL_BPP_32, OGLES2_RT_UNORM, 4, SWZ_XYZW, 5, 301 },
-    /* (masked) */    { 0, 0, OGLES2_RT_NONE, 0, 0, 0, 0 },
-    /* ABGR4444 */    { V3D_INTERNAL_TYPE_8, V3D_INTERNAL_BPP_32, OGLES2_RT_UNORM, 4, SWZ_XYZW, 4, 307 },
-    /* BGR565 */      { V3D_INTERNAL_TYPE_8, V3D_INTERNAL_BPP_32, OGLES2_RT_UNORM, 3, SWZ_XYZ1, 5, 309 },
-    /* R11FG11FB10F */ { V3D_INTERNAL_TYPE_16F, V3D_INTERNAL_BPP_64, OGLES2_RT_F16, 3, SWZ_XYZ1, 11, 124 },
-    /* RGBA32F */     { V3D_INTERNAL_TYPE_32F, V3D_INTERNAL_BPP_128, OGLES2_RT_F32, 4, SWZ_XYZW, 32, 24 },
-    /* RG32F */       { V3D_INTERNAL_TYPE_32F, V3D_INTERNAL_BPP_64, OGLES2_RT_F32, 2, SWZ_XY01, 32, 22 },
-    /* R32F */        { V3D_INTERNAL_TYPE_32F, V3D_INTERNAL_BPP_32, OGLES2_RT_F32, 1, SWZ_X001, 32, 21 },
-    /* RGBA32I */     { V3D_INTERNAL_TYPE_32I, V3D_INTERNAL_BPP_128, OGLES2_RT_INT, 4, SWZ_XYZW, 32, 20 },
-    /* RG32I */       { V3D_INTERNAL_TYPE_32I, V3D_INTERNAL_BPP_64, OGLES2_RT_INT, 2, SWZ_XY01, 32, 18 },
-    /* R32I */        { V3D_INTERNAL_TYPE_32I, V3D_INTERNAL_BPP_32, OGLES2_RT_INT, 1, SWZ_X001, 32, 17 },
-    /* RGBA32UI */    { V3D_INTERNAL_TYPE_32UI, V3D_INTERNAL_BPP_128, OGLES2_RT_UINT, 4, SWZ_XYZW, 32, 16 },
-    /* RG32UI */      { V3D_INTERNAL_TYPE_32UI, V3D_INTERNAL_BPP_64, OGLES2_RT_UINT, 2, SWZ_XY01, 32, 14 },
-    /* R32UI */       { V3D_INTERNAL_TYPE_32UI, V3D_INTERNAL_BPP_32, OGLES2_RT_UINT, 1, SWZ_X001, 32, 13 },
-    /* RGBA16F */     { V3D_INTERNAL_TYPE_16F, V3D_INTERNAL_BPP_64, OGLES2_RT_F16, 4, SWZ_XYZW, 16, 56 },
-    /* RG16F */       { V3D_INTERNAL_TYPE_16F, V3D_INTERNAL_BPP_64, OGLES2_RT_F16, 2, SWZ_XY01, 16, 54 },
-    /* R16F */        { V3D_INTERNAL_TYPE_16F, V3D_INTERNAL_BPP_64, OGLES2_RT_F16, 1, SWZ_X001, 16, 53 },
-    /* RGBA16I */     { V3D_INTERNAL_TYPE_16I, V3D_INTERNAL_BPP_64, OGLES2_RT_INT, 4, SWZ_XYZW, 16, 52 },
-    /* RG16I */       { V3D_INTERNAL_TYPE_16I, V3D_INTERNAL_BPP_32, OGLES2_RT_INT, 2, SWZ_XY01, 16, 50 },
-    /* R16I */        { V3D_INTERNAL_TYPE_16I, V3D_INTERNAL_BPP_32, OGLES2_RT_INT, 1, SWZ_X001, 16, 49 },
-    /* RGBA16UI */    { V3D_INTERNAL_TYPE_16UI, V3D_INTERNAL_BPP_64, OGLES2_RT_UINT, 4, SWZ_XYZW, 16, 48 },
-    /* RG16UI */      { V3D_INTERNAL_TYPE_16UI, V3D_INTERNAL_BPP_32, OGLES2_RT_UINT, 2, SWZ_XY01, 16, 46 },
-    /* R16UI */       { V3D_INTERNAL_TYPE_16UI, V3D_INTERNAL_BPP_32, OGLES2_RT_UINT, 1, SWZ_X001, 16, 45 },
-    /* RGBA8 */       { V3D_INTERNAL_TYPE_8, V3D_INTERNAL_BPP_32, OGLES2_RT_UNORM, 4, SWZ_XYZW, 8, 84 },
-    /* RGB8 */        { 0, 0, OGLES2_RT_NONE, 0, 0, 0, 0 },
-    /* RG8 */         { V3D_INTERNAL_TYPE_8, V3D_INTERNAL_BPP_32, OGLES2_RT_UNORM, 2, SWZ_XY01, 8, 82 },
-    /* R8 */          { V3D_INTERNAL_TYPE_8, V3D_INTERNAL_BPP_32, OGLES2_RT_UNORM, 1, SWZ_X001, 8, 81 },
-    /* RGBA8I */      { V3D_INTERNAL_TYPE_8I, V3D_INTERNAL_BPP_32, OGLES2_RT_INT, 4, SWZ_XYZW, 8, 80 },
-    /* RG8I */        { V3D_INTERNAL_TYPE_8I, V3D_INTERNAL_BPP_32, OGLES2_RT_INT, 2, SWZ_XY01, 8, 78 },
-    /* R8I */         { V3D_INTERNAL_TYPE_8I, V3D_INTERNAL_BPP_32, OGLES2_RT_INT, 1, SWZ_X001, 8, 77 },
-    /* RGBA8UI */     { V3D_INTERNAL_TYPE_8UI, V3D_INTERNAL_BPP_32, OGLES2_RT_UINT, 4, SWZ_XYZW, 8, 76 },
-    /* RG8UI */       { V3D_INTERNAL_TYPE_8UI, V3D_INTERNAL_BPP_32, OGLES2_RT_UINT, 2, SWZ_XY01, 8, 74 },
-    /* R8UI */        { V3D_INTERNAL_TYPE_8UI, V3D_INTERNAL_BPP_32, OGLES2_RT_UINT, 1, SWZ_X001, 8, 73 },
+    /* SRGB8ALPHA8 */ { V3D_INTERNAL_TYPE_16F, V3D_INTERNAL_BPP_64, OGLES3_RT_UNORM, 4, SWZ_XYZW, 8, 346 },
+    /* SRGB */        { 0, 0, OGLES3_RT_NONE, 0, 0, 0, 0 },
+    /* RGB10A2UI */   { V3D_INTERNAL_TYPE_16UI, V3D_INTERNAL_BPP_64, OGLES3_RT_UINT, 4, SWZ_XYZW, 10, 112 },
+    /* RGB10A2 */     { V3D_INTERNAL_TYPE_16F, V3D_INTERNAL_BPP_64, OGLES3_RT_UNORM, 4, SWZ_XYZW, 10, 114 },
+    /* ABGR1555 */    { V3D_INTERNAL_TYPE_8, V3D_INTERNAL_BPP_32, OGLES3_RT_UNORM, 4, SWZ_XYZW, 5, 301 },
+    /* (masked) */    { 0, 0, OGLES3_RT_NONE, 0, 0, 0, 0 },
+    /* ABGR4444 */    { V3D_INTERNAL_TYPE_8, V3D_INTERNAL_BPP_32, OGLES3_RT_UNORM, 4, SWZ_XYZW, 4, 307 },
+    /* BGR565 */      { V3D_INTERNAL_TYPE_8, V3D_INTERNAL_BPP_32, OGLES3_RT_UNORM, 3, SWZ_XYZ1, 5, 309 },
+    /* R11FG11FB10F */ { V3D_INTERNAL_TYPE_16F, V3D_INTERNAL_BPP_64, OGLES3_RT_F16, 3, SWZ_XYZ1, 11, 124 },
+    /* RGBA32F */     { V3D_INTERNAL_TYPE_32F, V3D_INTERNAL_BPP_128, OGLES3_RT_F32, 4, SWZ_XYZW, 32, 24 },
+    /* RG32F */       { V3D_INTERNAL_TYPE_32F, V3D_INTERNAL_BPP_64, OGLES3_RT_F32, 2, SWZ_XY01, 32, 22 },
+    /* R32F */        { V3D_INTERNAL_TYPE_32F, V3D_INTERNAL_BPP_32, OGLES3_RT_F32, 1, SWZ_X001, 32, 21 },
+    /* RGBA32I */     { V3D_INTERNAL_TYPE_32I, V3D_INTERNAL_BPP_128, OGLES3_RT_INT, 4, SWZ_XYZW, 32, 20 },
+    /* RG32I */       { V3D_INTERNAL_TYPE_32I, V3D_INTERNAL_BPP_64, OGLES3_RT_INT, 2, SWZ_XY01, 32, 18 },
+    /* R32I */        { V3D_INTERNAL_TYPE_32I, V3D_INTERNAL_BPP_32, OGLES3_RT_INT, 1, SWZ_X001, 32, 17 },
+    /* RGBA32UI */    { V3D_INTERNAL_TYPE_32UI, V3D_INTERNAL_BPP_128, OGLES3_RT_UINT, 4, SWZ_XYZW, 32, 16 },
+    /* RG32UI */      { V3D_INTERNAL_TYPE_32UI, V3D_INTERNAL_BPP_64, OGLES3_RT_UINT, 2, SWZ_XY01, 32, 14 },
+    /* R32UI */       { V3D_INTERNAL_TYPE_32UI, V3D_INTERNAL_BPP_32, OGLES3_RT_UINT, 1, SWZ_X001, 32, 13 },
+    /* RGBA16F */     { V3D_INTERNAL_TYPE_16F, V3D_INTERNAL_BPP_64, OGLES3_RT_F16, 4, SWZ_XYZW, 16, 56 },
+    /* RG16F */       { V3D_INTERNAL_TYPE_16F, V3D_INTERNAL_BPP_64, OGLES3_RT_F16, 2, SWZ_XY01, 16, 54 },
+    /* R16F */        { V3D_INTERNAL_TYPE_16F, V3D_INTERNAL_BPP_64, OGLES3_RT_F16, 1, SWZ_X001, 16, 53 },
+    /* RGBA16I */     { V3D_INTERNAL_TYPE_16I, V3D_INTERNAL_BPP_64, OGLES3_RT_INT, 4, SWZ_XYZW, 16, 52 },
+    /* RG16I */       { V3D_INTERNAL_TYPE_16I, V3D_INTERNAL_BPP_32, OGLES3_RT_INT, 2, SWZ_XY01, 16, 50 },
+    /* R16I */        { V3D_INTERNAL_TYPE_16I, V3D_INTERNAL_BPP_32, OGLES3_RT_INT, 1, SWZ_X001, 16, 49 },
+    /* RGBA16UI */    { V3D_INTERNAL_TYPE_16UI, V3D_INTERNAL_BPP_64, OGLES3_RT_UINT, 4, SWZ_XYZW, 16, 48 },
+    /* RG16UI */      { V3D_INTERNAL_TYPE_16UI, V3D_INTERNAL_BPP_32, OGLES3_RT_UINT, 2, SWZ_XY01, 16, 46 },
+    /* R16UI */       { V3D_INTERNAL_TYPE_16UI, V3D_INTERNAL_BPP_32, OGLES3_RT_UINT, 1, SWZ_X001, 16, 45 },
+    /* RGBA8 */       { V3D_INTERNAL_TYPE_8, V3D_INTERNAL_BPP_32, OGLES3_RT_UNORM, 4, SWZ_XYZW, 8, 84 },
+    /* RGB8 */        { 0, 0, OGLES3_RT_NONE, 0, 0, 0, 0 },
+    /* RG8 */         { V3D_INTERNAL_TYPE_8, V3D_INTERNAL_BPP_32, OGLES3_RT_UNORM, 2, SWZ_XY01, 8, 82 },
+    /* R8 */          { V3D_INTERNAL_TYPE_8, V3D_INTERNAL_BPP_32, OGLES3_RT_UNORM, 1, SWZ_X001, 8, 81 },
+    /* RGBA8I */      { V3D_INTERNAL_TYPE_8I, V3D_INTERNAL_BPP_32, OGLES3_RT_INT, 4, SWZ_XYZW, 8, 80 },
+    /* RG8I */        { V3D_INTERNAL_TYPE_8I, V3D_INTERNAL_BPP_32, OGLES3_RT_INT, 2, SWZ_XY01, 8, 78 },
+    /* R8I */         { V3D_INTERNAL_TYPE_8I, V3D_INTERNAL_BPP_32, OGLES3_RT_INT, 1, SWZ_X001, 8, 77 },
+    /* RGBA8UI */     { V3D_INTERNAL_TYPE_8UI, V3D_INTERNAL_BPP_32, OGLES3_RT_UINT, 4, SWZ_XYZW, 8, 76 },
+    /* RG8UI */       { V3D_INTERNAL_TYPE_8UI, V3D_INTERNAL_BPP_32, OGLES3_RT_UINT, 2, SWZ_XY01, 8, 74 },
+    /* R8UI */        { V3D_INTERNAL_TYPE_8UI, V3D_INTERNAL_BPP_32, OGLES3_RT_UINT, 1, SWZ_X001, 8, 73 },
 };
 
 /* The integer texture types' output formats (V3D_TEXTURE_DATA_FORMAT_R8I
@@ -3236,7 +3236,7 @@ static const UBYTE int_out[19] = {
  * in an ES3 context): R8, RG8, RGB10_A2, SRGB8_ALPHA8, the integer formats
  * but RGB, and with EXT_color_buffer_float the R, RG and RGBA half and
  * single floats and R11F_G11F_B10F. */
-static int rt_out(const struct OGLES2Texture *t, const struct OGLES2Face *f, int l)
+static int rt_out(const struct OGLES3Texture *t, const struct OGLES3Face *f, int l)
 {
     GLenum fm = f->format[l], ty = f->type[l];
     BOOL es3 = t->es3_rules && (f->sized_given & (1UL << l)); /* ES 3.0 4.4.4: sized formats only */
@@ -3284,10 +3284,10 @@ static int rt_out(const struct OGLES2Texture *t, const struct OGLES2Face *f, int
  * buffer, the store and the fragment key need it. The GPU copy is in level
  * 0's format, so the level must have level 0's format and type. FALSE: not
  * colour-renderable. */
-BOOL ogles2_texture_rt(struct OGLES2Texture *t, int k, int l, struct OGLES2RtFormat *rf)
+BOOL ogles2_texture_rt(struct OGLES3Texture *t, int k, int l, struct OGLES3RtFormat *rf)
 {
     static const UBYTE swz[4][4] = { { 0, 1, 2, 3 }, { 0, 1, 2, 5 }, { 0, 1, 4, 5 }, { 0, 4, 4, 5 } };
-    const struct OGLES2Face *f, *f0 = &t->f[0];
+    const struct OGLES3Face *f, *f0 = &t->f[0];
     const struct rt_desc *e;
     int out;
     if (k < 0 || k >= t->nf)
@@ -3305,7 +3305,7 @@ BOOL ogles2_texture_rt(struct OGLES2Texture *t, int k, int l, struct OGLES2RtFor
     rf->type = e->type;
     rf->bpp = e->bpp;
     rf->kind = e->kind;
-    rf->clamp = e->kind == OGLES2_RT_INT || e->kind == OGLES2_RT_UINT ? V3D_RENDER_TARGET_CLAMP_INT
+    rf->clamp = e->kind == OGLES3_RT_INT || e->kind == OGLES3_RT_UINT ? V3D_RENDER_TARGET_CLAMP_INT
               : out == V3D_OUTPUT_IMAGE_FORMAT_SRGB8ALPHA8         ? V3D_RENDER_TARGET_CLAMP_NORM
                                                                    : V3D_RENDER_TARGET_CLAMP_NONE;
     rf->comps = e->comps;
@@ -3326,17 +3326,17 @@ BOOL ogles2_texture_rt(struct OGLES2Texture *t, int k, int l, struct OGLES2RtFor
     return TRUE;
 }
 
-BOOL ogles2_texture_renderable(struct OGLES2Texture *t, int k, int l)
+BOOL ogles2_texture_renderable(struct OGLES3Texture *t, int k, int l)
 {
-    struct OGLES2RtFormat rf;
+    struct OGLES3RtFormat rf;
     return ogles2_texture_rt(t, k, l, &rf);
 }
 
-BOOL ogles2_texture_surface(struct OGLES2Context *ctx, struct OGLES2Texture *t, int k, int l,
-                            struct OGLES2Surface *s)
+BOOL ogles2_texture_surface(struct OGLES3Context *ctx, struct OGLES3Texture *t, int k, int l,
+                            struct OGLES3Surface *s)
 {
     const V3DTexture *g;
-    struct OGLES2RtFormat rf;
+    struct OGLES3RtFormat rf;
     ULONG cpp;
     if (!ogles2_texture_rt(t, k, l, &rf))
         return FALSE;
@@ -3368,9 +3368,9 @@ BOOL ogles2_texture_surface(struct OGLES2Context *ctx, struct OGLES2Texture *t, 
  * bits (16, 24, or ES 3.0's 32 of a float) and whether it holds stencil
  * too (DEPTH_STENCIL_OES; DEPTH32F_STENCIL8's in an image of its own,
  * ogles2_texture_s8_surface). */
-BOOL ogles2_texture_depth(const struct OGLES2Texture *t, int l, UBYTE *bits, BOOL *stencil)
+BOOL ogles2_texture_depth(const struct OGLES3Texture *t, int l, UBYTE *bits, BOOL *stencil)
 {
-    const struct OGLES2Face *f = &t->f[0];
+    const struct OGLES3Face *f = &t->f[0];
     int c;
     if ((t->target != GL_TEXTURE_2D && t->target != GL_TEXTURE_2D_MULTISAMPLE) || l < 0 || l >= MAX_LEVELS ||
         !(f->defined & (1UL << l)))
@@ -3387,8 +3387,8 @@ BOOL ogles2_texture_depth(const struct OGLES2Texture *t, int l, UBYTE *bits, BOO
  * storage made first: the tile buffer stores into the level's own layout
  * as D16 or D24S8, which the TMU then samples as DEPTH_COMP16 or
  * DEPTH24_X8 (Mesa's depth textures). FALSE: none. */
-BOOL ogles2_texture_zs_surface(struct OGLES2Context *ctx, struct OGLES2Texture *t, int l,
-                               struct OGLES2Surface *s)
+BOOL ogles2_texture_zs_surface(struct OGLES3Context *ctx, struct OGLES3Texture *t, int l,
+                               struct OGLES3Surface *s)
 {
     const V3DTexture *g;
     UBYTE bits;
@@ -3419,11 +3419,11 @@ BOOL ogles2_texture_zs_surface(struct OGLES2Context *ctx, struct OGLES2Texture *
  * copies (zeros without one) when made and when given since (the
  * callers of keep_stencil dealt with the jobs that use the texture first).
  * FALSE: none, or no memory. */
-BOOL ogles2_texture_s8_surface(struct OGLES2Context *ctx, struct OGLES2Texture *t, int l,
-                               struct OGLES2Surface *s)
+BOOL ogles2_texture_s8_surface(struct OGLES3Context *ctx, struct OGLES3Texture *t, int l,
+                               struct OGLES3Surface *s)
 {
-    const struct OGLES2Face *f = &t->f[0];
-    struct OGLES2S8 *p;
+    const struct OGLES3Face *f = &t->f[0];
+    struct OGLES3S8 *p;
     int n, k;
     if (l < 0 || l >= MAX_LEVELS || !(f->defined & (1UL << l)) || f->format[l] != GL_DEPTH_STENCIL_OES ||
         f->type[l] != GL_FLOAT_32_UNSIGNED_INT_24_8_REV)
@@ -3475,7 +3475,7 @@ BOOL ogles2_texture_s8_surface(struct OGLES2Context *ctx, struct OGLES2Texture *
 /* ES 3.1's stencil texturing: a depth and stencil texture sampled with
  * GL_DEPTH_STENCIL_TEXTURE_MODE GL_STENCIL_INDEX reads its stencil indices
  * as unsigned integers (s, 0, 0, 1), nearest. */
-static BOOL stencil_sampled(const struct OGLES2Texture *t)
+static BOOL stencil_sampled(const struct OGLES3Texture *t)
 {
     return t->ds_mode == GL_STENCIL_INDEX && t->f[0].format[0] == GL_DEPTH_STENCIL_OES;
 }
@@ -3483,12 +3483,12 @@ static BOOL stencil_sampled(const struct OGLES2Texture *t)
 /* draw.c: unit `unit`'s texture of that kind returns 32 bits (by its level
  * 0's format; an incomplete one samples the RGBA8 fallback, which the
  * 32-bit variants read correctly too). */
-BOOL ogles2_texture_wide(struct OGLES2Context *ctx, int unit, int kind)
+BOOL ogles2_texture_wide(struct OGLES3Context *ctx, int unit, int kind)
 {
-    struct OGLES2TexState *ts = ctx->tex;
-    const struct OGLES2Texture *t;
+    struct OGLES3TexState *ts = ctx->tex;
+    const struct OGLES3Texture *t;
     int b;
-    if (!ts || kind == OGLES2_TEX_NONE)
+    if (!ts || kind == OGLES3_TEX_NONE)
         return FALSE;
     t = unit_texture(ts, kind, unit);
     /* A depth comparison returns 16 bits (Mesa's v3d_get_tex_return_size). */
@@ -3500,7 +3500,7 @@ BOOL ogles2_texture_wide(struct OGLES2Context *ctx, int unit, int kind)
     return (t->f[0].defined & (1UL << b)) && level_wide(&t->f[0], b);
 }
 
-void ogles2_texture_rendered(struct OGLES2Texture *t, int k, int l)
+void ogles2_texture_rendered(struct OGLES3Texture *t, int k, int l)
 {
     if (k >= t->nf)
         return;
@@ -3519,10 +3519,10 @@ static UBYTE float_byte(GLfloat v)
 /* A box of a FLOAT-class level as its 16-byte texels (floats, or ES 3.0's
  * integer words), `stride` bytes a row: from the GPU's copy, else (a
  * state-only context) the RAM copy. */
-static BOOL read_box16(struct OGLES2Texture *t, int k, int l, int x, int y, int w, int h, UBYTE *box,
+static BOOL read_box16(struct OGLES3Texture *t, int k, int l, int x, int y, int w, int h, UBYTE *box,
                        ULONG stride)
 {
-    const struct OGLES2Face *f = &t->f[k];
+    const struct OGLES3Face *f = &t->f[k];
     int j;
     if (level_class(f, l) != CLASS_FLOAT)
         return FALSE;
@@ -3539,10 +3539,10 @@ static BOOL read_box16(struct OGLES2Texture *t, int k, int l, int x, int y, int 
  * half-float, RGB10_A2 or sRGB target): each value clamped to [0,1] and
  * rounded, as GLES 2.0 4.3.1 converts a colour for an unsigned normalized
  * type. */
-static BOOL read_float(struct OGLES2Texture *t, int k, int l, int x, int y, int w, int h, UBYTE *rgba,
+static BOOL read_float(struct OGLES3Texture *t, int k, int l, int x, int y, int w, int h, UBYTE *rgba,
                        ULONG stride)
 {
-    const struct OGLES2Face *f = &t->f[k];
+    const struct OGLES3Face *f = &t->f[k];
     ULONG row = (ULONG)w * 16, i;
     GLfloat *box = AllocVec(row * h + 4, MEMF_ANY);
     int j;
@@ -3565,10 +3565,10 @@ static BOOL read_float(struct OGLES2Texture *t, int k, int l, int x, int y, int 
     return TRUE;
 }
 
-BOOL ogles2_texture_read(struct OGLES2Texture *t, int k, int l, int x, int y, int w, int h,
+BOOL ogles2_texture_read(struct OGLES3Texture *t, int k, int l, int x, int y, int w, int h,
                          UBYTE *rgba, ULONG stride)
 {
-    const struct OGLES2Face *f = &t->f[k];
+    const struct OGLES3Face *f = &t->f[k];
     int j;
     if (level_class(f, l) == CLASS_FLOAT)
         return !int_components(f->format[l]) && read_float(t, k, l, x, y, w, h, rgba, stride);
@@ -3583,7 +3583,7 @@ BOOL ogles2_texture_read(struct OGLES2Texture *t, int k, int l, int x, int y, in
     return TRUE;
 }
 
-BOOL ogles2_texture_read_wide(struct OGLES2Texture *t, int k, int l, int x, int y, int w, int h, UBYTE *out,
+BOOL ogles2_texture_read_wide(struct OGLES3Texture *t, int k, int l, int x, int y, int w, int h, UBYTE *out,
                               ULONG stride)
 {
     return read_box16(t, k, l, x, y, w, h, out, stride);
@@ -3615,10 +3615,10 @@ static UBYTE srgb_byte(GLfloat v)
 
 /* The same for an RGBA8-class level (its copy RGBA bytes; an sRGB one
  * encoded from the linear value). */
-static BOOL fill_bytes(struct OGLES2Texture *t, int k, int l, int x, int y, int w, int h, const ULONG *v,
+static BOOL fill_bytes(struct OGLES3Texture *t, int k, int l, int x, int y, int w, int h, const ULONG *v,
                        BOOL is_int, const GLboolean *mask)
 {
-    struct OGLES2Face *f = &t->f[k];
+    struct OGLES3Face *f = &t->f[k];
     BOOL srgb = f->sized[l] == GL_SRGB8_ALPHA8;
     ULONG row = (ULONG)w * 4;
     UBYTE b[4], *box;
@@ -3652,10 +3652,10 @@ static BOOL fill_bytes(struct OGLES2Texture *t, int k, int l, int x, int y, int 
  * 16-byte texels `stride` bytes a row (RGBA floats, or 32-bit integers for
  * an integer level), those `mask` marks (0: all), into the RAM copy (an
  * 8-bit one clamped and rounded, sRGB encoded), stored again. */
-BOOL ogles2_texture_write(struct OGLES2Texture *t, int k, int l, int x, int y, int w, int h, const UBYTE *src,
+BOOL ogles2_texture_write(struct OGLES3Texture *t, int k, int l, int x, int y, int w, int h, const UBYTE *src,
                           ULONG stride, const UBYTE *mask)
 {
-    struct OGLES2Face *f;
+    struct OGLES3Face *f;
     BOOL srgb;
     ULONG cb;
     UBYTE *box;
@@ -3697,10 +3697,10 @@ BOOL ogles2_texture_write(struct OGLES2Texture *t, int k, int l, int x, int y, i
     return TRUE;
 }
 
-BOOL ogles2_texture_fill(struct OGLES2Texture *t, int k, int l, int x, int y, int w, int h, const ULONG *v,
+BOOL ogles2_texture_fill(struct OGLES3Texture *t, int k, int l, int x, int y, int w, int h, const ULONG *v,
                          BOOL is_int, const GLboolean *mask)
 {
-    struct OGLES2Face *f = &t->f[k];
+    struct OGLES3Face *f = &t->f[k];
     BOOL ints = int_components(f->format[l]) != 0;
     ULONG word[4], row = (ULONG)w * 16;
     UBYTE *box;
@@ -3735,10 +3735,10 @@ BOOL ogles2_texture_fill(struct OGLES2Texture *t, int k, int l, int x, int y, in
  * scratch copy): one w x h level in format and type, `sized` kept
  * (keep_sized), sampled nearest; `es3`: ES 3.0's rules (its formats are
  * colour-renderable). */
-static struct OGLES2Texture *hidden(struct OGLES2Context *ctx, UWORD w, UWORD h, GLenum format, GLenum type,
+static struct OGLES3Texture *hidden(struct OGLES3Context *ctx, UWORD w, UWORD h, GLenum format, GLenum type,
                                     GLenum sized, BOOL es3)
 {
-    struct OGLES2Texture *t = AllocVec(sizeof(*t), MEMF_ANY | MEMF_CLEAR);
+    struct OGLES3Texture *t = AllocVec(sizeof(*t), MEMF_ANY | MEMF_CLEAR);
     if (!t)
         return 0;
     init_object(t, 0, GL_TEXTURE_2D);
@@ -3762,7 +3762,7 @@ static struct OGLES2Texture *hidden(struct OGLES2Context *ctx, UWORD w, UWORD h,
     return t;
 }
 
-struct OGLES2Texture *ogles2_texture_hidden(struct OGLES2Context *ctx, UWORD w, UWORD h, GLenum format,
+struct OGLES3Texture *ogles2_texture_hidden(struct OGLES3Context *ctx, UWORD w, UWORD h, GLenum format,
                                             GLenum type)
 {
     return hidden(ctx, w, h, format, type, 0, FALSE);
@@ -3770,7 +3770,7 @@ struct OGLES2Texture *ogles2_texture_hidden(struct OGLES2Context *ctx, UWORD w, 
 
 /* A colour renderbuffer's storage in an ES 3.0 sized format (fbo.c checks
  * it is colour-renderable), stored as glTexStorage2D stores it. */
-struct OGLES2Texture *ogles2_texture_hidden_sized(struct OGLES2Context *ctx, UWORD w, UWORD h, GLenum ifmt)
+struct OGLES3Texture *ogles2_texture_hidden_sized(struct OGLES3Context *ctx, UWORD w, UWORD h, GLenum ifmt)
 {
     GLenum format, type;
     if (!sized_storage(ifmt, &format, &type))
@@ -3778,7 +3778,7 @@ struct OGLES2Texture *ogles2_texture_hidden_sized(struct OGLES2Context *ctx, UWO
     return hidden(ctx, w, h, format, type, keep_sized(ifmt), TRUE);
 }
 
-void ogles2_texture_hidden_free(struct OGLES2Context *ctx, struct OGLES2Texture *t)
+void ogles2_texture_hidden_free(struct OGLES3Context *ctx, struct OGLES3Texture *t)
 {
     (void)ctx;
     if (!t)
@@ -3797,11 +3797,11 @@ void ogles2_texture_hidden_free(struct OGLES2Context *ctx, struct OGLES2Texture 
  * The caller has rendered and finished the context's jobs: none still reads
  * the scratch texture, none still writes the bitmap. 0: the TFU could not
  * (the CPU copies). */
-struct OGLES2Texture *ogles2_texture_scratch(struct OGLES2Context *ctx, UWORD w, UWORD h, ULONG src, ULONG stride,
+struct OGLES3Texture *ogles2_texture_scratch(struct OGLES3Context *ctx, UWORD w, UWORD h, ULONG src, ULONG stride,
                                              BOOL bgra)
 {
-    struct OGLES2TexState *ts = ts_get(ctx);
-    struct OGLES2Texture *t;
+    struct OGLES3TexState *ts = ts_get(ctx);
+    struct OGLES3Texture *t;
     UBYTE sw0, sw2;
     int r;
     if (!ts || !ctx->v3d)
@@ -3836,10 +3836,10 @@ struct OGLES2Texture *ogles2_texture_scratch(struct OGLES2Context *ctx, UWORD w,
 
 /* Texture t on unit 0's 2D target for the copy's draw (draw.c); the one
  * there before is returned, to be put back. */
-struct OGLES2Texture *ogles2_texture_unit0(struct OGLES2Context *ctx, struct OGLES2Texture *t)
+struct OGLES3Texture *ogles2_texture_unit0(struct OGLES3Context *ctx, struct OGLES3Texture *t)
 {
-    struct OGLES2TexState *ts = ts_get(ctx);
-    struct OGLES2Texture *old;
+    struct OGLES3TexState *ts = ts_get(ctx);
+    struct OGLES3Texture *old;
     if (!ts)
         return 0;
     old = ts->unit2d[0];
@@ -3859,7 +3859,7 @@ struct OGLES2Texture *ogles2_texture_unit0(struct OGLES2Context *ctx, struct OGL
 /* A framebuffer object's colour texture sampled by the copy: level 0,
  * nearest, clamped, whatever the application set (put back with
  * ogles2_texture_params_restore). */
-void ogles2_texture_params_copy(struct OGLES2Texture *t, struct OGLES2TexParams *saved)
+void ogles2_texture_params_copy(struct OGLES3Texture *t, struct OGLES3TexParams *saved)
 {
     saved->s = t->s;
     saved->base_level = t->base_level;
@@ -3879,7 +3879,7 @@ void ogles2_texture_params_copy(struct OGLES2Texture *t, struct OGLES2TexParams 
     t->pver++;
 }
 
-void ogles2_texture_params_restore(struct OGLES2Texture *t, const struct OGLES2TexParams *saved)
+void ogles2_texture_params_restore(struct OGLES3Texture *t, const struct OGLES3TexParams *saved)
 {
     t->s = saved->s;
     t->base_level = saved->base_level;
@@ -3889,7 +3889,7 @@ void ogles2_texture_params_restore(struct OGLES2Texture *t, const struct OGLES2T
     t->pver++;
 }
 
-static void set_level(struct OGLES2Context *ctx, struct OGLES2Texture *t, int k, GLint level, UBYTE *img,
+static void set_level(struct OGLES3Context *ctx, struct OGLES3Texture *t, int k, GLint level, UBYTE *img,
                       GLsizei width, GLsizei height, GLenum format, GLenum type, BOOL given, GLenum sized,
                       BOOL sized_given, GLenum ifmt);
 
@@ -3975,12 +3975,12 @@ static GLenum sized_base(GLenum ifmt, GLenum format, GLenum type)
     return ok && format == base ? base : NOT_FILLED;
 }
 
-static void tex_image(struct OGLES2Context *ctx, GLenum target, GLint level, GLint internalformat,
+static void tex_image(struct OGLES3Context *ctx, GLenum target, GLint level, GLint internalformat,
                          GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type,
                          const void *pixels)
 {
-    struct OGLES2TexState *ts;
-    struct OGLES2Texture *t;
+    struct OGLES3TexState *ts;
+    struct OGLES3Texture *t;
     GLenum err, keep, f0, t0, given = (GLenum)internalformat; /* as given: GL_TEXTURE_INTERNAL_FORMAT */
     UBYTE *img;
     const UBYTE *src = 0;
@@ -4075,7 +4075,7 @@ static void tex_image(struct OGLES2Context *ctx, GLenum target, GLint level, GLi
 
 /* A face's level becomes `img`, its new RAM copy (0: empty); `given`: it
  * holds the image's texels, else zeros. */
-static void put_level(struct OGLES2Face *f, int level, UBYTE *img, GLsizei width, GLsizei height, GLenum format,
+static void put_level(struct OGLES3Face *f, int level, UBYTE *img, GLsizei width, GLsizei height, GLenum format,
                       GLenum type, BOOL given, GLenum sized, BOOL sized_given, GLenum ifmt)
 {
     f->ifmt[level] = ifmt;
@@ -4102,7 +4102,7 @@ static void put_level(struct OGLES2Face *f, int level, UBYTE *img, GLsizei width
 }
 
 /* A face's level no longer exists (a 2D array or 3D level given fewer layers). */
-static void drop_level(struct OGLES2Face *f, int level)
+static void drop_level(struct OGLES3Face *f, int level)
 {
     if (f->shadow[level])
         FreeVec(f->shadow[level]);
@@ -4118,11 +4118,11 @@ static void drop_level(struct OGLES2Face *f, int level)
 /* Level `level` of face k becomes `img`, its new RAM copy (0: empty);
  * `given`: it holds the image's texels, else zeros. The caller has dealt
  * with the jobs that use the texture (before_change). */
-static void set_level(struct OGLES2Context *ctx, struct OGLES2Texture *t, int k, GLint level, UBYTE *img,
+static void set_level(struct OGLES3Context *ctx, struct OGLES3Texture *t, int k, GLint level, UBYTE *img,
                       GLsizei width, GLsizei height, GLenum format, GLenum type, BOOL given, GLenum sized,
                       BOOL sized_given, GLenum ifmt)
 {
-    struct OGLES2Face *f = &t->f[k];
+    struct OGLES3Face *f = &t->f[k];
     put_level(f, level, img, width, height, format, type, given, sized, sized_given, ifmt);
     if (!ctx->v3d)
         return; /* a state-only context keeps the images only */
@@ -4140,7 +4140,7 @@ static void set_level(struct OGLES2Context *ctx, struct OGLES2Texture *t, int k,
 }
 
 /* Timed for probe P (frame.c). */
-void ogles2_glTexImage2D(struct OGLES2Context *ctx, GLenum target, GLint level, GLint internalformat,
+void ogles2_glTexImage2D(struct OGLES3Context *ctx, GLenum target, GLint level, GLint internalformat,
                          GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type,
                          const void *pixels)
 {
@@ -4150,13 +4150,13 @@ void ogles2_glTexImage2D(struct OGLES2Context *ctx, GLenum target, GLint level, 
         ctx->sum_teximage += (double)(ULONG)(ogles2_clock_us() - t0);
 }
 
-static void tex_sub_image(struct OGLES2Context *ctx, GLenum target, GLint level, GLint xoffset,
+static void tex_sub_image(struct OGLES3Context *ctx, GLenum target, GLint level, GLint xoffset,
                             GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type,
                             const void *pixels)
 {
-    struct OGLES2TexState *ts;
-    struct OGLES2Texture *t;
-    struct OGLES2Face *f;
+    struct OGLES3TexState *ts;
+    struct OGLES3Texture *t;
+    struct OGLES3Face *f;
     GLenum err;
     UBYTE *sub;
     ULONG cb;
@@ -4223,7 +4223,7 @@ static void tex_sub_image(struct OGLES2Context *ctx, GLenum target, GLint level,
 }
 
 /* Timed for probe P (frame.c). */
-void ogles2_glTexSubImage2D(struct OGLES2Context *ctx, GLenum target, GLint level, GLint xoffset,
+void ogles2_glTexSubImage2D(struct OGLES3Context *ctx, GLenum target, GLint level, GLint xoffset,
                             GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type,
                             const void *pixels)
 {
@@ -4242,9 +4242,9 @@ void ogles2_glTexSubImage2D(struct OGLES2Context *ctx, GLenum target, GLint leve
 #define MAX_LAYERS 2048 /* GL_MAX_ARRAY_TEXTURE_LAYERS (state.c) */
 
 /* Room for n faces (allocated past six). */
-static BOOL faces_room(struct OGLES2Texture *t, int n)
+static BOOL faces_room(struct OGLES3Texture *t, int n)
 {
-    struct OGLES2Face *nf;
+    struct OGLES3Face *nf;
     if (n <= t->nf)
         return TRUE;
     if (!(nf = AllocVec((ULONG)n * sizeof(*nf), MEMF_ANY | MEMF_CLEAR)))
@@ -4257,7 +4257,7 @@ static BOOL faces_room(struct OGLES2Texture *t, int n)
     return TRUE;
 }
 
-static struct OGLES2Texture *image_texture_3d(struct OGLES2Context *ctx, struct OGLES2TexState *ts, GLenum target)
+static struct OGLES3Texture *image_texture_3d(struct OGLES3Context *ctx, struct OGLES3TexState *ts, GLenum target)
 {
     if (target == GL_TEXTURE_3D)
         return ts->unit3d[ts->active];
@@ -4267,12 +4267,12 @@ static struct OGLES2Texture *image_texture_3d(struct OGLES2Context *ctx, struct 
     return 0;
 }
 
-void ogles2_glTexImage3D(struct OGLES2Context *ctx, GLenum target, GLint level, GLint internalformat,
+void ogles2_glTexImage3D(struct OGLES3Context *ctx, GLenum target, GLint level, GLint internalformat,
                          GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type,
                          const void *pixels)
 {
-    struct OGLES2TexState *ts;
-    struct OGLES2Texture *t;
+    struct OGLES3TexState *ts;
+    struct OGLES3Texture *t;
     GLenum err, keep, f0, t0, given = (GLenum)internalformat; /* as given: GL_TEXTURE_INTERNAL_FORMAT */
     ULONG cb, row, in;
     const UBYTE *src;
@@ -4365,13 +4365,13 @@ void ogles2_glTexImage3D(struct OGLES2Context *ctx, GLenum target, GLint level, 
     }
 }
 
-void ogles2_glTexSubImage3D(struct OGLES2Context *ctx, GLenum target, GLint level, GLint xoffset, GLint yoffset,
+void ogles2_glTexSubImage3D(struct OGLES3Context *ctx, GLenum target, GLint level, GLint xoffset, GLint yoffset,
                             GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type,
                             const void *pixels)
 {
-    struct OGLES2TexState *ts;
-    struct OGLES2Texture *t;
-    struct OGLES2Face *f;
+    struct OGLES3TexState *ts;
+    struct OGLES3Texture *t;
+    struct OGLES3Face *f;
     GLenum err;
     UBYTE *sub;
     ULONG cb, row, in;
@@ -4417,7 +4417,7 @@ void ogles2_glTexSubImage3D(struct OGLES2Context *ctx, GLenum target, GLint leve
     }
     stored = t->gpu && level < t->gpu->num_levels && consistent(f, level) && depth_ok(t, level);
     for (k = zoffset; k < zoffset + depth; k++) {
-        struct OGLES2Face *fk = &t->f[k];
+        struct OGLES3Face *fk = &t->f[k];
         convert(sub, (ULONG)width * cb, src + (ULONG)(k - zoffset) * in, format, type, width, height, row);
         for (y = 0; y < height; y++)
             memcpy(fk->shadow[level] + ((ULONG)(yoffset + y) * fk->w[level] + xoffset) * cb,
@@ -4489,11 +4489,11 @@ static BOOL es3_sized(GLenum ifmt)
            ifmt == GL_DEPTH32F_STENCIL8;
 }
 
-static void tex_storage(struct OGLES2Context *ctx, GLenum target, GLsizei levels, GLenum ifmt, GLsizei width,
+static void tex_storage(struct OGLES3Context *ctx, GLenum target, GLsizei levels, GLenum ifmt, GLsizei width,
                         GLsizei height, GLsizei depth)
 {
-    struct OGLES2TexState *ts;
-    struct OGLES2Texture *t;
+    struct OGLES3TexState *ts;
+    struct OGLES3Texture *t;
     GLenum format, type;
     BOOL layers = target == GL_TEXTURE_3D || target == GL_TEXTURE_2D_ARRAY;
     int l, k, max, n = 1, big;
@@ -4562,7 +4562,7 @@ static void tex_storage(struct OGLES2Context *ctx, GLenum target, GLsizei levels
     t->pver++; /* the levels the records name */
 }
 
-void ogles2_glTexStorage2D(struct OGLES2Context *ctx, GLenum target, GLsizei levels, GLenum internalformat,
+void ogles2_glTexStorage2D(struct OGLES3Context *ctx, GLenum target, GLsizei levels, GLenum internalformat,
                            GLsizei width, GLsizei height)
 {
     if (target != GL_TEXTURE_2D && target != GL_TEXTURE_CUBE_MAP) {
@@ -4573,7 +4573,7 @@ void ogles2_glTexStorage2D(struct OGLES2Context *ctx, GLenum target, GLsizei lev
     tex_storage(ctx, target, levels, internalformat, width, height, 1);
 }
 
-void ogles2_glTexStorage3D(struct OGLES2Context *ctx, GLenum target, GLsizei levels, GLenum internalformat,
+void ogles2_glTexStorage3D(struct OGLES3Context *ctx, GLenum target, GLsizei levels, GLenum internalformat,
                            GLsizei width, GLsizei height, GLsizei depth)
 {
     if (target != GL_TEXTURE_3D && target != GL_TEXTURE_2D_ARRAY) {
@@ -4590,12 +4590,12 @@ void ogles2_glTexStorage3D(struct OGLES2Context *ctx, GLenum target, GLsizei lev
  * holds every sample (MS_SHIFT), sampled by texelFetch at sample i (the
  * compiler's lowering reads the 2x2 square) and rendered into by a 4x job
  * that stores them all (fbo.c). Sampler state is none: nearest. */
-void ogles2_glTexStorage2DMultisample(struct OGLES2Context *ctx, GLenum target, GLsizei samples,
+void ogles2_glTexStorage2DMultisample(struct OGLES3Context *ctx, GLenum target, GLsizei samples,
                                       GLenum internalformat, GLsizei width, GLsizei height,
                                       GLboolean fixedsamplelocations)
 {
-    struct OGLES2TexState *ts;
-    struct OGLES2Texture *t;
+    struct OGLES3TexState *ts;
+    struct OGLES3Texture *t;
     GLenum format, type;
     BOOL none;
     UBYTE *img;
@@ -4648,7 +4648,7 @@ void ogles2_glTexStorage2DMultisample(struct OGLES2Context *ctx, GLenum target, 
     t->pver++;
 }
 
-UBYTE ogles2_texture_samples(const struct OGLES2Texture *t, GLboolean *fixed)
+UBYTE ogles2_texture_samples(const struct OGLES3Texture *t, GLboolean *fixed)
 {
     if (fixed)
         *fixed = t->samples ? t->fixed_samples : GL_TRUE;
@@ -4657,12 +4657,12 @@ UBYTE ogles2_texture_samples(const struct OGLES2Texture *t, GLboolean *fixed)
 
 /* ES 3.0's compressed 2D arrays (3.8.6): ETC2/EAC (and S3TC) layers, each
  * kept as its blocks; a 3D texture is GL_INVALID_OPERATION. */
-void ogles2_glCompressedTexImage3D(struct OGLES2Context *ctx, GLenum target, GLint level, GLenum internalformat,
+void ogles2_glCompressedTexImage3D(struct OGLES3Context *ctx, GLenum target, GLint level, GLenum internalformat,
                                    GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize,
                                    const void *data)
 {
-    struct OGLES2TexState *ts;
-    struct OGLES2Texture *t;
+    struct OGLES3TexState *ts;
+    struct OGLES3Texture *t;
     ULONG bs, layer;
     int k;
     if (!ogles2_es3_entry(ctx) || !(ts = ts_get(ctx)) || !(t = image_texture_3d(ctx, ts, target)))
@@ -4711,13 +4711,13 @@ void ogles2_glCompressedTexImage3D(struct OGLES2Context *ctx, GLenum target, GLi
     free_gpu(t); /* made again at the first use */
 }
 
-void ogles2_glCompressedTexSubImage3D(struct OGLES2Context *ctx, GLenum target, GLint level, GLint xoffset,
+void ogles2_glCompressedTexSubImage3D(struct OGLES3Context *ctx, GLenum target, GLint level, GLint xoffset,
                                       GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth,
                                       GLenum format, GLsizei imageSize, const void *data)
 {
-    struct OGLES2TexState *ts;
-    struct OGLES2Texture *t;
-    struct OGLES2Face *f;
+    struct OGLES3TexState *ts;
+    struct OGLES3Texture *t;
+    struct OGLES3Face *f;
     ULONG bs, bw, bh, row, j, layer;
     int k;
     BOOL stored;
@@ -4762,7 +4762,7 @@ void ogles2_glCompressedTexSubImage3D(struct OGLES2Context *ctx, GLenum target, 
     row = blocks4(f->w[level]) * bs;
     stored = t->gpu && level < t->gpu->num_levels && consistent(f, level) && depth_ok(t, level);
     for (k = zoffset; k < zoffset + depth; k++) {
-        struct OGLES2Face *fk = &t->f[k];
+        struct OGLES3Face *fk = &t->f[k];
         const UBYTE *src = (const UBYTE *)data + (ULONG)(k - zoffset) * layer;
         for (j = 0; j < bh; j++)
             CopyMem((APTR)(src + j * bw * bs),
@@ -4796,13 +4796,13 @@ static int base_components(GLenum format)
 /* width x height pixels from (x, y) as `format` bytes, tightly packed
  * (unpack alignment 1): LUMINANCE takes red, ALPHA alpha, RGB drops alpha
  * (table 3.15). Pixels outside the framebuffer read as 0. */
-static UBYTE *read_region(struct OGLES2Context *ctx, GLint x, GLint y, GLsizei width, GLsizei height,
+static UBYTE *read_region(struct OGLES3Context *ctx, GLint x, GLint y, GLsizei width, GLsizei height,
                           GLenum format)
 {
     ULONG n = (ULONG)width * height, i;
     int c = base_components(format);
     UBYTE *rgba = AllocVec(n * 4 + 1, MEMF_ANY | MEMF_CLEAR), *out;
-    struct OGLES2PixelStore pack = ctx->pack;
+    struct OGLES3PixelStore pack = ctx->pack;
     if (!rgba)
         return 0;
     memset(&ctx->pack, 0, sizeof(ctx->pack));
@@ -4826,17 +4826,17 @@ static UBYTE *read_region(struct OGLES2Context *ctx, GLint x, GLint y, GLsizei w
     return out;
 }
 
-static void copy_tex_image(struct OGLES2Context *ctx, GLenum target, GLint level, GLenum internalformat, GLint x,
+static void copy_tex_image(struct OGLES3Context *ctx, GLenum target, GLint level, GLenum internalformat, GLint x,
                            GLint y, GLsizei width, GLsizei height, GLint border);
-static void copy_tex_sub_image(struct OGLES2Context *ctx, GLenum target, GLint level, GLint xoffset, GLint yoffset,
+static void copy_tex_sub_image(struct OGLES3Context *ctx, GLenum target, GLint level, GLint xoffset, GLint yoffset,
                                GLint x, GLint y, GLsizei width, GLsizei height);
 
 /* ES 3.0: from the read framebuffer (fbo.c, ogles2_fbo_read_begin). */
-void ogles2_glCopyTexImage2D(struct OGLES2Context *ctx, GLenum target, GLint level,
+void ogles2_glCopyTexImage2D(struct OGLES3Context *ctx, GLenum target, GLint level,
                              GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height,
                              GLint border)
 {
-    struct OGLES2Framebuffer *saved;
+    struct OGLES3Framebuffer *saved;
     if (!ogles2_context_valid(ctx))
         return;
     saved = ogles2_fbo_read_begin(ctx);
@@ -4844,10 +4844,10 @@ void ogles2_glCopyTexImage2D(struct OGLES2Context *ctx, GLenum target, GLint lev
     ogles2_fbo_read_end(ctx, saved);
 }
 
-void ogles2_glCopyTexSubImage2D(struct OGLES2Context *ctx, GLenum target, GLint level, GLint xoffset,
+void ogles2_glCopyTexSubImage2D(struct OGLES3Context *ctx, GLenum target, GLint level, GLint xoffset,
                                 GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height)
 {
-    struct OGLES2Framebuffer *saved;
+    struct OGLES3Framebuffer *saved;
     if (!ogles2_context_valid(ctx))
         return;
     saved = ogles2_fbo_read_begin(ctx);
@@ -4855,11 +4855,11 @@ void ogles2_glCopyTexSubImage2D(struct OGLES2Context *ctx, GLenum target, GLint 
     ogles2_fbo_read_end(ctx, saved);
 }
 
-static void copy_tex_image(struct OGLES2Context *ctx, GLenum target, GLint level, GLenum internalformat, GLint x,
+static void copy_tex_image(struct OGLES3Context *ctx, GLenum target, GLint level, GLenum internalformat, GLint x,
                            GLint y, GLsizei width, GLsizei height, GLint border)
 {
     UBYTE *img;
-    struct OGLES2PixelStore unpack;
+    struct OGLES3PixelStore unpack;
     if (!ogles2_context_valid(ctx))
         return;
     if (target != GL_TEXTURE_2D && target != GL_TEXTURE_RECTANGLE && !face_target(target)) {
@@ -4882,9 +4882,9 @@ static void copy_tex_image(struct OGLES2Context *ctx, GLenum target, GLint level
      * glTexImage2D makes it (its errors are glTexImage2D's), then the
      * region drawn into it. */
     if ((internalformat == GL_RGB || internalformat == GL_RGBA) && width > 0 && height > 0 &&
-        ctx->error == GL_NO_ERROR && ctx->v3d && !(ctx->probe & OGLES2_PROBE_CPU_COPY)) {
-        struct OGLES2TexState *ts;
-        struct OGLES2Texture *t;
+        ctx->error == GL_NO_ERROR && ctx->v3d && !(ctx->probe & OGLES3_PROBE_CPU_COPY)) {
+        struct OGLES3TexState *ts;
+        struct OGLES3Texture *t;
         int k;
         ogles2_glTexImage2D(ctx, target, level, (GLint)internalformat, width, height, 0, internalformat,
                             GL_UNSIGNED_BYTE, 0);
@@ -4905,11 +4905,11 @@ static void copy_tex_image(struct OGLES2Context *ctx, GLenum target, GLint level
     FreeVec(img);
 }
 
-static void copy_tex_sub_image(struct OGLES2Context *ctx, GLenum target, GLint level, GLint xoffset, GLint yoffset,
+static void copy_tex_sub_image(struct OGLES3Context *ctx, GLenum target, GLint level, GLint xoffset, GLint yoffset,
                                GLint x, GLint y, GLsizei width, GLsizei height)
 {
     UBYTE *img;
-    struct OGLES2PixelStore unpack;
+    struct OGLES3PixelStore unpack;
     GLenum fmt;
     if (!ogles2_context_valid(ctx))
         return;
@@ -4927,9 +4927,9 @@ static void copy_tex_sub_image(struct OGLES2Context *ctx, GLenum target, GLint l
      * LUMINANCE texture takes red); glTexSubImage2D reports a level that
      * does not exist. */
     {
-        struct OGLES2TexState *ts = ts_get(ctx);
-        struct OGLES2Texture *t;
-        const struct OGLES2Face *f;
+        struct OGLES3TexState *ts = ts_get(ctx);
+        struct OGLES3Texture *t;
+        const struct OGLES3Face *f;
         int k;
         if (!ts || !(t = image_texture(ctx, ts, target, level, &k)))
             return;
@@ -4967,13 +4967,13 @@ static void copy_tex_sub_image(struct OGLES2Context *ctx, GLenum target, GLint l
  * framebuffer as glCopyTexSubImage2D copies on the CPU: in the level's
  * format, through glTexSubImage3D (its errors; so only levels that take
  * bytes: not float, integer or packed ones). */
-void ogles2_glCopyTexSubImage3D(struct OGLES2Context *ctx, GLenum target, GLint level, GLint xoffset,
+void ogles2_glCopyTexSubImage3D(struct OGLES3Context *ctx, GLenum target, GLint level, GLint xoffset,
                                 GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height)
 {
-    struct OGLES2Framebuffer *saved;
-    struct OGLES2TexState *ts;
-    struct OGLES2Texture *t;
-    struct OGLES2PixelStore unpack;
+    struct OGLES3Framebuffer *saved;
+    struct OGLES3TexState *ts;
+    struct OGLES3Texture *t;
+    struct OGLES3PixelStore unpack;
     GLenum fmt = GL_RGBA;
     UBYTE *img = 0;
     if (!ogles2_es3_entry(ctx) || !(ts = ts_get(ctx)) || !(t = image_texture_3d(ctx, ts, target)))
@@ -5012,10 +5012,10 @@ void ogles2_glCopyTexSubImage3D(struct OGLES2Context *ctx, GLenum target, GLint 
  * framebuffer object cannot draw into one (not colour-renderable). */
 
 /* Level `level` of an S3TC texture: `bytes` of blocks (data 0: zeros). */
-static void dxt_image(struct OGLES2Context *ctx, struct OGLES2TexState *ts, GLenum target, GLint level,
+static void dxt_image(struct OGLES3Context *ctx, struct OGLES3TexState *ts, GLenum target, GLint level,
                       GLenum format, GLsizei width, GLsizei height, ULONG bytes, const void *data)
 {
-    struct OGLES2Texture *t;
+    struct OGLES3Texture *t;
     UBYTE *img;
     int k;
     if (width > (MAX_SIZE >> level) || height > (MAX_SIZE >> level) || (face_target(target) && width != height)) {
@@ -5039,11 +5039,11 @@ static void dxt_image(struct OGLES2Context *ctx, struct OGLES2TexState *ts, GLen
     set_level(ctx, t, k, level, img, width, height, format, 0, data != 0, 0, FALSE, format);
 }
 
-void ogles2_glCompressedTexImage2D(struct OGLES2Context *ctx, GLenum target, GLint level,
+void ogles2_glCompressedTexImage2D(struct OGLES3Context *ctx, GLenum target, GLint level,
                                    GLenum internalformat, GLsizei width, GLsizei height, GLint border,
                                    GLsizei imageSize, const void *data)
 {
-    struct OGLES2TexState *ts;
+    struct OGLES3TexState *ts;
     ULONG bw, bh, bs;
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
         return;
@@ -5069,13 +5069,13 @@ void ogles2_glCompressedTexImage2D(struct OGLES2Context *ctx, GLenum target, GLi
     dxt_image(ctx, ts, target, level, internalformat, width, height, (ULONG)imageSize, data);
 }
 
-void ogles2_glCompressedTexSubImage2D(struct OGLES2Context *ctx, GLenum target, GLint level,
+void ogles2_glCompressedTexSubImage2D(struct OGLES3Context *ctx, GLenum target, GLint level,
                                       GLint xoffset, GLint yoffset, GLsizei width, GLsizei height,
                                       GLenum format, GLsizei imageSize, const void *data)
 {
-    struct OGLES2TexState *ts;
-    struct OGLES2Texture *t;
-    struct OGLES2Face *f;
+    struct OGLES3TexState *ts;
+    struct OGLES3Texture *t;
+    struct OGLES3Face *f;
     ULONG bs, bw, bh, row, j;
     int k;
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
@@ -5171,13 +5171,13 @@ static void box_down_float(const GLfloat *src, int sw, int sh, GLfloat *dst, int
  * in a format the TFU filters. The levels it writes are newer on the GPU
  * than their RAM copies, as a render target's are (read back when the CPU
  * needs them, sync). Probe M keeps the CPU path. FALSE: the CPU path runs. */
-static BOOL generate_tfu(struct OGLES2Context *ctx, struct OGLES2TexState *ts, struct OGLES2Texture *t, int n)
+static BOOL generate_tfu(struct OGLES3Context *ctx, struct OGLES3TexState *ts, struct OGLES3Texture *t, int n)
 {
-    struct OGLES2Face *f = &t->f[0];
-    struct OGLES2Context *m, *user;
+    struct OGLES3Face *f = &t->f[0];
+    struct OGLES3Context *m, *user;
     ULONG made = ((1UL << n) - 1) & ~1UL; /* levels 1 .. n-1 */
     int l, r;
-    if ((ctx->probe & OGLES2_PROBE_CPU_MIPMAP) || !ctx->v3d || faces(t) != 1 || layered(t) || n < 2 || !t->gpu ||
+    if ((ctx->probe & OGLES3_PROBE_CPU_MIPMAP) || !ctx->v3d || faces(t) != 1 || layered(t) || n < 2 || !t->gpu ||
         !t->gpu->texture_mem.hostptr || t->gpu->num_levels < n || !v3d_tfu_supports_mipmaps(t->hw_type))
         return FALSE;
     for (l = 1; l < n; l++) {
@@ -5222,7 +5222,7 @@ static BOOL generate_tfu(struct OGLES2Context *ctx, struct OGLES2TexState *ts, s
 /* A 3D texture's levels b + 1 to e from level b on the CPU: each slice a
  * box filter of two (the last one of an odd depth alone, as the 2D box
  * filter takes a row). */
-static BOOL generate_volume(struct OGLES2Context *ctx, struct OGLES2Texture *t, int b, int e, int cls)
+static BOOL generate_volume(struct OGLES3Context *ctx, struct OGLES3Texture *t, int b, int e, int cls)
 {
     int l, z;
     ULONG i, cb = copy_bytes(cls);
@@ -5231,7 +5231,7 @@ static BOOL generate_volume(struct OGLES2Context *ctx, struct OGLES2Texture *t, 
         int d = t->d[l - 1] > 1 ? t->d[l - 1] / 2 : 1;
         for (z = 0; z < d; z++) {
             int z1 = 2 * z + 1 < t->d[l - 1] ? 2 * z + 1 : 2 * z;
-            struct OGLES2Face *a = &t->f[2 * z], *b = &t->f[z1];
+            struct OGLES3Face *a = &t->f[2 * z], *b = &t->f[z1];
             UBYTE *img = AllocVec((ULONG)w * h * cb, MEMF_ANY), *two = AllocVec((ULONG)w * h * cb, MEMF_ANY);
             if (!img || !two) {
                 if (img)
@@ -5266,7 +5266,7 @@ static BOOL generate_volume(struct OGLES2Context *ctx, struct OGLES2Texture *t, 
 /* ES 3.0 3.8.10: a base level given a sized format is colour-renderable
  * and filterable: not a signed normalized, 32-bit float, RGB16F, RGB9_E5 or
  * SRGB8 one (integer, depth and compressed ones refused before). */
-static BOOL mip_sized_ok(const struct OGLES2Face *f, int b)
+static BOOL mip_sized_ok(const struct OGLES3Face *f, int b)
 {
     GLenum s = f->sized[b], ty = f->type[b];
     if (!((f->defined & f->sized_given) >> b & 1) || s == GL_R11F_G11F_B10F || s == GL_SRGB8_ALPHA8)
@@ -5280,11 +5280,11 @@ static BOOL mip_sized_ok(const struct OGLES2Face *f, int b)
 /* ES 3.0 3.8.10: levels base + 1 to q from the base level (level 0 in
  * GLES2 contexts), q the chain's last level or the max level, an immutable
  * texture's base and max clamped to its levels. */
-void ogles2_glGenerateMipmap(struct OGLES2Context *ctx, GLenum target)
+void ogles2_glGenerateMipmap(struct OGLES3Context *ctx, GLenum target)
 {
-    struct OGLES2TexState *ts;
-    struct OGLES2Texture *t;
-    const struct OGLES2Face *fb;
+    struct OGLES3TexState *ts;
+    struct OGLES3Texture *t;
+    const struct OGLES3Face *fb;
     int l, n, k, cls, b, e, d;
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
         return;
@@ -5354,7 +5354,7 @@ void ogles2_glGenerateMipmap(struct OGLES2Context *ctx, GLenum target)
     for (l = b + 1; l <= e; l++)
         t->d[l] = t->d[b]; /* an array's layers: every level has them all */
     for (k = 0; k < faces_at(t, b); k++) {
-        struct OGLES2Face *f = &t->f[k];
+        struct OGLES3Face *f = &t->f[k];
         for (l = b + 1; l <= e; l++) {
             int w = f->w[l - 1] > 1 ? f->w[l - 1] / 2 : 1, h = f->h[l - 1] > 1 ? f->h[l - 1] / 2 : 1;
             UBYTE *img = AllocVec((ULONG)w * h * copy_bytes(cls), MEMF_ANY);
@@ -5386,7 +5386,7 @@ void ogles2_glGenerateMipmap(struct OGLES2Context *ctx, GLenum target)
 
 /* ---- ES 3.1's images in shaders (stage D item 2) ---- */
 
-static struct OGLES2Texture *fallback(struct OGLES2TexState *ts);
+static struct OGLES3Texture *fallback(struct OGLES3TexState *ts);
 static void *claim32(V3DContext *v, ULONG size);
 
 /* The stored format of an image unit's format (ES 3.1 table 8.27) and its
@@ -5415,10 +5415,10 @@ static UBYTE image_hw_type(GLenum f, UBYTE *cpp)
 /* Unit u's image when shaders can read and write it (ES 3.1 8.22: a
  * texture, its level and layer there, a format of its texel size), else
  * NULL. */
-static struct OGLES2ImageUnit *valid_image(struct OGLES2TexState *ts, int u)
+static struct OGLES3ImageUnit *valid_image(struct OGLES3TexState *ts, int u)
 {
-    struct OGLES2ImageUnit *im;
-    struct OGLES2Texture *t;
+    struct OGLES3ImageUnit *im;
+    struct OGLES3Texture *t;
     UBYTE cpp;
     if (!ts || !ts->images || u < 0 || u >= MAX_IMAGE_UNITS)
         return 0;
@@ -5435,11 +5435,11 @@ static struct OGLES2ImageUnit *valid_image(struct OGLES2TexState *ts, int u)
     return t->gpu && cpp == t->cpp ? im : 0;
 }
 
-ULONG ogles2_image_state(struct OGLES2Context *ctx, int unit, void *dst)
+ULONG ogles2_image_state(struct OGLES3Context *ctx, int unit, void *dst)
 {
-    struct OGLES2TexState *ts = ts_get(ctx);
-    struct OGLES2ImageUnit *im = valid_image(ts, unit);
-    struct OGLES2Texture *t;
+    struct OGLES3TexState *ts = ts_get(ctx);
+    struct OGLES3ImageUnit *im = valid_image(ts, unit);
+    struct OGLES3Texture *t;
     v3d_texture_shader_state *tsr;
     V3DTexture *g;
     ULONG *w, base;
@@ -5496,10 +5496,10 @@ ULONG ogles2_image_state(struct OGLES2Context *ctx, int unit, void *dst)
     return (ULONG)tsr;
 }
 
-ULONG ogles2_image_size(struct OGLES2Context *ctx, int unit, int what)
+ULONG ogles2_image_size(struct OGLES3Context *ctx, int unit, int what)
 {
-    struct OGLES2ImageUnit *im = valid_image(ts_get(ctx), unit);
-    struct OGLES2Texture *t;
+    struct OGLES3ImageUnit *im = valid_image(ts_get(ctx), unit);
+    struct OGLES3Texture *t;
     if (!im)
         return 0;
     t = im->t;
@@ -5511,10 +5511,10 @@ ULONG ogles2_image_size(struct OGLES2Context *ctx, int unit, int what)
     }
 }
 
-void ogles2_image_written(struct OGLES2Context *ctx, int unit, ULONG serial)
+void ogles2_image_written(struct OGLES3Context *ctx, int unit, ULONG serial)
 {
-    struct OGLES2ImageUnit *im = valid_image(ts_get(ctx), unit);
-    struct OGLES2Texture *t;
+    struct OGLES3ImageUnit *im = valid_image(ts_get(ctx), unit);
+    struct OGLES3Texture *t;
     int k;
     if (!im || im->access == GL_READ_ONLY)
         return;
@@ -5534,13 +5534,13 @@ void ogles2_image_written(struct OGLES2Context *ctx, int unit, ULONG serial)
  * width or height (level 0's minified to it), the depth and the layers
  * (1: no 3D or array textures before stage B). A kind without textures
  * answers 1, as the fallback it samples. */
-ULONG ogles2_texture_size(struct OGLES2Context *ctx, int unit, int kind, int what)
+ULONG ogles2_texture_size(struct OGLES3Context *ctx, int unit, int kind, int what)
 {
-    struct OGLES2TexState *ts = ts_get(ctx);
-    struct OGLES2Texture *t;
+    struct OGLES3TexState *ts = ts_get(ctx);
+    struct OGLES3Texture *t;
     ULONG s;
     int b;
-    if (!ts || kind == OGLES2_TEX_NONE)
+    if (!ts || kind == OGLES3_TEX_NONE)
         return 1;
     t = unit_texture(ts, kind, unit); /* the integer flag aside */
     /* the depth of a 3D texture (minified as width and height), the layers of an array */
@@ -5559,14 +5559,14 @@ ULONG ogles2_texture_size(struct OGLES2Context *ctx, int unit, int kind, int wha
 /* ---- sampler objects (ES 3.0 3.8.2; stage B item 7) ---- */
 
 /* The sampler named `name`; their names come from glGenSamplers only. */
-static struct OGLES2Sampler *smp_by_name(struct OGLES2Share *sh, GLuint name)
+static struct OGLES3Sampler *smp_by_name(struct OGLES3Share *sh, GLuint name)
 {
     return name && name < sh->nsmp ? sh->smp[name] : 0;
 }
 
-void ogles2_glGenSamplers(struct OGLES2Context *ctx, GLsizei count, GLuint *samplers)
+void ogles2_glGenSamplers(struct OGLES3Context *ctx, GLsizei count, GLuint *samplers)
 {
-    struct OGLES2Share *sh;
+    struct OGLES3Share *sh;
     GLsizei k;
     GLuint i = 1, nn, j;
     if (!ogles2_es3_entry(ctx))
@@ -5577,12 +5577,12 @@ void ogles2_glGenSamplers(struct OGLES2Context *ctx, GLsizei count, GLuint *samp
     }
     sh = ctx->share;
     for (k = 0; k < count; k++) {
-        struct OGLES2Sampler *so, **tab;
+        struct OGLES3Sampler *so, **tab;
         while (i < sh->nsmp && sh->smp[i])
             i++;
         if (i >= sh->nsmp) { /* the table grows */
             nn = sh->nsmp ? sh->nsmp * 2 : 32;
-            if (i >= OGLES2_NEAR_NAMES || !(tab = AllocVec(nn * sizeof(*tab), MEMF_ANY | MEMF_CLEAR))) {
+            if (i >= OGLES3_NEAR_NAMES || !(tab = AllocVec(nn * sizeof(*tab), MEMF_ANY | MEMF_CLEAR))) {
                 ogles2_error(ctx, GL_OUT_OF_MEMORY);
                 return;
             }
@@ -5608,10 +5608,10 @@ void ogles2_glGenSamplers(struct OGLES2Context *ctx, GLsizei count, GLuint *samp
 
 /* ES 3.0 says a sampler deleted while another context has it bound lives
  * on there until unbound; here every member of the share group unbinds it. */
-void ogles2_glDeleteSamplers(struct OGLES2Context *ctx, GLsizei count, const GLuint *samplers)
+void ogles2_glDeleteSamplers(struct OGLES3Context *ctx, GLsizei count, const GLuint *samplers)
 {
     ogles2_labels_forget(ctx, GL_SAMPLER_KHR, count, samplers); /* KHR_debug's labels of the names */
-    struct OGLES2Context *m;
+    struct OGLES3Context *m;
     GLsizei k;
     int u;
     if (!ogles2_es3_entry(ctx))
@@ -5621,12 +5621,12 @@ void ogles2_glDeleteSamplers(struct OGLES2Context *ctx, GLsizei count, const GLu
         return;
     }
     for (k = 0; samplers && k < count; k++) {
-        struct OGLES2Sampler *so = smp_by_name(ctx->share, samplers[k]);
+        struct OGLES3Sampler *so = smp_by_name(ctx->share, samplers[k]);
         if (!so)
             continue;
         for (m = ctx->share->first; m; m = m->share_next)
             if (m->tex) {
-                for (u = 0; u < OGLES2_MAX_TEXTURE_UNITS; u++)
+                for (u = 0; u < OGLES3_MAX_TEXTURE_UNITS; u++)
                     if (m->tex->unitsmp[u] == so)
                         m->tex->unitsmp[u] = 0;
                 if (m->tex->copy_smp == so)
@@ -5637,20 +5637,20 @@ void ogles2_glDeleteSamplers(struct OGLES2Context *ctx, GLsizei count, const GLu
     }
 }
 
-GLboolean ogles2_glIsSampler(struct OGLES2Context *ctx, GLuint sampler)
+GLboolean ogles2_glIsSampler(struct OGLES3Context *ctx, GLuint sampler)
 {
     if (!ogles2_es3_entry(ctx))
         return GL_FALSE;
     return smp_by_name(ctx->share, sampler) ? GL_TRUE : GL_FALSE;
 }
 
-void ogles2_glBindSampler(struct OGLES2Context *ctx, GLuint unit, GLuint sampler)
+void ogles2_glBindSampler(struct OGLES3Context *ctx, GLuint unit, GLuint sampler)
 {
-    struct OGLES2TexState *ts;
-    struct OGLES2Sampler *so = 0;
+    struct OGLES3TexState *ts;
+    struct OGLES3Sampler *so = 0;
     if (!ogles2_es3_entry(ctx))
         return;
-    if (unit >= OGLES2_MAX_TEXTURE_UNITS) {
+    if (unit >= OGLES3_MAX_TEXTURE_UNITS) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
@@ -5665,9 +5665,9 @@ void ogles2_glBindSampler(struct OGLES2Context *ctx, GLuint unit, GLuint sampler
     ts->unitsmp[unit] = so;
 }
 
-static void sampler_param(struct OGLES2Context *ctx, GLuint sampler, GLenum pname, GLint i, GLfloat f)
+static void sampler_param(struct OGLES3Context *ctx, GLuint sampler, GLenum pname, GLint i, GLfloat f)
 {
-    struct OGLES2Sampler *so;
+    struct OGLES3Sampler *so;
     GLenum err;
     if (!ogles2_es3_entry(ctx))
         return;
@@ -5682,31 +5682,31 @@ static void sampler_param(struct OGLES2Context *ctx, GLuint sampler, GLenum pnam
     so->ver = ++smp_serial;
 }
 
-void ogles2_glSamplerParameteri(struct OGLES2Context *ctx, GLuint sampler, GLenum pname, GLint param)
+void ogles2_glSamplerParameteri(struct OGLES3Context *ctx, GLuint sampler, GLenum pname, GLint param)
 {
     sampler_param(ctx, sampler, pname, param, (GLfloat)param);
 }
 
-void ogles2_glSamplerParameterf(struct OGLES2Context *ctx, GLuint sampler, GLenum pname, GLfloat param)
+void ogles2_glSamplerParameterf(struct OGLES3Context *ctx, GLuint sampler, GLenum pname, GLfloat param)
 {
     sampler_param(ctx, sampler, pname, round_param(param), param);
 }
 
-void ogles2_glSamplerParameteriv(struct OGLES2Context *ctx, GLuint sampler, GLenum pname, const GLint *param)
+void ogles2_glSamplerParameteriv(struct OGLES3Context *ctx, GLuint sampler, GLenum pname, const GLint *param)
 {
     if (param)
         sampler_param(ctx, sampler, pname, param[0], (GLfloat)param[0]);
 }
 
-void ogles2_glSamplerParameterfv(struct OGLES2Context *ctx, GLuint sampler, GLenum pname, const GLfloat *param)
+void ogles2_glSamplerParameterfv(struct OGLES3Context *ctx, GLuint sampler, GLenum pname, const GLfloat *param)
 {
     if (param)
         sampler_param(ctx, sampler, pname, round_param(param[0]), param[0]);
 }
 
-static BOOL get_sampler_param(struct OGLES2Context *ctx, GLuint sampler, GLenum pname, GLfloat *v)
+static BOOL get_sampler_param(struct OGLES3Context *ctx, GLuint sampler, GLenum pname, GLfloat *v)
 {
-    struct OGLES2Sampler *so;
+    struct OGLES3Sampler *so;
     if (!ogles2_es3_entry(ctx))
         return FALSE;
     if (!(so = smp_by_name(ctx->share, sampler))) {
@@ -5720,14 +5720,14 @@ static BOOL get_sampler_param(struct OGLES2Context *ctx, GLuint sampler, GLenum 
     return TRUE;
 }
 
-void ogles2_glGetSamplerParameteriv(struct OGLES2Context *ctx, GLuint sampler, GLenum pname, GLint *params)
+void ogles2_glGetSamplerParameteriv(struct OGLES3Context *ctx, GLuint sampler, GLenum pname, GLint *params)
 {
     GLfloat v;
     if (params && get_sampler_param(ctx, sampler, pname, &v))
         *params = exact_param(pname) ? (GLint)(ULONG)v : round_param(v);
 }
 
-void ogles2_glGetSamplerParameterfv(struct OGLES2Context *ctx, GLuint sampler, GLenum pname, GLfloat *params)
+void ogles2_glGetSamplerParameterfv(struct OGLES3Context *ctx, GLuint sampler, GLenum pname, GLfloat *params)
 {
     GLfloat v;
     if (params && get_sampler_param(ctx, sampler, pname, &v))
@@ -5736,9 +5736,9 @@ void ogles2_glGetSamplerParameterfv(struct OGLES2Context *ctx, GLuint sampler, G
 
 /* The fallback texture, 1x1 (0,0,0,1) (GLES 2.0 3.8.2: an incomplete
  * texture samples that). */
-static struct OGLES2Texture *fallback(struct OGLES2TexState *ts)
+static struct OGLES3Texture *fallback(struct OGLES3TexState *ts)
 {
-    struct OGLES2Texture *t = &ts->fallback;
+    struct OGLES3Texture *t = &ts->fallback;
     if (!t->gpu) {
         init_object(t, 0, GL_TEXTURE_2D);
         t->s.min_filter = t->s.mag_filter = GL_NEAREST;
@@ -5756,9 +5756,9 @@ static struct OGLES2Texture *fallback(struct OGLES2TexState *ts)
 }
 
 /* The same for an integer sampler: (0, 0, 0, 1) in RGBA8UI. */
-static struct OGLES2Texture *fallback_int(struct OGLES2TexState *ts)
+static struct OGLES3Texture *fallback_int(struct OGLES3TexState *ts)
 {
-    struct OGLES2Texture *t = &ts->fallback_int;
+    struct OGLES3Texture *t = &ts->fallback_int;
     if (!t->gpu) {
         init_object(t, 0, GL_TEXTURE_2D);
         t->s.min_filter = t->s.mag_filter = GL_NEAREST;
@@ -5795,10 +5795,10 @@ static UBYTE wrap_mode(GLenum w)
 /* What a draw samples for t: t, or the view of its base level (chain_base;
  * Mesa lays a new resource out from the base level so), made again after
  * a change or for another base level, with t's parameters. */
-static struct OGLES2Texture *based_view(struct OGLES2Context *ctx, struct OGLES2TexState *ts,
-                                        struct OGLES2Texture *t)
+static struct OGLES3Texture *based_view(struct OGLES3Context *ctx, struct OGLES3TexState *ts,
+                                        struct OGLES3Texture *t)
 {
-    struct OGLES2Texture *v = t->view;
+    struct OGLES3Texture *v = t->view;
     int b = chain_base(t), n, k, l;
     if (v && t->view_base != b) {
         before_change(ctx, ts, v);
@@ -5821,8 +5821,8 @@ static struct OGLES2Texture *based_view(struct OGLES2Context *ctx, struct OGLES2
             ULONG bit = 1UL << l, to = 1UL << (l - b);
             v->d[l - b] = t->d[l];
             for (k = 0; k < n && k < t->nf; k++) {
-                const struct OGLES2Face *s = &t->f[k];
-                struct OGLES2Face *f = &v->f[k];
+                const struct OGLES3Face *s = &t->f[k];
+                struct OGLES3Face *f = &v->f[k];
                 if (!(s->defined & bit))
                     continue;
                 f->w[l - b] = s->w[l];
@@ -5856,11 +5856,11 @@ static struct OGLES2Texture *based_view(struct OGLES2Context *ctx, struct OGLES2
  * kind, written into the job's state buffer (packing as PiStorm3D's
  * v3d_texture_emit_state; values as Mesa's v3dx_state.c). FALSE: out of
  * memory. */
-BOOL ogles2_texture_state(struct OGLES2Context *ctx, int unit, int kind, ULONG *tex_state,
+BOOL ogles2_texture_state(struct OGLES3Context *ctx, int unit, int kind, ULONG *tex_state,
                           ULONG *sampler_state)
 {
-    struct OGLES2TexState *ts = ts_get(ctx);
-    struct OGLES2Texture *t;
+    struct OGLES3TexState *ts = ts_get(ctx);
+    struct OGLES3Texture *t;
     V3DContext *v = ctx->v3d;
     v3d_texture_shader_state *tsr;
     v3d_sampler_state *ss;
@@ -5871,8 +5871,8 @@ BOOL ogles2_texture_state(struct OGLES2Context *ctx, int unit, int kind, ULONG *
     UWORD *swivel16;
     int first = 0, last = 0;
     BOOL own, stencil, s8_uif = FALSE;
-    struct OGLES2Sampler *so;
-    const struct OGLES2SamplerParams *sp;
+    struct OGLES3Sampler *so;
+    const struct OGLES3SamplerParams *sp;
     ULONG sver;
     BOOL isfb;
 
@@ -5880,12 +5880,12 @@ BOOL ogles2_texture_state(struct OGLES2Context *ctx, int unit, int kind, ULONG *
         return FALSE;
     so = ts->unitsmp[unit];
     sver = so ? so->ver : 0;
-    /* A sampler of a kind with no textures yet (OGLES2_TEX_NONE: GLSL ES
+    /* A sampler of a kind with no textures yet (OGLES3_TEX_NONE: GLSL ES
      * 3.00's integer samplers until stage B) reads what an incomplete
      * texture reads. */
-    if (kind == OGLES2_TEX_NONE && !(t = fallback(ts)))
+    if (kind == OGLES3_TEX_NONE && !(t = fallback(ts)))
         return FALSE;
-    if (kind != OGLES2_TEX_NONE)
+    if (kind != OGLES3_TEX_NONE)
         t = based_view(ctx, ts, unit_texture(ts, kind, unit));
     isfb = FALSE;
     /* The same records as the last draw with it: a texture a draw of a job
@@ -5918,7 +5918,7 @@ BOOL ogles2_texture_state(struct OGLES2Context *ctx, int unit, int kind, ULONG *
                        (ULONG)t->name, (ULONG)(!t->gpu ? "no GPU copy" : base_ok(t) ? "mip chain" : "level 0"),
                        (ULONG)t->f[0].w[0], (ULONG)t->f[0].h[0], (ULONG)sp->min_filter, (ULONG)l, (ULONG)n);
         }
-        if (!(t = (kind & OGLES2_TEX_INT) ? fallback_int(ts) : fallback(ts)))
+        if (!(t = (kind & OGLES3_TEX_INT) ? fallback_int(ts) : fallback(ts)))
             return FALSE;
         sp = &t->s;
         first = last = 0;
@@ -5960,7 +5960,7 @@ BOOL ogles2_texture_state(struct OGLES2Context *ctx, int unit, int kind, ULONG *
     } else if (stencil) {
         /* DEPTH32F_STENCIL8: its S8 image of the base level, R8UI (Mesa's
          * separate stencil), as a texture of one level */
-        struct OGLES2Surface s8;
+        struct OGLES3Surface s8;
         if (ogles2_texture_s8_surface(ctx, t, first, &s8)) {
             tsr->texture_base_pointer_rshift_6 = s8.addr >> 6;
             tsr->base_level = tsr->max_level = 0;

@@ -42,9 +42,9 @@ static GLfloat srgb_linear(GLfloat c)
 /* The read buffer's box as 16-byte texels (floats, or with *ints 32-bit
  * integers): the read framebuffer's image, or the default framebuffer's
  * bitmap. FALSE: nothing to read. */
-static BOOL read_raw(struct OGLES2Context *ctx, int x, int y, int w, int h, UBYTE *box, BOOL *ints)
+static BOOL read_raw(struct OGLES3Context *ctx, int x, int y, int w, int h, UBYTE *box, BOOL *ints)
 {
-    struct OGLES2RtFormat rf;
+    struct OGLES3RtFormat rf;
     ULONG row = (ULONG)w * 16;
     UBYTE *bytes;
     BOOL srgb = FALSE;
@@ -53,7 +53,7 @@ static BOOL read_raw(struct OGLES2Context *ctx, int x, int y, int w, int h, UBYT
     if (ctx->draw_fb) {
         if (!ogles2_fbo_read_format(ctx, &rf))
             return FALSE;
-        *ints = rf.kind == OGLES2_RT_INT || rf.kind == OGLES2_RT_UINT;
+        *ints = rf.kind == OGLES3_RT_INT || rf.kind == OGLES3_RT_UINT;
         srgb = rf.out == 0; /* V3D_OUTPUT_IMAGE_FORMAT_SRGB8ALPHA8 */
         if (ogles2_fbo_read_wide(ctx, x, y, w, h, box, row))
             return TRUE; /* floats or integers as stored */
@@ -83,7 +83,7 @@ static BOOL read_raw(struct OGLES2Context *ctx, int x, int y, int w, int h, UBYT
  * as floats (sRGB decoded) and averaged, as the tile buffer resolves in
  * its 8-bit or 16F type; an integer format's (ES 3.1) its sample 0, the
  * one value ES 3.1 4.3.3 asks of a pixel. */
-static BOOL read_box(struct OGLES2Context *ctx, int x, int y, int w, int h, UBYTE *box, BOOL *ints)
+static BOOL read_box(struct OGLES3Context *ctx, int x, int y, int w, int h, UBYTE *box, BOOL *ints)
 {
     GLfloat *all, *out = (GLfloat *)box;
     ULONG row = (ULONG)w * 8; /* floats in a row of samples */
@@ -108,10 +108,10 @@ static BOOL read_box(struct OGLES2Context *ctx, int x, int y, int w, int h, UBYT
  * read framebuffer, clamped), the destination rectangle (dx0..dx1,
  * dy0..dy1, flips allowed) mapped onto the source rectangle (sx0..sx1,
  * sy0..sy1), written where the scissor box and the draw framebuffer allow. */
-static void blit_color(struct OGLES2Context *ctx, GLint sx0, GLint sy0, GLint sx1, GLint sy1, GLint dx0, GLint dy0,
+static void blit_color(struct OGLES3Context *ctx, GLint sx0, GLint sy0, GLint sx1, GLint sy1, GLint dx0, GLint dy0,
                        GLint dx1, GLint dy1, BOOL linear)
 {
-    struct OGLES2Framebuffer *saved;
+    struct OGLES3Framebuffer *saved;
     LONG rx0, ry0, rx1, ry1, ox0, oy0, ox1, oy1, x, y;
     ULONG rw, rh, ow, oh;
     UBYTE *src = 0, *dst = 0, *mask = 0;
@@ -154,7 +154,7 @@ static void blit_color(struct OGLES2Context *ctx, GLint sx0, GLint sy0, GLint sx
     if (oy0 < 0) oy0 = 0;
     if (ox1 > (LONG)ctx->fb_w) ox1 = ctx->fb_w;
     if (oy1 > (LONG)ctx->fb_h) oy1 = ctx->fb_h;
-    if (ctx->state.caps & OGLES2_CAP_SCISSOR_TEST) {
+    if (ctx->state.caps & OGLES3_CAP_SCISSOR_TEST) {
         if (ctx->scissor[0] > ox0) ox0 = ctx->scissor[0];
         if (ctx->scissor[1] > oy0) oy0 = ctx->scissor[1];
         if (ctx->scissor[0] + ctx->scissor[2] < ox1) ox1 = ctx->scissor[0] + ctx->scissor[2];
@@ -214,7 +214,7 @@ static void blit_color(struct OGLES2Context *ctx, GLint sx0, GLint sy0, GLint sx
         }
     FreeVec(src);
     /* every draw buffer (the default framebuffer: its one) */
-    for (rt = 0; rt < OGLES2_MAX_DRAW_BUFFERS; rt++)
+    for (rt = 0; rt < OGLES3_MAX_DRAW_BUFFERS; rt++)
         if (ctx->fb_draw_mask & (1 << rt))
             ogles2_fbo_write(ctx, rt, (int)ox0, (int)oy0, (int)ow, (int)oh, dst, ow * 16, mask);
     FreeVec(mask);
@@ -223,7 +223,7 @@ static void blit_color(struct OGLES2Context *ctx, GLint sx0, GLint sy0, GLint sx
 
 /* The destination box: the rectangle within the draw framebuffer and the
  * scissor box; FALSE: empty. */
-static BOOL dst_box(struct OGLES2Context *ctx, GLint dx0, GLint dy0, GLint dx1, GLint dy1, LONG *b)
+static BOOL dst_box(struct OGLES3Context *ctx, GLint dx0, GLint dy0, GLint dx1, GLint dy1, LONG *b)
 {
     b[0] = dx0 < dx1 ? dx0 : dx1;
     b[2] = dx0 < dx1 ? dx1 : dx0;
@@ -233,7 +233,7 @@ static BOOL dst_box(struct OGLES2Context *ctx, GLint dx0, GLint dy0, GLint dx1, 
     if (b[1] < 0) b[1] = 0;
     if (b[2] > (LONG)ctx->fb_w) b[2] = ctx->fb_w;
     if (b[3] > (LONG)ctx->fb_h) b[3] = ctx->fb_h;
-    if (ctx->state.caps & OGLES2_CAP_SCISSOR_TEST) {
+    if (ctx->state.caps & OGLES3_CAP_SCISSOR_TEST) {
         if (ctx->scissor[0] > b[0]) b[0] = ctx->scissor[0];
         if (ctx->scissor[1] > b[1]) b[1] = ctx->scissor[1];
         if (ctx->scissor[0] + ctx->scissor[2] < b[2]) b[2] = ctx->scissor[0] + ctx->scissor[2];
@@ -244,22 +244,22 @@ static BOOL dst_box(struct OGLES2Context *ctx, GLint dx0, GLint dy0, GLint dx1, 
 
 /* A colour image's kind for the format checks (integers against the
  * rest): the read buffer's, or draw buffer rt's. */
-static UBYTE kind_of(struct OGLES2Context *ctx, int rt)
+static UBYTE kind_of(struct OGLES3Context *ctx, int rt)
 {
     if (rt < 0) {
-        struct OGLES2RtFormat rf;
-        struct OGLES2Framebuffer *saved = ogles2_fbo_read_begin(ctx);
-        UBYTE k = !ctx->draw_fb ? OGLES2_RT_UNORM : ogles2_fbo_read_format(ctx, &rf) ? rf.kind : OGLES2_RT_NONE;
+        struct OGLES3RtFormat rf;
+        struct OGLES3Framebuffer *saved = ogles2_fbo_read_begin(ctx);
+        UBYTE k = !ctx->draw_fb ? OGLES3_RT_UNORM : ogles2_fbo_read_format(ctx, &rf) ? rf.kind : OGLES3_RT_NONE;
         ogles2_fbo_read_end(ctx, saved);
         return k;
     }
     return ctx->fb_rt[rt].kind;
 }
 
-void ogles2_glBlitFramebuffer(struct OGLES2Context *ctx, GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1,
+void ogles2_glBlitFramebuffer(struct OGLES3Context *ctx, GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1,
                               GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter)
 {
-    struct OGLES2Framebuffer *saved;
+    struct OGLES3Framebuffer *saved;
     UBYTE rk;
     int rt;
     if (!ogles2_es3_entry(ctx))
@@ -297,19 +297,19 @@ void ogles2_glBlitFramebuffer(struct OGLES2Context *ctx, GLint srcX0, GLint srcY
     /* colour: integers to integers only, and never filtered */
     if (mask & GL_COLOR_BUFFER_BIT) {
         rk = kind_of(ctx, -1);
-        for (rt = 0; rt < OGLES2_MAX_DRAW_BUFFERS && rk != OGLES2_RT_NONE; rt++) {
+        for (rt = 0; rt < OGLES3_MAX_DRAW_BUFFERS && rk != OGLES3_RT_NONE; rt++) {
             UBYTE dk;
-            BOOL ri = rk == OGLES2_RT_INT || rk == OGLES2_RT_UINT, di;
+            BOOL ri = rk == OGLES3_RT_INT || rk == OGLES3_RT_UINT, di;
             if (!(ctx->fb_draw_mask & (1 << rt)))
                 continue;
             dk = kind_of(ctx, rt);
-            di = dk == OGLES2_RT_INT || dk == OGLES2_RT_UINT;
+            di = dk == OGLES3_RT_INT || dk == OGLES3_RT_UINT;
             if (ri != di || (ri && dk != rk) || (ri && filter == GL_LINEAR)) {
                 ogles2_error(ctx, GL_INVALID_OPERATION);
                 return;
             }
         }
-        if (rk == OGLES2_RT_NONE)
+        if (rk == OGLES3_RT_NONE)
             mask &= ~(GLbitfield)GL_COLOR_BUFFER_BIT; /* no read buffer: nothing */
     }
     /* depth and stencil: the same format both sides (ES 3.0 4.3.3); a

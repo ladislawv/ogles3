@@ -10,7 +10,7 @@
 .ket }
 
 FailAt 21
-If NOT EXISTS libs/ogles2.library
+If NOT EXISTS libs/ogles3.library
   Echo "Please CD into the ogles2-m4-2 directory first,"
   Echo "then run:  Execute Run-M2"
   Quit 20

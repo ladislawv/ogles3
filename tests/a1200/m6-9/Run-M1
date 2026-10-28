@@ -35,14 +35,14 @@ If NOT "{WAYS}" EQ "0"
 EndIf
 
 If {GL} EQ 1 VAL
-  Echo "The same bar drawn by ogles2.library, ways 5 to 8 (5 to 8 squares)."
+  Echo "The same bar drawn by ogles3.library, ways 5 to 8 (5 to 8 squares)."
   Assign LIBS: M6R9:libs ADD
   Avail FLUSH >NIL:
-  SetEnv OGLES2/LogFile M6R9:results/ogles2.log
+  SetEnv OGLES3/LogFile M6R9:results/ogles2.log
   CD M6R9:bin
   M6R9:bin/m6_vsync >M6R9:results/2-vsync.txt
   CD M6R9:
-  UnSetEnv OGLES2/LogFile
+  UnSetEnv OGLES3/LogFile
   Assign LIBS: M6R9:libs REMOVE
   Avail FLUSH >NIL:
   Echo "vsync done" >>M6R9:results/00-progress.txt

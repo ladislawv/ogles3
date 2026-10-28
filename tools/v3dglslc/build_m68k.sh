@@ -21,7 +21,7 @@ cc = json.load(open(os.path.join(replay.MESA_BUILD, "compile_commands.json")))
 ref = next(e for e in cc if e["file"].endswith("state_tracker/st_manager.c"))
 commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=replay.MESA_SRC,
                         capture_output=True, text=True).stdout.strip()[:12]
-# The build stamp ogles2.library tells compilers apart by (ogles2_compiler_id):
+# The build stamp ogles3.library tells compilers apart by (ogles2_compiler_id):
 # the time, this repository's commit (+ if changed) and Mesa's.
 import time
 ours = subprocess.run(["git", "rev-parse", "--short=12", "HEAD"], cwd=h,
@@ -32,7 +32,7 @@ stamp = "%s %s%s mesa %s" % (time.strftime("%Y%m%d-%H%M%S", time.gmtime()), ours
 # Its $VER: the library's version.revision and date (ogles2_internal.h).
 import re
 lib = open(os.path.join(os.path.dirname(os.path.dirname(h)), "ogles2", "ogles2_internal.h")).read()
-ver = "%s.%s (%s)" % tuple(re.search(r"#define OGLES2_LIB_%s\s+\"?([^\"\s]+)" % n, lib).group(1)
+ver = "%s.%s (%s)" % tuple(re.search(r"#define OGLES3_LIB_%s\s+\"?([^\"\s]+)" % n, lib).group(1)
                            for n in ("VERSION", "REVISION", "DATE"))
 rc = 0
 for src in (os.path.join(h, "v3dglslc.c"), os.path.join(v, "v3dp_writer.c")):

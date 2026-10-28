@@ -23,7 +23,7 @@
 #include <proto/graphics.h>
 #include <proto/cybergraphics.h>
 #include <proto/timer.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include "../common/smooth_shaders.h"
 
 struct IntuitionBase *IntuitionBase;
@@ -60,8 +60,8 @@ int main(int argc, char **argv)
     CyberGfxBase = OpenLibrary((STRPTR) "cybergraphics.library", 41);
     if (!IntuitionBase || !GfxBase || !CyberGfxBase ||
         OpenDevice((STRPTR)TIMERNAME, UNIT_MICROHZ, (struct IORequest *)&timer_req, 0) ||
-        !OGLES2Open()) {
-        printf("needs intuition, graphics, cybergraphics, timer.device and %s\n", OGLES2NAME);
+        !OGLES3Open()) {
+        printf("needs intuition, graphics, cybergraphics, timer.device and %s\n", OGLES3NAME);
         return 20;
     }
     TimerBase = timer_req.tr_node.io_Device;
@@ -75,10 +75,10 @@ int main(int argc, char **argv)
     }
 
     before = AvailMem(MEMF_ANY);
-    ctx = aglCreateContextTags2(&err, OGLES2_CCT_DEPTH, 24, OGLES2_CCT_STENCIL, 8,
-                                OGLES2_CCT_PISTORM_WIDTH, 320, OGLES2_CCT_PISTORM_HEIGHT, 240,
-                                OGLES2_CCT_GET_WIDTH, (ULONG)&w, OGLES2_CCT_GET_HEIGHT, (ULONG)&h,
-                                OGLES2_CCT_PISTORM_GET_WINDOW, (ULONG)&win, TAG_DONE);
+    ctx = aglCreateContextTags2(&err, OGLES3_CCT_DEPTH, 24, OGLES3_CCT_STENCIL, 8,
+                                OGLES3_CCT_PISTORM_WIDTH, 320, OGLES3_CCT_PISTORM_HEIGHT, 240,
+                                OGLES3_CCT_GET_WIDTH, (ULONG)&w, OGLES3_CCT_GET_HEIGHT, (ULONG)&h,
+                                OGLES3_CCT_PISTORM_GET_WINDOW, (ULONG)&win, TAG_DONE);
     if (!ctx || !win) {
         printf("FAIL: create a context with its own window (error %lu)\n", (unsigned long)err);
         return 20;
@@ -185,7 +185,7 @@ int main(int argc, char **argv)
     printf("%s: destroy returns the memory (%ld bytes difference)\n",
            after + 16384 >= before ? "PASS" : "FAIL", (long)after - (long)before);
     printf("     the log has dropped frames and GPU memory at the end\n");
-    OGLES2Close();
+    OGLES3Close();
     CloseDevice((struct IORequest *)&timer_req);
     CloseLibrary(CyberGfxBase);
     CloseLibrary((struct Library *)GfxBase);

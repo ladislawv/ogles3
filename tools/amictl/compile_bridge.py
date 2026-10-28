@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The PC's side of v3dglslc-remote (tools/amictl/server/v3dglslc_remote.c,
 docs/GLES3_PLAN.md "Compiling on the PC"): connects to it on the A1200,
-compiles each request ogles2.library sends there with the host v3dglslc
+compiles each request ogles3.library sends there with the host v3dglslc
 (SERVE: the same requests as frames on its stdin, the same files byte for
 byte) and sends the written files back.
 

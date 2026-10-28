@@ -16,7 +16,7 @@ shipped beside the program. There is nothing to watch. The whole run
 takes less than a minute. Normally it runs remotely (amictl); it works by
 hand too.
 
-Before running it, make sure no ogles2.library is installed in LIBS: (it
+Before running it, make sure no ogles3.library is installed in LIBS: (it
 would be used instead of the package's): results/00-libs.txt lists what
 LIBS: has.
 
@@ -37,13 +37,13 @@ that hung:   Execute Run-M1 FROM=<the next step>
 Contents
 --------
 Run-M1                       the test script
-libs-release/ogles2.library  the library as a release builds it
-libs-es3/ogles2.library      a test build with OpenGL ES 3.0 contexts, with
+libs-release/ogles3.library  the library as a release builds it
+libs-es3/ogles3.library      a test build with OpenGL ES 3.0 contexts, with
                              the shader compiler (libs-es3n: without it)
 oldcache/                    an old compiler's file the library must replace
 bin/m8_es3                   the OpenGL ES 3 test
 bin/m8_draw                  the OpenGL ES 3 drawing test
 bin/shaders/, bin/*.v3dp     the test programs' shaders and their compiled files
 bin/smoke                    the library's smoke test
-bin/OGLES2Log                writes the library's log file on request
+bin/OGLES3Log                writes the library's log file on request
 notes-template.txt           copied to results/notes.txt at the end

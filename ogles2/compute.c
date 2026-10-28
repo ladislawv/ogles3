@@ -27,7 +27,7 @@
 /* The context's dispatch memory: [constant buffer copy][uniform stream] in
  * `stream`, the zeroed uniform block, the spill area and the shared
  * memory, each grown when a dispatch needs more. */
-struct OGLES2Compute
+struct OGLES3Compute
 {
     v3d_mem stream, zero, spill, shared;
     ULONG stream_size, zero_size, spill_size, shared_size;
@@ -51,9 +51,9 @@ struct OGLES2Compute
 #define CFG5_SINGLE_SEG           (1UL << 1)
 #define CFG5_THREADING            (1UL << 0)
 
-void ogles2_compute_free(struct OGLES2Context *ctx)
+void ogles2_compute_free(struct OGLES3Context *ctx)
 {
-    struct OGLES2Compute *c = ctx->compute;
+    struct OGLES3Compute *c = ctx->compute;
     if (!c)
         return;
     if (c->stream.hostptr)
@@ -91,21 +91,21 @@ static ULONG le32(ULONG x)
     return (x >> 24) | ((x >> 8) & 0xff00UL) | ((x << 8) & 0xff0000UL) | (x << 24);
 }
 
-static const struct OGLES2Variant *compute_variant(const struct OGLES2Image *im)
+static const struct OGLES3Variant *compute_variant(const struct OGLES3Image *im)
 {
     UWORD i;
     for (i = 0; i < im->nvariants; i++)
-        if (im->variants[i].stage == OGLES2_VARIANT_COMPUTE)
+        if (im->variants[i].stage == OGLES3_VARIANT_COMPUTE)
             return &im->variants[i];
     return 0;
 }
 
 /* The buffer uniform block k of the shader (Mesa's UBO k + 1) reads: the
  * range at its binding, else the zeroed block; *size its bytes. */
-static ULONG block_address(struct OGLES2Context *ctx, const struct OGLES2Program *p, ULONG k, ULONG zero,
+static ULONG block_address(struct OGLES3Context *ctx, const struct OGLES3Program *p, ULONG k, ULONG zero,
                            ULONG *size)
 {
-    const struct OGLES2Image *im = p->image;
+    const struct OGLES3Image *im = p->image;
     ULONG a, n = 0;
     UWORD b;
     *size = 0;
@@ -123,9 +123,9 @@ static ULONG block_address(struct OGLES2Context *ctx, const struct OGLES2Program
 /* Storage buffer k of the shader (Mesa's SSBO k): a storage block's range
  * at its binding, or past them an atomic counter buffer's (FORMAT.md's
  * 0x8000 | binding); 0 without a buffer (or memory). */
-static ULONG storage_address(struct OGLES2Context *ctx, const struct OGLES2Program *p, ULONG k, ULONG *size)
+static ULONG storage_address(struct OGLES3Context *ctx, const struct OGLES3Program *p, ULONG k, ULONG *size)
 {
-    const struct OGLES2Image *im = p->image;
+    const struct OGLES3Image *im = p->image;
     UWORD e;
     *size = 0;
     if (k >= im->stage_nsblocks[0])
@@ -141,7 +141,7 @@ static ULONG storage_address(struct OGLES2Context *ctx, const struct OGLES2Progr
  * payload) times its size, a number the compiler masks to 16 bits less
  * the local invocation index's (nir_to_vir.c's compute setup); at most
  * every group of the dispatch (Mesa allocates that many). */
-static ULONG shared_groups(const struct OGLES2Variant *v, const ULONG *groups)
+static ULONG shared_groups(const struct OGLES3Variant *v, const ULONG *groups)
 {
     ULONG wg = (ULONG)v->local_size[0] * v->local_size[1] * v->local_size[2], cap, n;
     int bits = 0;
@@ -155,30 +155,30 @@ static ULONG shared_groups(const struct OGLES2Variant *v, const ULONG *groups)
 
 /* The image unit of the compute shader's image k (ES 3.1: its uniform's
  * layout(binding)), -1 for none. */
-static int image_unit(const struct OGLES2Program *p, ULONG k)
+static int image_unit(const struct OGLES3Program *p, ULONG k)
 {
-    const struct OGLES2Image *im = p->image;
+    const struct OGLES3Image *im = p->image;
     UWORD u;
     for (u = 0; u < im->nuniforms; u++) {
-        const struct OGLES2ImageUniform *un = &im->uniforms[u];
+        const struct OGLES3ImageUniform *un = &im->uniforms[u];
         ULONG ne = un->array ? un->array : 1;
-        if ((un->flags & OGLES2_UNIFORM_IMAGE) && k >= un->sampler[0] && k - un->sampler[0] < ne)
-            return p->uniform_loc[u] == OGLES2_LOC_NONE ? 0 : p->sampler_unit[p->uniform_loc[u] + k - un->sampler[0]];
+        if ((un->flags & OGLES3_UNIFORM_IMAGE) && k >= un->sampler[0] && k - un->sampler[0] < ne)
+            return p->uniform_loc[u] == OGLES3_LOC_NONE ? 0 : p->sampler_unit[p->uniform_loc[u] + k - un->sampler[0]];
     }
     return -1;
 }
 
 /* The texture unit and sampler kind of the compute shader's texture k (its
  * sampler uniform's glUniform1i or layout(binding)); FALSE for none. */
-static BOOL sampler_unit(const struct OGLES2Program *p, ULONG k, int *unit, int *kind)
+static BOOL sampler_unit(const struct OGLES3Program *p, ULONG k, int *unit, int *kind)
 {
-    const struct OGLES2Image *im = p->image;
+    const struct OGLES3Image *im = p->image;
     UWORD u;
     for (u = 0; u < im->nuniforms; u++) {
-        const struct OGLES2ImageUniform *un = &im->uniforms[u];
+        const struct OGLES3ImageUniform *un = &im->uniforms[u];
         ULONG ne = un->array ? un->array : 1;
-        if ((un->flags & OGLES2_UNIFORM_SAMPLER) && k >= un->sampler[0] && k - un->sampler[0] < ne) {
-            *unit = p->uniform_loc[u] == OGLES2_LOC_NONE ? 0 : p->sampler_unit[p->uniform_loc[u] + k - un->sampler[0]];
+        if ((un->flags & OGLES3_UNIFORM_SAMPLER) && k >= un->sampler[0] && k - un->sampler[0] < ne) {
+            *unit = p->uniform_loc[u] == OGLES3_LOC_NONE ? 0 : p->sampler_unit[p->uniform_loc[u] + k - un->sampler[0]];
             *kind = ogles2_sampler_kind(un->type);
             return TRUE;
         }
@@ -188,13 +188,13 @@ static BOOL sampler_unit(const struct OGLES2Program *p, ULONG k, int *unit, int 
 
 /* A sampler of the program reads a texture the TMU returns 32 bits for:
  * the dispatch takes the .v3dw's variant (every sampler 32 bits). */
-static BOOL wants_wide(struct OGLES2Context *ctx, const struct OGLES2Program *p)
+static BOOL wants_wide(struct OGLES3Context *ctx, const struct OGLES3Program *p)
 {
     ULONG k;
     int unit, kind;
     if (!ogles2_wide_seen)
         return FALSE;
-    for (k = 0; k < OGLES2_MAX_STAGE_SAMPLERS; k++)
+    for (k = 0; k < OGLES3_MAX_STAGE_SAMPLERS; k++)
         if (sampler_unit(p, k, &unit, &kind) && ogles2_texture_wide(ctx, unit, kind))
             return TRUE;
     return FALSE;
@@ -203,13 +203,13 @@ static BOOL wants_wide(struct OGLES2Context *ctx, const struct OGLES2Program *p)
 /* The dispatch's memory and uniform stream (Mesa's v3d_write_uniforms for
  * the compute stage); the stream's address, 0 when something is missing
  * (logged). */
-static ULONG write_stream(struct OGLES2Context *ctx, struct OGLES2Compute *c, const struct OGLES2Program *p,
-                          const struct OGLES2Variant *v, const ULONG *groups)
+static ULONG write_stream(struct OGLES3Context *ctx, struct OGLES3Compute *c, const struct OGLES3Program *p,
+                          const struct OGLES3Variant *v, const ULONG *groups)
 {
-    const struct OGLES2Image *im = p->image;
+    const struct OGLES3Image *im = p->image;
     ULONG cwords = im->cbuf_words[0], cbytes = (cwords * 4 + 15) & ~15UL, zero = 0, *u, n;
-    ULONG ibytes = v->no_textures ? 0 : (OGLES2_MAX_STAGE_IMAGES + 2 * OGLES2_MAX_STAGE_SAMPLERS) * 32UL + 32;
-    ULONG img[OGLES2_MAX_STAGE_IMAGES], tex[OGLES2_MAX_STAGE_SAMPLERS][2];
+    ULONG ibytes = v->no_textures ? 0 : (OGLES3_MAX_STAGE_IMAGES + 2 * OGLES3_MAX_STAGE_SAMPLERS) * 32UL + 32;
+    ULONG img[OGLES3_MAX_STAGE_IMAGES], tex[OGLES3_MAX_STAGE_SAMPLERS][2];
     UBYTE *tsr, *trec;
     UWORD i;
     if (!grow(&c->stream, &c->stream_size, cbytes + ibytes + (v->nrecipe + 1) * 4UL + 64))
@@ -218,7 +218,7 @@ static ULONG write_stream(struct OGLES2Context *ctx, struct OGLES2Compute *c, co
      * boundary after the stream's constant buffer, made at their first
      * entry. */
     tsr = (UBYTE *)V3D_ALIGN_UP((v3d_uintptr)c->stream.hostptr + cbytes, 32);
-    trec = tsr + OGLES2_MAX_STAGE_IMAGES * 32; /* the textures' state and sampler records, copied */
+    trec = tsr + OGLES3_MAX_STAGE_IMAGES * 32; /* the textures' state and sampler records, copied */
     memset(img, 0, sizeof(img));
     memset(tex, 0, sizeof(tex));
     if (v->uses_ubo)
@@ -248,18 +248,18 @@ static ULONG write_stream(struct OGLES2Context *ctx, struct OGLES2Compute *c, co
     for (i = 0; i < v->nrecipe; i++) {
         ULONG d = v->rdata[i], w;
         switch (v->rtype[i]) {
-        case OGLES2_U_UNIFORM:        w = p->cbuf[0][d]; break;
-        case OGLES2_U_CONSTANT:       w = d; break;
-        case OGLES2_U_UBO_ADDR:
+        case OGLES3_U_UNIFORM:        w = p->cbuf[0][d]; break;
+        case OGLES3_U_CONSTANT:       w = d; break;
+        case OGLES3_U_UBO_ADDR:
             w = ((d >> 24) ? block_address(ctx, p, (d >> 24) - 1, zero, &n) : (ULONG)c->stream.hostptr) +
                 (d & 0xffffff);
             break;
-        case OGLES2_U_GET_UBO_SIZE:
+        case OGLES3_U_GET_UBO_SIZE:
             w = cwords * 4;
             if (d)
                 block_address(ctx, p, d - 1, zero, &w);
             break;
-        case OGLES2_U_SSBO_OFFSET:
+        case OGLES3_U_SSBO_OFFSET:
             /* Not dispatched without the buffer: the shader would write
              * wherever address 0 is. */
             if (!(w = storage_address(ctx, p, d, &n))) {
@@ -267,15 +267,15 @@ static ULONG write_stream(struct OGLES2Context *ctx, struct OGLES2Compute *c, co
                 return 0;
             }
             break;
-        case OGLES2_U_GET_SSBO_SIZE:  storage_address(ctx, p, d, &w); break;
-        case OGLES2_U_NUM_WORK_GROUPS: w = groups[d < 3 ? d : 0]; break;
-        case OGLES2_U_SHARED_OFFSET:  w = (ULONG)V3D_ALIGN_UP((v3d_uintptr)c->shared.hostptr, 256); break;
-        case OGLES2_U_SPILL_OFFSET:   w = (ULONG)V3D_ALIGN_UP((v3d_uintptr)c->spill.hostptr, 256); break;
-        case OGLES2_U_SPILL_SIZE_PER_THREAD: w = v->spill_size; break;
-        case OGLES2_U_TMU_CONFIG_P0: /* Mesa's write_tmu_p0/p1: the records with the compiler's bits */
-        case OGLES2_U_TMU_CONFIG_P1: {
-            ULONG k = (d >> 24) & (OGLES2_MAX_STAGE_SAMPLERS - 1), ts, ss;
-            int unit = 0, kind = OGLES2_TEX_NONE;
+        case OGLES3_U_GET_SSBO_SIZE:  storage_address(ctx, p, d, &w); break;
+        case OGLES3_U_NUM_WORK_GROUPS: w = groups[d < 3 ? d : 0]; break;
+        case OGLES3_U_SHARED_OFFSET:  w = (ULONG)V3D_ALIGN_UP((v3d_uintptr)c->shared.hostptr, 256); break;
+        case OGLES3_U_SPILL_OFFSET:   w = (ULONG)V3D_ALIGN_UP((v3d_uintptr)c->spill.hostptr, 256); break;
+        case OGLES3_U_SPILL_SIZE_PER_THREAD: w = v->spill_size; break;
+        case OGLES3_U_TMU_CONFIG_P0: /* Mesa's write_tmu_p0/p1: the records with the compiler's bits */
+        case OGLES3_U_TMU_CONFIG_P1: {
+            ULONG k = (d >> 24) & (OGLES3_MAX_STAGE_SAMPLERS - 1), ts, ss;
+            int unit = 0, kind = OGLES3_TEX_NONE;
             if (!tex[k][0]) {
                 sampler_unit(p, k, &unit, &kind);
                 if (!ogles2_texture_state(ctx, unit, kind, &ts, &ss))
@@ -286,28 +286,28 @@ static ULONG write_stream(struct OGLES2Context *ctx, struct OGLES2Compute *c, co
                 tex[k][0] = (ULONG)(trec + k * 64);
                 tex[k][1] = (ULONG)(trec + k * 64 + 32);
             }
-            w = tex[k][v->rtype[i] == OGLES2_U_TMU_CONFIG_P1] | (d & 0xffffff);
+            w = tex[k][v->rtype[i] == OGLES3_U_TMU_CONFIG_P1] | (d & 0xffffff);
             break;
         }
-        case OGLES2_U_TEXTURE_WIDTH:
-        case OGLES2_U_TEXTURE_HEIGHT:
-        case OGLES2_U_TEXTURE_DEPTH:
-        case OGLES2_U_TEXTURE_ARRAY_SIZE: {
-            int unit = 0, kind = OGLES2_TEX_NONE;
-            sampler_unit(p, d & (OGLES2_MAX_STAGE_SAMPLERS - 1), &unit, &kind);
-            w = ogles2_texture_size(ctx, unit, kind, (int)(v->rtype[i] - OGLES2_U_TEXTURE_WIDTH));
+        case OGLES3_U_TEXTURE_WIDTH:
+        case OGLES3_U_TEXTURE_HEIGHT:
+        case OGLES3_U_TEXTURE_DEPTH:
+        case OGLES3_U_TEXTURE_ARRAY_SIZE: {
+            int unit = 0, kind = OGLES3_TEX_NONE;
+            sampler_unit(p, d & (OGLES3_MAX_STAGE_SAMPLERS - 1), &unit, &kind);
+            w = ogles2_texture_size(ctx, unit, kind, (int)(v->rtype[i] - OGLES3_U_TEXTURE_WIDTH));
             break;
         }
-        case OGLES2_U_IMAGE_TMU_CONFIG_P0: /* Mesa's write_image_tmu_p0 */
+        case OGLES3_U_IMAGE_TMU_CONFIG_P0: /* Mesa's write_image_tmu_p0 */
             if (!img[d >> 24] && !(img[d >> 24] = ogles2_image_state(ctx, image_unit(p, d >> 24), tsr + (d >> 24) * 32)))
                 return 0;
             w = img[d >> 24] | (d & 0xffffff);
             break;
-        case OGLES2_U_IMAGE_WIDTH:
-        case OGLES2_U_IMAGE_HEIGHT:
-        case OGLES2_U_IMAGE_DEPTH:
-        case OGLES2_U_IMAGE_ARRAY_SIZE:
-            w = ogles2_image_size(ctx, image_unit(p, d), (int)(v->rtype[i] - OGLES2_U_IMAGE_WIDTH));
+        case OGLES3_U_IMAGE_WIDTH:
+        case OGLES3_U_IMAGE_HEIGHT:
+        case OGLES3_U_IMAGE_DEPTH:
+        case OGLES3_U_IMAGE_ARRAY_SIZE:
+            w = ogles2_image_size(ctx, image_unit(p, d), (int)(v->rtype[i] - OGLES3_U_IMAGE_WIDTH));
             break;
         default:
             ogles2_log("glDispatchCompute: uniform type %ld not implemented", (LONG)v->rtype[i]);
@@ -321,20 +321,20 @@ static ULONG write_stream(struct OGLES2Context *ctx, struct OGLES2Compute *c, co
 
 /* The program a dispatch runs: the one in use, else the bound pipeline's
  * compute program (ES 3.1); NULL or another: none. */
-static struct OGLES2Program *compute_program(struct OGLES2Context *ctx)
+static struct OGLES3Program *compute_program(struct OGLES3Context *ctx)
 {
-    struct OGLES2Program *p = ctx->program;
+    struct OGLES3Program *p = ctx->program;
     if (!p && ctx->pipe)
         p = ogles2_pipeline_program(ctx, TRUE);
     return p && p->image && p->image->compute ? p : 0;
 }
 
-static void dispatch(struct OGLES2Context *ctx, const ULONG *groups)
+static void dispatch(struct OGLES3Context *ctx, const ULONG *groups)
 {
-    struct OGLES2Program *p = compute_program(ctx);
-    const struct OGLES2Variant *v;
-    const struct OGLES2Image *own;
-    struct OGLES2Compute *c;
+    struct OGLES3Program *p = compute_program(ctx);
+    const struct OGLES3Variant *v;
+    const struct OGLES3Image *own;
+    struct OGLES3Compute *c;
     struct SignalSemaphore *gpu = ogles2_device_gpu_lock();
     ULONG cfg[7], wg_size, batches, stream;
     int k, r;
@@ -350,7 +350,7 @@ static void dispatch(struct OGLES2Context *ctx, const ULONG *groups)
      * program with samplers). */
     own = p->image;
     if (wants_wide(ctx, p)) {
-        const struct OGLES2Image *w = ogles2_image_wide_file((struct OGLES2Image *)p->image);
+        const struct OGLES3Image *w = ogles2_image_wide_file((struct OGLES3Image *)p->image);
         if (w && compute_variant(w))
             own = w;
         else
@@ -360,7 +360,7 @@ static void dispatch(struct OGLES2Context *ctx, const ULONG *groups)
         ogles2_log("glDispatchCompute: the program has no compute code in GPU memory");
         return;
     }
-    if (!ctx->compute && !(ctx->compute = AllocVec(sizeof(struct OGLES2Compute), MEMF_ANY | MEMF_CLEAR))) {
+    if (!ctx->compute && !(ctx->compute = AllocVec(sizeof(struct OGLES3Compute), MEMF_ANY | MEMF_CLEAR))) {
         ogles2_error(ctx, GL_OUT_OF_MEMORY);
         return;
     }
@@ -408,12 +408,12 @@ static void dispatch(struct OGLES2Context *ctx, const ULONG *groups)
         ogles2_log("glDispatchCompute: %ld x %ld x %ld work groups of %ld did not finish", (LONG)groups[0],
                    (LONG)groups[1], (LONG)groups[2], (LONG)wg_size);
     /* What it stored into images is newer than their RAM copies (ES 3.1). */
-    for (k = 0; v->uses_images && k < OGLES2_MAX_STAGE_IMAGES; k++)
+    for (k = 0; v->uses_images && k < OGLES3_MAX_STAGE_IMAGES; k++)
         if (image_unit(p, k) >= 0)
             ogles2_image_written(ctx, image_unit(p, k), 0);
 }
 
-void ogles2_glDispatchCompute(struct OGLES2Context *ctx, GLuint num_groups_x, GLuint num_groups_y,
+void ogles2_glDispatchCompute(struct OGLES3Context *ctx, GLuint num_groups_x, GLuint num_groups_y,
                               GLuint num_groups_z)
 {
     ULONG g[3];
@@ -433,7 +433,7 @@ void ogles2_glDispatchCompute(struct OGLES2Context *ctx, GLuint num_groups_x, GL
     dispatch(ctx, g);
 }
 
-void ogles2_glDispatchComputeIndirect(struct OGLES2Context *ctx, GLintptr indirect)
+void ogles2_glDispatchComputeIndirect(struct OGLES3Context *ctx, GLintptr indirect)
 {
     ULONG g[3];
     GLenum e;
@@ -469,7 +469,7 @@ void ogles2_glDispatchComputeIndirect(struct OGLES2Context *ctx, GLintptr indire
     (GL_ATOMIC_COUNTER_BARRIER_BIT | GL_FRAMEBUFFER_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT |     \
      GL_SHADER_STORAGE_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT | GL_UNIFORM_BARRIER_BIT)
 
-void ogles2_glMemoryBarrier(struct OGLES2Context *ctx, GLbitfield barriers)
+void ogles2_glMemoryBarrier(struct OGLES3Context *ctx, GLbitfield barriers)
 {
     if (!ogles2_es31_entry(ctx))
         return;
@@ -477,7 +477,7 @@ void ogles2_glMemoryBarrier(struct OGLES2Context *ctx, GLbitfield barriers)
         ogles2_error(ctx, GL_INVALID_VALUE);
 }
 
-void ogles2_glMemoryBarrierByRegion(struct OGLES2Context *ctx, GLbitfield barriers)
+void ogles2_glMemoryBarrierByRegion(struct OGLES3Context *ctx, GLbitfield barriers)
 {
     if (!ogles2_es31_entry(ctx))
         return;

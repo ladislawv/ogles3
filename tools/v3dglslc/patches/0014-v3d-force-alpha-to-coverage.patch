@@ -2,7 +2,7 @@ ogles2: v3dglslc compiles a program's alpha-to-coverage fragment variants
 (its .v3da file) with v3d_force_alpha_to_coverage set: the fragment key gets
 msaa and sample_alpha_to_coverage as a draw into a multisampled framebuffer
 with GL_SAMPLE_ALPHA_TO_COVERAGE would give them. The offline compiler has
-no multisampled framebuffer in its GLES2 context. ogles2.library uses these
+no multisampled framebuffer in its GLES2 context. ogles3.library uses these
 variants in a 4x MSAA context (dEQP-GLES2 multisample.proportionality_
 alpha_to_coverage). Off, nothing changes.
 

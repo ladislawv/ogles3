@@ -41,10 +41,10 @@ struct dedup
     v3d_u32 gen;
     /* What the last emit_state was made from: the same again skips it. */
     ULONG ver;
-    const struct OGLES2Framebuffer *fb;
+    const struct OGLES3Framebuffer *fb;
     UWORD fb_w, fb_h;
     UBYTE fb_depth_bits, fb_stencil_bits;
-    const struct OGLES2Variant *fs;
+    const struct OGLES3Variant *fs;
     BOOL cfg, cw, vp, blend, cwm, lw, st;
     UBYTE effp, erfp, cp, edo, dtf, zue, eze, ezue, be, se, wf, pf, pv, rom;
     UBYTE smask;          /* the SAMPLE_STATE mask last sent (4x MSAA) */
@@ -62,33 +62,33 @@ struct dedup
     /* The varying flags (flat, no-perspective, centroid: varying_flags):
      * the fragment shader they were sent for this pass, and which kinds the
      * hardware holds set (bit 0 flat, 1 no-perspective, 2 centroid). */
-    const struct OGLES2Variant *flags_fs;
+    const struct OGLES3Variant *flags_fs;
     UBYTE flags_set;
 };
 
-struct OGLES2Draw
+struct OGLES3Draw
 {
     v3d_mem builtin_code;          /* the built-in image's code, uploaded at first use */
-    struct OGLES2Program quad;     /* clears drawn as rectangles (built-in image) */
+    struct OGLES3Program quad;     /* clears drawn as rectangles (built-in image) */
     BOOL quad_ready;
     /* and into several render targets (EXT_draw_buffers): clear_mrt_v3dp.h */
-    struct OGLES2Program mrt_quad;
-    struct OGLES2Image *mrt_image;
+    struct OGLES3Program mrt_quad;
+    struct OGLES3Image *mrt_image;
     BOOL mrt_ready, mrt_failed;
     /* and depth and stencil where a target is 32-bit float or integer: clear_zs_v3dp.h */
-    struct OGLES2Program zs_quad;
-    struct OGLES2Image *zs_image;
+    struct OGLES3Program zs_quad;
+    struct OGLES3Image *zs_image;
     BOOL zs_ready, zs_failed;
     BOOL wrong_width_logged;       /* a draw skipped for its colour writes' width (draw_arrays) */
     /* and glCopyTex* on the GPU (copy.c): copy_tex_v3dp.h */
-    struct OGLES2Program copy_prog;
-    struct OGLES2Image *copy_image;
+    struct OGLES3Program copy_prog;
+    struct OGLES3Image *copy_image;
     BOOL copy_ready, copy_failed;
     struct dedup dd;
     v3d_u32 defattr_gen;           /* the default attribute block of this control list */
     ULONG defattr;
-    const struct OGLES2Image *missed; /* the last image a variant miss was logged for */
-    const struct OGLES2Image *missed_rt; /* and a render-target miss (EXT_draw_buffers) */
+    const struct OGLES3Image *missed; /* the last image a variant miss was logged for */
+    const struct OGLES3Image *missed_rt; /* and a render-target miss (EXT_draw_buffers) */
     v3d_mem spill;                 /* register spilling's scratch area (spill_area) */
     ULONG spill_size;              /* bytes a thread has in it */
     v3d_mem zero_ubo;              /* zeros a uniform block reads while no buffer can be bound (ubo_copies) */
@@ -117,7 +117,7 @@ static BOOL packed_type(GLenum type)
 }
 
 /* An element's bytes as the application stores it. */
-static ULONG elem_bytes(const struct OGLES2Array *a)
+static ULONG elem_bytes(const struct OGLES3Array *a)
 {
     return packed_type(a->type) ? 4 : (ULONG)(type_size(a->type) * a->size);
 }
@@ -139,15 +139,15 @@ static ULONG elem_bytes(const struct OGLES2Array *a)
  * AN_FreeTwice). GLES2 and ES 3.0 contexts change formats and bindings
  * together, attribute i on binding i, so the draws see what they always
  * saw. */
-static void vab_refresh(struct OGLES2Context *ctx, GLuint j, struct OGLES2Buffer *prev)
+static void vab_refresh(struct OGLES3Context *ctx, GLuint j, struct OGLES3Buffer *prev)
 {
-    struct OGLES2Buffer *old[OGLES2_MAX_VERTEX_ATTRIBS + 1];
-    const struct OGLES2Array *bnd = &ctx->array[j];
+    struct OGLES3Buffer *old[OGLES3_MAX_VERTEX_ATTRIBS + 1];
+    const struct OGLES3Array *bnd = &ctx->array[j];
     int i, k, n = 0;
     if (prev && prev != bnd->bbuffer)
         old[n++] = prev;
-    for (i = 0; i < OGLES2_MAX_VERTEX_ATTRIBS; i++) {
-        struct OGLES2Array *a = &ctx->array[i];
+    for (i = 0; i < OGLES3_MAX_VERTEX_ATTRIBS; i++) {
+        struct OGLES3Array *a = &ctx->array[i];
         if (a->binding != j)
             continue;
         if (a->buffer && a->buffer != bnd->bbuffer) {
@@ -170,14 +170,14 @@ static void vab_refresh(struct OGLES2Context *ctx, GLuint j, struct OGLES2Buffer
  * error. ES 3.1 2.9.1: the attribute's format with relative offset 0, on
  * binding `index`, whose buffer, offset and stride (0: the format's packed
  * size) it sets. */
-static BOOL set_pointer(struct OGLES2Context *ctx, GLuint index, GLint size, GLenum type, GLboolean normalized,
+static BOOL set_pointer(struct OGLES3Context *ctx, GLuint index, GLint size, GLenum type, GLboolean normalized,
                         GLsizei stride, const void *pointer, GLboolean integer)
 {
-    struct OGLES2Array *a, *bnd;
-    struct OGLES2Buffer *old;
+    struct OGLES3Array *a, *bnd;
+    struct OGLES3Buffer *old;
     if (!ogles2_context_valid(ctx))
         return FALSE;
-    if (index >= OGLES2_MAX_VERTEX_ATTRIBS || size < 1 || size > 4 || stride < 0 ||
+    if (index >= OGLES3_MAX_VERTEX_ATTRIBS || size < 1 || size > 4 || stride < 0 ||
         (ogles2_es31(ctx) && stride > 2048)) { /* GL_MAX_VERTEX_ATTRIB_STRIDE */
         ogles2_error(ctx, GL_INVALID_VALUE);
         return FALSE;
@@ -213,14 +213,14 @@ static BOOL set_pointer(struct OGLES2Context *ctx, GLuint index, GLint size, GLe
     return TRUE;
 }
 
-void ogles2_glVertexAttribPointer(struct OGLES2Context *ctx, GLuint index, GLint size, GLenum type,
+void ogles2_glVertexAttribPointer(struct OGLES3Context *ctx, GLuint index, GLint size, GLenum type,
                                   GLboolean normalized, GLsizei stride, const void *pointer)
 {
     set_pointer(ctx, index, size, type, normalized, stride, pointer, GL_FALSE);
 }
 
 /* ES 3.0's integer arrays: read as integers by an integer input. */
-void ogles2_glVertexAttribIPointer(struct OGLES2Context *ctx, GLuint index, GLint size, GLenum type, GLsizei stride,
+void ogles2_glVertexAttribIPointer(struct OGLES3Context *ctx, GLuint index, GLint size, GLenum type, GLsizei stride,
                                    const void *pointer)
 {
     if (!ogles2_es3_entry(ctx))
@@ -235,10 +235,10 @@ void ogles2_glVertexAttribIPointer(struct OGLES2Context *ctx, GLuint index, GLin
 
 /* ES 3.1 2.9.1: glVertexAttribDivisor is the attribute on binding index,
  * that binding's divisor set. */
-static void attrib_divisor(struct OGLES2Context *ctx, GLuint index, GLuint divisor)
+static void attrib_divisor(struct OGLES3Context *ctx, GLuint index, GLuint divisor)
 {
     GLuint old;
-    if (index >= OGLES2_MAX_VERTEX_ATTRIBS) {
+    if (index >= OGLES3_MAX_VERTEX_ATTRIBS) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
@@ -255,7 +255,7 @@ static void attrib_divisor(struct OGLES2Context *ctx, GLuint index, GLuint divis
 /* An ES 3.1 context with a vertex array object other than 0 bound: ES 3.1
  * 10.3.1 (and Mesa for ES 3.1, as for core GL) refuses the entries
  * below with object 0 (GL_INVALID_OPERATION). */
-static BOOL vab_entry(struct OGLES2Context *ctx)
+static BOOL vab_entry(struct OGLES3Context *ctx)
 {
     if (!ogles2_es31_entry(ctx))
         return FALSE;
@@ -266,14 +266,14 @@ static BOOL vab_entry(struct OGLES2Context *ctx)
     return TRUE;
 }
 
-void ogles2_glBindVertexBuffer(struct OGLES2Context *ctx, GLuint bindingindex, GLuint buffer, GLintptr offset,
+void ogles2_glBindVertexBuffer(struct OGLES3Context *ctx, GLuint bindingindex, GLuint buffer, GLintptr offset,
                                GLsizei stride)
 {
-    struct OGLES2Array *bnd;
-    struct OGLES2Buffer *b = 0, *old;
+    struct OGLES3Array *bnd;
+    struct OGLES3Buffer *b = 0, *old;
     if (!vab_entry(ctx))
         return;
-    if (bindingindex >= OGLES2_MAX_VERTEX_ATTRIBS || offset < 0 || stride < 0 || stride > 2048) {
+    if (bindingindex >= OGLES3_MAX_VERTEX_ATTRIBS || offset < 0 || stride < 0 || stride > 2048) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
@@ -290,11 +290,11 @@ void ogles2_glBindVertexBuffer(struct OGLES2Context *ctx, GLuint bindingindex, G
 }
 
 /* glVertexAttribFormat and glVertexAttribIFormat (`integer`). */
-static void attrib_format(struct OGLES2Context *ctx, GLuint index, GLint size, GLenum type, GLboolean normalized,
+static void attrib_format(struct OGLES3Context *ctx, GLuint index, GLint size, GLenum type, GLboolean normalized,
                           GLuint relativeoffset, GLboolean integer)
 {
-    struct OGLES2Array *a;
-    if (index >= OGLES2_MAX_VERTEX_ATTRIBS || size < 1 || size > 4 || relativeoffset > 2047) {
+    struct OGLES3Array *a;
+    if (index >= OGLES3_MAX_VERTEX_ATTRIBS || size < 1 || size > 4 || relativeoffset > 2047) {
         ogles2_error(ctx, GL_INVALID_VALUE); /* GL_MAX_VERTEX_ATTRIB_RELATIVE_OFFSET */
         return;
     }
@@ -316,26 +316,26 @@ static void attrib_format(struct OGLES2Context *ctx, GLuint index, GLint size, G
     vab_refresh(ctx, a->binding, 0);
 }
 
-void ogles2_glVertexAttribFormat(struct OGLES2Context *ctx, GLuint attribindex, GLint size, GLenum type,
+void ogles2_glVertexAttribFormat(struct OGLES3Context *ctx, GLuint attribindex, GLint size, GLenum type,
                                  GLboolean normalized, GLuint relativeoffset)
 {
     if (vab_entry(ctx))
         attrib_format(ctx, attribindex, size, type, normalized, relativeoffset, GL_FALSE);
 }
 
-void ogles2_glVertexAttribIFormat(struct OGLES2Context *ctx, GLuint attribindex, GLint size, GLenum type,
+void ogles2_glVertexAttribIFormat(struct OGLES3Context *ctx, GLuint attribindex, GLint size, GLenum type,
                                   GLuint relativeoffset)
 {
     if (vab_entry(ctx))
         attrib_format(ctx, attribindex, size, type, GL_FALSE, relativeoffset, GL_TRUE);
 }
 
-void ogles2_glVertexAttribBinding(struct OGLES2Context *ctx, GLuint attribindex, GLuint bindingindex)
+void ogles2_glVertexAttribBinding(struct OGLES3Context *ctx, GLuint attribindex, GLuint bindingindex)
 {
     GLuint old;
     if (!vab_entry(ctx))
         return;
-    if (attribindex >= OGLES2_MAX_VERTEX_ATTRIBS || bindingindex >= OGLES2_MAX_VERTEX_ATTRIBS) {
+    if (attribindex >= OGLES3_MAX_VERTEX_ATTRIBS || bindingindex >= OGLES3_MAX_VERTEX_ATTRIBS) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
@@ -346,11 +346,11 @@ void ogles2_glVertexAttribBinding(struct OGLES2Context *ctx, GLuint attribindex,
         vab_refresh(ctx, old, 0);
 }
 
-void ogles2_glVertexBindingDivisor(struct OGLES2Context *ctx, GLuint bindingindex, GLuint divisor)
+void ogles2_glVertexBindingDivisor(struct OGLES3Context *ctx, GLuint bindingindex, GLuint divisor)
 {
     if (!vab_entry(ctx))
         return;
-    if (bindingindex >= OGLES2_MAX_VERTEX_ATTRIBS) {
+    if (bindingindex >= OGLES3_MAX_VERTEX_ATTRIBS) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
@@ -360,13 +360,13 @@ void ogles2_glVertexBindingDivisor(struct OGLES2Context *ctx, GLuint bindinginde
 
 /* glGetIntegeri_v's GL_VERTEX_BINDING_* (state.c asks): -1 another query,
  * 0 an error set, 1 *v. */
-int ogles2_vab_query(struct OGLES2Context *ctx, GLenum pname, GLuint index, GLint64 *v)
+int ogles2_vab_query(struct OGLES3Context *ctx, GLenum pname, GLuint index, GLint64 *v)
 {
-    const struct OGLES2Array *bnd;
+    const struct OGLES3Array *bnd;
     if (pname != GL_VERTEX_BINDING_BUFFER && pname != GL_VERTEX_BINDING_OFFSET && pname != GL_VERTEX_BINDING_STRIDE &&
         pname != GL_VERTEX_BINDING_DIVISOR)
         return -1;
-    if (index >= OGLES2_MAX_VERTEX_ATTRIBS) {
+    if (index >= OGLES3_MAX_VERTEX_ATTRIBS) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return 0;
     }
@@ -378,48 +378,48 @@ int ogles2_vab_query(struct OGLES2Context *ctx, GLenum pname, GLuint index, GLin
     return 1;
 }
 
-void ogles2_glVertexAttribDivisor(struct OGLES2Context *ctx, GLuint index, GLuint divisor)
+void ogles2_glVertexAttribDivisor(struct OGLES3Context *ctx, GLuint index, GLuint divisor)
 {
     if (ogles2_es3_entry(ctx))
         attrib_divisor(ctx, index, divisor);
 }
 
 /* EXT_instanced_arrays (GLES2 contexts; ES3 ones have both) */
-void ogles2_glVertexAttribDivisorEXT(struct OGLES2Context *ctx, GLuint index, GLuint divisor)
+void ogles2_glVertexAttribDivisorEXT(struct OGLES3Context *ctx, GLuint index, GLuint divisor)
 {
     if (ogles2_context_valid(ctx))
         attrib_divisor(ctx, index, divisor);
 }
 
-static void enable_array(struct OGLES2Context *ctx, GLuint index, GLboolean on)
+static void enable_array(struct OGLES3Context *ctx, GLuint index, GLboolean on)
 {
     if (!ogles2_context_valid(ctx))
         return;
-    if (index >= OGLES2_MAX_VERTEX_ATTRIBS) {
+    if (index >= OGLES3_MAX_VERTEX_ATTRIBS) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
     ctx->array[index].enabled = on;
 }
 
-void ogles2_glEnableVertexAttribArray(struct OGLES2Context *ctx, GLuint index)
+void ogles2_glEnableVertexAttribArray(struct OGLES3Context *ctx, GLuint index)
 {
     enable_array(ctx, index, GL_TRUE);
 }
 
-void ogles2_glDisableVertexAttribArray(struct OGLES2Context *ctx, GLuint index)
+void ogles2_glDisableVertexAttribArray(struct OGLES3Context *ctx, GLuint index)
 {
     enable_array(ctx, index, GL_FALSE);
 }
 
-void ogles2_glGetVertexAttribiv(struct OGLES2Context *ctx, GLuint index, GLenum pname,
+void ogles2_glGetVertexAttribiv(struct OGLES3Context *ctx, GLuint index, GLenum pname,
                                 GLint *params)
 {
-    const struct OGLES2Array *a;
+    const struct OGLES3Array *a;
     int k;
     if (!ogles2_context_valid(ctx) || !params)
         return;
-    if (index >= OGLES2_MAX_VERTEX_ATTRIBS) {
+    if (index >= OGLES3_MAX_VERTEX_ATTRIBS) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
@@ -461,24 +461,24 @@ void ogles2_glGetVertexAttribiv(struct OGLES2Context *ctx, GLuint index, GLenum 
 }
 
 /* ES 3.0: the same, a current value as the integers it was given. */
-void ogles2_glGetVertexAttribIiv(struct OGLES2Context *ctx, GLuint index, GLenum pname, GLint *params)
+void ogles2_glGetVertexAttribIiv(struct OGLES3Context *ctx, GLuint index, GLenum pname, GLint *params)
 {
     if (ogles2_es3_entry(ctx))
         ogles2_glGetVertexAttribiv(ctx, index, pname, params);
 }
 
-void ogles2_glGetVertexAttribIuiv(struct OGLES2Context *ctx, GLuint index, GLenum pname, GLuint *params)
+void ogles2_glGetVertexAttribIuiv(struct OGLES3Context *ctx, GLuint index, GLenum pname, GLuint *params)
 {
     if (ogles2_es3_entry(ctx))
         ogles2_glGetVertexAttribiv(ctx, index, pname, (GLint *)params);
 }
 
-void ogles2_glGetVertexAttribPointerv(struct OGLES2Context *ctx, GLuint index, GLenum pname,
+void ogles2_glGetVertexAttribPointerv(struct OGLES3Context *ctx, GLuint index, GLenum pname,
                                       void **pointer)
 {
     if (!ogles2_context_valid(ctx) || !pointer)
         return;
-    if (index >= OGLES2_MAX_VERTEX_ATTRIBS) {
+    if (index >= OGLES3_MAX_VERTEX_ATTRIBS) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
@@ -491,9 +491,9 @@ void ogles2_glGetVertexAttribPointerv(struct OGLES2Context *ctx, GLuint index, G
 
 /* ---- per-context draw state ---- */
 
-static struct OGLES2Draw *draw_state(struct OGLES2Context *ctx)
+static struct OGLES3Draw *draw_state(struct OGLES3Context *ctx)
 {
-    struct OGLES2Draw *d = ctx->draw;
+    struct OGLES3Draw *d = ctx->draw;
     if (!d) {
         if (!(d = AllocVec(sizeof(*d), MEMF_ANY | MEMF_CLEAR)))
             return 0;
@@ -505,8 +505,8 @@ static struct OGLES2Draw *draw_state(struct OGLES2Context *ctx)
 
 /* The GPU address of a variant's code. A loaded image carries its own; the
  * built-in one is uploaded once per context (it is static data). */
-static ULONG code_address(struct OGLES2Draw *d, const struct OGLES2Image *im,
-                          const struct OGLES2Variant *v)
+static ULONG code_address(struct OGLES3Draw *d, const struct OGLES3Image *im,
+                          const struct OGLES3Variant *v)
 {
     if (im->code_mem)
         return (ULONG)im->code_mem->hostptr + v->code_offset;
@@ -528,9 +528,9 @@ static ULONG code_address(struct OGLES2Draw *d, const struct OGLES2Image *im,
     return (ULONG)d->builtin_code.hostptr + v->code_offset;
 }
 
-void ogles2_draw_free(struct OGLES2Context *ctx)
+void ogles2_draw_free(struct OGLES3Context *ctx)
 {
-    struct OGLES2Draw *d = ctx->draw;
+    struct OGLES3Draw *d = ctx->draw;
     if (!d)
         return;
     if (d->builtin_code.hostptr)
@@ -584,11 +584,11 @@ static ULONG float_bits(GLfloat f)
 /* EXT_clip_control's ZERO_TO_ONE (docs/M7_EXTENSIONS_PLAN.md step 4). V3D
  * 4.2 clips clip-space z to -w..w only: its window-space Z planes clamp
  * (the m7-3 probe). A program compiled with Mesa patch 0013 turns z into
- * 2z - w itself (OGLES2_U_CLIP_Z_COEFF -1), which the hardware clips and
+ * 2z - w itself (OGLES3_U_CLIP_Z_COEFF -1), which the hardware clips and
  * maps as -w..w: the viewport stays GL's. An older binary gets the 0..w
  * mapping from the viewport instead: its depth is right, but what lies
  * before the near plane is drawn at depth n. */
-static BOOL zero_to_one_in_viewport(const struct OGLES2Context *ctx)
+static BOOL zero_to_one_in_viewport(const struct OGLES3Context *ctx)
 {
     return ctx->state.clip_depth == GL_ZERO_TO_ONE_EXT &&
            !(ctx->program && ctx->program->image && ctx->program->image->clip_z_coeff);
@@ -596,9 +596,9 @@ static BOOL zero_to_one_in_viewport(const struct OGLES2Context *ctx)
 
 /* The viewport's Z scale and offset: clip-space z from -w..w to the depth
  * range, or from 0..w (Mesa's _mesa_get_viewport_xform). */
-static void viewport_z(const struct OGLES2Context *ctx, float *zs, float *zo)
+static void viewport_z(const struct OGLES3Context *ctx, float *zs, float *zo)
 {
-    const struct OGLES2State *s = &ctx->state;
+    const struct OGLES3State *s = &ctx->state;
     if (zero_to_one_in_viewport(ctx)) {
         *zs = s->depth_range[1] - s->depth_range[0];
         *zo = s->depth_range[0];
@@ -612,7 +612,7 @@ static void viewport_z(const struct OGLES2Context *ctx, float *zs, float *zo)
  * framebuffer (plan 7.11), unless EXT_clip_control's upper-left origin turns
  * it over again; a framebuffer object only with that origin. A negative Y
  * scale, and the winding of front faces reversed (Mesa's state tracker). */
-static BOOL y_down(const struct OGLES2Context *ctx)
+static BOOL y_down(const struct OGLES3Context *ctx)
 {
     return ctx->fb_flip ^ (ctx->state.clip_origin == GL_UPPER_LEFT_EXT);
 }
@@ -620,23 +620,23 @@ static BOOL y_down(const struct OGLES2Context *ctx)
 /* The program's state variables (FORMAT.md STAGE_PARAMS kind 2), computed
  * into its constant buffers before a draw, as Mesa's prog_statevars.c does
  * for a framebuffer drawn upside down (FlipY: the default framebuffer). */
-static void update_state_vars(struct OGLES2Context *ctx, struct OGLES2Program *p)
+static void update_state_vars(struct OGLES3Context *ctx, struct OGLES3Program *p)
 {
-    const struct OGLES2Image *im = p->image;
+    const struct OGLES3Image *im = p->image;
     const GLfloat *dr = ctx->state.depth_range;
     UWORD i;
     for (i = 0; i < im->nstatevars; i++) {
-        const struct OGLES2StateVar *sv = &im->statevars[i];
+        const struct OGLES3StateVar *sv = &im->statevars[i];
         GLfloat v[4];
         int k;
         switch (sv->state) {
-        case OGLES2_STATE_DEPTH_RANGE:
+        case OGLES3_STATE_DEPTH_RANGE:
             v[0] = dr[0];
             v[1] = dr[1];
             v[2] = dr[1] - dr[0];
             v[3] = 1.0f;
             break;
-        case OGLES2_STATE_FB_WPOS_Y_TRANSFORM:
+        case OGLES3_STATE_FB_WPOS_Y_TRANSFORM:
             /* Mesa's prog_statevars.c: flipped (-1, height, 1, 0), else
              * (1, 0, -1, height) */
             v[0] = ctx->fb_flip ? -1.0f : 1.0f;
@@ -644,7 +644,7 @@ static void update_state_vars(struct OGLES2Context *ctx, struct OGLES2Program *p
             v[2] = ctx->fb_flip ? 1.0f : -1.0f;
             v[3] = ctx->fb_flip ? 0.0f : (GLfloat)ctx->fb_h;
             break;
-        case OGLES2_STATE_FB_PNTC_Y_TRANSFORM:
+        case OGLES3_STATE_FB_PNTC_Y_TRANSFORM:
             /* upper-left sprite origin: inverted on a flipped buffer only */
             v[0] = ctx->fb_flip ? -1.0f : 1.0f;
             v[1] = ctx->fb_flip ? 1.0f : 0.0f;
@@ -664,12 +664,12 @@ static void update_state_vars(struct OGLES2Context *ctx, struct OGLES2Program *p
  * recipes' unit field), [0] vertex, [1] fragment; 0 where unused. */
 struct tex_states
 {
-    ULONG tex[2][OGLES2_MAX_STAGE_SAMPLERS], smp[2][OGLES2_MAX_STAGE_SAMPLERS];
-    UBYTE unit[2][OGLES2_MAX_STAGE_SAMPLERS], kind[2][OGLES2_MAX_STAGE_SAMPLERS]; /* textureSize's */
+    ULONG tex[2][OGLES3_MAX_STAGE_SAMPLERS], smp[2][OGLES3_MAX_STAGE_SAMPLERS];
+    UBYTE unit[2][OGLES3_MAX_STAGE_SAMPLERS], kind[2][OGLES3_MAX_STAGE_SAMPLERS]; /* textureSize's */
     ULONG ubo[2];   /* little-endian copy of each stage's constant buffer, if read */
     ULONG zero_ubo; /* what a uniform block without a buffer reads */
-    ULONG img[2][OGLES2_MAX_STAGE_IMAGES]; /* ES 3.1: each stage's images' texture states */
-    UBYTE iunit[2][OGLES2_MAX_STAGE_IMAGES]; /* and their image units */
+    ULONG img[2][OGLES3_MAX_STAGE_IMAGES]; /* ES 3.1: each stage's images' texture states */
+    UBYTE iunit[2][OGLES3_MAX_STAGE_IMAGES]; /* and their image units */
 };
 
 /* The largest uniform block (GL_MAX_UNIFORM_BLOCK_SIZE). */
@@ -679,12 +679,12 @@ struct tex_states
  * shader reads its constant buffer through the TMU, so a stage whose recipe
  * asks for it gets a little-endian copy in the state buffer. Made before any
  * uniform stream (a claim must not happen while another is half filled). */
-static BOOL ubo_copies(struct OGLES2Context *ctx, const struct OGLES2Program *p,
-                       const struct OGLES2Variant *const v[3], struct tex_states *ts)
+static BOOL ubo_copies(struct OGLES3Context *ctx, const struct OGLES3Program *p,
+                       const struct OGLES3Variant *const v[3], struct tex_states *ts)
 {
     int k, si;
     for (k = 0; k < 3; k++) {
-        si = v[k]->stage == OGLES2_VARIANT_FS ? 1 : 0;
+        si = v[k]->stage == OGLES3_VARIANT_FS ? 1 : 0;
         if (ts->ubo[si])
             continue;
         if (v[k]->uses_ubo) {
@@ -700,7 +700,7 @@ static BOOL ubo_copies(struct OGLES2Context *ctx, const struct OGLES2Program *p,
          * cache clean before every submission covers the zeros written
          * here. */
         if ((v[k]->uses_blocks || v[k]->uses_storage) && !ts->zero_ubo) {
-            struct OGLES2Draw *d = ctx->draw;
+            struct OGLES3Draw *d = ctx->draw;
             if (!d->zero_ubo.hostptr) {
                 if (v3d_mem_alloc(ogles2_device(), &d->zero_ubo, ZERO_UBO_BYTES + 256) < 0) {
                     memset(&d->zero_ubo, 0, sizeof(d->zero_ubo));
@@ -721,10 +721,10 @@ static BOOL ubo_copies(struct OGLES2Context *ctx, const struct OGLES2Program *p,
  * (job_storage: its caches cleaned after the render). Without one, size 0
  * at the zeroed block: the bounds checks every such program has (Mesa
  * patch 0017) drop its accesses there. *size: the range's bytes. */
-static ULONG draw_storage(struct OGLES2Context *ctx, const struct OGLES2Program *p, int si, ULONG k,
+static ULONG draw_storage(struct OGLES3Context *ctx, const struct OGLES3Program *p, int si, ULONG k,
                           const struct tex_states *tst, ULONG *size)
 {
-    const struct OGLES2Image *im = p->image;
+    const struct OGLES3Image *im = p->image;
     ULONG a = 0;
     UWORD e;
     *size = 0;
@@ -745,10 +745,10 @@ static ULONG draw_storage(struct OGLES2Context *ctx, const struct OGLES2Program 
  * reads: the range bound at the block's binding (§5 item 6), else the
  * zeroed block (ubo_copies). *size (if asked): the range's bytes, or the
  * block's own size without one. */
-static ULONG block_buffer(struct OGLES2Context *ctx, const struct OGLES2Program *p, int si, ULONG k,
+static ULONG block_buffer(struct OGLES3Context *ctx, const struct OGLES3Program *p, int si, ULONG k,
                           const struct tex_states *tst, ULONG *size)
 {
-    const struct OGLES2Image *im = p->image;
+    const struct OGLES3Image *im = p->image;
     ULONG a, n = 0;
     UWORD b;
     if (size)
@@ -773,9 +773,9 @@ static ULONG block_buffer(struct OGLES2Context *ctx, const struct OGLES2Program 
  * (core << 6) | (qpu << 2) | thread, so QPUs x 4 slices of the largest spill
  * size drawn with yet. Only the GPU touches it. A smaller old area goes when
  * the open job has rendered (its draws may use it). */
-static BOOL spill_area(struct OGLES2Context *ctx, const struct OGLES2Variant *const v[3])
+static BOOL spill_area(struct OGLES3Context *ctx, const struct OGLES3Variant *const v[3])
 {
-    struct OGLES2Draw *d = ctx->draw;
+    struct OGLES3Draw *d = ctx->draw;
     ULONG need = 0;
     int k;
     for (k = 0; k < 3; k++)
@@ -802,13 +802,13 @@ static BOOL spill_area(struct OGLES2Context *ctx, const struct OGLES2Variant *co
 /* The image's sampler uniforms, listed at the program's first draw (most of
  * a fixed-function emulation's uniforms are not samplers): how many to look
  * at, p->samplers[k] or (0xfe, too many to list) every uniform. */
-static UWORD list_samplers(struct OGLES2Program *p)
+static UWORD list_samplers(struct OGLES3Program *p)
 {
-    const struct OGLES2Image *im = p->image;
+    const struct OGLES3Image *im = p->image;
     UWORD u, n;
     if (p->nsamplers == 0xff) {
         for (u = 0, n = 0; u < im->nuniforms && n <= 16; u++)
-            if (im->uniforms[u].flags & OGLES2_UNIFORM_SAMPLER) {
+            if (im->uniforms[u].flags & OGLES3_UNIFORM_SAMPLER) {
                 if (n < 16)
                     p->samplers[n] = u;
                 n++;
@@ -819,7 +819,7 @@ static UWORD list_samplers(struct OGLES2Program *p)
 }
 
 /* The texture unit of element e of sampler uniform u (glUniform1i). */
-static UBYTE unit_of(const struct OGLES2Program *p, UWORD u, UWORD e)
+static UBYTE unit_of(const struct OGLES3Program *p, UWORD u, UWORD e)
 {
     return p->uniform_loc[u] == 0xFFFF ? 0 : p->sampler_unit[p->uniform_loc[u] + e];
 }
@@ -827,15 +827,15 @@ static UBYTE unit_of(const struct OGLES2Program *p, UWORD u, UWORD e)
 /* A fragment-shader sampler of the program reads a texture the TMU returns
  * 32 bits for (a float or depth texture): the draw needs the 32-bit
  * variants (Mesa's sampler_is_32b key). */
-static BOOL wants_wide(struct OGLES2Context *ctx, struct OGLES2Program *p)
+static BOOL wants_wide(struct OGLES3Context *ctx, struct OGLES3Program *p)
 {
-    const struct OGLES2Image *im = p->image;
+    const struct OGLES3Image *im = p->image;
     UWORD k, n = list_samplers(p);
     for (k = 0; k < n; k++) {
         UWORD u = p->nsamplers == 0xfe ? k : p->samplers[k];
-        const struct OGLES2ImageUniform *un = &im->uniforms[u];
+        const struct OGLES3ImageUniform *un = &im->uniforms[u];
         UWORD e, ne = un->array ? un->array : 1;
-        if (!(un->flags & OGLES2_UNIFORM_SAMPLER) || un->sampler[1] >= OGLES2_MAX_STAGE_SAMPLERS)
+        if (!(un->flags & OGLES3_UNIFORM_SAMPLER) || un->sampler[1] >= OGLES3_MAX_STAGE_SAMPLERS)
             continue;
         for (e = 0; e < ne; e++)
             if (ogles2_texture_wide(ctx, unit_of(p, u, e), ogles2_sampler_kind(un->type)))
@@ -846,24 +846,24 @@ static BOOL wants_wide(struct OGLES2Context *ctx, struct OGLES2Program *p)
 
 /* Every sampler uniform of the program: its texture index in each stage
  * that uses it reads the texture unit glUniform1i gave it. */
-static BOOL texture_states(struct OGLES2Context *ctx, struct OGLES2Program *p,
+static BOOL texture_states(struct OGLES3Context *ctx, struct OGLES3Program *p,
                            struct tex_states *ts)
 {
-    const struct OGLES2Image *im = p->image;
+    const struct OGLES3Image *im = p->image;
     UWORD u, k, n;
     int st;
     n = list_samplers(p);
     for (k = 0; k < n; k++) {
-        const struct OGLES2ImageUniform *un;
+        const struct OGLES3ImageUniform *un;
         u = p->nsamplers == 0xfe ? k : p->samplers[k];
         un = &im->uniforms[u];
-        if (!(un->flags & OGLES2_UNIFORM_SAMPLER))
+        if (!(un->flags & OGLES3_UNIFORM_SAMPLER))
             continue;
         for (st = 0; st < 2; st++) {
             UWORD e, ne = un->array ? un->array : 1;
             for (e = 0; e < ne; e++) { /* an array: an element a texture index */
                 ULONG idx = un->sampler[st] + e;
-                if (un->sampler[st] >= OGLES2_MAX_STAGE_SAMPLERS || idx >= OGLES2_MAX_STAGE_SAMPLERS)
+                if (un->sampler[st] >= OGLES3_MAX_STAGE_SAMPLERS || idx >= OGLES3_MAX_STAGE_SAMPLERS)
                     break;
                 ts->unit[st][idx] = unit_of(p, u, e);
                 ts->kind[st][idx] = (UBYTE)ogles2_sampler_kind(un->type);
@@ -880,21 +880,21 @@ static BOOL texture_states(struct OGLES2Context *ctx, struct OGLES2Program *p,
  * reads images: its image index in each stage that uses it reads the image
  * unit its layout(binding) gave it, which the draw may store into (the job
  * then cleans its caches after the render, job_storage). */
-static BOOL image_states(struct OGLES2Context *ctx, struct OGLES2Program *p, const struct OGLES2Variant *const v[3],
+static BOOL image_states(struct OGLES3Context *ctx, struct OGLES3Program *p, const struct OGLES3Variant *const v[3],
                          struct tex_states *ts)
 {
-    const struct OGLES2Image *im = p->image;
+    const struct OGLES3Image *im = p->image;
     UWORD u, e;
     int st;
     if (!v[0]->uses_images && !v[1]->uses_images && !v[2]->uses_images)
         return TRUE;
     for (u = 0; u < im->nuniforms; u++) {
-        const struct OGLES2ImageUniform *un = &im->uniforms[u];
+        const struct OGLES3ImageUniform *un = &im->uniforms[u];
         UWORD ne = un->array ? un->array : 1;
-        if (!(un->flags & OGLES2_UNIFORM_IMAGE))
+        if (!(un->flags & OGLES3_UNIFORM_IMAGE))
             continue;
         for (st = 0; st < 2; st++)
-            for (e = 0; e < ne && un->sampler[st] + e < OGLES2_MAX_STAGE_IMAGES; e++) {
+            for (e = 0; e < ne && un->sampler[st] + e < OGLES3_MAX_STAGE_IMAGES; e++) {
                 ULONG idx = un->sampler[st] + e;
                 UBYTE unit = unit_of(p, u, e);
                 ts->iunit[st][idx] = unit;
@@ -910,13 +910,13 @@ static BOOL image_states(struct OGLES2Context *ctx, struct OGLES2Program *p, con
 /* One shader's uniform stream from its recipe (plan section 8.6, Mesa's
  * v3d_write_uniforms); its address. One word more than the recipe: the
  * hardware prefetches the next uniform. */
-static ULONG write_uniforms(struct OGLES2Context *ctx, const struct OGLES2Program *p,
-                            const struct OGLES2Variant *var, const struct tex_states *tst)
+static ULONG write_uniforms(struct OGLES3Context *ctx, const struct OGLES3Program *p,
+                            const struct OGLES3Variant *var, const struct tex_states *tst)
 {
-    int si = var->stage == OGLES2_VARIANT_FS ? 1 : 0;
+    int si = var->stage == OGLES3_VARIANT_FS ? 1 : 0;
     const ULONG *cle = p->cbuf_le[si];
     const ULONG *rtype = var->rtype, *rdata = var->rdata;
-    const struct OGLES2State *s = &ctx->state;
+    const struct OGLES3State *s = &ctx->state;
     float zs, zo;
     ULONG *u;
     int i, k, n;
@@ -941,72 +941,72 @@ static ULONG write_uniforms(struct OGLES2Context *ctx, const struct OGLES2Progra
         i = var->uidx ? var->special[k] : k;
         d = rdata[i];
         switch (rtype[i]) {
-        case OGLES2_U_UNIFORM:           w = p->cbuf[si][d]; break;
-        case OGLES2_U_CONSTANT:          w = d; break;
+        case OGLES3_U_UNIFORM:           w = p->cbuf[si][d]; break;
+        case OGLES3_U_CONSTANT:          w = d; break;
         /* The default framebuffer is drawn upside down (plan 7.11): a
          * negative Y scale, as Mesa's state tracker gives a window; a
          * framebuffer object is not (y_down). */
-        case OGLES2_U_VIEWPORT_X_SCALE:  w = float_bits(ctx->viewport[2] * 0.5f * 256.0f); break;
-        case OGLES2_U_VIEWPORT_Y_SCALE:
+        case OGLES3_U_VIEWPORT_X_SCALE:  w = float_bits(ctx->viewport[2] * 0.5f * 256.0f); break;
+        case OGLES3_U_VIEWPORT_Y_SCALE:
             w = float_bits(ctx->viewport[3] * (y_down(ctx) ? -0.5f : 0.5f) * 256.0f);
             break;
-        case OGLES2_U_VIEWPORT_Z_SCALE:  w = float_bits(zs); break;
-        case OGLES2_U_VIEWPORT_Z_OFFSET: w = float_bits(zo); break;
-        case OGLES2_U_CLIP_Z_COEFF:
+        case OGLES3_U_VIEWPORT_Z_SCALE:  w = float_bits(zs); break;
+        case OGLES3_U_VIEWPORT_Z_OFFSET: w = float_bits(zo); break;
+        case OGLES3_U_CLIP_Z_COEFF:
             w = float_bits(s->clip_depth == GL_ZERO_TO_ONE_EXT ? -1.0f : 0.0f);
             break;
-        case OGLES2_U_LINE_WIDTH:
-        case OGLES2_U_AA_LINE_WIDTH:     w = float_bits(s->line_width); break;
-        case OGLES2_U_BLEND_CONSTANT_R:
-        case OGLES2_U_BLEND_CONSTANT_R + 1:
-        case OGLES2_U_BLEND_CONSTANT_R + 2:
-        case OGLES2_U_BLEND_CONSTANT_R + 3:
-            w = float_bits(s->blend_color[var->rtype[i] - OGLES2_U_BLEND_CONSTANT_R]);
+        case OGLES3_U_LINE_WIDTH:
+        case OGLES3_U_AA_LINE_WIDTH:     w = float_bits(s->line_width); break;
+        case OGLES3_U_BLEND_CONSTANT_R:
+        case OGLES3_U_BLEND_CONSTANT_R + 1:
+        case OGLES3_U_BLEND_CONSTANT_R + 2:
+        case OGLES3_U_BLEND_CONSTANT_R + 3:
+            w = float_bits(s->blend_color[var->rtype[i] - OGLES3_U_BLEND_CONSTANT_R]);
             break;
         /* Mesa's write_tmu_p0/p1: the state's address with the
          * compiler's configuration bits in its low bits. */
-        case OGLES2_U_TMU_CONFIG_P0:
-            w = tst->tex[si][(d >> 24) & (OGLES2_MAX_STAGE_SAMPLERS - 1)] | (d & 0xffffff);
+        case OGLES3_U_TMU_CONFIG_P0:
+            w = tst->tex[si][(d >> 24) & (OGLES3_MAX_STAGE_SAMPLERS - 1)] | (d & 0xffffff);
             break;
-        case OGLES2_U_TMU_CONFIG_P1:
-            w = tst->smp[si][(d >> 24) & (OGLES2_MAX_STAGE_SAMPLERS - 1)] | (d & 0xffffff);
+        case OGLES3_U_TMU_CONFIG_P1:
+            w = tst->smp[si][(d >> 24) & (OGLES3_MAX_STAGE_SAMPLERS - 1)] | (d & 0xffffff);
             break;
-        case OGLES2_U_IMAGE_TMU_CONFIG_P0: /* Mesa's write_image_tmu_p0 (the loader checked the index) */
+        case OGLES3_U_IMAGE_TMU_CONFIG_P0: /* Mesa's write_image_tmu_p0 (the loader checked the index) */
             w = tst->img[si][d >> 24] | (d & 0xffffff);
             break;
-        case OGLES2_U_IMAGE_WIDTH:
-        case OGLES2_U_IMAGE_HEIGHT:
-        case OGLES2_U_IMAGE_DEPTH:
-        case OGLES2_U_IMAGE_ARRAY_SIZE:
-            w = ogles2_image_size(ctx, tst->iunit[si][d], (int)(rtype[i] - OGLES2_U_IMAGE_WIDTH));
+        case OGLES3_U_IMAGE_WIDTH:
+        case OGLES3_U_IMAGE_HEIGHT:
+        case OGLES3_U_IMAGE_DEPTH:
+        case OGLES3_U_IMAGE_ARRAY_SIZE:
+            w = ogles2_image_size(ctx, tst->iunit[si][d], (int)(rtype[i] - OGLES3_U_IMAGE_WIDTH));
             break;
-        case OGLES2_U_UBO_ADDR: /* unit 0 the constant buffer, the others uniform blocks */
+        case OGLES3_U_UBO_ADDR: /* unit 0 the constant buffer, the others uniform blocks */
             w = ((d >> 24) ? block_buffer(ctx, p, si, (d >> 24) - 1, tst, 0) : tst->ubo[si]) + (d & 0xffffff);
             break;
-        case OGLES2_U_GET_UBO_SIZE: /* Mesa's cb[data].buffer_size, cb[0] the constant buffer */
+        case OGLES3_U_GET_UBO_SIZE: /* Mesa's cb[data].buffer_size, cb[0] the constant buffer */
             w = p->image->cbuf_words[si] * 4UL;
             if (d)
                 block_buffer(ctx, p, si, d - 1, tst, &w);
             break;
-        case OGLES2_U_TEXTURE_WIDTH:
-        case OGLES2_U_TEXTURE_HEIGHT:
-        case OGLES2_U_TEXTURE_DEPTH:
-        case OGLES2_U_TEXTURE_ARRAY_SIZE:
-            d &= OGLES2_MAX_STAGE_SAMPLERS - 1;
-            w = ogles2_texture_size(ctx, tst->unit[si][d], tst->kind[si][d], (int)(rtype[i] - OGLES2_U_TEXTURE_WIDTH));
+        case OGLES3_U_TEXTURE_WIDTH:
+        case OGLES3_U_TEXTURE_HEIGHT:
+        case OGLES3_U_TEXTURE_DEPTH:
+        case OGLES3_U_TEXTURE_ARRAY_SIZE:
+            d &= OGLES3_MAX_STAGE_SAMPLERS - 1;
+            w = ogles2_texture_size(ctx, tst->unit[si][d], tst->kind[si][d], (int)(rtype[i] - OGLES3_U_TEXTURE_WIDTH));
             break;
-        case OGLES2_U_SPILL_OFFSET:
+        case OGLES3_U_SPILL_OFFSET:
             w = (ULONG)V3D_ALIGN_UP((v3d_uintptr)ctx->draw->spill.hostptr, 256);
             break;
-        case OGLES2_U_SPILL_SIZE_PER_THREAD: w = ctx->draw->spill_size; break;
-        case OGLES2_U_PISTORM_VP_WIDTH:  w = float_bits((GLfloat)ctx->viewport[2]); break;
-        case OGLES2_U_PISTORM_VP_HEIGHT: w = float_bits((GLfloat)ctx->viewport[3]); break;
-        case OGLES2_U_SSBO_OFFSET: { /* a fragment shader's storage buffer (ES 3.1) */
+        case OGLES3_U_SPILL_SIZE_PER_THREAD: w = ctx->draw->spill_size; break;
+        case OGLES3_U_PISTORM_VP_WIDTH:  w = float_bits((GLfloat)ctx->viewport[2]); break;
+        case OGLES3_U_PISTORM_VP_HEIGHT: w = float_bits((GLfloat)ctx->viewport[3]); break;
+        case OGLES3_U_SSBO_OFFSET: { /* a fragment shader's storage buffer (ES 3.1) */
             ULONG bytes;
             w = draw_storage(ctx, p, si, d, tst, &bytes);
             break;
         }
-        case OGLES2_U_GET_SSBO_SIZE:
+        case OGLES3_U_GET_SSBO_SIZE:
             draw_storage(ctx, p, si, d, tst, &w);
             break;
         default:                         w = 0; break; /* the loader refuses the rest */
@@ -1020,8 +1020,8 @@ static ULONG write_uniforms(struct OGLES2Context *ctx, const struct OGLES2Progra
 /* The coordinate or vertex shader's stream (k 0 or 1): the one its last
  * draw in this job wrote, when nothing it reads has changed since. The
  * fragment shader's samples the draw's textures: always written. */
-static ULONG vertex_uniforms(struct OGLES2Context *ctx, struct OGLES2Program *p, int k,
-                             const struct OGLES2Variant *var, const struct tex_states *tst)
+static ULONG vertex_uniforms(struct OGLES3Context *ctx, struct OGLES3Program *p, int k,
+                             const struct OGLES3Variant *var, const struct tex_states *tst)
 {
     ULONG addr;
     if (p->us_var[k] == var && p->us_gen[k] == g_v3d_cl_generation && p->us_ctx[k] == ctx &&
@@ -1042,9 +1042,9 @@ static ULONG vertex_uniforms(struct OGLES2Context *ctx, struct OGLES2Program *p,
 /* The state write_uniforms reads besides the constant buffers and the
  * textures (the blend colour only in a fragment shader's): a new version
  * when it changes. */
-static void uniform_state(struct OGLES2Context *ctx)
+static void uniform_state(struct OGLES3Context *ctx)
 {
-    const struct OGLES2State *s = &ctx->state;
+    const struct OGLES3State *s = &ctx->state;
     ULONG u0 = (ULONG)ctx->viewport[2], u1 = (ULONG)ctx->viewport[3];
     ULONG u2 = float_bits(s->depth_range[0]), u3 = float_bits(s->depth_range[1]);
     ULONG u4 = float_bits(s->line_width), u5 = ctx->fb_flip;
@@ -1057,7 +1057,7 @@ static void uniform_state(struct OGLES2Context *ctx)
 }
 
 /* The 16 default attribute values (0, 0, 0, 1), once per control list. */
-static ULONG default_attribs(struct OGLES2Context *ctx, struct OGLES2Draw *dd)
+static ULONG default_attribs(struct OGLES3Context *ctx, struct OGLES3Draw *dd)
 {
     ULONG *p;
     int i;
@@ -1232,7 +1232,7 @@ static void convert_elems(UBYTE *dst, ULONG dst_stride, const UBYTE *src, ULONG 
 /* Copies [first, first+count) of an enabled array in the GPU's byte order,
  * tightly packed at a 4-byte stride: a client array into the state buffer
  * per draw (plan 7.5), a buffer's through its kept GPU copy (buffer.c). */
-static BOOL copy_array(struct OGLES2Context *ctx, const struct OGLES2Array *a, GLint first,
+static BOOL copy_array(struct OGLES3Context *ctx, const struct OGLES3Array *a, GLint first,
                        GLsizei count, struct attr_src *out, BOOL probe_addr)
 {
     int es = type_size(a->type), n = a->size;
@@ -1301,7 +1301,7 @@ static BOOL copy_array(struct OGLES2Context *ctx, const struct OGLES2Array *a, G
 }
 
 /* A disabled array reads the current generic attribute: 16 bytes, stride 0. */
-static BOOL constant_attrib(struct OGLES2Context *ctx, GLuint index, struct attr_src *out)
+static BOOL constant_attrib(struct OGLES3Context *ctx, GLuint index, struct attr_src *out)
 {
     ULONG *p;
     int k;
@@ -1327,7 +1327,7 @@ static BOOL constant_attrib(struct OGLES2Context *ctx, GLuint index, struct attr
  * them once; it is used while they agree). */
 static void put_le32(UBYTE *b, ULONG x);
 static BOOL packets_ok(V3DContext *v);
-static int column_slot(const struct OGLES2ImageAttrib *at, int k);
+static int column_slot(const struct OGLES3ImageAttrib *at, int k);
 
 static void attr_record(UBYTE *b, ULONG address, UBYTE normalized, UBYTE is_signed, UBYTE vsize,
                         UBYTE vtype, UBYTE vs_reads, UBYTE cs_reads, UWORD divisor, ULONG stride, ULONG maxindex)
@@ -1345,9 +1345,9 @@ static void attr_record(UBYTE *b, ULONG address, UBYTE normalized, UBYTE is_sign
 /* The GL shader state record and its attribute records, one per vertex
  * input slot (Mesa's emit_shader_state_record and v3d_emit_gl_shader_state,
  * V3D 4.2, no geometry shader); the record's address. */
-static ULONG shader_record(struct OGLES2Context *ctx, struct OGLES2Program *p, ULONG defattr,
-                           const ULONG code[3], const ULONG unif[3], const struct OGLES2Variant *cs,
-                           const struct OGLES2Variant *vs, const struct OGLES2Variant *fs,
+static ULONG shader_record(struct OGLES3Context *ctx, struct OGLES3Program *p, ULONG defattr,
+                           const ULONG code[3], const ULONG unif[3], const struct OGLES3Variant *cs,
+                           const struct OGLES3Variant *vs, const struct OGLES3Variant *fs,
                            GLenum mode, const struct attr_src *src, int nslots)
 {
     V3DContext *v = ctx->v3d;
@@ -1555,7 +1555,7 @@ static UBYTE stencil_op(GLenum op)
  * v3d_packet.xml (plan 4.3): ref bits 0-7, test mask 8-15, function 16-18,
  * stencil fail op 19-21, depth fail op 22-24, pass op 25-27, front 28,
  * back 29, write mask 32-39. */
-static void stencil_bytes(const struct OGLES2State *s, int face, UBYTE *b)
+static void stencil_bytes(const struct OGLES3State *s, int face, UBYTE *b)
 {
     GLint ref = s->stencil_ref[face];
     ULONG w = (ULONG)(s->stencil_func[face] - GL_NEVER) |
@@ -1613,7 +1613,7 @@ static void emit_stencil(V3DContext *v, const UBYTE *b)
 /* Mesa's per-frame early-Z direction (v3d_update_job_ez), from this draw's
  * depth and stencil state; the frame keeps one direction or gives early Z up. */
 static void update_ez(V3DContext *v, BOOL depth_on, GLenum func, BOOL stencil_on,
-                      const struct OGLES2State *s)
+                      const struct OGLES3State *s)
 {
     UBYTE draw_ez = V3D_EZ_UNDECIDED;
     if (depth_on) {
@@ -1644,13 +1644,13 @@ static void update_ez(V3DContext *v, BOOL depth_on, GLenum func, BOOL stencil_on
         v->first_ez_state = v->ez_state;
 }
 
-static void emit_state(struct OGLES2Context *ctx, struct dedup *dd, int prim,
-                       const struct OGLES2Variant *fs)
+static void emit_state(struct OGLES3Context *ctx, struct dedup *dd, int prim,
+                       const struct OGLES3Variant *fs)
 {
     V3DContext *v = ctx->v3d;
-    const struct OGLES2State *s = &ctx->state;
-    BOOL depth_on = (s->caps & OGLES2_CAP_DEPTH_TEST) && ctx->fb_depth_bits;
-    BOOL stencil_on = (s->caps & OGLES2_CAP_STENCIL_TEST) && ctx->fb_stencil_bits;
+    const struct OGLES3State *s = &ctx->state;
+    BOOL depth_on = (s->caps & OGLES3_CAP_DEPTH_TEST) && ctx->fb_depth_bits;
+    BOOL stencil_on = (s->caps & OGLES3_CAP_STENCIL_TEST) && ctx->fb_stencil_bits;
     BOOL flip = ctx->fb_flip;
     UBYTE effp, erfp, cp, edo, dtf, zue, eze, ezue, be, se, wf, pf, pv, rom, smask;
     LONG fh = (LONG)ctx->fb_h;
@@ -1687,7 +1687,7 @@ static void emit_state(struct OGLES2Context *ctx, struct dedup *dd, int prim,
     r = vx + vw;
     t = flip ? fh - (vy + vh) : vy;
     b = flip ? fh - vy : vy + vh;
-    if (s->caps & OGLES2_CAP_SCISSOR_TEST) {
+    if (s->caps & OGLES3_CAP_SCISSOR_TEST) {
         LONG sl = ctx->scissor[0], sr = sl + ctx->scissor[2];
         LONG st = flip ? fh - (ctx->scissor[1] + ctx->scissor[3]) : ctx->scissor[1];
         LONG sb = flip ? fh - ctx->scissor[1] : ctx->scissor[1] + ctx->scissor[3];
@@ -1713,14 +1713,14 @@ static void emit_state(struct OGLES2Context *ctx, struct dedup *dd, int prim,
      * (its shaders flip y the same way), for clockwise on an object, and
      * the other way round with an upper-left origin (y_down). */
     effp = erfp = TRUE;
-    if (s->caps & OGLES2_CAP_CULL_FACE) {
+    if (s->caps & OGLES3_CAP_CULL_FACE) {
         if (s->cull_face_mode != GL_BACK) effp = FALSE;  /* FRONT or FRONT_AND_BACK */
         if (s->cull_face_mode != GL_FRONT) erfp = FALSE; /* BACK or FRONT_AND_BACK */
     }
-    if (s->caps & OGLES2_CAP_RASTERIZER_DISCARD) /* Mesa: both facings off (transform feedback still) */
+    if (s->caps & OGLES3_CAP_RASTERIZER_DISCARD) /* Mesa: both facings off (transform feedback still) */
         effp = erfp = FALSE;
     cp = y_down(ctx) ? s->front_face == GL_CCW : s->front_face == GL_CW;
-    edo = (s->caps & OGLES2_CAP_POLYGON_OFFSET_FILL) ? TRUE : FALSE;
+    edo = (s->caps & OGLES3_CAP_POLYGON_OFFSET_FILL) ? TRUE : FALSE;
     dtf = depth_on ? (UBYTE)(s->depth_func - GL_NEVER) : V3D_COMPARE_FUNC_ALWAYS;
     zue = depth_on && s->depth_mask;
     update_ez(v, depth_on, s->depth_func, stencil_on, s);
@@ -1734,7 +1734,7 @@ static void emit_state(struct OGLES2Context *ctx, struct dedup *dd, int prim,
         ezue = v->ez_state != V3D_EZ_DISABLED;
     /* Mesa's v3dx_emit.c: the tile buffer does not blend while the shader
      * does (a 32-bit float or integer target in the framebuffer) */
-    be = (s->caps & OGLES2_CAP_BLEND) && !ctx->fb_soft_blend ? TRUE : FALSE;
+    be = (s->caps & OGLES3_CAP_BLEND) && !ctx->fb_soft_blend ? TRUE : FALSE;
     se = stencil_on ? TRUE : FALSE;
     /* glPolygonMode and glProvokingVertex (AmigaOS 4), as Mesa's v3dx_emit.c:
      * the hardware applies the fill modes to triangles only. */
@@ -1747,13 +1747,13 @@ static void emit_state(struct OGLES2Context *ctx, struct dedup *dd, int prim,
      * request. */
     rom = ctx->job_msaa ? 1 : 0;
     smask = 0xF;
-    if (ctx->job_msaa && (s->caps & OGLES2_CAP_SAMPLE_COVERAGE)) {
+    if (ctx->job_msaa && (s->caps & OGLES3_CAP_SAMPLE_COVERAGE)) {
         int n = (int)(s->sample_coverage_value * 4.0f + 0.5f);
         smask = (UBYTE)((1U << n) - 1);
         if (s->sample_coverage_invert)
             smask = (UBYTE)(~smask & 0xF);
     }
-    if (ctx->job_msaa && (s->caps & OGLES2_CAP_SAMPLE_MASK)) /* ES 3.1's glSampleMaski */
+    if (ctx->job_msaa && (s->caps & OGLES3_CAP_SAMPLE_MASK)) /* ES 3.1's glSampleMaski */
         smask &= (UBYTE)(s->sample_mask & 0xF);
     if (!dd->cfg || dd->effp != effp || dd->erfp != erfp || dd->cp != cp || dd->edo != edo ||
         dd->dtf != dtf || dd->zue != zue || dd->eze != eze || dd->ezue != ezue || dd->be != be ||
@@ -1863,7 +1863,7 @@ static void emit_state(struct OGLES2Context *ctx, struct dedup *dd, int prim,
         ULONG m = (s->color_mask[0] ? 0 : 1) | (s->color_mask[1] ? 0 : 2) |
                   (s->color_mask[2] ? 0 : 4) | (s->color_mask[3] ? 0 : 8);
         cwm = 0;
-        for (k = 0; k < OGLES2_MAX_DRAW_BUFFERS; k++)
+        for (k = 0; k < OGLES3_MAX_DRAW_BUFFERS; k++)
             cwm |= ((ctx->fb_draw_mask & ctx->draw_rts & (1 << k)) ? m : 0xF) << (4 * k);
     }
     if (!dd->cwm || dd->cwm_mask != cwm) {
@@ -2026,9 +2026,9 @@ static BOOL packets_ok(V3DContext *v)
 /* Probe P: the time since the last mark goes to stage k (frame.c reports
  * them): 0 checks and the index range, 1 shaders, 2 textures, 3 uniforms,
  * 4 vertex data, 5 the record, 6 indices, 7 the binning list. */
-static void mark(struct OGLES2Context *ctx, int k)
+static void mark(struct OGLES3Context *ctx, int k)
 {
-    if (ctx->probe & OGLES2_PROBE_PERIODIC) {
+    if (ctx->probe & OGLES3_PROBE_PERIODIC) {
         ULONG t = ogles2_clock_us();
         if (k >= 0)
             ctx->stage[k] += (double)(ULONG)(t - ctx->t_stage);
@@ -2072,9 +2072,9 @@ struct elements
 /* Stage st's (0 vertex, 1 fragment) 32-bit samplers: Mesa's sampler_is_32b,
  * a bit per texture index whose bound texture returns 32 bits a channel
  * (v3d_setup_shared_key); 0 while no such texture was ever given an image. */
-static ULONG sampler_bits(struct OGLES2Context *ctx, struct OGLES2Program *p, int st)
+static ULONG sampler_bits(struct OGLES3Context *ctx, struct OGLES3Program *p, int st)
 {
-    const struct OGLES2Image *im = p->image;
+    const struct OGLES3Image *im = p->image;
     UWORD k, n;
     ULONG bits = 0;
     if (!ogles2_wide_seen)
@@ -2082,13 +2082,13 @@ static ULONG sampler_bits(struct OGLES2Context *ctx, struct OGLES2Program *p, in
     n = list_samplers(p);
     for (k = 0; k < n; k++) {
         UWORD u = p->nsamplers == 0xfe ? k : p->samplers[k];
-        const struct OGLES2ImageUniform *un = &im->uniforms[u];
+        const struct OGLES3ImageUniform *un = &im->uniforms[u];
         UWORD e, ne = un->array ? un->array : 1;
-        if (!(un->flags & OGLES2_UNIFORM_SAMPLER))
+        if (!(un->flags & OGLES3_UNIFORM_SAMPLER))
             continue;
         for (e = 0; e < ne; e++) {
             ULONG idx = un->sampler[st] + e;
-            if (un->sampler[st] >= OGLES2_MAX_STAGE_SAMPLERS || idx >= OGLES2_MAX_STAGE_SAMPLERS)
+            if (un->sampler[st] >= OGLES3_MAX_STAGE_SAMPLERS || idx >= OGLES3_MAX_STAGE_SAMPLERS)
                 break;
             if (ogles2_texture_wide(ctx, unit_of(p, u, e), ogles2_sampler_kind(un->type)))
                 bits |= 1UL << idx;
@@ -2134,25 +2134,25 @@ static ULONG pipe_factor(GLenum f, GLenum e)
  * blending each one's format and the blend state, which integer targets
  * never use (ES 3.0 4.1.7; Mesa's state tracker disables it for them):
  * ADD of ONE and ZERO when off. */
-static void vk_targets(struct OGLES2Context *ctx, struct OGLES2VkTargets *t)
+static void vk_targets(struct OGLES3Context *ctx, struct OGLES3VkTargets *t)
 {
-    const struct OGLES2State *s = &ctx->state;
+    const struct OGLES3State *s = &ctx->state;
     int i;
     memset(t, 0, sizeof(*t));
     t->soft = ctx->fb_soft_blend;
     for (i = 0; i < ctx->fb_nrt; i++) {
-        const struct OGLES2RtFormat *rf = &ctx->fb_rt[i];
-        BOOL integer = rf->kind == OGLES2_RT_INT || rf->kind == OGLES2_RT_UINT;
-        if (!(ctx->fb_draw_mask & (1 << i)) || rf->kind == OGLES2_RT_NONE)
+        const struct OGLES3RtFormat *rf = &ctx->fb_rt[i];
+        BOOL integer = rf->kind == OGLES3_RT_INT || rf->kind == OGLES3_RT_UINT;
+        if (!(ctx->fb_draw_mask & (1 << i)) || rf->kind == OGLES3_RT_NONE)
             continue;
-        if (rf->kind == OGLES2_RT_F32 || integer)
+        if (rf->kind == OGLES3_RT_F32 || integer)
             t->f32 |= (UBYTE)(1 << i);
         if (!t->soft)
             continue;
         t->cbufs |= (UBYTE)(1 << i);
         t->fmt[i] = rf->pipe;
         memcpy(t->swz[i], rf->swz, 4);
-        if ((s->caps & OGLES2_CAP_BLEND) && !integer) {
+        if ((s->caps & OGLES3_CAP_BLEND) && !integer) {
             t->blend[i][0] = pipe_func(s->blend_eq_rgb);
             t->blend[i][1] = pipe_factor(s->blend_src_rgb, s->blend_eq_rgb);
             t->blend[i][2] = pipe_factor(s->blend_dst_rgb, s->blend_eq_rgb);
@@ -2168,13 +2168,13 @@ static void vk_targets(struct OGLES2Context *ctx, struct OGLES2VkTargets *t)
 }
 
 /* A variant of `stage` fitting `want` in one image, or 0. */
-static const struct OGLES2Variant *find_in(const struct OGLES2Image *im, UBYTE stage, const UBYTE *want)
+static const struct OGLES3Variant *find_in(const struct OGLES3Image *im, UBYTE stage, const UBYTE *want)
 {
     UWORD i;
     for (i = 0; im && i < im->nvariants; i++) {
-        const struct OGLES2Variant *v = &im->variants[i];
+        const struct OGLES3Variant *v = &im->variants[i];
         if (v->stage == stage &&
-            (stage == OGLES2_VARIANT_FS ? ogles2_vk_fs_fits(v->key, want) : ogles2_vk_vs_fits(v->key, want)))
+            (stage == OGLES3_VARIANT_FS ? ogles2_vk_fs_fits(v->key, want) : ogles2_vk_vs_fits(v->key, want)))
             return v;
     }
     return 0;
@@ -2184,21 +2184,21 @@ static const struct OGLES2Variant *find_in(const struct OGLES2Image *im, UBYTE s
  * .v3dw and .v3da where the key has 32-bit samplers or alpha to coverage,
  * then its .v3dx images (shipped, the cache's and its older ones); its
  * image in *owner. */
-static const struct OGLES2Variant *find_x(struct OGLES2Image *im, UBYTE stage, const UBYTE *want,
-                                          const struct OGLES2Image **owner)
+static const struct OGLES3Variant *find_x(struct OGLES3Image *im, UBYTE stage, const UBYTE *want,
+                                          const struct OGLES3Image **owner)
 {
-    const struct OGLES2Variant *v;
-    const struct OGLES2Image *x;
+    const struct OGLES3Variant *v;
+    const struct OGLES3Image *x;
     if ((v = find_in(im, stage, want))) {
         *owner = im;
         return v;
     }
-    if (stage == OGLES2_VARIANT_FS && ogles2_vk_bits(want) && (x = ogles2_image_wide_file(im)) &&
+    if (stage == OGLES3_VARIANT_FS && ogles2_vk_bits(want) && (x = ogles2_image_wide_file(im)) &&
         (v = find_in(x, stage, want))) {
         *owner = x;
         return v;
     }
-    if (stage == OGLES2_VARIANT_FS && want[OGLES2_VK_FS_A2C] && (x = ogles2_image_a2c_file(im)) &&
+    if (stage == OGLES3_VARIANT_FS && want[OGLES3_VK_FS_A2C] && (x = ogles2_image_a2c_file(im)) &&
         (v = find_in(x, stage, want))) {
         *owner = x;
         return v;
@@ -2219,7 +2219,7 @@ static const struct OGLES2Variant *find_x(struct OGLES2Image *im, UBYTE stage, c
  * `flags` in its second byte) and the key; its length. */
 static ULONG key_entry(UBYTE *e, UBYTE stage, UBYTE flags, const UBYTE *key)
 {
-    ULONG n = stage == OGLES2_VARIANT_FS ? OGLES2_FS_KEY_BYTES : OGLES2_VS_KEY_BYTES;
+    ULONG n = stage == OGLES3_VARIANT_FS ? OGLES3_FS_KEY_BYTES : OGLES3_VS_KEY_BYTES;
     e[0] = stage;
     e[1] = flags;
     e[2] = e[3] = 0;
@@ -2233,36 +2233,36 @@ static ULONG key_entry(UBYTE *e, UBYTE stage, UBYTE flags, const UBYTE *key)
  * compiler gives the vertex key the fragment variant's inputs as its used
  * outputs (V3DGLSL_KEY_OUTPUTS_FROM_FS), as Mesa's v3d_update_compiled_vs
  * does. A vertex variant alone is asked for when only it is missing. */
-static BOOL es3_variants(struct OGLES2Context *ctx, struct OGLES2Program *p, GLenum fsmode, UBYTE cbufs,
-                         const ULONG *bits, BOOL a2c, const struct OGLES2VkTargets *tg, const struct OGLES2Variant **vs,
-                         const struct OGLES2Variant **fs, const struct OGLES2Image **vown,
-                         const struct OGLES2Image **fown)
+static BOOL es3_variants(struct OGLES3Context *ctx, struct OGLES3Program *p, GLenum fsmode, UBYTE cbufs,
+                         const ULONG *bits, BOOL a2c, const struct OGLES3VkTargets *tg, const struct OGLES3Variant **vs,
+                         const struct OGLES3Variant **fs, const struct OGLES3Image **vown,
+                         const struct OGLES3Image **fown)
 {
-    struct OGLES2Image *im = (struct OGLES2Image *)p->image;
-    UBYTE want[OGLES2_FS_KEY_BYTES], vwant[OGLES2_VS_KEY_BYTES];
-    UBYTE req[8 + OGLES2_FS_KEY_BYTES + OGLES2_VS_KEY_BYTES];
-    const struct OGLES2Variant *f, *v = 0;
+    struct OGLES3Image *im = (struct OGLES3Image *)p->image;
+    UBYTE want[OGLES3_FS_KEY_BYTES], vwant[OGLES3_VS_KEY_BYTES];
+    UBYTE req[8 + OGLES3_FS_KEY_BYTES + OGLES3_VS_KEY_BYTES];
+    const struct OGLES3Variant *f, *v = 0;
     int prim;
     if (!(*fs)->key || !(*vs)->key)
         return FALSE;
-    prim = fsmode == GL_POINTS ? OGLES2_VK_POINTS
-         : fsmode == GL_LINES || fsmode == GL_LINE_LOOP || fsmode == GL_LINE_STRIP ? OGLES2_VK_LINES
-                                                                                   : OGLES2_VK_TRIANGLES;
+    prim = fsmode == GL_POINTS ? OGLES3_VK_POINTS
+         : fsmode == GL_LINES || fsmode == GL_LINE_LOOP || fsmode == GL_LINE_STRIP ? OGLES3_VK_LINES
+                                                                                   : OGLES3_VK_TRIANGLES;
     ogles2_vk_fs_want(want, (*fs)->key, prim, cbufs, bits[1], a2c);
     ogles2_vk_fs_targets(want, tg);
-    f = find_x(im, OGLES2_VARIANT_FS, want, fown);
+    f = find_x(im, OGLES3_VARIANT_FS, want, fown);
     if (!f) {
-        ULONG n = key_entry(req, OGLES2_VARIANT_FS, 0, want);
+        ULONG n = key_entry(req, OGLES3_VARIANT_FS, 0, want);
         ogles2_vk_vs_want(vwant, (*vs)->key, 0, 0, bits[0]);
-        n += key_entry(req + n, OGLES2_VARIANT_VS, V3DGLSL_KEY_OUTPUTS_FROM_FS >> 8, vwant);
+        n += key_entry(req + n, OGLES3_VARIANT_VS, V3DGLSL_KEY_OUTPUTS_FROM_FS >> 8, vwant);
         if (ogles2_image_compile_variants(ctx, im, req, n))
-            f = find_x(im, OGLES2_VARIANT_FS, want, fown);
+            f = find_x(im, OGLES3_VARIANT_FS, want, fown);
     }
     if (f) {
         ogles2_vk_vs_want(vwant, (*vs)->key, f->num_inputs, f->input_slots, bits[0]);
-        v = find_x(im, OGLES2_VARIANT_VS, vwant, vown);
-        if (!v && ogles2_image_compile_variants(ctx, im, req, key_entry(req, OGLES2_VARIANT_VS, 0, vwant)))
-            v = find_x(im, OGLES2_VARIANT_VS, vwant, vown);
+        v = find_x(im, OGLES3_VARIANT_VS, vwant, vown);
+        if (!v && ogles2_image_compile_variants(ctx, im, req, key_entry(req, OGLES3_VARIANT_VS, 0, vwant)))
+            v = find_x(im, OGLES3_VARIANT_VS, vwant, vown);
         if (v) {
             *fs = f;
             *vs = v;
@@ -2290,21 +2290,21 @@ static BOOL es3_variants(struct OGLES2Context *ctx, struct OGLES2Program *p, GLe
 /* Draws with program p and the context's state; arguments are valid. The
  * vertices [first, first+count) are copied; without `el` they are drawn in
  * order, with it through its indices. */
-static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLenum mode,
+static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLenum mode,
                         GLint first, GLsizei count, const struct elements *el, GLsizei instances)
 {
-    const struct OGLES2Image *im = p->image;
-    const struct OGLES2Variant *cs, *vs, *fs;
-    const struct OGLES2Image *fim; /* the fragment shader's image */
+    const struct OGLES3Image *im = p->image;
+    const struct OGLES3Variant *cs, *vs, *fs;
+    const struct OGLES3Image *fim; /* the fragment shader's image */
     GLenum fsmode;
-    struct OGLES2Draw *d;
+    struct OGLES3Draw *d;
     V3DContext *v = ctx->v3d;
-    struct attr_src src[OGLES2_MAX_VERTEX_ATTRIBS];
+    struct attr_src src[OGLES3_MAX_VERTEX_ATTRIBS];
     struct tex_states tst;
     BOOL vid;        /* a shader reads gl_VertexID: the real vertex numbers (below) */
     BOOL a2c;        /* alpha to coverage in an ES3 program's key */
     ULONG bits[2];   /* an ES3 program's 32-bit samplers, vertex and fragment */
-    struct OGLES2VkTargets tg; /* and its render targets' key fields */
+    struct OGLES3VkTargets tg; /* and its render targets' key fields */
     GLenum itype_gl; /* the indices' type as the GPU gets them */
     BOOL xfb;        /* it feeds back (transform feedback, xfb.c) */
     ULONG unif[3], code[3], defattr, rec, idx_addr = 0, idx_size = 0;
@@ -2313,7 +2313,7 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
     /* GL_RASTERIZER_DISCARD: no fragments, and without transform feedback a
      * draw then has no effect at all: nothing is drawn. With it, binning
      * still feeds back (CFG_BITS discards every primitive, emit_state). */
-    if ((ctx->state.caps & OGLES2_CAP_RASTERIZER_DISCARD) && !ogles2_xfb_drawing(ctx))
+    if ((ctx->state.caps & OGLES3_CAP_RASTERIZER_DISCARD) && !ogles2_xfb_drawing(ctx))
         return;
     if (!(d = draw_state(ctx))) {
         ogles2_error(ctx, GL_OUT_OF_MEMORY);
@@ -2330,7 +2330,7 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
     /* A 4x MSAA default framebuffer, or multisampled renderbuffers, with
      * GL_SAMPLE_ALPHA_TO_COVERAGE (Mesa turns alpha into the sample mask in
      * the fragment shader). */
-    a2c = (ctx->state.caps & OGLES2_CAP_SAMPLE_ALPHA_TO_COVERAGE) != 0 &&
+    a2c = (ctx->state.caps & OGLES3_CAP_SAMPLE_ALPHA_TO_COVERAGE) != 0 &&
           (ctx->draw_fb ? ogles2_fbo_samples(ctx->draw_fb) != 0 : ctx->msaa);
     fim = im;
     bits[0] = bits[1] = 0;
@@ -2347,12 +2347,12 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
          * the .v3dw), else its alpha-to-coverage variants (the .v3da). Not
          * both: no file holds both, and the 32-bit ones keep theirs. */
         if (ogles2_wide_seen && wants_wide(ctx, p)) {
-            const struct OGLES2Image *w = ogles2_image_wide((struct OGLES2Image *)im);
+            const struct OGLES3Image *w = ogles2_image_wide((struct OGLES3Image *)im);
             if (w)
                 fim = w;
         }
         if (a2c && fim == im) {
-            const struct OGLES2Image *a = ogles2_image_a2c((struct OGLES2Image *)im);
+            const struct OGLES3Image *a = ogles2_image_a2c((struct OGLES3Image *)im);
             if (a)
                 fim = a;
         }
@@ -2370,9 +2370,9 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
         code[2] = p->var_code[2];
     } else {
         UBYTE cbufs = (UBYTE)((1 << ctx->fb_nrt) - 1);
-        cs = ogles2_image_variant(im, OGLES2_VARIANT_CS, 0, mode);
-        vs = ogles2_image_variant(im, OGLES2_VARIANT_VS, 0, mode);
-        fs = ogles2_image_variant(fim, OGLES2_VARIANT_FS, cbufs, fsmode);
+        cs = ogles2_image_variant(im, OGLES3_VARIANT_CS, 0, mode);
+        vs = ogles2_image_variant(im, OGLES3_VARIANT_VS, 0, mode);
+        fs = ogles2_image_variant(fim, OGLES3_VARIANT_FS, cbufs, fsmode);
         if (!cs || !vs || !fs) {
             ogles2_log("glDrawArrays: the program has no shader for this primitive; nothing drawn");
             return;
@@ -2392,7 +2392,7 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
         {
             /* An OpenGL ES 3 program: the variants for this state's keys
              * (above); a GLES2 one keeps 1.x's. */
-            const struct OGLES2Image *vown = im, *fown = fim;
+            const struct OGLES3Image *vown = im, *fown = fim;
             if (im->format2)
                 es3_variants(ctx, p, fsmode, ctx->draw_fb ? ctx->fb_draw_mask : 1, bits, a2c, &tg, &vs, &fs,
                              &vown, &fown);
@@ -2433,8 +2433,8 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
         UBYTE need = 0, has = fs->key ? ogles2_vk_fs_f32(fs->key) : 0, cb = fs->cbufs ? fs->cbufs : 1;
         for (i = 0; i < ctx->fb_nrt; i++)
             if ((ctx->fb_draw_mask & (1 << i)) &&
-                (ctx->fb_rt[i].kind == OGLES2_RT_F32 || ctx->fb_rt[i].kind == OGLES2_RT_INT ||
-                 ctx->fb_rt[i].kind == OGLES2_RT_UINT))
+                (ctx->fb_rt[i].kind == OGLES3_RT_F32 || ctx->fb_rt[i].kind == OGLES3_RT_INT ||
+                 ctx->fb_rt[i].kind == OGLES3_RT_UINT))
                 need |= (UBYTE)(1 << i);
         if ((need & cb) != (has & cb)) { /* a target the variant does not write gets no write at all */
             if (!d->wrong_width_logged) {
@@ -2458,7 +2458,7 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
     update_state_vars(ctx, p);
     memset(&tst, 0, sizeof(tst));
     {
-        const struct OGLES2Variant *vv[3];
+        const struct OGLES3Variant *vv[3];
         vv[0] = cs; vv[1] = vs; vv[2] = fs;
         if (!ubo_copies(ctx, p, vv, &tst) || !spill_area(ctx, vv) || !image_states(ctx, p, vv, &tst))
             goto nomem;
@@ -2492,7 +2492,7 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
                 for (k = 0; k < im->attribs[a].columns; k++)
                     if (column_slot(&im->attribs[a], k) == (int)i)
                         g = p->attrib_index[a] + k;
-            p->slot_attrib[i] = (UBYTE)(g < OGLES2_MAX_VERTEX_ATTRIBS ? g : 0xff);
+            p->slot_attrib[i] = (UBYTE)(g < OGLES3_MAX_VERTEX_ATTRIBS ? g : 0xff);
         }
         p->nslots = (UBYTE)nslots;
     }
@@ -2500,7 +2500,7 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
     for (i = 0; i < nslots; i++) {
         GLuint g = p->slot_attrib[i];
         BOOL ok;
-        if (g >= OGLES2_MAX_VERTEX_ATTRIBS) {
+        if (g >= OGLES3_MAX_VERTEX_ATTRIBS) {
             ok = constant_attrib(ctx, 0, &src[i]); /* a slot no attribute claims */
         } else if (ctx->array[g].enabled && ctx->array[g].zero_stride) {
             /* ES 3.1: a binding of stride 0, every vertex its first element:
@@ -2519,7 +2519,7 @@ static void draw_arrays(struct OGLES2Context *ctx, struct OGLES2Program *p, GLen
         } else {
             ok = ctx->array[g].enabled
                      ? copy_array(ctx, &ctx->array[g], first, count, &src[i],
-                                  i == 0 && (ctx->probe & OGLES2_PROBE_ADDR) && ctx->probe_addr)
+                                  i == 0 && (ctx->probe & OGLES3_PROBE_ADDR) && ctx->probe_addr)
                      : constant_attrib(ctx, g, &src[i]);
         }
         if (!ok)
@@ -2683,7 +2683,7 @@ nomem:
 
 /* The vertex input slot of column k of an attribute (a matrix's columns are
  * generic attributes of their own), -1 if the shader does not read it. */
-static int column_slot(const struct OGLES2ImageAttrib *at, int k)
+static int column_slot(const struct OGLES3ImageAttrib *at, int k)
 {
     int j, n = 0;
     if (at->slot == 0xff)
@@ -2700,12 +2700,12 @@ static int column_slot(const struct OGLES2ImageAttrib *at, int k)
 
 /* Every enabled array the program reads has data, and a buffer's holds
  * vertices [0, end) (GLES2 leaves reading past it undefined: not drawn). */
-static BOOL arrays_ok(struct OGLES2Context *ctx, const struct OGLES2Program *p, ULONG end,
+static BOOL arrays_ok(struct OGLES3Context *ctx, const struct OGLES3Program *p, ULONG end,
                       GLsizei instances, const char *fn)
 {
     int a;
     for (a = 0; a < p->image->nattribs; a++) {
-        const struct OGLES2Array *arr = &ctx->array[p->attrib_index[a]];
+        const struct OGLES3Array *arr = &ctx->array[p->attrib_index[a]];
         ULONG end_a = end;
         if (p->image->attribs[a].slot == 0xff || !arr->enabled)
             continue;
@@ -2732,10 +2732,10 @@ static BOOL arrays_ok(struct OGLES2Context *ctx, const struct OGLES2Program *p, 
     return TRUE;
 }
 
-static void draw_instances(struct OGLES2Context *ctx, GLenum mode, GLint first, GLsizei count, GLsizei instances)
+static void draw_instances(struct OGLES3Context *ctx, GLenum mode, GLint first, GLsizei count, GLsizei instances)
 {
     ULONG t0 = ogles2_clock_us();
-    struct OGLES2Program *p;
+    struct OGLES3Program *p;
 
     if (!ogles2_context_valid(ctx))
         return;
@@ -2772,19 +2772,19 @@ static void draw_instances(struct OGLES2Context *ctx, GLenum mode, GLint first, 
     ctx->sum_draw += (double)(ULONG)(ogles2_clock_us() - t0);
 }
 
-void ogles2_glDrawArrays(struct OGLES2Context *ctx, GLenum mode, GLint first, GLsizei count)
+void ogles2_glDrawArrays(struct OGLES3Context *ctx, GLenum mode, GLint first, GLsizei count)
 {
     draw_instances(ctx, mode, first, count, 1);
 }
 
-void ogles2_glDrawArraysInstanced(struct OGLES2Context *ctx, GLenum mode, GLint first, GLsizei count,
+void ogles2_glDrawArraysInstanced(struct OGLES3Context *ctx, GLenum mode, GLint first, GLsizei count,
                                   GLsizei instancecount)
 {
     if (ogles2_es3_entry(ctx))
         draw_instances(ctx, mode, first, count, instancecount);
 }
 
-void ogles2_glDrawArraysInstancedEXT(struct OGLES2Context *ctx, GLenum mode, GLint first, GLsizei count,
+void ogles2_glDrawArraysInstancedEXT(struct OGLES3Context *ctx, GLenum mode, GLint first, GLsizei count,
                                      GLsizei instancecount)
 {
     draw_instances(ctx, mode, first, count, instancecount);
@@ -2795,11 +2795,11 @@ void ogles2_glDrawArraysInstancedEXT(struct OGLES2Context *ctx, GLenum mode, GLi
  * the rebased indices stay as they are. With `range` (glDrawRangeElements)
  * the program has said which indices it uses, range[0] to range[1]: they
  * are not scanned. */
-static void draw_elements(struct OGLES2Context *ctx, GLenum mode, GLsizei count, GLenum type,
+static void draw_elements(struct OGLES3Context *ctx, GLenum mode, GLsizei count, GLenum type,
                           const void *indices, GLint basevertex, const ULONG *range, GLsizei instances,
                           const char *fn)
 {
-    struct OGLES2Program *p;
+    struct OGLES3Program *p;
     struct elements el;
     ULONG lo = ~0UL, hi = 0, k, t0 = ogles2_clock_us();
     BOOL restart;
@@ -2807,7 +2807,7 @@ static void draw_elements(struct OGLES2Context *ctx, GLenum mode, GLsizei count,
     if (!ogles2_context_valid(ctx))
         return;
     mark(ctx, -1);
-    restart = (ctx->state.caps & OGLES2_CAP_PRIMITIVE_RESTART) != 0;
+    restart = (ctx->state.caps & OGLES3_CAP_PRIMITIVE_RESTART) != 0;
     if (mode > GL_TRIANGLE_FAN ||
         (type != GL_UNSIGNED_BYTE && type != GL_UNSIGNED_SHORT && type != GL_UNSIGNED_INT)) {
         ogles2_error(ctx, GL_INVALID_ENUM);
@@ -2947,13 +2947,13 @@ static void draw_elements(struct OGLES2Context *ctx, GLenum mode, GLsizei count,
     ctx->sum_draw += (double)(ULONG)(ogles2_clock_us() - t0);
 }
 
-void ogles2_glDrawElements(struct OGLES2Context *ctx, GLenum mode, GLsizei count, GLenum type,
+void ogles2_glDrawElements(struct OGLES3Context *ctx, GLenum mode, GLsizei count, GLenum type,
                            const void *indices)
 {
     draw_elements(ctx, mode, count, type, indices, 0, 0, 1, "glDrawElements");
 }
 
-static void elements_instanced(struct OGLES2Context *ctx, GLenum mode, GLsizei count, GLenum type,
+static void elements_instanced(struct OGLES3Context *ctx, GLenum mode, GLsizei count, GLenum type,
                                const void *indices, GLsizei instancecount)
 {
     if (instancecount < 0) {
@@ -2964,21 +2964,21 @@ static void elements_instanced(struct OGLES2Context *ctx, GLenum mode, GLsizei c
         draw_elements(ctx, mode, count, type, indices, 0, 0, instancecount, "glDrawElementsInstanced");
 }
 
-void ogles2_glDrawElementsInstanced(struct OGLES2Context *ctx, GLenum mode, GLsizei count, GLenum type,
+void ogles2_glDrawElementsInstanced(struct OGLES3Context *ctx, GLenum mode, GLsizei count, GLenum type,
                                     const void *indices, GLsizei instancecount)
 {
     if (ogles2_es3_entry(ctx))
         elements_instanced(ctx, mode, count, type, indices, instancecount);
 }
 
-void ogles2_glDrawElementsInstancedEXT(struct OGLES2Context *ctx, GLenum mode, GLsizei count, GLenum type,
+void ogles2_glDrawElementsInstancedEXT(struct OGLES3Context *ctx, GLenum mode, GLsizei count, GLenum type,
                                        const void *indices, GLsizei instancecount)
 {
     if (ogles2_context_valid(ctx))
         elements_instanced(ctx, mode, count, type, indices, instancecount);
 }
 
-void ogles2_glDrawElementsBaseVertexOES(struct OGLES2Context *ctx, GLenum mode, GLsizei count,
+void ogles2_glDrawElementsBaseVertexOES(struct OGLES3Context *ctx, GLenum mode, GLsizei count,
                                         GLenum type, const void *indices, GLint basevertex)
 {
     draw_elements(ctx, mode, count, type, indices, basevertex, 0, 1, "glDrawElementsBaseVertexOES");
@@ -2987,7 +2987,7 @@ void ogles2_glDrawElementsBaseVertexOES(struct OGLES2Context *ctx, GLenum mode, 
 /* GLES 3.0's glDrawRangeElements, offered to GLES2 programs through
  * aglGetProcAddress (ports/gl4es passes a locked array range): the indices
  * lie in [start, end], so ogles2 does not scan them for their range. */
-void ogles2_glDrawRangeElements(struct OGLES2Context *ctx, GLenum mode, GLuint start, GLuint end,
+void ogles2_glDrawRangeElements(struct OGLES3Context *ctx, GLenum mode, GLuint start, GLuint end,
                                 GLsizei count, GLenum type, const void *indices)
 {
     ULONG range[2];
@@ -3010,7 +3010,7 @@ void ogles2_glDrawRangeElements(struct OGLES2Context *ctx, GLenum mode, GLuint s
 /* ES 3.1 10.5's checks after the mode's, in Mesa's order: a vertex array
  * object other than 0, no enabled array in client memory, no transform
  * feedback drawing; then the command (buffer.c). FALSE: the error set. */
-static BOOL indirect_command(struct OGLES2Context *ctx, const void *indirect, ULONG bytes, ULONG *cmd)
+static BOOL indirect_command(struct OGLES3Context *ctx, const void *indirect, ULONG bytes, ULONG *cmd)
 {
     GLenum e;
     int k;
@@ -3018,7 +3018,7 @@ static BOOL indirect_command(struct OGLES2Context *ctx, const void *indirect, UL
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return FALSE;
     }
-    for (k = 0; k < OGLES2_MAX_VERTEX_ATTRIBS; k++)
+    for (k = 0; k < OGLES3_MAX_VERTEX_ATTRIBS; k++)
         if (ctx->array[k].enabled && !ctx->array[k].buffer) {
             ogles2_error(ctx, GL_INVALID_OPERATION);
             return FALSE;
@@ -3033,7 +3033,7 @@ static BOOL indirect_command(struct OGLES2Context *ctx, const void *indirect, UL
 /* DrawArraysIndirectCommand: count, instance count, first, a reserved word
  * (base instance, 0 in ES). Counts past GLsizei's range or a reserved word
  * not 0: undefined, nothing drawn (logged). */
-void ogles2_glDrawArraysIndirect(struct OGLES2Context *ctx, GLenum mode, const void *indirect)
+void ogles2_glDrawArraysIndirect(struct OGLES3Context *ctx, GLenum mode, const void *indirect)
 {
     ULONG cmd[4];
     if (!ogles2_es31_entry(ctx))
@@ -3056,7 +3056,7 @@ void ogles2_glDrawArraysIndirect(struct OGLES2Context *ctx, GLenum mode, const v
 /* DrawElementsIndirectCommand: count, instance count, first index, base
  * vertex, a reserved word; the indices from the element array buffer,
  * which must be bound. */
-void ogles2_glDrawElementsIndirect(struct OGLES2Context *ctx, GLenum mode, GLenum type, const void *indirect)
+void ogles2_glDrawElementsIndirect(struct OGLES3Context *ctx, GLenum mode, GLenum type, const void *indirect)
 {
     ULONG cmd[5], size;
     if (!ogles2_es31_entry(ctx))
@@ -3089,9 +3089,9 @@ void ogles2_glDrawElementsIndirect(struct OGLES2Context *ctx, GLenum mode, GLenu
  * colour (the last generic attribute, constant) in every output, position
  * from the last but one; tools/clear_mrt. 0: none (logged once), and the
  * built-in one clears the first target only. */
-static struct OGLES2Program *mrt_program(struct OGLES2Draw *d)
+static struct OGLES3Program *mrt_program(struct OGLES3Draw *d)
 {
-    struct OGLES2Program *p = &d->mrt_quad;
+    struct OGLES3Program *p = &d->mrt_quad;
     UWORD a;
     if (!d->mrt_ready && !d->mrt_failed) {
         char why[96];
@@ -3108,7 +3108,7 @@ static struct OGLES2Program *mrt_program(struct OGLES2Draw *d)
         return 0;
     for (a = 0; a < d->mrt_image->nattribs; a++)
         p->attrib_index[a] = d->mrt_image->attribs[a].name[2] == 'p' /* a_position */
-                                 ? OGLES2_MAX_VERTEX_ATTRIBS - 2 : OGLES2_MAX_VERTEX_ATTRIBS - 1;
+                                 ? OGLES3_MAX_VERTEX_ATTRIBS - 2 : OGLES3_MAX_VERTEX_ATTRIBS - 1;
     return p;
 }
 
@@ -3117,9 +3117,9 @@ static struct OGLES2Program *mrt_program(struct OGLES2Draw *d)
 /* The program draw_clear clears depth and stencil with where a target is
  * 32-bit float or integer: position from the last but one generic
  * attribute, no colour output; tools/clear_zs. 0: none (logged once). */
-static struct OGLES2Program *zs_program(struct OGLES2Draw *d)
+static struct OGLES3Program *zs_program(struct OGLES3Draw *d)
 {
-    struct OGLES2Program *p = &d->zs_quad;
+    struct OGLES3Program *p = &d->zs_quad;
     if (!d->zs_ready && !d->zs_failed) {
         char why[96];
         if (!(d->zs_image = ogles2_v3dp_load(clear_zs_v3dp, sizeof(clear_zs_v3dp), why, sizeof(why))) ||
@@ -3133,7 +3133,7 @@ static struct OGLES2Program *zs_program(struct OGLES2Draw *d)
     }
     if (!d->zs_ready)
         return 0;
-    p->attrib_index[0] = OGLES2_MAX_VERTEX_ATTRIBS - 2;
+    p->attrib_index[0] = OGLES3_MAX_VERTEX_ATTRIBS - 2;
     return p;
 }
 
@@ -3143,9 +3143,9 @@ static struct OGLES2Program *zs_program(struct OGLES2Draw *d)
  * quad, position from the last but one generic attribute, texture
  * coordinates from the last; tools/copy_tex. 0: none (logged once), and the
  * copies go through the CPU. */
-static struct OGLES2Program *copy_program(struct OGLES2Draw *d)
+static struct OGLES3Program *copy_program(struct OGLES3Draw *d)
 {
-    struct OGLES2Program *p = &d->copy_prog;
+    struct OGLES3Program *p = &d->copy_prog;
     UWORD a;
     if (!d->copy_ready && !d->copy_failed) {
         char why[96];
@@ -3162,7 +3162,7 @@ static struct OGLES2Program *copy_program(struct OGLES2Draw *d)
         return 0;
     for (a = 0; a < d->copy_image->nattribs; a++)
         p->attrib_index[a] = d->copy_image->attribs[a].name[2] == 'p' /* a_position */
-                                 ? OGLES2_MAX_VERTEX_ATTRIBS - 2 : OGLES2_MAX_VERTEX_ATTRIBS - 1;
+                                 ? OGLES3_MAX_VERTEX_ATTRIBS - 2 : OGLES3_MAX_VERTEX_ATTRIBS - 1;
     return p;
 }
 
@@ -3173,15 +3173,15 @@ static struct OGLES2Program *copy_program(struct OGLES2Draw *d)
  * application's state applies: no test, blending, dithering or mask, as a
  * copy writes. The application's state is restored afterwards. FALSE:
  * nothing drawn (no program). */
-BOOL ogles2_draw_copy(struct OGLES2Context *ctx, struct OGLES2Texture *src, const GLfloat *tc, GLint x, GLint y,
+BOOL ogles2_draw_copy(struct OGLES3Context *ctx, struct OGLES3Texture *src, const GLfloat *tc, GLint x, GLint y,
                       GLsizei w, GLsizei h)
 {
-    struct OGLES2State saved = ctx->state, *s = &ctx->state;
-    struct OGLES2Array saved_pos = ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2];
-    struct OGLES2Array saved_tc = ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 1];
-    struct OGLES2Program *saved_prog = ctx->program, *p;
-    struct OGLES2Texture *saved_tex;
-    struct OGLES2Draw *d;
+    struct OGLES3State saved = ctx->state, *s = &ctx->state;
+    struct OGLES3Array saved_pos = ctx->array[OGLES3_MAX_VERTEX_ATTRIBS - 2];
+    struct OGLES3Array saved_tc = ctx->array[OGLES3_MAX_VERTEX_ATTRIBS - 1];
+    struct OGLES3Program *saved_prog = ctx->program, *p;
+    struct OGLES3Texture *saved_tex;
+    struct OGLES3Draw *d;
     static const GLfloat pos[8] = {-1, -1, 1, -1, -1, 1, 1, 1};
     GLfloat uv[8];
     GLint saved_vp[4];
@@ -3194,7 +3194,7 @@ BOOL ogles2_draw_copy(struct OGLES2Context *ctx, struct OGLES2Texture *src, cons
     uv[0] = tc[0]; uv[1] = tc[1]; uv[2] = tc[2]; uv[3] = tc[1];
     uv[4] = tc[0]; uv[5] = tc[3]; uv[6] = tc[2]; uv[7] = tc[3];
     for (k = 0; k < 2; k++) {
-        struct OGLES2Array *a = &ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2 + k];
+        struct OGLES3Array *a = &ctx->array[OGLES3_MAX_VERTEX_ATTRIBS - 2 + k];
         a->enabled = GL_TRUE;
         a->size = 2;
         a->type = GL_FLOAT;
@@ -3229,8 +3229,8 @@ BOOL ogles2_draw_copy(struct OGLES2Context *ctx, struct OGLES2Texture *src, cons
     ogles2_texture_unit0(ctx, saved_tex);
     ctx->state = saved;
     ctx->state_ver++;
-    ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2] = saved_pos;
-    ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 1] = saved_tc;
+    ctx->array[OGLES3_MAX_VERTEX_ATTRIBS - 2] = saved_pos;
+    ctx->array[OGLES3_MAX_VERTEX_ATTRIBS - 1] = saved_tc;
     ctx->program = saved_prog;
     for (k = 0; k < 4; k++)
         ctx->viewport[k] = saved_vp[k];
@@ -3244,14 +3244,14 @@ BOOL ogles2_draw_copy(struct OGLES2Context *ctx, struct OGLES2Texture *src, cons
  * the built-in program, an identity matrix, the clear colour as a constant
  * attribute, z at the clear depth, and a state that writes exactly what
  * glClear writes. The application's state is restored afterwards. */
-void ogles2_draw_clear(struct OGLES2Context *ctx, GLbitfield mask, UBYTE rts, const GLfloat *color, GLfloat depth,
+void ogles2_draw_clear(struct OGLES3Context *ctx, GLbitfield mask, UBYTE rts, const GLfloat *color, GLfloat depth,
                        GLint stencil)
 {
     static const GLfloat identity[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-    struct OGLES2State saved = ctx->state, *s = &ctx->state;
-    struct OGLES2Array saved_pos = ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2];
-    struct OGLES2Program *saved_prog = ctx->program, *quad;
-    struct OGLES2Draw *d;
+    struct OGLES3State saved = ctx->state, *s = &ctx->state;
+    struct OGLES3Array saved_pos = ctx->array[OGLES3_MAX_VERTEX_ATTRIBS - 2];
+    struct OGLES3Program *saved_prog = ctx->program, *quad;
+    struct OGLES3Draw *d;
     GLint saved_vp[4];
     GLfloat pos[12], z;
     int k;
@@ -3277,11 +3277,11 @@ void ogles2_draw_clear(struct OGLES2Context *ctx, GLbitfield mask, UBYTE rts, co
             ogles2_cbuf_set(&d->quad, 0, (ULONG)k, float_bits(identity[k]));
     }
     quad = &d->quad;
-    quad->attrib_index[0] = OGLES2_MAX_VERTEX_ATTRIBS - 2;
-    quad->attrib_index[1] = OGLES2_MAX_VERTEX_ATTRIBS - 1;
+    quad->attrib_index[0] = OGLES3_MAX_VERTEX_ATTRIBS - 2;
+    quad->attrib_index[1] = OGLES3_MAX_VERTEX_ATTRIBS - 1;
     /* EXT_draw_buffers: GLES2 clears every draw buffer. */
     if (ctx->fb_nrt > 1 && (mask & GL_COLOR_BUFFER_BIT)) {
-        struct OGLES2Program *m = mrt_program(d);
+        struct OGLES3Program *m = mrt_program(d);
         if (m)
             quad = m;
     }
@@ -3297,32 +3297,32 @@ void ogles2_draw_clear(struct OGLES2Context *ctx, GLbitfield mask, UBYTE rts, co
     pos[0] = -1; pos[1] = -1;  pos[3] = 1; pos[4] = -1;
     pos[6] = -1; pos[7] = 1;   pos[9] = 1; pos[10] = 1;
     pos[2] = pos[5] = pos[8] = pos[11] = z;
-    ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2].enabled = GL_TRUE;
-    ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2].size = 3;
-    ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2].type = GL_FLOAT;
-    ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2].normalized = GL_FALSE;
-    ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2].stride = 0;
-    ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2].zero_stride = GL_FALSE;
-    ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2].integer = GL_FALSE;
-    ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2].pointer = pos;
-    ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2].buffer = 0;
-    ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2].divisor = 0;
-    ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 1].enabled = GL_FALSE;
+    ctx->array[OGLES3_MAX_VERTEX_ATTRIBS - 2].enabled = GL_TRUE;
+    ctx->array[OGLES3_MAX_VERTEX_ATTRIBS - 2].size = 3;
+    ctx->array[OGLES3_MAX_VERTEX_ATTRIBS - 2].type = GL_FLOAT;
+    ctx->array[OGLES3_MAX_VERTEX_ATTRIBS - 2].normalized = GL_FALSE;
+    ctx->array[OGLES3_MAX_VERTEX_ATTRIBS - 2].stride = 0;
+    ctx->array[OGLES3_MAX_VERTEX_ATTRIBS - 2].zero_stride = GL_FALSE;
+    ctx->array[OGLES3_MAX_VERTEX_ATTRIBS - 2].integer = GL_FALSE;
+    ctx->array[OGLES3_MAX_VERTEX_ATTRIBS - 2].pointer = pos;
+    ctx->array[OGLES3_MAX_VERTEX_ATTRIBS - 2].buffer = 0;
+    ctx->array[OGLES3_MAX_VERTEX_ATTRIBS - 2].divisor = 0;
+    ctx->array[OGLES3_MAX_VERTEX_ATTRIBS - 1].enabled = GL_FALSE;
     for (k = 0; k < 4; k++)
-        s->attrib[OGLES2_MAX_VERTEX_ATTRIBS - 1][k] = color[k];
+        s->attrib[OGLES3_MAX_VERTEX_ATTRIBS - 1][k] = color[k];
 
     /* The state: only the scissor test stays the application's (the
      * rectangle is filled whatever glPolygonMode says). */
-    s->caps &= OGLES2_CAP_SCISSOR_TEST;
+    s->caps &= OGLES3_CAP_SCISSOR_TEST;
     s->polygon_mode = GL_FILL;
     if (!(mask & GL_COLOR_BUFFER_BIT))
         s->color_mask[0] = s->color_mask[1] = s->color_mask[2] = s->color_mask[3] = GL_FALSE;
     if (mask & GL_DEPTH_BUFFER_BIT) {
-        s->caps |= OGLES2_CAP_DEPTH_TEST;
+        s->caps |= OGLES3_CAP_DEPTH_TEST;
         s->depth_func = GL_ALWAYS;
     }
     if (mask & GL_STENCIL_BUFFER_BIT) {
-        s->caps |= OGLES2_CAP_STENCIL_TEST;
+        s->caps |= OGLES3_CAP_STENCIL_TEST;
         for (k = 0; k < 2; k++) {
             s->stencil_func[k] = GL_ALWAYS;
             s->stencil_ref[k] = stencil & 0xff;
@@ -3349,7 +3349,7 @@ void ogles2_draw_clear(struct OGLES2Context *ctx, GLbitfield mask, UBYTE rts, co
 
     ctx->state = saved;
     ctx->state_ver++;
-    ctx->array[OGLES2_MAX_VERTEX_ATTRIBS - 2] = saved_pos;
+    ctx->array[OGLES3_MAX_VERTEX_ATTRIBS - 2] = saved_pos;
     ctx->program = saved_prog;
     for (k = 0; k < 4; k++)
         ctx->viewport[k] = saved_vp[k];

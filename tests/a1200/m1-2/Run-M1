@@ -9,7 +9,7 @@
 .ket }
 
 FailAt 21
-If NOT EXISTS libs/ogles2.library
+If NOT EXISTS libs/ogles3.library
   Echo "Please CD into the ogles2-m1-2 directory first,"
   Echo "then run:  Execute Run-M1"
   Quit 20
@@ -22,7 +22,7 @@ EndIf
 Echo "ogles2 M1 run 2, starting at step {FROM}" >>M1R2:results/00-progress.txt
 Date >>M1R2:results/00-progress.txt
 Assign LIBS: M1R2:libs ADD
-SetEnv OGLES2/LogFile M1R2:results/ogles2.log
+SetEnv OGLES3/LogFile M1R2:results/ogles2.log
 
 If NOT {FROM} GT 1 VAL
   Echo "Step 1 of 5: smoke test (no drawing)"
@@ -54,7 +54,7 @@ If NOT {FROM} GT 5 VAL
   Echo "step 5 done" >>M1R2:results/00-progress.txt
 EndIf
 
-UnSetEnv OGLES2/LogFile
+UnSetEnv OGLES3/LogFile
 Assign LIBS: M1R2:libs REMOVE
 If NOT EXISTS M1R2:results/notes.txt
   Copy M1R2:notes-template.txt M1R2:results/notes.txt

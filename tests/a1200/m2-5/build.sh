@@ -12,13 +12,13 @@ REPO=$(cd "$HERE/../../.." && pwd)
 BS=${BS:-$HOME/ogles2-build/m68k-sync}
 B=${B:-$HOME/ogles2-build/m68k}
 
-make -C "$REPO" -j8 B="$BS" EXTRA_CFLAGS=-DOGLES2_LOG_SYNC > /dev/null
+make -C "$REPO" -j8 B="$BS" EXTRA_CFLAGS=-DOGLES3_LOG_SYNC > /dev/null
 make -C "$REPO" -j8 B="$B" > /dev/null
 B="$B" bash "$REPO/tests/corpus/build_corpus.sh" > /dev/null 2>&1 || { echo "build_corpus.sh failed"; exit 1; }
 C=$B/corpus
 mkdir -p "$PKG/libs" "$PKG/bin" "$PKG/data"
-cp "$BS/ogles2.library" "$PKG/libs/"
-cp "$BS/cmd/OGLES2Log" "$PKG/bin/"
+cp "$BS/ogles3.library" "$PKG/libs/"
+cp "$BS/cmd/OGLES3Log" "$PKG/bin/"
 cp "$C"/v3dp/*.v3dp "$PKG/bin/"
 cp "$C"/data/*.tga "$PKG/data/"
 
@@ -54,7 +54,7 @@ cat <<'EOF'
 .ket }
 
 FailAt 21
-If NOT EXISTS libs/ogles2.library
+If NOT EXISTS libs/ogles3.library
   Echo "Please CD into the ogles2-m2-5 directory first,"
   Echo "then run:  Execute Run-M1"
   Quit 20
@@ -67,10 +67,10 @@ EndIf
 Echo "ogles2 M2 run 5, starting at step {FROM}" >>M2R5:results/00-progress.txt
 Date >>M2R5:results/00-progress.txt
 Assign LIBS: M2R5:libs ADD
-; Expunge libraries nobody has open: an ogles2.library left in memory by an
+; Expunge libraries nobody has open: an ogles3.library left in memory by an
 ; earlier run would otherwise be used instead of this package's.
 Avail FLUSH >NIL:
-SetEnv OGLES2/LogFile M2R5:results/ogles2.log
+SetEnv OGLES3/LogFile M2R5:results/ogles2.log
 SetEnv CORPUS_FRAMES 60
 ; The samples open their images from the current directory.
 CD M2R5:data
@@ -96,7 +96,7 @@ CD M2R5:
 UnSetEnv CORPUS_FRAMES
 UnSetEnv CORPUS_SHOT
 UnSetEnv CORPUS_OUT
-UnSetEnv OGLES2/LogFile
+UnSetEnv OGLES3/LogFile
 Assign LIBS: M2R5:libs REMOVE
 If NOT EXISTS M2R5:results/notes.txt
   Copy M2R5:notes-template.txt M2R5:results/notes.txt

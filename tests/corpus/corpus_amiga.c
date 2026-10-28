@@ -1,5 +1,5 @@
 /*
- * corpus.h's backend on the Amiga: ogles2.library, in the window it opens.
+ * corpus.h's backend on the Amiga: ogles3.library, in the window it opens.
  * Esc in that window, or Ctrl-C, ends a run early (a live run's only end).
  */
 #include <stdio.h>
@@ -9,7 +9,7 @@
 #include <proto/exec.h>
 #include <proto/dos.h>
 #include <proto/intuition.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include "corpus.h"
 
 struct IntuitionBase *IntuitionBase;
@@ -20,18 +20,18 @@ int corpus_backend_open(const char *title, int width, int height, int depth, int
 {
     ULONG err = 0;
     (void)title; /* the window ogles2 opens has no title */
-    if (!OGLES2Open()) {
-        printf("corpus: needs %s\n", OGLES2NAME);
+    if (!OGLES3Open()) {
+        printf("corpus: needs %s\n", OGLES3NAME);
         return 0;
     }
-    ctx = aglCreateContextTags2(&err, OGLES2_CCT_DEPTH, (ULONG)(depth ? 24 : 0),
-                                OGLES2_CCT_STENCIL, (ULONG)(stencil ? 8 : 0),
-                                OGLES2_CCT_PISTORM_WIDTH, (ULONG)width,
-                                OGLES2_CCT_PISTORM_HEIGHT, (ULONG)height,
-                                OGLES2_CCT_PISTORM_GET_WINDOW, (ULONG)&win, TAG_DONE);
+    ctx = aglCreateContextTags2(&err, OGLES3_CCT_DEPTH, (ULONG)(depth ? 24 : 0),
+                                OGLES3_CCT_STENCIL, (ULONG)(stencil ? 8 : 0),
+                                OGLES3_CCT_PISTORM_WIDTH, (ULONG)width,
+                                OGLES3_CCT_PISTORM_HEIGHT, (ULONG)height,
+                                OGLES3_CCT_PISTORM_GET_WINDOW, (ULONG)&win, TAG_DONE);
     if (!ctx) {
         printf("corpus: aglCreateContextTags2 failed (error %lu)\n", (unsigned long)err);
-        OGLES2Close();
+        OGLES3Close();
         return 0;
     }
     aglMakeCurrent(ctx);
@@ -73,5 +73,5 @@ void corpus_backend_close(void)
     if (IntuitionBase)
         CloseLibrary((struct Library *)IntuitionBase);
     IntuitionBase = 0;
-    OGLES2Close();
+    OGLES3Close();
 }

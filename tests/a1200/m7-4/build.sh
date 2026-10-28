@@ -11,10 +11,10 @@ REPO=$(cd "$HERE/../../.." && pwd)
 B=${B:-$HOME/ogles2-build/m68k-sync}
 V=${V:-$HOME/ogles2-build/v3dglslc}
 
-make -C "$REPO" -j8 B="$B" EXTRA_CFLAGS=-DOGLES2_LOG_SYNC > /dev/null
+make -C "$REPO" -j8 B="$B" EXTRA_CFLAGS=-DOGLES3_LOG_SYNC > /dev/null
 make -C "$REPO" B="$B" test-v3dp > /dev/null
 mkdir -p "$PKG/libs" "$PKG/compiler" "$PKG/bin"
-cp "$B/ogles2.library" "$PKG/libs/"
+cp "$B/ogles3.library" "$PKG/libs/"
 cp "$V/v3dglslc.stripped" "$PKG/compiler/v3dglslc" # in LIBS: for step 2 only (m7_mrt's program)
-cp "$B/tests/m7_mrt" "$B/tests/m1_draw" "$B/tests/m2_texture" "$B/tests/m5_fbo" "$B/cmd/OGLES2Log" "$PKG/bin/"
+cp "$B/tests/m7_mrt" "$B/tests/m1_draw" "$B/tests/m2_texture" "$B/tests/m5_fbo" "$B/cmd/OGLES3Log" "$PKG/bin/"
 cp "$B"/v3dp/*.v3dp "$B"/v3dp/*.v3dw "$PKG/bin/"

@@ -1,9 +1,9 @@
 /*
  * The triangle example's shaders. The release ships their compiled program
- * (<hash>.v3dp beside the example): ogles2.library finds a program's binary
+ * (<hash>.v3dp beside the example): ogles3.library finds a program's binary
  * by a hash of its exact source text, so a program runs without the shader
  * compiler installed. Change a byte here and the program needs the compiler
- * (LIBS:v3dglslc, or one beside the program) or a new binary.
+ * (LIBS:v3dglslc3, or one beside the program) or a new binary.
  */
 static const char triangle_vs[] =
     "attribute vec2 a_position;\n"

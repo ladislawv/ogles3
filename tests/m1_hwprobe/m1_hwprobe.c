@@ -1,7 +1,7 @@
 /*
  * M1 hardware probes (plan section 9, M1), each run once on the A1200 and
  * recorded in the plan. On a hidden 320x240 bitmap; each probe is switched
- * on through ENV:OGLES2/Probe for one context and compared with the normal
+ * on through ENV:OGLES3/Probe for one context and compared with the normal
  * path:
  *   F  does the attribute record's fixed type read GL 16.16 (plan 7.5)?
  *   Y  does Flip Y on the raster store and load mirror the picture (7.11)?
@@ -26,7 +26,7 @@
 #include <proto/graphics.h>
 #include <proto/cybergraphics.h>
 #include <proto/timer.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include "../common/smooth_shaders.h"
 
 struct GfxBase *GfxBase;
@@ -92,14 +92,14 @@ static void setprobe(const char *letters, ULONG addr)
 {
     char buf[16];
     if (letters)
-        SetVar((STRPTR) "OGLES2/Probe", (STRPTR)letters, -1, GVF_GLOBAL_ONLY);
+        SetVar((STRPTR) "OGLES3/Probe", (STRPTR)letters, -1, GVF_GLOBAL_ONLY);
     else
-        DeleteVar((STRPTR) "OGLES2/Probe", GVF_GLOBAL_ONLY);
+        DeleteVar((STRPTR) "OGLES3/Probe", GVF_GLOBAL_ONLY);
     if (addr) {
         sprintf(buf, "%08lx", (unsigned long)addr);
-        SetVar((STRPTR) "OGLES2/ProbeAddr", (STRPTR)buf, -1, GVF_GLOBAL_ONLY);
+        SetVar((STRPTR) "OGLES3/ProbeAddr", (STRPTR)buf, -1, GVF_GLOBAL_ONLY);
     } else {
-        DeleteVar((STRPTR) "OGLES2/ProbeAddr", GVF_GLOBAL_ONLY);
+        DeleteVar((STRPTR) "OGLES3/ProbeAddr", GVF_GLOBAL_ONLY);
     }
 }
 
@@ -110,7 +110,7 @@ static void *open_ctx(const char *letters, ULONG addr)
     void *ctx;
     GLuint vs, fs, prog;
     setprobe(letters, addr);
-    ctx = aglCreateContextTags2(&err, OGLES2_CCT_BITMAP, (ULONG)bm, TAG_DONE);
+    ctx = aglCreateContextTags2(&err, OGLES3_CCT_BITMAP, (ULONG)bm, TAG_DONE);
     setprobe(0, 0);
     if (!ctx) {
         printf("     cannot create a context (error %lu)\n", (unsigned long)err);
@@ -305,8 +305,8 @@ int main(int argc, char **argv)
     CyberGfxBase = OpenLibrary((STRPTR) "cybergraphics.library", 41);
     if (!GfxBase || !CyberGfxBase ||
         OpenDevice((STRPTR)TIMERNAME, UNIT_MICROHZ, (struct IORequest *)&timer_req, 0) ||
-        !OGLES2Open()) {
-        printf("needs graphics 39, cybergraphics 41, timer.device and %s\n", OGLES2NAME);
+        !OGLES3Open()) {
+        printf("needs graphics 39, cybergraphics 41, timer.device and %s\n", OGLES3NAME);
         return 20;
     }
     TimerBase = timer_req.tr_node.io_Device;
@@ -337,7 +337,7 @@ int main(int argc, char **argv)
     fflush(stdout);
     probe_semaphore(); /* last: if it hangs the GPU, the others are recorded */
     FreeBitMap(bm);
-    OGLES2Close();
+    OGLES3Close();
     CloseDevice((struct IORequest *)&timer_req);
     CloseLibrary(CyberGfxBase);
     CloseLibrary((struct Library *)GfxBase);

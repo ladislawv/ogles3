@@ -30,11 +30,11 @@ by line. To go on after the step that hung:   Execute Run-M1 FROM=<the next step
 Contents
 --------
 Run-M1               the test script
-libs/ogles2.library  the library (logs every line at once)
+libs/ogles3.library  the library (logs every line at once)
 libs/v3dglslc        the shader compiler (SDL writes its shaders at run time)
 bin/audiotest        plays a tone and checks the sound keeps going
 bin/screens          lists the open screens
 bin/testgles2, testsprite2, testrendercopyex, testdraw2   SDL's tests
-bin/OGLES2Log        writes the library's log file on request
+bin/OGLES3Log        writes the library's log file on request
 cache/               compiled shaders
 notes-template.txt   copied to results/notes.txt at the end

@@ -24,7 +24,7 @@
 #include <cybergraphx/cybergraphics.h>
 #include <proto/exec.h>
 #include <proto/graphics.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include <GLES3/gl31.h> /* ES 3.0 and, in ES 3.1 contexts, 3.1 */
 
 #ifndef GL_ETC1_RGB8_OES
@@ -3181,19 +3181,19 @@ int main(void)
     ULONG e = 0;
     printf("ogles2 M8: GLSL ES 3.00 programs drawn in an OpenGL ES 3.0 context\n");
     GfxBase = (struct GfxBase *)OpenLibrary((STRPTR) "graphics.library", 39);
-    if (!GfxBase || !OGLES2Open()) {
-        printf("needs graphics 39 and %s\n", OGLES2NAME);
+    if (!GfxBase || !OGLES3Open()) {
+        printf("needs graphics 39 and %s\n", OGLES3NAME);
         if (GfxBase)
             CloseLibrary((struct Library *)GfxBase);
         return 20;
     }
     bm = AllocBitMap(64, 64, 32, BMF_MINPLANES | BMF_SPECIALFMT | SHIFT_PIXFMT(PIXFMT_BGRA32), 0);
-    if (!bm || !(ctx = aglCreateContextTags2(&e, OGLES2_CCT_BITMAP, (ULONG)bm, OGLES2_CCT_PISTORM_ES_VERSION, 30,
+    if (!bm || !(ctx = aglCreateContextTags2(&e, OGLES3_CCT_BITMAP, (ULONG)bm, OGLES3_CCT_PISTORM_ES_VERSION, 30,
                                              TAG_DONE))) {
         printf("FAIL: no ES 3.0 context (error %lu): a library built with ES3=1 is needed\n", (unsigned long)e);
         if (bm)
             FreeBitMap(bm);
-        OGLES2Close();
+        OGLES3Close();
         CloseLibrary((struct Library *)GfxBase);
         return 20;
     }
@@ -3273,8 +3273,8 @@ int main(void)
     }
     check(glGetError() == GL_NO_ERROR, "no GL error left over");
     aglDestroyContext(ctx);
-    if ((ctx = aglCreateContextTags2(&e, OGLES2_CCT_BITMAP, (ULONG)bm, OGLES2_CCT_PISTORM_ES_VERSION, 30,
-                                     OGLES2_CCT_PISTORM_MSAA, 4, TAG_DONE))) {
+    if ((ctx = aglCreateContextTags2(&e, OGLES3_CCT_BITMAP, (ULONG)bm, OGLES3_CCT_PISTORM_ES_VERSION, 30,
+                                     OGLES3_CCT_PISTORM_MSAA, 4, TAG_DONE))) {
         aglMakeCurrent(ctx);
         glViewport(0, 0, 64, 64);
         test_wide_a2c();
@@ -3284,7 +3284,7 @@ int main(void)
         check(0, "a 4x MSAA ES 3.0 context");
     }
     FreeBitMap(bm);
-    OGLES2Close();
+    OGLES3Close();
     CloseLibrary((struct Library *)GfxBase);
     printf("%s: %d of %d\n", failures ? "FAILED" : "PASSED", checks - failures, checks);
     return failures ? 10 : 0;

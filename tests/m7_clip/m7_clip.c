@@ -28,7 +28,7 @@
 #include <cybergraphx/cybergraphics.h>
 #include <proto/exec.h>
 #include <proto/graphics.h>
-#include <proto/ogles2.h>
+#include <proto/ogles3.h>
 #include <GLES2/gl2ext.h>
 
 struct GfxBase *GfxBase;
@@ -247,18 +247,18 @@ int main(void)
     const char *ext;
     printf("ogles2 M7: EXT_clip_control, and the Z planes probe\n");
     GfxBase = (struct GfxBase *)OpenLibrary((STRPTR) "graphics.library", 39);
-    if (!GfxBase || !OGLES2Open()) {
-        printf("needs graphics 39 and %s\n", OGLES2NAME);
+    if (!GfxBase || !OGLES3Open()) {
+        printf("needs graphics 39 and %s\n", OGLES3NAME);
         return 20;
     }
     /* Every way out closes what was opened: a library left open cannot be
      * expunged, and the next build would not load until a reboot. */
     bm = AllocBitMap(N, N, 32, BMF_MINPLANES | BMF_SPECIALFMT | SHIFT_PIXFMT(PIXFMT_BGRA32), 0);
-    if (!bm || !(ctx = aglCreateContextTags2(&err, OGLES2_CCT_BITMAP, (ULONG)bm, OGLES2_CCT_DEPTH, 16, TAG_DONE))) {
+    if (!bm || !(ctx = aglCreateContextTags2(&err, OGLES3_CCT_BITMAP, (ULONG)bm, OGLES3_CCT_DEPTH, 16, TAG_DONE))) {
         printf("FAIL: no context (error %lu)\n", (unsigned long)err);
         if (bm)
             FreeBitMap(bm);
-        OGLES2Close();
+        OGLES3Close();
         CloseLibrary((struct Library *)GfxBase);
         return 20;
     }
@@ -269,7 +269,7 @@ int main(void)
         printf("FAIL: the program did not link\n");
         aglDestroyContext(ctx);
         FreeBitMap(bm);
-        OGLES2Close();
+        OGLES3Close();
         CloseLibrary((struct Library *)GfxBase);
         return 20;
     }
@@ -301,7 +301,7 @@ int main(void)
     glDeleteProgram(prog);
     aglDestroyContext(ctx);
     FreeBitMap(bm);
-    OGLES2Close();
+    OGLES3Close();
     CloseLibrary((struct Library *)GfxBase);
     if (failures)
         printf("FAILED: %d of %d checks passed\n", checks - failures, checks);
