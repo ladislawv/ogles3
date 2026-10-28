@@ -21,7 +21,7 @@
 
 /*
  * ALTERED SOURCE (ogles2, ports/sdl3): OpenGL ES 2.0 for the AmigaOS 3
- * video driver of SDL3_68k, on ogles2.library (PiStorm, V3D 4.2). Derived
+ * video driver of SDL3_68k, on ogles3.library (PiStorm, V3D 4.2). Derived
  * from AmigaOS 4's src/video/amigaos4/SDL_os4opengles2.c and its backend
  * choice (SDL_os4video.c), as ports/sdl2's for SDL2_68k: a window whose GL
  * profile is ES 2.x (SDL's GLES2 renderer asks for that) gets an ogles2
@@ -33,7 +33,7 @@
 #if SDL_VIDEO_DRIVER_AMIGAOS3 && defined(SDL_VIDEO_OPENGL_ES2)
 
 #include <proto/exec.h>
-#include <proto/ogles2.h> /* ogles2's libogles2.a: agl*, inline gl* */
+#include <proto/ogles3.h> /* ogles2's libogles3.a: agl*, inline gl* */
 
 #include "SDL_os3video.h"
 #include "SDL_os3window.h"
@@ -42,14 +42,14 @@
 #include "SDL_os3opengl.h"
 #endif
 
-/* libogles2.a (client/ogles2_open.c) */
-extern BOOL OGLES2Open(void);
-extern void OGLES2Close(void);
+/* libogles3.a (client/ogles3_open.c) */
+extern BOOL OGLES3Open(void);
+extern void OGLES3Close(void);
 
 static bool os3_gles2_open;
 static int os3_gles2_swap_interval;
 
-/* The profile SDL asks for: ES 2.x and 3.x go to ogles2.library. */
+/* The profile SDL asks for: ES 2.x and 3.x go to ogles3.library. */
 static bool OS3_GLES2_Wanted(SDL_VideoDevice *_this)
 {
     return _this->gl_config.profile_mask == SDL_GL_CONTEXT_PROFILE_ES &&
@@ -94,7 +94,7 @@ bool OS3_GL_LoadLibraryAny(SDL_VideoDevice *_this, const char *path)
     OS3_MiniGL_SetFunctions(_this);
     return OS3_GL_LoadLibrary(_this, path);
 #else
-    return SDL_SetError("AmigaOS3: only OpenGL ES 2.0 (ogles2.library) is available");
+    return SDL_SetError("AmigaOS3: only OpenGL ES 2.0 (ogles3.library) is available");
 #endif
 }
 
@@ -105,8 +105,8 @@ bool OS3_GLES2_LoadLibrary(SDL_VideoDevice *_this, const char *path)
     if (os3_gles2_open) {
         return true;
     }
-    if (!OGLES2Open()) {
-        return SDL_SetError("AmigaOS3: cannot open ogles2.library");
+    if (!OGLES3Open()) {
+        return SDL_SetError("AmigaOS3: cannot open ogles3.library");
     }
     os3_gles2_open = true;
     return true;
@@ -116,12 +116,12 @@ void OS3_GLES2_UnloadLibrary(SDL_VideoDevice *_this)
 {
     (void)_this;
     if (os3_gles2_open) {
-        OGLES2Close();
+        OGLES3Close();
         os3_gles2_open = false;
     }
 }
 
-/* GL functions without the context argument (libogles2.a's thunks), as
+/* GL functions without the context argument (libogles3.a's thunks), as
  * SDL's GLES2 renderer and programs call them. */
 SDL_FunctionPointer OS3_GLES2_GetProcAddress(SDL_VideoDevice *_this, const char *proc)
 {
@@ -132,7 +132,7 @@ SDL_FunctionPointer OS3_GLES2_GetProcAddress(SDL_VideoDevice *_this, const char 
     }
     func = aglGetProcAddress(proc);
     if (!func) {
-        SDL_SetError("AmigaOS3: ogles2.library has no '%s'", proc);
+        SDL_SetError("AmigaOS3: ogles3.library has no '%s'", proc);
     }
     return (SDL_FunctionPointer)func;
 }
@@ -153,8 +153,8 @@ SDL_GLContext OS3_GLES2_CreateContext(SDL_VideoDevice *_this, SDL_Window *window
     struct Window *w;
     ULONG err = 0;
     void *ctx;
-    /* OGLES2_CCT_PISTORM_ES_VERSION: 20, or 30 and 31 for ES 3.x (ogles2
-     * 2.0 on); 3.2 and later no ogles2.library offers. */
+    /* OGLES3_CCT_PISTORM_ES_VERSION: 20, or 30 and 31 for ES 3.x (ogles2
+     * 2.0 on); 3.2 and later no ogles3.library offers. */
     int major = _this->gl_config.major_version, minor = _this->gl_config.minor_version;
     ULONG version = major == 3 ? (ULONG)(30 + minor) : 20;
 
@@ -163,7 +163,7 @@ SDL_GLContext OS3_GLES2_CreateContext(SDL_VideoDevice *_this, SDL_Window *window
         return NULL;
     }
     if (major == 3 && minor > 1) {
-        SDL_SetError("AmigaOS3: ogles2.library has no OpenGL ES %d.%d contexts", major, minor);
+        SDL_SetError("AmigaOS3: ogles3.library has no OpenGL ES %d.%d contexts", major, minor);
         return NULL;
     }
     if (d->gl_context) {
@@ -182,28 +182,28 @@ SDL_GLContext OS3_GLES2_CreateContext(SDL_VideoDevice *_this, SDL_Window *window
      * (ogles2's window mode; a fullscreen SDL window is a borderless window
      * on its own screen). */
     ctx = aglCreateContextTags2(&err,
-                                OGLES2_CCT_WINDOW, (ULONG)w,
-                                OGLES2_CCT_VSYNC, (ULONG)os3_gles2_swap_interval,
-                                OGLES2_CCT_DEPTH, (ULONG)_this->gl_config.depth_size,
-                                OGLES2_CCT_STENCIL, (ULONG)_this->gl_config.stencil_size,
-                                OGLES2_CCT_PISTORM_ES_VERSION, version,
+                                OGLES3_CCT_WINDOW, (ULONG)w,
+                                OGLES3_CCT_VSYNC, (ULONG)os3_gles2_swap_interval,
+                                OGLES3_CCT_DEPTH, (ULONG)_this->gl_config.depth_size,
+                                OGLES3_CCT_STENCIL, (ULONG)_this->gl_config.stencil_size,
+                                OGLES3_CCT_PISTORM_ES_VERSION, version,
                                 TAG_DONE);
-    if (!ctx && err == OGLES2_CCE_UNSUPPORTED && major == 3) {
-        SDL_SetError("AmigaOS3: this ogles2.library has no OpenGL ES %d.%d contexts", major, minor);
+    if (!ctx && err == OGLES3_CCE_UNSUPPORTED && major == 3) {
+        SDL_SetError("AmigaOS3: this ogles3.library has no OpenGL ES %d.%d contexts", major, minor);
         return NULL;
     }
     if (!ctx) {
-        SDL_SetError("AmigaOS3: ogles2.library could not create a context (error %lu)", (unsigned long)err);
+        SDL_SetError("AmigaOS3: ogles3.library could not create a context (error %lu)", (unsigned long)err);
         return NULL;
     }
     aglMakeCurrent(ctx);
-    /* A library before 2.0 ignores the version tag: an ES 2.0 context. */
+    /* A library without ES 3 contexts gives an ES 2.0 one (ogles2.library 1.x ignores the tag). */
     if (major == 3) {
         const char *v = (const char *)glGetString(GL_VERSION);
         if (!v || SDL_strncmp(v, "OpenGL ES 3", 11) != 0) {
             aglMakeCurrent(NULL);
             aglDestroyContext(ctx);
-            SDL_SetError("AmigaOS3: ogles2.library before 2.0 has no OpenGL ES 3 contexts");
+            SDL_SetError("AmigaOS3: this library has no OpenGL ES 3 contexts");
             return NULL;
         }
     }
@@ -224,19 +224,19 @@ bool OS3_GLES2_MakeCurrent(SDL_VideoDevice *_this, SDL_Window *window, SDL_GLCon
 }
 
 /* The window resized: the context renders into it at its new size
- * (ogles2's aglSetParams2(OGLES2_CCT_WINDOW)); objects and state stay. The
+ * (ogles2's aglSetParams2(OGLES3_CCT_WINDOW)); objects and state stay. The
  * window code calls this through OS3_GL_ResizeWindow (SDL_os3opengl.c). */
 void OS3_GLES2_ResizeWindow(SDL_VideoDevice *_this, SDL_Window *window, int w, int h)
 {
     SDL_WindowData *d = window ? window->internal : NULL;
-    void *previous = OGLES2CurrentContext;
+    void *previous = OGLES3CurrentContext;
     (void)_this;
     if (!d || !d->gl_context || !d->syswin || w <= 0 || h <= 0) {
         return;
     }
     if (w != d->gl_width || h != d->gl_height) {
         aglMakeCurrent(d->gl_context);
-        aglSetParamsTags2(OGLES2_CCT_WINDOW, (ULONG)d->syswin, TAG_DONE);
+        aglSetParamsTags2(OGLES3_CCT_WINDOW, (ULONG)d->syswin, TAG_DONE);
         d->gl_width = w;
         d->gl_height = h;
         if (previous != (void *)d->gl_context) {
@@ -249,11 +249,11 @@ bool OS3_GLES2_SetSwapInterval(SDL_VideoDevice *_this, int interval)
 {
     (void)_this;
     if (interval != 0 && interval != 1) {
-        return SDL_SetError("AmigaOS3: ogles2.library supports swap interval 0 or 1 only");
+        return SDL_SetError("AmigaOS3: ogles3.library supports swap interval 0 or 1 only");
     }
     os3_gles2_swap_interval = interval;
-    if (OGLES2CurrentContext) {
-        aglSetParamsTags2(OGLES2_CCT_VSYNC, (ULONG)interval, TAG_DONE);
+    if (OGLES3CurrentContext) {
+        aglSetParamsTags2(OGLES3_CCT_VSYNC, (ULONG)interval, TAG_DONE);
     }
     return true;
 }
@@ -275,7 +275,7 @@ bool OS3_GLES2_SwapWindow(SDL_VideoDevice *_this, SDL_Window *window)
     }
     /* Host-owned windows resize outside SDL's IDCMP event loop. */
     OS3_GLES2_ResizeWindow(_this, window, inner_w(d->syswin), inner_h(d->syswin));
-    if (OGLES2CurrentContext != (void *)d->gl_context) {
+    if (OGLES3CurrentContext != (void *)d->gl_context) {
         aglMakeCurrent(d->gl_context);
     }
     /* ogles2 renders the frame and presents it (waiting for the vertical
@@ -300,7 +300,7 @@ bool OS3_GLES2_DestroyContext(SDL_VideoDevice *_this, SDL_GLContext context)
             break;
         }
     }
-    if (OGLES2CurrentContext == (void *)context) {
+    if (OGLES3CurrentContext == (void *)context) {
         aglMakeCurrent(NULL);
     }
     aglDestroyContext(context);

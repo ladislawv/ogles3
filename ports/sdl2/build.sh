@@ -1,7 +1,7 @@
 #!/bin/bash
-# Builds SDL2 for AmigaOS 3 (68k) with OpenGL ES 2.0 on ogles2.library:
+# Builds SDL2 for AmigaOS 3 (68k) with OpenGL ES 2.0 on ogles3.library:
 # $B/sdl2/libSDL2.a and libSDL2_test.a (clib2), and test programs in
-# $B/sdl2/tests. Run in WSL after `make` (it needs libogles2.a and the
+# $B/sdl2/tests. Run in WSL after `make` (it needs libogles3.a and the
 # generated headers):
 #   bash ports/sdl2/build.sh
 # The sources are not in this repository: Steffen Haeuser's SDL2_68k (the
@@ -12,7 +12,7 @@
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
 REPO=$(cd "$HERE/../.." && pwd)
-B=${B:-$HOME/ogles2-build/m68k}
+B=${B:-$HOME/ogles3-build/m68k}
 TC=${TC:-$HOME/amiga-gcc-install}
 SDL68K_SRC=${SDL68K_SRC:-$HOME/sdl2-msn}
 SDL68K_COMMIT=3632f48dc4d085355954322ae452ecc7b007ebc6 # 2026-10-06, SDL 2.33.0 (Aminet SDL_68k 2026-10-07)
@@ -22,7 +22,7 @@ PISTORM3D_SDK=${PISTORM3D_SDK:-/mnt/c/- CPP/pistorm3d/SDK}
 O=$B/sdl2
 export PATH="$TC/bin:$PATH" # the Makefiles call m68k-amigaos-gcc and vasmm68k_mot
 
-[ -f "$B/libogles2.a" ] && [ -f "$B/gen/include/proto/ogles2.h" ] || { echo "run make first (B=$B)"; exit 1; }
+[ -f "$B/libogles3.a" ] && [ -f "$B/gen/include/proto/ogles3.h" ] || { echo "run make first (B=$B)"; exit 1; }
 [ -f "$PISTORM3D_SDK/lib/libminigl.a" ] || { echo "no PiStorm3D SDK at $PISTORM3D_SDK"; exit 1; }
 if [ ! -d "$SDL68K_SRC/.git" ]; then
     git clone -q https://github.com/SteffenHaeuser/SDL2_68k.git "$SDL68K_SRC"
@@ -53,19 +53,19 @@ cp "$PISTORM3D_SDK/lib/libminigl.a" "$O/lib/"
 # clib2, the Makefile's own flags (68040, FPU), plus ogles2's optimiser passes
 # (-fbbb without "e", as the library's own Makefile).
 FBBB=-fbbb=abcfhilmnprsz0
-make -C "$L" -f Makefile -j8 OGLES2_CFLAGS="-I$O/inc -I$MGLINC $FBBB" >"$O/make.log" 2>&1 ||
+make -C "$L" -f Makefile -j8 OGLES3_CFLAGS="-I$O/inc -I$MGLINC $FBBB" >"$O/make.log" 2>&1 ||
     { grep -E "error|Error" "$O/make.log" | head -30; echo "sdl2: make failed ($O/make.log)"; exit 1; }
 cp "$L/build/clib2/libSDL2.a" "$L/build/clib2/libSDL2_test.a" "$O/"
 echo "$O/libSDL2.a: $(stat -c %s "$O/libSDL2.a") bytes"
 
 # Test programs: SDL2_68k's adapted upstream ones and upstream's GLES2 ones,
-# with its Amiga preamble; linked with libogles2.a (aglGetProcAddress) and
+# with its Amiga preamble; linked with libogles3.a (aglGetProcAddress) and
 # MiniGL's import library. -lm881: clib2's maths (-lm would be libnix's).
 BASE=(-std=gnu99 -O2 -m68040 -mcrt=clib2 -mhard-float $FBBB -w -D__AMIGAOS3__ "-I$L/include" "-I$O/inc" "-I$MGLINC"
       "-I$L/examples/upstream")
 CFLAGS=("${BASE[@]}" -include "$L/examples/upstream/amiga_test_preamble.h") # programs only (it defines __stack)
 LIBS=(-Wl,--wrap=SDL_RenderPresent -Wl,--wrap=SDL_GL_SwapWindow # run_for.c's frame-time check
-      -L"$O" -lSDL2_test -lSDL2 -L"$B" -logles2 -L"$O/lib" -lminigl -ldebug -lamiga -lm881 -lstubs)
+      -L"$O" -lSDL2_test -lSDL2 -L"$B" -logles3 -L"$O/lib" -lminigl -ldebug -lamiga -lm881 -lstubs)
 m68k-amigaos-gcc "${BASE[@]}" -c "$L/examples/upstream/testutils.c" -o "$O/testutils.o"
 # Each with tests/run_for.c's main: --seconds N quits it after N seconds of frames
 # (the test's main is test_main).
@@ -80,9 +80,9 @@ done
 # Ours for the fixes of patches/0002 (GitHub issue 5): audiotest (the audio
 # thread keeps playing), screens (Intuition's screens: no "SDL" one left
 # behind by a fullscreen program). Not linked with run_for.o's wrappers.
-m68k-amigaos-gcc "${CFLAGS[@]}" "$HERE/tests/audiotest.c" -L"$O" -lSDL2 -L"$B" -logles2 -L"$O/lib" -lminigl -ldebug -lamiga -lm881 -lstubs -o "$O/tests/audiotest"
+m68k-amigaos-gcc "${CFLAGS[@]}" "$HERE/tests/audiotest.c" -L"$O" -lSDL2 -L"$B" -logles3 -L"$O/lib" -lminigl -ldebug -lamiga -lm881 -lstubs -o "$O/tests/audiotest"
 # gles3test: OpenGL ES 3 contexts through SDL (GLES3 plan stage C item 6).
-m68k-amigaos-gcc "${CFLAGS[@]}" "$HERE/tests/gles3test.c" -L"$O" -lSDL2 -L"$B" -logles2 -L"$O/lib" -lminigl -ldebug -lamiga -lm881 -lstubs -o "$O/tests/gles3test"
+m68k-amigaos-gcc "${CFLAGS[@]}" "$HERE/tests/gles3test.c" -L"$O" -lSDL2 -L"$B" -logles3 -L"$O/lib" -lminigl -ldebug -lamiga -lm881 -lstubs -o "$O/tests/gles3test"
 m68k-amigaos-gcc -std=gnu99 -O2 -m68020 -mcrt=clib2 -Wall "$HERE/tests/screens.c" -o "$O/tests/screens"
 cp "$L/examples/upstream/icon.bmp" "$SDLUP_SRC/test/sample.bmp" "$O/tests/"
 ls -l "$O/tests"

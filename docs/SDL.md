@@ -1,8 +1,8 @@
-# SDL2 and SDL3 with ogles2.library
+# SDL2 and SDL3 with ogles3.library
 
 This project adds an OpenGL ES 2.0 backend to the 68k AmigaOS 3 versions of SDL2
 and SDL3. With it, SDL programs draw through the PiStorm's VideoCore GPU
-(ogles2.library) instead of the CPU or MiniGL.
+(ogles3.library) instead of the CPU or MiniGL.
 
 | | SDL2 | SDL3 |
 |---|---|---|
@@ -12,8 +12,8 @@ and SDL3. With it, SDL programs draw through the PiStorm's VideoCore GPU
 | Licence | zlib (as SDL) | zlib (as SDL) |
 
 Both are static link libraries built with clib2; there is no `SDL2.library`.
-They ship as a separate archive, `ogles2-1.3-sdl.lha` (or `.zip` for a PC), which unpacks
-over the ogles2 SDK archive: `SDK/SDL2/`, `SDK/SDL3/`, `SDK/MiniGL/` (PiStorm3D's MiniGL SDK,
+They ship as a separate archive, `ogles3-1.0-beta1-sdl.lha` (or `.zip` for a PC), which unpacks
+over the ogles3 SDK archive: `SDK/SDL2/`, `SDK/SDL3/`, `SDK/MiniGL/` (PiStorm3D's MiniGL SDK,
 which SDL links for its desktop-GL path), this guide as `SDK/doc/SDL.md`, and two examples
 (`SDK/examples-sdl/`: `sdl2_sprites`, the 2D renderer; `sdl3_gles2`, a program's own GLES2
 code; built in `Examples/SDL/`). Or build them from the source tree (below).
@@ -22,21 +22,21 @@ code; built in `Examples/SDL/`). Or build them from the source tree (below).
 
 1. **An ogles2 GL context backend** (`src/video/amigaos3/SDL_os3opengles2.c`,
    derived from AmigaOS 4's `SDL_os4opengles2.c`). A program that asks SDL for
-   an OpenGL ES 2.0 context gets one from ogles2.library on its SDL window:
+   an OpenGL ES 2.0 context gets one from ogles3.library on its SDL window:
    - `SDL_GL_CreateContext`, `SDL_GL_SwapWindow`, `SDL_GL_GetProcAddress` work
      as on other platforms;
-   - `SDL_GL_SetSwapInterval(1)` gives vsync (`OGLES2_CCT_VSYNC`), 0 turns it off;
+   - `SDL_GL_SetSwapInterval(1)` gives vsync (`OGLES3_CCT_VSYNC`), 0 turns it off;
    - depth and stencil sizes come from `SDL_GL_DEPTH_SIZE` and
      `SDL_GL_STENCIL_SIZE` (0 and 0 allocate none: cheaper for 2D);
    - resizing the window or toggling full screen keeps the context, its
-     textures, buffers and shaders (`aglSetParams2(OGLES2_CCT_WINDOW)`).
+     textures, buffers and shaders (`aglSetParams2(OGLES3_CCT_WINDOW)`).
 2. **SDL's GLES2 renderer** (`SDL_Renderer` named `"opengles2"`) built in. Programs
    that use only the 2D API (`SDL_CreateRenderer`, textures, `SDL_RenderCopy` /
    `SDL_RenderTexture`, lines, rectangles, rotation, blending) are drawn by the GPU
    with no GL code of their own.
 3. **The backend is chosen by profile**, as on AmigaOS 4: an ES 2.x request
    (`SDL_GL_CONTEXT_PROFILE_ES`, which the GLES2 renderer makes) goes to
-   ogles2.library; any other GL request still goes to minigl.library. Existing
+   ogles3.library; any other GL request still goes to minigl.library. Existing
    MiniGL programs behave as before.
 4. **Two fixes in SDL2_68k** that matter even without GLES2: a crash in the
    software renderer when built with bebbo GCC 6.5 (a library call nested in
@@ -66,8 +66,8 @@ code; built in `Examples/SDL/`). Or build them from the source tree (below).
   AmigaOS 4 or the web compiles here unchanged: the same `SDL_GL_*` calls, the
   same GLSL ES shaders. That includes SDL's `testgles2` and the GLES2 renderer
   itself, which were not modified for AmigaOS 3.
-- **Real shaders.** GLSL ES 1.00, framebuffer objects, float textures, 4x MSAA
-  and the extensions of ogles2.library 1.3, none of which MiniGL offers.
+- **Real shaders.** GLSL ES 1.00, 3.00 and 3.10, framebuffer objects, float textures,
+  4x MSAA and the extensions of ogles3.library 1.0, none of which MiniGL offers.
 - **Vsync without tearing**, in a window and full screen.
 - **Nothing lost.** Audio, input, timers, threads and MiniGL programs work as in
   the SDL_68k releases.
@@ -77,12 +77,12 @@ code; built in `Examples/SDL/`). Or build them from the source tree (below).
 - PiStorm with a Raspberry Pi 4B or CM4, Emu68, AmigaOS 3.x, an RTG system
   (Picasso96 or CyberGraphX), a 32-bit RTG screen (SDL's full screen also opens
   one).
-- `ogles2.library` and, for any program that compiles shaders at run time, the
-  compiler `v3dglslc`, installed in `LIBS:` (`Install-ogles2`) or in the
+- `ogles3.library` and, for any program that compiles shaders at run time, the
+  compiler `v3dglslc`, installed in `LIBS:` (`Install-ogles3`) or in the
   program's drawer (`PROGDIR:libs/` or `PROGDIR:`).
 - **SDL's GLES2 renderer writes its shaders at run time**, so 2D programs need
   the compiler too. The first run compiles each shader (about a second each);
-  the results go to `OGLES2Cache:` (or `T:`) and later runs load them. To ship
+  the results go to `OGLES3Cache:` (or `T:`) and later runs load them. To ship
   without the compiler, run the program once and ship the `.v3dp` and `.v3ds`
   files from the cache in a `shaders/` drawer beside the program (see `release/GettingStarted.txt`, the
   section on shaders).
@@ -93,7 +93,7 @@ code; built in `Examples/SDL/`). Or build them from the source tree (below).
 
 The SDL archive: `bash release/build_release.sh sdl` (with `dist`, also into `release/dist/`).
 The libraries alone, in WSL on the build machine, after `make` in the repository root (it
-builds `libogles2.a`):
+builds `libogles3.a`):
 
 ```sh
 bash ports/sdl2/build.sh    # -> $B/sdl2/libSDL2.a, $B/sdl2/tests/
@@ -118,8 +118,8 @@ SDL3 also: -fshort-wchar   (clib2's wchar_t is 2 bytes; SDL3 checks it)
 Link:
 
 ```
-SDL2: -lSDL2 -logles2 -lminigl -ldebug -lamiga -lm881 -lstubs
-SDL3: -lSDL3 -logles2 -lminigl -ldebug -lamiga -lm881 -latomic -lstubs
+SDL2: -lSDL2 -logles3 -lminigl -ldebug -lamiga -lm881 -lstubs
+SDL3: -lSDL3 -logles3 -lminigl -ldebug -lamiga -lm881 -latomic -lstubs
 ```
 
 Use `-lm881`, not `-lm`: with clib2, `-lm` links libnix's maths, which gives
@@ -129,7 +129,7 @@ pass `e` drops the rounding of float-to-integer conversions.
 Include paths: the ogles2 SDK's `include/`, `SDL2/include` or `SDL3/include`, and
 `MiniGL/minigl-shared-library/include` (SDL's `SDL_opengl.h` includes `<proto/minigl.h>`).
 
-You do not call `OGLES2Open()` yourself: SDL opens ogles2.library when it loads
+You do not call `OGLES3Open()` yourself: SDL opens ogles3.library when it loads
 the GL library and closes it on `SDL_Quit`.
 
 ### 2D with the GLES2 renderer (SDL2)
@@ -181,7 +181,7 @@ SDL_GLContext ctx = SDL_GL_CreateContext(win);
 SDL_GL_SetSwapInterval(1);                 /* vsync */
 
 /* GL functions: either call them directly (#include <GLES2/gl2.h>, linked
- * through -logles2), or look them up with SDL_GL_GetProcAddress("glDrawArrays"),
+ * through -logles3), or look them up with SDL_GL_GetProcAddress("glDrawArrays"),
  * as portable SDL code does. */
 while (running) {
     /* events, glClear, glDrawArrays ... */
@@ -190,7 +190,7 @@ while (running) {
 SDL_GL_DeleteContext(ctx);                 /* SDL3: SDL_GL_DestroyContext */
 ```
 
-The profile request is what selects ogles2.library. A program that does not set
+The profile request is what selects ogles3.library. A program that does not set
 `SDL_GL_CONTEXT_PROFILE_ES` and version 2 gets MiniGL.
 
 ## Things to know
@@ -202,8 +202,9 @@ The profile request is what selects ogles2.library. A program that does not set
   frame's CPU work with the GPU render.
 - **Shaders compile on the Amiga** the first time (about a second each, once).
   Ship the cache's `.v3dp` and `.v3ds` files in `shaders/` to start instantly.
-- **GLES2 only.** SDL's desktop-GL renderer and GLES3 code do not run on ogles2;
-  for desktop GL code use gl4es (`ports/gl4es`) on ogles2, or SDL's MiniGL path.
+- **OpenGL ES 2.0 to 3.1.** A program asks SDL for profile ES and version 2.0, 3.0 or
+  3.1 (3.0 and 3.1 give OpenGL ES 3.1; 3.2 is refused). SDL's desktop-GL renderer does
+  not run on ogles3; for desktop GL code use gl4es (`ports/gl4es`), or SDL's MiniGL path.
 - **Audio (SDL2):** SDL picks Paula (`audio.device`) first, then AHI. SDL2_68k
   reads no Amiga environment variable (its `SDL_getenv` is SDL's own table), so
   `SetEnv SDL_AUDIODRIVER ahi` does nothing: a program chooses AHI with

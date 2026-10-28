@@ -53,17 +53,17 @@ EndIf
 Avail FLUSH >NIL:
 Assign LIBS: M8R4:libs-es3 REMOVE
 
-; A release build: ES 3.0 contexts refused.
+; A release build (ogles3.library 1.0): ES 3.0 asked gives ES 3.1.
 Assign LIBS: M8R4:libs-release ADD
 Avail FLUSH >NIL:
 If NOT {FROM} GT 4 VAL
-  Echo "Step 4 of 5: SDL2 asks a release build for OpenGL ES 3.0, a second."
-  M8R4:bin/gles3test REFUSED >M8R4:results/4-sdl2-gles3test-refused.txt
+  Echo "Step 4 of 5: SDL2 asks a release build for OpenGL ES 3.0 (3.1 given), a second."
+  M8R4:bin/gles3test ES31 >M8R4:results/4-sdl2-gles3test-release.txt
   Echo "step 4 done" >>M8R4:results/00-progress.txt
 EndIf
 If NOT {FROM} GT 5 VAL
   Echo "Step 5 of 5: the same with SDL3, a second."
-  M8R4:bin3/gles3test REFUSED >M8R4:results/5-sdl3-gles3test-refused.txt
+  M8R4:bin3/gles3test ES31 >M8R4:results/5-sdl3-gles3test-release.txt
   Echo "step 5 done" >>M8R4:results/00-progress.txt
 EndIf
 Avail FLUSH >NIL:

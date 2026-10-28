@@ -30,8 +30,8 @@ index 349adfbf..3026389f 100644
           -I./include -I./src \
 -         -D__AMIGAOS3__ -DSDL_OS3_DEBUG
 +         -D__AMIGAOS3__
- # ogles2 (ports/sdl2): its headers (include/ and the generated proto/ogles2.h)
- CFLAGS += $(OGLES2_CFLAGS)
+ # ogles2 (ports/sdl2): its headers (include/ and the generated proto/ogles3.h)
+ CFLAGS += $(OGLES3_CFLAGS)
  
 diff --git a/libSDL2-amigaos3-main/src/audio/amigaos3/SDL_os3audio.c b/libSDL2-amigaos3-main/src/audio/amigaos3/SDL_os3audio.c
 index d924649c..04398daf 100644

@@ -1,7 +1,7 @@
 #!/bin/bash
-# Builds SDL3 for AmigaOS 3 (68k) with OpenGL ES 2.0 on ogles2.library:
+# Builds SDL3 for AmigaOS 3 (68k) with OpenGL ES 2.0 on ogles3.library:
 # $B/sdl3/libSDL3.a and libSDL3_test.a (clib2), and test programs in
-# $B/sdl3/tests. Run in WSL after `make` (it needs libogles2.a and the
+# $B/sdl3/tests. Run in WSL after `make` (it needs libogles3.a and the
 # generated headers):
 #   bash ports/sdl3/build.sh
 # The sources are not in this repository: Steffen Haeuser's SDL3_68k (the
@@ -11,7 +11,7 @@
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
 REPO=$(cd "$HERE/../.." && pwd)
-B=${B:-$HOME/ogles2-build/m68k}
+B=${B:-$HOME/ogles3-build/m68k}
 TC=${TC:-$HOME/amiga-gcc-install}
 SDL3_68K_SRC=${SDL3_68K_SRC:-$HOME/sdl3-msn}
 SDL3_68K_COMMIT=c82dea042718200eea401e7ed62d88b997bc9fd9 # 2026-10-06, SDL 3.4.14 (Aminet SDL_68k 2026-10-07)
@@ -19,7 +19,7 @@ PISTORM3D_SDK=${PISTORM3D_SDK:-/mnt/c/- CPP/pistorm3d/SDK}
 O=$B/sdl3
 export PATH="$TC/bin:$PATH" # the Makefile calls m68k-amigaos-gcc
 
-[ -f "$B/libogles2.a" ] && [ -f "$B/gen/include/proto/ogles2.h" ] || { echo "run make first (B=$B)"; exit 1; }
+[ -f "$B/libogles3.a" ] && [ -f "$B/gen/include/proto/ogles3.h" ] || { echo "run make first (B=$B)"; exit 1; }
 [ -f "$PISTORM3D_SDK/lib/libminigl.a" ] || { echo "no PiStorm3D SDK at $PISTORM3D_SDK"; exit 1; }
 if [ ! -d "$SDL3_68K_SRC/.git" ]; then
     git clone -q https://github.com/SteffenHaeuser/SDL3_68k.git "$SDL3_68K_SRC"
@@ -47,12 +47,12 @@ cp "$PISTORM3D_SDK/lib/libminigl.a" "$O/lib/"
 # plus ogles2's optimiser passes (-fbbb without "e", as the library's own
 # Makefile).
 FBBB=-fbbb=abcfhilmnprsz0
-make -C "$L" -f Makefile.amigaos3 -j8 clib2 OGLES2_CFLAGS="-I$O/inc -I$MGLINC $FBBB" >"$O/make.log" 2>&1 ||
+make -C "$L" -f Makefile.amigaos3 -j8 clib2 OGLES3_CFLAGS="-I$O/inc -I$MGLINC $FBBB" >"$O/make.log" 2>&1 ||
     { grep -E "error|Error" "$O/make.log" | head -30; echo "sdl3: make failed ($O/make.log)"; exit 1; }
 cp "$L/build/clib2/libSDL3.a" "$L/build/clib2/libSDL3_test.a" "$O/"
 echo "$O/libSDL3.a: $(stat -c %s "$O/libSDL3.a") bytes"
 
-# Test programs: SDL3's own (test/), linked with libogles2.a
+# Test programs: SDL3's own (test/), linked with libogles3.a
 # (aglGetProcAddress) and MiniGL's import library. -lm881: clib2's maths
 # (-lm would be libnix's).
 CFLAGS=(-std=gnu99 -O2 -m68040 -mcrt=clib2 -mhard-float -fshort-wchar $FBBB -w -D__AMIGAOS3__ -DNOIXEMUL
@@ -62,7 +62,7 @@ CFLAGS=(-std=gnu99 -O2 -m68040 -mcrt=clib2 -mhard-float -fshort-wchar $FBBB -w -
 # with SDL3's main callbacks through SDL_RunApp, wrapped; one with its own
 # main as test_main, from run_for's main().
 LIBS=(-Wl,--wrap=SDL_RenderPresent -Wl,--wrap=SDL_GL_SwapWindow
-      -L"$O" -lSDL3_test -lSDL3 -L"$B" -logles2 -L"$O/lib" -lminigl -ldebug -lamiga -lm881 -latomic -lstubs)
+      -L"$O" -lSDL3_test -lSDL3 -L"$B" -logles3 -L"$O/lib" -lminigl -ldebug -lamiga -lm881 -latomic -lstubs)
 m68k-amigaos-gcc "${CFLAGS[@]}" -c "$L/test/testutils.c" -o "$O/testutils.o"
 m68k-amigaos-gcc "${CFLAGS[@]}" -c "$HERE/tests/run_for.c" -o "$O/run_for_cb.o"
 m68k-amigaos-gcc "${CFLAGS[@]}" -DRUN_FOR_MAIN -c "$HERE/tests/run_for.c" -o "$O/run_for_main.o"
@@ -78,10 +78,10 @@ for t in testgles2 testsprite testrendercopyex testdraw; do
 done
 # Ours for patches/0002: atomictest (the audio thread and the application's
 # task contending for SDL's atomics and spinlocks while a tone plays).
-m68k-amigaos-gcc "${CFLAGS[@]}" "$HERE/tests/atomictest.c" -L"$O" -lSDL3 -L"$B" -logles2 -L"$O/lib" -lminigl \
+m68k-amigaos-gcc "${CFLAGS[@]}" "$HERE/tests/atomictest.c" -L"$O" -lSDL3 -L"$B" -logles3 -L"$O/lib" -lminigl \
     -ldebug -lamiga -lm881 -latomic -lstubs -o "$O/tests/atomictest"
 # gles3test: OpenGL ES 3 contexts through SDL (GLES3 plan stage C item 6).
-m68k-amigaos-gcc "${CFLAGS[@]}" "$HERE/tests/gles3test.c" -L"$O" -lSDL3 -L"$B" -logles2 -L"$O/lib" -lminigl \
+m68k-amigaos-gcc "${CFLAGS[@]}" "$HERE/tests/gles3test.c" -L"$O" -lSDL3 -L"$B" -logles3 -L"$O/lib" -lminigl \
     -ldebug -lamiga -lm881 -latomic -lstubs -o "$O/tests/gles3test"
 cp "$L/test/icon.png" "$L/test/sample.png" "$O/tests/"
 ls -l "$O/tests"

@@ -25,6 +25,7 @@ mkdir -p "$PKG/libs-es3" "$PKG/libs-release" "$PKG/bin" "$PKG/bin3"
 cp "$B3/ogles3.library" "$PKG/libs-es3/"
 cp "$V/v3dglslc.stripped" "$PKG/libs-es3/v3dglslc3"
 cp "$BS/ogles3.library" "$PKG/libs-release/"
+cp "$V/v3dglslc.stripped" "$PKG/libs-release/v3dglslc3" # ES 3.0 asked gives 3.1: its program compiles
 cp "$BS/cmd/OGLES3Log" "$PKG/bin/"
 cp "$B/sdl2/tests/gles3test" "$B/sdl2/tests/testgles2" "$PKG/bin/"
 cp "$B/sdl3/tests/gles3test" "$PKG/bin3/"

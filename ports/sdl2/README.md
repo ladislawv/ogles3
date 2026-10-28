@@ -1,10 +1,10 @@
-# SDL2 on AmigaOS 3 with OpenGL ES 2.0 (ogles2.library)
+# SDL2 on AmigaOS 3 with OpenGL ES 2.0 (ogles3.library)
 
 SDL2 for 68k AmigaOS 3 is Steffen Haeuser's
 [SDL2_68k](https://github.com/SteffenHaeuser/SDL2_68k) (the SDL2 of Aminet's
 `dev/lib/SDL_68k`, SDL 2.33.0): RTG and AGA, threads, timers, AHI and Paula
 audio, and OpenGL through minigl.library. This directory adds an OpenGL ES
-2.0 backend on ogles2.library to its video driver, and SDL's GLES2 renderer.
+2.0 backend on ogles3.library to its video driver, and SDL's GLES2 renderer.
 It is the plan's M6 item "SDL2 / SDL3: an ogles2 GL-context backend plus
 SDL's GLES2 renderer" (`docs/DEVELOPMENT_PLAN.md` §9, §13).
 
@@ -24,7 +24,7 @@ programs in `$B/sdl2/tests`. It needs PiStorm3D's SDK for the MiniGL backend
 headers) and SDL 2.30.3 from upstream for `testgles2` and `testrendercopyex`
 (`$SDLUP_SRC`, cloned if missing).
 
-A program links `-lSDL2 -logles2 -lminigl -ldebug -lamiga -lm881 -lstubs`
+A program links `-lSDL2 -logles3 -lminigl -ldebug -lamiga -lm881 -lstubs`
 (clib2; `-lm881`, not `-lm`, which would be libnix's maths).
 
 ## How it is put together
@@ -32,19 +32,19 @@ A program links `-lSDL2 -logles2 -lminigl -ldebug -lamiga -lm881 -lstubs`
 - **`src/video/amigaos3/SDL_os3opengles2.c`** (zlib, as SDL; derived from
   AmigaOS 4's `SDL_os4opengles2.c`): an ogles2 context on the SDL window's
   Intuition window (ogles2's window mode: an offscreen bitmap, then
-  `ClipBlit`), `SDL_GL_GetProcAddress` through libogles2.a's
+  `ClipBlit`), `SDL_GL_GetProcAddress` through libogles3.a's
   `aglGetProcAddress` (functions without the context argument, as SDL's
-  renderer calls them), swap interval 0 or 1 (`OGLES2_CCT_VSYNC`), and the
+  renderer calls them), swap interval 0 or 1 (`OGLES3_CCT_VSYNC`), and the
   window resized or replaced by a fullscreen toggle through
-  `aglSetParams2(OGLES2_CCT_WINDOW)`, which keeps the context's objects.
+  `aglSetParams2(OGLES3_CCT_WINDOW)`, which keeps the context's objects.
   No `glFinish` before the swap: ogles2 overlaps the next frame's CPU work
   with the render.
 - **The backend is chosen when SDL loads the GL library**, by the profile
   the program asks for, as AmigaOS 4's driver does: ES 2.x
   (`SDL_GL_CONTEXT_PROFILE_ES`, which SDL's GLES2 renderer sets) gets
-  ogles2.library; anything else gets minigl.library as before. ES 3.0 and
-  3.1 go to ogles2.library too, asked for with
-  `OGLES2_CCT_PISTORM_ES_VERSION`: a library without them (before 2.1, or
+  ogles3.library; anything else gets minigl.library as before. ES 3.0 and
+  3.1 go to ogles3.library too, asked for with
+  `OGLES3_CCT_PISTORM_ES_VERSION`: a library without them (before 2.1, or
   a build without ES 3 contexts) is refused with SDL's error, ES 3.2 and
   later always. `tests/gles3test.c` checks it (package `m8-4`).
 - **`patches/0001-gles2-on-ogles2.patch`**: the configuration

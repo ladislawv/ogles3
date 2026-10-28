@@ -1,8 +1,8 @@
-ogles2 (ports/sdl2): OpenGL ES 2.0 on ogles2.library for SDL2_68k.
+ogles2 (ports/sdl2): OpenGL ES 2.0 on ogles3.library for SDL2_68k.
 
 - The configuration enables SDL_VIDEO_OPENGL_ES2 and SDL's GLES2 renderer.
 - The video device's GL_LoadLibrary chooses the backend by the profile
-  asked for (as AmigaOS 4's driver): ES 2.x gets ogles2.library
+  asked for (as AmigaOS 4's driver): ES 2.x gets ogles3.library
   (SDL_os3opengles2.c, from ports/sdl2), anything else minigl.library.
 - The window data notes an ogles2 context (gl_es); MiniGL's resize and
   delete, which the window and event code call directly, hand those over.
@@ -14,7 +14,7 @@ ogles2 (ports/sdl2): OpenGL ES 2.0 on ogles2.library for SDL2_68k.
   AllocBitMap was called through CyberGfxBase: the software renderer
   crashed when a window is larger than its surface).
 - Both Makefiles build the new backend and the GLES2 renderer, with
-  $(OGLES2_CFLAGS) for ogles2's headers.
+  $(OGLES3_CFLAGS) for ogles2's headers.
 
 diff --git a/libSDL2-amigaos3-main/Makefile b/libSDL2-amigaos3-main/Makefile
 index d7ef54e1..349adfbf 100644
@@ -24,8 +24,8 @@ index d7ef54e1..349adfbf 100644
           -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare \
           -I./include -I./src \
           -D__AMIGAOS3__ -DSDL_OS3_DEBUG
-+# ogles2 (ports/sdl2): its headers (include/ and the generated proto/ogles2.h)
-+CFLAGS += $(OGLES2_CFLAGS)
++# ogles2 (ports/sdl2): its headers (include/ and the generated proto/ogles3.h)
++CFLAGS += $(OGLES3_CFLAGS)
  
  # --- SDL2 Core Source Files (platform-independent) ---
  # Enumerated from SDL2 CMakeLists.txt (SDL2 branch, commit f9e8203)
@@ -42,7 +42,7 @@ index d7ef54e1..349adfbf 100644
  	src/render/software/SDL_triangle.c
  
 -SRCS_RENDER = $(SRCS_RENDER_CORE) $(SRCS_RENDER_SW)
-+# ogles2 (ports/sdl2): SDL's GLES2 renderer on ogles2.library
++# ogles2 (ports/sdl2): SDL's GLES2 renderer on ogles3.library
 +SRCS_RENDER_GLES2 = \
 +	src/render/opengles2/SDL_render_gles2.c \
 +	src/render/opengles2/SDL_shaders_gles2.c
@@ -59,8 +59,8 @@ index 085f6b2f..c13cd4d2 100644
           -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare \
           -I./include -I./src \
           -D__AMIGAOS3__ -DSDL_OS3_DEBUG
-+# ogles2 (ports/sdl2): its headers (include/ and the generated proto/ogles2.h)
-+CFLAGS += $(OGLES2_CFLAGS)
++# ogles2 (ports/sdl2): its headers (include/ and the generated proto/ogles3.h)
++CFLAGS += $(OGLES3_CFLAGS)
  
  # --- SDL2 Core Source Files (platform-independent) ---
  # Enumerated from SDL2 CMakeLists.txt (SDL2 branch, commit f9e8203)
@@ -77,7 +77,7 @@ index 085f6b2f..c13cd4d2 100644
  	src/render/software/SDL_triangle.c
  
 -SRCS_RENDER = $(SRCS_RENDER_CORE) $(SRCS_RENDER_SW)
-+# ogles2 (ports/sdl2): SDL's GLES2 renderer on ogles2.library
++# ogles2 (ports/sdl2): SDL's GLES2 renderer on ogles3.library
 +SRCS_RENDER_GLES2 = \
 +	src/render/opengles2/SDL_render_gles2.c \
 +	src/render/opengles2/SDL_shaders_gles2.c
@@ -94,7 +94,7 @@ index 864ee533..87d41a7e 100644
  #if !defined(WARPUP)
  #if !defined(SDL_AMIGAOS3_SW_ONLY)
  #define SDL_VIDEO_OPENGL            1   /* minigl.library backend (68k) */
-+/* ogles2 (ports/sdl2): OpenGL ES 2.0 through ogles2.library for windows whose
++/* ogles2 (ports/sdl2): OpenGL ES 2.0 through ogles3.library for windows whose
 + * GL profile is ES 2.x, and SDL's GLES2 renderer on it (SDL_os3opengles2.c). */
 +#define SDL_VIDEO_OPENGL_ES2        1
 +#define SDL_VIDEO_RENDER_OGL_ES2    1
@@ -214,7 +214,7 @@ index dcbf5140..db126c4a 100644
      int            external_window; /* native Window and screen belong to caller */
      int            gl_width, gl_height; /* current MiniGL drawable size */
      void          *gl_context;    /* MiniGL context associated with this SDL window */
-+    int            gl_es;         /* ogles2: gl_context is an ogles2.library context */
++    int            gl_es;         /* ogles2: gl_context is an ogles3.library context */
      /* AGA palette shadow for dirty detection (used when CyberGfxBase == NULL) */
      SDL_Color      aga_palette[256];
      int            aga_palette_set; /* 0 = never synced */

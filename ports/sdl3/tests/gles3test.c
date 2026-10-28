@@ -5,7 +5,9 @@
  * from a library without ES 3.0 contexts, SDL's error; ES 3.2 is refused,
  * and ES 2.0 is as before. Prints PASS/FAIL lines; returns 0 when all
  * passed, 10 otherwise.
- *   gles3test [REFUSED]   REFUSED: ES 3.0 must be refused (a release build)
+ *   gles3test [REFUSED|ES31]   REFUSED: ES 3.0 must be refused (ogles2.library
+ *                              before 2.1); ES31: ES 3.0 asked gives 3.1
+ *                              (ogles3.library 1.0's release build)
  */
 #include <stdio.h>
 #include <string.h>
@@ -98,6 +100,8 @@ static int draws(void)
 int main(int argc, char **argv)
 {
     int refused = argc > 1 && !strcmp(argv[1], "REFUSED");
+    int es31 = argc > 1 && !strcmp(argv[1], "ES31");
+    const char *want = es31 ? "OpenGL ES 3.1" : "OpenGL ES 3.0";
     SDL_Window *w;
     SDL_GLContext c;
     const char *v;
@@ -120,7 +124,8 @@ int main(int argc, char **argv)
         v = c ? (const char *)((GetString)SDL_GL_GetProcAddress("glGetString"))(GL_VERSION) : 0;
         if (v)
             printf("     GL_VERSION %s\n", v);
-        check(v && !strncmp(v, "OpenGL ES 3.0", 13), "ES 3.0: a context of that version");
+        check(v && !strncmp(v, want, 13), es31 ? "ES 3.0 asked: an ES 3.1 context (the highest)"
+                                               : "ES 3.0: a context of that version");
         check(c && draws(), "ES 3.0: a GLSL ES 3.00 program draws");
         SDL_GL_SwapWindow(w);
     }

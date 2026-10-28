@@ -1,5 +1,5 @@
 /*
-  SDL2 OpenGL ES 2.0 backend -- AmigaOS 3.x ogles2.library (ogles2, ports/sdl2).
+  SDL2 OpenGL ES 2.0 backend -- AmigaOS 3.x ogles3.library (ogles2, ports/sdl2).
   zlib licence, as SDL; see SDL_os3opengles2.c.
 */
 #ifndef SDL_os3opengles2_h_

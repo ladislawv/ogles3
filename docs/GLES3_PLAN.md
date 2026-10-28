@@ -23,8 +23,14 @@ releases. Skipped for the beta (the developer's call): the whole
 dEQP-GLES2, -GLES3 and -GLES31 runs, the GLES2 regression set and the
 speed against 1.x. `release/build_release.sh` builds
 `ogles3-1.0-beta1.lha`, `-sdk.lha` and `-sdk.zip` (into
-`~/ogles3-build/release`; no SDL archive yet: the SDL ports still build
-against the ogles2 names). On the A1200 from the release tree (the
+`~/ogles3-build/release`) and, with `sdl`, `ogles3-1.0-beta1-sdl.lha` and
+`.zip`: SDL2 and SDL3 moved to the ogles3 names (ports/sdl2, ports/sdl3:
+their files and patches; `gles3test ES31`: ES 3.0 asked of the release
+gives 3.1). `m8-4` on the A1200: both SDLs' ES 3.0 contexts (the ES3=1
+build) and the release's ES 3.1 draw their GLSL ES 3.00 programs, ES 3.2
+refused, ES 2.0 as before, `testgles2` 500 fps; the SDL archive's
+`sdl2_sprites` (47.9 fps) and `sdl3_gles2` run and quit by their close
+gadgets. gl4es, Quake III and glmark2 still use the ogles2 names. On the A1200 from the release tree (the
 library in `Examples/libs/`, no compiler): the four examples run in ES 3.1
 contexts from their shipped binaries; `boingocean` 54.8 fps in its
 window, `boing2026` 49.7 fps at 640x480 (1.3.2's ReadMe: about 53; the Pi
