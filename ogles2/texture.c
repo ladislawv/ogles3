@@ -104,6 +104,12 @@ struct OGLES2Texture
     /* ES 3.0's texture swizzle (GL_TEXTURE_SWIZZLE_R..A: GL_RED..GL_ALPHA,
      * GL_ZERO, GL_ONE), composed with the format's own (swizzle above). */
     GLenum gl_swizzle[4];
+    /* ES 3.1's glTexStorage2DMultisample: 0 none, else 4 (any count of 1 to
+     * 4: Mesa's st asks 2 for 1 where there is real MSAA, and V3D stores 4);
+     * every sample kept, a pixel a 2x2 square of them, so its level is
+     * twice the size GL gives (MS_SHIFT). */
+    UBYTE samples;
+    GLboolean fixed_samples;
     GLenum ds_mode;                 /* ES 3.1's GL_DEPTH_STENCIL_TEXTURE_MODE: GL_DEPTH_COMPONENT or
                                      * GL_STENCIL_INDEX (stencil texturing, stage D item 4) */
     ULONG st_sver;                  /* the records' sampler object's version (0: none) */
@@ -129,6 +135,9 @@ struct OGLES2Texture
 
 /* Both records fit their halves of rec. */
 typedef char ogles2_rec_fits[sizeof(v3d_texture_shader_state) <= 32 && sizeof(v3d_sampler_state) <= 32 ? 1 : -1];
+
+/* A 4x multisample texture's level is twice its size: what GL sees, shifted. */
+#define MS_SHIFT(t) ((t)->samples == 4 ? 1 : 0)
 
 /* ---- the context's texture state ---- */
 
@@ -780,7 +789,8 @@ static struct OGLES2Texture *unit_texture(struct OGLES2TexState *ts, int kind, i
     return kind == OGLES2_TEX_CUBE    ? ts->unitcube[unit]
          : kind == OGLES2_TEX_RECT    ? ts->unitrect[unit]
          : kind == OGLES2_TEX_3D      ? ts->unit3d[unit]
-         : kind == OGLES2_TEX_ARRAY   ? ts->unitarray[unit] : ts->unit2d[unit];
+         : kind == OGLES2_TEX_ARRAY   ? ts->unitarray[unit]
+         : kind == OGLES2_TEX_2DMS    ? ts->unit2dms[unit] : ts->unit2d[unit];
 }
 
 /* The largest anisotropy (the sampler's 2, 4, 8 or 16) and LOD bias (its
@@ -1180,13 +1190,13 @@ static BOOL level_param(struct OGLES2Context *ctx, GLenum target, GLint level, G
                     lf = &level_fmts[n];
     }
     switch (pname) {
-    case GL_TEXTURE_WIDTH:  *v = defined ? (GLint)f->w[level] : 0; break;
-    case GL_TEXTURE_HEIGHT: *v = defined ? (GLint)f->h[level] : 0; break;
+    case GL_TEXTURE_WIDTH:  *v = defined ? (GLint)f->w[level] >> MS_SHIFT(t) : 0; break;
+    case GL_TEXTURE_HEIGHT: *v = defined ? (GLint)f->h[level] >> MS_SHIFT(t) : 0; break;
     case GL_TEXTURE_DEPTH:
         *v = !defined ? 0 : (bind == GL_TEXTURE_3D || bind == GL_TEXTURE_2D_ARRAY) ? (GLint)t->d[level] : 1;
         break;
-    case GL_TEXTURE_SAMPLES: *v = 0; break;                /* multisample storage: stage D item 4 */
-    case GL_TEXTURE_FIXED_SAMPLE_LOCATIONS: *v = GL_TRUE; break;
+    case GL_TEXTURE_SAMPLES: *v = defined ? t->samples : 0; break;
+    case GL_TEXTURE_FIXED_SAMPLE_LOCATIONS: *v = defined && t->samples ? t->fixed_samples : GL_TRUE; break;
     case GL_TEXTURE_INTERNAL_FORMAT: *v = defined ? (GLint)ifmt : GL_RGBA; break;
     case GL_TEXTURE_RED_SIZE:     *v = lf ? lf->r : 0; break;
     case GL_TEXTURE_GREEN_SIZE:   *v = lf ? lf->g : 0; break;
@@ -3108,8 +3118,8 @@ BOOL ogles2_texture_image(const struct OGLES2Texture *t, int k, int l, UWORD *w,
     if (k < 0 || k >= t->nf || l < 0 || l >= MAX_LEVELS || !(t->f[k].defined & (1UL << l)))
         return FALSE; /* faces: a cube map's, a 2D array's layers, a 3D texture's slices */
     f = &t->f[k];
-    *w = f->w[l];
-    *h = f->h[l];
+    *w = (UWORD)(f->w[l] >> MS_SHIFT(t)); /* a multisample texture's: its size as GL gives it */
+    *h = (UWORD)(f->h[l] >> MS_SHIFT(t));
     *format = f->format[l];
     *type = f->type[l];
     return TRUE;
@@ -3325,7 +3335,8 @@ BOOL ogles2_texture_depth(const struct OGLES2Texture *t, int l, UBYTE *bits, BOO
 {
     const struct OGLES2Face *f = &t->f[0];
     int c;
-    if (t->target != GL_TEXTURE_2D || l < 0 || l >= MAX_LEVELS || !(f->defined & (1UL << l)))
+    if ((t->target != GL_TEXTURE_2D && t->target != GL_TEXTURE_2D_MULTISAMPLE) || l < 0 || l >= MAX_LEVELS ||
+        !(f->defined & (1UL << l)))
         return FALSE;
     c = level_class(f, l);
     if (c != CLASS_DEPTH16 && c != CLASS_DEPTH24)
@@ -3401,6 +3412,14 @@ BOOL ogles2_texture_s8_surface(struct OGLES2Context *ctx, struct OGLES2Texture *
     return TRUE;
 }
 
+/* ES 3.1's stencil texturing: a depth and stencil texture sampled with
+ * GL_DEPTH_STENCIL_TEXTURE_MODE GL_STENCIL_INDEX reads its stencil indices
+ * as unsigned integers (s, 0, 0, 1), nearest. */
+static BOOL stencil_sampled(const struct OGLES2Texture *t)
+{
+    return t->ds_mode == GL_STENCIL_INDEX && t->f[0].format[0] == GL_DEPTH_STENCIL_OES;
+}
+
 /* draw.c: unit `unit`'s texture of that kind returns 32 bits (by its level
  * 0's format; an incomplete one samples the RGBA8 fallback, which the
  * 32-bit variants read correctly too). */
@@ -3414,6 +3433,8 @@ BOOL ogles2_texture_wide(struct OGLES2Context *ctx, int unit, int kind)
     t = unit_texture(ts, kind, unit);
     /* A depth comparison returns 16 bits (Mesa's v3d_get_tex_return_size). */
     if ((ts->unitsmp[unit] ? &ts->unitsmp[unit]->s : &t->s)->compare_mode == GL_COMPARE_REF_TO_TEXTURE)
+        return FALSE;
+    if (stencil_sampled(t)) /* 8-bit integers (Mesa's S8X24_UINT: 16-bit returns) */
         return FALSE;
     b = chain_base(t); /* its view's level 0 */
     return (t->f[0].defined & (1UL << b)) && level_wide(&t->f[0], b);
@@ -4486,6 +4507,77 @@ void ogles2_glTexStorage3D(struct OGLES2Context *ctx, GLenum target, GLsizei lev
     tex_storage(ctx, target, levels, internalformat, width, height, depth);
 }
 
+/* ES 3.1 8.8: a multisample texture (GL_TEXTURE_2D_MULTISAMPLE), errors in
+ * Mesa's order (teximage.c's texture_image_multisample): 1 to 4 samples
+ * give 4 (Mesa's st_texture_storage asks 2 for 1, V3D has 4 only); the storage
+ * holds every sample (MS_SHIFT), sampled by texelFetch at sample i (the
+ * compiler's lowering reads the 2x2 square) and rendered into by a 4x job
+ * that stores them all (fbo.c). Sampler state is none: nearest. */
+void ogles2_glTexStorage2DMultisample(struct OGLES2Context *ctx, GLenum target, GLsizei samples,
+                                      GLenum internalformat, GLsizei width, GLsizei height,
+                                      GLboolean fixedsamplelocations)
+{
+    struct OGLES2TexState *ts;
+    struct OGLES2Texture *t;
+    GLenum format, type;
+    BOOL none;
+    UBYTE *img;
+    int s, sw, sh;
+    if (!ogles2_es31_entry(ctx) || !(ts = ts_get(ctx)))
+        return;
+    if (target != GL_TEXTURE_2D_MULTISAMPLE) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    if (samples < 1) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    if (!sized_storage(internalformat, &format, &type) || !ogles2_fbo_renderable_format(ctx, internalformat, &none)) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    if (samples > 4 || none) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
+    if (width < 1 || height < 1 || width > MAX_SIZE || height > MAX_SIZE) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    if (!(t = bound(ctx, ts, target)))
+        return;
+    if (!t->name || t->immutable_levels) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
+    s = 4;
+    sw = 2 * width;
+    sh = 2 * height;
+    before_change(ctx, ts, t);
+    free_levels(t);
+    if (!(img = AllocVec((ULONG)sw * sh * copy_bytes(class_of(format, type)), MEMF_ANY | MEMF_CLEAR))) {
+        ogles2_error(ctx, GL_OUT_OF_MEMORY);
+        return;
+    }
+    put_level(&t->f[0], 0, img, sw, sh, format, type, FALSE, keep_sized(internalformat), TRUE, internalformat);
+    if (class_of(format, type) != CLASS_RGBA8)
+        ogles2_wide_seen |= wide_class(format, type);
+    t->samples = (UBYTE)s;
+    t->fixed_samples = fixedsamplelocations ? GL_TRUE : GL_FALSE;
+    t->s.min_filter = t->s.mag_filter = GL_NEAREST;
+    t->immutable_levels = 1;
+    t->es3_rules = TRUE;
+    t->pver++;
+}
+
+UBYTE ogles2_texture_samples(const struct OGLES2Texture *t, GLboolean *fixed)
+{
+    if (fixed)
+        *fixed = t->samples ? t->fixed_samples : GL_TRUE;
+    return t->samples;
+}
+
 /* ES 3.0's compressed 2D arrays (3.8.6): ETC2/EAC (and S3TC) layers, each
  * kept as its blocks; a 3D texture is GL_INVALID_OPERATION. */
 void ogles2_glCompressedTexImage3D(struct OGLES2Context *ctx, GLenum target, GLint level, GLenum internalformat,
@@ -5382,6 +5474,7 @@ ULONG ogles2_texture_size(struct OGLES2Context *ctx, int unit, int kind, int wha
     s = what == 3 ? t->d[0] : what == 2 ? t->d[0] : what ? t->f[0].h[0] : t->f[0].w[0];
     if (!s || what == 3)
         return s;
+    s >>= MS_SHIFT(t);
     s = t->base_level > 0 && t->base_level < 32 ? s >> t->base_level : s;
     return s ? s : 1;
 }
@@ -5674,6 +5767,7 @@ static struct OGLES2Texture *based_view(struct OGLES2Context *ctx, struct OGLES2
     v->s = t->s;
     v->lod_bias = t->lod_bias;
     memcpy(v->gl_swizzle, t->gl_swizzle, sizeof(v->gl_swizzle));
+    v->ds_mode = t->ds_mode;
     v->base_level = 0;
     v->max_level = t->max_level - b;
     v->pver = t->pver;
@@ -5698,7 +5792,7 @@ BOOL ogles2_texture_state(struct OGLES2Context *ctx, int unit, int kind, ULONG *
     UBYTE *swivel24, temp;
     UWORD *swivel16;
     int first = 0, last = 0;
-    BOOL own;
+    BOOL own, stencil, s8_uif = FALSE;
     struct OGLES2Sampler *so;
     const struct OGLES2SamplerParams *sp;
     ULONG sver;
@@ -5780,26 +5874,53 @@ BOOL ogles2_texture_state(struct OGLES2Context *ctx, int unit, int kind, ULONG *
     tsr->image_depth_hi = (ULONG)faces(t) >> 10;
     tsr->array_stride_64_byte_aligned = faces(t) > 1 ? t->face_stride / 64 : 0;
     tsr->texture_type = t->hw_type;
+    stencil = stencil_sampled(t);
+    if (stencil && t->f[0].type[0] != GL_FLOAT_32_UNSIGNED_INT_24_8_REV) {
+        /* D24S8's word as RGBA8UI: its low byte the stencil (Mesa's
+         * S8X24_UINT view) */
+        tsr->texture_type = V3D_TEXTURE_DATA_FORMAT_RGBA8UI;
+    } else if (stencil) {
+        /* DEPTH32F_STENCIL8: its S8 image of the base level, R8UI (Mesa's
+         * separate stencil), as a texture of one level */
+        struct OGLES2Surface s8;
+        if (ogles2_texture_s8_surface(ctx, t, first, &s8)) {
+            tsr->texture_base_pointer_rshift_6 = s8.addr >> 6;
+            tsr->base_level = tsr->max_level = 0;
+            tsr->image_width_lo = t->f[0].w[first] & 0x3f;
+            tsr->image_width_hi = t->f[0].w[first] >> 6;
+            tsr->image_height = t->f[0].h[first];
+            tsr->image_depth_lo = 1;
+            tsr->image_depth_hi = 0;
+            tsr->array_stride_64_byte_aligned = 0;
+            tsr->texture_type = V3D_TEXTURE_DATA_FORMAT_R8UI;
+            s8_uif = TRUE;
+        }
+    }
     /* ES 3.0's sRGB formats: RGBA8 the TMU decodes (Mesa: util_format_is_srgb) */
     tsr->srgb = t->f[0].sized[0] == GL_SRGB8 || t->f[0].sized[0] == GL_SRGB8_ALPHA8 || srgb_etc2(t->f[0].format[0]);
     /* The GL swizzle composed with the format's (Mesa's
      * util_format_compose_swizzles): component k reads the format's channel
      * the GL swizzle names, or zero or one. */
     {
+        static const UBYTE stencil_sw[4] = { v3d_SWIZZLE_RED, v3d_SWIZZLE_ZERO, v3d_SWIZZLE_ZERO, v3d_SWIZZLE_ONE };
+        const UBYTE *fsw = stencil ? stencil_sw : t->swizzle;
         UBYTE sw[4];
         int k;
         for (k = 0; k < 4; k++)
             sw[k] = t->gl_swizzle[k] == GL_ZERO ? v3d_SWIZZLE_ZERO
                   : t->gl_swizzle[k] == GL_ONE ? v3d_SWIZZLE_ONE
-                  : t->gl_swizzle[k] == GL_GREEN ? t->swizzle[1]
-                  : t->gl_swizzle[k] == GL_BLUE ? t->swizzle[2]
-                  : t->gl_swizzle[k] == GL_ALPHA ? t->swizzle[3] : t->swizzle[0];
+                  : t->gl_swizzle[k] == GL_GREEN ? fsw[1]
+                  : t->gl_swizzle[k] == GL_BLUE ? fsw[2]
+                  : t->gl_swizzle[k] == GL_ALPHA ? fsw[3] : fsw[0];
         tsr->swizzle_r = sw[0];
         tsr->swizzle_g = sw[1];
         tsr->swizzle_b = sw[2];
         tsr->swizzle_a = sw[3];
     }
-    if (g->tiling_format == V3D_MEMORY_FORMAT_UIF_XOR) {
+    if (s8_uif) { /* the S8 image: UIF without XOR, no padding (ogles2_fbo_zs_alloc) */
+        tsr->level_0_is_strictly_uif = TRUE;
+        tsr->extended = TRUE;
+    } else if (g->tiling_format == V3D_MEMORY_FORMAT_UIF_XOR) {
         tsr->level_0_is_strictly_uif = TRUE;
         tsr->level_0_xor_enable = TRUE;
         tsr->level_0_ubpad = g->ub_pad;
@@ -5825,7 +5946,9 @@ BOOL ogles2_texture_state(struct OGLES2Context *ctx, int unit, int kind, ULONG *
                              sp->min_filter != GL_LINEAR_MIPMAP_LINEAR;
     /* 32-bit floats and depth: the TMU does not filter them, but for a
      * depth comparison (ES 3.0 3.8.13: a shadow sampler filters as set). */
-    if (unfilterable_type(t->hw_type) && sp->compare_mode != GL_COMPARE_REF_TO_TEXTURE &&
+    if (stencil) /* integers: nearest (ES 3.1 8.17 makes a stencil texture filtered otherwise incomplete) */
+        ss->mag_filter_nearest = ss->min_filter_nearest = ss->mip_filter_nearest = TRUE;
+    else if (unfilterable_type(t->hw_type) && sp->compare_mode != GL_COMPARE_REF_TO_TEXTURE &&
         !(ss->mag_filter_nearest && ss->min_filter_nearest && ss->mip_filter_nearest)) {
         ss->mag_filter_nearest = ss->min_filter_nearest = ss->mip_filter_nearest = TRUE;
         if (!t->warned_filter) {

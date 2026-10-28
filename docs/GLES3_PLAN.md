@@ -245,9 +245,11 @@ Mesa's driver, so they could follow later as an extension
       (3) dropped (the update above); (4) stage C items 2 and 6 (done
       2026-10-27), then stage D, each with the dEQP groups of its own
       features (under way: §7's "Compute" and "Then" notes; items 1, 2 (4
-      `image_load_store` cases open) and 3 done, the A1200 restarts in
-      `draw_indirect.draw_arrays_indirect` parked; next items 4, 5, the
-      rest of 6, dEQP's `ssbo` and `program_interface_query`); (5) stage
+      `image_load_store` cases open), 3 and 4 (D32F_S8's uploaded stencil
+      open) done, the A1200 restarts in `draw_indirect.draw_arrays_indirect`
+      parked; next item 5's separate shader objects, the rest of 6
+      (framebuffers without attachments first), dEQP's `ssbo` and
+      `program_interface_query`); (5) stage
       B's end without dEQP-GLES2 and the whole dEQP-GLES3 run at the end.
     - **Open points:** the `derivate.dfdx.texture.basic.float_mediump`
       failure seen once (12 pixels); a program's default variants can
@@ -2845,6 +2847,40 @@ stopped.
    0 (on the CPU, `blit.c`). `GL_SAMPLE_MASK_VALUE`'s 64-bit query is the
    mask as a signed int, as Mesa's. dEQP-GLES31 `state_query.texture_level`:
    all but the 2D multisample target's.
+   **Done (2026-10-28), but D32F_S8's uploaded stencil:**
+   - **Multisample textures.** `glTexStorage2DMultisample` (Mesa's error order;
+     1 to 4 samples give 4: Mesa's st asks 2 for 1 where there is real MSAA,
+     and the compiler's `texelFetch` lowering assumes 4x; formats as
+     `glGetInternalformativ`'s, `ogles2_fbo_renderable_format`) stores
+     every sample, the level twice the size GL gives (`MS_SHIFT`: the
+     sizes `glGetTexLevelParameter*`, `textureSize` and attachments report
+     are halved); no sampler state (nearest). Attached at level 0
+     (`glFramebufferTexture2D` with `GL_TEXTURE_2D_MULTISAMPLE`), the job
+     is 4x and stores every sample, as a 4x renderbuffer's; completeness
+     compares the samples and the fixed sample locations (a renderbuffer's
+     fixed). `sampler2DMS` and its integer kinds (`OGLES2_TEX_2DMS`, unit
+     `unit2dms`; `glUniform1i` takes them); the compiler's key textures
+     for them (4 samples, no sampler parameters). `glGetMultisamplefv`
+     (the 4x positions, or the centre without samples).
+   - **Stencil texturing.** `GL_STENCIL_INDEX` mode on a depth-stencil
+     texture: D24S8 read as `RGBA8UI` (its low byte), DEPTH32F_STENCIL8 from
+     its S8 image (`R8UI`, one level), (s, 0, 0, 1), nearest, 16-bit
+     returns; the base-level view keeps the mode. **Open:** a
+     DEPTH32F_STENCIL8 upload's stencil is dropped (its RAM copy holds the
+     float depth only; the S8 image is per level of face 0): its 3
+     `stencil_texturing.format.depth32f_stencil8_*` cases fail.
+     `OES_texture_stencil8` (stencil-only textures) not offered (ES 3.2).
+   - **Gather** needed nothing of the library's (the compiler's P2 bits).
+   - `m8_draw`'s `test_ms_texture` (8 checks: errors, queries, a 4x clear
+     read by `texelFetch` at samples 0 and 3, completeness with mixed fixed
+     locations, sample 0's position). `m8-5` 47 of 47, 191 of 191.
+     dEQP-GLES31: `texture.multisample` 55 of 55 (102 not supported:
+     multisample 2D arrays, the sample-count limits), `texture.gather` 435
+     of 435 (396 `EXT_gpu_shader5`), `stencil_texturing` 8 of 11 (3 above,
+     3 `OES_texture_stencil8`), `state_query.texture_level` 190 of 190 (162
+     extensions), `multisample` 8 not supported (a multisampled default
+     framebuffer), `fbo` 9 passed and 65 failed (all `no_attachments`, item
+     6).
 5. **Vertex attribute binding** (`glBindVertexBuffer`, `glVertexAttribFormat`,
    `glVertexAttribIFormat`, `glVertexAttribBinding`, `glVertexBindingDivisor`)
    and **separate shader objects** (program pipelines, `glProgramUniform*`).

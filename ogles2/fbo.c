@@ -780,6 +780,14 @@ static BOOL no_samples(struct OGLES2Context *ctx, GLenum f)
     return es3_color(f) && ((!ogles2_es31(ctx) && int_color(f)) || f == GL_R32F || f == GL_RG32F || f == GL_RGBA32F);
 }
 
+/* ES 3.1's glTexStorage2DMultisample: a renderable sized format (colour,
+ * depth or stencil); *none: it offers no sample counts. */
+BOOL ogles2_fbo_renderable_format(struct OGLES2Context *ctx, GLenum f, BOOL *none)
+{
+    *none = no_samples(ctx, f);
+    return es3_color(f) || is_depth(f) || is_stencil(f);
+}
+
 /* ES 3.0 6.1.15: a renderbuffer format's sample counts, GL_MAX_SAMPLES (4)
  * for every renderable format but those (none); ES 3.1's
  * GL_TEXTURE_2D_MULTISAMPLE the same. */
@@ -919,7 +927,8 @@ void ogles2_glFramebufferTexture2D(struct OGLES2Context *ctx, GLenum target, GLe
         return;
     a = attachment_index(ctx, attachment);
     if (!(which = fb_target(ctx, target)) ||
-        (texture && textarget != GL_TEXTURE_2D && textarget != GL_TEXTURE_RECTANGLE && !cube_face)) {
+        (texture && textarget != GL_TEXTURE_2D && textarget != GL_TEXTURE_RECTANGLE && !cube_face &&
+         !(ogles2_es31(ctx) && textarget == GL_TEXTURE_2D_MULTISAMPLE))) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
@@ -935,7 +944,8 @@ void ogles2_glFramebufferTexture2D(struct OGLES2Context *ctx, GLenum target, GLe
         GLenum tt;
         /* GLES 2.0 4.4.3 takes level 0 only; OES_fbo_render_mipmap (offered,
          * as Mesa does) and ES 3.0 any level. */
-        if (level < 0 || level > 12 || (textarget == GL_TEXTURE_RECTANGLE && level != 0)) {
+        if (level < 0 || level > 12 ||
+            ((textarget == GL_TEXTURE_RECTANGLE || textarget == GL_TEXTURE_2D_MULTISAMPLE) && level != 0)) {
             ogles2_error(ctx, GL_INVALID_VALUE);
             return;
         }
@@ -1257,10 +1267,11 @@ static GLenum status_of(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb)
     const struct OGLES2Attachment *d = &fb->att[ATT_DEPTH], *s = &fb->att[ATT_STENCIL];
     BOOL es3 = ogles2_es3(ctx);
     UWORD w0 = 0, h0 = 0, w, h;
-    int a, n = 0, samples = -1;
+    int a, n = 0, samples = -1, fixed = -1;
     for (a = 0; a < NATT; a++) {
         const struct OGLES2Attachment *at = &fb->att[a];
         int ns;
+        GLboolean fx = GL_TRUE;
         if (at->type == GL_NONE)
             continue;
         if (!att_size(at, &w, &h) || !w || !h)
@@ -1281,10 +1292,14 @@ static GLenum status_of(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb)
             if (at->face || !ogles2_texture_depth(at->tex, at->level, &bits, &st) || (a == ATT_STENCIL && !st))
                 return GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT;
         }
-        ns = at->type == GL_RENDERBUFFER ? at->rb->samples : 0;
-        if (samples >= 0 && ns != samples)
+        /* ES 3.1 9.4.2: the same samples (a multisample texture's
+         * GL_TEXTURE_SAMPLES), and the same fixed sample locations (a
+         * renderbuffer's fixed) */
+        ns = at->type == GL_RENDERBUFFER ? at->rb->samples : ogles2_texture_samples(at->tex, &fx);
+        if ((samples >= 0 && ns != samples) || (fixed >= 0 && (int)fx != fixed))
             return GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE;
         samples = ns;
+        fixed = fx;
         if (n++ == 0) {
             w0 = w;
             h0 = h;
@@ -1860,6 +1875,8 @@ UBYTE ogles2_fbo_samples(const struct OGLES2Framebuffer *fb)
     for (a = 0; fb && a < NATT; a++)
         if (fb->att[a].type == GL_RENDERBUFFER && fb->att[a].rb->samples > n)
             n = fb->att[a].rb->samples;
+        else if (fb->att[a].type == GL_TEXTURE && ogles2_texture_samples(fb->att[a].tex, 0) == 4)
+            n = 4; /* a multisample texture (ES 3.1: always 4x) */
     return n;
 }
 

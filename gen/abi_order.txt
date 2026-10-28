@@ -331,3 +331,5 @@ glProgramUniformMatrix2x4fv
 glProgramUniformMatrix4x2fv
 glProgramUniformMatrix3x4fv
 glProgramUniformMatrix4x3fv
+glTexStorage2DMultisample
+glGetMultisamplefv

@@ -2399,6 +2399,71 @@ static void test_images(void)
     glDeleteProgram(p);
 }
 
+/* ES 3.1's multisample textures (GLES3 plan stage D item 4): a 4x RGBA8
+ * 16x16 texture, its queries and errors, cleared through a framebuffer
+ * (a 4x job storing every sample) to (0.2, 0.4, 0.6), and es31ms reading
+ * its samples 0 and 3 with texelFetch (textureSize 16 in alpha); the
+ * sample positions of the 4x framebuffer. */
+static void test_ms_texture(void)
+{
+    GLuint p = program("es31ms"), t[2], fb;
+    GLint w = 0, s = 0, fixed = -1;
+    GLfloat pos[2] = { 0, 0 };
+    GLenum st, st2;
+    if (!p) {
+        check(0, "multisample textures: es31ms links");
+        return;
+    }
+    glGenTextures(2, t);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, t[0]);
+    glTexStorage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 0, GL_RGBA8, 16, 16, GL_TRUE);
+    check(glGetError() == GL_INVALID_VALUE, "multisample textures: 0 samples is GL_INVALID_VALUE");
+    glTexStorage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA32F, 16, 16, GL_TRUE);
+    check(glGetError() == GL_INVALID_OPERATION, "multisample textures: RGBA32F offers no samples");
+    glTexStorage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 3, GL_RGBA8, 16, 16, GL_FALSE);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D_MULTISAMPLE, 0, GL_TEXTURE_WIDTH, &w);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D_MULTISAMPLE, 0, GL_TEXTURE_SAMPLES, &s);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D_MULTISAMPLE, 0, GL_TEXTURE_FIXED_SAMPLE_LOCATIONS, &fixed);
+    check(glGetError() == GL_NO_ERROR && w == 16 && s == 4 && fixed == GL_FALSE,
+          "multisample textures: 3 samples give 4, the size and fixed locations as given");
+    glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    check(glGetError() == GL_INVALID_ENUM, "multisample textures: no sampler state");
+    glGenFramebuffers(1, &fb);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, t[0], 1);
+    check(glGetError() == GL_INVALID_VALUE, "multisample textures: attached at level 1 is GL_INVALID_VALUE");
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, t[0], 0);
+    st = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, t[1]);
+    glTexStorage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA8, 16, 16, GL_TRUE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D_MULTISAMPLE, t[1], 0);
+    st2 = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D_MULTISAMPLE, 0, 0);
+    check(st == GL_FRAMEBUFFER_COMPLETE && st2 == GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE,
+          "multisample textures: complete, and not with fixed locations mixed");
+    glGetMultisamplefv(GL_SAMPLE_POSITION, 0, pos);
+    check(glGetError() == GL_NO_ERROR && pos[0] == 0.375f && pos[1] == 0.125f,
+          "multisample textures: sample 0 at (0.375, 0.125)");
+    glViewport(0, 0, 16, 16);
+    glClearColor(0.2f, 0.4f, 0.6f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, 64, 64);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, t[0]);
+    glUseProgram(p);
+    draw_cover(p);
+    check(pixel_is(32, 32, 51, 102, 153, 255, 2) && glGetError() == GL_NO_ERROR,
+          "multisample textures: a 4x clear's samples 0 and 3 read by texelFetch, textureSize 16");
+    glUseProgram(0);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+    glDeleteFramebuffers(1, &fb);
+    glDeleteTextures(2, t);
+    glDeleteProgram(p);
+}
+
 /* ES 3.1's explicit uniform locations (GLES3 plan stage D item 6): es31loc
  * has tint at 7 and scale at 2 (the colour is tint * scale), an unused
  * uniform at 20 (not active: glUniform* there is ignored), nothing at 3
@@ -2972,6 +3037,8 @@ int main(void)
                 test_uniform_locations();
             if (!skipped("images"))
                 test_images();
+            if (!skipped("ms_texture"))
+                test_ms_texture();
         }
     }
     check(glGetError() == GL_NO_ERROR, "no GL error left over");

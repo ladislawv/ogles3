@@ -88,3 +88,5 @@ command glProgramUniformMatrix2x4fv
 command glProgramUniformMatrix4x2fv
 command glProgramUniformMatrix3x4fv
 command glProgramUniformMatrix4x3fv
+command glTexStorage2DMultisample
+command glGetMultisamplefv

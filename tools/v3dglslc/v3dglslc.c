@@ -277,6 +277,10 @@ static struct { GLenum type, target; char kind; GLuint tex[2]; } more_samplers[]
     { GL_UNSIGNED_INT_SAMPLER_3D, GL_TEXTURE_3D, 'u' },
     { GL_UNSIGNED_INT_SAMPLER_CUBE, GL_TEXTURE_CUBE_MAP, 'u' },
     { GL_UNSIGNED_INT_SAMPLER_2D_ARRAY, GL_TEXTURE_2D_ARRAY, 'u' },
+    /* ES 3.1's multisample textures (texelFetch only) */
+    { GL_SAMPLER_2D_MULTISAMPLE, GL_TEXTURE_2D_MULTISAMPLE, 'f' },
+    { GL_INT_SAMPLER_2D_MULTISAMPLE, GL_TEXTURE_2D_MULTISAMPLE, 'i' },
+    { GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE, GL_TEXTURE_2D_MULTISAMPLE, 'u' },
 };
 
 static int more_sampler(GLenum type)
@@ -314,6 +318,10 @@ static GLuint make_key_texture(GLenum target, char kind, int wide)
             _mesa_TexImage2D(face, 0, ifmt, 1, 1, 0, fmt, type, zeros);
     } else if (target == GL_TEXTURE_3D || target == GL_TEXTURE_2D_ARRAY) {
         _mesa_TexImage3D(target, 0, ifmt, 1, 1, 1, 0, fmt, type, zeros);
+    } else if (target == GL_TEXTURE_2D_MULTISAMPLE) { /* no sampler state */
+        _mesa_TexStorage2DMultisample(target, 4, ifmt, 1, 1, GL_TRUE);
+        _mesa_BindTexture(target, 0);
+        return t;
     } else {
         _mesa_TexImage2D(target, 0, ifmt, 1, 1, 0, fmt, type, zeros);
     }

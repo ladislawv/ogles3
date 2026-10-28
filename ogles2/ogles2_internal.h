@@ -924,6 +924,11 @@ BOOL ogles2_fbo_default_read_none(struct OGLES2Context *ctx);
 BOOL ogles2_texture_surface(struct OGLES2Context *ctx, struct OGLES2Texture *t, int k, int l,
                             struct OGLES2Surface *s);
 void ogles2_texture_rendered(struct OGLES2Texture *t, int k, int l); /* the GPU's copy is newer */
+/* ES 3.1: a multisample texture's GL_TEXTURE_SAMPLES (0 another texture, 1,
+ * or 4: its level twice the size, every sample kept) and fixed locations. */
+UBYTE ogles2_texture_samples(const struct OGLES2Texture *t, GLboolean *fixed);
+/* fbo.c: a sized format a multisample texture may have; *none: no samples. */
+BOOL ogles2_fbo_renderable_format(struct OGLES2Context *ctx, GLenum f, BOOL *none);
 /* OES_depth_texture: level l is a depth image (bits 16 or 24; stencil: DEPTH_STENCIL_OES). */
 BOOL ogles2_texture_depth(const struct OGLES2Texture *t, int l, UBYTE *bits, BOOL *stencil);
 /* That image as a job's depth/stencil surface, its GPU storage made first; FALSE: none. */
@@ -939,6 +944,7 @@ BOOL ogles2_texture_zs_surface(struct OGLES2Context *ctx, struct OGLES2Texture *
 #define OGLES2_TEX_NONE 3 /* a sampler of no kind the library has: reads the incomplete texture's (0, 0, 0, 1) */
 #define OGLES2_TEX_3D    4 /* ES 3.0 */
 #define OGLES2_TEX_ARRAY 5 /* a 2D array */
+#define OGLES2_TEX_2DMS  6 /* ES 3.1: GL_TEXTURE_2D_MULTISAMPLE (texelFetch only) */
 #define OGLES2_TEX_INT   0x10 /* ORed in: an integer sampler (isampler*, usampler*): its incomplete
                                * texture's (0, 0, 0, 1) integers */
 static inline int ogles2_sampler_kind(GLenum type)
@@ -952,6 +958,9 @@ static inline int ogles2_sampler_kind(GLenum type)
          : type == GL_INT_SAMPLER_CUBE || type == GL_UNSIGNED_INT_SAMPLER_CUBE ? OGLES2_TEX_CUBE | OGLES2_TEX_INT
          : type == GL_INT_SAMPLER_3D || type == GL_UNSIGNED_INT_SAMPLER_3D ? OGLES2_TEX_3D | OGLES2_TEX_INT
          : type == GL_INT_SAMPLER_2D_ARRAY || type == GL_UNSIGNED_INT_SAMPLER_2D_ARRAY ? OGLES2_TEX_ARRAY | OGLES2_TEX_INT
+         : type == GL_SAMPLER_2D_MULTISAMPLE ? OGLES2_TEX_2DMS
+         : type == GL_INT_SAMPLER_2D_MULTISAMPLE || type == GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE
+               ? OGLES2_TEX_2DMS | OGLES2_TEX_INT
                                                                                     : OGLES2_TEX_NONE;
 }
 /* textureSize's values for unit's texture of that kind: what 0 width, 1

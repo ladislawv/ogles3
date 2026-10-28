@@ -258,6 +258,31 @@ void ogles2_glSampleMaski(struct OGLES2Context *ctx, GLuint maskNumber, GLbitfie
     ctx->state_ver++;
 }
 
+/* ES 3.1: sample i's position in the pixel, in the draw framebuffer (Mesa's
+ * _mesa_GetMultisamplefv: one sample's index 0 without samples, the
+ * centre); 4x MSAA's are Mesa's V3D ones (v3d_context.c). */
+void ogles2_glGetMultisamplefv(struct OGLES2Context *ctx, GLenum pname, GLuint index, GLfloat *val)
+{
+    static const GLfloat pos4[4][2] = { { 0.375f, 0.125f }, { 0.875f, 0.375f }, { 0.125f, 0.625f },
+                                        { 0.625f, 0.875f } };
+    UBYTE n;
+    if (!ogles2_es31_entry(ctx))
+        return;
+    if (pname != GL_SAMPLE_POSITION) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    n = ctx->draw_fb ? ogles2_fbo_samples(ctx->draw_fb) : ctx->msaa ? 4 : 0;
+    if (index >= (n ? n : 1U)) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    if (!val)
+        return;
+    val[0] = n ? pos4[index][0] : 0.5f;
+    val[1] = n ? pos4[index][1] : 0.5f;
+}
+
 /* glGetIntegeri_v's and glGetBooleani_v's indexed state other than the
  * buffer bindings (buffer.c): ES 3.1's sample mask word, compute limits and
  * image units (texture.c). -1: no such query (GL_INVALID_ENUM, set here);
