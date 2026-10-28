@@ -481,6 +481,10 @@ struct OGLES2Image
      * NULL: the runtime numbers the visible uniforms in order. */
     UWORD nremap;
     const UWORD *remap;
+    /* Format 2's OPAQUE_UNITS: nopaque entries, each the uniform's index,
+     * its elements, then each one's first unit (layout(binding)). */
+    UWORD nopaque;
+    const UWORD *opaque_units;
 };
 #define OGLES2_LOC_NONE     0xFFFF /* a location of no uniform (GL_INVALID_OPERATION) */
 #define OGLES2_LOC_INACTIVE 0xFFFE /* an inactive uniform's explicit location (ignored) */

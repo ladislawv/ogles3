@@ -373,7 +373,10 @@ static GLenum sampler_target(GLenum type, int wide, GLuint *tex)
  *    RGBA32F textures, for the variants with every sampler 32-bit). */
 static void bind_samplers(GLuint p, int restore, int wide)
 {
-    GLint n = 0, i, j, unit = 0;
+    /* The units the program had (layout(binding), ES 3.1): put back after
+     * the draws, as the file records them (OPAQUE_UNITS). */
+    static GLint saved[64][32];
+    GLint n = 0, i, j, unit = 0, ns = 0;
 
     _mesa_GetProgramiv(p, GL_ACTIVE_UNIFORMS, &n);
     for (i = 0; i < n; i++) {
@@ -384,10 +387,13 @@ static void bind_samplers(GLuint p, int restore, int wide)
         if (!is_sampler(type))
             continue;
         loc = _mesa_GetUniformLocation(p, name);
-        if (loc < 0 || size > 32)
+        if (loc < 0 || size > 32 || ns >= 64)
             continue;
+        if (!restore)
+            for (j = 0; j < size; j++)
+                _mesa_GetUniformiv(p, loc + j, &saved[ns][j]);
         for (j = 0; j < size; j++) {
-            units[j] = restore ? 0 : unit;
+            units[j] = restore ? saved[ns][j] : unit;
             if (!restore) {
                 GLuint tex;
                 GLenum target = sampler_target(type, wide, &tex);
@@ -397,6 +403,7 @@ static void bind_samplers(GLuint p, int restore, int wide)
             }
         }
         _mesa_Uniform1iv(loc, size, units);
+        ns++;
     }
     _mesa_ActiveTexture(GL_TEXTURE0);
 }
@@ -1291,6 +1298,11 @@ int main(int argc, char **argv)
         ctx->Const.MaxElementIndex = 0xffffff;
         ctx->Const.MaxServerWaitTimeout = 0;
         ctx->Const.MaxTextureLodBias = 15.0f;
+        /* Uniform locations up to 4096 (ES 3.1's minimum 1024; the driver
+         * offers 81852): the file's UNIFORM_LOCATIONS and the library's
+         * tables hold one entry a location, 16-bit. A larger
+         * layout(location) fails to compile, as GLSL wants. */
+        ctx->Const.MaxUserAssignableUniformLocations = 4096;
     }
     if (limits)
         return print_limits();

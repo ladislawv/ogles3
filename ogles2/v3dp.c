@@ -708,6 +708,28 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             im->abuffers = a;
             break;
         }
+        case 14: { /* OPAQUE_UNITS (format 2): samplers' and images' first units */
+            ULONG n = u32(&s), j, nu = 0, x;
+            UWORD *o;
+            /* entries: uniform, elements, the units; stored as such, unit
+             * values clipped to a byte (units are below 256) */
+            if (!format2 || n > 1024 || !(o = alloc(im, sec_len[i] + 8)))
+                FAIL("opaque units:", 0, n);
+            for (j = 0; j < n && !s.bad; j++) {
+                ULONG u = u32(&s), ne = u32(&s), e;
+                if (ne > 4096)
+                    FAIL("opaque units of a uniform:", 0, ne);
+                o[nu++] = (UWORD)u;
+                o[nu++] = (UWORD)ne;
+                for (e = 0; e < ne; e++) {
+                    x = u32(&s);
+                    o[nu++] = (UWORD)(x < 256 ? x : 0);
+                }
+            }
+            im->nopaque = (UWORD)n;
+            im->opaque_units = o;
+            break;
+        }
         case 13: { /* UNIFORM_LOCATIONS (format 2): Mesa's locations */
             ULONG n = u32(&s), j, x;
             UWORD *r;

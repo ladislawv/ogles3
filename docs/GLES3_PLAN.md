@@ -2623,6 +2623,19 @@ test towards it until the A1200 restarts; then the cause. Then dEQP's
 NOFALLBACK`: without the bridge a compile fails) and does not start
 without a `compile_bridge.py` process (the bridge had died unnoticed at
 21:59, and the A1200's compiler then sat on one program for 20 minutes).
+**Then (2026-10-28): `layout(binding)` of samplers, uniform locations'
+limit.** The compiler writes the units samplers and images start with
+(format 2 section 14, `OPAQUE_UNITS`, from Mesa's storage; `bind_samplers`
+now puts back the program's own units after its key-state draws, where it
+set 0) and the library starts `sampler_unit` there (the units started at 0,
+whatever `layout(binding)` said). `GL_MAX_UNIFORM_LOCATIONS` is 4096 in the
+library and in `v3dglslc`'s context (Mesa's 81852 made dEQP's
+`uniform_location.min_max` programs' location tables too big to write; a
+larger location now fails to compile, as GLSL wants). `m8-5` 47 of 47, 181
+of 181; dEQP-GLES31 `uniform_location` 341 of 341 (19 not supported: ES
+3.2), `layout_binding` 84 passed, 20 failed (all images, item 2), 64 not
+supported (tessellation, and too few uniforms for some negative cases).
+
 **Parked (2026-10-28), open:** further runs singly: `triangles.single_attribute`
 and `points.single_attribute` pass; `triangles.multiple_attributes` and
 `first.first_1` restart the A1200, often but not every time, more often

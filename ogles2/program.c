@@ -97,6 +97,7 @@ static const struct OGLES2Image builtin_smooth = {
     0, 0, 0, {0, 0}, {0, 0},       /* not a compute program, no storage blocks */
     0, 0,                          /* no atomic counter buffers */
     0, 0,                          /* locations numbered by the runtime */
+    0, 0,                          /* samplers start at unit 0 */
 };
 
 const struct OGLES2Image *ogles2_builtin_image(void)
@@ -1451,6 +1452,18 @@ static BOOL bind_image(struct OGLES2Program *p, const struct OGLES2Image *im)
         }
     }
     p->nlocations = nloc;
+    /* Samplers' and images' first units (layout(binding), ES 3.1). */
+    {
+        const UWORD *o = im->opaque_units;
+        UWORD k2, e;
+        for (k2 = 0; o && k2 < im->nopaque; k2++) {
+            UWORD un = o[0], ne = o[1];
+            for (e = 0; e < ne; e++)
+                if (un < im->nuniforms && p->uniform_loc[un] != 0xFFFF && p->uniform_loc[un] + e < nloc)
+                    p->sampler_unit[p->uniform_loc[un] + e] = (UBYTE)o[2 + e];
+            o += 2 + ne;
+        }
+    }
     for (u = 0; u < im->nublocks; u++)
         p->block_binding[u] = im->ublocks[u].binding;
     for (k = 0; k < 2; k++)

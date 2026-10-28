@@ -308,6 +308,7 @@ location word, bit 30: the input has a location of its own (`layout(location)`, 
 | 11 | `STORAGE_BLOCKS` | exactly 1 with feature bit 1, else none |
 | 12 | `ATOMIC_BUFFERS` | exactly 1 with feature bit 3, else none |
 | 13 | `UNIFORM_LOCATIONS` | at most 1 (format 2; written since 2026-10-27) |
+| 14 | `OPAQUE_UNITS` | at most 1 (format 2; written since 2026-10-28) |
 
 **`VARIANT`** of stage 5, a compute shader (feature bit 2): the common key (Mesa's
 `v3d_update_compiled_cs` keys compute shaders by it alone), the common prog data, then
@@ -332,6 +333,10 @@ uniform's index in `UNIFORMS` (an array's elements on consecutive locations), `0
 explicit location of a uniform that is not active (`glUniform*` there is ignored), `0xffffffff`
 none (`GL_INVALID_OPERATION`). Without the section the runtime numbers the visible uniforms'
 elements in `UNIFORMS` order, as format 1.0 does.
+
+**`OPAQUE_UNITS`**: the units the program's samplers and images start with (`layout(binding)`,
+ES 3.1; else 0): `u32` count, then per such uniform `u32` its index in `UNIFORMS`, `u32`
+elements, `u32[n]` each one's unit (Mesa's storage). Without the section every one starts at 0.
 
 **`ATOMIC_BUFFERS`**: `u32` count, then per buffer (Mesa's `AtomicBuffers`, in its order):
 `u32` binding, `u32` minimum size in bytes, `u32` stages that reference it (bit per stage),

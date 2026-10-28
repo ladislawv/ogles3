@@ -2356,6 +2356,12 @@ static void test_uniform_locations(void)
         check(0, "uniform locations: es31loc links");
         return;
     }
+    {
+        GLint unit = -1, lt = glGetUniformLocation(p, "tex");
+        if (lt >= 0)
+            glGetUniformiv(p, lt, &unit);
+        check(unit == 3 && glGetError() == GL_NO_ERROR, "uniform locations: a sampler starts at its layout(binding) unit 3");
+    }
     check(glGetUniformLocation(p, "tint") == 7 && glGetUniformLocation(p, "scale") == 2 &&
               glGetUniformLocation(p, "unused") == -1 &&
               glGetProgramResourceLocation(p, GL_UNIFORM, "tint") == 7 && glGetError() == GL_NO_ERROR,

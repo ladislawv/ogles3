@@ -12,7 +12,7 @@ VARIANT_STAGES = {0: "vertex", 1: "vertex binning", 4: "fragment", 5: "compute"}
 KINDS = {0: "uniform", 1: "constant", 2: "state"}
 SECTIONS = {1: "PROGRAM", 2: "STRINGS", 3: "STAGE_PARAMS", 4: "UNIFORMS", 5: "ATTRIBUTES",
             6: "VARIANT", 7: "UNIFORM_BLOCKS", 8: "INTERFACE", 9: "VARIANT_OF",
-            10: "TRANSFORM_FEEDBACK", 11: "STORAGE_BLOCKS", 12: "ATOMIC_BUFFERS", 13: "UNIFORM_LOCATIONS"}
+            10: "TRANSFORM_FEEDBACK", 11: "STORAGE_BLOCKS", 12: "ATOMIC_BUFFERS", 13: "UNIFORM_LOCATIONS", 14: "OPAQUE_UNITS"}
 FEATURE_TF = 0x1  # format 2: transform feedback (a TRANSFORM_FEEDBACK section)
 FEATURE_STORAGE = 0x2  # ES 3.1: shader storage blocks (a STORAGE_BLOCKS section)
 FEATURE_COMPUTE = 0x4  # ES 3.1: a compute program
@@ -389,6 +389,16 @@ def dump(path, show_qpu):
                     raise Bad("stage map names a block past the last")
                 print("  %s: buffer i -> block %s" % (STAGES.get(stage, stage),
                       ["atomic binding %d" % (b & 0x7fff) if b & 0x8000 else b for b in blocks]))
+            r.done()
+        elif t == 14 and v2:
+            n = r.u32()
+            out = []
+            for _ in range(n):
+                u, ne = r.u32(), r.u32()
+                if nuniforms is not None and u >= nuniforms:
+                    raise Bad("opaque units of no uniform")
+                out.append("%d:%s" % (u, r.u32s(ne)))
+            print("OPAQUE_UNITS %d: %s" % (n, " ".join(out)))
             r.done()
         elif t == 13 and v2:
             n = r.u32()

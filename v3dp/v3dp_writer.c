@@ -40,6 +40,7 @@ enum {
     SEC_STORAGE_BLOCKS = 11,     /* format 2, with the feature bit V3DP_FEATURE_STORAGE */
     SEC_ATOMIC_BUFFERS = 12,     /* format 2, with the feature bit V3DP_FEATURE_ATOMIC */
     SEC_UNIFORM_LOCATIONS = 13,  /* format 2 */
+    SEC_OPAQUE_UNITS = 14,       /* format 2 */
 };
 
 enum { VARIANT_VS = 0, VARIANT_VS_BIN = 1, VARIANT_FS = 4, VARIANT_CS = 5 };
@@ -816,6 +817,33 @@ static int put_uniform_locations(struct buf *b, struct gl_shader_program *prog)
     return 0;
 }
 
+/* Format 2: the units the program's samplers and images start with
+ * (layout(binding), ES 3.1; else 0): per such uniform its index in
+ * UNIFORMS, its elements, and each one's unit (Mesa's storage). */
+static void put_opaque_units(struct buf *b, struct gl_shader_program *prog)
+{
+    const struct gl_shader_program_data *d = prog->data;
+    unsigned i, e, n = 0, ne;
+
+    for (i = 0; i < d->NumUniformStorage; i++) {
+        const struct glsl_type *t = glsl_without_array(d->UniformStorage[i].type);
+        if ((glsl_type_is_sampler(t) || glsl_type_is_image(t)) && d->UniformStorage[i].storage)
+            n++;
+    }
+    put_u32(b, n);
+    for (i = 0; i < d->NumUniformStorage; i++) {
+        const struct gl_uniform_storage *u = &d->UniformStorage[i];
+        const struct glsl_type *t = glsl_without_array(u->type);
+        if (!(glsl_type_is_sampler(t) || glsl_type_is_image(t)) || !u->storage)
+            continue;
+        ne = u->array_elements ? u->array_elements : 1;
+        put_u32(b, i);
+        put_u32(b, ne);
+        for (e = 0; e < ne; e++)
+            put_u32(b, (uint32_t)u->storage[e].i);
+    }
+}
+
 static void put_atomic_buffers(struct buf *b, struct gl_shader_program *prog)
 {
     const struct gl_shader_program_data *d = prog->data;
@@ -1138,6 +1166,10 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
             num_sections++;
             buf_free(&sec);
         }
+        put_opaque_units(&sec, prog);
+        put_section(&body, SEC_OPAQUE_UNITS, &sec);
+        num_sections++;
+        buf_free(&sec);
         if (put_uniform_locations(&sec, prog))
             goto out;
         put_section(&body, SEC_UNIFORM_LOCATIONS, &sec);
