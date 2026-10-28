@@ -1307,8 +1307,11 @@ static GLenum status_of(struct OGLES2Context *ctx, struct OGLES2Framebuffer *fb)
             return GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS;
         }
     }
+    /* ES 3.1 9.4.2: without attachments, complete when its default size
+     * (glFramebufferParameteri) is not 0 */
     if (!n)
-        return GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT;
+        return ogles2_es31(ctx) && fb->default_w && fb->default_h ? GL_FRAMEBUFFER_COMPLETE
+                                                                  : GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT;
     /* Depth and stencil: one packed image for both, or apart without a
      * packed one (D16 or a depth texture, and S8); ES 3.0: one image. */
     if (d->type != GL_NONE && s->type != GL_NONE && (es3 || packed(d) || packed(s)) && !same_image(d, s))
@@ -1333,6 +1336,17 @@ GLenum ogles2_glCheckFramebufferStatus(struct OGLES2Context *ctx, GLenum target)
 GLenum ogles2_fb_status(struct OGLES2Context *ctx)
 {
     return ctx->draw_fb ? status_of(ctx, ctx->draw_fb) : GL_FRAMEBUFFER_COMPLETE;
+}
+
+/* ES 3.1: a framebuffer object without attachments, drawn at its default
+ * size and samples (glFramebufferParameteri). */
+static BOOL no_attachments(const struct OGLES2Framebuffer *fb)
+{
+    int a;
+    for (a = 0; a < NATT; a++)
+        if (fb->att[a].type != GL_NONE)
+            return FALSE;
+    return TRUE;
 }
 
 /* The fb_* fields: the default framebuffer's, or the bound object's. */
@@ -1386,6 +1400,10 @@ void ogles2_fb_update(struct OGLES2Context *ctx)
             if (!ctx->fb_h || h < ctx->fb_h)
                 ctx->fb_h = h;
         }
+    }
+    if (no_attachments(fb)) { /* ES 3.1: the default size (a job that stores nothing) */
+        ctx->fb_w = fb->default_w;
+        ctx->fb_h = fb->default_h;
     }
     if (fb->att[ATT_DEPTH].type == GL_RENDERBUFFER) {
         GLenum f = fb->att[ATT_DEPTH].rb->format;
@@ -1877,6 +1895,8 @@ UBYTE ogles2_fbo_samples(const struct OGLES2Framebuffer *fb)
             n = fb->att[a].rb->samples;
         else if (fb->att[a].type == GL_TEXTURE && ogles2_texture_samples(fb->att[a].tex, 0) == 4)
             n = 4; /* a multisample texture (ES 3.1: always 4x) */
+    if (fb && no_attachments(fb) && fb->default_samples)
+        n = 4; /* ES 3.1: its default samples, 1 to 4 as 4 (Mesa's st takes the next count V3D has) */
     return n;
 }
 

@@ -2942,7 +2942,13 @@ stopped.
    and stores none (`STORE_TILE_BUFFER_GENERAL` with buffer NONE, as Mesa,
    `v3dx_rcl.c:314-321`); today such a framebuffer cannot be drawn
    (`fbo.c:1117`, `job.c:848-850`; dEQP-GLES31's 72 `fbo.no_attachments`
-   cases).
+   cases). **Done (2026-10-28):** such a framebuffer is complete in ES 3.1
+   when its default width and height are not 0 (else still
+   `GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT`); `ogles2_fb_update`
+   gives it its default size, `ogles2_fbo_samples` 4 for default samples
+   of 1 to 4 (the job then 4x), and the job, with no target drawn, stores
+   buffer NONE (the render list's existing case). dEQP-GLES31 `fbo` 74 of
+   74 (44 not supported: cube map arrays, ES 3.2's sRGB write control).
 7. **dEQP-GLES31's must-pass lists** on the A1200 (package `m8-3`),
    `gles31-main` and `gles31-multisample`; the ES 3.2 extensions' groups
    report "not supported" (§3).
