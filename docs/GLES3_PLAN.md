@@ -3063,7 +3063,23 @@ stopped.
    74 (44 not supported: cube map arrays, ES 3.2's sRGB write control).
 7. **dEQP-GLES31's must-pass lists** on the A1200 (package `m8-3`),
    `gles31-main` and `gles31-multisample`; the ES 3.2 extensions' groups
-   report "not supported" (§3).
+   report "not supported" (§3). **Groups so far (2026-10-28, watched):**
+   `debug` 430 of 430 in `negative_coverage.get_error` (68 not supported;
+   the whole group 428 passed, 2 failed before the two fixes: a depth or
+   stencil `glBlitFramebuffer` within one framebuffer is
+   `GL_INVALID_OPERATION`, as is reading from a framebuffer whose read
+   buffer is `GL_NONE`; 1121 cases need `GL_KHR_debug`, which the library
+   lacks), `fbo` 74 of 74 again; `shaders.builtin_functions` 1603 of 1603
+   (two hours; 1342 not supported: tessellation 812, geometry shaders 416,
+   `EXT_gpu_shader5` 108, `OES_texture_storage_multisample_2d_array` 6),
+   `helper_invocation` 60 of 60 (20 not supported: more samples than 4),
+   `builtin_constants` 31 of 31, `arrays` 8 of 8, `functions` 2 of 2,
+   `builtin_var` 6 of 6, `default_vertex_array_object` 1 of 1; wholly not
+   supported: `implicit_conversions` (2068: GLSL ES 3.2 and
+   `EXT_shader_implicit_conversions`), `srgb_texture_decode` (21:
+   `EXT_texture_sRGB_decode`, `_R8`, `_RG8`). The watcher also prints the
+   A1200's free memory (Avail) each report: 1.62 GB to 1.61 GB over the
+   two hours, no leak to speak of.
 
 Done when: dEQP-GLES31 passes except documented deviations, as GLES2 and
 GLES3 do; `GL_VERSION` "OpenGL ES 3.1 ogles2.library 2.2"; **release 2.2**.

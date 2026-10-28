@@ -1911,6 +1911,12 @@ BOOL ogles2_fbo_read_ready(struct OGLES2Context *ctx)
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return FALSE;
     }
+    /* ES 3.0 4.3.1, 3.8.5: no read buffer (glReadBuffer(GL_NONE)) */
+    if (ogles2_es3(ctx) && (ctx->draw_fb ? ctx->draw_fb->read_buf == GL_NONE
+                                         : ctx->fbo && ctx->fbo->default_read_none)) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return FALSE;
+    }
     return TRUE;
 }
 

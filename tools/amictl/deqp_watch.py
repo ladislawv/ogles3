@@ -13,7 +13,8 @@ is alive (HELLO: its start counter, which a reset raises), reads both files
 from where it last stopped (amictld 1.4's GETFROM) and prints one line:
 the cases done and their counts, the last case finished and its status, the
 case running and for how long, and the library's new lines (those that are
-not compile and link reports). Both files are kept as they arrive in the
+not compile and link reports), and its free memory (Avail: a leak shows as a
+falling count). Both files are kept as they arrive in the
 results directory (live-progress.txt, live-ogles2.log): after a crash they
 hold what the A1200 had written up to the last report.
 
@@ -74,6 +75,22 @@ def read_more(st, remote, offset):
     if size < offset:  # started again
         return b""
     return data
+
+
+def free_memory(st):
+    """The A1200's free memory as "; free N KB (largest M KB)" (AmigaDOS
+    Avail): a leak shows as a falling count across reports."""
+    try:
+        rc, out, _ = st.run("Avail", "", 10)
+    except Exception:
+        return ""
+    for line in out.decode("latin-1", "replace").splitlines():
+        # "total<available> <in use> <maximum> <largest>" (Avail runs the
+        # word into a long number)
+        m = re.match(r"\s*total\s*(\d+)\s+\d+\s+\d+\s+(\d+)", line, re.I)
+        if m:
+            return "; free %d KB (largest %d KB)" % (int(m.group(1)) // 1024, int(m.group(2)) // 1024)
+    return ""
 
 
 class Progress:
@@ -173,6 +190,7 @@ def main(argv):
             live_log.flush()
             new_log = [l for l in data.decode("latin-1", "replace").splitlines() if l.strip()]
             done, rc, out = st.wait(job, 0.2)
+            free = free_memory(st) if not done else ""
             last_answer = time.time()
             warned = False
         except Exception as e:  # no answer, a dropped connection
@@ -189,8 +207,8 @@ def main(argv):
                 break
             continue
         notable = [l for l in new_log if not QUIET_LOG.match(l)]
-        print("%s %s; log +%d%s" % (time.strftime("%H:%M:%S"), prog.summary(), len(new_log),
-                                    "".join("\n    " + l for l in notable[-5:])), flush=True)
+        print("%s %s; log +%d%s%s" % (time.strftime("%H:%M:%S"), prog.summary(), len(new_log), free,
+                                      "".join("\n    " + l for l in notable[-5:])), flush=True)
         if done:
             break
         if time.time() - t0 > a.timeout:

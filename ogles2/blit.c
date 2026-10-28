@@ -321,7 +321,10 @@ void ogles2_glBlitFramebuffer(struct OGLES2Context *ctx, GLint srcX0, GLint srcY
             continue;
         rf = ogles2_fbo_zs_format(ctx, ctx->read_fb, rt);
         df = ogles2_fbo_zs_format(ctx, ctx->draw_fb, rt);
-        if (rf && df && rf != df) {
+        /* ...and not the same image (ES 3.0 4.3.3, Mesa's "source and
+         * destination depth buffer cannot be the same"): one framebuffer
+         * for both */
+        if (rf && df && (rf != df || ctx->read_fb == ctx->draw_fb)) {
             ogles2_error(ctx, GL_INVALID_OPERATION);
             return;
         }
