@@ -42,12 +42,15 @@ extern v3d_u32 g_v3d_cl_generation; /* v3d_frame.c: bumped whenever a control li
 #define MAX_SIZE   4096
 
 /* DEPTH32F_STENCIL8's stencil: an S8 image per level beside the depth
- * (Mesa's separate stencil), as the renderbuffer's (fbo.c). */
+ * (Mesa's separate stencil), as the renderbuffer's (fbo.c), a layer per
+ * face (bytes apart); `stale`: levels to fill again from the faces' stencil
+ * copies (given since). */
 struct OGLES2S8
 {
     v3d_mem mem[MAX_LEVELS];
     ULONG base[MAX_LEVELS], ub[MAX_LEVELS], bytes[MAX_LEVELS];
-    UWORD w[MAX_LEVELS], h[MAX_LEVELS];
+    UWORD w[MAX_LEVELS], h[MAX_LEVELS], n[MAX_LEVELS];
+    ULONG stale;
 };
 
 /* The images of one face (a 2D texture has one). */
@@ -58,7 +61,9 @@ struct OGLES2Face
     GLenum format[MAX_LEVELS];      /* each level's internal format (glTexSubImage2D must match it) */
     GLenum type[MAX_LEVELS];        /* and the type it was given in (picks the stored format) */
     UBYTE *shadow[MAX_LEVELS];      /* RGBA8 copy of each level */
-    ULONG rendered;                 /* levels the GPU drew into since: the copy is stale */
+    UBYTE *stencil[MAX_LEVELS];     /* DEPTH32F_STENCIL8: the stencil indices given, a byte a texel
+                                     * (the RAM copy keeps the depth only); 0: none given */
+    ULONG rendered;                /* levels the GPU drew into since: the copy is stale */
     ULONG blank;                    /* levels never given texels (glTexImage2D without pixels):
                                      * the copy is zeros, as a new GPU copy is (MEMF_CLEAR) */
     GLenum sized[MAX_LEVELS];       /* ES 3.0: the sized format where format and type do not say the
@@ -293,8 +298,10 @@ static void free_view(struct OGLES2Texture *t)
         return;
     t->view = 0;
     for (k = 0; k < v->nf; k++)
-        for (l = 0; l < MAX_LEVELS; l++)
+        for (l = 0; l < MAX_LEVELS; l++) {
             v->f[k].shadow[l] = 0;
+            v->f[k].stencil[l] = 0;
+        }
     free_levels(v);
     FreeVec(v);
 }
@@ -308,6 +315,9 @@ static void free_levels(struct OGLES2Texture *t)
             if (t->f[k].shadow[l])
                 FreeVec(t->f[k].shadow[l]);
             t->f[k].shadow[l] = 0;
+            if (t->f[k].stencil[l])
+                FreeVec(t->f[k].stencil[l]);
+            t->f[k].stencil[l] = 0;
         }
         t->f[k].defined = 0;
         t->f[k].blank = 0;
@@ -1785,6 +1795,32 @@ static void convert_depth(UBYTE *dst, ULONG dst_stride, const UBYTE *src, GLenum
             }
         }
     }
+}
+
+/* DEPTH32F_STENCIL8 given as FLOAT_32_UNSIGNED_INT_24_8_REV: the stencil
+ * indices (each texel's second word's low byte, which convert_depth drops)
+ * of a w x h box at (x, y) of face f's level l, `row` bytes a source row,
+ * into the face's stencil copy; the level's S8 image is filled from the
+ * copies at its next use (ogles2_texture_s8_surface). FALSE: no memory. */
+static BOOL keep_stencil(struct OGLES2Texture *t, struct OGLES2Face *f, int l, const UBYTE *src, ULONG row,
+                         int x, int y, int w, int h)
+{
+    int i, j;
+    if (!w || !h)
+        return TRUE;
+    if (!f->stencil[l] && !(f->stencil[l] = AllocVec((ULONG)f->w[l] * f->h[l], MEMF_ANY | MEMF_CLEAR)))
+        return FALSE;
+    for (j = 0; j < h; j++, src += row) {
+        UBYTE *d = f->stencil[l] + (ULONG)(y + j) * f->w[l] + x;
+        for (i = 0; i < w; i++) {
+            ULONG v;
+            memcpy(&v, src + (ULONG)i * 8 + 4, 4);
+            d[i] = (UBYTE)v;
+        }
+    }
+    if (t->s8)
+        t->s8->stale |= 1UL << l;
+    return TRUE;
 }
 
 /* The 16-bit packed types into an RGBA8 texel (R in the top byte: the copy's
@@ -3376,31 +3412,54 @@ BOOL ogles2_texture_zs_surface(struct OGLES2Context *ctx, struct OGLES2Texture *
     return TRUE;
 }
 
-/* DEPTH32F_STENCIL8's level l: its stencil as a job's S8 image, made
- * (zeros: glTexImage2D's stencil indices are not kept) at the first use
- * and again when the level's size changed. FALSE: none, or no memory. */
+/* DEPTH32F_STENCIL8's level l: its stencil as a job's S8 image (layer 0;
+ * the TMU samples every face's, a layer each), made at the first use and
+ * again when the level's size changed, and filled from the faces' stencil
+ * copies (zeros without one) when made and when given since (the
+ * callers of keep_stencil dealt with the jobs that use the texture first).
+ * FALSE: none, or no memory. */
 BOOL ogles2_texture_s8_surface(struct OGLES2Context *ctx, struct OGLES2Texture *t, int l,
                                struct OGLES2Surface *s)
 {
     const struct OGLES2Face *f = &t->f[0];
     struct OGLES2S8 *p;
-    UBYTE bits;
-    BOOL st;
-    if (!ogles2_texture_depth(t, l, &bits, &st) || !st || bits != 32)
+    int n, k;
+    if (l < 0 || l >= MAX_LEVELS || !(f->defined & (1UL << l)) || f->format[l] != GL_DEPTH_STENCIL_OES ||
+        f->type[l] != GL_FLOAT_32_UNSIGNED_INT_24_8_REV)
         return FALSE;
+    n = faces_at(t, l);
     if (!t->s8 && !(t->s8 = AllocVec(sizeof(*t->s8), MEMF_ANY | MEMF_CLEAR)))
         return FALSE;
     p = t->s8;
-    if (p->mem[l].hostptr && (p->w[l] != f->w[l] || p->h[l] != f->h[l])) {
+    if (p->mem[l].hostptr && (p->w[l] != f->w[l] || p->h[l] != f->h[l] || p->n[l] != n)) {
         ogles2_job_finish(ctx); /* a running render may still use it */
         v3d_mem_free(ogles2_device(), &p->mem[l]);
         memset(&p->mem[l], 0, sizeof(p->mem[l]));
     }
     if (!p->mem[l].hostptr) {
-        if (!ogles2_fbo_zs_alloc(f->w[l], f->h[l], 1, &p->mem[l], &p->base[l], &p->ub[l], &p->bytes[l]))
+        if (!ogles2_fbo_zs_alloc(f->w[l], f->h[l], 1, (ULONG)n, &p->mem[l], &p->base[l], &p->ub[l], &p->bytes[l]))
             return FALSE;
         p->w[l] = f->w[l];
         p->h[l] = f->h[l];
+        p->n[l] = (UWORD)n;
+        p->stale |= 1UL << l;
+    }
+    if (p->stale & (1UL << l)) {
+        ULONG ph = p->ub[l] * 2 * v3d_utile_height(1); /* ogles2_fbo_zs_alloc's padding */
+        v3d_texture_box box;
+        box.x = box.y = box.z = 0;
+        box.width = f->w[l];
+        box.height = f->h[l];
+        box.depth = 1;
+        for (k = 0; k < n; k++) {
+            UBYTE *layer = (UBYTE *)p->base[l] + (ULONG)k * p->bytes[l];
+            if (t->f[k].stencil[l])
+                v3d_store_tiled_image(layer, p->bytes[l] / ph, t->f[k].stencil[l], f->w[l],
+                                      V3D_MEMORY_FORMAT_UIF_NO_XOR, 1, ph, &box);
+            else
+                memset(layer, 0, p->bytes[l]);
+        }
+        p->stale &= ~(1UL << l);
     }
     s->addr = p->base[l];
     s->ub = p->ub[l];
@@ -3923,7 +3982,8 @@ static void tex_image(struct OGLES2Context *ctx, GLenum target, GLint level, GLi
     struct OGLES2Texture *t;
     GLenum err, keep, f0, t0, given = (GLenum)internalformat; /* as given: GL_TEXTURE_INTERNAL_FORMAT */
     UBYTE *img;
-    ULONG cb;
+    const UBYTE *src = 0;
+    ULONG cb, row = 0, image;
     BOOL sized;
     int k;
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
@@ -4004,11 +4064,12 @@ static void tex_image(struct OGLES2Context *ctx, GLenum target, GLint level, GLi
     if (class_of(format, type) != CLASS_RGBA8)
         ogles2_wide_seen |= wide_class(format, type);
     if (img && pixels) {
-        ULONG row, image;
-        const UBYTE *src = unpack_image(ctx, pixels, format, type, width, height, &row, &image);
+        src = unpack_image(ctx, pixels, format, type, width, height, &row, &image);
         convert(img, (ULONG)width * cb, src, format, type, width, height, row);
     }
     set_level(ctx, t, k, level, img, width, height, format, type, pixels != 0, keep, sized, given);
+    if (src && type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV && !keep_stencil(t, &t->f[k], level, src, row, 0, 0, width, height))
+        ogles2_error(ctx, GL_OUT_OF_MEMORY);
 }
 
 /* A face's level becomes `img`, its new RAM copy (0: empty); `given`: it
@@ -4025,6 +4086,9 @@ static void put_level(struct OGLES2Face *f, int level, UBYTE *img, GLsizei width
     if (f->shadow[level])
         FreeVec(f->shadow[level]);
     f->shadow[level] = img;
+    if (f->stencil[level]) /* the caller keeps the new image's (keep_stencil) */
+        FreeVec(f->stencil[level]);
+    f->stencil[level] = 0;
     f->w[level] = (UWORD)width;
     f->h[level] = (UWORD)height;
     f->format[level] = format;
@@ -4042,6 +4106,9 @@ static void drop_level(struct OGLES2Face *f, int level)
     if (f->shadow[level])
         FreeVec(f->shadow[level]);
     f->shadow[level] = 0;
+    if (f->stencil[level])
+        FreeVec(f->stencil[level]);
+    f->stencil[level] = 0;
     f->defined &= ~(1UL << level);
     f->blank &= ~(1UL << level);
     f->rendered &= ~(1UL << level);
@@ -4139,6 +4206,9 @@ static void tex_sub_image(struct OGLES2Context *ctx, GLenum target, GLint level,
         ULONG row, image;
         const UBYTE *src = unpack_image(ctx, pixels, format, type, width, height, &row, &image);
         convert(sub, (ULONG)width * cb, src, format, type, width, height, row);
+        if (type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV &&
+            !keep_stencil(t, f, level, src, row, xoffset, yoffset, width, height))
+            ogles2_error(ctx, GL_OUT_OF_MEMORY);
     }
     for (y = 0; y < height; y++)
         memcpy(f->shadow[level] + ((ULONG)(yoffset + y) * f->w[level] + xoffset) * cb,
@@ -4273,6 +4343,9 @@ void ogles2_glTexImage3D(struct OGLES2Context *ctx, GLenum target, GLint level, 
         if (img && pixels)
             convert(img, (ULONG)width * cb, src + (ULONG)k * in, format, type, width, height, row);
         put_level(&t->f[k], level, img, width, height, format, type, pixels != 0, keep, sized, given);
+        if (img && pixels && type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV &&
+            !keep_stencil(t, &t->f[k], level, src + (ULONG)k * in, row, 0, 0, width, height))
+            ogles2_error(ctx, GL_OUT_OF_MEMORY);
     }
     for (k = depth; k < t->nf; k++)
         drop_level(&t->f[k], level);
@@ -4349,6 +4422,9 @@ void ogles2_glTexSubImage3D(struct OGLES2Context *ctx, GLenum target, GLint leve
             memcpy(fk->shadow[level] + ((ULONG)(yoffset + y) * fk->w[level] + xoffset) * cb,
                    sub + (ULONG)y * width * cb, (ULONG)width * cb);
         fk->blank &= ~(1UL << level);
+        if (type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV &&
+            !keep_stencil(t, fk, level, src + (ULONG)(k - zoffset) * in, row, xoffset, yoffset, width, height))
+            ogles2_error(ctx, GL_OUT_OF_MEMORY);
         if (stored)
             store_box(t, k, level, sub, xoffset, yoffset, width, height);
     }
@@ -5889,9 +5965,10 @@ BOOL ogles2_texture_state(struct OGLES2Context *ctx, int unit, int kind, ULONG *
             tsr->image_width_lo = t->f[0].w[first] & 0x3f;
             tsr->image_width_hi = t->f[0].w[first] >> 6;
             tsr->image_height = t->f[0].h[first];
-            tsr->image_depth_lo = 1;
-            tsr->image_depth_hi = 0;
-            tsr->array_stride_64_byte_aligned = 0;
+            /* a cube's or an array's layers, a layer's bytes apart */
+            tsr->image_depth_lo = (ULONG)faces_at(t, first) & 0x3ff;
+            tsr->image_depth_hi = (ULONG)faces_at(t, first) >> 10;
+            tsr->array_stride_64_byte_aligned = faces_at(t, first) > 1 ? s8.bytes / 64 : 0;
             tsr->texture_type = V3D_TEXTURE_DATA_FORMAT_R8UI;
             s8_uif = TRUE;
         }

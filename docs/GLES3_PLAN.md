@@ -244,9 +244,9 @@ Mesa's driver, so they could follow later as an extension
       `negative_api`, with `ports/deqp/run_pc.sh` and the PC compiling;
       (3) dropped (the update above); (4) stage C items 2 and 6 (done
       2026-10-27), then stage D, each with the dEQP groups of its own
-      features (under way: §7's "Compute" and "Then" notes; items 1, 2 (4
-      `image_load_store` cases open), 3 and 4 (D32F_S8's uploaded stencil
-      open) done, the A1200 restarts in `draw_indirect.draw_arrays_indirect`
+      features (under way: §7's "Compute" and "Then" notes; items 1, 2, 3
+      and 4 done (2026-10-28: `image_load_store`, `ssbo` and
+      `stencil_texturing` whole), the A1200 restarts in `draw_indirect.draw_arrays_indirect`
       parked; next item 5's separate shader objects, the rest of 6
       (framebuffers without attachments first), dEQP's `ssbo` and
       `program_interface_query`); (5) stage
@@ -2874,10 +2874,18 @@ stopped.
    - **Stencil texturing.** `GL_STENCIL_INDEX` mode on a depth-stencil
      texture: D24S8 read as `RGBA8UI` (its low byte), DEPTH32F_STENCIL8 from
      its S8 image (`R8UI`, one level), (s, 0, 0, 1), nearest, 16-bit
-     returns; the base-level view keeps the mode. **Open:** a
-     DEPTH32F_STENCIL8 upload's stencil is dropped (its RAM copy holds the
-     float depth only; the S8 image is per level of face 0): its 3
-     `stencil_texturing.format.depth32f_stencil8_*` cases fail.
+     returns; the base-level view keeps the mode. A DEPTH32F_STENCIL8
+     upload's stencil was dropped (its RAM copy holds the float depth only;
+     the S8 image was per level of face 0, 2D only): its 3
+     `stencil_texturing.format.depth32f_stencil8_*` cases failed. **Fixed
+     (2026-10-28):** `keep_stencil` keeps each face's given stencil indices
+     (a byte a texel, `OGLES2Face.stencil`) and marks the level's S8 image
+     stale; the image has a layer per face (2D arrays and cube maps too,
+     `ogles2_fbo_zs_alloc`'s `layers`), filled from the copies (zeros without
+     one, `v3d_store_tiled_image`) when made and when stale, and sampled with
+     its layers and their stride. Not kept: a draw's stencil outside a later
+     `glTexSubImage*` box (the refill writes the whole level from the
+     copies). `stencil_texturing` 11 of 11 (3 not supported).
      `OES_texture_stencil8` (stencil-only textures) not offered (ES 3.2).
    - **Gather** needed nothing of the library's (the compiler's P2 bits).
    - `m8_draw`'s `test_ms_texture` (8 checks: errors, queries, a 4x clear
@@ -3093,8 +3101,8 @@ stopped.
    the changes since), the last `layout.random.all_shared_buffer.36`,
    refused "uniform recipe too long: 7983": the library's cap was 4096,
    now `nrecipe`'s 65535 (a dispatch's stream grows to fit); its group 50
-   of 50. `image_load_store` 622 of 622 (above); `stencil_texturing` still
-   8 passed, 3 failed (uploaded D32F_S8 stencil).
+   of 50. `image_load_store` 622 of 622 (above); `stencil_texturing` 11 of
+   11 once D32F_S8's uploaded stencil was kept (item 4); `fbo` 74 of 74.
 
 Done when: dEQP-GLES31 passes except documented deviations, as GLES2 and
 GLES3 do; `GL_VERSION` "OpenGL ES 3.1 ogles2.library 2.2"; **release 2.2**.

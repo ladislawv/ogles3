@@ -975,7 +975,7 @@ BOOL ogles2_texture_depth(const struct OGLES2Texture *t, int l, UBYTE *bits, BOO
 /* That image as a job's depth/stencil surface, its GPU storage made first; FALSE: none. */
 BOOL ogles2_texture_s8_surface(struct OGLES2Context *ctx, struct OGLES2Texture *t, int l,
                                struct OGLES2Surface *s);
-BOOL ogles2_fbo_zs_alloc(UWORD w, UWORD h, ULONG cpp, struct v3d_mem *mem, ULONG *base, ULONG *ub, ULONG *bytes);
+BOOL ogles2_fbo_zs_alloc(UWORD w, UWORD h, ULONG cpp, ULONG layers, struct v3d_mem *mem, ULONG *base, ULONG *ub, ULONG *bytes);
 BOOL ogles2_texture_zs_surface(struct OGLES2Context *ctx, struct OGLES2Texture *t, int l,
                                struct OGLES2Surface *s);
 /* The texture kinds a sampler reads (its uniform's type). */

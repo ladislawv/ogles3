@@ -265,13 +265,15 @@ static BOOL gles2_format(GLenum f)
 }
 
 /* Depth and stencil: UIF without XOR, Mesa's padding for a UIF level
- * (also DEPTH32F_STENCIL8 textures' stencil, texture.c). */
-BOOL ogles2_fbo_zs_alloc(UWORD w, UWORD h, ULONG cpp, v3d_mem *mem, ULONG *base, ULONG *ub, ULONG *bytes)
+ * (also DEPTH32F_STENCIL8 textures' stencil, texture.c: `layers` of them,
+ * *bytes apart). */
+BOOL ogles2_fbo_zs_alloc(UWORD w, UWORD h, ULONG cpp, ULONG layers, v3d_mem *mem, ULONG *base, ULONG *ub,
+                         ULONG *bytes)
 {
     ULONG ub_w = 2 * v3d_utile_width((int)cpp), ub_h = 2 * v3d_utile_height((int)cpp);
     ULONG pw = (w + 4 * ub_w - 1) / (4 * ub_w) * (4 * ub_w);
     ULONG ph = (h + ub_h - 1) / ub_h * ub_h;
-    if (v3d_mem_alloc(ogles2_device(), mem, pw * ph * cpp + 4096) < 0)
+    if (v3d_mem_alloc(ogles2_device(), mem, pw * ph * cpp * layers + 4096) < 0)
         return FALSE;
     *base = ((ULONG)mem->hostptr + 4095) & ~4095UL;
     *ub = ph / ub_h;
@@ -286,11 +288,11 @@ BOOL ogles2_fbo_zs_alloc(UWORD w, UWORD h, ULONG cpp, v3d_mem *mem, ULONG *base,
 static BOOL rb_zs_storage(struct OGLES2Renderbuffer *rb)
 {
     ULONG cpp = rb->format == GL_DEPTH_COMPONENT16 ? 2 : rb->format == GL_STENCIL_INDEX8 ? 1 : 4;
-    if (!ogles2_fbo_zs_alloc(RB_SW(rb), RB_SH(rb), cpp, &rb->mem, &rb->base, &rb->ub, &rb->bytes))
+    if (!ogles2_fbo_zs_alloc(RB_SW(rb), RB_SH(rb), cpp, 1, &rb->mem, &rb->base, &rb->ub, &rb->bytes))
         return FALSE;
     rb->cpp = (UBYTE)cpp;
     if (rb->format == GL_DEPTH32F_STENCIL8 &&
-        !ogles2_fbo_zs_alloc(RB_SW(rb), RB_SH(rb), 1, &rb->smem, &rb->sbase, &rb->sub, &rb->sbytes))
+        !ogles2_fbo_zs_alloc(RB_SW(rb), RB_SH(rb), 1, 1, &rb->smem, &rb->sbase, &rb->sub, &rb->sbytes))
         return FALSE; /* rb_free_storage frees the depth */
     return TRUE;
 }
