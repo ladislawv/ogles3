@@ -2722,8 +2722,13 @@ orders neither). dEQP-GLES31 `draw_indirect` 203 of 203 (18 not
 supported), no restart; `debug.negative_coverage.get_error` 430 of 430
 again; dEQP-GLES3 `vertex_array_objects` 10 of 10 (package `m8-2`'s
 `Run-M1` takes `PROGRESS` and `SOURCES` as `m8-3`'s, so the watcher runs
-dEQP-GLES3 too). `m8-1` cannot be built on this machine: it needs a 1.x
-compiler in `~/ogles2-build` for `es3old`'s format 1.0 file.
+dEQP-GLES3 too). `m8-1` needed a 1.x compiler in `~/ogles2-build` only to
+make `es3old`'s format 1.0 file at each build (the library uses one
+compiler for every context); the file is kept in
+`tests/a1200/m8-1/oldcache/` now (made once by 1.3.2's host compiler;
+`build.sh` checks the sources' SHA-256 sums it was made from). `m8-1`: the
+smoke test, `m8_es3` 27 and 144, `m8_draw` 152 of 152 three ways (the
+format 1.0 file refused and replaced).
 
 **Before that (parked 2026-10-28):** further runs singly: `triangles.single_attribute`
 and `points.single_attribute` pass; `triangles.multiple_attributes` and

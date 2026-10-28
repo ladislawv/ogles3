@@ -33,14 +33,14 @@ done
 # A 1.x compiler's file of an OpenGL ES 3 program (format 1.0), named by its
 # hash, which Run-M1 puts into the cache before step 5: the library must
 # refuse it and compile a format 2 file in its place (GLES3 plan stage A
-# item 7). V1: a 1.x compiler's build (the ogles2 clone's).
-V1=${V1:-$HOME/ogles2-build/v3dglslc}
-O=$(mktemp -d)
-cp "$PKG/bin/shaders/es3old.vert" "$PKG/bin/shaders/es3old.frag" "$O/"
-(cd "$O" && "$V1/host/v3dglslc" -o . es3old.vert es3old.frag > /dev/null 2>&1) ||
-    { echo "no 1.x compiler in $V1 for es3old's format 1.0 file"; exit 1; }
-python3 "$REPO/v3dp/v3dp_hashname.py" "$O"/*.v3dp > /dev/null
-[ "$(od -An -tu2 -j4 -N2 "$O"/*.v3dp | tr -d ' ')" = 1 ] || { echo "es3old's file is not format 1.0"; exit 1; }
+# item 7). Kept in oldcache/ (format 1.0 is frozen): made once by ogles2
+# 1.3.2's host v3dglslc (`v3dglslc -o . es3old.vert es3old.frag`, then
+# v3dp/v3dp_hashname.py) from the sources whose SHA-256 sums follow; its
+# name is their program hash, so other sources would leave it unread and
+# test_old would test nothing: then make it again the same way.
+ES3OLD_SUMS="e2a9ed0bd55e2a5ba63e83e9bf04c5e6d6b230a7c3a080523daadb657fbc0573 5b2a91fe7b56c335aee569f7e99114c13f671b6465c4e97709c9e95ecb5ced63"
+[ "$(cat "$PKG/bin/shaders/es3old.vert" | sha256sum | cut -d' ' -f1) $(cat "$PKG/bin/shaders/es3old.frag" | sha256sum | cut -d' ' -f1)" = "$ES3OLD_SUMS" ] ||
+    { echo "es3old's sources changed: make oldcache/'s format 1.0 file again (see build.sh)"; exit 1; }
+[ "$(od -An -tu2 -j4 -N2 "$HERE"/oldcache/*.v3dp | tr -d ' ')" = 1 ] || { echo "oldcache/'s file is not format 1.0"; exit 1; }
 mkdir -p "$PKG/oldcache"
-cp "$O"/*.v3dp "$PKG/oldcache/"
-rm -rf "$O"
+cp "$HERE"/oldcache/*.v3dp "$PKG/oldcache/"
