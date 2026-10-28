@@ -1,0 +1,16 @@
+#version 310 es
+// Arrays of arrays of images (GLES3 plan stage D): img[i][j] is unit
+// 3i + j (Mesa patch 0018: [1][2] was 7); each image's texel holds 100 and
+// its unit.
+layout(local_size_x = 1) in;
+layout(binding = 0, r32ui) readonly uniform highp uimage2D img[2][3];
+layout(std430, binding = 0) buffer Out { highp uint v[6]; } o;
+void main()
+{
+    o.v[0] = imageLoad(img[0][0], ivec2(0)).x;
+    o.v[1] = imageLoad(img[0][1], ivec2(0)).x;
+    o.v[2] = imageLoad(img[0][2], ivec2(0)).x;
+    o.v[3] = imageLoad(img[1][0], ivec2(0)).x;
+    o.v[4] = imageLoad(img[1][1], ivec2(0)).x;
+    o.v[5] = imageLoad(img[1][2], ivec2(0)).x;
+}

@@ -1,0 +1,17 @@
+diff --git a/src/compiler/glsl/gl_nir_lower_images.c b/src/compiler/glsl/gl_nir_lower_images.c
+index 27949f98355..5aa304cb4cc 100644
+--- a/src/compiler/glsl/gl_nir_lower_images.c
++++ b/src/compiler/glsl/gl_nir_lower_images.c
+@@ -53,7 +53,11 @@ type_size_align_1(const struct glsl_type *type, unsigned *size, unsigned *align)
+       s = 1;
+ 
+    *size = s;
+-   *align = s;
++   /* ogles2: 1, not s: nir_build_deref_offset rounds an array's stride up
++    * with ALIGN_POT, which takes powers of two only, so image2D[2][3]'s
++    * [1][2] became 1 * ALIGN_POT(3, 3) + 2 = 7 instead of 5 (past the six
++    * units); slots are packed, any alignment of 1 is exact */
++   *align = 1;
+ }
+ 
+ static bool

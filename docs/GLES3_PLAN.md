@@ -3046,8 +3046,15 @@ stopped.
      its location and i on; transform feedback varyings are named as given
      (no `[0]`). `program_interface_query` after them: 2834 passed, 2 failed:
      `uniform.location.default_block.array.array.{image_2d,iimage_2d_array}`,
-     whose arrays of arrays of images crash Mesa's compile of the key-state
-     dispatch (every unit bound; the host compiler ends: open, Mesa's). dEQP-GLES31 before these: `state_query` 599 of 599
+     whose arrays of arrays of images crashed the host compiler in the
+     key-state dispatch. **Fixed (2026-10-28), Mesa patch 0018:**
+     `gl_nir_lower_images` gives an array's alignment as its size, and
+     `nir_build_deref_offset` rounds strides with `ALIGN_POT` (powers of
+     two only), so `image2D[2][3]`'s `[1][2]` was image 7 of 6 (stride 5)
+     and `v3d_write_uniforms` read an unbound slot; alignment 1 now
+     (a Mesa driver meets it only when it draws: compiles are lazy there).
+     `m8_draw`'s `test_images_aoa` (`es31aoa.comp`); `program_interface_query`
+     2836 of 2836 (1913 not supported). dEQP-GLES31 before these: `state_query` 599 of 599
      (732 not supported), `ssbo` 2023 passed, 38 failed (412 before the
      listing: the rest unsized arrays of structures in instance arrays and
      random layouts, "shader execution failed"), `program_interface_query`
@@ -3103,6 +3110,17 @@ stopped.
    now `nrecipe`'s 65535 (a dispatch's stream grows to fit); its group 50
    of 50. `image_load_store` 622 of 622 (above); `stencil_texturing` 11 of
    11 once D32F_S8's uploaded stencil was kept (item 4); `fbo` 74 of 74.
+   The groups not run before: `texture` 490 of 490 (2103 not supported:
+   cube map arrays, texture buffers, border clamp and the like),
+   `tessellation_geometry_interaction` 1 of 1 (30 not supported); wholly
+   not supported (ES 3.2 and extensions the library does not offer):
+   `sample_shading` 28, `shaders.sample_variables` 207,
+   `shaders.multisample_interpolation` 195, `shaders.framebuffer_fetch` 44,
+   `blend_equation_advanced` 102, `android_extension_pack` 56,
+   `primitive_bounding_box` 227, `geometry_shading` 207, `tessellation`
+   406, `copy_image` 12,395. Every group of `gles31-main` has now run on the
+   A1200 at least once; open: `draw_indirect` (restarts, parked above) and
+   `debug`'s 1121 cases that need `GL_KHR_debug` (the developer's call).
 
 Done when: dEQP-GLES31 passes except documented deviations, as GLES2 and
 GLES3 do; `GL_VERSION` "OpenGL ES 3.1 ogles2.library 2.2"; **release 2.2**.

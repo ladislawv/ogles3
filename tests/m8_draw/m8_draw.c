@@ -2480,6 +2480,52 @@ static void test_images_r32f(void)
     glDeleteProgram(px);
 }
 
+/* Arrays of arrays of images (GLES3 plan stage D item 2): es31aoa's
+ * img[2][3] at units 0 to 5, each a 1x1 R32UI of 100 + its unit, read
+ * img[i][j] from unit 3i + j (Mesa patch 0018). */
+static void test_images_aoa(void)
+{
+    GLuint p = compute_program("es31aoa"), t[6], b, v;
+    const GLuint *d;
+    int i, ok;
+    if (!p) {
+        check(0, "images aoa: es31aoa links");
+        return;
+    }
+    glGenTextures(6, t);
+    for (i = 0; i < 6; i++) {
+        v = 100 + (GLuint)i;
+        glBindTexture(GL_TEXTURE_2D, t[i]);
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_R32UI, 1, 1);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, &v);
+        glBindImageTexture((GLuint)i, t[i], 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32UI);
+    }
+    glGenBuffers(1, &b);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, b);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, 6 * 4, 0, GL_DYNAMIC_READ);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, b);
+    glUseProgram(p);
+    glDispatchCompute(1, 1, 1);
+    glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT);
+    d = (const GLuint *)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, 6 * 4, GL_MAP_READ_BIT);
+    ok = d != 0;
+    for (i = 0; ok && i < 6; i++)
+        if (d[i] != 100 + (GLuint)i) {
+            printf("     img[%d][%d] read %lu\n", i / 3, i % 3, (unsigned long)d[i]);
+            ok = 0;
+        }
+    if (d)
+        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+    check(ok && glGetError() == GL_NO_ERROR, "images aoa: img[i][j] reads unit 3i + j");
+    for (i = 0; i < 6; i++)
+        glBindImageTexture((GLuint)i, 0, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32UI);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    glDeleteBuffers(1, &b);
+    glDeleteTextures(6, t);
+    glUseProgram(0);
+    glDeleteProgram(p);
+}
+
 /* ES 3.1's multisample textures (GLES3 plan stage D item 4): a 4x RGBA8
  * 16x16 texture, its queries and errors, cleared through a framebuffer
  * (a 4x job storing every sample) to (0.2, 0.4, 0.6), and es31ms reading
@@ -3186,6 +3232,8 @@ int main(void)
                 test_images();
             if (!skipped("images_r32f"))
                 test_images_r32f();
+            if (!skipped("images_aoa"))
+                test_images_aoa();
             if (!skipped("ms_texture"))
                 test_ms_texture();
             if (!skipped("pipelines"))
