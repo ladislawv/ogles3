@@ -4,7 +4,7 @@
  * ogles3.library for AmigaOS 3.x on PiStorm (Raspberry Pi 4, V3D 4.2):
  * names, versions, context tags and error codes.
  *
- * Tag NAMES follow AmigaOS 4's ogles3.library so that source written for it
+ * Tag NAMES follow AmigaOS 4's ogles2.library so that source written for it
  * compiles unchanged; their VALUES are this library's own (plan section 6.4).
  * The dispatch table is in <libraries/ogles3_dispatch.h> (generated).
  */
@@ -88,7 +88,7 @@ extern "C" {
 #define OGLES3_CCE_NOT_IMPLEMENTED 6  /* development builds: entry not written yet */
 
 /* Enums of the extensions ogles2 offers that <GLES2/gl2ext.h> lacks, with
- * the names AmigaOS 4's ogles3.library uses (desktop GL's, no suffix). */
+ * the names AmigaOS 4's ogles2.library uses (desktop GL's, no suffix). */
 #ifndef GL_TEXTURE_LOD_BIAS
 #define GL_TEXTURE_LOD_BIAS           0x8501 /* EXT_texture_lod_bias: a texture parameter */
 #define GL_MAX_TEXTURE_LOD_BIAS       0x84FD

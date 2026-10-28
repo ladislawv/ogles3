@@ -1,5 +1,5 @@
 # agl* entries of the dispatch table (plan section 6.4; names and argument
-# lists as AmigaOS 4's ogles3.library, from glSnoop). One per line:
+# lists as AmigaOS 4's ogles2.library, from glSnoop). One per line:
 #   name | return type | arguments after the context | context | client wrapper
 # context:  ctx   the library entry takes struct OGLES3Context *ctx first:
 #                 the client passes the program's current context
