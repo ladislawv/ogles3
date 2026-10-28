@@ -27,8 +27,10 @@ speed against 1.x. `release/build_release.sh` builds
 against the ogles2 names). On the A1200 from the release tree (the
 library in `Examples/libs/`, no compiler): the four examples run in ES 3.1
 contexts from their shipped binaries; `boingocean` 54.8 fps in its
-window, `boing2026` 49.7 fps at 640x480 (1.3.2's ReadMe: about 53: to
-check before 1.0). Found on the way: the m68k compiler lacked Mesa patch
+window, `boing2026` 49.7 fps at 640x480 (1.3.2's ReadMe: about 53; the Pi
+then ran at 2.2 GHz, now at its default clock, so not comparable). The
+source is to be published as github.com/ladislawv/ogles3 (the ReadMe's
+link; the private repository ogles3.1 renamed to it). Found on the way: the m68k compiler lacked Mesa patch
 0018 (only the host one had been rebuilt; `es31aoa` in `compare_v3dp.sh`
 caught it).
 

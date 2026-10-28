@@ -139,7 +139,7 @@ for ogles2.library 1.x builds with its #include lines changed to
 
 The import library and the headers are MIT-licensed: programs of any
 licence may use them. The source of everything here, the compiler's
-included, is at https://github.com/ladislawv/ogles2.
+included, is at https://github.com/ladislawv/ogles3.
 
 Conformance
 -----------
