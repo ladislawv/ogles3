@@ -30,7 +30,7 @@ contexts from their shipped binaries; `boingocean` 54.8 fps in its
 window, `boing2026` 49.7 fps at 640x480 (1.3.2's ReadMe: about 53; the Pi
 then ran at 2.2 GHz, now at its default clock, so not comparable). The
 source is to be published as github.com/ladislawv/ogles3 (the ReadMe's
-link; the private repository ogles3.1 renamed to it). Found on the way: the m68k compiler lacked Mesa patch
+link; the private repository ogles3.1 renamed to it on 2026-10-28, done). Found on the way: the m68k compiler lacked Mesa patch
 0018 (only the host one had been rebuilt; `es31aoa` in `compare_v3dp.sh`
 caught it).
 
@@ -71,7 +71,7 @@ Mesa's driver, so they could follow later as an extension
 ## 1. Where the work lives, and releases
 
 - **Private until released.** The branch `gles3` lives in the private
-  repository `github.com/ladislawv/ogles3.1`, in a working copy of its own
+  repository `github.com/ladislawv/ogles3` (named ogles3.1 until 2026-10-28), in a working copy of its own
   beside the ogles2 clone; the public `github.com/ladislawv/ogles2` is a
   fetch-only remote there (`ogles2`), and a `pre-push` hook refuses `gles3`
   to it. `local.env` (not in git) sends this copy's builds to
