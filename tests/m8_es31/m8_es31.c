@@ -327,6 +327,92 @@ static void in_es30(void)
     check(glGetError() == GL_INVALID_ENUM, "ES 3.0: GL_SHADER_STORAGE_BUFFER_BINDING is GL_INVALID_ENUM");
 }
 
+/* KHR_debug (GLES3 plan §7, item 7): a callback's message for an error,
+ * the log without one, an inserted message, a debug group's push and pop
+ * messages and its stack errors, a filter, labels and the limits. */
+static GLenum cb_source, cb_type, cb_severity;
+static GLuint cb_id;
+static int cb_calls;
+static char cb_text[64];
+
+static void debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+                           const GLchar *message, const void *user)
+{
+    cb_source = source;
+    cb_type = type;
+    cb_id = id;
+    cb_severity = severity;
+    cb_calls += user == (const void *)&cb_calls;
+    strncpy(cb_text, message, sizeof(cb_text) - 1);
+    cb_text[sizeof(cb_text) - 1] = 0;
+}
+
+static void khr_debug(void)
+{
+    static const char text[] = "an application's message";
+    GLenum src[2], type[2], sev[2];
+    GLuint id[2], b = 0, n;
+    GLsizei len[2], l = -1;
+    char log[128], label[16];
+    void *fn = 0;
+    check(strstr((const char *)glGetString(GL_EXTENSIONS), "GL_KHR_debug") != 0, "KHR_debug: offered");
+    check(!glIsEnabled(GL_DEBUG_OUTPUT_KHR) && get_int(GL_DEBUG_GROUP_STACK_DEPTH_KHR) == 1 &&
+              get_int(GL_MAX_DEBUG_MESSAGE_LENGTH_KHR) == 256 && get_int(GL_MAX_DEBUG_LOGGED_MESSAGES_KHR) == 64 &&
+              get_int(GL_MAX_DEBUG_GROUP_STACK_DEPTH_KHR) == 64 && get_int(GL_MAX_LABEL_LENGTH_KHR) == 256,
+          "KHR_debug: output off, its limits");
+    glEnable(GL_DEBUG_OUTPUT_KHR);
+    glDebugMessageCallbackKHR(debug_callback, &cb_calls);
+    glGetPointervKHR(GL_DEBUG_CALLBACK_FUNCTION_KHR, &fn);
+    glEnable(0x1234); /* GL_INVALID_ENUM */
+    check(cb_calls == 1 && cb_source == GL_DEBUG_SOURCE_API_KHR && cb_type == GL_DEBUG_TYPE_ERROR_KHR &&
+              cb_id == GL_INVALID_ENUM && cb_severity == GL_DEBUG_SEVERITY_HIGH_KHR && cb_text[0] &&
+              glGetError() == GL_INVALID_ENUM && fn == (void *)debug_callback,
+          "KHR_debug: an error is a message to the callback");
+    glDebugMessageCallbackKHR(0, 0);
+    glEnable(0x1234);
+    glGetError();
+    glDebugMessageInsertKHR(GL_DEBUG_SOURCE_APPLICATION_KHR, GL_DEBUG_TYPE_MARKER_KHR, 7,
+                            GL_DEBUG_SEVERITY_NOTIFICATION_KHR, -1, text);
+    n = get_int(GL_DEBUG_LOGGED_MESSAGES_KHR);
+    l = get_int(GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH_KHR);
+    check(n == 2 && glGetDebugMessageLogKHR(2, sizeof(log), src, type, id, sev, len, log) == 2 &&
+              src[0] == GL_DEBUG_SOURCE_API_KHR && type[0] == GL_DEBUG_TYPE_ERROR_KHR && l == len[0] &&
+              src[1] == GL_DEBUG_SOURCE_APPLICATION_KHR && id[1] == 7 && len[1] == (GLsizei)sizeof(text) &&
+              !strcmp(log + len[0], text) && get_int(GL_DEBUG_LOGGED_MESSAGES_KHR) == 0,
+          "KHR_debug: without a callback the log, an inserted message");
+    glPushDebugGroupKHR(GL_DEBUG_SOURCE_APPLICATION_KHR, 3, -1, "group");
+    glDebugMessageControlKHR(GL_DEBUG_SOURCE_API_KHR, GL_DEBUG_TYPE_ERROR_KHR, GL_DONT_CARE, 0, 0, GL_FALSE);
+    glEnable(0x1234); /* filtered out in the group */
+    check(get_int(GL_DEBUG_GROUP_STACK_DEPTH_KHR) == 2 && get_int(GL_DEBUG_LOGGED_MESSAGES_KHR) == 1,
+          "KHR_debug: a push message, an error filtered in the group");
+    glPopDebugGroupKHR();
+    glEnable(0x1234); /* the filter went with the group */
+    check(glGetDebugMessageLogKHR(2, 0, 0, type, id, 0, 0, 0) == 2 && type[0] == GL_DEBUG_TYPE_PUSH_GROUP_KHR &&
+              type[1] == GL_DEBUG_TYPE_POP_GROUP_KHR && id[1] == 3 &&
+              glGetDebugMessageLogKHR(1, 0, 0, type, 0, 0, 0, 0) == 1 && type[0] == GL_DEBUG_TYPE_ERROR_KHR,
+          "KHR_debug: the pop message, the filter gone with its group");
+    glGetError();
+    glPopDebugGroupKHR();
+    check(glGetError() == GL_STACK_UNDERFLOW_KHR, "KHR_debug: a pop past the default group: GL_STACK_UNDERFLOW");
+    glGetDebugMessageLogKHR(64, 0, 0, 0, 0, 0, 0, 0);
+    glGenBuffers(1, &b);
+    glBindBuffer(GL_ARRAY_BUFFER, b);
+    glObjectLabelKHR(GL_BUFFER_KHR, b, -1, "vertices");
+    glGetObjectLabelKHR(GL_BUFFER_KHR, b, sizeof(label), &l, label);
+    check(l == 8 && !strcmp(label, "vertices") && glGetError() == GL_NO_ERROR, "KHR_debug: a buffer's label");
+    glGetObjectLabelKHR(GL_BUFFER_KHR, b, 4, &l, label);
+    check(l == 3 && !strcmp(label, "ver"), "KHR_debug: a label cut to the buffer given");
+    glDeleteBuffers(1, &b);
+    glGetObjectLabelKHR(GL_BUFFER_KHR, b, sizeof(label), &l, label);
+    glObjectLabelKHR(0x1234, 1, -1, "x");
+    check(glGetError() == GL_INVALID_VALUE && glGetError() == GL_NO_ERROR,
+          "KHR_debug: a deleted buffer has no label (GL_INVALID_VALUE)");
+    glObjectLabelKHR(0x1234, 1, -1, "x");
+    check(glGetError() == GL_INVALID_ENUM, "KHR_debug: not an identifier: GL_INVALID_ENUM");
+    glGetDebugMessageLogKHR(64, 0, 0, 0, 0, 0, 0, 0);
+    glDisable(GL_DEBUG_OUTPUT_KHR);
+}
+
 int main(int argc, char **argv)
 {
     void *c31, *c30;
@@ -373,6 +459,7 @@ int main(int argc, char **argv)
         buffers();
         attrib_binding();
         others(gpu);
+        khr_debug();
         check(glGetError() == GL_NO_ERROR, "ES 3.1: no GL error left over");
         aglDestroyContext(c31);
         c30 = context(30, &err);

@@ -342,3 +342,14 @@ glValidateProgramPipeline
 glGetProgramPipelineiv
 glGetProgramPipelineInfoLog
 glCreateShaderProgramv
+glDebugMessageControlKHR
+glDebugMessageInsertKHR
+glDebugMessageCallbackKHR
+glGetDebugMessageLogKHR
+glPushDebugGroupKHR
+glPopDebugGroupKHR
+glObjectLabelKHR
+glGetObjectLabelKHR
+glObjectPtrLabelKHR
+glGetObjectPtrLabelKHR
+glGetPointervKHR

@@ -102,7 +102,7 @@ BOOL ogles2_state_dither(struct OGLES2Context *ctx)
 static void set_cap(struct OGLES2Context *ctx, GLenum cap, int on)
 {
     ULONG bit;
-    if (!ogles2_context_valid(ctx))
+    if (!ogles2_context_valid(ctx) || ogles2_debug_cap(ctx, cap, on, 0)) /* KHR_debug's two */
         return;
     bit = cap_bit(ctx, cap);
     if (!bit) {
@@ -131,8 +131,11 @@ void ogles2_glDisable(struct OGLES2Context *ctx, GLenum cap)
 GLboolean ogles2_glIsEnabled(struct OGLES2Context *ctx, GLenum cap)
 {
     ULONG bit;
+    GLboolean dbg;
     if (!ogles2_context_valid(ctx))
         return GL_FALSE;
+    if (ogles2_debug_cap(ctx, cap, -1, &dbg))
+        return dbg;
     bit = cap_bit(ctx, cap);
     if (!bit) {
         ogles2_error(ctx, GL_INVALID_ENUM);
@@ -1056,6 +1059,14 @@ static int lookup(struct OGLES2Context *ctx, GLenum pname, struct value *v)
             v->kind = K_INT;
             v->n = 1;
             return 1;
+        }
+        {
+            BOOL boolean;
+            if (ogles2_debug_query(ctx, pname, &v->i[0], &boolean)) { /* KHR_debug */
+                v->kind = boolean ? K_BOOL : K_INT;
+                v->n = 1;
+                return 1;
+            }
         }
         return ogles2_es3(ctx) && lookup_es3(ctx, pname, v);
     }

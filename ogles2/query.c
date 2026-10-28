@@ -131,6 +131,7 @@ static void end(struct OGLES2Context *ctx, struct OGLES2QueryState *qs, struct O
 /* ES 3.0 2.13: deleting an active query ends it. */
 void ogles2_glDeleteQueries(struct OGLES2Context *ctx, GLsizei n, const GLuint *ids)
 {
+    ogles2_labels_forget(ctx, GL_QUERY_KHR, n, ids); /* KHR_debug's labels of the names */
     struct OGLES2QueryState *qs;
     GLsizei k;
     if (!ogles2_es3_entry(ctx))

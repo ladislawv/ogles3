@@ -99,3 +99,15 @@ command glValidateProgramPipeline
 command glGetProgramPipelineiv
 command glGetProgramPipelineInfoLog
 command glCreateShaderProgramv
+# KHR_debug (every context version; ES 3.2's names without the suffix are not offered)
+command glDebugMessageControlKHR
+command glDebugMessageInsertKHR
+command glDebugMessageCallbackKHR
+command glGetDebugMessageLogKHR
+command glPushDebugGroupKHR
+command glPopDebugGroupKHR
+command glObjectLabelKHR
+command glGetObjectLabelKHR
+command glObjectPtrLabelKHR
+command glGetObjectPtrLabelKHR
+command glGetPointervKHR

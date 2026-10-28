@@ -213,6 +213,7 @@ void ogles2_glGenTransformFeedbacks(struct OGLES2Context *ctx, GLsizei n, GLuint
 
 void ogles2_glDeleteTransformFeedbacks(struct OGLES2Context *ctx, GLsizei n, const GLuint *ids)
 {
+    ogles2_labels_forget(ctx, GL_TRANSFORM_FEEDBACK, n, ids); /* KHR_debug's labels of the names */
     struct OGLES2XfbState *xs;
     GLsizei k;
     if (!ogles2_es3_entry(ctx))

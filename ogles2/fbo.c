@@ -612,6 +612,7 @@ void ogles2_glBindRenderbuffer(struct OGLES2Context *ctx, GLenum target, GLuint 
 
 void ogles2_glDeleteFramebuffers(struct OGLES2Context *ctx, GLsizei n, const GLuint *framebuffers)
 {
+    ogles2_labels_forget(ctx, GL_FRAMEBUFFER, n, framebuffers); /* KHR_debug's labels of the names */
     struct OGLES2FboState *fs;
     GLsizei k;
     int a;
@@ -646,6 +647,7 @@ void ogles2_glDeleteFramebuffers(struct OGLES2Context *ctx, GLsizei n, const GLu
 
 void ogles2_glDeleteRenderbuffers(struct OGLES2Context *ctx, GLsizei n, const GLuint *renderbuffers)
 {
+    ogles2_labels_forget(ctx, GL_RENDERBUFFER, n, renderbuffers); /* KHR_debug's labels of the names */
     struct OGLES2FboState *fs;
     struct OGLES2Context *m;
     struct OGLES2Framebuffer *fb;

@@ -69,6 +69,8 @@ GLboolean ogles2_glIsSync(struct OGLES2Context *ctx, GLsync sync)
 
 void ogles2_glDeleteSync(struct OGLES2Context *ctx, GLsync sync)
 {
+    if (ctx && ctx->share && ctx->share->labels)
+        ogles2_label_forget(ctx, GL_SYNC_FENCE, (ULONG)sync); /* KHR_debug's label */
     struct OGLES2Sync **p, *s;
     if (!ogles2_es3_entry(ctx) || !sync)
         return;

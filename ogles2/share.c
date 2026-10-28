@@ -83,6 +83,7 @@ BOOL ogles2_share_leave(struct OGLES2Context *ctx)
         return FALSE;
     }
     /* The modules freed the objects and their tables (members was 1). */
+    ogles2_labels_free(sh);
     FreeVec(sh);
     return TRUE;
 }

@@ -96,6 +96,7 @@ struct OGLES2Share
     GLuint nsmp;
     struct OGLES2Sync *syncs;         /* sync.c: ES 3.0's sync objects */
     struct OGLES2Buffer *orphans;     /* buffer.c: deleted buffers vertex array objects still use */
+    struct OGLES2Label *labels;       /* debug_khr.c: KHR_debug's object labels */
 };
 
 /* glPixelStorei's state for one direction (ES 3.0 3.7.1 and 4.3.1; the
@@ -831,6 +832,7 @@ struct OGLES2Context
     struct OGLES2Framebuffer *pend_fb; /* NULL: the default framebuffer */
     struct OGLES2Target pend_tg;
     UBYTE marker_depth;             /* EXT_debug_marker: groups pushed (debug.c) */
+    struct OGLES2Debug *dbg;        /* KHR_debug's state (debug_khr.c), NULL until first used */
     UBYTE job_discard;              /* EXT_discard_framebuffer: OGLES2_DISCARD_* the open job does not store */
     UBYTE job_noload;               /* and those it does not load (discarded before it began) */
     struct OGLES2VaoState *vao;     /* vao.c's (ES 3.0's vertex array objects), NULL until first used */
@@ -1180,6 +1182,14 @@ GLuint ogles2_vao_bound(const struct OGLES2Context *ctx);
 BOOL ogles2_vao_uses_buffer(struct OGLES2Context *ctx, const struct OGLES2Buffer *b);
 void ogles2_vaos_free(struct OGLES2Context *ctx);
 void ogles2_syncs_free(struct OGLES2Context *ctx); /* sync.c, with the group's last member */
+/* debug_khr.c: KHR_debug */
+void ogles2_debug_error(struct OGLES2Context *ctx, GLenum error); /* every GL error, as a message */
+BOOL ogles2_debug_cap(struct OGLES2Context *ctx, GLenum cap, int on, GLboolean *state);
+BOOL ogles2_debug_query(struct OGLES2Context *ctx, GLenum pname, GLint *v, BOOL *boolean);
+void ogles2_debug_free(struct OGLES2Context *ctx); /* and the context's own objects' labels */
+void ogles2_labels_free(struct OGLES2Share *sh);
+void ogles2_label_forget(struct OGLES2Context *ctx, GLenum identifier, ULONG name); /* a deleted name's label */
+void ogles2_labels_forget(struct OGLES2Context *ctx, GLenum identifier, GLsizei n, const GLuint *names); /* glDelete*'s */
 /* query.c: the occlusion counter off around the library's own draws; freed with the context */
 void ogles2_query_pause(struct OGLES2Context *ctx, BOOL pause);
 void ogles2_queries_free(struct OGLES2Context *ctx);

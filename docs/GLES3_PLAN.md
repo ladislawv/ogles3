@@ -3163,8 +3163,28 @@ stopped.
    `primitive_bounding_box` 227, `geometry_shading` 207, `tessellation`
    406, `copy_image` 12,395. Every group of `gles31-main` has now run on the
    A1200 at least once; `draw_indirect` 203 of 203 once its double free
-   was found (above); open: `debug`'s 1121 cases that need `GL_KHR_debug`
-   (the developer's call).
+   was found (above). **`GL_KHR_debug` (2026-10-28, the developer's call):**
+   `ogles2/debug_khr.c`, offered in every context version (Mesa's way):
+   the 11 `KHR` entries (appended to the table), `GL_DEBUG_OUTPUT` (off: no
+   context is a debug one) and `_SYNCHRONOUS` (messages are always given
+   in the call), a log of 64 messages of at most 256 characters, the
+   program's callback (a C function, arguments on the stack, called from
+   the calling task; a message made inside it is dropped), filters as
+   controls per debug group (newest first, from the top group down, else
+   the default: all but low severity), 64 groups with their push and pop
+   messages, labels of at most 256 characters in one list per share group
+   (by identifier and name; the container objects' also by context; a
+   `glDelete*` drops its names' labels, a shader's or program's at its
+   real free; a sync object's by address). Every GL error is a message
+   (`ogles2_error`, only while output is on): source API, type error, its
+   enum the id, high severity, the error's name as text. The generated
+   `<libraries/ogles2_dispatch.h>` includes `<GLES2/gl2ext.h>` for
+   `GLDEBUGPROCKHR` (the header probe passes in every order). +8.2 KB
+   (429,056 bytes). `m8_es31`'s `khr_debug` (11 checks); `m8-5` 58 of 58,
+   204 of 204. dEQP-GLES31 `debug` 1405 of 1405 (was 428: the
+   `negative_coverage.callbacks` and `.log` cases, filters, groups, labels,
+   state queries), 214 not supported (ES 3.2 and extensions not offered:
+   `EXT_texture_sRGB_decode`, tessellation, `OES_sample_variables`, ...).
 
 Done when: dEQP-GLES31 passes except documented deviations, as GLES2 and
 GLES3 do; `GL_VERSION` "OpenGL ES 3.1 ogles2.library 2.2"; **release 2.2**.

@@ -409,6 +409,7 @@ void ogles2_glGenBuffers(struct OGLES2Context *ctx, GLsizei n, GLuint *buffers)
 
 void ogles2_glDeleteBuffers(struct OGLES2Context *ctx, GLsizei n, const GLuint *buffers)
 {
+    ogles2_labels_forget(ctx, GL_BUFFER_KHR, n, buffers); /* KHR_debug's labels of the names */
     if (ogles2_context_valid(ctx))
         ogles2_trace(ctx, "glDeleteBuffers", n, n > 0 && buffers ? buffers[0] : 0);
     struct OGLES2BufState *bs;

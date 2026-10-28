@@ -190,6 +190,7 @@ static GLuint new_name(struct OGLES2Context *ctx, void *obj)
 static void free_shader(struct OGLES2Context *ctx, struct OGLES2Shader *s)
 {
     ctx->share->objects[s->name] = 0;
+    ogles2_label_forget(ctx, GL_SHADER_KHR, s->name);
     if (s->source)
         FreeVec(s->source);
     if (s->info_log)
@@ -264,6 +265,7 @@ static void set_log(struct OGLES2Program *p, const char *a, const char *b)
 static void free_program(struct OGLES2Context *ctx, struct OGLES2Program *p)
 {
     ctx->share->objects[p->name] = 0;
+    ogles2_label_forget(ctx, GL_PROGRAM_KHR, p->name);
     release_shader(ctx, p->vs);
     release_shader(ctx, p->fs);
     release_shader(ctx, p->cs);
@@ -2341,6 +2343,7 @@ void ogles2_glGenProgramPipelines(struct OGLES2Context *ctx, GLsizei n, GLuint *
 
 void ogles2_glDeleteProgramPipelines(struct OGLES2Context *ctx, GLsizei n, const GLuint *pipelines)
 {
+    ogles2_labels_forget(ctx, GL_PROGRAM_PIPELINE_KHR, n, pipelines); /* KHR_debug's labels of the names */
     GLsizei k;
     if (!ogles2_es31_entry(ctx))
         return;

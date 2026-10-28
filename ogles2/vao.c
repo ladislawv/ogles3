@@ -187,6 +187,7 @@ void ogles2_glGenVertexArrays(struct OGLES2Context *ctx, GLsizei n, GLuint *arra
 
 void ogles2_glDeleteVertexArrays(struct OGLES2Context *ctx, GLsizei n, const GLuint *arrays)
 {
+    ogles2_labels_forget(ctx, GL_VERTEX_ARRAY_KHR, n, arrays); /* KHR_debug's labels of the names */
     if (ogles2_es3_entry(ctx))
         deletevertexarrays(ctx, n, arrays);
 }
@@ -210,6 +211,7 @@ void ogles2_glGenVertexArraysOES(struct OGLES2Context *ctx, GLsizei n, GLuint *a
 
 void ogles2_glDeleteVertexArraysOES(struct OGLES2Context *ctx, GLsizei n, const GLuint *arrays)
 {
+    ogles2_labels_forget(ctx, GL_VERTEX_ARRAY_KHR, n, arrays); /* KHR_debug's labels of the names */
     if (ogles2_context_valid(ctx))
         deletevertexarrays(ctx, n, arrays);
 }

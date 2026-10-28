@@ -629,6 +629,7 @@ int ogles2_image_query(struct OGLES2Context *ctx, GLenum pname, GLuint index, GL
 
 void ogles2_glDeleteTextures(struct OGLES2Context *ctx, GLsizei n, const GLuint *textures)
 {
+    ogles2_labels_forget(ctx, GL_TEXTURE, n, textures); /* KHR_debug's labels of the names */
     struct OGLES2TexState *ts;
     struct OGLES2Context *m;
     GLsizei k;
@@ -5609,6 +5610,7 @@ void ogles2_glGenSamplers(struct OGLES2Context *ctx, GLsizei count, GLuint *samp
  * on there until unbound; here every member of the share group unbinds it. */
 void ogles2_glDeleteSamplers(struct OGLES2Context *ctx, GLsizei count, const GLuint *samplers)
 {
+    ogles2_labels_forget(ctx, GL_SAMPLER_KHR, count, samplers); /* KHR_debug's labels of the names */
     struct OGLES2Context *m;
     GLsizei k;
     int u;

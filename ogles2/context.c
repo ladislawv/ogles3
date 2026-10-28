@@ -15,6 +15,8 @@
 
 void ogles2_error(struct OGLES2Context *ctx, GLenum error)
 {
+    if (ctx && ctx->dbg) /* KHR_debug: each error a message, the first kept or not */
+        ogles2_debug_error(ctx, error);
     if (ctx && ctx->error == GL_NO_ERROR)
         ctx->error = error;
 }
@@ -259,6 +261,7 @@ void ogles2_aglDestroyContext(struct OGLES2Context *ctx)
     ogles2_queries_free(ctx);
     ogles2_syncs_free(ctx);
     ogles2_buffers_free(ctx);
+    ogles2_debug_free(ctx);
     ogles2_trace(ctx, "aglDestroyContext: buffers freed", -1, 0);
     /* The modules freed the shared objects if it was the group's last
      * member (share.c), else only what is the context's own. A group with
@@ -350,7 +353,7 @@ static const struct { const char *name; UBYTE in; } extensions[] = {
     {"GL_OES_standard_derivatives", EXT_ALL}, {"GL_OES_get_program_binary", EXT_ALL},
     {"GL_OES_texture_float", EXT_ALL}, {"GL_OES_texture_half_float", EXT_ALL},
     {"GL_OES_texture_half_float_linear", EXT_ALL}, {"GL_OES_depth_texture", EXT_ALL},
-    {"GL_ARB_texture_rectangle", EXT_ALL}, {"GL_EXT_debug_marker", EXT_ALL},
+    {"GL_ARB_texture_rectangle", EXT_ALL}, {"GL_EXT_debug_marker", EXT_ALL}, {"GL_KHR_debug", EXT_ALL},
     {"GL_EXT_texture_compression_dxt1", EXT_ALL}, {"GL_EXT_texture_compression_s3tc", EXT_ALL},
     {"GL_ANGLE_texture_compression_dxt3", EXT_ALL}, {"GL_ANGLE_texture_compression_dxt5", EXT_ALL},
     {"GL_EXT_clip_control", EXT_ALL}, {"GL_EXT_draw_buffers", EXT_ALL},
