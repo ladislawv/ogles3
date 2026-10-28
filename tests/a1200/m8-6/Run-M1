@@ -1,0 +1,65 @@
+; Run-M1 - ogles2 M8 run 6: dEQP-GLES31 draw_indirect's draws, over and over.
+;   See ReadMe.txt.
+;   CD to this directory, then:   Execute Run-M1
+;   ARGS: m8_indirect's (iterations, direct, noread, nodelete, one, first0)
+;   PROGRESS=1: the library logs to RAM:ogles2.log (tools/amictl/deqp_watch.py
+;   reads it and RAM:deqp-progress.txt while this runs)
+; Nothing is installed: libs/ is added to LIBS: for the run and removed at
+; the end; OGLES2Cache: points at cache/. Output goes to results/.
+.key ARGS/K,PROGRESS/K
+.def ARGS "500"
+.def PROGRESS 0
+.bra {
+.ket }
+
+FailAt 21
+If NOT EXISTS libs/ogles2.library
+  Echo "Please CD into the ogles2-m8-6 directory first,"
+  Echo "then run:  Execute Run-M1"
+  Quit 20
+EndIf
+
+Assign M8R6: ""
+If NOT EXISTS M8R6:results
+  MakeDir M8R6:results
+EndIf
+If NOT EXISTS M8R6:cache
+  MakeDir M8R6:cache
+EndIf
+Assign OGLES2Cache: M8R6:cache
+Echo "ogles2 M8 run 6: m8_indirect {ARGS}" >>M8R6:results/00-progress.txt
+Date >>M8R6:results/00-progress.txt
+; An ogles2 installed in LIBS: would win over the package's (added after it).
+List LIBS:ogles2#? LIBS:v3dglslc >M8R6:results/00-libs.txt
+If {PROGRESS} EQ 1 VAL
+  Delete RAM:deqp-progress.txt RAM:ogles2.log QUIET >NIL:
+  SetEnv OGLES2/LogFile RAM:ogles2.log
+Else
+  SetEnv OGLES2/LogFile M8R6:results/ogles2.log
+EndIf
+; m8_indirect reads its shaders from shaders/ here.
+CD M8R6:bin
+Assign LIBS: M8R6:libs ADD
+Avail FLUSH >NIL:
+
+Echo "m8_indirect {ARGS}: a 256x256 window, triangles redrawn quickly."
+M8R6:bin/m8_indirect {ARGS} >M8R6:results/1-m8_indirect.txt
+Echo "m8_indirect done" >>M8R6:results/00-progress.txt
+
+If {PROGRESS} EQ 1 VAL
+  Copy RAM:ogles2.log RAM:deqp-progress.txt M8R6:results/ QUIET >NIL:
+EndIf
+Avail FLUSH >NIL:
+Assign LIBS: M8R6:libs REMOVE
+CD M8R6:
+UnSetEnv OGLES2/LogFile
+Assign OGLES2Cache:
+If NOT EXISTS M8R6:results/notes.txt
+  Copy M8R6:notes-template.txt M8R6:results/notes.txt
+EndIf
+List M8R6:results >M8R6:results/99-files.txt
+Echo "finished" >>M8R6:results/00-progress.txt
+Date >>M8R6:results/00-progress.txt
+Assign M8R6:
+Echo ""
+Echo "Done. Results are in results/."

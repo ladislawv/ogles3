@@ -1070,13 +1070,19 @@ GLenum ogles2_buffer_dispatch_indirect(struct OGLES2Context *ctx, GLintptr offse
 
 /* glDrawArraysIndirect's and glDrawElementsIndirect's command (ES 3.1
  * 10.5), `bytes` at `offset` in the GL_DRAW_INDIRECT_BUFFER binding, into
- * words: 0, or the error (Mesa's order: GL_INVALID_VALUE for an offset
- * not a word's, GL_INVALID_OPERATION without a buffer or past its end; a
- * negative offset is past it, dEQP-GLES31's signed32_wrap case). */
+ * words: 0, or the error (GL_INVALID_OPERATION without a buffer, then
+ * GL_INVALID_VALUE for an offset not a word's, GL_INVALID_OPERATION past
+ * its end; a negative offset is past it, dEQP-GLES31's signed32_wrap
+ * case). */
 GLenum ogles2_buffer_draw_indirect(struct OGLES2Context *ctx, GLintptr offset, ULONG bytes, ULONG *words)
 {
     struct OGLES2BufState *bs = bs_get(ctx);
     struct OGLES2Buffer *b = bs ? bs->draw_indirect : 0;
+    /* no buffer before the alignment (Mesa checks the alignment first): a
+     * client pointer, dEQP's negative.client_command_array, is aligned on
+     * a PC, not always on the 68k; ES 3.1 orders neither */
+    if (!b)
+        return GL_INVALID_OPERATION;
     if (offset & 3)
         return GL_INVALID_VALUE;
     if (!b || !b->data || (ULONG)offset > b->size || b->size - (ULONG)offset < bytes)

@@ -132,9 +132,16 @@ static void drop_refs(struct OGLES2Context *ctx, struct OGLES2Xfb *o)
     o->active = o->paused = FALSE;
     o->program = 0;
     ogles2_program_unref(ctx, p);
+    /* each buffer once, after every reference went: one bound at two
+     * indices was freed twice (as draw.c's vab_refresh) */
     for (k = 0; k < OGLES2_MAX_XFB_BUFFERS; k++) {
         struct OGLES2Buffer *b = o->bind[k].b;
-        o->bind[k].b = 0;
+        int j;
+        if (!b)
+            continue;
+        for (j = k; j < OGLES2_MAX_XFB_BUFFERS; j++)
+            if (o->bind[j].b == b)
+                o->bind[j].b = 0;
         ogles2_buffer_release(ctx, b);
     }
 }

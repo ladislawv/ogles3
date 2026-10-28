@@ -131,20 +131,31 @@ static ULONG elem_bytes(const struct OGLES2Array *a)
 /* ES 3.1's vertex attribute binding (stage D item 5): every attribute that
  * reads binding j takes its buffer, offset, stride and divisor (the fields
  * the draws read), the attribute's relative offset added. The buffers no
- * longer referenced are released (a deleted one only they held). GLES2
- * and ES 3.0 contexts change formats and bindings together, attribute i on
- * binding i, so the draws see what they always saw. */
-static void vab_refresh(struct OGLES2Context *ctx, GLuint j)
+ * longer referenced, and `prev` (the binding's buffer before the caller
+ * changed it, or 0), are released once each after every reference changed:
+ * a deleted buffer only they held is freed, and releasing it twice (two
+ * attributes on the binding, or an attribute's and the binding's
+ * reference) freed it twice (dEQP-GLES31 draw_indirect's restarts, exec's
+ * AN_FreeTwice). GLES2 and ES 3.0 contexts change formats and bindings
+ * together, attribute i on binding i, so the draws see what they always
+ * saw. */
+static void vab_refresh(struct OGLES2Context *ctx, GLuint j, struct OGLES2Buffer *prev)
 {
-    struct OGLES2Buffer *old[OGLES2_MAX_VERTEX_ATTRIBS];
+    struct OGLES2Buffer *old[OGLES2_MAX_VERTEX_ATTRIBS + 1];
     const struct OGLES2Array *bnd = &ctx->array[j];
-    int i, n = 0;
+    int i, k, n = 0;
+    if (prev && prev != bnd->bbuffer)
+        old[n++] = prev;
     for (i = 0; i < OGLES2_MAX_VERTEX_ATTRIBS; i++) {
         struct OGLES2Array *a = &ctx->array[i];
         if (a->binding != j)
             continue;
-        if (a->buffer != bnd->bbuffer)
-            old[n++] = a->buffer;
+        if (a->buffer && a->buffer != bnd->bbuffer) {
+            for (k = 0; k < n && old[k] != a->buffer; k++)
+                ;
+            if (k == n)
+                old[n++] = a->buffer;
+        }
         a->buffer = bnd->bbuffer;
         a->pointer = (const UBYTE *)bnd->boffset + a->reloffset;
         a->stride = bnd->bstride;
@@ -198,9 +209,7 @@ static BOOL set_pointer(struct OGLES2Context *ctx, GLuint index, GLint size, GLe
     bnd->bbuffer = ogles2_buffer_array(ctx); /* GLES 2.0 2.9: captured now */
     bnd->boffset = pointer;
     bnd->bstride = stride ? stride : (GLsizei)elem_bytes(a);
-    vab_refresh(ctx, index);
-    if (old != bnd->bbuffer)
-        ogles2_buffer_release(ctx, old); /* a vertex array object's deleted buffer */
+    vab_refresh(ctx, index, old); /* old released there: a vertex array object's deleted buffer */
     return TRUE;
 }
 
@@ -236,9 +245,9 @@ static void attrib_divisor(struct OGLES2Context *ctx, GLuint index, GLuint divis
     old = ctx->array[index].binding;
     ctx->array[index].binding = (UBYTE)index;
     ctx->array[index].bdivisor = divisor;
-    vab_refresh(ctx, index);
+    vab_refresh(ctx, index, 0);
     if (old != index)
-        vab_refresh(ctx, old);
+        vab_refresh(ctx, old, 0);
 }
 
 /* ---- ES 3.1's vertex attribute binding (stage D item 5) ---- */
@@ -277,9 +286,7 @@ void ogles2_glBindVertexBuffer(struct OGLES2Context *ctx, GLuint bindingindex, G
     bnd->bbuffer = b;
     bnd->boffset = (const void *)offset;
     bnd->bstride = stride;
-    vab_refresh(ctx, bindingindex);
-    if (old != b)
-        ogles2_buffer_release(ctx, old);
+    vab_refresh(ctx, bindingindex, old);
 }
 
 /* glVertexAttribFormat and glVertexAttribIFormat (`integer`). */
@@ -306,7 +313,7 @@ static void attrib_format(struct OGLES2Context *ctx, GLuint index, GLint size, G
     a->normalized = normalized ? GL_TRUE : GL_FALSE;
     a->integer = integer;
     a->reloffset = relativeoffset;
-    vab_refresh(ctx, a->binding);
+    vab_refresh(ctx, a->binding, 0);
 }
 
 void ogles2_glVertexAttribFormat(struct OGLES2Context *ctx, GLuint attribindex, GLint size, GLenum type,
@@ -334,9 +341,9 @@ void ogles2_glVertexAttribBinding(struct OGLES2Context *ctx, GLuint attribindex,
     }
     old = ctx->array[attribindex].binding;
     ctx->array[attribindex].binding = (UBYTE)bindingindex;
-    vab_refresh(ctx, bindingindex);
+    vab_refresh(ctx, bindingindex, 0);
     if (old != bindingindex)
-        vab_refresh(ctx, old);
+        vab_refresh(ctx, old, 0);
 }
 
 void ogles2_glVertexBindingDivisor(struct OGLES2Context *ctx, GLuint bindingindex, GLuint divisor)
@@ -348,7 +355,7 @@ void ogles2_glVertexBindingDivisor(struct OGLES2Context *ctx, GLuint bindinginde
         return;
     }
     ctx->array[bindingindex].bdivisor = divisor;
-    vab_refresh(ctx, bindingindex);
+    vab_refresh(ctx, bindingindex, 0);
 }
 
 /* glGetIntegeri_v's GL_VERTEX_BINDING_* (state.c asks): -1 another query,

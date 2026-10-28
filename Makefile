@@ -68,7 +68,7 @@ CLIENT_OBJ := $(patsubst %.c,$(B)/obj/%.o,$(CLIENT_SRC)) $(B)/obj/client/lvo.o \
 .PHONY: all gen clean vbcc
 all: $(B)/fpcheck.ok $(B)/libv3dcore.a $(B)/ogles2.library $(B)/libogles2.a $(B)/tests/abi_layout $(B)/tests/smoke \
      $(B)/tests/abi_probe $(B)/tests/m1_clear $(B)/tests/m1_probe $(B)/tests/m1_draw $(B)/tests/m1_hwprobe $(B)/tests/m1_soak $(B)/tests/m2_link $(B)/tests/m2_texture $(B)/tests/m2_elements $(B)/tests/m2_buffers $(B)/tests/m4_stress $(B)/tests/m4_depth $(B)/tests/m4_setbitmap $(B)/tests/gears_gles2 $(B)/tests/cachetime $(B)/tests/emuspeed $(B)/tests/m5_fbo \
-     $(B)/tests/rtt_churn $(B)/tests/m6_share $(B)/tests/m6_tasks $(B)/tests/m6_ext $(B)/tests/m6_tfu $(B)/tests/m6_flip $(B)/tests/m6_vsync $(B)/tests/m6_msaa $(B)/tests/m7_points $(B)/tests/m7_s3tc $(B)/tests/m7_clip $(B)/tests/m7_mrt $(B)/tests/m7_half $(B)/tests/m7_copy $(B)/tests/m8_es3 $(B)/tests/m8_draw $(B)/tests/m8_es31 $(B)/cmd/OGLES2Log $(B)/amictl/amictld \
+     $(B)/tests/rtt_churn $(B)/tests/m6_share $(B)/tests/m6_tasks $(B)/tests/m6_ext $(B)/tests/m6_tfu $(B)/tests/m6_flip $(B)/tests/m6_vsync $(B)/tests/m6_msaa $(B)/tests/m7_points $(B)/tests/m7_s3tc $(B)/tests/m7_clip $(B)/tests/m7_mrt $(B)/tests/m7_half $(B)/tests/m7_copy $(B)/tests/m8_es3 $(B)/tests/m8_draw $(B)/tests/m8_es31 $(B)/tests/m8_indirect $(B)/cmd/OGLES2Log $(B)/amictl/amictld \
      $(B)/amictl/v3dglslc-remote
 
 # ---- generated code (plan section 6.6). Re-run when the inputs or the set of
@@ -223,6 +223,9 @@ $(B)/tests/m8_draw: tests/m8_draw/m8_draw.c $(B)/libogles2.a
 $(B)/tests/m8_es31: tests/m8_es31/m8_es31.c $(B)/libogles2.a
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
+$(B)/tests/m8_indirect: tests/m8_indirect/m8_indirect.c $(B)/libogles2.a
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(INC) $< -L$(B) -logles2 -o $@
 # The GLES3 headers with <proto/ogles2.h> in every order (docs/GLES3_PLAN.md
 # §3): GCC 6.5 and GCC 16 with -Werror, vbcc without a message but its
 # warnings inside Khronos' headers (gl2ext.h's GL_MESA_sampler_objects repeats
@@ -373,7 +376,7 @@ $(B)/v3dp/.stamp: $(wildcard tests/common/*.h) tools/v3dp_tests/emit.c v3dp/v3dp
 	    tools/v3dglslc/test/shaders/es3inst.* tools/v3dglslc/test/shaders/es3int.* \
 	    tools/v3dglslc/test/shaders/es3utex.* tools/v3dglslc/test/shaders/es3itex.* \
 	    tools/v3dglslc/test/shaders/es3rt.* tools/v3dglslc/test/shaders/es3xfb.* \
-	    tools/v3dglslc/test/shaders/es31cs.comp tools/v3dglslc/test/shaders/es31oob.comp tools/v3dglslc/test/shaders/es31ac.comp tools/v3dglslc/test/shaders/es31img.comp tools/v3dglslc/test/shaders/es31tex32.comp tools/v3dglslc/test/shaders/es31xchg.comp tools/v3dglslc/test/shaders/es31aoa.comp tools/v3dglslc/test/shaders/es31frag.* tools/v3dglslc/test/shaders/es31loc.* tools/v3dglslc/test/shaders/es31ms.* $(B)/v3dp/src/
+	    tools/v3dglslc/test/shaders/es31cs.comp tools/v3dglslc/test/shaders/es31oob.comp tools/v3dglslc/test/shaders/es31ac.comp tools/v3dglslc/test/shaders/es31img.comp tools/v3dglslc/test/shaders/es31tex32.comp tools/v3dglslc/test/shaders/es31xchg.comp tools/v3dglslc/test/shaders/es31aoa.comp tools/v3dglslc/test/shaders/es31di.* tools/v3dglslc/test/shaders/es31frag.* tools/v3dglslc/test/shaders/es31loc.* tools/v3dglslc/test/shaders/es31ms.* $(B)/v3dp/src/
 	cd $(B)/v3dp/src && ../emit && for v in *.vert; do \
 	    $(V3DGLSLC) -o .. $$([ -f $${v%.vert}.link ] && echo -b $${v%.vert}.link) $$v $${v%.vert}.frag || exit 1; done && \
 	    for c in *.comp; do $(V3DGLSLC) -o .. $$c || exit 1; done

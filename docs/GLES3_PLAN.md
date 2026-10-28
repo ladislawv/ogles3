@@ -246,7 +246,8 @@ Mesa's driver, so they could follow later as an extension
       2026-10-27), then stage D, each with the dEQP groups of its own
       features (under way: §7's "Compute" and "Then" notes; items 1, 2, 3
       and 4 done (2026-10-28: `image_load_store`, `ssbo` and
-      `stencil_texturing` whole), the A1200 restarts in `draw_indirect.draw_arrays_indirect`
+      `stencil_texturing` whole; `draw_indirect`'s restarts, a double free,
+      fixed: §7), formerly the A1200 restarts in `draw_indirect.draw_arrays_indirect`
       parked; next item 5's separate shader objects, the rest of 6
       (framebuffers without attachments first), dEQP's `ssbo` and
       `program_interface_query`); (5) stage
@@ -2687,7 +2688,44 @@ of 622. **Trap:** the A1200's program cache keeps a compute program's
 `.v3dp` from before a compiler change (no `.v3dw` then): delete
 `Stuff:amictld/work/ogles2-m8-3/cache/#?` after such a change.
 
-**Parked (2026-10-28), open:** further runs singly: `triangles.single_attribute`
+**Fixed (2026-10-28): the draw_indirect restarts were a double free.**
+`m8_indirect` (package `m8-6`: dEQP's draws in a 256x256 window, its
+shader `es31di`, random data, an indirect buffer made and deleted per
+draw; `ARGS` switch the parts off; stage lines and iterations in
+`RAM:deqp-progress.txt` for the watcher) restarted the A1200 within
+seconds every time, the alert `0100 0009` (exec, `AN_FreeTwice`). ES 3.1's
+attribute binding code released a buffer twice: `glVertexAttribPointer`
+(and `glBindVertexBuffer`) released the binding's old buffer after
+`vab_refresh` had released the attribute's reference to the same one, so
+a buffer deleted while an unbound vertex array object held it (dEQP's
+draw tests delete theirs every iteration) was freed, then freed again;
+`vab_refresh` could also list a buffer twice (two attributes on one
+binding). Now every dropped reference goes into one list, each buffer
+once, released after all changed (`vab_refresh`'s `prev`); a transform
+feedback object's bindings likewise (`xfb.c`'s `drop_refs`). The bug came
+with item 5 (2026-10-27) and touched every context with vertex array
+objects. `m8_draw`'s `test_vao_orphans` (50 rounds of it); `m8_indirect`
+1500 iterations, no alert. dEQP-GLES31 `draw_indirect` then ran whole but
+for `compute_interop.large.drawelements_separate_grid_1000x1000_drawcount_5000`:
+5000 draws of 1200 indices in one frame, about 24 MB in the state buffer,
+which doubled at every grow and kept every block until the frame ended
+(4 + 8 + ... + 64 MB): `GL_OUT_OF_MEMORY`, after which dEQP aborted the
+run. `v3d_cl_claim_grow` doubles up to 8 MB blocks now, then stays there
+(a new block holds new claims only: nothing is copied). 16
+`compute_interop.large` cases need a larger `GL_MAX_SHADER_STORAGE_BLOCK_SIZE`
+than Mesa's V3D gives (not supported, as on Mesa). Last,
+`negative.client_command_array`: a client pointer with no indirect buffer
+bound got `GL_INVALID_VALUE` (not a word's offset: dEQP's array is
+aligned on a PC, not always on the 68k) where dEQP expects
+`GL_INVALID_OPERATION`; the missing buffer is checked first now (ES 3.1
+orders neither). dEQP-GLES31 `draw_indirect` 203 of 203 (18 not
+supported), no restart; `debug.negative_coverage.get_error` 430 of 430
+again; dEQP-GLES3 `vertex_array_objects` 10 of 10 (package `m8-2`'s
+`Run-M1` takes `PROGRESS` and `SOURCES` as `m8-3`'s, so the watcher runs
+dEQP-GLES3 too). `m8-1` cannot be built on this machine: it needs a 1.x
+compiler in `~/ogles2-build` for `es3old`'s format 1.0 file.
+
+**Before that (parked 2026-10-28):** further runs singly: `triangles.single_attribute`
 and `points.single_attribute` pass; `triangles.multiple_attributes` and
 `first.first_1` restart the A1200, often but not every time, more often
 while the SD card is written (a background `Copy` on Stuff: is enough;
@@ -3119,8 +3157,9 @@ stopped.
    `blend_equation_advanced` 102, `android_extension_pack` 56,
    `primitive_bounding_box` 227, `geometry_shading` 207, `tessellation`
    406, `copy_image` 12,395. Every group of `gles31-main` has now run on the
-   A1200 at least once; open: `draw_indirect` (restarts, parked above) and
-   `debug`'s 1121 cases that need `GL_KHR_debug` (the developer's call).
+   A1200 at least once; `draw_indirect` 203 of 203 once its double free
+   was found (above); open: `debug`'s 1121 cases that need `GL_KHR_debug`
+   (the developer's call).
 
 Done when: dEQP-GLES31 passes except documented deviations, as GLES2 and
 GLES3 do; `GL_VERSION` "OpenGL ES 3.1 ogles2.library 2.2"; **release 2.2**.

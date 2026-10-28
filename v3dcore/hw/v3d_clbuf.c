@@ -30,12 +30,21 @@ void* v3d_cl_claim_grow(V3DDevice* device, v3d_mem* mem, v3d_static_buffer* buf,
         return v3d_buffer_claim_memory(buf, size);
     }
 
-    /* Buffer full -- grow. Double, but ensure the new capacity actually
-     * fits the requested claim on top of what's already used. */
+    /* Buffer full -- a new block. Its content starts empty (below: nothing
+     * is copied, the old block retires with the frame), so it needs room for
+     * this claim only: double up to 8 MB, then 8 MB blocks (or the claim's
+     * size). Doubling for ever held every block of the frame at once, about
+     * twice the data again: 5000 draws of 1200 indices (dEQP-GLES31
+     * draw_indirect.compute_interop.large, 24 MB) ran out at a 64 MB block
+     * (ogles2). */
     new_capacity = (v3d_u32)buf->capacity * 2;
-    if (new_capacity < (v3d_u32)buf->used + size)
+    if (new_capacity > 8u << 20)
     {
-        new_capacity = (v3d_u32)buf->used + (v3d_u32)size;
+        new_capacity = 8u << 20;
+    }
+    if (new_capacity < (v3d_u32)size)
+    {
+        new_capacity = (v3d_u32)size;
     }
 
     D(("v3d_cl_claim_grow: GROWING buf=%lx old_capacity=%ld used=%ld requested=%ld new_capacity=%ld\n",

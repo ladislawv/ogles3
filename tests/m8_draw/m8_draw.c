@@ -2480,6 +2480,35 @@ static void test_images_r32f(void)
     glDeleteProgram(px);
 }
 
+/* A vertex array object's buffers deleted while it is not bound (it keeps
+ * them, ES 3.0 2.9.1), then its attributes given new ones: each old buffer
+ * freed once (ES 3.1 contexts' binding code released one twice: exec's
+ * AN_FreeTwice and a restart, dEQP-GLES31 draw_indirect's; GLES3 plan
+ * stage D item 3). Two attributes, 50 rounds. */
+static void test_vao_orphans(void)
+{
+    static const GLfloat data[8] = { 0, 0, 1, 0, 0, 1, 1, 1 };
+    GLuint vao, b[2];
+    int i, a;
+    glGenVertexArrays(1, &vao);
+    for (i = 0; i < 50; i++) {
+        glBindVertexArray(vao);
+        glGenBuffers(2, b);
+        for (a = 0; a < 2; a++) {
+            glBindBuffer(GL_ARRAY_BUFFER, b[a]);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
+            glEnableVertexAttribArray((GLuint)a);
+            glVertexAttribPointer((GLuint)a, 2, GL_FLOAT, GL_FALSE, 0, 0);
+        }
+        glBindVertexArray(0);
+        glDeleteBuffers(2, b); /* kept by the object */
+    }
+    glBindVertexArray(0);
+    glDeleteVertexArrays(1, &vao);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    check(glGetError() == GL_NO_ERROR, "vertex arrays: buffers deleted while held, then replaced, freed once");
+}
+
 /* Arrays of arrays of images (GLES3 plan stage D item 2): es31aoa's
  * img[2][3] at units 0 to 5, each a 1x1 R32UI of 100 + its unit, read
  * img[i][j] from unit 3i + j (Mesa patch 0018). */
@@ -3234,6 +3263,8 @@ int main(void)
                 test_images_r32f();
             if (!skipped("images_aoa"))
                 test_images_aoa();
+            if (!skipped("vao_orphans"))
+                test_vao_orphans();
             if (!skipped("ms_texture"))
                 test_ms_texture();
             if (!skipped("pipelines"))
