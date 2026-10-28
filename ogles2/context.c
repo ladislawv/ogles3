@@ -360,6 +360,14 @@ static const struct { const char *name; UBYTE in; } extensions[] = {
     {"GL_NV_fbo_color_attachments", EXT_ALL}, {"GL_OES_required_internalformat", EXT_ALL},
     {"GL_EXT_color_buffer_half_float", EXT_ALL}, {"GL_EXT_frag_depth", EXT_ALL},
     {"GL_OES_vertex_array_object", EXT_ALL}, {"GL_EXT_instanced_arrays", EXT_ALL},
+    /* ES 3.0's features as GLES2 extensions (ogles3.library 1.0; gles2_ext.c,
+     * texture.c, fbo.c, draw.c), listed in every context as Mesa does */
+    {"GL_OES_texture_3D", EXT_ALL}, {"GL_EXT_texture_storage", EXT_ALL},
+    {"GL_EXT_texture_rg", EXT_ALL}, {"GL_OES_depth24", EXT_ALL},
+    {"GL_EXT_map_buffer_range", EXT_ALL}, {"GL_EXT_occlusion_query_boolean", EXT_ALL},
+    {"GL_EXT_shadow_samplers", EXT_ALL}, {"GL_EXT_unpack_subimage", EXT_ALL},
+    {"GL_OES_vertex_half_float", EXT_ALL}, {"GL_EXT_texture_type_2_10_10_10_REV", EXT_ALL},
+    {"GL_EXT_multi_draw_arrays", EXT_ALL},
     {"GL_EXT_color_buffer_float", EXT_ES3}, /* stage B item 10: the float targets */
     /* The compiler's (Mesa offers it in ES 3.0 contexts): gl_FragDepth's
      * layout is a hint the hardware has no use for. */

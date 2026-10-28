@@ -732,7 +732,8 @@ void ogles2_glBindTexture(struct OGLES3Context *ctx, GLenum target, GLuint textu
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
         return;
     if (target != GL_TEXTURE_2D && target != GL_TEXTURE_CUBE_MAP && target != GL_TEXTURE_RECTANGLE &&
-        !(ogles2_es3(ctx) && (target == GL_TEXTURE_3D || target == GL_TEXTURE_2D_ARRAY)) &&
+        target != GL_TEXTURE_3D && /* GLES2 contexts too: OES_texture_3D */
+        !(ogles2_es3(ctx) && target == GL_TEXTURE_2D_ARRAY) &&
         !(ogles2_es31(ctx) && target == GL_TEXTURE_2D_MULTISAMPLE)) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
@@ -783,7 +784,7 @@ static struct OGLES3Texture *bound(struct OGLES3Context *ctx, struct OGLES3TexSt
         return ts->unitcube[ts->active];
     if (target == GL_TEXTURE_RECTANGLE)
         return ts->unitrect[ts->active];
-    if (ogles2_es3(ctx) && target == GL_TEXTURE_3D)
+    if (target == GL_TEXTURE_3D) /* GLES2 contexts too: OES_texture_3D */
         return ts->unit3d[ts->active];
     if (ogles2_es3(ctx) && target == GL_TEXTURE_2D_ARRAY)
         return ts->unitarray[ts->active];
@@ -829,9 +830,7 @@ static GLenum smp_param(struct OGLES3Context *ctx, struct OGLES3SamplerParams *s
             return GL_INVALID_ENUM;
         sp->mag_filter = e;
         return GL_NO_ERROR;
-    case GL_TEXTURE_WRAP_R: /* ES 3.0 */
-        if (!ogles2_es3(ctx))
-            return GL_INVALID_ENUM;
+    case GL_TEXTURE_WRAP_R: /* ES 3.0; OES_texture_3D's GL_TEXTURE_WRAP_R_OES in GLES2 contexts */
         /* fall through */
     case GL_TEXTURE_WRAP_S:
     case GL_TEXTURE_WRAP_T:
@@ -855,14 +854,15 @@ static GLenum smp_param(struct OGLES3Context *ctx, struct OGLES3SamplerParams *s
     case GL_TEXTURE_MAX_LOD:
         sp->max_lod = f;
         return GL_NO_ERROR;
-    /* ES 3.0's depth comparison (stage B item 8) */
+    /* ES 3.0's depth comparison (stage B item 8); EXT_shadow_samplers'
+     * in GLES2 contexts (the same enums) */
     case GL_TEXTURE_COMPARE_MODE:
-        if (!ogles2_es3(ctx) || (e != GL_NONE && e != GL_COMPARE_REF_TO_TEXTURE))
+        if (e != GL_NONE && e != GL_COMPARE_REF_TO_TEXTURE)
             return GL_INVALID_ENUM;
         sp->compare_mode = e;
         return GL_NO_ERROR;
     case GL_TEXTURE_COMPARE_FUNC:
-        if (!ogles2_es3(ctx) || e < GL_NEVER || e > GL_ALWAYS)
+        if (e < GL_NEVER || e > GL_ALWAYS)
             return GL_INVALID_ENUM;
         sp->compare_func = e;
         return GL_NO_ERROR;
@@ -882,11 +882,9 @@ static BOOL smp_get(struct OGLES3Context *ctx, const struct OGLES3SamplerParams 
     case GL_TEXTURE_MAX_ANISOTROPY_EXT:  *v = sp->max_aniso; return TRUE;
     case GL_TEXTURE_MIN_LOD:             *v = sp->min_lod; return TRUE;
     case GL_TEXTURE_MAX_LOD:             *v = sp->max_lod; return TRUE;
-    case GL_TEXTURE_WRAP_R:
-    case GL_TEXTURE_COMPARE_MODE:
+    case GL_TEXTURE_WRAP_R:       /* OES_texture_3D's in GLES2 contexts */
+    case GL_TEXTURE_COMPARE_MODE: /* EXT_shadow_samplers' in GLES2 contexts */
     case GL_TEXTURE_COMPARE_FUNC:
-        if (!ogles2_es3(ctx))
-            return FALSE;
         *v = (GLfloat)(pname == GL_TEXTURE_WRAP_R ? sp->wrap_r
                        : pname == GL_TEXTURE_COMPARE_MODE ? sp->compare_mode : sp->compare_func);
         return TRUE;
@@ -1027,9 +1025,9 @@ static BOOL get_param(struct OGLES3Context *ctx, GLenum target, GLenum pname, GL
         *v = (GLfloat)t->ds_mode;
         return TRUE;
     case GL_TEXTURE_LOD_BIAS:            *v = t->lod_bias; return TRUE;
-    case GL_TEXTURE_IMMUTABLE_FORMAT:
+    case GL_TEXTURE_IMMUTABLE_FORMAT: /* EXT_texture_storage's in GLES2 contexts */
     case GL_TEXTURE_IMMUTABLE_LEVELS:
-        if (!ogles2_es3(ctx))
+        if (!ogles2_es3(ctx) && pname == GL_TEXTURE_IMMUTABLE_LEVELS)
             break;
         *v = pname == GL_TEXTURE_IMMUTABLE_LEVELS ? (GLfloat)t->immutable_levels
                                                   : (t->immutable_levels ? 1.0f : 0.0f);
@@ -1270,7 +1268,9 @@ void ogles2_glPixelStorei(struct OGLES3Context *ctx, GLenum pname, GLint param)
     case GL_PACK_SKIP_ROWS:      v = &ctx->pack.skip_rows; break;
     default:                     v = 0; break;
     }
-    if (!v || !ogles2_es3(ctx)) {
+    /* GLES2 contexts: EXT_unpack_subimage's three */
+    if (!v || (!ogles2_es3(ctx) && pname != GL_UNPACK_ROW_LENGTH && pname != GL_UNPACK_SKIP_PIXELS &&
+               pname != GL_UNPACK_SKIP_ROWS)) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
@@ -1295,9 +1295,9 @@ BOOL ogles2_texture_query(struct OGLES3Context *ctx, GLenum pname, GLint *v)
             return FALSE;
         *v = ts ? (GLint)ts->unit2dms[ts->active]->name : 0;
         return TRUE;
-    case GL_TEXTURE_BINDING_3D:
+    case GL_TEXTURE_BINDING_3D: /* OES_texture_3D's in GLES2 contexts */
     case GL_TEXTURE_BINDING_2D_ARRAY:
-        if (!ogles2_es3(ctx))
+        if (!ogles2_es3(ctx) && pname != GL_TEXTURE_BINDING_3D)
             return FALSE;
         *v = !ts ? 0 : (GLint)(pname == GL_TEXTURE_BINDING_3D ? ts->unit3d : ts->unitarray)[ts->active]->name;
         return TRUE;
@@ -1307,6 +1307,7 @@ BOOL ogles2_texture_query(struct OGLES3Context *ctx, GLenum pname, GLint *v)
         *v = ts && ts->unitsmp[ts->active] ? (GLint)ts->unitsmp[ts->active]->name : 0;
         return TRUE;
     case GL_MAX_RECTANGLE_TEXTURE_SIZE: *v = MAX_SIZE; return TRUE;
+    case GL_MAX_3D_TEXTURE_SIZE: *v = MAX_SIZE; return TRUE; /* also OES_texture_3D's in GLES2 contexts */
     case GL_UNPACK_ALIGNMENT:     *v = ctx->unpack.alignment; return TRUE;
     case GL_PACK_ALIGNMENT:       *v = ctx->pack.alignment; return TRUE;
     case GL_UNPACK_ROW_LENGTH:
@@ -1317,7 +1318,8 @@ BOOL ogles2_texture_query(struct OGLES3Context *ctx, GLenum pname, GLint *v)
     case GL_PACK_ROW_LENGTH:
     case GL_PACK_SKIP_PIXELS:
     case GL_PACK_SKIP_ROWS:
-        if (!ogles2_es3(ctx))
+        if (!ogles2_es3(ctx) && pname != GL_UNPACK_ROW_LENGTH && pname != GL_UNPACK_SKIP_PIXELS &&
+            pname != GL_UNPACK_SKIP_ROWS) /* EXT_unpack_subimage's in GLES2 contexts */
             return FALSE;
         *v = pname == GL_UNPACK_ROW_LENGTH     ? ctx->unpack.row_length
            : pname == GL_UNPACK_IMAGE_HEIGHT   ? ctx->unpack.image_height
@@ -1481,12 +1483,16 @@ static int components(GLenum format)
     }
 }
 
-/* ES 3.0's formats and types in a GLES2 context: GL_RED and GL_RG
- * (EXT_texture_rg is not offered there), signed bytes, the packed 32-bit
- * types, float depth. */
+/* ES 3.0's formats and types in a GLES2 context: signed bytes, the packed
+ * 32-bit types, float depth; GL_RED and GL_RG but EXT_texture_rg's (bytes,
+ * half floats, floats), and GL_UNSIGNED_INT_2_10_10_10_REV but
+ * EXT_texture_type_2_10_10_10_REV's (RGBA and RGB). */
 static BOOL rg_refused(struct OGLES3Context *ctx, GLenum format, GLenum type)
 {
-    if (!ogles2_es3(ctx) &&
+    BOOL rg_ext = (format == GL_RED || format == GL_RG) &&
+                  (type == GL_UNSIGNED_BYTE || type == GL_HALF_FLOAT_OES || type == GL_FLOAT);
+    BOOL rev_ext = type == GL_UNSIGNED_INT_2_10_10_10_REV && (format == GL_RGBA || format == GL_RGB);
+    if (!ogles2_es3(ctx) && !rg_ext && !rev_ext &&
         (format == GL_RED || format == GL_RG || int_components(format) || type == GL_BYTE ||
          type == GL_UNSIGNED_INT_2_10_10_10_REV ||
          type == GL_UNSIGNED_INT_10F_11F_11F_REV || type == GL_UNSIGNED_INT_5_9_9_9_REV ||
@@ -4257,6 +4263,19 @@ static BOOL faces_room(struct OGLES3Texture *t, int n)
     return TRUE;
 }
 
+/* The 3D entries in a GLES2 context: OES_texture_3D's, GL_TEXTURE_3D only
+ * (GL_TEXTURE_2D_ARRAY: GL_INVALID_ENUM); ES3 contexts every target. */
+static BOOL tex3d_entry(struct OGLES3Context *ctx, GLenum target)
+{
+    if (!ogles2_context_valid(ctx))
+        return FALSE;
+    if (!ogles2_es3(ctx) && target != GL_TEXTURE_3D) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return FALSE;
+    }
+    return TRUE;
+}
+
 static struct OGLES3Texture *image_texture_3d(struct OGLES3Context *ctx, struct OGLES3TexState *ts, GLenum target)
 {
     if (target == GL_TEXTURE_3D)
@@ -4278,7 +4297,7 @@ void ogles2_glTexImage3D(struct OGLES3Context *ctx, GLenum target, GLint level, 
     const UBYTE *src;
     int k, max;
     BOOL sized;
-    if (!ogles2_es3_entry(ctx) || !(ts = ts_get(ctx)) || !(t = image_texture_3d(ctx, ts, target)))
+    if (!tex3d_entry(ctx, target) || !(ts = ts_get(ctx)) || !(t = image_texture_3d(ctx, ts, target)))
         return;
     type = half_type(ctx, type);
     if (!pixel_size(format, type, &err)) {
@@ -4378,7 +4397,7 @@ void ogles2_glTexSubImage3D(struct OGLES3Context *ctx, GLenum target, GLint leve
     const UBYTE *src;
     int y, k;
     BOOL stored;
-    if (!ogles2_es3_entry(ctx) || !(ts = ts_get(ctx)) || !(t = image_texture_3d(ctx, ts, target)))
+    if (!tex3d_entry(ctx, target) || !(ts = ts_get(ctx)) || !(t = image_texture_3d(ctx, ts, target)))
         return;
     type = half_type(ctx, type);
     if (!pixel_size(format, type, &err)) {
@@ -4497,8 +4516,13 @@ static void tex_storage(struct OGLES3Context *ctx, GLenum target, GLsizei levels
     GLenum format, type;
     BOOL layers = target == GL_TEXTURE_3D || target == GL_TEXTURE_2D_ARRAY;
     int l, k, max, n = 1, big;
-    if (!ogles2_es3_entry(ctx) || !(ts = ts_get(ctx)))
+    /* GLES2 contexts: EXT_texture_storage's (2D, cube maps, OES_texture_3D's 3D) */
+    if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
         return;
+    if (!ogles2_es3(ctx) && target == GL_TEXTURE_2D_ARRAY) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
     if (target == GL_TEXTURE_RECTANGLE || target == GL_TEXTURE_2D_MULTISAMPLE) { /* the latter's: glTexStorage2DMultisample */
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
@@ -4665,7 +4689,7 @@ void ogles2_glCompressedTexImage3D(struct OGLES3Context *ctx, GLenum target, GLi
     struct OGLES3Texture *t;
     ULONG bs, layer;
     int k;
-    if (!ogles2_es3_entry(ctx) || !(ts = ts_get(ctx)) || !(t = image_texture_3d(ctx, ts, target)))
+    if (!tex3d_entry(ctx, target) || !(ts = ts_get(ctx)) || !(t = image_texture_3d(ctx, ts, target)))
         return;
     if (!(bs = dxt_block_bytes(internalformat)) || internalformat == GL_ETC1_RGB8_OES) {
         ogles2_error(ctx, GL_INVALID_ENUM);
@@ -4721,7 +4745,7 @@ void ogles2_glCompressedTexSubImage3D(struct OGLES3Context *ctx, GLenum target, 
     ULONG bs, bw, bh, row, j, layer;
     int k;
     BOOL stored;
-    if (!ogles2_es3_entry(ctx) || !(ts = ts_get(ctx)) || !(t = image_texture_3d(ctx, ts, target)))
+    if (!tex3d_entry(ctx, target) || !(ts = ts_get(ctx)) || !(t = image_texture_3d(ctx, ts, target)))
         return;
     if (!(bs = dxt_block_bytes(format)) || format == GL_ETC1_RGB8_OES) {
         ogles2_error(ctx, GL_INVALID_ENUM);
@@ -4976,7 +5000,7 @@ void ogles2_glCopyTexSubImage3D(struct OGLES3Context *ctx, GLenum target, GLint 
     struct OGLES3PixelStore unpack;
     GLenum fmt = GL_RGBA;
     UBYTE *img = 0;
-    if (!ogles2_es3_entry(ctx) || !(ts = ts_get(ctx)) || !(t = image_texture_3d(ctx, ts, target)))
+    if (!tex3d_entry(ctx, target) || !(ts = ts_get(ctx)) || !(t = image_texture_3d(ctx, ts, target)))
         return;
     if (level < 0 || level >= MAX_LEVELS || width < 0 || height < 0) {
         ogles2_error(ctx, GL_INVALID_VALUE);

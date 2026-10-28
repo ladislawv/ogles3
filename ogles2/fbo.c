@@ -258,10 +258,13 @@ static BOOL is_color(GLenum f)
     return gles2_color(f) || es3_color(f);
 }
 
-/* A GLES2 context's renderbuffer formats (the others: GL_INVALID_ENUM). */
+/* A GLES2 context's renderbuffer formats (the others: GL_INVALID_ENUM):
+ * also OES_depth24's GL_DEPTH_COMPONENT24_OES and EXT_texture_rg's GL_R8_EXT
+ * and GL_RG8_EXT (ogles3.library 1.0). */
 static BOOL gles2_format(GLenum f)
 {
-    return gles2_color(f) || f == GL_DEPTH_COMPONENT16 || f == GL_STENCIL_INDEX8 || f == GL_DEPTH24_STENCIL8_OES;
+    return gles2_color(f) || f == GL_DEPTH_COMPONENT16 || f == GL_STENCIL_INDEX8 || f == GL_DEPTH24_STENCIL8_OES ||
+           f == GL_DEPTH_COMPONENT24 || f == GL_R8 || f == GL_RG8;
 }
 
 /* Depth and stencil: UIF without XOR, Mesa's padding for a UIF level
@@ -740,7 +743,7 @@ static void rb_storage(struct OGLES3Context *ctx, GLenum target, GLenum internal
     rb->h = (UWORD)height;
     rb->samples = samples ? 4 : 0;
     if (width && height && ctx->v3d) {
-        if (ogles2_es3(ctx) && es3_color(internalformat)) {
+        if ((ogles2_es3(ctx) || internalformat == GL_R8 || internalformat == GL_RG8) && es3_color(internalformat)) {
             ok = (rb->color = ogles2_texture_hidden_sized(ctx, RB_SW(rb), RB_SH(rb), internalformat)) != 0;
         } else if (is_color(internalformat)) {
             GLenum f = internalformat == GL_RGB565 || internalformat == GL_RGB8_OES ? GL_RGB : GL_RGBA;

@@ -448,7 +448,76 @@ static int extensions_agree(void)
     return *p == 0 && glGetError() == GL_NO_ERROR;
 }
 
+
 static int nogpu; /* NOGPU: under vamos (no system timer: glBufferData times itself on it) */
+
+/* ES 3.0's features as GLES2 extensions (ogles3.library 1.0), in the
+ * current GLES2 context: each listed, and each used once. */
+static void gles2_extensions(void)
+{
+    static const char *const names[] = {
+        "GL_OES_texture_3D", "GL_EXT_texture_storage", "GL_EXT_texture_rg", "GL_OES_depth24",
+        "GL_EXT_map_buffer_range", "GL_EXT_occlusion_query_boolean", "GL_EXT_shadow_samplers",
+        "GL_EXT_unpack_subimage", "GL_OES_vertex_half_float", "GL_EXT_texture_type_2_10_10_10_REV",
+        "GL_EXT_multi_draw_arrays", "GL_KHR_debug"};
+    const char *ext = (const char *)glGetString(GL_EXTENSIONS);
+    GLuint t[2], rb, q = 0, b;
+    GLint v = -5, w = -5;
+    unsigned k;
+    int listed = 1;
+    for (k = 0; k < sizeof(names) / sizeof(names[0]); k++)
+        if (!ext || !strstr(ext, names[k])) {
+            printf("     not listed: %s\n", names[k]);
+            listed = 0;
+        }
+    check(listed, "ES 2.0: the GLES2 extensions of ES 3.0's features are listed");
+    glGenTextures(2, t);
+    glBindTexture(GL_TEXTURE_3D_OES, t[0]);
+    glTexImage3DOES(GL_TEXTURE_3D_OES, 0, GL_RGBA, 4, 4, 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+    glTexParameteri(GL_TEXTURE_3D_OES, GL_TEXTURE_WRAP_R_OES, GL_CLAMP_TO_EDGE);
+    glGetIntegerv(GL_TEXTURE_BINDING_3D_OES, &v);
+    check(glGetError() == GL_NO_ERROR && v == (GLint)t[0], "ES 2.0: OES_texture_3D: a 3D texture, its wrap R");
+    glBindTexture(GL_TEXTURE_2D, t[1]);
+    glTexStorage2DEXT(GL_TEXTURE_2D, 1, GL_R8_EXT, 4, 4);
+    glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_IMMUTABLE_FORMAT_EXT, &v);
+    if (!nogpu) /* glTexSubImage2D times itself (vamos has no system timer) */
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 1, 1, GL_RED_EXT, GL_UNSIGNED_BYTE, "x");
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_EXT, GL_COMPARE_REF_TO_TEXTURE_EXT);
+    glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_EXT, &w);
+    check(glGetError() == GL_NO_ERROR && v == 1 && w == GL_COMPARE_REF_TO_TEXTURE_EXT,
+          "ES 2.0: EXT_texture_storage of EXT_texture_rg's R8, EXT_shadow_samplers' compare mode");
+    glDeleteTextures(2, t);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, 8);
+    glGetIntegerv(GL_UNPACK_ROW_LENGTH_EXT, &v);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, 0);
+    check(glGetError() == GL_NO_ERROR && v == 8, "ES 2.0: EXT_unpack_subimage's row length");
+    glGenRenderbuffers(1, &rb);
+    glBindRenderbuffer(GL_RENDERBUFFER, rb);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24_OES, 4, 4);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_RG8_EXT, 4, 4);
+    check(glGetError() == GL_NO_ERROR, "ES 2.0: OES_depth24's and EXT_texture_rg's renderbuffers");
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glDeleteRenderbuffers(1, &rb);
+    glGenQueriesEXT(1, &q);
+    glBeginQueryEXT(GL_ANY_SAMPLES_PASSED_EXT, q);
+    glGetQueryivEXT(GL_ANY_SAMPLES_PASSED_EXT, GL_CURRENT_QUERY_EXT, &v);
+    glEndQueryEXT(GL_ANY_SAMPLES_PASSED_EXT);
+    check(glGetError() == GL_NO_ERROR && v == (GLint)q && glIsQueryEXT(q), "ES 2.0: EXT_occlusion_query_boolean");
+    glDeleteQueriesEXT(1, &q);
+    glGenBuffers(1, &b);
+    glBindBuffer(GL_ARRAY_BUFFER, b);
+    if (!nogpu) { /* glBufferData times itself (vamos has no system timer) */
+        void *p;
+        glBufferData(GL_ARRAY_BUFFER, 16, 0, GL_STATIC_DRAW);
+        p = glMapBufferRangeEXT(GL_ARRAY_BUFFER, 0, 16, GL_MAP_WRITE_BIT_EXT);
+        check(p != 0 && glUnmapBufferOES(GL_ARRAY_BUFFER) && glGetError() == GL_NO_ERROR,
+              "ES 2.0: EXT_map_buffer_range");
+    }
+    glVertexAttribPointer(1, 2, GL_HALF_FLOAT_OES, GL_FALSE, 0, 0);
+    check(glGetError() == GL_NO_ERROR, "ES 2.0: OES_vertex_half_float's attribute type");
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glDeleteBuffers(1, &b);
+}
 
 int main(int argc, char **argv)
 {
@@ -556,12 +625,13 @@ int main(int argc, char **argv)
         check(glGetError() == GL_INVALID_OPERATION, "ES 2.0: glGenSamplers is GL_INVALID_OPERATION");
         glGetIntegerv(GL_SAMPLER_BINDING, &v);
         check(v == -5 && glGetError() == GL_INVALID_ENUM, "ES 2.0: GL_SAMPLER_BINDING is GL_INVALID_ENUM");
-        glBindTexture(GL_TEXTURE_3D, t);
-        check(glGetError() == GL_INVALID_ENUM, "ES 2.0: GL_TEXTURE_3D is GL_INVALID_ENUM");
-        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, 1, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-        check(glGetError() == GL_INVALID_OPERATION, "ES 2.0: glTexImage3D is GL_INVALID_OPERATION");
-        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-        check(glGetError() == GL_INVALID_ENUM, "ES 2.0: GL_UNPACK_ROW_LENGTH is GL_INVALID_ENUM");
+        glBindTexture(GL_TEXTURE_2D_ARRAY, t);
+        check(glGetError() == GL_INVALID_ENUM, "ES 2.0: GL_TEXTURE_2D_ARRAY is GL_INVALID_ENUM");
+        glTexImage3DOES(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, 1, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+        check(glGetError() == GL_INVALID_ENUM, "ES 2.0: glTexImage3DOES of a 2D array is GL_INVALID_ENUM");
+        glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
+        check(glGetError() == GL_INVALID_ENUM, "ES 2.0: GL_UNPACK_IMAGE_HEIGHT is GL_INVALID_ENUM");
+        gles2_extensions();
         glBindBuffer(GL_COPY_READ_BUFFER, 0);
         check(glGetError() == GL_INVALID_ENUM, "ES 2.0: GL_COPY_READ_BUFFER is GL_INVALID_ENUM");
         glBindVertexArray(0);
@@ -586,8 +656,6 @@ int main(int argc, char **argv)
             check(d == 0 && !glIsVertexArrayOES(a) && glGetError() == GL_NO_ERROR,
                   "ES 2.0: object 0's divisor 0 again; the object deleted");
         }
-        glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, &v);
-        check(v == -5 && glGetError() == GL_INVALID_ENUM, "ES 2.0: GL_TEXTURE_COMPARE_MODE is GL_INVALID_ENUM");
         glDeleteTextures(1, &t);
     }
     {

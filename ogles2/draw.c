@@ -182,8 +182,13 @@ static BOOL set_pointer(struct OGLES3Context *ctx, GLuint index, GLint size, GLe
         ogles2_error(ctx, GL_INVALID_VALUE);
         return FALSE;
     }
+    /* OES_vertex_half_float's GL_HALF_FLOAT_OES (every context): ES 3.0's GL_HALF_FLOAT */
+    BOOL half_oes = type == GL_HALF_FLOAT_OES && !integer;
+    if (half_oes)
+        type = GL_HALF_FLOAT;
     if (!type_size(type) ||
-        (!ogles2_es3(ctx) && (type == GL_HALF_FLOAT || type == GL_INT || type == GL_UNSIGNED_INT || packed_type(type)))) {
+        (!ogles2_es3(ctx) && !half_oes &&
+         (type == GL_HALF_FLOAT || type == GL_INT || type == GL_UNSIGNED_INT || packed_type(type)))) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return FALSE;
     }

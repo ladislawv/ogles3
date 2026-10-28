@@ -111,3 +111,23 @@ command glGetObjectLabelKHR
 command glObjectPtrLabelKHR
 command glGetObjectPtrLabelKHR
 command glGetPointervKHR
+# GLES2 extensions of ES 3.0's features (ogles3.library 1.0, gles2_ext.c)
+command glTexImage3DOES
+command glTexSubImage3DOES
+command glCopyTexSubImage3DOES
+command glCompressedTexImage3DOES
+command glCompressedTexSubImage3DOES
+command glFramebufferTexture3DOES
+command glTexStorage2DEXT
+command glTexStorage3DEXT
+command glMapBufferRangeEXT
+command glFlushMappedBufferRangeEXT
+command glGenQueriesEXT
+command glDeleteQueriesEXT
+command glIsQueryEXT
+command glBeginQueryEXT
+command glEndQueryEXT
+command glGetQueryivEXT
+command glGetQueryObjectuivEXT
+command glMultiDrawArraysEXT
+command glMultiDrawElementsEXT

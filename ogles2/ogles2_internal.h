@@ -836,6 +836,7 @@ struct OGLES3Context
     struct OGLES3Target pend_tg;
     UBYTE marker_depth;             /* EXT_debug_marker: groups pushed (debug.c) */
     struct OGLES3Debug *dbg;        /* KHR_debug's state (debug_khr.c), NULL until first used */
+    UBYTE gles2_ext;                /* a GLES2 extension's entry is calling its ES 3.0 one (gles2_ext.c) */
     UBYTE job_discard;              /* EXT_discard_framebuffer: OGLES3_DISCARD_* the open job does not store */
     UBYTE job_noload;               /* and those it does not load (discarded before it began) */
     struct OGLES3VaoState *vao;     /* vao.c's (ES 3.0's vertex array objects), NULL until first used */
@@ -1298,12 +1299,13 @@ static inline BOOL ogles2_es3(const struct OGLES3Context *ctx)
     return ctx->es_version >= 30;
 }
 /* An ES 3.0-only entry (docs/GLES3_PLAN.md §3): a valid ES3 context, else
- * FALSE, with GL_INVALID_OPERATION in a GLES2 context, as an entry it lacks. */
+ * FALSE, with GL_INVALID_OPERATION in a GLES2 context, as an entry it lacks;
+ * but for a GLES2 extension's entry that stands for it (gles2_ext.c). */
 static inline BOOL ogles2_es3_entry(struct OGLES3Context *ctx)
 {
     if (!ogles2_context_valid(ctx))
         return FALSE;
-    if (ctx->es_version < 30) {
+    if (ctx->es_version < 30 && !ctx->gles2_ext) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return FALSE;
     }
