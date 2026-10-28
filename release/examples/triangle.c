@@ -2,7 +2,7 @@
  * ogles3.library example 1: a coloured triangle turning in a window.
  *
  * The program opens its own window (with a close gadget) and gives it to
- * ogles2 with OGLES3_CCT_WINDOW; ogles2 renders into it at each
+ * ogles3 with OGLES3_CCT_WINDOW; ogles3 renders into it at each
  * aglSwapBuffers. The vertices go into a buffer object once; each frame
  * only sets the angle. Close the window, press Esc or Ctrl-C to quit.
  *
@@ -95,11 +95,11 @@ int main(void)
         return 20;
     }
     if (!OGLES3Open()) {
-        printf("needs %s 1.3 or newer: in LIBS:, or in this program's drawer or its libs/\n"
+        printf("needs %s 1.0 or newer: in LIBS:, or in this program's drawer or its libs/\n"
                "(an older one that another program is using cannot be replaced)\n", OGLES3NAME);
         goto out;
     }
-    win = OpenWindowTags(NULL, WA_Title, (ULONG) "ogles2: triangle", WA_InnerWidth, 320, WA_InnerHeight, 240,
+    win = OpenWindowTags(NULL, WA_Title, (ULONG) "ogles3: triangle", WA_InnerWidth, 320, WA_InnerHeight, 240,
                          WA_DragBar, TRUE, WA_DepthGadget, TRUE, WA_CloseGadget, TRUE, WA_Activate, TRUE,
                          WA_IDCMP, IDCMP_CLOSEWINDOW | IDCMP_VANILLAKEY, TAG_DONE);
     if (!win) {

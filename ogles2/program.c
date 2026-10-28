@@ -8,7 +8,7 @@
  * name being the hash's first 24 hex digits (FFS allows 30 characters); the
  * full hash in the file must match. A
  * program with no binary fails to link; its sources go to
- * T:ogles2_missing_shaders.txt for the offline compiler; with the on-target
+ * T:ogles3_missing_shaders.txt for the offline compiler; with the on-target
  * compiler present (LIBS:v3dglslc3 or beside the program, compiler.c) the program is compiled
  * into the disk cache first. Loaded images stay
  * in the context's program cache, by hash, until the context goes: a
@@ -1044,11 +1044,11 @@ static void mark_compiled(const struct OGLES3Shader *s)
     write_record(path, s->info_log); /* also over a refusal: it linked after all */
 }
 
-/* Appends a program without a binary to T:ogles2_missing_shaders.txt, for
+/* Appends a program without a binary to T:ogles3_missing_shaders.txt, for
  * the offline compiler (plan 7.8). */
 static void note_missing(const struct OGLES3Program *p, const char *hex)
 {
-    BPTR fh = Open((STRPTR) "T:ogles2_missing_shaders.txt", MODE_READWRITE);
+    BPTR fh = Open((STRPTR) "T:ogles3_missing_shaders.txt", MODE_READWRITE);
     if (!fh)
         return;
     Seek(fh, 0, OFFSET_END);
@@ -1133,7 +1133,7 @@ static void file_path(char *path, const char *dir, const char *hex)
 /* Plan 7.8: the program's drawer (its shaders/ drawer, then the drawer
  * itself), the disk cache (OGLES3Cache:, or T: when it is not assigned:
  * that is where compiled programs go then), the on-target compiler, else the
- * sources go to T:ogles2_missing_shaders.txt. A file the library cannot use
+ * sources go to T:ogles3_missing_shaders.txt. A file the library cannot use
  * does not end the search (docs/GLES3_PLAN.md §3): the next place is tried,
  * and the compiler replaces the cache's. */
 static struct OGLES3Image *load_image(struct OGLES3Program *p, const UBYTE *hash, const char *hex,
@@ -1179,7 +1179,7 @@ static struct OGLES3Image *load_image(struct OGLES3Program *p, const UBYTE *hash
     }
     if (any_refused)
         return 0; /* try_file said why, in the log and the program's log */
-    ogles2_log("glLinkProgram: no binary for program %s (sources in T:ogles2_missing_shaders.txt)",
+    ogles2_log("glLinkProgram: no binary for program %s (sources in T:ogles3_missing_shaders.txt)",
                (ULONG)hex);
     set_log(p, "no program binary for this program: ", hex);
     note_missing(p, hex);

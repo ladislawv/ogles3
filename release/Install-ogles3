@@ -1,4 +1,4 @@
-; Install-ogles3 - installs ogles3.library 1.3 (release 1.3.2). See ReadMe.
+; Install-ogles3 - installs ogles3.library 1.0 (release 1.0-beta1). See ReadMe.
 ; From a Shell, in this drawer:   Execute Install-ogles3
 ; It asks before each step; with ALL it does every step without asking:
 ;                                 Execute Install-ogles3 ALL
@@ -13,7 +13,8 @@ If NOT EXISTS Libs/ogles3.library
   Quit 20
 EndIf
 
-Echo "ogles3.library 1.3 (release 1.3.2): OpenGL ES 2.0 for PiStorm (Raspberry Pi 4)"
+Echo "ogles3.library 1.0 (release 1.0-beta1): OpenGL ES 3.1 for PiStorm (Raspberry Pi 4)"
+Echo "It goes beside ogles2.library 1.x, which stays as it is."
 Echo ""
 
 ; ---- the library
@@ -28,7 +29,7 @@ EndIf
 ; version and 20 for none. The numbers are this library's (build_release.sh
 ; checks them).
 Copy Libs/ogles3.library LIBS: CLONE
-Version >NIL: LIBS:ogles3.library 1 3 FILE
+Version >NIL: LIBS:ogles3.library 1 0 FILE
 If WARN
   Echo "Could not copy ogles3.library to LIBS:."
   Quit 20
@@ -36,14 +37,14 @@ EndIf
 ; an older version still in memory is replaced at its next opening
 Avail FLUSH >NIL:
 Echo "  LIBS:ogles3.library installed."
-; An installed compiler older than this library, or one without a version
-; string (1.3.1's and before), is replaced with it: the library uses
-; LIBS:v3dglslc3 first.
+; An installed compiler older than this library is replaced with it: the
+; library uses LIBS:v3dglslc3 first (ogles2.library 1.x's LIBS:v3dglslc is
+; another program, left as it is).
 If EXISTS LIBS:v3dglslc3
-  Version >NIL: LIBS:v3dglslc3 1 3 FILE
+  Version >NIL: LIBS:v3dglslc3 1 0 FILE
   If WARN
-    Copy Libs/v3dglslc LIBS: CLONE
-    Version >NIL: LIBS:v3dglslc3 1 3 FILE
+    Copy Libs/v3dglslc3 LIBS: CLONE
+    Version >NIL: LIBS:v3dglslc3 1 0 FILE
     If WARN
       Echo "Could not replace the older LIBS:v3dglslc3 (19 MB free? write-protected?)."
       Quit 20
@@ -56,20 +57,20 @@ EndIf
 ; ---- the shader compiler
 Lab compiler
 Echo ""
-Echo "The shader compiler v3dglslc (19 MB) compiles programs' shaders the"
+Echo "The shader compiler v3dglslc3 (19 MB) compiles programs' shaders the"
 Echo "first time they run. Programs that ship their compiled shaders (such"
 Echo "as the examples) do not need it; programs that make shaders at run"
 Echo "time (gl4es, for instance) do."
 If "{ALL}" EQ ""
-  Ask "Copy v3dglslc to LIBS:? (y/n)"
+  Ask "Copy v3dglslc3 to LIBS:? (y/n)"
   If NOT WARN
     Skip cache
   EndIf
 EndIf
-Copy Libs/v3dglslc LIBS: CLONE
-Version >NIL: LIBS:v3dglslc3 1 3 FILE
+Copy Libs/v3dglslc3 LIBS: CLONE
+Version >NIL: LIBS:v3dglslc3 1 0 FILE
 If WARN
-  Echo "Could not copy v3dglslc to LIBS: (19 MB free? write-protected?)."
+  Echo "Could not copy v3dglslc3 to LIBS: (19 MB free? write-protected?)."
   Quit 20
 EndIf
 Echo "  LIBS:v3dglslc3 installed."
@@ -97,17 +98,17 @@ Assign OGLES3Cache: SYS:OGLES3Cache
 If EXISTS S:User-Startup
   Search S:User-Startup "OGLES3Cache:" QUIET >NIL:
   If WARN
-    Echo ";BEGIN ogles2" >>S:User-Startup
+    Echo ";BEGIN ogles3" >>S:User-Startup
     Echo "Assign OGLES3Cache: SYS:OGLES3Cache" >>S:User-Startup
-    Echo ";END ogles2" >>S:User-Startup
+    Echo ";END ogles3" >>S:User-Startup
     Echo "  Added to S:User-Startup."
   Else
     Echo "  S:User-Startup already assigns OGLES3Cache:."
   EndIf
 Else
-  Echo ";BEGIN ogles2" >S:User-Startup
+  Echo ";BEGIN ogles3" >S:User-Startup
   Echo "Assign OGLES3Cache: SYS:OGLES3Cache" >>S:User-Startup
-  Echo ";END ogles2" >>S:User-Startup
+  Echo ";END ogles3" >>S:User-Startup
   Echo "  S:User-Startup made."
 EndIf
 

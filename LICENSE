@@ -1,11 +1,14 @@
-ogles2.library licensing
+ogles3.library licensing
 ========================
+
+(ogles3.library is built from the ogles2 project's source: the library's
+source files are in ogles2/.)
 
 This repository holds code under two licences, plus third-party code that
 keeps its own. The licence decision is D6 in docs/DEVELOPMENT_PLAN.md
 (section 12).
 
-1. ogles2.library as built is under the Hyperion MiniGL Open Source
+1. ogles3.library as built is under the Hyperion MiniGL Open Source
    License below, because it incorporates PiStorm3D's V3D backend
    (minigl.library 29.1, see v3dcore/PROVENANCE.md). In short: the library
    may only be built for AmigaOS, and the source of all modifications must
@@ -25,7 +28,7 @@ keeps its own. The licence decision is D6 in docs/DEVELOPMENT_PLAN.md
      program of any licence, GPL included, may link them; the library
      itself is opened at run time with OpenLibrary);
    - the other front-end files: ogles2/buffer.c, compiler.c, context.c,
-     debug.c, device.c, etc1.c, etc1.h, fbo.c, frame.c, library.c, log.c,
+     debug.c, debug_khr.c, gles2_ext.c, device.c, etc1.c, etc1.h, fbo.c, frame.c, library.c, log.c,
      ogles2_internal.h, runtime.c, share.c, start.s, state.c, v3dp.c,
      clear_mrt_v3dp.h;
    - cmd/, tests/, v3dp/, gen/ (except gen/khronos/), dev/, docs/, release/;
@@ -47,7 +50,7 @@ keeps its own. The licence decision is D6 in docs/DEVELOPMENT_PLAN.md
    - ogles2/blake3.c, ogles2/blake3.h follow the BLAKE3 reference
      implementation (CC0 / Apache-2.0).
    - tools/v3dglslc builds Mesa (MIT, with the patches in
-     tools/v3dglslc/patches); the compiler shipped as LIBS:v3dglslc is Mesa
+     tools/v3dglslc/patches); the compiler shipped as LIBS:v3dglslc3 is Mesa
      and carries Mesa's notices.
    - The corpus programs (Mesa demos, the OpenGL ES 2.0 Programming Guide
      samples) are not in this repository: tests/corpus/build_corpus.sh

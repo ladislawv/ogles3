@@ -1,9 +1,27 @@
-ogles3.library 1.3 (release 1.3.2) for AmigaOS 3.x on PiStorm
-=============================================
+ogles3.library 1.0 (release 1.0-beta1) for AmigaOS 3.x on PiStorm
+==================================================================
 
-OpenGL ES 2.0 for 68k AmigaOS, drawn by the Raspberry Pi 4's GPU (Broadcom
-V3D 4.2) through PiStorm and Emu68. The API is source-compatible with
-AmigaOS 4's ogles3.library: the GLES2 functions plus the agl* context calls.
+OpenGL ES 3.1 for 68k AmigaOS, drawn by the Raspberry Pi 4's GPU (Broadcom
+V3D 4.2) through PiStorm and Emu68. Programs get OpenGL ES 3.1 contexts,
+and OpenGL ES 3.0 and 2.0 ones when they ask: compute shaders, storage
+buffers and images, instancing, uniform buffers, transform feedback,
+multisampled framebuffers, GLSL ES 3.10 and 3.00, and everything of
+OpenGL ES 2.0. The agl* context calls are those of AmigaOS 4's
+ogles2.library.
+
+This is a beta. Every part of the Khronos conformance tests for OpenGL
+ES 3.1 that applies passes on an A1200, group by group; the complete runs
+of the OpenGL ES 2.0, 3.0 and 3.1 lists are still to come (see
+"Conformance"). Please report what goes wrong.
+
+ogles3 and ogles2
+-----------------
+ogles3.library is a new library beside ogles2.library 1.x (OpenGL ES 2.0),
+not a replacement for it: programs written for ogles2 keep using
+ogles2.library, and both can be installed at once. Each has its own
+shader compiler (ogles3's is LIBS:v3dglslc3) and its own cache of compiled
+shaders (OGLES3Cache:). Programs use ogles3 when they are built with its
+SDK.
 
 Requirements
 ------------
@@ -16,12 +34,12 @@ What is in this archive
 -----------------------
   Install-ogles3      the installer (an AmigaDOS script, see below)
   Libs/ogles3.library the library
-  Libs/v3dglslc       the shader compiler (Mesa's V3D compiler, 19 MB)
+  Libs/v3dglslc3      the shader compiler (Mesa's V3D compiler, 19 MB)
   C/OGLES3Log         writes the library's log while a program runs
-  Examples/           two small programs with their compiled shaders
+  Examples/           small programs with their compiled shaders
   SDK/                headers, import libraries, documentation and the
                       examples' sources, for programmers (only in
-                      ogles2-1.3.2-sdk.lha; see "For programmers")
+                      ogles3-1.0-beta1-sdk.lha; see "For programmers")
   LICENSE, licences/  licences and notices
 
 Installing
@@ -31,18 +49,18 @@ From a Shell, in this drawer:
     Execute Install-ogles3
 
 It asks before each step:
-- copies ogles3.library to LIBS:, and replaces a LIBS:v3dglslc3 older than
-  it (any from 1.3.1 or before) without asking, since the library uses
-  that one first;
-- copies the shader compiler v3dglslc to LIBS: (optional, see "Shaders");
+- copies ogles3.library to LIBS: (an older LIBS:v3dglslc3 is replaced
+  without asking, since the library uses that one first);
+- copies the shader compiler v3dglslc3 to LIBS: (optional, see "Shaders");
 - makes the drawer SYS:OGLES3Cache and adds "Assign OGLES3Cache:
   SYS:OGLES3Cache" to S:User-Startup, so compiled shaders are kept across
   reboots (optional; without it they are kept in T: until the next reboot);
 - copies OGLES3Log to C: (optional).
-"Execute Install-ogles3 ALL" does all four without asking.
+"Execute Install-ogles3 ALL" does all four without asking. Nothing of an
+installed ogles2.library is touched.
 
 To remove it: delete LIBS:ogles3.library, LIBS:v3dglslc3, C:OGLES3Log and
-SYS:OGLES3Cache, and the lines between ";BEGIN ogles2" and ";END ogles2"
+SYS:OGLES3Cache, and the lines between ";BEGIN ogles3" and ";END ogles3"
 in S:User-Startup.
 
 Using it without installing
@@ -51,30 +69,28 @@ A program finds ogles3.library and the compiler in its own drawer when they
 are not installed: the library in LIBS:, else PROGDIR:libs/, else beside the
 program; the compiler likewise (LIBS:v3dglslc3, PROGDIR:libs/v3dglslc3,
 PROGDIR:v3dglslc3). So a program can be shipped with a libs/ drawer holding
-ogles3.library (and v3dglslc, if it needs to compile shaders). This works
-for programs built with this SDK's import library (version 1.3 or newer).
-A program's own copy also replaces an installed one that is too old for
-it, unless another program is using the old one at that moment (AmigaOS
-keeps one ogles3.library in memory for all programs).
+ogles3.library (and v3dglslc3, if it needs to compile shaders). A
+program's own copy also replaces an installed one that is too old for it,
+unless another program is using the old one at that moment (AmigaOS keeps
+one ogles3.library in memory for all programs).
 
 To try the examples this way: copy Libs/ogles3.library into Examples/libs/
-and run Examples/triangle, Examples/cube or Examples/boingocean.
+and run the programs in Examples/.
 
 Shaders
 -------
-The GPU runs machine code compiled from each program's GLSL. ogles2 finds
+The GPU runs machine code compiled from each program's GLSL. ogles3 finds
 a program's compiled form ("binary", a .v3dp file named by a hash of the
 GLSL text) in the program's shaders/ drawer, beside the program, or in
-OGLES3Cache: (or T:). When there is
-none, the compiler v3dglslc compiles it (about 0.2 s per program; its first
-start takes about a second) and the result goes into OGLES3Cache:, so the
-next run needs no compiler.
+OGLES3Cache: (or T:). When there is none, the compiler v3dglslc3 compiles
+it (about 0.2 s per program; its first start takes about a second) and the
+result goes into OGLES3Cache:, so the next run needs no compiler. Some
+draws need another variant of a program (for float or integer render
+targets, for instance); the compiler makes it at that draw, and it is
+kept in the cache too.
 
 Programs that ship their binaries (as the examples do) run without the
-compiler. Where it is installed, they leave it unstarted only if they also
-ship their shaders' records (.v3ds files, in shaders/ with the binaries),
-as the examples do. Programs that make shaders at run time (gl4es
-and the programs built on it, for instance) need it.
+compiler. Programs that make shaders at run time need it.
 
 The examples
 ------------
@@ -82,42 +98,44 @@ The examples
   Examples/cube       a textured cube with a depth buffer, in a window you
                       can resize
   Examples/boingocean the Boing ball floating on a ray-marched ocean, all
-                      drawn by shaders: 60 fps at 640 x 480 on a Pi 4 with
-                      "boingocean FULLSCREEN" from a Shell (about 55 in a
-                      window); drag with the mouse to move the camera, keys
-                      1 to 4 draw it at 1/1 to 1/4 size and scale it up
+                      drawn by shaders; drag with the mouse to move the
+                      camera, keys 1 to 4 draw it at 1/1 to 1/4 size
   Examples/boing2026  the 1984 Boing Ball remade: it bounces in a neon room
                       with a soft shadow, a reflecting floor, bloom, 4x
-                      antialiasing and its "boing" on Paula (about 53 fps
-                      at 640 x 480); "boing2026 TOUR" shows each effect in
-                      turn. Its keys and options: Examples/boing2026.txt
+                      antialiasing and its "boing" on Paula; "boing2026
+                      TOUR" shows each effect in turn. Its keys and
+                      options: Examples/boing2026.txt
 Close the window or press Esc to quit. Their .v3dp files are in
 Examples/shaders/: they run without the compiler.
 
 Logging
 -------
-The library logs to T:ogles2.log, or to the file named in the environment
-variable OGLES3/LogFile (SetEnv OGLES3/LogFile RAM:ogles2.log). OGLES3Log
+The library logs to T:ogles3.log, or to the file named in the environment
+variable OGLES3/LogFile (SetEnv OGLES3/LogFile RAM:ogles3.log). OGLES3Log
 writes the buffered log while a program still runs. A program that fails
 usually says why there.
 
 For programmers
 ---------------
-The SDK comes in two forms: ogles2-1.3.2-sdk.lha (this archive with SDK/
-added) and ogles2-1.3.2-sdk.zip (the SDK alone, for building on a PC with a
-cross compiler). SDL2 and SDL3 with an ogles2 backend are a separate
-archive, ogles2-1.3.2-sdl.lha or .zip, which unpacks over the SDK (its
-ReadMe-SDL). It holds:
+The SDK comes in two forms: ogles3-1.0-beta1-sdk.lha (this archive with
+SDK/ added) and ogles3-1.0-beta1-sdk.zip (the SDK alone, for building on a
+PC with a cross compiler). It holds:
 
-SDK/include    <proto/ogles3.h> (GLES2 and agl*), <libraries/ogles3.h>
-               (tags, errors, extra enumerants), the dispatch table, and
-               Khronos' GLES2/ and KHR/ headers
+SDK/include    <proto/ogles3.h> (every OpenGL ES 3.1 function and agl*),
+               <libraries/ogles3.h> (tags, errors, extra enumerants), the
+               dispatch table, and Khronos' GLES2/, GLES3/ and KHR/ headers
 SDK/lib        libogles3.a (GCC) and ogles3.lib (vbcc), the import library
 SDK/doc        GettingStarted.txt: writing, building, debugging and shipping
-               a program, and a prompt for working with an AI assistant;
-               ogles3.doc: the agl* calls, shaders and binaries, extensions
-               and deviations from GLES2 and from AmigaOS 4's library
+               a program, moving one from ogles2.library, and a prompt for
+               working with an AI assistant; ogles3.doc: the agl* calls,
+               context versions, shaders and binaries, extensions and
+               deviations
 SDK/examples   the examples' sources and a Makefile (GCC and vbcc)
+
+A context is OpenGL ES 3.1 unless the program asks for another with the
+tag OGLES3_CCT_PISTORM_ES_VERSION (20 gives OpenGL ES 2.0). Source written
+for ogles2.library 1.x builds with its #include lines changed to
+<proto/ogles3.h>: the OGLES2_ names are still defined.
 
 The import library and the headers are MIT-licensed: programs of any
 licence may use them. The source of everything here, the compiler's
@@ -125,27 +143,32 @@ included, is at https://github.com/ladislawv/ogles2.
 
 Conformance
 -----------
-The Khronos dEQP-GLES2 must-pass list (17,165 cases), run on an A1200:
-all pass except 25 cube-map cases (the GPU always filters cube maps
-seamlessly, as GLES 3 requires) and 6 timing and quality warnings. The
-SDK's ogles3.doc lists the deviations.
+The Khronos dEQP-GLES31 tests, run group by group on an A1200: every case
+that applies passes; those of OpenGL ES 3.2 and of extensions the library
+does not offer report "not supported". dEQP-GLES3 passed group by group
+while OpenGL ES 3.0 was built, and the whole dEQP-GLES2 list passed in
+ogles2.library 1.3. The complete runs of the three lists, and the speed
+comparison with ogles2 1.3, come before the final 1.0. The SDK's
+ogles3.doc lists the deviations: cube maps always filter seamlessly,
+multisampling is always 4x, 32-bit float textures filter nearest, and
+there are no geometry or tessellation shaders (OpenGL ES 3.2).
 
 Licence
 -------
 ogles3.library incorporates PiStorm3D's V3D backend and is distributed
 under the Hyperion MiniGL Open Source License (licences/
 License_MiniGL_Library.txt): for AmigaOS only, with the source published.
-The import library, headers, examples and OGLES3Log are MIT. v3dglslc is
+The import library, headers, examples and OGLES3Log are MIT. v3dglslc3 is
 Mesa (MIT; licences/Mesa/). LICENSE lists every part.
 
 Credits
 -------
-ogles2 is developed by R-Typer and Ladislawv, with Claude Opus 5.5
+ogles3 is developed by R-Typer and Ladislawv, with Claude Opus 5.5
 (Anthropic's AI assistant).
 
-It builds on: PiStorm3D (minigl.library for PiStorm) by Steffen "MagicSN" Haeuser, whose
-V3D backend this library builds on, with Dennis van der Boon; the V3D
-assembler by Macoy Madson; Mesa's V3D driver and compiler (Broadcom, VMware
-and the Mesa contributors); Emu68 by Michal Schulz; PiStorm by Claude
-Schwarz and contributors; bebbo's amiga-gcc; vbcc by Volker Barthelmann
-and Frank Wille.
+It builds on: PiStorm3D (minigl.library for PiStorm) by Steffen "MagicSN"
+Haeuser, whose V3D backend this library builds on, with Dennis van der
+Boon; the V3D assembler by Macoy Madson; Mesa's V3D driver and compiler
+(Broadcom, VMware and the Mesa contributors); Emu68 by Michal Schulz;
+PiStorm by Claude Schwarz and contributors; bebbo's amiga-gcc; vbcc by
+Volker Barthelmann and Frank Wille.

@@ -1358,7 +1358,7 @@ void ogles2_device_context_free(struct V3DContext *v);
 BOOL ogles2_device_context_resize(struct V3DContext *v, UWORD w, UWORD h);
 
 /* ---- log (log.c; plan section 10) ----
- * Lines go to a RAM ring buffer, appended to the log file (T:ogles2.log, or
+ * Lines go to a RAM ring buffer, appended to the log file (T:ogles3.log, or
  * the path in ENV:OGLES3/LogFile) when a context is destroyed, when the
  * library is closed and when the OGLES3Log command asks. Builds with
  * OGLES3_LOG_SYNC write every line at once, so a hang loses nothing.

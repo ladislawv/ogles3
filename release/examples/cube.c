@@ -5,7 +5,7 @@
  * Shows what the triangle does not: a depth buffer (OGLES3_CCT_DEPTH), an
  * index buffer, a texture with mipmaps made by glGenerateMipmap, a matrix
  * uniform, and a window the user may resize: at IDCMP_NEWSIZE the program
- * gives ogles2 the window again (aglSetParams2 with OGLES3_CCT_WINDOW), which
+ * gives ogles3 the window again (aglSetParams2 with OGLES3_CCT_WINDOW), which
  * resizes the surface, and sets the viewport to the new size.
  * Close the window, press Esc or Ctrl-C to quit.
  *
@@ -168,11 +168,11 @@ int main(void)
         return 20;
     }
     if (!OGLES3Open()) {
-        printf("needs %s 1.3 or newer: in LIBS:, or in this program's drawer or its libs/\n"
+        printf("needs %s 1.0 or newer: in LIBS:, or in this program's drawer or its libs/\n"
                "(an older one that another program is using cannot be replaced)\n", OGLES3NAME);
         goto out;
     }
-    win = OpenWindowTags(NULL, WA_Title, (ULONG) "ogles2: cube", WA_InnerWidth, 400, WA_InnerHeight, 300,
+    win = OpenWindowTags(NULL, WA_Title, (ULONG) "ogles3: cube", WA_InnerWidth, 400, WA_InnerHeight, 300,
                          WA_DragBar, TRUE, WA_DepthGadget, TRUE, WA_CloseGadget, TRUE, WA_SizeGadget, TRUE,
                          WA_SizeBBottom, TRUE, WA_MinWidth, 100, WA_MinHeight, 80, WA_MaxWidth, -1,
                          WA_MaxHeight, -1, WA_Activate, TRUE,

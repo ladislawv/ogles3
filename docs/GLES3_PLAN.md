@@ -1,5 +1,37 @@
 # OpenGL ES 3.0 and 3.1 on ogles2.library
 
+**Release 1.0-beta1 of ogles3.library (2026-10-28, the developer's
+decisions):** the work ships as a library of its own, `ogles3.library`
+1.0, beside `ogles2.library` 1.x, in one release (no 2.0/2.1/2.2 split,
+§1 below is history). Its names: the compiler `LIBS:v3dglslc3`, the cache
+`OGLES3Cache:`, the settings `ENV:OGLES3/`, the logs `T:ogles3.log` and
+`T:ogles3_missing_shaders.txt`; the SDK `<proto/ogles3.h>`,
+`<libraries/ogles3.h>` (with the `OGLES2_` names as aliases, unless
+`OGLES3_NO_OGLES2_NAMES`), `<clib/ogles3_protos.h>`, `libogles3.a`,
+`ogles3.lib`, `OGLES3Open`, `OGLES3_` tags, `OGLES3Log`, `Install-ogles3`,
+`ogles3.doc` (the source directory and the internal `ogles2_` names stay).
+A context asked for no version is OpenGL ES 3.1; the default build has ES
+3.0 and 3.1 contexts (`ES3=1` caps a test build at 3.0). GLES2 contexts
+offer ES 3.0's features as GLES2 extensions (`ogles2/gles2_ext.c`:
+`OES_texture_3D`, `EXT_texture_storage`, `EXT_texture_rg`, `OES_depth24`,
+`EXT_map_buffer_range`, `EXT_occlusion_query_boolean`,
+`EXT_shadow_samplers`, `EXT_unpack_subimage`, `OES_vertex_half_float`,
+`EXT_texture_type_2_10_10_10_REV`, `EXT_multi_draw_arrays`;
+`EXT_shader_texture_lod` not: Mesa's V3D lacks it), and every context
+`KHR_debug`. Geometry shaders and the rest of OpenGL ES 3.2 are for later
+releases. Skipped for the beta (the developer's call): the whole
+dEQP-GLES2, -GLES3 and -GLES31 runs, the GLES2 regression set and the
+speed against 1.x. `release/build_release.sh` builds
+`ogles3-1.0-beta1.lha`, `-sdk.lha` and `-sdk.zip` (into
+`~/ogles3-build/release`; no SDL archive yet: the SDL ports still build
+against the ogles2 names). On the A1200 from the release tree (the
+library in `Examples/libs/`, no compiler): the four examples run in ES 3.1
+contexts from their shipped binaries; `boingocean` 54.8 fps in its
+window, `boing2026` 49.7 fps at 640x480 (1.3.2's ReadMe: about 53: to
+check before 1.0). Found on the way: the m68k compiler lacked Mesa patch
+0018 (only the host one had been rebuilt; `es31aoa` in `compare_v3dp.sh`
+caught it).
+
 **Status: plan (2026-10-18; revised eight times, research added and checked
 2026-10-19, every line citation and each stage reviewed for implementation
 the same day), work on branch `gles3`.** Stage A (begun 2026-10-22) is

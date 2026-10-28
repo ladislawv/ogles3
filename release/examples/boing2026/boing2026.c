@@ -27,7 +27,7 @@
  * Frames are not limited: VSYNC waits for the display (no tearing). TOUR switches the
  * effects off and on one by one, saying in the title what each proves.
  *
- * Built on the ogles2 SDK's Boing Ocean example. MIT License.
+ * Built on the ogles3 SDK's Boing Ocean example. MIT License.
  */
 #include <stdio.h>
 #include <string.h>
@@ -873,11 +873,11 @@ int main(void)
     timer_open = TRUE;
     TimerBase = timer_req.tr_node.io_Device;
     if (!OGLES3Open()) {
-        printf("needs %s 1.3 or newer: in LIBS:, or in this program's drawer or its libs/\n", OGLES3NAME);
+        printf("needs %s 1.0 or newer: in LIBS:, or in this program's drawer or its libs/\n", OGLES3NAME);
         goto out;
     }
     if (full) {
-        /* The first 32-bit mode of the size asked for that ogles2 accepts. */
+        /* The first 32-bit mode of the size asked for that ogles3 accepts. */
         ULONG id = INVALID_ID;
         if (!(GfxBase = (struct GfxBase *)OpenLibrary((STRPTR) "graphics.library", 39))) {
             printf("FULLSCREEN needs graphics.library 39\n");
@@ -894,7 +894,7 @@ int main(void)
                                         OGLES3_CCT_GET_HEIGHT, (ULONG)&height, TAG_DONE);
         }
         if (!ctx || !iw) {
-            printf("no %dx%d screen mode that ogles2 can draw into (it needs a 32-bit one)\n", w0, h0);
+            printf("no %dx%d screen mode that ogles3 can draw into (it needs a 32-bit one)\n", w0, h0);
             goto out;
         }
         ModifyIDCMP(iw, IDCMP_VANILLAKEY | IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE);

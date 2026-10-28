@@ -16,7 +16,7 @@
 
 #define LOG_SIZE 32768 /* bytes of buffered lines */
 #define LINE_MAX 240
-#define DEFAULT_PATH "T:ogles2.log"
+#define DEFAULT_PATH "T:ogles3.log"
 
 static char ring[LOG_SIZE];
 static ULONG head, used; /* write position, bytes held */

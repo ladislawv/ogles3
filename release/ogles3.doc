@@ -15,11 +15,21 @@ ogles3.library/aglGetProcAddress
 ogles3.library/--background--                   ogles3.library/--background--
 
    PURPOSE
-       OpenGL ES 2.0 for AmigaOS 3.x on a PiStorm with a Raspberry Pi 4
-       (or CM4) running Emu68: the GLES2 functions are drawn by the Pi's
-       GPU (Broadcom V3D 4.2). The API is source-compatible with AmigaOS 4's
-       ogles3.library: the GLES2 functions with their standard names, and
-       the agl* context calls described here.
+       OpenGL ES 3.1 (and 3.0 and 2.0) for AmigaOS 3.x on a PiStorm with a
+       Raspberry Pi 4 (or CM4) running Emu68: the GL functions are drawn by
+       the Pi's GPU (Broadcom V3D 4.2). The API is source-compatible with
+       AmigaOS 4's ogles2.library for GLES2 code: the GL functions with
+       their standard names, and the agl* context calls described here.
+
+   VERSION
+       ogles3.library 1.0, release 1.0-beta1 (a beta: see CONFORMANCE).
+       It is a library of its own, beside ogles2.library 1.x (OpenGL ES
+       2.0), which it does not replace: programs built for ogles2 keep
+       using that. Their files do not meet either: ogles3's compiler is
+       LIBS:v3dglslc3, its cache OGLES3Cache:, its settings ENV:OGLES3/.
+       Source written for ogles2.library 1.x builds against this SDK with
+       its #include lines changed (<proto/ogles3.h>): <libraries/ogles3.h>
+       defines the OGLES2_ names as the OGLES3_ ones.
 
    REQUIREMENTS
        A PiStorm with a Raspberry Pi 4B or CM4, Emu68, AmigaOS 3.x, an RTG
@@ -30,7 +40,8 @@ ogles3.library/--background--                   ogles3.library/--background--
        GettingStarted.txt (beside this file) walks through a first
        program, building, shaders, shipping and debugging.
 
-       A program includes <proto/ogles3.h> and links the import library:
+       A program includes <proto/ogles3.h> (and <GLES3/gl31.h> for the
+       OpenGL ES 3.x enumerants) and links the import library:
        libogles3.a (GCC) or ogles3.lib (vbcc). It calls OGLES3Open() before
        anything else; the GL functions and agl* calls then go to
        ogles3.library through its dispatch table, with the current context
@@ -44,7 +55,7 @@ ogles3.library/--background--                   ogles3.library/--background--
                                                  TAG_DONE);
                if (ctx) {
                    aglMakeCurrent(ctx);
-                   ... GLES2 calls, aglSwapBuffers() once per frame ...
+                   ... GL calls, aglSwapBuffers() once per frame ...
                    aglDestroyContext(ctx);
                }
                OGLES3Close();
@@ -70,8 +81,18 @@ ogles3.library/--background--                   ogles3.library/--background--
        program may therefore bring the library in its own drawer for
        systems where it is not installed; see OGLES3Open().
 
+   CONTEXT VERSIONS
+       A context is OpenGL ES 3.1 unless OGLES3_CCT_PISTORM_ES_VERSION asks
+       for another: 20 gives OpenGL ES 2.0, 30 and 31 give 3.1 (the
+       highest the library has). GL_VERSION reads "OpenGL ES 3.1
+       ogles3.library 1.0" ("OpenGL ES 2.0 ..." in a 2.0 context), and
+       GL_SHADING_LANGUAGE_VERSION "OpenGL ES GLSL ES 3.10" ("1.00"). A
+       3.1 context takes GLSL ES 1.00, 3.00 and 3.10 shaders; a 2.0 context
+       1.00 only. Contexts share objects only with contexts of their own
+       version.
+
    EXTENSIONS
-       GL_EXTENSIONS lists: OES_element_index_uint,
+       Every context lists: OES_element_index_uint,
        OES_compressed_ETC1_RGB8_texture, EXT_texture_format_BGRA8888,
        OES_mapbuffer, EXT_blend_minmax, OES_draw_elements_base_vertex,
        OES_rgb8_rgba8, OES_packed_depth_stencil, OES_fbo_render_mipmap,
@@ -84,7 +105,23 @@ ogles3.library/--background--                   ogles3.library/--background--
        EXT_texture_compression_dxt1, EXT_texture_compression_s3tc,
        ANGLE_texture_compression_dxt3, ANGLE_texture_compression_dxt5,
        EXT_clip_control, EXT_draw_buffers, NV_fbo_color_attachments,
-       OES_required_internalformat, EXT_color_buffer_half_float.
+       OES_required_internalformat, EXT_color_buffer_half_float,
+       EXT_frag_depth, OES_vertex_array_object, EXT_instanced_arrays,
+       KHR_debug, and ES 3.0's features as GLES2 extensions:
+       OES_texture_3D, EXT_texture_storage, EXT_texture_rg, OES_depth24,
+       EXT_map_buffer_range, EXT_occlusion_query_boolean,
+       EXT_shadow_samplers, EXT_unpack_subimage, OES_vertex_half_float,
+       EXT_texture_type_2_10_10_10_REV, EXT_multi_draw_arrays.
+       OpenGL ES 3.x contexts add EXT_color_buffer_float and
+       EXT_conservative_depth; 3.1 contexts OES_shader_image_atomic.
+
+       KHR_debug: debug messages with their filters and debug groups, the
+       message log (64 messages of at most 256 characters) or the
+       program's callback, and labels on every kind of object. Every GL
+       error is a message while GL_DEBUG_OUTPUT is enabled (it starts
+       disabled: no context is a debug context). The callback is a C
+       function with its arguments on the stack, called from the task
+       that makes the GL call, during that call.
 
        EXT_color_buffer_half_float: half-float RGBA textures
        (OES_texture_half_float) and GL_RGBA16F_EXT, GL_RGB16F_EXT,
@@ -111,19 +148,25 @@ ogles3.library/--background--                   ogles3.library/--background--
        of an object, go through the CPU.
 
    LIMITS
-       Textures and framebuffers up to 4096 x 4096; 16 vertex attributes.
-       glGetIntegerv answers the rest.
+       Textures and framebuffers up to 4096 x 4096 (3D textures 4096
+       deep, 2048 array layers); 16 vertex attributes; 4 samples
+       (GL_MAX_SAMPLES); 4 draw buffers; compute work groups of up to 256
+       invocations. glGetIntegerv answers the rest, with Mesa's values for
+       the V3D 4.2.
 
    ENVIRONMENT
-       OGLES3/LogFile  the log's file (default T:ogles2.log). OGLES3Log
+       OGLES3/LogFile  the log's file (default T:ogles3.log). OGLES3Log
                        (C/) writes the buffered log while a program runs.
        OGLES3/MSAA     4 or 0: 4x multisampling for contexts created
                        without OGLES3_CCT_PISTORM_MSAA.
 
    CONFORMANCE
-       The Khronos dEQP-GLES2 must-pass list (17,165 cases) on an A1200:
-       all pass except the documented deviation below (seamless cube map
-       filtering), and timing and quality warnings. See --deviations--.
+       Khronos dEQP-GLES31 on an A1200, each group run alone: every case
+       that runs passes (those of OpenGL ES 3.2 and of extensions the
+       library does not offer report "not supported"). dEQP-GLES3 passed
+       group by group while ES 3.0 was built; dEQP-GLES2 passed whole in
+       ogles2.library 1.3. The whole lists have not been run again on this
+       library yet: that is why it is a beta. See --deviations--.
 
    AUTHORS
        Developed by R-Typer and Ladislawv, with Claude Opus 5.5
@@ -150,7 +193,14 @@ ogles3.library/--shaders--                         ogles3.library/--shaders--
           step 3 (about 0.2 s per program; its first start takes about a
           second);
        5. otherwise the link fails: the info log names the program's hash,
-          and both sources are appended to T:ogles2_missing_shaders.txt.
+          and both sources are appended to T:ogles3_missing_shaders.txt.
+
+       A compute program (one compute shader) is found the same way. The
+       binaries are in format 2: the library compiles again a binary that
+       ogles2.library 1.x made (format 1). A draw whose state needs another
+       variant of a program (some render target and sampler formats) gets
+       it from the cache, or compiles it at that draw when the compiler is
+       there.
 
        <hash> is the first 24 hexadecimal digits of the BLAKE3 hash of the
        two sources, byte for byte; attribute bindings are not part of it.
@@ -183,7 +233,7 @@ ogles3.library/--shaders--                         ogles3.library/--shaders--
 ogles3.library/--deviations--                   ogles3.library/--deviations--
 
    Where ogles3.library differs from the GLES 2.0 specification or from
-   AmigaOS 4's ogles3.library:
+   AmigaOS 4's ogles2.library:
 
    - Cube maps are always filtered seamlessly across face edges (the
      hardware does this, as GLES 3 requires); GLES 2 filters each face
@@ -195,9 +245,18 @@ ogles3.library/--deviations--                   ogles3.library/--deviations--
      sample it as a texture to see its values.
    - glPolygonMode takes GL_FRONT_AND_BACK only: the hardware has one mode
      for both faces.
-   - Framebuffer objects are not multisampled; only the default
-     framebuffer is (OGLES3_CCT_PISTORM_MSAA).
+   - Multisampling is always 4x: a request for 1 to 4 samples (a
+     renderbuffer, a multisample texture, the default framebuffer) gets
+     4, and GL_MAX_SAMPLES is 4.
    - Textures of 32-bit float formats are sampled with nearest filtering.
+   - No OpenGL ES 3.2: no geometry or tessellation shaders, no texture
+     buffers, cube map arrays or ES 3.2's extensions.
+   - Stencil a draw wrote into a DEPTH32F_STENCIL8 texture is replaced by
+     the uploaded stencil when part of that texture is uploaded again
+     (glTexSubImage*).
+   - With no OGLES3Cache: assign, compiled shaders go to T:, which
+     ogles2.library 1.x also uses: the two compile each other's programs
+     again there.
    - Without the compiler, glCompileShader cannot check a shader: it
      reports GL_COMPILE_STATUS TRUE, and errors appear at link time.
    - Context tags accepted but not acted on: OGLES3_CCT_RESIZE_VIEWPORT,
@@ -278,7 +337,9 @@ ogles3.library/aglCreateContext2               ogles3.library/aglCreateContext2
        void *aglCreateContextTags2(ULONG *errcode, ULONG tag1, ...);
 
    FUNCTION
-       Creates a GLES2 context and its default framebuffer. Where it draws:
+       Creates an OpenGL ES context (3.1 unless
+       OGLES3_CCT_PISTORM_ES_VERSION says otherwise) and its default
+       framebuffer. Where it draws:
            OGLES3_CCT_WINDOW (struct Window *): into the program's window;
                each aglSwapBuffers() copies the frame into the window's
                inner area. The window should be on a 32-bit RTG screen.
@@ -310,6 +371,8 @@ ogles3.library/aglCreateContext2               ogles3.library/aglCreateContext2
                compiled variant (instructions, threads, spills).
            OGLES3_CCT_PISTORM_MSAA (ULONG): 0 or 4 samples per pixel for
                the default framebuffer; without the tag, ENV:OGLES3/MSAA.
+           OGLES3_CCT_PISTORM_ES_VERSION (ULONG): 20 for OpenGL ES 2.0, 30
+               or 31 for OpenGL ES 3.1 (the default).
            OGLES3_CCT_GET_WIDTH, OGLES3_CCT_GET_HEIGHT (ULONG *): receive
                the surface size.
            OGLES3_CCT_PISTORM_GET_WINDOW (struct Window **): receives the

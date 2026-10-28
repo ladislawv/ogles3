@@ -1,4 +1,4 @@
-# The ogles2 examples, with bebbo's amiga-gcc (clib2):  make
+# The ogles3 examples, with bebbo's amiga-gcc (clib2):  make
 # or with vbcc:  make vbcc
 # From the SDK's examples/ drawer; the headers and import libraries are in
 # ../include and ../lib. The programs need their .v3dp files (the compiled

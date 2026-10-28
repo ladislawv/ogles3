@@ -2,7 +2,7 @@
  * ogles3.library example 3: Boing Ocean. The Amiga Boing ball floating on a
  * ray-marched ocean, drawn entirely by one fragment shader.
  *
- * Shows a heavy shader on ogles2 and how to make it affordable:
+ * Shows a heavy shader on ogles3 and how to make it affordable:
  *   - everything that is the same for every pixel is worked out once a frame
  *     on the CPU and passed as uniforms: the camera, the sun, the sky light,
  *     the ball's float (the mean water height under it and the slope there)
@@ -23,7 +23,7 @@
  *   boingocean [WIDTH=w] [HEIGHT=h] [SCALE=1..4] [FRAMES=n] [FULLSCREEN]
  * FRAMES quits after n frames and prints the average frame rate.
  * FULLSCREEN opens a 32-bit screen of WIDTH x HEIGHT (640 x 480 by default)
- * that ogles2 draws straight into, with no window to blit into; input then
+ * that ogles3 draws straight into, with no window to blit into; input then
  * comes from the screen's backdrop window (OGLES3_CCT_PISTORM_GET_WINDOW).
  *
  * Build (see the Makefile):
@@ -368,15 +368,15 @@ int main(void)
     timer_open = TRUE;
     TimerBase = timer_req.tr_node.io_Device;
     if (!OGLES3Open()) {
-        printf("needs %s 1.3 or newer: in LIBS:, or in this program's drawer or its libs/\n"
+        printf("needs %s 1.0 or newer: in LIBS:, or in this program's drawer or its libs/\n"
                "(an older one that another program is using cannot be replaced)\n", OGLES3NAME);
         goto out;
     }
     if (full) {
-        /* A true-colour mode of the size asked for, which ogles2 opens as a
+        /* A true-colour mode of the size asked for, which ogles3 opens as a
          * screen. graphics.library cannot tell a 24-bit mode (3 bytes a
-         * pixel) from a 32-bit one, and ogles2 takes only 32-bit ones: try
-         * each mode of that size with 24 or more bits until ogles2 accepts
+         * pixel) from a 32-bit one, and ogles3 takes only 32-bit ones: try
+         * each mode of that size with 24 or more bits until ogles3 accepts
          * one. (An ASL screen-mode requester is the friendlier way.) */
         ULONG id = INVALID_ID;
         if (!(GfxBase = (struct GfxBase *)OpenLibrary((STRPTR) "graphics.library", 39))) {
@@ -393,14 +393,14 @@ int main(void)
                                         (ULONG)&width, OGLES3_CCT_GET_HEIGHT, (ULONG)&height, TAG_DONE);
         }
         if (!ctx || !iw) {
-            printf("no %dx%d screen mode that ogles2 can draw into (it needs a 32-bit one)\n", w0, h0);
+            printf("no %dx%d screen mode that ogles3 can draw into (it needs a 32-bit one)\n", w0, h0);
             goto out;
         }
         /* The backdrop window has no messages until asked for. */
         ModifyIDCMP(iw, IDCMP_VANILLAKEY | IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE);
         iw->Flags |= WFLG_REPORTMOUSE | WFLG_RMBTRAP;
     } else {
-    win = OpenWindowTags(NULL, WA_Title, (ULONG) "ogles2: Boing Ocean", WA_InnerWidth, w0, WA_InnerHeight, h0,
+    win = OpenWindowTags(NULL, WA_Title, (ULONG) "ogles3: Boing Ocean", WA_InnerWidth, w0, WA_InnerHeight, h0,
                          WA_DragBar, TRUE, WA_DepthGadget, TRUE, WA_CloseGadget, TRUE, WA_SizeGadget, TRUE,
                          WA_SizeBBottom, TRUE, WA_MinWidth, 100, WA_MinHeight, 80, WA_MaxWidth, -1,
                          WA_MaxHeight, -1, WA_Activate, TRUE, WA_ReportMouse, TRUE, WA_RMBTrap, TRUE,
@@ -530,7 +530,7 @@ int main(void)
         title_frames++;
         if (!full && now_s() - last_title >= 1.0) {
             double n = now_s();
-            sprintf(title, "ogles2: Boing Ocean  %.1f fps  %dx%d", title_frames / (n - last_title), target_w,
+            sprintf(title, "ogles3: Boing Ocean  %.1f fps  %dx%d", title_frames / (n - last_title), target_w,
                     target_h);
             SetWindowTitles(win, (UBYTE *)title, (UBYTE *)-1);
             last_title = n;

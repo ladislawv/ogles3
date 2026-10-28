@@ -1,6 +1,6 @@
 /*
  * OGLES3Log: write ogles3.library's buffered log to its file now (plan
- * section 10). The file is T:ogles2.log, or the path in ENV:OGLES3/LogFile.
+ * section 10). The file is T:ogles3.log, or the path in ENV:OGLES3/LogFile.
  * Useful while a program that uses the library is still running.
  *   usage: OGLES3Log
  */
@@ -30,7 +30,7 @@ int main(void)
     }
     CloseLibrary(OGLES3Base);
     if (GetVar((STRPTR) "OGLES3/LogFile", (STRPTR)path, sizeof(path), GVF_GLOBAL_ONLY) <= 0)
-        strcpy(path, "T:ogles2.log");
+        strcpy(path, "T:ogles3.log");
     printf("OGLES3Log: log appended to %s\n", path);
     return 0;
 }

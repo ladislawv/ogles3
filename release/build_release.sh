@@ -1,12 +1,12 @@
 #!/bin/bash
-# Builds the release: ~/ogles2-build/release/ogles2/ (the tree) and the
-# archives ogles2-<version>.lha (users), ogles2-<version>-sdk.lha (with the
-# SDK) and ogles2-<version>-sdk.zip (the SDK alone). Run inside WSL:
-#   bash release/build_release.sh        (into ~/ogles2-build/release)
+# Builds the release: ~/ogles3-build/release/ogles3/ (the tree) and the
+# archives ogles3-<version>.lha (users), ogles3-<version>-sdk.lha (with the
+# SDK) and ogles3-<version>-sdk.zip (the SDK alone). Run inside WSL:
+#   bash release/build_release.sh        (into ~/ogles3-build/release)
 #   bash release/build_release.sh dist   (and copies them to release/dist/)
 #   bash release/build_release.sh sdl    (also the SDL archive; with dist too)
-# The SDL archive, ogles2-<version>-sdl.lha and -sdl.zip, holds SDL2 and SDL3
-# with the ogles2 backend (ports/sdl2, ports/sdl3, built here), PiStorm3D's
+# The SDL archive, ogles3-<version>-sdl.lha and -sdl.zip, holds SDL2 and SDL3
+# with the ogles3 backend (ports/sdl2, ports/sdl3, built here), PiStorm3D's
 # MiniGL SDK (SDL links it for its desktop-GL path) and two examples built
 # from the SDK as assembled; it unpacks over the SDK archive.
 #
@@ -19,13 +19,13 @@
 set -eu
 REPO=$(cd "$(dirname "$0")/.." && pwd)
 HERE=$REPO/release
-B=${B:-$HOME/ogles2-build/m68k}
-V=${V:-$HOME/ogles2-build/v3dglslc}
+B=${B:-$HOME/ogles3-build/m68k}
+V=${V:-$HOME/ogles3-build/v3dglslc}
 TC=${TC:-$HOME/amiga-gcc-install}
 VBCC=${VBCC:-$HOME/vbcc}
-MESA=${MESA:-$HOME/mesa-build/mesa}
+MESA=${MESA:-$HOME/mesa-build-gles3/mesa}
 LHA=${LHA:-$HOME/tools/bin/lha}
-OUT=${OUT:-$HOME/ogles2-build/release}
+OUT=${OUT:-$HOME/ogles3-build/release}
 PISTORM3D_SDK=${PISTORM3D_SDK:-/mnt/c/- CPP/pistorm3d/SDK}
 DIST=0
 SDL=0
@@ -43,8 +43,8 @@ VERSION=$VER.$REV
 # the archives' name: the release (OGLES3_RELEASE), which may be newer than the library's version.revision
 RELEASE=$(sed -n 's/^#define OGLES3_RELEASE *"\([^"]*\)".*/\1/p' "$REPO/ogles2/ogles2_internal.h")
 RELEASE=${RELEASE:-$VERSION}
-R=$OUT/ogles2
-echo "ogles2 $RELEASE (library $VERSION) -> $R"
+R=$OUT/ogles3
+echo "ogles3 $RELEASE (library $VERSION) -> $R"
 
 # ---- builds
 make -C "$REPO" -j8 B="$B" > /dev/null
@@ -55,13 +55,13 @@ make -C "$REPO" B="$B" vbcc > /dev/null
 }
 # The compiler's $VER is the library's version (build_m68k.sh), which
 # Install-ogles3 compares the installed compiler with.
-LC_ALL=C grep -aq "\$VER: v3dglslc $VERSION " "$V/v3dglslc.stripped" ||
-    { echo "$V/v3dglslc.stripped is not v3dglslc $VERSION: build_m68k.sh again"; exit 1; }
+LC_ALL=C grep -aq "\$VER: v3dglslc3 $VERSION " "$V/v3dglslc.stripped" ||
+    { echo "$V/v3dglslc.stripped is not v3dglslc3 $VERSION: build_m68k.sh again"; exit 1; }
 [ "$(grep -c "Version >NIL: LIBS:" "$HERE/Install-ogles3")" = \
-  "$(grep -cE "Version >NIL: LIBS:(ogles3.library|v3dglslc) $VER $REV FILE" "$HERE/Install-ogles3")" ] ||
+  "$(grep -cE "Version >NIL: LIBS:(ogles3.library|v3dglslc3) $VER $REV FILE" "$HERE/Install-ogles3")" ] ||
     { echo "Install-ogles3 compares LIBS: with another version than $VER $REV"; exit 1; }
 
-rm -rf "$R" "$OUT/ogles2-$RELEASE.lha" "$OUT/work"
+rm -rf "$R" "$OUT/ogles3-$RELEASE.lha" "$OUT/work"
 mkdir -p "$R"/{Libs,C,Examples,SDK/include,SDK/lib,SDK/doc,SDK/examples,licences/Mesa} "$OUT/work"
 
 # Text files: LF line ends and ASCII, as AmigaOS's tools expect.
@@ -74,7 +74,7 @@ text() { # source destination
 text "$HERE/ReadMe" "$R/ReadMe"
 text "$HERE/Install-ogles3" "$R/Install-ogles3"
 cp "$B/ogles3.library" "$R/Libs/"
-cp "$V/v3dglslc.stripped" "$R/Libs/v3dglslc"
+cp "$V/v3dglslc.stripped" "$R/Libs/v3dglslc3"
 cp "$B/cmd/OGLES3Log" "$R/C/"
 $TC/bin/m68k-amigaos-strip "$R/C/OGLES3Log"
 
@@ -85,7 +85,7 @@ cp "$MESA/docs/license.rst" "$R/licences/Mesa/license.txt"
 for l in MIT Apache-2.0 BSL-1.0; do cp "$MESA/licenses/$l" "$R/licences/Mesa/$l.txt"; done
 cat > "$R/licences/Mesa/ReadMe" <<'EOF'
 LIBS:v3dglslc3 is Mesa's GLSL compiler and V3D back end (Mesa 74b6971 with the
-patches in the ogles2 source, tools/v3dglslc/patches). The Mesa files it is
+patches in the ogles3 source, tools/v3dglslc/patches). The Mesa files it is
 built from are MIT (MIT.txt; license.txt is Mesa's own summary); header-only
 parts of Mesa's util library carry Apache-2.0 or BSL-1.0 alternatives, whose
 texts are here too.
@@ -98,7 +98,7 @@ find "$R/SDK/include" -type f -name '*.h' -exec sed -i 's/\r$//' {} +
 cp "$B/libogles3.a" "$R/SDK/lib/"
 cp "$B/vbcc/ogles3.lib" "$R/SDK/lib/"
 # Autodoc: a form feed before each entry
-sed 's/\r$//' "$HERE/ogles3.doc" | awk 'NR > 1 && /^ogles2\.library\/[^ ]+ +ogles2\.library\// {printf "\f"} {print}' \
+sed 's/\r$//' "$HERE/ogles3.doc" | awk 'NR > 1 && /^ogles3\.library\/[^ ]+ +ogles3\.library\// {printf "\f"} {print}' \
     > "$R/SDK/doc/ogles3.doc"
 text "$HERE/GettingStarted.txt" "$R/SDK/doc/GettingStarted.txt"
 for f in Makefile triangle.c triangle_shaders.h cube.c cube_shaders.h boingocean.c boingocean_shaders.h; do
@@ -156,17 +156,17 @@ PATH=$VBCC/bin:$PATH VBCC=$VBCC make -C "$W/sdk-vbcc/examples" vbcc \
 echo "examples: GCC and vbcc builds ok"
 
 # ---- the archives
-#   ogles2-<v>.lha      for users: library, compiler, installer, examples
-#   ogles2-<v>-sdk.lha  the same with SDK/
-#   ogles2-<v>-sdk.zip  SDK/ alone (with the licences), for cross development on a PC
+#   ogles3-<v>.lha      for users: library, compiler, installer, examples
+#   ogles3-<v>-sdk.lha  the same with SDK/
+#   ogles3-<v>-sdk.zip  SDK/ alone (with the licences), for cross development on a PC
 # LhA archives: lh5, which every Amiga LhA/LZX/UnArc version reads.
-rm -f "$OUT"/ogles2-$RELEASE*.lha "$OUT"/ogles2-$RELEASE*.zip
-(cd "$OUT" && $LHA -ao5q "ogles2-$RELEASE-sdk.lha" ogles2)
-rm -rf "$W/user" && mkdir -p "$W/user" && cp -r "$R" "$W/user/" && rm -rf "$W/user/ogles2/SDK"
-(cd "$W/user" && $LHA -ao5q "$OUT/ogles2-$RELEASE.lha" ogles2)
-S=$W/zip/ogles2-sdk-$RELEASE
+rm -f "$OUT"/ogles3-$RELEASE*.lha "$OUT"/ogles3-$RELEASE*.zip
+(cd "$OUT" && $LHA -ao5q "ogles3-$RELEASE-sdk.lha" ogles3)
+rm -rf "$W/user" && mkdir -p "$W/user" && cp -r "$R" "$W/user/" && rm -rf "$W/user/ogles3/SDK"
+(cd "$W/user" && $LHA -ao5q "$OUT/ogles3-$RELEASE.lha" ogles3)
+S=$W/zip/ogles3-sdk-$RELEASE
 rm -rf "$W/zip" && mkdir -p "$S" && cp -r "$R/SDK/." "$S/" && cp -r "$R/LICENSE" "$R/licences" "$S/"
-python3 - "$W/zip" "ogles2-sdk-$RELEASE" "$OUT/ogles2-$RELEASE-sdk.zip" <<'EOF'
+python3 - "$W/zip" "ogles3-sdk-$RELEASE" "$OUT/ogles3-$RELEASE-sdk.zip" <<'EOF'
 import os, sys, zipfile
 base, top, out = sys.argv[1:]
 with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
@@ -176,14 +176,14 @@ with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
             p = os.path.join(d, f)
             z.write(p, os.path.relpath(p, base))
 EOF
-(cd "$OUT" && $LHA -l "ogles2-$RELEASE.lha" | tail -3)
-ls -l "$OUT"/ogles2-$RELEASE*.lha "$OUT"/ogles2-$RELEASE*.zip
-(cd "$OUT" && sha256sum ogles2-$RELEASE*.lha ogles2-$RELEASE*.zip)
+(cd "$OUT" && $LHA -l "ogles3-$RELEASE.lha" | tail -3)
+ls -l "$OUT"/ogles3-$RELEASE*.lha "$OUT"/ogles3-$RELEASE*.zip
+(cd "$OUT" && sha256sum ogles3-$RELEASE*.lha ogles3-$RELEASE*.zip)
 
 # ---- "sdl": the SDL archive (unpacks over the SDK archive: the drawers merge)
-#   ogles2-<v>-sdl.lha  ogles2/SDK/{SDL2,SDL3,MiniGL,doc/SDL.md,examples-sdl},
-#                       ogles2/Examples/SDL, ogles2/licences, ogles2/ReadMe-SDL
-#   ogles2-<v>-sdl.zip  the SDK part alone, under ogles2-sdk-<v>/ as the SDK zip
+#   ogles3-<v>-sdl.lha  ogles3/SDK/{SDL2,SDL3,MiniGL,doc/SDL.md,examples-sdl},
+#                       ogles3/Examples/SDL, ogles3/licences, ogles3/ReadMe-SDL
+#   ogles3-<v>-sdl.zip  the SDK part alone, under ogles3-sdk-<v>/ as the SDK zip
 if [ $SDL = 1 ]; then
     B="$B" PISTORM3D_SDK="$PISTORM3D_SDK" bash "$REPO/ports/sdl2/build.sh" > "$W/sdl2-build.txt" 2>&1 ||
         { tail -20 "$W/sdl2-build.txt"; exit 1; }
@@ -191,7 +191,7 @@ if [ $SDL = 1 ]; then
         { tail -20 "$W/sdl3-build.txt"; exit 1; }
     L2=${SDL68K_SRC:-$HOME/sdl2-msn}/libSDL2-amigaos3-main
     L3=${SDL3_68K_SRC:-$HOME/sdl3-msn}/SDL3
-    RS=$OUT/sdl/ogles2
+    RS=$OUT/sdl/ogles3
     rm -rf "$OUT/sdl"
     mkdir -p "$RS"/SDK/{SDL2/include/SDL2,SDL2/lib,SDL3/include/SDL3,SDL3/lib,MiniGL,doc,examples-sdl}         "$RS/Examples/SDL" "$RS/licences"
     text "$HERE/ReadMe-SDL" "$RS/ReadMe-SDL"
@@ -213,7 +213,7 @@ if [ $SDL = 1 ]; then
         sed 's/\r$//' "$REPO/licences/$f" > "$RS/licences/$f"
     done
     sed 's/\r$//' "$REPO/LICENSE" > "$RS/LICENSE"
-    # The examples, built from the ogles2 SDK and this archive's SDK together.
+    # The examples, built from the ogles3 SDK and this archive's SDK together.
     rm -rf "$W/sdk-sdl" && mkdir -p "$W/sdk-sdl" && cp -r "$R/SDK/." "$RS/SDK/." "$W/sdk-sdl/"
     make -C "$W/sdk-sdl/examples-sdl" CC="$TC/bin/m68k-amigaos-gcc" > "$W/examples-sdl.txt" 2>&1 ||
         { grep -v lang_reloc "$W/examples-sdl.txt" | tail -20; exit 1; } # the linker traces relocations on stderr
@@ -221,12 +221,12 @@ if [ $SDL = 1 ]; then
         $TC/bin/m68k-amigaos-strip -o "$RS/Examples/SDL/$p" "$W/sdk-sdl/examples-sdl/$p" && chmod 755 "$RS/Examples/SDL/$p"
     done
     echo "SDL examples: built"
-    rm -f "$OUT"/ogles2-$RELEASE-sdl.lha "$OUT"/ogles2-$RELEASE-sdl.zip
-    (cd "$OUT/sdl" && $LHA -ao5q "$OUT/ogles2-$RELEASE-sdl.lha" ogles2)
-    SZ=$W/zip-sdl/ogles2-sdk-$RELEASE
+    rm -f "$OUT"/ogles3-$RELEASE-sdl.lha "$OUT"/ogles3-$RELEASE-sdl.zip
+    (cd "$OUT/sdl" && $LHA -ao5q "$OUT/ogles3-$RELEASE-sdl.lha" ogles3)
+    SZ=$W/zip-sdl/ogles3-sdk-$RELEASE
     rm -rf "$W/zip-sdl" && mkdir -p "$SZ" && cp -r "$RS/SDK/." "$SZ/" && cp -r "$RS/LICENSE" "$RS/licences" "$SZ/"
     text "$HERE/ReadMe-SDL" "$SZ/ReadMe-SDL"
-    python3 - "$W/zip-sdl" "ogles2-sdk-$RELEASE" "$OUT/ogles2-$RELEASE-sdl.zip" <<'PYEOF'
+    python3 - "$W/zip-sdl" "ogles3-sdk-$RELEASE" "$OUT/ogles3-$RELEASE-sdl.zip" <<'PYEOF'
 import os, sys, zipfile
 base, top, out = sys.argv[1:]
 with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
@@ -236,16 +236,16 @@ with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
             p = os.path.join(d, f)
             z.write(p, os.path.relpath(p, base))
 PYEOF
-    ls -l "$OUT"/ogles2-$RELEASE-sdl.lha "$OUT"/ogles2-$RELEASE-sdl.zip
+    ls -l "$OUT"/ogles3-$RELEASE-sdl.lha "$OUT"/ogles3-$RELEASE-sdl.zip
 fi
 
 # ---- "dist": the archives into the repository (release/dist/), for those
 # who develop on Windows without WSL's build output at hand. Only on request:
 # each copy is a new 10 MB in the repository's history.
 if [ $DIST = 1 ]; then
-    rm -f "$HERE"/dist/ogles2-*.lha "$HERE"/dist/ogles2-*.zip
+    rm -f "$HERE"/dist/ogles3-*.lha "$HERE"/dist/ogles3-*.zip
     mkdir -p "$HERE/dist"
-    cp "$OUT"/ogles2-$RELEASE*.lha "$OUT"/ogles2-$RELEASE*.zip "$HERE/dist/"
-    (cd "$HERE/dist" && sha256sum ogles2-$RELEASE*.lha ogles2-$RELEASE*.zip > SHA256SUMS)
+    cp "$OUT"/ogles3-$RELEASE*.lha "$OUT"/ogles3-$RELEASE*.zip "$HERE/dist/"
+    (cd "$HERE/dist" && sha256sum ogles3-$RELEASE*.lha ogles3-$RELEASE*.zip > SHA256SUMS)
     echo "copied to $HERE/dist"
 fi

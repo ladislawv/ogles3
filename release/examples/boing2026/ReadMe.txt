@@ -14,7 +14,7 @@ do at all: this needs shaders.
 
 Running it
 ----------
-Needs ogles3.library 1.3 (in LIBS:, or in libs/ beside the program) and a
+Needs ogles3.library 1.0 (in LIBS:, or in libs/ beside the program) and a
 32-bit RTG screen. The shaders come compiled (shaders/), so the shader
 compiler is not needed.
 
