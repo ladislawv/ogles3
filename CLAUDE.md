@@ -38,9 +38,13 @@ repositories: git in WSL needs credentials (CONTRIBUTING.md, "Access").
 - Windows Python writes CRLF; files here are LF (`.gitattributes`). Make patches to the
   ported sources against the clones the builds use (`~/ioq3-upstream`, `~/ioq3-amiga`, in
   WSL), not against a Windows checkout: git on Windows turns LF into CRLF there.
-- An ogles2.library already in memory stays there: test scripts run `Avail FLUSH` first.
-- An ogles2 installed in the Amiga's `LIBS:` (by the release's `Install-ogles2`) wins over a
-  package's `libs/` (added after it): check `List LIBS:ogles2#? LIBS:v3dglslc` before tests.
-  The station cannot answer the installer's questions: `Execute Install-ogles2 ALL`.
+- An ogles3.library (ogles2.library on `main`) already in memory stays there: test scripts
+  run `Avail FLUSH` first.
+- An ogles3 installed in the Amiga's `LIBS:` (by the release's `Install-ogles3`) wins over a
+  package's `libs/` (added after it): check `List LIBS:ogles3#? LIBS:v3dglslc3` before tests.
+  The station cannot answer the installer's questions: `Execute Install-ogles3 ALL`.
+- On `gles3` the library is `ogles3.library` 1.0 (docs/GLES3_PLAN.md, the release note at its
+  top): its compiler `v3dglslc3`, cache `OGLES3Cache:`, log `T:ogles3.log`, settings
+  `ENV:OGLES3/`; the test packages keep their `ogles2-` names.
 - Quake III keeps settings in `home/baseq3/q3config.cfg` between runs: delete it for a clean
   comparison. A timedemo's sound is garbled by nature (it runs faster than real time).
