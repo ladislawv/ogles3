@@ -3024,8 +3024,13 @@ stopped.
      separable fragment program's inputs (a vertex program's outputs) have
      their own locations (`GL_LOCATION` and `glGetProgramResourceLocation`:
      the interface's, -1 without an explicit one); an array of blocks is found
-     by its name alone (its element 0); transform feedback varyings are named
-     as given (no `[0]`). dEQP-GLES31 before these: `state_query` 599 of 599
+     by its name alone (its element 0), and every element of one lists element
+     0's members (Mesa's); an array input or output's element `name[i]` has
+     its location and i on; transform feedback varyings are named as given
+     (no `[0]`). `program_interface_query` after them: 2834 passed, 2 failed:
+     `uniform.location.default_block.array.array.{image_2d,iimage_2d_array}`,
+     whose arrays of arrays of images crash Mesa's compile of the key-state
+     dispatch (every unit bound; the host compiler ends: open, Mesa's). dEQP-GLES31 before these: `state_query` 599 of 599
      (732 not supported), `ssbo` 2023 passed, 38 failed (412 before the
      listing: the rest unsized arrays of structures in instance arrays and
      random layouts, "shader execution failed"), `program_interface_query`

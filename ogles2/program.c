@@ -3753,12 +3753,35 @@ static GLint buffer_var_index(const struct OGLES2Image *im, UWORD u)
     return n;
 }
 
+/* The block whose members a block lists: its own, or for an element of an
+ * array of blocks without any (Mesa lists them for every element) its
+ * element 0's. */
+static const struct OGLES2ImageBlock *members_of(const struct OGLES2Image *im, const struct OGLES2ImageBlock *b)
+{
+    BOOL storage = b >= im->sblocks && b < im->sblocks + im->nsblocks;
+    const struct OGLES2ImageBlock *all = storage ? im->sblocks : im->ublocks;
+    UWORD n = storage ? im->nsblocks : im->nublocks, k;
+    ULONG len = str_len(b->name), base;
+    if (b->nmembers || !len || b->name[len - 1] != ']')
+        return b;
+    for (base = len; base && b->name[base - 1] != '['; base--)
+        ;
+    if (!base)
+        return b;
+    for (k = 0; k < n; k++)
+        if (str_len(all[k].name) == base + 2 && !strncmp(all[k].name, b->name, base) &&
+            str_eq(all[k].name + base, "0]"))
+            return &all[k];
+    return b;
+}
+
 /* A storage block's members GL_BUFFER_VARIABLE lists: their count, their
  * indices into v (room of them). */
 static GLint block_vars(const struct OGLES2Image *im, const struct OGLES2ImageBlock *b, GLint *v, GLint room)
 {
     UWORD k;
     GLint n = 0;
+    b = members_of(im, b);
     for (k = 0; k < b->nmembers; k++)
         if (b->members[k] < im->nuniforms && listed_var(im, &im->uniforms[b->members[k]])) {
             if (v && n < room)
@@ -3802,7 +3825,8 @@ void ogles2_glGetProgramInterfaceiv(struct OGLES2Context *ctx, GLuint program, G
         for (i = 0; i < n; i++) {
             resource(p->image, programInterface, (ULONG)i, &r);
             if (r.b) {
-                GLint nv = programInterface == GL_UNIFORM_BLOCK ? r.b->nmembers : block_vars(p->image, r.b, 0, 0);
+                GLint nv = programInterface == GL_UNIFORM_BLOCK ? members_of(p->image, r.b)->nmembers
+                                                                : block_vars(p->image, r.b, 0, 0);
                 if (nv > m)
                     m = nv;
             }
@@ -3945,7 +3969,8 @@ static LONG property(struct OGLES2Program *p, GLenum iface, const struct resourc
             return 1;
         }
         v[0] = prop == GL_BUFFER_DATA_SIZE      ? (GLint)r->b->size
-             : prop == GL_NUM_ACTIVE_VARIABLES ? (iface == GL_UNIFORM_BLOCK ? r->b->nmembers : block_vars(im, r->b, 0, 0))
+             : prop == GL_NUM_ACTIVE_VARIABLES ? (iface == GL_UNIFORM_BLOCK ? members_of(im, r->b)->nmembers
+                                                                            : block_vars(im, r->b, 0, 0))
              : iface == GL_UNIFORM_BLOCK       ? (GLint)p->block_binding[r->b - im->ublocks]
                                                : (GLint)r->b->binding;
         return 1;
@@ -3961,8 +3986,11 @@ static LONG property(struct OGLES2Program *p, GLenum iface, const struct resourc
             GLint n = block_vars(im, r->b, v, room);
             return n < room ? n : room;
         }
-        for (k = 0; k < r->b->nmembers && k < room; k++)
-            v[k] = active_index(im, r->b->members[k]);
+        {
+            const struct OGLES2ImageBlock *mb = members_of(im, r->b);
+            for (k = 0; k < mb->nmembers && k < room; k++)
+                v[k] = active_index(im, mb->members[k]);
+        }
         return k;
     case GL_REFERENCED_BY_VERTEX_SHADER:
     case GL_REFERENCED_BY_FRAGMENT_SHADER:
@@ -4048,11 +4076,20 @@ GLint ogles2_glGetProgramResourceLocation(struct OGLES2Context *ctx, GLuint prog
         struct resource r;
         LONG i;
         for (i = 0; i < n; i++) {
-            ULONG len;
+            ULONG len, e = 0;
             resource(p->image, programInterface, (ULONG)i, &r);
             len = str_len(r.name);
-            if (str_eq(r.name, name) || (r.add0 && !strncmp(r.name, name, len) && str_eq(name + len, "[0]")))
-                return (r.v->flags & 1) ? (GLint)r.v->location : -1;
+            if (!str_eq(r.name, name)) {
+                const char *q = name + len;
+                /* an array's element "name[e]": its location and e on */
+                if (!r.v->array || strncmp(r.name, name, len) || *q != '[' || q[1] < '0' || q[1] > '9')
+                    continue;
+                for (q++; *q >= '0' && *q <= '9'; q++)
+                    e = e * 10 + (ULONG)(*q - '0');
+                if (*q != ']' || q[1] || e >= r.v->array)
+                    continue;
+            }
+            return (r.v->flags & 1) ? (GLint)(r.v->location + e) : -1;
         }
         return -1;
     }
