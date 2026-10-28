@@ -33,6 +33,12 @@ static const char *link_bindings;
  * with the pseudo-stage "SEPA" (v3dp/FORMAT.md). */
 static int link_separable;
 
+/* ES 3.1: a program pipeline's draws (V3DGLSL_LINK_PIPELINE): its fragment
+ * program (0: none, a program's own draws) and the two programs' hashes,
+ * the hash's pseudo-stages "PIPV" and "PIPF" (FORMAT.md). */
+static GLuint pipe_fs;
+static char pipe_hex[2][65];
+
 #define XFBV_MARK "XFBV\n"
 
 /* The transform feedback part of link state `b` (after its "XFBV" line), or NULL. */
@@ -226,6 +232,53 @@ static int link_pair(const char *vs_label, const char *fs_label, const char *vs_
 }
 
 #ifdef V3DC_WRITER
+/* ES 3.1: a program pipeline's variants: vs and fs each linked separable
+ * (vs with the link state), drawn through a Mesa pipeline of the two
+ * (draw_key_states with pipe_fs), written as its .v3dx. */
+static int link_pipeline(const char *vs_src, const char *fs_src, const char *target, char *log, size_t log_size)
+{
+    GLuint pa, pb, vs, fs;
+    GLint la = 0, lb = 0;
+    int vs_ok, fs_ok, ok = 0;
+    unsigned stages[2] = { V3DP_HASH_PIPV, V3DP_HASH_PIPF };
+    const char *sources[2];
+    GET_CURRENT_CONTEXT(ctx);
+
+    fprintf(stderr, "v3dglslc: ==== pipeline %.12s + %.12s\n", pipe_hex[0], pipe_hex[1]);
+    vs = compile_src(GL_VERTEX_SHADER, "vertex shader", vs_src, &vs_ok, log, log_size);
+    fs = compile_src(GL_FRAGMENT_SHADER, "fragment shader", fs_src, &fs_ok, log, log_size);
+    pa = glCreateProgram();
+    pb = glCreateProgram();
+    if (vs_ok && fs_ok) {
+        glProgramParameteri(pa, GL_PROGRAM_SEPARABLE, GL_TRUE);
+        glAttachShader(pa, vs);
+        apply_bindings(pa, link_bindings);
+        apply_xfb(pa, link_bindings);
+        glLinkProgram(pa);
+        glGetProgramiv(pa, GL_LINK_STATUS, &la);
+        glProgramParameteri(pb, GL_PROGRAM_SEPARABLE, GL_TRUE);
+        glAttachShader(pb, fs);
+        glLinkProgram(pb);
+        glGetProgramiv(pb, GL_LINK_STATUS, &lb);
+        if (!la || !lb)
+            log_add(log, log_size, "a pipeline's program did not link", NULL);
+    }
+    if (la && lb) {
+        sources[0] = pipe_hex[0];
+        sources[1] = pipe_hex[1];
+        pipe_fs = pb;
+        ok = write_files(_mesa_lookup_shader_program(ctx, pa), pa, target, 2, stages, sources);
+        pipe_fs = 0;
+        if (!ok)
+            log_add(log, log_size, "the pipeline's variants could not be written: ", target);
+    }
+    glDeleteProgram(pa);
+    glDeleteProgram(pb);
+    glDeleteShader(vs);
+    glDeleteShader(fs);
+    return ok;
+}
+
 /* ES 3.1: a compute program from memory, as link_pair (written with
  * write_program's fragment source NULL). */
 static int link_compute(const char *label, const char *src, const char *target, char *log, size_t log_size)

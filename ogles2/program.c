@@ -86,7 +86,7 @@ static const struct OGLES2Image builtin_smooth = {
     0, 0,
     sizeof(builtin_coordinate) + sizeof(builtin_vertex_smooth) + sizeof(builtin_fragment_smooth),
     0,          /* no OGLES2_U_CLIP_Z_COEFF: clears are drawn NEGATIVE_ONE_TO_ONE */
-    0, 0,       /* code memory (draw.c uploads it per context), allocations */
+    0, 0, 0,    /* code memory (draw.c uploads it per context), not borrowed, allocations */
     0, 0,       /* no binary */
     0, 0,       /* no 32-bit-sampler variants */
     0, 0,       /* no alpha-to-coverage variants */
@@ -99,6 +99,7 @@ static const struct OGLES2Image builtin_smooth = {
     0, 0,                          /* no atomic counter buffers */
     0, 0,                          /* locations numbered by the runtime */
     0, 0,                          /* samplers start at unit 0 */
+    0,                             /* no interface types */
 };
 
 const struct OGLES2Image *ogles2_builtin_image(void)
@@ -2239,6 +2240,8 @@ void ogles2_glProgramBinaryOES(struct OGLES2Context *ctx, GLuint program, GLenum
  * used. They hold their programs as glUseProgram does (in_use). ---- */
 
 static void pair_free(struct OGLES2Context *ctx, struct OGLES2Pipeline *pp);
+static void image_hex(const struct OGLES2Image *im, char *hex);
+static void file_path(char *path, const char *dir, const char *hex);
 
 static struct OGLES2Pipeline *pipe_by_name(struct OGLES2Context *ctx, GLuint name)
 {
@@ -2491,6 +2494,10 @@ static BOOL interfaces_match(const struct OGLES2Image *out, const struct OGLES2I
         pi = pv->interpolation ? pv->interpolation : 1;
         if (pv->type != c->type || pv->array != c->array || ci != pi || pv->precision != c->precision)
             return FALSE;
+        /* the same structure (Mesa: outermost_struct_type) */
+        if (out->interface_types && in->interface_types &&
+            out->interface_types[pv - out->interface] != in->interface_types[c - in->interface])
+            return FALSE;
     }
     return nout == 0;
 }
@@ -2564,6 +2571,78 @@ static void pair_free(struct OGLES2Context *ctx, struct OGLES2Pipeline *pp)
     pp->pair_blk = 0;
 }
 
+/* The image of a pipeline of vertex program image a and fragment program
+ * image b: composed of theirs (ogles2_v3dp_compose), kept in the program
+ * cache by its hash (BLAKE3 of "PIPV" a's hash and "PIPF" b's, as the
+ * program hash's pseudo-stages; FORMAT.md), its variants its .v3dx's:
+ * shipped, cached, else compiled through a Mesa pipeline of the two
+ * (V3DGLSL_LINK_PIPELINE). NULL: no memory, no variants (logged). */
+static struct OGLES2Image *pair_image(struct OGLES2Context *ctx, const struct OGLES2Image *a,
+                                      const struct OGLES2Image *b)
+{
+    static const char digits[] = "0123456789abcdef";
+    char line[140], hex[FILE_HASH_DIGITS + 1], path[96];
+    UBYTE hash[32];
+    struct blake3 h;
+    struct OGLES2Image *im;
+    const struct OGLES2Image *x;
+    int k, s;
+    /* "PIPE <a's hash> <b's hash>\n", the hex the pseudo-stages hash */
+    memcpy(line, "PIPE ", 5);
+    for (s = 0; s < 2; s++)
+        for (k = 0; k < 32; k++) {
+            const UBYTE *hh = s ? b->hash : a->hash;
+            line[5 + 65 * s + 2 * k] = digits[hh[k] >> 4];
+            line[5 + 65 * s + 2 * k + 1] = digits[hh[k] & 15];
+        }
+    line[69] = ' ';
+    line[134] = '\n';
+    line[135] = 0;
+    blake3_init(&h);
+    for (s = 0; s < 2; s++) {
+        ULONG stage = s ? 0x50495046UL : 0x50495056UL; /* "PIPF", "PIPV" */
+        UBYTE w[8];
+        for (k = 0; k < 4; k++) {
+            w[k] = (UBYTE)(stage >> (8 * k));
+            w[4 + k] = (UBYTE)(64 >> (8 * k));
+        }
+        blake3_update(&h, w, 8);
+        blake3_update(&h, line + 5 + 65 * s, 64);
+    }
+    blake3_final(&h, hash);
+    for (im = ctx->share->images; im && memcmp(im->hash, hash, 32); im = im->next)
+        ;
+    if (!im) {
+        if (!(im = ogles2_v3dp_compose(a, b, hash, line)))
+            return 0;
+        im->next = ctx->share->images;
+        ctx->share->images = im;
+    }
+    if (im->nvariants)
+        return im;
+    if (!(x = ogles2_image_x(im, FALSE)) && !(x = ogles2_image_x(im, TRUE)) && ogles2_compiler_installed()) {
+        char *log = AllocVec(1024, MEMF_ANY | MEMF_CLEAR);
+        image_hex(im, hex);
+        file_path(path, ogles2_cache_dir(), hex);
+        if (log && ogles2_compile_pipeline(im->vs_src, im->fs_src, im->bind_src, im->layout_crc, path, log, 1024)) {
+            im->xc_tried = FALSE;
+            x = ogles2_image_x(im, TRUE);
+        } else {
+            ogles2_log("pipeline: the compiler made no variants for it: %s", (ULONG)(log ? log : "out of memory"));
+        }
+        if (log)
+            FreeVec(log);
+    }
+    if (!x || !x->nvariants)
+        return 0;
+    /* its variants the .v3dx's (kept: im->xs or im->xc, and older ones chained) */
+    im->variants = x->variants;
+    im->nvariants = x->nvariants;
+    im->code_mem = x->code_mem;
+    im->code_total = x->code_total;
+    return im;
+}
+
 /* A uniform of program s by name; 0xFFFF none. */
 static UWORD stage_uniform(const struct OGLES2Program *s, const char *name)
 {
@@ -2582,40 +2661,26 @@ static UWORD stage_uniform(const struct OGLES2Program *s, const char *name)
 static BOOL pair_link(struct OGLES2Context *ctx, struct OGLES2Pipeline *pp)
 {
     struct OGLES2Program *a = pp->stage[0], *b = pp->stage[1], *q;
-    struct OGLES2Shader *vs, *fs;
+    struct OGLES2Image *im;
     UWORD k, n;
-    q = AllocVec(sizeof(*q), MEMF_ANY | MEMF_CLEAR);
-    vs = AllocVec(sizeof(*vs), MEMF_ANY | MEMF_CLEAR);
-    fs = AllocVec(sizeof(*fs), MEMF_ANY | MEMF_CLEAR);
-    if (!q || !vs || !fs || !a->image->vs_src || !b->image->fs_src) {
-        if (q)
-            FreeVec(q);
-        if (vs)
-            FreeVec(vs);
-        if (fs)
-            FreeVec(fs);
+    if (!a->image->vs_src || !b->image->fs_src)
         return FALSE;
-    }
+    if (!(im = pair_image(ctx, a->image, b->image)))
+        return FALSE;
+    if (!(q = AllocVec(sizeof(*q), MEMF_ANY | MEMF_CLEAR)))
+        return FALSE;
     q->kind = OGLES2_OBJ_PROGRAM;
     q->separable = TRUE;
-    vs->kind = fs->kind = OGLES2_OBJ_SHADER;
-    vs->type = GL_VERTEX_SHADER;
-    fs->type = GL_FRAGMENT_SHADER;
-    vs->source = (char *)a->image->vs_src;
-    fs->source = (char *)b->image->fs_src;
-    vs->compiled = fs->compiled = GL_TRUE;
-    q->vs = vs;
-    q->fs = fs;
     memcpy(q->bind_name, a->bind_name, sizeof(q->bind_name)); /* the attributes' locations as a's */
     memcpy(q->bind_index, a->bind_index, sizeof(q->bind_index));
     q->nbindings = a->nbindings;
     pp->pair = q;
-    link_program(ctx, q, a->image->bind_src ? a->image->bind_src : V3DGLSL_SEPA_MARK);
-    if (!q->linked) {
-        ogles2_log("pipeline %ld: programs %ld and %ld did not link as one: %s", (ULONG)pp->name, (ULONG)a->name,
-                   (ULONG)b->name, (ULONG)(q->info_log ? q->info_log : ""));
+    if (!bind_image(q, im)) {
+        ogles2_log("pipeline %ld: no memory for its programs %ld and %ld", (ULONG)pp->name, (ULONG)a->name,
+                   (ULONG)b->name);
         return FALSE;
     }
+    q->linked = GL_TRUE;
     /* each sampler's or image's unit from its stage's program (by name) */
     n = q->nlocations;
     if (!(pp->pair_loc = AllocVec(n * 4UL + 4, MEMF_ANY)) ||
@@ -3637,8 +3702,7 @@ static void resource(const struct OGLES2Image *im, GLenum iface, ULONG i, struct
         return;
     case GL_TRANSFORM_FEEDBACK_VARYING:
         r->x = &im->xfb->varyings[i];
-        r->name = r->x->name;
-        r->add0 = r->x->size > 1 && !ends_bracket(r->name);
+        r->name = r->x->name; /* as glTransformFeedbackVaryings named it (Mesa's) */
         return;
     }
 }
@@ -3771,6 +3835,11 @@ GLuint ogles2_glGetProgramResourceIndex(struct OGLES2Context *ctx, GLuint progra
         resource(p->image, programInterface, (ULONG)i, &r);
         len = str_len(r.name);
         if (str_eq(r.name, name) || (r.add0 && !strncmp(r.name, name, len) && str_eq(name + len, "[0]")))
+            return (GLuint)i;
+        /* an array of blocks: its first by the array's name (Mesa's
+         * _mesa_program_resource_find_name) */
+        if ((programInterface == GL_UNIFORM_BLOCK || programInterface == GL_SHADER_STORAGE_BLOCK) &&
+            len == str_len(name) + 3 && !strncmp(r.name, name, len - 3) && str_eq(r.name + len - 3, "[0]"))
             return (GLuint)i;
     }
     return GL_INVALID_INDEX;
@@ -3971,6 +4040,22 @@ GLint ogles2_glGetProgramResourceLocation(struct OGLES2Context *ctx, GLuint prog
     }
     if (!name || !strncmp(name, "gl_", 3))
         return -1;
+    /* a separable program's inputs or outputs between stages (ES 3.1: a
+     * fragment program's inputs, a vertex program's outputs): the
+     * interface's, -1 without a location of their own */
+    if ((programInterface == GL_PROGRAM_INPUT && !(p->image->stages & 0x01)) ||
+        (programInterface == GL_PROGRAM_OUTPUT && !(p->image->stages & 0x10))) {
+        struct resource r;
+        LONG i;
+        for (i = 0; i < n; i++) {
+            ULONG len;
+            resource(p->image, programInterface, (ULONG)i, &r);
+            len = str_len(r.name);
+            if (str_eq(r.name, name) || (r.add0 && !strncmp(r.name, name, len) && str_eq(name + len, "[0]")))
+                return (r.v->flags & 1) ? (GLint)r.v->location : -1;
+        }
+        return -1;
+    }
     if (programInterface == GL_PROGRAM_OUTPUT)
         return ogles2_glGetFragDataLocation(ctx, program, name);
     if (programInterface == GL_PROGRAM_INPUT)

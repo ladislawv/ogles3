@@ -335,6 +335,18 @@ BOOL ogles2_compile_separable(const char *vs, const char *fs, const char *bindin
     return request(V3DGLSL_LINK_SEPARABLE, vs, fs, bindings, path, log, log_size, &result, 0, 0, 0) && result == 0;
 }
 
+/* ES 3.1: a program pipeline's variants (docs/GLES3_PLAN.md stage D item 5):
+ * vs's and fs's separable programs drawn through a Mesa pipeline, into the
+ * .v3dx beside `path`, its layout CRC `layout_crc` (the library composes
+ * it). A compiler older than V3DGLSL_LINK_PIPELINE refuses (result 3). */
+BOOL ogles2_compile_pipeline(const char *vs, const char *fs, const char *bindings, ULONG layout_crc, const char *path,
+                             char *log, ULONG log_size)
+{
+    LONG result;
+    return request(V3DGLSL_LINK_PIPELINE, vs, fs, bindings, path, log, log_size, &result, 0, 0, layout_crc) &&
+           result == 0;
+}
+
 /* ES 3.1: as ogles2_compile_shader, a compute shader. */
 int ogles2_compile_compute_shader(const char *src, char *log, ULONG log_size)
 {

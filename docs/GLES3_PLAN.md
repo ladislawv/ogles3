@@ -2961,19 +2961,37 @@ stopped.
      takes each stage program's constant buffer (the same shader, the same
      layout), its samplers' and images' units (by name, per location) and
      its uniform blocks' bindings. A dispatch with a pipeline runs its
-     compute program. This is not the plan's per-pair `.v3dx` of two
-     programs' hashes: the pair is an ordinary program file. **Its limit
-     (2026-10-28):** one link merges the stages' uniforms: a uniform of the
-     same name in both is one (the fragment stage's folded into the vertex
-     stage's, its constant buffer then empty), and dEQP-GLES31's
-     `separate_shader.random` fails 30 of 128, every one with uniforms and
-     varyings ("pipeline rendering differs from equivalent monolithic
-     program"; none with constants or without varyings). **Next:** the plan's
-     design: the compiler links both programs separable and draws them through
-     a Mesa pipeline (`glUseProgramStages`), the variants into a file of the
-     pair; the library composes the draw's image from each stage's own
-     program (its constant buffer, uniforms, blocks; attributes and transform
-     feedback the vertex program's) and those variants.
+     compute program. **The pair's image (2026-10-28, the plan's design):**
+     the first try linked the two shaders as one program, which merges the
+     stages' uniforms (a uniform of the same name in both became one, the
+     fragment stage's constant buffer then empty: dEQP-GLES31's
+     `separate_shader.random` failed 30 of 128). Now each stage is its own
+     program's: `ogles2_v3dp_compose` (v3dp.c) makes the pair's image from
+     the vertex program's image (constant buffer, state variables,
+     attributes, transform feedback, vertex block maps) and the fragment
+     program's, their uniforms, uniform and storage blocks, atomic counter
+     buffers, interface and units one after the other (the fragment
+     program's indices moved past the vertex one's); its hash BLAKE3 of the
+     pseudo-stages `"PIPV"` and `"PIPF"` with the two programs' hashes as
+     64 hex digits (`V3DP_HASH_PIPV`, `_PIPF`), its layout CRC the two
+     programs' mixed, kept in the program cache. Its variants are its
+     `.v3dx`'s (shipped, cached, else compiled: `V3DGLSL_LINK_PIPELINE`, 11:
+     the compiler links each program separable, the vertex one with its link
+     state, draws the key states through a Mesa pipeline of the two,
+     `glUseProgramStages`, and writes the variants as a `.v3dx`, its
+     `VARIANT_OF` the CRC the library sends: `v3dp_write_pipeline_variants`);
+     its draw-time variants the same way (a `COMPILE_VARIANT` whose link
+     state begins `PIPE <hash> <hash>`). The image borrows the `.v3dx`'s
+     variants and code (`code_borrowed`). The pair program still copies each
+     stage program's constant buffer, units and block bindings before a
+     draw, now of the same layout by construction. dEQP-GLES31
+     `separate_shader` 203 passed, 3 failed (structures compared, below),
+     57 not supported (ES 3.2's shader I/O blocks and GLSL).
+   - **Interface matching of structures:** Mesa compares a varying's
+     outermost structure type; the file's new `INTERFACE_TYPES` section (15)
+     gives each interface entry its structure's identity (FNV-1a of its
+     name and members' names, types, array sizes and precisions), and
+     `interfaces_match` compares them.
    - **A double free (fixed):** deleting a pipeline released each of its
      slots (three stages and the active program), so a program in two of them
      was freed twice once deleted; after some 70 to 120 of dEQP's
@@ -3002,7 +3020,16 @@ stopped.
      variables listed as ES 3.1 7.3.1.1 says (Mesa's
      `should_add_buffer_variable`: a top-level array by its element 0 only;
      `GL_BUFFER_VARIABLE`'s count, indices and names, and a storage block's
-     active variables); `strchr` in the runtime.
+     active variables); `strchr` in the runtime. Interface queries: a
+     separable fragment program's inputs (a vertex program's outputs) have
+     their own locations (`GL_LOCATION` and `glGetProgramResourceLocation`:
+     the interface's, -1 without an explicit one); an array of blocks is found
+     by its name alone (its element 0); transform feedback varyings are named
+     as given (no `[0]`). dEQP-GLES31 before these: `state_query` 599 of 599
+     (732 not supported), `ssbo` 2023 passed, 38 failed (412 before the
+     listing: the rest unsized arrays of structures in instance arrays and
+     random layouts, "shader execution failed"), `program_interface_query`
+     2821 passed, 15 failed (1913 not supported).
 6. **GLSL ES 3.10 and queries:** explicit uniform locations and
    `layout(binding)` (from the file, §3), arrays of arrays,
    `glGetProgramInterfaceiv`, `glGetProgramResource*`, everything left of

@@ -6,6 +6,7 @@
 #     PATTERN  a dEQP case pattern, e.g. 'dEQP-GLES3.functional.transform_feedback.*'
 #     NAME     the log's name: results/NAME.qpa in the run's results directory
 #     --images keep the images in the log (Run-M1 IMAGES=1; ports/deqp/qpa_images.py)
+#     --sources keep the shaders' sources in the log (Run-M1 SOURCES=1)
 #     --build  build the package first (tests/a1200/build_package.sh)
 # Needs, after `. ./local.env` in WSL: the station (tools/amictl, station.local),
 # `python3 tools/amictl/compile_bridge.py` running in another shell (it runs
@@ -20,7 +21,8 @@ BUILD=0
 while [ $# -gt 2 ]; do
     case "$1" in
         --package) PKG=$2; shift 2 ;;
-        --images) KEYS="IMAGES=1"; shift ;;
+        --images) KEYS="${KEYS:+$KEYS }IMAGES=1"; shift ;;
+        --sources) KEYS="${KEYS:+$KEYS }SOURCES=1"; shift ;;
         --build) BUILD=1; shift ;;
         *) echo "unknown option $1"; exit 2 ;;
     esac

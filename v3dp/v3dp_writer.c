@@ -41,6 +41,7 @@ enum {
     SEC_ATOMIC_BUFFERS = 12,     /* format 2, with the feature bit V3DP_FEATURE_ATOMIC */
     SEC_UNIFORM_LOCATIONS = 13,  /* format 2 */
     SEC_OPAQUE_UNITS = 14,       /* format 2 */
+    SEC_INTERFACE_TYPES = 15,    /* format 2: INTERFACE's structures (ES 3.1's interface matching) */
 };
 
 enum { VARIANT_VS = 0, VARIANT_VS_BIN = 1, VARIANT_FS = 4, VARIANT_CS = 5 };
@@ -896,6 +897,58 @@ static int put_interface(struct buf *b, struct buf *strings, struct gl_shader_pr
     return 0;
 }
 
+/* A structure type's identity, as Mesa's interface matching compares
+ * outermost_struct_type (validate_io): its name and its members' names,
+ * types and precisions in order (FNV-1a, 32 bits; 0 none). */
+static uint32_t fnv(uint32_t h, const void *data, size_t n)
+{
+    const unsigned char *p = data;
+    while (n--)
+        h = (h ^ *p++) * 16777619u;
+    return h;
+}
+
+static uint32_t struct_hash(const struct glsl_type *t)
+{
+    uint32_t h = 2166136261u;
+    unsigned i;
+    const char *name;
+    if (!t)
+        return 0;
+    name = glsl_get_type_name(t);
+    h = fnv(h, name, strlen(name) + 1);
+    for (i = 0; i < t->length; i++) {
+        const struct glsl_struct_field *f = &t->fields.structure[i];
+        const struct glsl_type *ft = f->type;
+        uint32_t w[3];
+        h = fnv(h, f->name, strlen(f->name) + 1);
+        w[0] = glsl_without_array(ft)->gl_type;
+        w[1] = glsl_type_is_array(ft) ? glsl_get_length(ft) : 0;
+        w[2] = f->precision;
+        h = fnv(h, w, sizeof(w));
+        if (glsl_type_is_struct(glsl_without_array(ft)))
+            w[0] = struct_hash(glsl_without_array(ft)), h = fnv(h, w, 4);
+    }
+    return h ? h : 1;
+}
+
+/* Format 2, ES 3.1: per INTERFACE entry (in its order) the identity of the
+ * structure it is a member of (0: none). */
+static void put_interface_types(struct buf *b, struct gl_shader_program *prog)
+{
+    const struct gl_program_resource *res = prog->data->ProgramResourceList;
+    unsigned i, n = 0;
+    for (i = 0; i < prog->data->NumProgramResourceList; i++)
+        if (res[i].Type == GL_PROGRAM_INPUT || res[i].Type == GL_PROGRAM_OUTPUT)
+            n++;
+    put_u32(b, n);
+    for (i = 0; i < prog->data->NumProgramResourceList; i++) {
+        const struct gl_shader_variable *var = res[i].Data;
+        if (res[i].Type == GL_PROGRAM_INPUT || res[i].Type == GL_PROGRAM_OUTPUT)
+            put_u32(b, struct_hash(var->outermost_struct_type));
+    }
+}
+
 static int put_attributes(struct buf *b, struct buf *strings, struct gl_shader_program *prog, int format2)
 {
     const struct gl_linked_shader *vs = prog->_LinkedShaders[MESA_SHADER_VERTEX];
@@ -1058,7 +1111,7 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
     blake3_hash hash;
     char commit[12];
     unsigned i, num_sections = 0, stage_mask = 0, nold = 0;
-    int rc = -1, format2 = prog->GLSL_Version >= 300, separable = 0;
+    int rc = -1, format2 = prog->GLSL_Version >= 300 || v3dx == 2, separable = 0;
     size_t layout_end = 0;
     struct buf *old = NULL;
     char tmp[600];
@@ -1102,6 +1155,8 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
     for (i = 0; i < NUM_FILE_STAGES; i++)
         if (prog->_LinkedShaders[stages_in_file[i]])
             stage_mask |= 1u << stages_in_file[i];
+    if (v3dx == 2) /* a pipeline's: its vertex program's and its fragment program's */
+        stage_mask = (1u << MESA_SHADER_VERTEX) | (1u << MESA_SHADER_FRAGMENT);
     put_bytes(&sec, hash, sizeof(hash));
     put_u32(&sec, stage_mask);
     if (format2) /* features (FORMAT.md, format 2) */
@@ -1174,6 +1229,10 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
         put_section(&body, SEC_OPAQUE_UNITS, &sec);
         num_sections++;
         buf_free(&sec);
+        put_interface_types(&sec, prog);
+        put_section(&body, SEC_INTERFACE_TYPES, &sec);
+        num_sections++;
+        buf_free(&sec);
         if (put_uniform_locations(&sec, prog))
             goto out;
         put_section(&body, SEC_UNIFORM_LOCATIONS, &sec);
@@ -1185,7 +1244,7 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
         /* A .v3dx: PROGRAM, an empty STRINGS, VARIANT_OF, the variants of
          * the existing file (oldest dropped past the limit), then the new
          * ones that are not among them. */
-        uint32_t crc = crc32_le(body.p, layout_end);
+        uint32_t crc = v3dx == 2 ? expect_crc : crc32_le(body.p, layout_end); /* a pipeline's: the library's */
         unsigned keep, j;
         if (expect_crc && crc != expect_crc) {
             fprintf(stderr, "v3dp: the program's link lays it out otherwise (%08x, not %08x): another "
@@ -1306,4 +1365,10 @@ int v3dp_write_variants(const char *path, struct gl_shader_program *prog, unsign
                         const unsigned *stages, const char *const *sources, uint32_t expect_layout_crc)
 {
     return write_file(path, prog, num_sources, stages, sources, 1, expect_layout_crc);
+}
+
+int v3dp_write_pipeline_variants(const char *path, struct gl_shader_program *vertex_prog, unsigned num_sources,
+                                 const unsigned *stages, const char *const *sources, uint32_t layout_crc)
+{
+    return write_file(path, vertex_prog, num_sources, stages, sources, 2, layout_crc);
 }

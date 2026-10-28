@@ -6,6 +6,7 @@
 ;   The result files' name:        Execute Run-M1 LIST=fbo NAME=fbo-2
 ;   With 4x multisampling:         Execute Run-M1 MSAA=1
 ;   Result images in the log:      Execute Run-M1 CASES=... IMAGES=1
+;   Shader sources in the log:     Execute Run-M1 CASES=... SOURCES=1
 ;   Watched from the PC:           Execute Run-M1 CASES=... PROGRESS=1
 ;     (tools/amictl/deqp_watch.py: each case's start and end in
 ;     RAM:deqp-progress.txt, the library's log in RAM:ogles2.log, both read
@@ -13,13 +14,14 @@
 ; Nothing is installed. Output goes to results/: <NAME>.txt (what dEQP
 ; prints, with the totals at the end) and <NAME>.qpa (its full log); NAME
 ; is LIST's, else "deqp".
-.key CASES/K,LIST/K,NAME/K,MSAA/K,IMAGES/K,PROGRESS/K
+.key CASES/K,LIST/K,NAME/K,MSAA/K,IMAGES/K,PROGRESS/K,SOURCES/K
 .def CASES dEQP-GLES31.info.*
 .def LIST ""
 .def NAME ""
 .def MSAA 0
 .def IMAGES 0
 .def PROGRESS 0
+.def SOURCES 0
 .bra {
 .ket }
 
@@ -57,6 +59,10 @@ Set DEQPIMG disable
 If {IMAGES} EQ 1 VAL
   Set DEQPIMG enable
 EndIf
+Set DEQPSRC disable
+If {SOURCES} EQ 1 VAL
+  Set DEQPSRC enable
+EndIf
 Set DEQPCFG rgba8888d24s8ms0
 If {MSAA} EQ 1 VAL
   Set DEQPCFG rgba8888d24s8ms4
@@ -84,7 +90,7 @@ Echo dEQP-GLES31: $DEQPSEL
 Echo "  A 256x256 window on the Workbench screen, a test after another; each"
 Echo "  test's shaders are compiled on the Amiga the first time (a pause; kept"
 Echo "  in cache/). Ctrl-C stops it after the current test."
-M8R3:bin/deqp-gles31 $DEQPSEL --deqp-archive-dir=M8R3:bin --deqp-log-filename=M8R3:results/$DEQPNAME.qpa --deqp-log-images=$DEQPIMG --deqp-log-shader-sources=disable --deqp-surface-width=256 --deqp-surface-height=256 --deqp-gl-config-name=$DEQPCFG >M8R3:results/$DEQPNAME.txt
+M8R3:bin/deqp-gles31 $DEQPSEL --deqp-archive-dir=M8R3:bin --deqp-log-filename=M8R3:results/$DEQPNAME.qpa --deqp-log-images=$DEQPIMG --deqp-log-shader-sources=$DEQPSRC --deqp-surface-width=256 --deqp-surface-height=256 --deqp-gl-config-name=$DEQPCFG >M8R3:results/$DEQPNAME.txt
 Echo "$DEQPNAME done" >>M8R3:results/00-progress.txt
 If {PROGRESS} EQ 1 VAL
   Copy RAM:deqp-progress.txt M8R3:results/ QUIET
@@ -95,6 +101,7 @@ UnSet DEQPSEL
 UnSet DEQPNAME
 UnSet DEQPCFG
 UnSet DEQPIMG
+UnSet DEQPSRC
 
 CD M8R3:
 UnSetEnv OGLES2/LogFile

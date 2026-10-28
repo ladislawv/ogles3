@@ -431,6 +431,7 @@ struct OGLES2Image
     BOOL clip_z_coeff;                    /* its vertex shaders read OGLES2_U_CLIP_Z_COEFF (compiled
                                              with Mesa patch 0013): ZERO_TO_ONE clips (draw.c) */
     struct v3d_mem *code_mem;             /* the code in GPU memory; NULL: built in */
+    BOOL code_borrowed;                   /* code_mem and the variants a .v3dx's of it (a pipeline's) */
     APTR blocks;                          /* v3dp.c's allocations, to free */
     UBYTE *binary;                        /* the .v3dp file it was loaded from (AllocVec'd; NULL:
                                              built in): OES_get_program_binary's binary */
@@ -495,6 +496,9 @@ struct OGLES2Image
      * its elements, then each one's first unit (layout(binding)). */
     UWORD nopaque;
     const UWORD *opaque_units;
+    /* Format 2's INTERFACE_TYPES: per interface entry the identity of the
+     * structure it is a member of (0 none; NULL: not in the file) */
+    const ULONG *interface_types;
 };
 #define OGLES2_LOC_NONE     0xFFFF /* a location of no uniform (GL_INVALID_OPERATION) */
 #define OGLES2_LOC_INACTIVE 0xFFFE /* an inactive uniform's explicit location (ignored) */
@@ -624,6 +628,10 @@ void ogles2_program_builtin_free(struct OGLES2Program *p);
 
 /* v3dp.c: a .v3dp file's image, or NULL with the reason in why[]. */
 struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, ULONG whylen);
+/* ES 3.1: a program pipeline's image, a's vertex stage and b's fragment
+ * stage, its hash and its compiles' link state line (v3dp.c). */
+struct OGLES2Image *ogles2_v3dp_compose(const struct OGLES2Image *a, const struct OGLES2Image *b,
+                                        const UBYTE hash[32], const char *pipe_line);
 void ogles2_image_free(struct OGLES2Image *im, struct OGLES2Context *ctx);
 /* The image's variant for `stage` and a draw of primitive `mode` (GL_POINTS ...). */
 const struct OGLES2Variant *ogles2_image_variant(const struct OGLES2Image *im, UBYTE stage, UBYTE cbufs,
@@ -1111,6 +1119,8 @@ BOOL ogles2_pipeline_ready(struct OGLES2Context *ctx, BOOL compute); /* program.
  * state the stage programs'; NULL: none (an invalid pipeline, no memory, a
  * link that failed: logged). */
 struct OGLES2Program *ogles2_pipeline_program(struct OGLES2Context *ctx, BOOL compute);
+BOOL ogles2_compile_pipeline(const char *vs, const char *fs, const char *bindings, ULONG layout_crc, const char *path,
+                             char *log, ULONG log_size);
 BOOL ogles2_compile_separable(const char *vs, const char *fs, const char *bindings, const char *path, char *log,
                               ULONG log_size);
 int ogles2_compile_compute_shader(const char *src, char *log, ULONG log_size);

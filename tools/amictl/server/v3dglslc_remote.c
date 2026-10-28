@@ -212,7 +212,8 @@ static int forward(struct V3DGLSLRequest *r)
     const char *name = 0, *p;
     char path[512], magic[4], *log = 0, *xfile = 0;
     ULONG dir = 0, xlen = 0, result, nlog, nfiles, i;
-    int bound = r->op == V3DGLSL_LINK_BOUND || r->op == V3DGLSL_COMPILE_VARIANT || r->op == V3DGLSL_LINK_SEPARABLE;
+    int bound = r->op == V3DGLSL_LINK_BOUND || r->op == V3DGLSL_COMPILE_VARIANT || r->op == V3DGLSL_LINK_SEPARABLE ||
+                r->op == V3DGLSL_LINK_PIPELINE;
     int variant = r->op == V3DGLSL_COMPILE_VARIANT;
     int ok = 1;
 
@@ -231,7 +232,7 @@ static int forward(struct V3DGLSLRequest *r)
         strcpy(path + strlen(path) - 5, ".v3dx");
         xfile = read_file(path, &xlen);
     }
-    ok = send_all("V3R1", 4) && send_u32(r->op) && send_u32(variant ? r->layout_crc : 0) &&
+    ok = send_all("V3R1", 4) && send_u32(r->op) && send_u32(variant || r->op == V3DGLSL_LINK_PIPELINE ? r->layout_crc : 0) &&
          send_str(r->vs, r->vs ? strlen(r->vs) : 0) && send_str(r->fs, r->fs ? strlen(r->fs) : 0) &&
          send_str(bound ? r->bindings : 0, bound && r->bindings ? strlen(r->bindings) : 0) &&
          send_str(variant ? r->keys : 0, variant ? r->keys_len : 0) && send_str(name, name ? strlen(name) : 0) &&

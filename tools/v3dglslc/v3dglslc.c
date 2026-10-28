@@ -48,9 +48,13 @@
 #define glBindAttribLocation _mesa_BindAttribLocation
 #define glTransformFeedbackVaryings _mesa_TransformFeedbackVaryings
 #define glProgramParameteri  _mesa_ProgramParameteri
+#define glGetProgramPipelineiv _mesa_GetProgramPipelineiv
 #define V3DC_WRITER
 static void program_path(char *out, size_t size, const char *vs_path, const char *fs_path);
 static int write_program(GLuint p, const char *path, const char *vs_src, const char *fs_src);
+struct gl_shader_program;
+static int write_files(struct gl_shader_program *prog, GLuint p, const char *path, unsigned nsrc,
+                       const unsigned *stages, const char *const *sources);
 #include "compile_common.c"
 #ifdef __amigaos__
 #include <proto/exec.h>
@@ -411,7 +415,7 @@ static void bind_samplers(GLuint p, int restore, int wide)
                 unit++;
             }
         }
-        _mesa_Uniform1iv(loc, size, units);
+        _mesa_ProgramUniform1iv(p, loc, size, units); /* p need not be in use (a pipeline's) */
         ns++;
     }
     _mesa_ActiveTexture(GL_TEXTURE0);
@@ -669,15 +673,31 @@ static int draw_key_states(GLuint p, int wide)
     static const GLenum modes[] = { GL_TRIANGLES, GL_LINES, GL_POINTS };
     static const GLfloat zeros[4 * 4 * 3]; /* 3 vertices of a mat4 attribute */
     GLint n = 0, i, err;
+    GLuint pipe = 0, fp = pipe_fs ? pipe_fs : p; /* the fragment shader's program */
     unsigned m;
 
     if (!draw_fbo && !make_target())
         return 0;
-    _mesa_UseProgram(p);
+    /* ES 3.1: a pipeline's, p its vertex program, pipe_fs its fragment one */
+    if (pipe_fs) {
+        _mesa_UseProgram(0);
+        _mesa_GenProgramPipelines(1, &pipe);
+        _mesa_UseProgramStages(pipe, GL_VERTEX_SHADER_BIT, p);
+        _mesa_UseProgramStages(pipe, GL_FRAGMENT_SHADER_BIT, pipe_fs);
+        _mesa_BindProgramPipeline(pipe);
+    } else {
+        _mesa_UseProgram(p);
+    }
     bind_samplers(p, 0, wide);
     bind_uniform_blocks(p);
     bind_storage_blocks(p); /* a fragment shader's (ES 3.1) */
     bind_images(p);
+    if (pipe_fs) {
+        bind_samplers(pipe_fs, 0, wide);
+        bind_uniform_blocks(pipe_fs);
+        bind_storage_blocks(pipe_fs);
+        bind_images(pipe_fs);
+    }
     _mesa_GetProgramiv(p, GL_ACTIVE_ATTRIBUTES, &n);
     for (i = 0; i < n; i++) {
         char name[256];
@@ -703,7 +723,7 @@ static int draw_key_states(GLuint p, int wide)
         const uint64_t more = BITFIELD64_BIT(FRAG_RESULT_DATA1) | BITFIELD64_BIT(FRAG_RESULT_DATA2) |
                               BITFIELD64_BIT(FRAG_RESULT_DATA3);
         /* GLSL ES 3.x: one target with the outputs' locations and types. */
-        GLuint typed = sp && sp->GLSL_Version >= 300 ? typed_target(p) : 0;
+        GLuint typed = sp && sp->GLSL_Version >= 300 ? typed_target(fp) : 0;
         if (typed)
             _mesa_BindFramebuffer(GL_FRAMEBUFFER, typed);
         for (m = 0; m < ARRAY_SIZE(modes); m++)
@@ -732,6 +752,11 @@ static int draw_key_states(GLuint p, int wide)
     for (i = 0; i < 16; i++)
         _mesa_DisableVertexAttribArray(i);
     bind_samplers(p, 1, 0);
+    if (pipe_fs) {
+        bind_samplers(pipe_fs, 1, 0);
+        _mesa_BindProgramPipeline(0);
+        _mesa_DeleteProgramPipelines(1, &pipe);
+    }
     _mesa_UseProgram(0);
     err = _mesa_GetError();
     if (err != GL_NO_ERROR) {
@@ -815,10 +840,24 @@ static int write_files(struct gl_shader_program *prog, GLuint p, const char *pat
 {
     int drawn;
 
+    /* ES 3.1: a pipeline's (p its vertex program, pipe_fs its fragment
+     * one): its key states' variants, or the keys', into its .v3dx */
+    if (pipe_fs && !variant_keys) {
+        char xpath[512];
+        size_t n = strlen(path);
+        if (n <= 5 || n >= sizeof(xpath))
+            return 0;
+        snprintf(xpath, sizeof(xpath), "%.*s.v3dx", (int)(n - 5), path);
+        v3dp_capture_begin();
+        drawn = key_states(p, 0);
+        v3dp_capture_end();
+        return drawn && v3dp_write_pipeline_variants(xpath, prog, nsrc, stages, sources, variant_layout_crc) == 0;
+    }
+
     /* A separable program of one stage (ES 3.1) draws nothing alone: its
      * file holds no variants (a pipeline's draws get theirs, stage D item
      * 5), and it has no .v3dw. */
-    if (!prog->_LinkedShaders[MESA_SHADER_VERTEX] != !prog->_LinkedShaders[MESA_SHADER_FRAGMENT]) {
+    if (!pipe_fs && !prog->_LinkedShaders[MESA_SHADER_VERTEX] != !prog->_LinkedShaders[MESA_SHADER_FRAGMENT]) {
         if (write_mode == WRITE_WIDE || variant_keys || write_mode == WRITE_A2C)
             return 0;
         v3dp_capture_begin();
@@ -878,6 +917,8 @@ static int write_files(struct gl_shader_program *prog, GLuint p, const char *pat
             at += used;
         }
         v3dp_capture_end();
+        if (pipe_fs)
+            return ok && v3dp_write_pipeline_variants(xpath, prog, nsrc, stages, sources, variant_layout_crc) == 0;
         return ok && v3dp_write_variants(xpath, prog, nsrc, stages, sources, variant_layout_crc) == 0;
     }
     /* The alpha-to-coverage variants: the same draws with the fragment key's
@@ -1036,6 +1077,34 @@ static int handle(uint32_t op, const char *vs, const char *fs, const char *out_p
             return ok ? 0 : 1;
         }
     }
+    /* ES 3.1: a program pipeline's variants, its default ones or the keys' */
+    if (op == V3DGLSL_LINK_PIPELINE ||
+        (op == V3DGLSL_COMPILE_VARIANT && bindings && !strncmp(bindings, V3DGLSL_PIPE_MARK, sizeof(V3DGLSL_PIPE_MARK) - 1))) {
+        if (!vs || !fs || !out_path || !bindings || strlen(bindings) < 5 + 130 || bindings[69] != ' ' ||
+            bindings[134] != '\n' || (op == V3DGLSL_COMPILE_VARIANT && (!keys || !keys_len))) {
+            log_add(log, log_size, "the compiler does not understand this request", NULL);
+            return 3;
+        }
+        memcpy(pipe_hex[0], bindings + 5, 64);
+        memcpy(pipe_hex[1], bindings + 70, 64);
+        pipe_hex[0][64] = pipe_hex[1][64] = 0;
+        write_mode = WRITE_PLAIN;
+        link_bindings = *(bindings + 135) ? bindings + 135 : NULL;
+        link_separable = 1;
+        if (link_bindings && !strncmp(link_bindings, V3DGLSL_SEPA_MARK, sizeof(V3DGLSL_SEPA_MARK) - 1))
+            link_bindings = *(link_bindings + sizeof(V3DGLSL_SEPA_MARK) - 1) ? link_bindings + sizeof(V3DGLSL_SEPA_MARK) - 1
+                                                                            : NULL;
+        variant_keys = op == V3DGLSL_COMPILE_VARIANT ? keys : NULL;
+        variant_keys_len = op == V3DGLSL_COMPILE_VARIANT ? keys_len : 0;
+        variant_layout_crc = layout_crc;
+        result = link_pipeline(vs, fs, out_path, log, log_size) ? 0 : 1;
+        link_bindings = NULL;
+        link_separable = 0;
+        variant_keys = NULL;
+        variant_keys_len = 0;
+        variant_layout_crc = 0;
+        return result;
+    }
     if ((op != V3DGLSL_LINK && op != V3DGLSL_COMPILE && op != V3DGLSL_LINK32 && op != V3DGLSL_LINK_BOUND &&
          op != V3DGLSL_LINK_A2C && op != V3DGLSL_COMPILE_VARIANT && op != V3DGLSL_LINK_SEPARABLE) ||
         (op == V3DGLSL_LINK_SEPARABLE && ((!vs && !fs) || !out_path)) ||
@@ -1146,8 +1215,10 @@ static int serve_stdio(void)
             return 20;
         }
         k = handle(op, s[0], s[1], s[4],
-                   op == V3DGLSL_LINK_BOUND || op == V3DGLSL_COMPILE_VARIANT || op == V3DGLSL_LINK_SEPARABLE ? s[2]
-                                                                                                              : NULL,
+                   op == V3DGLSL_LINK_BOUND || op == V3DGLSL_COMPILE_VARIANT || op == V3DGLSL_LINK_SEPARABLE ||
+                           op == V3DGLSL_LINK_PIPELINE
+                       ? s[2]
+                       : NULL,
                    op == V3DGLSL_COMPILE_VARIANT ? (const uint8_t *)s[3] : NULL, n[3], crc, log, sizeof(log));
         fwrite("V3A1", 1, 4, out);
         write_u32(out, (uint32_t)k);
@@ -1215,11 +1286,12 @@ static int serve(void)
                 /* An older sender's request ends before the fields its op
                  * does not read (v3dglsl_port.h). */
                 int bound = r->op == V3DGLSL_LINK_BOUND || r->op == V3DGLSL_COMPILE_VARIANT ||
-                            r->op == V3DGLSL_LINK_SEPARABLE;
+                            r->op == V3DGLSL_LINK_SEPARABLE || r->op == V3DGLSL_LINK_PIPELINE;
                 int variant = r->op == V3DGLSL_COMPILE_VARIANT;
                 r->result = handle(r->op, r->vs, r->fs, r->out_path, bound ? r->bindings : NULL,
                                    variant ? r->keys : NULL, variant ? r->keys_len : 0,
-                                   variant ? r->layout_crc : 0, r->log, r->log_size);
+                                   variant || r->op == V3DGLSL_LINK_PIPELINE ? r->layout_crc : 0, r->log,
+                                   r->log_size);
                 if (r->op != V3DGLSL_COMPILE && r->result != 3)
                     served++;
             }

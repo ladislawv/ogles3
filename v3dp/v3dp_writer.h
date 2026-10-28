@@ -31,6 +31,8 @@ int v3dp_last_fs_inputs(uint8_t *num_inputs, uint8_t *slots);
  * either is written in format 2. */
 #define V3DP_HASH_XFBV 0x58464256u
 #define V3DP_HASH_SEPA 0x53455041u
+#define V3DP_HASH_PIPV 0x50495056u /* a pipeline's: its vertex program's hash, 64 hex digits */
+#define V3DP_HASH_PIPF 0x50495046u /* and its fragment program's */
 
 /* Format 2's must-understand feature bits (PROGRAM's features word). */
 #define V3DP_FEATURE_TF 0x1u /* transform feedback: a TRANSFORM_FEEDBACK section */
@@ -72,6 +74,13 @@ int v3dp_write(const char *path, struct gl_shader_program *prog,
 int v3dp_write_variants(const char *path, struct gl_shader_program *prog,
                         unsigned num_sources, const unsigned *stages,
                         const char *const *sources, uint32_t expect_layout_crc);
+/* ES 3.1: a program pipeline's variants (captured from draws through a Mesa
+ * pipeline of two separable programs) as a .v3dx: its hash the sources'
+ * (V3DP_HASH_PIPV and _PIPF: the two programs' hashes), its VARIANT_OF
+ * layout_crc (the library composes the pipeline's image and its CRC). */
+int v3dp_write_pipeline_variants(const char *path, struct gl_shader_program *vertex_prog,
+                                 unsigned num_sources, const unsigned *stages,
+                                 const char *const *sources, uint32_t layout_crc);
 
 /* A variant's key from its bytes as the files and ogles2.library have them:
  * a u32 VARIANT stage (0 vertex, 1 binning, 4 fragment), then the key

@@ -63,6 +63,16 @@
                                   * COMPILE_VARIANT's of a separable program must). A compiler older
                                   * than this answers 3. */
 #define V3DGLSL_SEPA_MARK "SEPA\n" /* link state's first line: the program is separable */
+#define V3DGLSL_LINK_PIPELINE 11 /* ES 3.1: a program pipeline's variants: `vs` and `fs` each linked
+                                  * separable, drawn through a Mesa pipeline (the key states, or
+                                  * with `keys` as COMPILE_VARIANT), into the .v3dx beside out_path,
+                                  * its VARIANT_OF `layout_crc` (the library composes the image).
+                                  * `bindings`: V3DGLSL_PIPE_MARK, the two programs' hashes as 64 hex
+                                  * digits each and "\n", then the vertex program's link state; a
+                                  * COMPILE_VARIANT whose bindings begin so is a pipeline's too
+                                  * (docs/GLES3_PLAN.md stage D item 5). A compiler older than this
+                                  * answers 3. */
+#define V3DGLSL_PIPE_MARK "PIPE "
 #define V3DGLSL_KEY_OUTPUTS_FROM_FS 0x100 /* in a vertex key's stage word: its used outputs are
                                            * the inputs of the fragment variant compiled just
                                            * before it in the same request (Mesa's

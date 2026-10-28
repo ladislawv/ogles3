@@ -210,7 +210,7 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
     ULONG *sec_type, *sec_len;
     BOOL commit_ok = FALSE, format2;
     BOOL have_blocks = FALSE, have_interface = FALSE;
-    ULONG features = 0;
+    ULONG features = 0, types_n = 0;
 
     why[0] = 0;
     if (len < 32 || memcmp(file, "V3DP", 4))
@@ -756,6 +756,17 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             im->opaque_units = o;
             break;
         }
+        case 15: { /* INTERFACE_TYPES (format 2): each interface entry's structure */
+            ULONG n = u32(&s), j;
+            ULONG *t;
+            if (!format2 || n > 4096 || !(t = alloc(im, n * 4 + 4)))
+                FAIL("interface types:", 0, n);
+            for (j = 0; j < n; j++)
+                t[j] = u32(&s);
+            im->interface_types = t;
+            types_n = n;
+            break;
+        }
         case 13: { /* UNIFORM_LOCATIONS (format 2): Mesa's locations */
             ULONG n = u32(&s), j, x;
             UWORD *r;
@@ -872,6 +883,8 @@ struct OGLES2Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             }
         im->layout_crc = from ? crc32(from, (ULONG)(to - from)) : 0;
     }
+    if (im->interface_types && types_n != im->ninterface)
+        FAIL("interface types for another interface", 0, types_n);
     for (k = 0; k < im->nremap; k++)
         if (im->remap[k] < OGLES2_LOC_INACTIVE && im->remap[k] >= im->nuniforms)
             FAIL("a uniform location of no uniform", 0, im->remap[k]);
@@ -987,7 +1000,7 @@ void ogles2_image_free(struct OGLES2Image *im, struct OGLES2Context *ctx)
 {
     if (!im)
         return;
-    if (im->code_mem && im->code_mem->hostptr) {
+    if (im->code_mem && im->code_mem->hostptr && !im->code_borrowed) {
         /* The GPU may still run this code in the open job: free it after
          * that job (v3d_frame_defer_free), or now. */
         if (ctx && ctx->v3d && ctx->v3d->frame_active)
@@ -1044,4 +1057,203 @@ const struct OGLES2Variant *ogles2_image_variant(const struct OGLES2Image *im, U
             any = v;
     }
     return rt0 ? rt0 : any; /* a miss: the closest there is (plan 7.8); draw.c logs it */
+}
+
+/* ---- a program pipeline's image (ES 3.1, docs/GLES3_PLAN.md stage D item 5) ----
+ * The draws of a pipeline of two separable programs, a's vertex stage and
+ * b's fragment stage, each stage as its own program has it: a's constant
+ * buffer, attributes, transform feedback and vertex blocks; b's fragment
+ * ones; the uniforms, blocks, storage blocks, atomic counter buffers,
+ * interface and units a's then b's (b's indices moved past a's). No
+ * variants: they are the pair's, compiled through a Mesa pipeline of the two
+ * (V3DGLSL_LINK_PIPELINE) into its .v3dx, which program.c borrows. */
+static UWORD *moved(struct OGLES2Image *im, const UWORD *from, ULONG n, ULONG by, BOOL atomic_kept)
+{
+    UWORD *to = alloc(im, n * 2 + 2);
+    ULONG k;
+    if (!to)
+        return 0;
+    for (k = 0; k < n; k++)
+        to[k] = atomic_kept && (from[k] & 0x8000) ? from[k] : (UWORD)(from[k] + by);
+    return to;
+}
+
+static BOOL blocks_moved(struct OGLES2Image *im, struct OGLES2ImageBlock *to, const struct OGLES2ImageBlock *from,
+                         ULONG n, ULONG by)
+{
+    ULONG k;
+    for (k = 0; k < n; k++) {
+        to[k] = from[k];
+        if (from[k].nmembers && !(to[k].members = moved(im, from[k].members, from[k].nmembers, by, FALSE)))
+            return FALSE;
+    }
+    return TRUE;
+}
+
+static char *dup_str(struct OGLES2Image *im, const char *a, const char *b)
+{
+    ULONG la = 0, lb = 0;
+    char *t;
+    while (a && a[la])
+        la++;
+    while (b && b[lb])
+        lb++;
+    if (!(t = AllocVec(la + lb + 1, MEMF_ANY)))
+        return 0;
+    if (la)
+        CopyMem((APTR)a, t, la);
+    if (lb)
+        CopyMem((APTR)b, t + la, lb);
+    t[la + lb] = 0;
+    (void)im;
+    return t;
+}
+
+struct OGLES2Image *ogles2_v3dp_compose(const struct OGLES2Image *a, const struct OGLES2Image *b,
+                                        const UBYTE hash[32], const char *pipe_line)
+{
+    struct OGLES2Image *im = AllocVec(sizeof(*im), MEMF_ANY | MEMF_CLEAR);
+    struct OGLES2ImageUniform *u;
+    struct OGLES2ImageBlock *ub, *sb;
+    struct OGLES2ImageAtomic *ab;
+    struct OGLES2StateVar *sv;
+    struct OGLES2ImageVar *iv;
+    ULONG k, na, nb;
+    if (!im)
+        return 0;
+    im->name = "program pipeline";
+    CopyMem((APTR)hash, im->hash, 32);
+    im->format2 = TRUE;
+    im->separable = TRUE;
+    im->stages = 0x11;
+    im->code_borrowed = TRUE;
+    /* uniforms: a's, then b's (their blocks moved past a's) */
+    im->nuniforms = (UWORD)(a->nuniforms + b->nuniforms);
+    if (!(u = alloc(im, (im->nuniforms + 1UL) * sizeof(*u))))
+        goto fail;
+    for (k = 0; k < a->nuniforms; k++)
+        u[k] = a->uniforms[k];
+    for (k = 0; k < b->nuniforms; k++) {
+        struct OGLES2ImageUniform *v = &u[a->nuniforms + k];
+        *v = b->uniforms[k];
+        if (v->block >= 0)
+            v->block = (WORD)(v->block + ((v->flags & OGLES2_UNIFORM_BUFFER)   ? a->nsblocks
+                                          : (v->flags & OGLES2_UNIFORM_ATOMIC) ? a->nabuffers
+                                                                               : a->nublocks));
+    }
+    im->uniforms = u;
+    /* each stage's constant buffer and state variables, its program's */
+    im->cbuf_words[0] = a->cbuf_words[0];
+    im->cbuf_template[0] = a->cbuf_template[0];
+    im->cbuf_words[1] = b->cbuf_words[1];
+    im->cbuf_template[1] = b->cbuf_template[1];
+    im->nstatevars = (UWORD)(a->nstatevars + b->nstatevars);
+    if (!(sv = alloc(im, (im->nstatevars + 1UL) * sizeof(*sv))))
+        goto fail;
+    for (k = 0; k < a->nstatevars; k++)
+        sv[k] = a->statevars[k];
+    for (k = 0; k < b->nstatevars; k++)
+        sv[a->nstatevars + k] = b->statevars[k];
+    im->statevars = sv;
+    /* the vertex program's attributes, transform feedback, clip control */
+    im->nattribs = a->nattribs;
+    im->attribs = a->attribs;
+    im->xfb = a->xfb;
+    im->clip_z_coeff = a->clip_z_coeff;
+    /* uniform blocks and the stages' maps */
+    im->nublocks = (UWORD)(a->nublocks + b->nublocks);
+    if (!(ub = alloc(im, (im->nublocks + 1UL) * sizeof(*ub))) ||
+        !blocks_moved(im, ub, a->ublocks, a->nublocks, 0) ||
+        !blocks_moved(im, ub + a->nublocks, b->ublocks, b->nublocks, a->nuniforms))
+        goto fail;
+    im->ublocks = ub;
+    im->stage_nblocks[0] = a->stage_nblocks[0];
+    im->stage_block[0] = a->stage_block[0];
+    im->stage_nblocks[1] = b->stage_nblocks[1];
+    if (b->stage_nblocks[1] && !(im->stage_block[1] = moved(im, b->stage_block[1], b->stage_nblocks[1],
+                                                            a->nublocks, FALSE)))
+        goto fail;
+    /* storage blocks (atomic counter buffers' entries kept: by binding) */
+    im->nsblocks = (UWORD)(a->nsblocks + b->nsblocks);
+    if (!(sb = alloc(im, (im->nsblocks + 1UL) * sizeof(*sb))) ||
+        !blocks_moved(im, sb, a->sblocks, a->nsblocks, 0) ||
+        !blocks_moved(im, sb + a->nsblocks, b->sblocks, b->nsblocks, a->nuniforms))
+        goto fail;
+    for (k = 0; k < b->nsblocks; k++) /* the top-level arrays' sizes and strides: per member, b's own */
+        sb[a->nsblocks + k].top_level = b->sblocks[k].top_level;
+    im->sblocks = sb;
+    im->stage_nsblocks[0] = a->stage_nsblocks[0];
+    im->stage_sblock[0] = a->stage_sblock[0];
+    im->stage_nsblocks[1] = b->stage_nsblocks[1];
+    if (b->stage_nsblocks[1] && !(im->stage_sblock[1] = moved(im, b->stage_sblock[1], b->stage_nsblocks[1],
+                                                              a->nsblocks, TRUE)))
+        goto fail;
+    /* atomic counter buffers */
+    im->nabuffers = (UWORD)(a->nabuffers + b->nabuffers);
+    if (!(ab = alloc(im, (im->nabuffers + 1UL) * sizeof(*ab))))
+        goto fail;
+    for (k = 0; k < a->nabuffers; k++)
+        ab[k] = a->abuffers[k];
+    for (k = 0; k < b->nabuffers; k++) {
+        ab[a->nabuffers + k] = b->abuffers[k];
+        if (b->abuffers[k].ncounters &&
+            !(ab[a->nabuffers + k].counters = moved(im, b->abuffers[k].counters, b->abuffers[k].ncounters,
+                                                    a->nuniforms, FALSE)))
+            goto fail;
+    }
+    im->abuffers = ab;
+    /* inputs and outputs */
+    im->ninterface = (UWORD)(a->ninterface + b->ninterface);
+    if (!(iv = alloc(im, (im->ninterface + 1UL) * sizeof(*iv))))
+        goto fail;
+    for (k = 0; k < a->ninterface; k++)
+        iv[k] = a->interface[k];
+    for (k = 0; k < b->ninterface; k++)
+        iv[a->ninterface + k] = b->interface[k];
+    im->interface = iv;
+    if (a->interface_types && b->interface_types) {
+        ULONG *t = alloc(im, (im->ninterface + 1UL) * 4);
+        if (!t)
+            goto fail;
+        for (k = 0; k < a->ninterface; k++)
+            t[k] = a->interface_types[k];
+        for (k = 0; k < b->ninterface; k++)
+            t[a->ninterface + k] = b->interface_types[k];
+        im->interface_types = t;
+    }
+    /* the units samplers and images start with: each entry the uniform, its
+     * elements, then their units */
+    for (na = 0, k = 0; k < a->nopaque; k++)
+        na += 2 + a->opaque_units[na + 1];
+    for (nb = 0, k = 0; k < b->nopaque; k++)
+        nb += 2 + b->opaque_units[nb + 1];
+    if (na + nb) {
+        UWORD *o = alloc(im, (na + nb) * 2 + 2);
+        ULONG at;
+        if (!o)
+            goto fail;
+        for (k = 0; k < na; k++)
+            o[k] = a->opaque_units[k];
+        for (at = 0, k = 0; k < b->nopaque; k++) {
+            ULONG n = b->opaque_units[at + 1], j;
+            o[na + at] = (UWORD)(b->opaque_units[at] + a->nuniforms);
+            for (j = 1; j < 2 + n; j++)
+                o[na + at + j] = b->opaque_units[at + j];
+            at += 2 + n;
+        }
+        im->opaque_units = o;
+        im->nopaque = (UWORD)(a->nopaque + b->nopaque);
+    }
+    /* the pair's .v3dx: its own layout CRC, the compiles' sources and their
+     * link state ("PIPE <a's hash> <b's hash>", then a's) */
+    im->layout_crc = a->layout_crc ^ ((b->layout_crc << 7) | (b->layout_crc >> 25)) ^ 0x50495045UL;
+    im->vs_src = dup_str(im, a->vs_src, 0);
+    im->fs_src = dup_str(im, b->fs_src, 0);
+    im->bind_src = dup_str(im, pipe_line, a->bind_src);
+    if (!im->vs_src || !im->fs_src || !im->bind_src)
+        goto fail;
+    return im;
+fail:
+    ogles2_image_free(im, 0);
+    return 0;
 }
