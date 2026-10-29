@@ -27,14 +27,14 @@ git -C "$GL4ES_SRC" checkout -q -- .
 for p in "$HERE"/patches/*.patch ${GL4ES_EXTRA_PATCHES:-}; do
     git -C "$GL4ES_SRC" apply "$p" || { echo "gl4es: $p does not apply"; exit 1; }
 done
-[ -f "$B/gen/include/libraries/ogles2_dispatch.h" ] || { echo "run make first (B=$B)"; exit 1; }
+[ -f "$B/gen/include/libraries/ogles3_dispatch.h" ] || { echo "run make first (B=$B)"; exit 1; }
 
 rm -rf "$O"
 mkdir -p "$O/obj"
 # The compiler's -include and -I take no quoting through $FLAGS: a copy of
 # the forced header in the build directory (the repository's path has a space).
 cp "$HERE/os3_build.h" "$O/os3_build.h"
-python3 "$HERE/gen_glue.py" "$B/gen/include/libraries/ogles2_dispatch.h" "$O/ogles2_glue.c"
+python3 "$HERE/gen_glue.py" "$B/gen/include/libraries/ogles3_dispatch.h" "$O/ogles2_glue.c"
 
 # gl4es with its AmigaOS 4 code paths (no X11, EGL or dlopen; its agl
 # glue), without a constructor (agl_os3.c starts it). The CPU flags are the

@@ -1371,6 +1371,7 @@ void ogles2_fb_update(struct OGLES3Context *ctx)
         ctx->fb_draw_mask = ctx->default_draw_buffer == GL_NONE ? 0 : 1;
         ctx->fb_nrt = 1;
         ctx->fb_soft_blend = 0;
+        ctx->fb_wide = 0;
         memset(ctx->fb_rt, 0, sizeof(ctx->fb_rt));
         ctx->fb_rt[0].out = V3D_OUTPUT_IMAGE_FORMAT_RGBA8; /* the bitmap's */
         ctx->fb_rt[0].type = V3D_INTERNAL_TYPE_8;
@@ -1384,6 +1385,7 @@ void ogles2_fb_update(struct OGLES3Context *ctx)
     ctx->fb_draw_mask = 0;
     ctx->fb_nrt = 1;
     ctx->fb_soft_blend = 0;
+    ctx->fb_wide = 0;
     memset(ctx->fb_rt, 0, sizeof(ctx->fb_rt));
     for (a = 0; a < OGLES3_MAX_DRAW_BUFFERS; a++)
         if (fb->draw_buf[a] != GL_NONE && fb->att[ATT_COLOR + a].type != GL_NONE) {
@@ -1394,6 +1396,8 @@ void ogles2_fb_update(struct OGLES3Context *ctx)
              * cannot blend (32-bit floats, integers) */
             if (att_rt(&fb->att[ATT_COLOR + a], rf) && rf->kind != OGLES3_RT_UNORM && rf->kind != OGLES3_RT_F16)
                 ctx->fb_soft_blend = 1;
+            if (rf->kind == OGLES3_RT_F32 || rf->kind == OGLES3_RT_INT || rf->kind == OGLES3_RT_UINT)
+                ctx->fb_wide |= (UBYTE)(1 << a);
         }
     ctx->fb_w = ctx->fb_h = 0;
     ctx->fb_flip = FALSE;

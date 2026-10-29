@@ -40,6 +40,78 @@ link; the private repository ogles3.1 renamed to it on 2026-10-28, done). Found 
 0018 (only the host one had been rebuilt; `es31aoa` in `compare_v3dp.sh`
 caught it).
 
+**The draw's CPU cost against 1.3.1 (2026-10-28/29, open).** A GLES2 draw
+cost 44% more CPU than in 1.3.1: the Doom 3 port's timedemo (its
+PLAN.md, "Next" 3 and §14; `bench-20261028-223954`) 34.6 against 24.1 µs
+a draw, 16.3 fps against 17.6. **Quake III** (renderergl2 from
+`C:\GitHub\ioq3-amiga`, a clone of ioq3-amiga's head `d58221c`, where
+Quake benchmarks now build from with `IOQ3_SRC`; its own
+`build_ioq3_ogles2_wsl.sh` built twice in `~/q3cmp`, with ogles2's SDK
+and with ogles3's under ogles2's names, `OGLES2Open` and the others
+defined to `OGLES3Open`'s; packages `ogles2-q3o2` and `-q3o3` made from
+`m6-5`'s, the library their only difference; `FRAMES=400 SPEEDS=1`,
+640x480, 199 demo frames, the shader caches warm; with `FRAMES` the
+package prints no timedemo line and probe T fills the log, so Quake's
+`com_speeds` is the measure; ogles3's context is ES 3.1, the glimp asks
+for no version): ogles2 1.3.2 8.19 ms a frame (122 fps), beta1 9.51 ms
+(105 fps), all of it in the renderer's back end (5.2 against 6.65 ms).
+- **Where:** probe P (Quake, µs a draw, ogles2 / beta1): checks 4.5 / 6.6,
+  shaders 0.8 / 2.2, textures 2.1 / 3.3, vertex data 10.1 / 12.5, binning
+  list 4.1 / 6.1; and outside the draws (the glue's `PROFILE=1`, µs a
+  frame) `glVertexAttribPointer` 69 / 289, `glBufferSubData` 216 / 309,
+  small calls 30-40% slower. A sampling profile by function (the Doom 3
+  port's `pc_sample` in both packages; the library's PCs mapped through
+  its link map and each object's own hunk symbols, static functions too,
+  by scripts not in the repository) showed the rest spread over the draw
+  path (`draw_arrays` with `emit_state` and `copy_array`, 1.3.1 inlining
+  them: 155 against 233 samples a run), the buffer updates and
+  `write_uniforms`.
+- **Done (uncommitted until the commit of 2026-10-29):** the render target
+  key only for ES3 programs, compared as `ctx->fb_wide` (the 32-bit
+  targets, kept by `ogles2_fb_update`) unless the shader blends, made in
+  full only for a new choice of variants; the wrong-width check from
+  `fb_wide` and the variant's `p->var_f32`; `struct tex_states`' images
+  not cleared at a draw (`TEX_STATES_CLEAR`); an array's format worked out
+  once (`array_fmt`, kept while `fmt_key` matches) instead of at every
+  draw; `glVertexAttribPointer` without `vab_refresh`'s look at all 16
+  attributes until `glVertexAttribBinding` first moves one
+  (`ctx->vab_moved`); `arrays_ok` asks `ogles2_buffer_cpu` only once a
+  buffer was ever given to the GPU to write (`ogles2_gpu_writes_seen`);
+  the draw's transform feedback calls only once `ctx->xfb` exists;
+  `glEnable`/`glDisable` ask KHR_debug only for a cap they do not know;
+  `write_uniforms`' rare recipe entries in `rare_uniform`, so its switch
+  is 1.x's (the main plan's `bb8665d` finding); runtime.c's `memcpy`,
+  `memset` and `memcmp` take long words for addresses 2 bytes off too
+  (the m68k ABI aligns structures to 2). Correction: the library's
+  `memcmp` (runtime.c) compares long words already; only misaligned
+  addresses went a byte at a time.
+- **Result:** Doom 3 (the first three items only; `bench-20261028-230541`)
+  17.4 fps against **16.5**, 32.2 µs a draw (shaders 0.95). Quake III
+  (`ogles2-q3o2-20261029-102001`, `-102127`; `-q3o3-20261029-102043`,
+  `-102210`): ogles2 7.82 and 7.75 ms (128 fps), ogles3 8.84 and 8.83 ms,
+  **113 fps** (beta1 105), back end 4.9 against 5.94 ms. `boing2026` the
+  same (52.8 fps; the GPU waits). Still 1 ms a frame to find.
+- **Found on the way:** this machine's Mesa tree
+  (`~/mesa-build-gles3/mesa`) lacked patches 0016-0018 (and 0015 matched
+  neither way), so the compilers built here, and the 1.0-beta1 archive
+  made from them on 2026-10-28, had none of them: the host compiler
+  crashed on `es31aoa.comp` (0018), which stopped every test package's
+  build. Reset and patched again (`apply_mesa_patches.sh`), Mesa and both
+  compilers rebuilt (`replay.py` and `build_m68k.sh` for the m68k one);
+  `compare_v3dp.sh` 34 of 34 identical. With this library in `LIBS:`
+  (the 1.0-beta1 `v3dglslc3` still there, as installed): `m8-5` 58 of 58
+  and 204 of 204 in ES 3.1 contexts (`ogles2-m8-5-20261029-103115`),
+  `m7-6` 17, 1 and 1 (`ogles2-m7-6-20261029-103128`). The 1.0-beta1
+  archive must be built again from these compilers before it is published.
+- **gl4es and Quake III on the ogles3 names:** `ports/gl4es` (`agl_os3.c`,
+  `gen_glue.py`, `include/gl4es_agl.h`, `build.sh`), `ports/ioq3` and
+  `ports/ioq3-gl2` (link `-logles3`, `ogles3_dispatch.h`,
+  `<libraries/ogles3.h>`); the three build, `m6-5` runs
+  (`ogles2-m6-5-20261028-233733`).
+- **Next:** the draw path's remaining cost (`draw_arrays`, `emit_state`,
+  `copy_array` out of line; the buffer update path), then whether code
+  layout is the rest (a GLES2-only build to compare).
+
 **Status: plan (2026-10-18; revised eight times, research added and checked
 2026-10-19, every line citation and each stage reviewed for implementation
 the same day), work on branch `gles3`.** Stage A (begun 2026-10-22) is

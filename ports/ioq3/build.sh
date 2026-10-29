@@ -160,7 +160,7 @@ MAIN=$(objs "$OUT" be_aas_bspq3 be_aas_cluster be_aas_debug be_aas_entity be_aas
   q_math q_shared1 q_shared2 q_shared3 q_shared4 q_shared5 q_shared6 q_shared7 q_shared8 mglv3d_log_noop)
 # gl4es before libogles2.a (ports/gl4es/README.md).
 $GCC -mcpu=68020 -m68881 -mcrt=clib2 -o "$BUILDOUT/quake3-gl4es" $MAIN \
-    -L"$B/gl4es" -L"$B" -lgl4es -logles2 -L"$LIBM020" -lm881 -lm -lc -lamiga 2>&1 | grep -v lang_reloc || true
+    -L"$B/gl4es" -L"$B" -lgl4es -logles3 -L"$LIBM020" -lm881 -lm -lc -lamiga 2>&1 | grep -v lang_reloc || true
 [ -f "$BUILDOUT/quake3-gl4es" ] || { echo "link failed"; exit 1; }
 
 CG=$(objs "$CGOUT" cg_main cg_consolecmds cg_draw cg_drawtools cg_effects cg_ents cg_event cg_info \

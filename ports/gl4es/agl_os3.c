@@ -2,7 +2,7 @@
  * gl4es's agl* functions on AmigaOS 3 with ogles2.library (ports/gl4es),
  * in place of gl4es's src/agl/agl.c, which calls AmigaOS 4's IOGLES2
  * interface. The context list and its gl4es state are agl.c's; the calls go
- * to ogles2.library's dispatch table, keeping libogles2.a's current
+ * to ogles3.library's dispatch table, keeping libogles3.a's current
  * context as its own aglMakeCurrent does (client/agl.c), so the GLES2
  * calls of the glue (ogles2_glue.c) reach the right context.
  *
@@ -16,13 +16,13 @@
 #include <string.h>
 #include <exec/types.h>
 #include <utility/tagitem.h>
-#include <libraries/ogles2.h>
-#include <libraries/ogles2_dispatch.h>
+#include <libraries/ogles3.h>
+#include <libraries/ogles3_dispatch.h>
 
-extern const struct OGLES2Dispatch *OGLES2Dispatch; /* libogles2.a */
-extern struct OGLES2Context *OGLES2CurrentContext;
-BOOL OGLES2Open(void);
-void OGLES2Close(void);
+extern const struct OGLES3Dispatch *OGLES3Dispatch; /* libogles3.a */
+extern struct OGLES3Context *OGLES3CurrentContext;
+BOOL OGLES3Open(void);
+void OGLES3Close(void);
 struct BitMap;
 
 /* gl4es */
@@ -107,7 +107,7 @@ static int started;
 static void stop(void)
 {
     close_gl4es();
-    OGLES2Close();
+    OGLES3Close();
 }
 
 static int start(void)
@@ -117,7 +117,7 @@ static int start(void)
         initialize_gl4es(); /* gl/init.c: reads LIBGL_* settings, opens ogles2 (os4OpenLib) */
         atexit(stop);
     }
-    return OGLES2Dispatch != 0;
+    return OGLES3Dispatch != 0;
 }
 
 /* ---- the agl functions ---- */
@@ -129,7 +129,7 @@ void *aglCreateContext2(ULONG *errcode, struct TagItem *tags)
             *errcode = OGLES2_CCE_NO_GPU;
         return NULL;
     }
-    return OGLES2Dispatch->aglCreateContext2(errcode, tags);
+    return OGLES3Dispatch->aglCreateContext2(errcode, tags);
 }
 
 void *aglCreateContext(ULONG *errcode, struct TagItem *tags)
@@ -138,7 +138,7 @@ void *aglCreateContext(ULONG *errcode, struct TagItem *tags)
 }
 
 /* GCC passes the arguments on the stack in order: the tags after errcode
- * already form a TagItem array (libogles2.a's client/agl.c does the same). */
+ * already form a TagItem array (libogles3.a's client/agl.c does the same). */
 void *aglCreateContextTags2(ULONG *errcode, ...)
 {
     return aglCreateContext2(errcode, (struct TagItem *)(&errcode + 1));
@@ -146,8 +146,8 @@ void *aglCreateContextTags2(ULONG *errcode, ...)
 
 static void make_current(void *context)
 {
-    OGLES2CurrentContext = (struct OGLES2Context *)context;
-    OGLES2Dispatch->aglMakeCurrent((struct OGLES2Context *)context);
+    OGLES3CurrentContext = (struct OGLES3Context *)context;
+    OGLES3Dispatch->aglMakeCurrent((struct OGLES3Context *)context);
 }
 
 void gl4es_glue_profile(ULONG frames); /* ogles2_glue.c: GL4ES_GLUE_PROFILE */
@@ -156,7 +156,7 @@ static ULONG swaps;
 
 void aglDestroyContext(void *context)
 {
-    if (!OGLES2Dispatch || !context)
+    if (!OGLES3Dispatch || !context)
         return;
     gl4es_glue_profile(swaps);
     swaps = 0;
@@ -169,13 +169,13 @@ void aglDestroyContext(void *context)
         make_current(agl_current_ctx);
     else
         make_current(agl_current_ctx = NULL);
-    OGLES2Dispatch->aglDestroyContext((struct OGLES2Context *)context);
+    OGLES3Dispatch->aglDestroyContext((struct OGLES3Context *)context);
 }
 
 void aglMakeCurrent(void *context)
 {
     agl_current_ctx = context;
-    if (!OGLES2Dispatch)
+    if (!OGLES3Dispatch)
         return;
     make_current(context);
     if (context)
@@ -184,8 +184,8 @@ void aglMakeCurrent(void *context)
 
 void aglSetParams2(struct TagItem *tags)
 {
-    if (OGLES2Dispatch)
-        OGLES2Dispatch->aglSetParams2(OGLES2CurrentContext, tags);
+    if (OGLES3Dispatch)
+        OGLES3Dispatch->aglSetParams2(OGLES3CurrentContext, tags);
 }
 
 void aglSetParamsTags2(ULONG tag1, ...)
@@ -197,13 +197,13 @@ void aglSwapBuffers(void)
 {
     swaps++;
     amiga_pre_swap(); /* gl4es: pending display lists and bitmaps, its own FBO */
-    if (OGLES2Dispatch)
-        OGLES2Dispatch->aglSwapBuffers(OGLES2CurrentContext);
+    if (OGLES3Dispatch)
+        OGLES3Dispatch->aglSwapBuffers(OGLES3CurrentContext);
     amiga_post_swap();
 }
 
 void aglSetBitmap(struct BitMap *bitmap)
 {
-    if (OGLES2Dispatch)
-        OGLES2Dispatch->aglSetBitmap(OGLES2CurrentContext, bitmap);
+    if (OGLES3Dispatch)
+        OGLES3Dispatch->aglSetBitmap(OGLES3CurrentContext, bitmap);
 }

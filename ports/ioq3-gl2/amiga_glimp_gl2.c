@@ -45,9 +45,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <proto/intuition.h>
 #include <proto/graphics.h>
 #include <proto/cybergraphics.h>
-#include <libraries/ogles2.h>
+#include <libraries/ogles3.h>
 
-/* libogles2.a (<proto/ogles2.h> is not included: its GL wrappers would
+/* libogles3.a (<proto/ogles3.h> is not included: its GL wrappers would
  * clash with the desktop GL declarations qgl.h brings). */
 void *aglCreateContextTags2(ULONG *errcode, ...);
 void aglSetParamsTags2(ULONG tag1, ...);
@@ -396,7 +396,7 @@ static void GLimp_CloseLibraries(void)
 void GLimp_Init(qboolean fixedFunction)
 {
 	shader_count = shader_shown = 0;
-	ri.Printf(PRINT_ALL, "===== quake3-68k, renderergl2 on ogles2.library =====\n");
+	ri.Printf(PRINT_ALL, "===== quake3-68k, renderergl2 on ogles3.library =====\n");
 	if (fixedFunction)
 		ri.Error(ERR_FATAL, "GLimp_Init: this build has OpenGL ES 2.0 only (renderergl2)\n");
 
@@ -413,16 +413,16 @@ void GLimp_Init(qboolean fixedFunction)
 		void *lib = NULL;
 		os4OpenLib(&lib);
 		if (!lib)
-			ri.Error(ERR_FATAL, "GLimp_Init: ogles2.library (1.1 or newer) did not open\n");
+			ri.Error(ERR_FATAL, "GLimp_Init: ogles3.library did not open\n");
 		lib_open = qtrue;
 		frames = 0;
 	}
 
 	if (!GLimp_SetMode(r_mode->integer, r_fullscreen->integer) &&
 	    (r_mode->integer == 3 || !GLimp_SetMode(3, r_fullscreen->integer)))
-		ri.Error(ERR_FATAL, "GLimp_Init: no OpenGL ES context (ogles2.library)\n");
+		ri.Error(ERR_FATAL, "GLimp_Init: no OpenGL ES context (ogles3.library)\n");
 	if (!GLimp_GetProcAddresses())
-		ri.Error(ERR_FATAL, "GLimp_Init: ogles2.library lacks a GLES 2.0 function\n");
+		ri.Error(ERR_FATAL, "GLimp_Init: ogles3.library lacks a GLES 2.0 function\n");
 
 	glConfig.driverType = GLDRV_ICD;
 	glConfig.hardwareType = GLHW_GENERIC;

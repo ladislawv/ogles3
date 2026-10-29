@@ -1,0 +1,10 @@
+Directory "M6R5:results" on Thursday 29-Oct-26
+00-progress.txt                  58 ----rwed Today     10:20:37
+1-timedemo.txt                empty ----rwed Today     10:20:33
+ogles2.log                    13090 ----rwed Today     10:20:33
+notes.txt                       353 ----rwed Today     10:20:37
+qconsole.log                  18176 ----rw-d Today     10:20:37
+shot0000.tga                 921618 ----rw-d Today     10:20:37
+98-cache.txt                  23548 ----rwed Today     10:20:37
+99-files.txt                    392 ----rwed Today     10:20:37
+8 files - 954K bytes - 1920 blocks used

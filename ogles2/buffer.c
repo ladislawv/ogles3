@@ -170,6 +170,11 @@ static void gpu_written(struct OGLES3Context *ctx, struct OGLES3Buffer *b)
     b->words_serial = b->serial; /* the words are the data still */
 }
 
+/* A buffer was ever given to the GPU to write (transform feedback, a
+ * storage block, an atomic counter): until then no draw needs to look at
+ * its arrays' buffers for words to copy back (draw.c, arrays_ok). */
+BOOL ogles2_gpu_writes_seen;
+
 void ogles2_buffer_cpu(struct OGLES3Context *ctx, struct OGLES3Buffer *b)
 {
     gpu_written(ctx, b);
@@ -1004,6 +1009,7 @@ static ULONG storage_range(struct OGLES3Context *ctx, struct buf_range *r, ULONG
     if (!(a = ogles2_buffer_words(ctx, r->b)))
         return 0;
     r->b->cs_written = TRUE;
+    ogles2_gpu_writes_seen = TRUE;
     *size = r->b->size - r->offset;
     if (r->size && r->size < *size)
         *size = r->size;
@@ -1046,6 +1052,7 @@ ULONG ogles2_buffer_storage_draw(struct OGLES3Context *ctx, BOOL atomic, ULONG i
     if (!r->b || r->offset >= r->b->size || !(a = ogles2_buffer_words(ctx, r->b)))
         return 0;
     r->b->xfb_job = ctx->job_serial;
+    ogles2_gpu_writes_seen = TRUE;
     *size = r->b->size - r->offset;
     if (r->size && r->size < *size)
         *size = r->size;
@@ -1099,8 +1106,10 @@ GLenum ogles2_buffer_draw_indirect(struct OGLES3Context *ctx, GLintptr offset, U
 ULONG ogles2_buffer_xfb(struct OGLES3Context *ctx, struct OGLES3Buffer *b)
 {
     ULONG a = ogles2_buffer_words(ctx, b);
-    if (a)
+    if (a) {
         b->xfb_job = ctx->job_serial;
+        ogles2_gpu_writes_seen = TRUE;
+    }
     return a;
 }
 

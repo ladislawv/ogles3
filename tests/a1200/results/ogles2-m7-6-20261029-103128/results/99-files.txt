@@ -1,0 +1,10 @@
+Directory "M7R6:results" on Thursday 29-Oct-26
+00-progress.txt                 112 ----rwed Today     10:31:33
+1-bitmap.txt                   1103 ----rwed Today     10:31:29
+ogles2.log                     5763 ----rwed Today     10:31:33
+2-window.txt                   1103 ----rwed Today     10:31:31
+3-bench.txt                     191 ----rwed Today     10:31:32
+4-bench-cpu.txt                 193 ----rwed Today     10:31:33
+notes.txt                       415 ----rwed Today     10:31:33
+99-files.txt                    392 ----rwed Today     10:31:33
+8 files - 9K bytes - 31 blocks used

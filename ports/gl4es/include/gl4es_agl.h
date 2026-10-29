@@ -1,15 +1,15 @@
 /*
  * The agl* functions of gl4es on AmigaOS 3 (ports/gl4es, agl_os3.c): a
  * program using desktop OpenGL through gl4es includes <GL/gl.h> (gl4es's)
- * and this, and links -lgl4es -logles2 -lm881. The context tags and error
- * codes are ogles2.library's (libraries/ogles2.h).
+ * and this, and links -lgl4es -logles3 -lm881. The context tags and error
+ * codes are ogles3.library's (libraries/ogles3.h, OGLES2_ names too).
  */
 #ifndef GL4ES_AGL_H
 #define GL4ES_AGL_H
 
 #include <exec/types.h>
 #include <utility/tagitem.h>
-#include <libraries/ogles2.h>
+#include <libraries/ogles3.h>
 
 #ifdef __cplusplus
 extern "C" {

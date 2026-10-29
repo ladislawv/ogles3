@@ -1,0 +1,327 @@
+logfile opened on Wed Oct 28 23:48:04 2026
+
+----- Client Initialization -----
+----- Initializing Renderer ----
+-------------------------------
+QKEY found.
+----- Client Initialization Complete -----
+----- R_Init -----
+===== quake3-68k, renderergl2 on ogles2.library =====
+...setting mode 3: 640 480 fullscreen
+...ogles2 context 640x480
+Available modes: '640x480 640x512 720x480 704x513 672x544 800x480 848x480 854x480 768x572 768x576 800x600 960x540 1280x546 1024x768 1025x833 1280x720 1366x768 1400x900 1280x1024 1400x1050 1496x1000 1680x1050 1600x1200 1920x1080 1920x1200 2560x1440'
+... Sys_EventPort at 0x84369e0
+...GL_EXT_occlusion_query_boolean not found
+...GL_NV_read_depth not found
+...GL_NV_read_stencil not found
+...GL_EXT_shadow_samplers not found
+...using GL_OES_standard_derivatives
+...using GL_OES_element_index_uint
+...using GLSL version OpenGL ES GLSL ES 1.00
+------- GLSL_InitGPUShaders -------
+Using GPU vertex animation
+loaded 114 GLSL shaders (48 gen 42 light 24 etc) in  2.31 seconds
+------- R_InitVaos -------
+Initializing Shaders
+
+GL_VENDOR: ogles2.library
+GL_RENDERER: V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM
+GL_VERSION: OpenGL ES 2.0 ogles2.library 1.3
+GL_EXTENSIONS: GL_OES_element_index_uint GL_OES_compressed_ETC1_RGB8_texture GL_EXT_texture_format_BGRA8888 GL_OES_mapbuffer GL_EXT_blend_minmax GL_OES_draw_elements_base_vertex GL_OES_rgb8_rgba8 GL_OES_packed_depth_stencil GL_OES_fbo_render_mipmap GL_EXT_discard_framebuffer GL_OES_texture_npot GL_EXT_read_format_bgra GL_EXT_texture_filter_anisotropic GL_EXT_texture_lod_bias GL_SGIS_texture_lod GL_ARB_texture_mirror_clamp_to_edge GL_OES_standard_derivatives GL_OES_get_program_binary GL_OES_texture_float GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_depth_texture GL_ARB_texture_rectangle GL_EXT_debug_marker GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_s3tc GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_EXT_clip_control GL_EXT_draw_buffers GL_NV_fbo_color_attachments GL_OES_required_internalformat GL_EXT_color_buffer_half_float
+GL_MAX_TEXTURE_SIZE: 4096
+GL_MAX_TEXTURE_IMAGE_UNITS: 16
+
+PIXELFORMAT: color(32-bits) Z(24-bit) stencil(8-bits)
+MODE: 3, 640 x 480 fullscreen hz:60
+GAMMA: software w/ 1 overbright bits
+texturemode: GL_LINEAR_MIPMAP_LINEAR
+picmip: 0
+texture bits: 32
+compiled vertex arrays: disabled
+texenv add: enabled
+compressed textures: disabled
+----- finished R_Init -----
+------ Initializing Sound ------
+Sound disabled.
+--------------------------------
+Try loading dll file M6R5:home/baseq3/ui68k.dll
+Sys_LoadDll(M6R5:home/baseq3/ui68k.dll)... 
+35 arenas parsed
+32 bots parsed
+--- Common Initialization Complete ---
+Hostname: localhost
+IP: 127.0.0.1
+Opening IP socket: 0.0.0.0:27960
+Demo file: demos/four.dm_68
+We are looking in the current search path:
+M6R5:home/baseq3
+Stuff:Quake3-68k-beta10/Quake3-68k-beta10/baseq3
+Stuff:Quake3-68k-beta10/Quake3-68k-beta10/baseq3/pak8.pk3 (9 files)
+Stuff:Quake3-68k-beta10/Quake3-68k-beta10/baseq3/pak7.pk3 (4 files)
+Stuff:Quake3-68k-beta10/Quake3-68k-beta10/baseq3/pak6.pk3 (64 files)
+Stuff:Quake3-68k-beta10/Quake3-68k-beta10/baseq3/pak5.pk3 (7 files)
+Stuff:Quake3-68k-beta10/Quake3-68k-beta10/baseq3/pak4.pk3 (272 files)
+Stuff:Quake3-68k-beta10/Quake3-68k-beta10/baseq3/pak3.pk3 (4 files)
+Stuff:Quake3-68k-beta10/Quake3-68k-beta10/baseq3/pak2.pk3 (148 files)
+Stuff:Quake3-68k-beta10/Quake3-68k-beta10/baseq3/pak1.pk3 (26 files)
+Stuff:Quake3-68k-beta10/Quake3-68k-beta10/baseq3/pak0.pk3 (3539 files)
+
+handle 1: qconsole.log
+handle 2: demos/four.dm_68
+----------------------
+8146 files in pk3 files
+RE_Shutdown( 0 )
+------- R_ShutdownVaos -------
+------- GLSL_ShutdownGPUShaders -------
+Hunk_Clear: reset the hunk ok
+----- R_Init -----
+------- GLSL_InitGPUShaders -------
+Using GPU vertex animation
+loaded 114 GLSL shaders (48 gen 42 light 24 etc) in  1.45 seconds
+------- R_InitVaos -------
+Initializing Shaders
+
+GL_VENDOR: ogles2.library
+GL_RENDERER: V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM
+GL_VERSION: OpenGL ES 2.0 ogles2.library 1.3
+GL_EXTENSIONS: GL_OES_element_index_uint GL_OES_compressed_ETC1_RGB8_texture GL_EXT_texture_format_BGRA8888 GL_OES_mapbuffer GL_EXT_blend_minmax GL_OES_draw_elements_base_vertex GL_OES_rgb8_rgba8 GL_OES_packed_depth_stencil GL_OES_fbo_render_mipmap GL_EXT_discard_framebuffer GL_OES_texture_npot GL_EXT_read_format_bgra GL_EXT_texture_filter_anisotropic GL_EXT_texture_lod_bias GL_SGIS_texture_lod GL_ARB_texture_mirror_clamp_to_edge GL_OES_standard_derivatives GL_OES_get_program_binary GL_OES_texture_float GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_depth_texture GL_ARB_texture_rectangle GL_EXT_debug_marker GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_s3tc GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_EXT_clip_control GL_EXT_draw_buffers GL_NV_fbo_color_attachments GL_OES_required_internalformat GL_EXT_color_buffer_half_float
+GL_MAX_TEXTURE_SIZE: 4096
+GL_MAX_TEXTURE_IMAGE_UNITS: 16
+
+PIXELFORMAT: color(32-bits) Z(24-bit) stencil(8-bits)
+MODE: 3, 640 x 480 fullscreen hz:60
+GAMMA: software w/ 1 overbright bits
+texturemode: GL_LINEAR_MIPMAP_LINEAR
+picmip: 0
+texture bits: 32
+compiled vertex arrays: disabled
+texenv add: enabled
+compressed textures: disabled
+----- finished R_Init -----
+Try loading dll file M6R5:home/baseq3/ui68k.dll
+Sys_LoadDll(M6R5:home/baseq3/ui68k.dll)... 
+35 arenas parsed
+32 bots parsed
+Try loading dll file M6R5:home/baseq3/cgame68k.dll
+Sys_LoadDll(M6R5:home/baseq3/cgame68k.dll)... 
+stitched 0 LoD cracks
+...loaded 3728 faces, 358 meshes, 180 trisurfs, 52 flares
+Failed to load model file models/players/characters/james/lower.md3
+CL_InitCGame: 13.91 seconds
+11 msec to draw all images
+frame:0 all:  6 sv:  0 ev:21511 cl:  2 gm:  0 rf:  0 bk:  4
+frame:1 all: 64 sv:  0 ev:  0 cl: 12 gm:  0 rf:  4 bk: 48
+frame:2 all: 13 sv:  1 ev:  0 cl:  4 gm:  0 rf:  1 bk:  7
+frame:3 all: 11 sv:  0 ev:  0 cl:  3 gm:  0 rf:  1 bk:  7
+frame:4 all:  9 sv:  0 ev:  1 cl:  1 gm:  0 rf:  1 bk:  7
+frame:5 all: 10 sv:  0 ev:  1 cl:  0 gm:  0 rf:  2 bk:  7
+frame:6 all: 10 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  7
+frame:7 all: 10 sv:  0 ev:  0 cl:  1 gm:  0 rf:  2 bk:  7
+frame:8 all: 18 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk: 15
+frame:9 all: 10 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  7
+frame:10 all: 32 sv:  0 ev:  1 cl:  2 gm:  0 rf:  2 bk: 28
+frame:11 all:  8 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  6
+frame:12 all:  9 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  6
+frame:13 all:  8 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  5
+frame:14 all: 10 sv:  0 ev:  0 cl:  3 gm:  0 rf:  1 bk:  6
+frame:15 all:  8 sv:  0 ev:  1 cl:  1 gm:  0 rf:  1 bk:  5
+frame:16 all:  8 sv:  0 ev:  1 cl:  1 gm:  0 rf:  1 bk:  5
+frame:17 all:  8 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  5
+frame:18 all:  8 sv:  0 ev:  0 cl:  3 gm:  0 rf:  0 bk:  5
+frame:19 all:  9 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  7
+frame:20 all:  7 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  5
+frame:21 all:  6 sv:  0 ev:  1 cl:  2 gm:  0 rf:  0 bk:  4
+frame:22 all:  6 sv:  0 ev:  1 cl:  1 gm:  0 rf:  1 bk:  4
+frame:23 all:  6 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  4
+frame:24 all:  5 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  3
+frame:25 all:  6 sv:  0 ev:  1 cl:  2 gm:  0 rf:  0 bk:  4
+frame:26 all:  5 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  3
+frame:27 all:  5 sv:  0 ev:  1 cl:  1 gm:  0 rf:  1 bk:  3
+frame:28 all:  5 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  3
+frame:29 all:  6 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  4
+frame:30 all:  5 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  3
+frame:31 all:  5 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  3
+frame:32 all:  5 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  3
+frame:33 all:  5 sv:  0 ev:  1 cl:  0 gm:  0 rf:  2 bk:  3
+frame:34 all:  6 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  4
+frame:35 all:  5 sv:  0 ev:  1 cl:  0 gm:  0 rf:  1 bk:  4
+frame:36 all:  7 sv:  0 ev:  0 cl:  3 gm:  0 rf:  0 bk:  4
+frame:37 all:  6 sv:  0 ev:  0 cl:  2 gm:  0 rf:  0 bk:  4
+frame:38 all:  6 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  4
+frame:39 all:  8 sv:  0 ev:  0 cl:  3 gm:  0 rf:  1 bk:  4
+frame:40 all:  6 sv:  1 ev:  0 cl:  0 gm:  0 rf:  1 bk:  4
+frame:41 all:  6 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  4
+frame:42 all:  6 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  4
+frame:43 all:  7 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  4
+frame:44 all: 19 sv:  0 ev:  0 cl:  2 gm:  0 rf:  0 bk: 17
+frame:45 all:  7 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  4
+frame:46 all:  8 sv:  0 ev:  0 cl:  3 gm:  0 rf:  0 bk:  5
+frame:47 all:  6 sv:  0 ev:  1 cl:  1 gm:  0 rf:  1 bk:  3
+frame:48 all:  8 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  5
+frame:49 all:  6 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  3
+frame:50 all:  7 sv:  0 ev:  0 cl:  3 gm:  0 rf:  0 bk:  4
+frame:51 all:  6 sv:  0 ev:  0 cl:  2 gm:  0 rf:  0 bk:  4
+frame:52 all:  8 sv:  1 ev:  0 cl:  2 gm:  0 rf:  0 bk:  5
+frame:53 all:  7 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  5
+frame:54 all:  7 sv:  0 ev:  1 cl:  2 gm:  0 rf:  0 bk:  5
+frame:55 all:  7 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  5
+frame:56 all:  7 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  5
+frame:57 all:  7 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  4
+frame:58 all:  8 sv:  0 ev:  0 cl:  3 gm:  0 rf:  1 bk:  4
+frame:59 all: 10 sv:  0 ev:  0 cl:  3 gm:  0 rf:  1 bk:  6
+frame:60 all:  7 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  5
+frame:61 all:  7 sv:  0 ev:  1 cl:  2 gm:  0 rf:  0 bk:  5
+frame:62 all:  8 sv:  0 ev:  0 cl:  1 gm:  0 rf:  2 bk:  5
+frame:63 all:  6 sv:  0 ev:  1 cl:  2 gm:  0 rf:  0 bk:  4
+frame:64 all:  8 sv:  0 ev:  1 cl:  2 gm:  0 rf:  0 bk:  6
+frame:65 all:  6 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  4
+frame:66 all:  7 sv:  0 ev:  1 cl:  1 gm:  0 rf:  1 bk:  5
+frame:67 all:  8 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  5
+frame:68 all:  7 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  5
+frame:69 all:  6 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  4
+frame:70 all:  7 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  4
+frame:71 all:  7 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  5
+frame:72 all:  6 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  4
+frame:73 all:  8 sv:  0 ev:  0 cl:  3 gm:  0 rf:  0 bk:  5
+frame:74 all:  8 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  5
+frame:75 all:  8 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  5
+frame:76 all:  7 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  5
+frame:77 all:  6 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  4
+frame:78 all:  7 sv:  0 ev:  1 cl:  2 gm:  0 rf:  1 bk:  4
+frame:79 all:  6 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  4
+frame:80 all:  8 sv:  0 ev:  0 cl:  4 gm:  0 rf:  0 bk:  4
+frame:81 all:  5 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  3
+frame:82 all:  6 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  4
+frame:83 all:  5 sv:  0 ev:  1 cl:  2 gm:  0 rf:  0 bk:  3
+frame:84 all:  6 sv:  0 ev:  1 cl:  2 gm:  0 rf:  1 bk:  3
+marty^7 almost dodged Thanatar^7's rocket
+frame:85 all:  6 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  4
+frame:86 all:  7 sv:  0 ev:  0 cl:  3 gm:  0 rf:  0 bk:  4
+frame:87 all:  6 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  4
+frame:88 all:  6 sv:  0 ev:  1 cl:  1 gm:  0 rf:  1 bk:  4
+frame:89 all:  8 sv:  0 ev:  1 cl:  1 gm:  0 rf:  2 bk:  5
+frame:90 all:  8 sv:  0 ev:  0 cl:  3 gm:  0 rf:  0 bk:  5
+frame:91 all:  7 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  5
+frame:92 all:  8 sv:  0 ev:  0 cl:  1 gm:  0 rf:  2 bk:  5
+frame:93 all:  7 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  4
+frame:94 all:  8 sv:  0 ev:  0 cl:  3 gm:  0 rf:  0 bk:  5
+frame:95 all:  7 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  4
+frame:96 all:  8 sv:  0 ev:  0 cl:  3 gm:  0 rf:  0 bk:  5
+frame:97 all:  7 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  4
+frame:98 all:  7 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  5
+frame:99 all:  7 sv:  0 ev:  1 cl:  2 gm:  0 rf:  0 bk:  5
+frame:100 all: 11 sv:  0 ev:  0 cl:  4 gm:  0 rf:  1 bk:  6
+frame:101 all:  8 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  5
+frame:102 all:  9 sv:  0 ev:  0 cl:  3 gm:  0 rf:  1 bk:  5
+frame:103 all:  7 sv:  0 ev:  1 cl:  1 gm:  0 rf:  1 bk:  5
+frame:104 all:  8 sv:  0 ev:  0 cl:  3 gm:  0 rf:  0 bk:  5
+frame:105 all:  7 sv:  1 ev:  0 cl:  2 gm:  0 rf:  0 bk:  4
+frame:106 all:  7 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  4
+frame:107 all:  7 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  4
+frame:108 all:  7 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  4
+frame:109 all:  6 sv:  0 ev:  0 cl:  3 gm:  0 rf:  0 bk:  3
+frame:110 all:  7 sv:  0 ev:  0 cl:  3 gm:  0 rf:  0 bk:  4
+frame:111 all:  7 sv:  0 ev:  0 cl:  3 gm:  0 rf:  1 bk:  3
+frame:112 all:  7 sv:  0 ev:  0 cl:  1 gm:  0 rf:  1 bk:  5
+frame:113 all:  6 sv:  0 ev:  1 cl:  2 gm:  0 rf:  0 bk:  4
+frame:114 all:  7 sv:  0 ev:  1 cl:  1 gm:  0 rf:  1 bk:  5
+frame:115 all:  8 sv:  0 ev:  3 cl:  1 gm:  0 rf:  2 bk:  5
+frame:116 all:  7 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  4
+frame:117 all:  6 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  3
+frame:118 all:  7 sv:  0 ev:  0 cl:  3 gm:  0 rf:  0 bk:  4
+frame:119 all:  8 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  5
+frame:120 all: 10 sv:  0 ev:  0 cl:  4 gm:  0 rf:  1 bk:  5
+frame:121 all:  7 sv:  0 ev:  1 cl:  1 gm:  0 rf:  1 bk:  5
+frame:122 all:  9 sv:  0 ev:  0 cl:  3 gm:  0 rf:  1 bk:  5
+frame:123 all:  8 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  5
+frame:124 all:  7 sv:  0 ev:  1 cl:  1 gm:  0 rf:  1 bk:  5
+frame:125 all:  8 sv:  0 ev:  0 cl:  3 gm:  0 rf:  0 bk:  5
+frame:126 all:  8 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  5
+frame:127 all:  8 sv:  0 ev:  1 cl:  2 gm:  0 rf:  1 bk:  5
+frame:128 all:  8 sv:  0 ev:  0 cl:  3 gm:  0 rf:  0 bk:  5
+frame:129 all:  8 sv:  0 ev:  0 cl:  4 gm:  0 rf:  0 bk:  4
+frame:130 all:  8 sv:  0 ev:  0 cl:  3 gm:  0 rf:  0 bk:  5
+frame:131 all:  7 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  4
+frame:132 all:  8 sv:  0 ev:  0 cl:  3 gm:  0 rf:  0 bk:  5
+frame:133 all:  6 sv:  0 ev:  1 cl:  2 gm:  0 rf:  0 bk:  4
+frame:134 all:  7 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  4
+frame:135 all:  8 sv:  0 ev:  0 cl:  1 gm:  0 rf:  2 bk:  5
+frame:136 all:  8 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  5
+frame:137 all:  8 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  5
+frame:138 all:  9 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  6
+frame:139 all:  9 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  6
+^2F^7red^2o^7 was gunned down by THEINDIGO^7
+frame:140 all: 14 sv:  0 ev:  1 cl:  5 gm:  0 rf:  2 bk:  7
+frame:141 all: 13 sv:  0 ev:  0 cl:  3 gm:  0 rf:  1 bk:  9
+frame:142 all: 11 sv:  0 ev:  0 cl:  3 gm:  0 rf:  1 bk:  7
+frame:143 all: 12 sv:  0 ev:  0 cl:  4 gm:  0 rf:  1 bk:  7
+frame:144 all: 11 sv:  0 ev:  0 cl:  3 gm:  0 rf:  1 bk:  7
+frame:145 all: 10 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  7
+frame:146 all: 10 sv:  0 ev:  1 cl:  2 gm:  0 rf:  1 bk:  7
+frame:147 all: 10 sv:  0 ev:  1 cl:  2 gm:  0 rf:  1 bk:  7
+frame:148 all: 12 sv:  0 ev:  1 cl:  4 gm:  0 rf:  1 bk:  7
+frame:149 all: 10 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  7
+frame:150 all: 11 sv:  0 ev:  0 cl:  4 gm:  0 rf:  1 bk:  6
+frame:151 all:  9 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  6
+frame:152 all: 10 sv:  0 ev:  0 cl:  4 gm:  0 rf:  0 bk:  6
+frame:153 all:  9 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  6
+frame:154 all: 10 sv:  0 ev:  0 cl:  2 gm:  0 rf:  2 bk:  6
+frame:155 all:  9 sv:  0 ev:  1 cl:  3 gm:  0 rf:  0 bk:  6
+frame:156 all: 10 sv:  0 ev:  0 cl:  3 gm:  0 rf:  1 bk:  6
+frame:157 all: 10 sv:  0 ev:  0 cl:  4 gm:  0 rf:  0 bk:  6
+frame:158 all: 10 sv:  0 ev:  0 cl:  5 gm:  0 rf:  0 bk:  5
+frame:159 all:  9 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  6
+frame:160 all: 10 sv:  0 ev:  0 cl:  2 gm:  0 rf:  2 bk:  6
+frame:161 all:  9 sv:  0 ev:  0 cl:  4 gm:  0 rf:  0 bk:  5
+frame:162 all:  9 sv:  0 ev:  0 cl:  1 gm:  0 rf:  2 bk:  6
+frame:163 all:  8 sv:  0 ev:  1 cl:  2 gm:  0 rf:  1 bk:  5
+frame:164 all:  9 sv:  0 ev:  1 cl:  4 gm:  0 rf:  0 bk:  5
+frame:165 all:  8 sv:  0 ev:  0 cl:  1 gm:  0 rf:  2 bk:  5
+frame:166 all:  8 sv:  0 ev:  1 cl:  3 gm:  0 rf:  0 bk:  5
+frame:167 all:  8 sv:  0 ev:  0 cl:  1 gm:  0 rf:  2 bk:  5
+frame:168 all: 14 sv:  0 ev:  0 cl:  7 gm:  0 rf:  2 bk:  5
+frame:169 all:  9 sv:  1 ev:  0 cl:  3 gm:  0 rf:  0 bk:  5
+frame:170 all:  9 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  6
+frame:171 all:  8 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  5
+frame:172 all:  9 sv:  0 ev:  1 cl:  3 gm:  0 rf:  0 bk:  6
+frame:173 all:  8 sv:  0 ev:  0 cl:  1 gm:  0 rf:  2 bk:  5
+frame:174 all:  8 sv:  0 ev:  1 cl:  2 gm:  0 rf:  0 bk:  6
+frame:175 all:  9 sv:  1 ev:  0 cl:  2 gm:  0 rf:  0 bk:  6
+Willits^7 ate Asuka^7's rocket
+frame:176 all: 10 sv:  0 ev:  0 cl:  3 gm:  0 rf:  2 bk:  5
+frame:177 all:  9 sv:  0 ev:  0 cl:  3 gm:  0 rf:  1 bk:  5
+frame:178 all: 10 sv:  0 ev:  0 cl:  2 gm:  0 rf:  2 bk:  6
+frame:179 all:  9 sv:  0 ev:  0 cl:  3 gm:  0 rf:  1 bk:  5
+frame:180 all:  9 sv:  0 ev:  0 cl:  3 gm:  0 rf:  1 bk:  5
+frame:181 all:  9 sv:  0 ev:  1 cl:  3 gm:  0 rf:  1 bk:  5
+frame:182 all:  9 sv:  0 ev:  0 cl:  2 gm:  0 rf:  2 bk:  5
+frame:183 all:  9 sv:  0 ev:  1 cl:  3 gm:  0 rf:  1 bk:  5
+frame:184 all:  9 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  6
+frame:185 all:  9 sv:  0 ev:  0 cl:  2 gm:  0 rf:  2 bk:  5
+frame:186 all:  9 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  6
+frame:187 all:  9 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  6
+frame:188 all:  8 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  5
+frame:189 all: 10 sv:  0 ev:  1 cl:  3 gm:  0 rf:  1 bk:  5
+frame:190 all:  7 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  4
+frame:191 all:  7 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  4
+frame:192 all:  9 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  6
+frame:193 all: 11 sv:  1 ev:  0 cl:  2 gm:  0 rf:  1 bk:  7
+frame:194 all: 12 sv:  0 ev:  1 cl:  3 gm:  0 rf:  1 bk:  8
+frame:195 all: 11 sv:  0 ev:  0 cl:  1 gm:  0 rf:  2 bk:  8
+frame:196 all: 14 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk: 11
+frame:197 all: 11 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  8
+frame:198 all: 10 sv:  0 ev:  0 cl:  2 gm:  0 rf:  1 bk:  7
+frame:199 all: 10 sv:  0 ev:  0 cl:  3 gm:  0 rf:  1 bk:  6
+Wrote screenshots/shot0000.tga
+Thanatar^7 was machinegunned by Duffy^7
+frame:200 all:226 sv:  0 ev:  1 cl:  2 gm:  0 rf:  1 bk:223
+frame:201 all:  9 sv:  0 ev:  1 cl:  1 gm:  0 rf:  1 bk:  7
+----- Client Shutdown (Client quit) -----
+RE_Shutdown( 1 )
+------- R_ShutdownVaos -------
+------- GLSL_ShutdownGPUShaders -------
+GLimp_Shutdown: input
+GLimp_Shutdown: the context
+GLimp_Shutdown: done
+Hunk_Clear: reset the hunk ok
+-----------------------

@@ -102,11 +102,12 @@ BOOL ogles2_state_dither(struct OGLES3Context *ctx)
 static void set_cap(struct OGLES3Context *ctx, GLenum cap, int on)
 {
     ULONG bit;
-    if (!ogles2_context_valid(ctx) || ogles2_debug_cap(ctx, cap, on, 0)) /* KHR_debug's two */
+    if (!ogles2_context_valid(ctx))
         return;
     bit = cap_bit(ctx, cap);
     if (!bit) {
-        ogles2_error(ctx, GL_INVALID_ENUM);
+        if (!ogles2_debug_cap(ctx, cap, on, 0)) /* KHR_debug's two: asked only for a cap not above */
+            ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
     if (!(ctx->state.caps & bit) == !on)

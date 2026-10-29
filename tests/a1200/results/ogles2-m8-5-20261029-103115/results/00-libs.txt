@@ -1,0 +1,8 @@
+Directory "LIBS:" on Thursday 29-Oct-26
+ogles3.library.beta1         434988 ----rwed Yesterday 20:47:28
+ogles3.library               435444 ----rwed Today     10:19:56
+2 files - 850K bytes - 1703 blocks used
+
+Directory "LIBS:" on Thursday 29-Oct-26
+v3dglslc3                  19041020 ----rwed Yesterday 20:47:28
+1 file - 18M bytes - 37191 blocks used

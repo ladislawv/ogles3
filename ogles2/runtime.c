@@ -10,11 +10,18 @@
  * at a time cost every draw microseconds (its 264-byte texture table alone,
  * M6's tests/perf/emuspeed). */
 #define ALIGNED(a, b) ((((unsigned long)(a) | (unsigned long)(b)) & 3) == 0)
+/* Two addresses the same bytes away from a long word: the leading bytes
+ * first make both aligned (the m68k ABI aligns structures to 2, so a stack
+ * copy or clear is often 2 bytes off). */
+#define SAME_PHASE(a, b) ((((unsigned long)(a) ^ (unsigned long)(b)) & 3) == 0)
 
 void *memcpy(void *dst, const void *src, size_t n)
 {
     unsigned char *d = dst;
     const unsigned char *s = src;
+    if (n >= 8 && SAME_PHASE(d, s))
+        for (; (unsigned long)d & 3; n--)
+            *d++ = *s++;
     if (ALIGNED(d, s)) {
         unsigned long *dl = (unsigned long *)d;
         const unsigned long *sl = (const unsigned long *)s;
@@ -53,6 +60,9 @@ void *memmove(void *dst, const void *src, size_t n)
 void *memset(void *dst, int c, size_t n)
 {
     unsigned char *d = dst;
+    if (n >= 8)
+        for (; (unsigned long)d & 3; n--)
+            *d++ = (unsigned char)c;
     if (ALIGNED(d, 0)) {
         unsigned long v = (unsigned char)c, *dl = (unsigned long *)d;
         v |= v << 8;
@@ -76,6 +86,10 @@ void *memset(void *dst, int c, size_t n)
 int memcmp(const void *a, const void *b, size_t n)
 {
     const unsigned char *x = a, *y = b;
+    if (n >= 8 && SAME_PHASE(x, y))
+        for (; (unsigned long)x & 3; n--, x++, y++)
+            if (*x != *y)
+                return *x - *y;
     if (ALIGNED(x, y)) {
         /* Equal long words skipped; the bytes of the first difference decide. */
         const unsigned long *xl = (const unsigned long *)x, *yl = (const unsigned long *)y;

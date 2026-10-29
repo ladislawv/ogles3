@@ -200,6 +200,12 @@ struct OGLES3Array
     const void *boffset;
     GLsizei bstride, ustride;
     GLuint bdivisor;
+    /* What a draw makes of the format (draw.c, array_fmt): kept while
+     * fmt_key (type, size, normalized, integer; 0 until the first draw) is
+     * the format's. */
+    ULONG fmt_key, fmt_ctype;
+    UWORD fmt_in_bytes, fmt_dst_stride;
+    UBYTE fmt_nconv, fmt_vsize, fmt_vtype, fmt_normalized, fmt_is_signed;
 };
 
 /* ---- program images (program.c, v3dp.c) ----
@@ -605,6 +611,7 @@ struct OGLES3Program
     ULONG var_bits[2];
     BOOL var_a2c;
     struct OGLES3VkTargets var_tg;  /* and the render targets' key fields (variant_key.h) */
+    UBYTE var_f32;                  /* the fragment variant's f32_color_rb (draw: ctx->fb_wide) */
     /* ES 3.0: each uniform block's buffer binding (glUniformBlockBinding;
      * from the image's at link), one per image block. */
     ULONG *block_binding;
@@ -822,6 +829,8 @@ struct OGLES3Context
     UBYTE fb_nrt;                   /* the tile buffer's render targets for it: 1 to 4 */
     struct OGLES3RtFormat fb_rt[OGLES3_MAX_DRAW_BUFFERS]; /* the drawn targets' formats (kind NONE: none) */
     UBYTE fb_soft_blend;            /* a drawn target the tile buffer cannot blend: the shader blends (Mesa) */
+    UBYTE fb_wide;                  /* the drawn targets of 32 bits a channel (F32, INT, UINT): bit i */
+    BOOL vab_moved;                 /* ES 3.1: glVertexAttribBinding gave an attribute another binding once */
     UBYTE draw_rts;                 /* the draw buffers a draw writes (ogles2_draw_clear: those it clears) */
     GLenum default_draw_buffer;     /* glDrawBuffersEXT on the default framebuffer: GL_BACK, GL_NONE */
     /* M6 overlap (job.c): a render submitted and not waited for yet. The
@@ -1157,6 +1166,7 @@ void ogles2_buffer_release(struct OGLES3Context *ctx, struct OGLES3Buffer *b);
  * waited for and taken into its data (never while a draw builds its job);
  * and the address transform feedback writes it at in the open job. */
 void ogles2_buffer_cpu(struct OGLES3Context *ctx, struct OGLES3Buffer *b);
+extern BOOL ogles2_gpu_writes_seen; /* buffer.c: ogles2_buffer_cpu has work only once it is set */
 ULONG ogles2_buffer_xfb(struct OGLES3Context *ctx, struct OGLES3Buffer *b);
 /* xfb.c, ES 3.0's transform feedback (docs/GLES3_PLAN.md stage C item 1):
  * the bound object's indexed bindings (NULL: no memory); whether it is
