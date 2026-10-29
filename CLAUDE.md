@@ -5,7 +5,7 @@ OpenGL ES 2.0 for AmigaOS 3 on the PiStorm's V3D 4.2 GPU (Raspberry Pi 4, Emu68)
 **Read first:** [`CONTRIBUTING.md`](CONTRIBUTING.md) (the handbook: build machine, building,
 testing on the Amiga, conventions, traps) and [`docs/DEVELOPMENT_PLAN.md`](docs/DEVELOPMENT_PLAN.md)
 §13 (status; its "Next" list is the work queue). On branch `gles3` (OpenGL ES 3.0/3.1):
-[`docs/GLES3_PLAN.md`](docs/GLES3_PLAN.md) §1, "Hand-off of 2026-10-27", first; this copy's
+[`docs/GLES3_PLAN.md`](docs/GLES3_PLAN.md), "Hand-off of 2026-10-29" at its top, first (performance work, `tools/perf/`; then §1's "Hand-off of 2026-10-27"); this copy's
 builds go to `~/ogles3-build` (`. ./local.env`, not in git).
 
 ## Build machine

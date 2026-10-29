@@ -26,4 +26,8 @@ $CC $FL -DBENCH_OGLES2 -I"$OGLES2_SDK/include" "$REPO/tests/perf/drawbench.c" -L
     -o "$PKG/bin/drawbench2"
 cp "$B/ogles3.library" "$OGLES2_LIBS/ogles2.library" "$OGLES2_LIBS/v3dglslc" "$PKG/libs/"
 cp "$V/v3dglslc.stripped" "$PKG/libs/v3dglslc3"
-[ -f "${PC_SAMPLE:-$HOME/q3cmp/pcs/pc_sample}" ] && cp "${PC_SAMPLE:-$HOME/q3cmp/pcs/pc_sample}" "$PKG/bin/" || true
+# PC_SAMPLE: the Doom 3 port's PC sampler, for Run-Bench PC=1 (tools/perf/drawbench.sh
+# builds it and gives it here).
+if [ -n "${PC_SAMPLE:-}" ] && [ -f "$PC_SAMPLE" ]; then
+    cp "$PC_SAMPLE" "$PKG/bin/"
+fi

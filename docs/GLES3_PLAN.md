@@ -1,5 +1,66 @@
 # OpenGL ES 3.0 and 3.1 on ogles2.library
 
+**Hand-off of 2026-10-29 (read this first; it continues on another machine
+and with another developer).** The work since 1.0-beta1 is making ogles3
+faster than ogles2 1.3 (the user's goal; §1's "The draw's CPU cost against
+1.3.1" below has every step and figure).
+- **Where it stands:** `tests/perf/drawbench` (one 30 s run compares the
+  libraries call by call): ogles3 is faster than ogles2 for draws whose
+  data repeats (the same draw 7.1 against 11.0 us; after a blend, depth,
+  program or texture change 23-32% faster) and slower for draws whose data
+  is new each time (new matrix and pointers 18.3 against 16.4 us; Quake
+  III's frame by its counts 29.0 against 24.4 us a draw). Quake III: 117
+  fps against 125.5 (1.0-beta1: 105). Calls: glVertexAttribPointer 243
+  against 184 ns, glBufferSubData 1,365 against 1,181, glBufferData 1,599
+  against 1,364, glEnable 307 against 250, glUseProgram 290 against 224.
+- **Next, in order:** (1) the draw on new data (Quake III's): the miss
+  path's per-attribute cost (`copy_array` with its caches' bookkeeping), the
+  index scan (an attempt at one pass, scan and copy fused with the arrays'
+  addresses moved back as for gl_VertexID, measured mixed: client arrays
+  and Quake's mix 1-3% faster, the same draw and new pointers 3-6% slower,
+  not kept; worth a second look with longer runs); (2) the buffer updates
+  and glBufferData (`buffer.c`: `patch_copies`, `drop_copies`); (3) the
+  small calls (VAP's ES 3.1 binding state, set_cap, glUseProgram); (4)
+  Quake III's remaining 0.5 ms a frame by its glue profile (`q3cmp.sh
+  glue`). Then the GLES3 plan's own queue (stage D, the release).
+- **Tools (all in the repository now, in WSL):** `tools/perf/drawbench.sh
+  run|probe TEST|profile TEST|lines DIR FUNC` (drawbench: the table,
+  probe P's stages, the PC sampler's functions in us a call, a function's
+  samples by source line); `tools/perf/q3cmp.sh build|run|glue|probe|pc|shot`
+  (Quake III on both libraries: build both games and packages first, then
+  a pair of runs is 90 s; a package's first run compiles its shaders);
+  `tools/perf/listing.sh FILE.c` (a source file's compile as a listing).
+  `tools/perf/common.sh` says what they need: this copy's `local.env`, the
+  Doom 3 port's checkout for its PC sampler (`DOOM3_REPO`), and
+  `LIBS_INSTALL=1` before one copies the build over `LIBS:ogles3.library`.
+  The Python helpers (hunksyms, libsyms, libprof, hotpc, hotline,
+  cmpprof, dbcmp, tgacmp) say what they do at their tops. Not tried on
+  the A1200 in this form (it was offline when they were written): first
+  run them once and fix what a path or name gets wrong.
+- **Quake III for these comparisons:** github.com/RTyp3r/ioq3-amiga-ogles3
+  (ioq3-amiga with `build_ioq3_ogles3_wsl.sh`, commit 5e6a9ea; clone it to
+  `C:\GitHub\ioq3-amiga` or set `IOQ3_SRC`). Benchmarks run at most 10 s or
+  400 frames a test (the user's rule).
+- **The A1200 as left (2026-10-29):** `LIBS:ogles3.library` a development
+  build (0475f84's, from before the reverted index experiment: put this
+  copy's build there again before measuring), 1.0-beta1's kept as
+  `LIBS:ogles3.library.beta1`; `LIBS:v3dglslc3` is 1.0-beta1's archive's,
+  built from a Mesa tree without patches 0016-0018 (below): replace it with
+  `~/ogles3-build/v3dglslc/v3dglslc.stripped` after a correct build, and
+  rebuild the 1.0-beta1 archive before publishing it; `Install-ogles3 ALL`
+  added the `OGLES3Cache:` assign to `S:User-Startup`.
+- **A new machine's Mesa tree:** after `apply_mesa_patches.sh` check that
+  every patch reports "present" or "applied" (this machine's tree had
+  0015 changed and 0016-0018 missing, and the script stopped at 0015
+  without anyone noticing); then `ninja install`, `build_host.sh`,
+  `replay.py`, `build_m68k.sh` and `tools/v3dglslc/test/compare_v3dp.sh`
+  (34 of 34 identical).
+- **Test packages that ask for no version run in ES 3.1 contexts:** GLES2
+  checks need `OGLES3_CCT_PISTORM_ES_VERSION, 20` (done for `m5_fbo`,
+  `m2_buffers`, `m2_link`); after a draw-path change run `m5-1`, `m7-6`,
+  `m8-5` and `q3cmp.sh shot` (0.15% of pixels differ between any two
+  runs).
+
 **Release 1.0-beta1 of ogles3.library (2026-10-28, the developer's
 decisions):** the work ships as a library of its own, `ogles3.library`
 1.0, beside `ogles2.library` 1.x, in one release (no 2.0/2.1/2.2 split,
