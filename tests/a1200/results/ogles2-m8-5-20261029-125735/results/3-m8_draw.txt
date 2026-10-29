@@ -1,0 +1,206 @@
+ogles2 M8: GLSL ES 3.00 programs drawn in an OpenGL ES 3.0 context
+PASS: flat: the last vertex's blue everywhere (not a blend of red, green and blue)
+PASS: rasterizer discard: a clear and a draw leave the picture as it was
+PASS: block: a uniform block member without a buffer reads zero (0.25, 0.5, 0.75 + 0)
+PASS: block: Extra's index, size, member, offset (glGetActiveUniformBlockiv, glGetActiveUniformsiv)
+PASS: block: Extra at binding 3 from a buffer range (+ 0.25, 0.25, 0, 0)
+PASS: block: a draw before and one after glBufferSubData in one frame
+PASS: block: Extra written through glMapBufferRange, flushed (+ 0.25, 0, 0, 0)
+PASS: block: its buffer deleted, zero again
+PASS: size: textureSize of a 16x8 texture
+PASS: size: textureSize at base level 1 (8x4)
+PASS: vertex id: glDrawArrays from vertex 3 (the last is 5)
+PASS: vertex id: indices 6, 7, 8 as given
+PASS: vertex id: indices 0, 1, 2 with base vertex 6
+PASS: vertex id: 8-bit indices with base vertex 297 (299: past 8 bits)
+PASS: primitive restart: a strip ended by index 0xFFFF
+PASS: draw-time variant: two outputs into one RGBA8 target draw its green
+PASS: a 1.x compiler's file of es3old refused and replaced
+PASS: sampler objects: the texture alone is incomplete (black)
+PASS: sampler objects: a sampler without mipmaps completes it
+PASS: sampler objects: unbound, the texture's own filter
+PASS: sampler objects: a mipmapping sampler makes it incomplete again
+PASS: 2D array: GL_TEXTURE_BINDING_2D_ARRAY
+PASS: 2D array: layers 1 and 2 (green, blue)
+PASS: 2D array: layer 1 replaced (yellow), layer 3 as it was
+PASS: 3D: slices 1 and 3 (green, white)
+PASS: 3D: glGenerateMipmap's level 1 (1x1x2), each slice two of level 0
+PASS: 3D: a 64x64x8 texture's slice 5
+PASS: 3D: its level 1's slice 2 (32x32x4), slices 4 and 5 filtered
+PASS: pixel store: a texel at (2, 1) of a 4-texel row length
+PASS: pixel store: glReadPixels at (1, 2) of a 4-pixel row length, the rest untouched
+PASS: pixel store: layers from images 1 and 2 of 2-row images
+PASS: pixel buffers: a texel from an unpack buffer
+PASS: pixel buffers: the pixel read into a pack buffer
+PASS: pixel buffers: texels copied between buffers
+PASS: vertex array objects: the first's arrays (red)
+PASS: vertex array objects: the second's arrays and element buffer (green)
+PASS: instanced draws: glDrawArraysInstanced, two instances (red, green)
+PASS: instanced draws: glDrawElementsInstanced with a divisor of 2 (both red)
+PASS: instanced draws: divisor 0 again, one instance (the left half, the last vertex's green)
+PASS: vertex formats: GL_INT integers (w the integer 1), an unsigned current value, three half floats
+PASS: vertex formats: GL_SHORT integers, normalized unsigned ints
+PASS: vertex formats: a normalized GL_UNSIGNED_INT_2_10_10_10_REV word
+PASS: vertex formats: a packed type of 3 components is GL_INVALID_OPERATION
+PASS: fences: unsignalled after a draw, no wait without a timeout
+PASS: fences: glClientWaitSync flushes and waits; signalled after
+PASS: fences: nothing outstanding, signalled at once
+PASS: fences: deleting a sync that is none is GL_INVALID_VALUE
+PASS: occlusion queries: a draw passes samples, a triangle off the picture none
+PASS: occlusion queries: one active at a time
+PASS: an empty scissor box: nothing drawn, no samples
+PASS: immutable storage: level 0 (red)
+PASS: immutable storage: base level 1 (green)
+PASS: immutable storage: base level 5 clamped to the last (green)
+PASS: base levels: level 2 alone, base level 2 (green)
+PASS: base levels: mipmapped without level 3: incomplete (black)
+PASS: base levels: levels 2 and 3, mipmapped (green)
+PASS: base levels: base level 3 (blue)
+PASS: base levels: a level 0 not of their chain, base level 2 (green)
+PASS: base levels: textureSize there (2x2)
+PASS: base levels: base level 0 (red)
+PASS: base levels: glGenerateMipmap from base level 1
+PASS: base levels: its chain from level 1 (green)
+PASS: base levels: its level 4, 1x1 (green)
+PASS: base levels: level 0 untouched (red)
+PASS: R and RG formats: GL_R8 (200, 0, 0, 1), GL_RG8 (10, 20, 0, 1)
+PASS: R and RG formats: GL_R16F, GL_RG32F
+PASS: more formats: GL_RGBA8_SNORM (1, 0.5, -1 clamped by the target, 1)
+PASS: more formats: GL_SRGB8_ALPHA8 decoded (188 to 0.5)
+PASS: more formats: GL_RGB10_A2
+PASS: more formats: GL_R11F_G11F_B10F and GL_RGB9_E5 from floats
+PASS: more formats: GL_DEPTH_COMPONENT32F as (d, 0, 0, 1)
+PASS: integer textures: GL_RGBA8UI (10, 20, 30, 255)
+PASS: integer textures: GL_RGBA32UI (40, 50, 60, 255)
+PASS: integer textures: GL_R16I -20 (20, 0, 0, 1)
+PASS: integer textures: a linear filter makes one incomplete (the integer (0, 0, 0, 1))
+PASS: ETC2/EAC: 15 compressed formats listed
+PASS: ETC2/EAC: ETC1 and GL_COMPRESSED_RGB8_ETC2 (255, 2, 2)
+PASS: ETC2/EAC: GL_COMPRESSED_SRGB8_ETC2 decoded (138 to 65)
+PASS: ETC2/EAC: punch-through opaque and transparent
+PASS: ETC2/EAC: R11, RG11 and signed R11
+PASS: ETC2/EAC: GL_COMPRESSED_RGBA8_ETC2_EAC (alpha 130)
+PASS: ETC2/EAC: a compressed 2D array's layers 0 and 1
+PASS: ETC2/EAC: layer 1 replaced by glCompressedTexSubImage3D
+PASS: ETC2/EAC: a compressed 3D texture is GL_INVALID_OPERATION
+PASS: render targets: RGBA32F, RGBA8I and R32UI complete
+PASS: render targets: RGBA32F drawn, read as RGBA/FLOAT
+PASS: render targets: RGBA8I drawn, read as RGBA_INTEGER
+PASS: render targets: R32UI drawn (4000000000, 0, 0, 1)
+PASS: glClearBufferfv: RGBA32F
+PASS: glClearBufferiv: RGBA8I
+PASS: glClearBufferuiv: R32UI
+PASS: glClearBufferfv in the scissor box: RGBA32F
+PASS: software blending: RGBA32F, ONE + ONE
+PASS: software blending: RGBA8I not blended
+PASS: render targets: R8 and RG8
+PASS: render targets: SRGB8_ALPHA8 stored encoded
+PASS: render targets: RGB10_A2
+PASS: render targets: R11F_G11F_B10F and R16F read as floats
+PASS: blending: RG8 reads a destination alpha of 1
+PASS: 32F depth: DEPTH32F_STENCIL8 complete, its depth GL_FLOAT
+PASS: 32F depth: depth and stencil tests against glClearBufferfi's 0.5 and 3
+PASS: rendered textures: 128x128 drawn, then sampled
+PASS: rendered textures: 129x117 drawn, then sampled
+PASS: rendered textures: 99x128 drawn, then sampled
+PASS: mixed clears: RGBA8 beside R32I, stencil cleared in half, colour in a quarter
+PASS: mixed clears: the R32I target the same
+PASS: framebuffers: GL_DEPTH_STENCIL_ATTACHMENT sets depth and stencil
+PASS: framebuffers: glReadPixels from the read binding (red) while drawing into the default one
+PASS: framebuffers: the default framebuffer drawn green
+PASS: framebuffers: glInvalidateFramebuffer of colour and depth-stencil
+PASS: framebuffers: an attachment past the last: GL_INVALID_OPERATION
+PASS: framebuffers: a 2D array's layer 1 drawn blue
+PASS: framebuffers: the array sampled: layer 1 blue
+PASS: framebuffers: the 3D texture sampled: slice 2 green
+PASS: blit: an RGBA8 object scaled twice into the default framebuffer
+PASS: blit: mirrored (green left, red right)
+PASS: blit: RGBA32F into RGBA32F within the scissor box
+PASS: blit: the default framebuffer into an object
+PASS: blit: depth with GL_LINEAR is GL_INVALID_OPERATION
+PASS: 32F depth texture: DEPTH32F_STENCIL8 as depth and stencil is complete
+PASS: 32F depth texture: its stencil kept across a read-back
+PASS: 32F depth texture: as the stencil attachment only
+PASS: renderbuffer resize: cleared again and blitted
+PASS: glCopyTexSubImage3D: into a layer and a slice, errors
+PASS: EXT_frag_depth: gl_FragDepthEXT tested (0.25 passes 0.5, 0.75 does not)
+PASS: EXT_instanced_arrays: an instanced colour in an OES_vertex_array_object object, both draws
+PASS: attachment queries: no storage 0 and GL_NONE; depth and stencil 24 and 8
+PASS: transform feedback: a triangle drawn, 1 primitive written
+PASS: transform feedback: each vertex's v_twice, v_pos and v_id in the buffer
+PASS: transform feedback: GL_RASTERIZER_DISCARD draws nothing
+PASS: transform feedback: two triangles around a pause, the second appended
+PASS: msaa: RGBA8 takes 4 samples
+PASS: msaa: RGBA32F takes none
+PASS: msaa: RGBA32F with samples is GL_INVALID_OPERATION
+PASS: msaa: 2 samples asked, 4 given
+PASS: msaa: complete, GL_SAMPLE_BUFFERS 1 and GL_SAMPLES 4
+PASS: msaa: glReadPixels is GL_INVALID_OPERATION
+PASS: msaa: glCopyTexImage2D is GL_INVALID_OPERATION
+PASS: msaa: resolved by glBlitFramebuffer
+PASS: msaa: inside red, outside clear
+PASS: msaa: a pixel on the edge partly covered (its samples averaged)
+PASS: msaa: a second job over the samples kept, alpha to coverage covering two
+PASS: msaa: a resolve into another rectangle is GL_INVALID_OPERATION
+PASS: msaa: a blit into multisampled renderbuffers is GL_INVALID_OPERATION
+PASS: vertex attribute binding: one interleaved buffer, two relative offsets
+PASS: vertex attribute binding: a binding of stride 0 gives every vertex its first element
+PASS: vertex attribute binding: glVertexBindingDivisor, an element per instance
+PASS: compute: program interface queries (storage block Out, buffer variable dst[], uniform scale)
+PASS: compute: a dispatch without a compute program is refused
+PASS: compute: 4 work groups of 16 write 64 words of a storage buffer
+PASS: compute: glDispatchComputeIndirect, 2 work groups from a buffer, after glBufferSubData
+PASS: compute: an indirect offset not a word's is GL_INVALID_VALUE
+PASS: compute: an indirect command past the buffer's end is refused
+PASS: compute: 65536 work groups is GL_INVALID_VALUE
+PASS: compute: a draw with a compute program is refused
+PASS: compute bounds: a storage store out of range dropped, a shared one kept in its array
+PASS: atomic counters: the queries (buffer binding 2, one counter at offset 4, no location)
+PASS: atomic counters: 64 increments, each value given once, the counter at 164
+PASS: fragment storage: 4096 fragments counted, each storing its count in its pixel's word
+PASS: indirect draws: glDrawArraysIndirect, 2 instances from first 3
+PASS: indirect draws: glDrawElementsIndirect at offset 16, base vertex 3
+PASS: indirect draws: an offset not a word's is GL_INVALID_VALUE
+PASS: indirect draws: a command past the buffer's end is refused
+PASS: indirect draws: vertex array object 0 is refused
+PASS: indirect draws: no indirect buffer is refused
+PASS: two attribute buffers in a vertex array object, glDrawArrays first 1
+PASS: two attribute buffers in a vertex array object, glDrawArraysIndirect
+PASS: uniform locations: a sampler starts at its layout(binding) unit 3
+PASS: uniform locations: layout(location) 7 and 2 as given, an inactive one -1
+PASS: uniform locations: glProgramUniform* on a program not in use
+PASS: uniform locations: glUniform* at an inactive explicit location is ignored
+PASS: uniform locations: a location of no uniform is GL_INVALID_OPERATION
+PASS: uniform locations: a draw with tint and scale set at 7 and 2
+PASS: images: dst at its layout(binding) unit 3, glUniform1i refused
+PASS: images: a dispatch loads src and stores dst (8x8, its sizes)
+PASS: images r32f: texture() returns 4097 and 16385 whole
+PASS: images r32f: imageAtomicExchange returns the old values whole
+PASS: images r32f: imageAtomicExchange stores 4098 and 12290 whole
+PASS: images aoa: img[i][j] reads unit 3i + j
+PASS: vertex arrays: buffers deleted while held, then replaced, freed once
+PASS: multisample textures: 0 samples is GL_INVALID_VALUE
+PASS: multisample textures: RGBA32F offers no samples
+PASS: multisample textures: 3 samples give 4, the size and fixed locations as given
+PASS: multisample textures: no sampler state
+PASS: multisample textures: attached at level 1 is GL_INVALID_VALUE
+PASS: multisample textures: complete, and not with fixed locations mixed
+PASS: multisample textures: sample 0 at (0.375, 0.125)
+PASS: multisample textures: a 4x clear's samples 0 and 3 read by texelFetch, textureSize 16
+PASS: pipelines: glCreateShaderProgramv links separable one-stage programs (v_col and gl_Position out)
+PASS: pipelines: a generated name is no object until bound
+PASS: pipelines: bound, and not valid with mismatched interfaces
+PASS: pipelines: valid with matching interfaces, its stages' programs
+PASS: pipelines: no such program is GL_INVALID_VALUE
+PASS: pipelines: a draw with two programs, the fragment one's uniform set by glProgramUniform4f
+PASS: pipelines: a draw with a vertex-only program is refused
+PASS: pipelines: deleted
+PASS: no GL error left over
+PASS: 32-bit samplers and alpha to coverage: a 4x MSAA context
+PASS: 32-bit samplers: a float texture read right
+PASS: alpha to coverage: alpha 0.5 covers half the samples
+PASS: both: a float texture with alpha to coverage
+PASS: neither: an RGBA8 texture covers every sample
+PASS: texture swizzle: (b, 0, 1, r)
+PASS: no GL error left over (4x MSAA)
+PASSED: 204 of 204

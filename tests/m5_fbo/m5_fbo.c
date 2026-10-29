@@ -611,8 +611,12 @@ int main(void)
     }
     bm = AllocBitMap(W, H, 32, BMF_MINPLANES | BMF_SPECIALFMT | SHIFT_PIXFMT(PIXFMT_BGRA32), 0);
     before = AvailMem(MEMF_ANY);
+    /* GLES2's rules, which these checks are of (separate depth and stencil
+     * renderbuffers, INCOMPLETE_DIMENSIONS, ...): a context asked for no
+     * version is OpenGL ES 3.1 */
     if (!bm || !(ctx = aglCreateContextTags2(&err, OGLES3_CCT_BITMAP, (ULONG)bm, OGLES3_CCT_DEPTH, 24,
-                                             OGLES3_CCT_STENCIL, 8, TAG_DONE))) {
+                                             OGLES3_CCT_STENCIL, 8, OGLES3_CCT_PISTORM_ES_VERSION, 20,
+                                             TAG_DONE))) {
         printf("FAIL: create a bitmap context (error %lu)\n", (unsigned long)err);
         return 20;
     }

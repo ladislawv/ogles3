@@ -20,6 +20,7 @@
  */
 #include <exec/memory.h>
 #include <proto/exec.h>
+#include <stddef.h>
 #include <string.h>
 #include "ogles2_internal.h"
 #include "v3d_context.h"
@@ -60,6 +61,7 @@ struct OGLES3Buffer
     ULONG size;
     UBYTE *data;             /* shadow, AllocVec'd; NULL while size is 0 */
     ULONG serial;            /* bumped on every change of the data */
+    ULONG uid;               /* unique to it among the library's buffers (ogles2_buffer_serial) */
     BOOL bound_once;         /* a buffer object exists once bound (GLES 2.0 2.9) */
     BOOL mapped;             /* OES_mapbuffer: glMapBufferOES handed out the shadow */
     ULONG map_offset, map_length; /* the mapping (ES 3.0's glMapBufferRange; OES's: all of it) */
@@ -142,8 +144,17 @@ static void drop_words(struct OGLES3Context *ctx, struct OGLES3Buffer *b)
  * words (transform feedback), that job is rendered and waited for, and the
  * words are copied back into the shadow (docs/GLES3_PLAN.md §5 item 1).
  * Never while a draw builds its job: draws call it before (arrays_ok,
- * ogles2_buffer_indices). */
-static void gpu_written(struct OGLES3Context *ctx, struct OGLES3Buffer *b)
+ * ogles2_buffer_indices). The test inline, the work in gpu_written_now:
+ * draws ask for every buffer they read, and almost none has work. */
+static void gpu_written_now(struct OGLES3Context *ctx, struct OGLES3Buffer *b);
+
+static inline void gpu_written(struct OGLES3Context *ctx, struct OGLES3Buffer *b)
+{
+    if (b && (b->xfb_job || b->cs_written))
+        gpu_written_now(ctx, b);
+}
+
+static __attribute__((noinline)) void gpu_written_now(struct OGLES3Context *ctx, struct OGLES3Buffer *b)
 {
     struct OGLES3Context *user;
     ULONG i, n, len;
@@ -227,12 +238,22 @@ void ogles2_buffers_free(struct OGLES3Context *ctx)
 /* ---- names and binding ---- */
 
 /* The binding of `target` (ES 3.0's in ES3 contexts only); NULL: none. */
-static struct OGLES3Buffer **slot(struct OGLES3Context *ctx, struct OGLES3BufState *bs, GLenum target)
+static __attribute__((noinline)) struct OGLES3Buffer **slot_es3(struct OGLES3Context *ctx, struct OGLES3BufState *bs,
+                                                                 GLenum target);
+
+/* GLES2's two targets inline, ES 3's in slot_es3 (buffer updates and
+ * binds ask for every call; tests/perf/drawbench). */
+static inline struct OGLES3Buffer **slot(struct OGLES3Context *ctx, struct OGLES3BufState *bs, GLenum target)
 {
     if (target == GL_ARRAY_BUFFER)
         return &bs->array;
     if (target == GL_ELEMENT_ARRAY_BUFFER)
         return &bs->element;
+    return slot_es3(ctx, bs, target);
+}
+
+static struct OGLES3Buffer **slot_es3(struct OGLES3Context *ctx, struct OGLES3BufState *bs, GLenum target)
+{
     if (!ogles2_es3(ctx))
         return 0;
     switch (target) {
@@ -352,6 +373,17 @@ static BOOL table_room(struct OGLES3BufState *bs, GLuint name)
     return TRUE;
 }
 
+static ULONG next_uid;
+
+/* The head draw.c reads inline (ogles2_internal.h) */
+_Static_assert(offsetof(struct OGLES3Buffer, name) == offsetof(struct OGLES3BufferHead, name) &&
+               offsetof(struct OGLES3Buffer, usage) == offsetof(struct OGLES3BufferHead, usage) &&
+               offsetof(struct OGLES3Buffer, size) == offsetof(struct OGLES3BufferHead, size) &&
+               offsetof(struct OGLES3Buffer, data) == offsetof(struct OGLES3BufferHead, data) &&
+               offsetof(struct OGLES3Buffer, serial) == offsetof(struct OGLES3BufferHead, serial) &&
+               offsetof(struct OGLES3Buffer, uid) == offsetof(struct OGLES3BufferHead, uid),
+               "struct OGLES3Buffer starts with struct OGLES3BufferHead");
+
 static struct OGLES3Buffer *create(struct OGLES3BufState *bs, GLuint name)
 {
     struct OGLES3Buffer *b;
@@ -363,6 +395,9 @@ static struct OGLES3Buffer *create(struct OGLES3BufState *bs, GLuint name)
     }
     b->name = name;
     b->usage = GL_STATIC_DRAW;
+    Forbid(); /* every context's buffers: one counter */
+    b->uid = ++next_uid ? next_uid : ++next_uid;
+    Permit();
     bs->sh->buf[slot] = b;
     return b;
 }
@@ -496,7 +531,8 @@ void ogles2_glBindBuffer(struct OGLES3Context *ctx, GLenum target, GLuint buffer
     if (*at != b) {
         struct OGLES3Buffer *old = *at;
         *at = b;
-        ogles2_buffer_release(ctx, old); /* a vertex array object's deleted element buffer */
+        if (old && old->deleted)
+            ogles2_buffer_release(ctx, old); /* a vertex array object's deleted element buffer */
     }
 }
 
@@ -521,7 +557,8 @@ static void buffer_data(struct OGLES3Context *ctx, GLenum target, GLsizeiptr siz
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
-    if (!valid_usage(ctx, usage)) {
+    if (usage != GL_STREAM_DRAW && usage != GL_DYNAMIC_DRAW && usage != GL_STATIC_DRAW &&
+        !valid_usage(ctx, usage)) { /* GLES2's three without the call */
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
@@ -1403,6 +1440,12 @@ const void *ogles2_buffer_indices(struct OGLES3Context *ctx, ULONG offset, ULONG
  * from into the job's state buffer, as from a client array. NULL for a
  * GL_STATIC_DRAW buffer: draws read its kept GPU copies (ogles2_buffer_copy),
  * which would be made again, whole, after every change. */
+ULONG ogles2_buffer_serial(const struct OGLES3Buffer *b, ULONG *uid)
+{
+    *uid = b->uid;
+    return b->serial;
+}
+
 const UBYTE *ogles2_buffer_stream(const struct OGLES3Buffer *b)
 {
     return b->usage != GL_STATIC_DRAW && b->usage != GL_STATIC_READ && b->usage != GL_STATIC_COPY ? b->data : 0;

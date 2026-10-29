@@ -283,8 +283,10 @@ int main(int argc, char **argv)
         printf("cannot open %s\n", OGLES3NAME);
         return 20;
     }
+    /* GLES2's rules, which these checks are of (transpose, ...): a context
+     * asked for no version is OpenGL ES 3.1 */
     ctx = aglCreateContextTags2(&err, OGLES3_CCT_PISTORM_STATE_ONLY, TRUE,
-                                OGLES3_CCT_DEBUG_SHADER_LOG, TRUE, TAG_DONE);
+                                OGLES3_CCT_DEBUG_SHADER_LOG, TRUE, OGLES3_CCT_PISTORM_ES_VERSION, 20, TAG_DONE);
     if (!ctx) {
         printf("FAIL: create a state-only context (error %lu)\n", (unsigned long)err);
         return 20;

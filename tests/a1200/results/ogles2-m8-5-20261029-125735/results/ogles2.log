@@ -1,0 +1,163 @@
+     1 ogles3.library 1.0 init
+     2 open (count 1)
+     3 GPU submission lock "V3D 4.2 submit" at 0x084E8C00
+     4 device: V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM, clipper granularity 256
+     5 device: GPU-visible RAM (device tree memory): 0x01000000-0x39DFFFFF
+     6 device: GPU-visible RAM (device tree memory): 0x40000000-0x79DFFFFF
+     7 device: memory region "expansion memory" 0x08000020-0x39DFFFFF fast: the GPU reaches it
+     8 device: memory region "expansion memory" 0x01000020-0x07FFFFFF fast: the GPU reaches it
+     9 device: memory region "expansion memory" 0x41000020-0x79DFFFFF fast: the GPU reaches it
+    10 device: memory region "memory" 0x00C00020-0x00C7FFFF fast: OUTSIDE the GPU-visible RAM
+    11 device: memory region "chip memory" 0x00001020-0x001FFFFF chip: OUTSIDE the GPU-visible RAM
+    12 aglCreateContext2: context 0x09231E74, OpenGL ES 3.1, 0x0, state only
+    13 aglDestroyContext: context 0x09231E74: freeing
+    14 aglDestroyContext: context 0x09231E74 (0 frames, 0 dropped, 0 binning blocks added)
+    15 aglCreateContext2: context 0x09231E74, OpenGL ES 3.1, 0x0, state only
+    16 aglDestroyContext: context 0x09231E74: freeing
+    17 aglDestroyContext: context 0x09231E74 (0 frames, 0 dropped, 0 binning blocks added)
+    18 close (count 0)
+    19 open (count 1)
+    20 aglCreateContext2: context 0x09231E74, OpenGL ES 3.1, 0x0, state only
+    21 aglDestroyContext: context 0x09231E74: freeing
+    22 aglDestroyContext: context 0x09231E74 (0 frames, 0 dropped, 0 binning blocks added)
+    23 close (count 0)
+    24 open (count 1)
+    25 display: application bitmap, 64x64, BGRA
+    26 device: context pools for 64x64, D16, 17524864 bytes of GPU memory in use
+    27 aglCreateContext2: context 0x09231E74, OpenGL ES 3.1, 64x64
+    28 compiler: CaffeineOS:Libs/v3dglslc3, 19041020 bytes, id 71566D3E
+    29 compiler: started (0 s)
+    30 compiler: shader compiled in 1260 ms
+    31 compiler: shader compiled in 40 ms
+    32 glLinkProgram: PROGDIR:947c2351709edbca992b76ee.v3dp (5 variants, 576 bytes of code)
+    33 compiler: shader compiled in 20 ms
+    34 compiler: shader compiled in 40 ms
+    35 glLinkProgram: PROGDIR:f3c6850b2bb5699c0a643008.v3dp (5 variants, 704 bytes of code)
+    36 draw: a uniform block without a buffer bound reads zeros (logged once)
+    37 compiler: shader compiled in 20 ms
+    38 compiler: shader compiled in 40 ms
+    39 glLinkProgram: PROGDIR:c87eaa8254810f1fbdb867ef.v3dp (5 variants, 608 bytes of code)
+    40 compiler: shader compiled in 20 ms
+    41 compiler: shader compiled in 40 ms
+    42 glLinkProgram: PROGDIR:710c839589f52928834637f3.v3dp (5 variants, 528 bytes of code)
+    43 compiler: shader compiled in 40 ms
+    44 compiler: shader compiled in 40 ms
+    45 glLinkProgram: PROGDIR:1dd0e85347e838b433996a28.v3dp (5 variants, 584 bytes of code)
+    46 glDrawArrays: no fragment shader variant for 1 render targets (EXT_draw_buffers): the program draws into the first only
+    47 compiler: variants compiled in 200 ms, OGLES3Cache:1dd0e85347e838b433996a28.v3dp
+    48 draw: OGLES3Cache:1dd0e85347e838b433996a28.v3dx (2 variants)
+    49 compiler: shader compiled in 40 ms
+    50 compiler: shader compiled in 40 ms
+    51 compiler: program compiled in 120 ms, OGLES3Cache:ace845f23ae378eb0972ec5b.v3dp
+    52 glLinkProgram: OGLES3Cache:ace845f23ae378eb0972ec5b.v3dp (5 variants, 440 bytes of code)
+    53 compiler: shader compiled in 40 ms
+    54 compiler: shader compiled in 40 ms
+    55 glLinkProgram: PROGDIR:7ee13c2f34ea9e47f6cf8eb4.v3dp (5 variants, 584 bytes of code)
+    56 texture 1 sampled while incomplete (it reads black): mip chain, level 0 2x2, min filter 0x2702, level 1 of 2 missing or inconsistent (logged once a texture)
+    57 compiler: shader compiled in 40 ms
+    58 compiler: shader compiled in 40 ms
+    59 glLinkProgram: PROGDIR:d13b2877eaefd8572762c52b.v3dp (5 variants, 608 bytes of code)
+    60 compiler: shader compiled in 40 ms
+    61 compiler: shader compiled in 40 ms
+    62 glLinkProgram: PROGDIR:0a64825d64d50083847acf29.v3dp (5 variants, 608 bytes of code)
+    63 compiler: shader compiled in 40 ms
+    64 glLinkProgram: PROGDIR:8d106f2d92cf57a4892e9d12.v3dp (5 variants, 600 bytes of code)
+    65 compiler: shader compiled in 40 ms
+    66 glLinkProgram: PROGDIR:cb772cd7474b54e0a13cd0ec.v3dp (5 variants, 600 bytes of code)
+    67 texture 0 sampled while incomplete (it reads black): mip chain, level 0 2x2, min filter 0x2700, level 1 of 2 missing or inconsistent (logged once a texture)
+    68 compiler: shader compiled in 40 ms
+    69 compiler: shader compiled in 40 ms
+    70 glLinkProgram: PROGDIR:81a5cfbf6231f62ffcc7d1c1.v3dp (5 variants, 776 bytes of code)
+    71 compiler: shader compiled in 40 ms
+    72 glLinkProgram: PROGDIR:91177c2a0894fdd030d724cb.v3dp (5 variants, 1016 bytes of code)
+    73 texture 1 sampled while incomplete (it reads black): mip chain, level 0 1x1, min filter 0x2600, level 1 of 1 missing or inconsistent (logged once a texture)
+    74 compiler: shader compiled in 40 ms
+    75 compiler: shader compiled in 40 ms
+    76 glLinkProgram: PROGDIR:cfddd768d4d187a9001fcebd.v3dp (5 variants, 808 bytes of code)
+    77 compiler: variants compiled in 120 ms, OGLES3Cache:cfddd768d4d187a9001fcebd.v3dp
+    78 draw: OGLES3Cache:cfddd768d4d187a9001fcebd.v3dx (2 variants)
+    79 compiler: variants compiled in 120 ms, OGLES3Cache:cfddd768d4d187a9001fcebd.v3dp
+    80 draw: OGLES3Cache:cfddd768d4d187a9001fcebd.v3dx (3 variants)
+    81 glDrawArrays: no fragment shader variant for 1 render targets (EXT_draw_buffers): the program draws into the first only
+    82 compiler: variants compiled in 120 ms, OGLES3Cache:cfddd768d4d187a9001fcebd.v3dp
+    83 draw: OGLES3Cache:cfddd768d4d187a9001fcebd.v3dx (4 variants)
+    84 compiler: shader compiled in 40 ms
+    85 compiler: shader compiled in 40 ms
+    86 compiler: program compiled in 120 ms, OGLES3Cache:48efd16e4dae347258ba73e2.v3dp
+    87 glLinkProgram: OGLES3Cache:48efd16e4dae347258ba73e2.v3dp (5 variants, 512 bytes of code)
+    88 framebuffer 1: tile pools of its own for 128x128
+    89 framebuffer 1: tile pools of its own for 129x117
+    90 framebuffer 1: tile pools of its own for 99x128
+    91 framebuffer 1: tile pools of its own for 128x128
+    92 compiler: variants compiled in 120 ms, OGLES3Cache:cfddd768d4d187a9001fcebd.v3dp
+    93 draw: OGLES3Cache:cfddd768d4d187a9001fcebd.v3dx (5 variants)
+    94 glDrawArrays: no fragment shader variant for 2 render targets (EXT_draw_buffers): the program draws into the first only
+    95 glDrawArrays: no fragment shader variant for 1 render targets (EXT_draw_buffers): the program draws into the first only
+    96 compiler: variants compiled in 120 ms, OGLES3Cache:cfddd768d4d187a9001fcebd.v3dp
+    97 draw: OGLES3Cache:cfddd768d4d187a9001fcebd.v3dx (6 variants)
+    98 compiler: shader compiled in 40 ms
+    99 compiler: shader compiled in 40 ms
+   100 compiler: program compiled in 120 ms, OGLES3Cache:00f4f82319a177abac458406.v3dp
+   101 glLinkProgram: OGLES3Cache:00f4f82319a177abac458406.v3dp (5 variants, 488 bytes of code)
+   102 compiler: shader compiled in 40 ms
+   103 compiler: shader compiled in 40 ms
+   104 compiler: program compiled in 160 ms, OGLES3Cache:f62d1b30495eb55ea5de7226.v3dp
+   105 glLinkProgram: OGLES3Cache:f62d1b30495eb55ea5de7226.v3dp (5 variants, 576 bytes of code)
+   106 compiler: shader compiled in 40 ms
+   107 compiler: shader compiled in 40 ms
+   108 glLinkProgram: PROGDIR:08d3243dff17f57b115a6761.v3dp (7 variants, 1152 bytes of code)
+   109 compiler: variants compiled in 100 ms, OGLES3Cache:cfddd768d4d187a9001fcebd.v3dp
+   110 draw: OGLES3Cache:cfddd768d4d187a9001fcebd.v3dx (7 variants)
+   111 compiler: shader compiled in 20 ms
+   112 glLinkProgram: PROGDIR:26a6e0895d8b3f6fbcec44a0.v3dp (1 variants, 248 bytes of code)
+   113 compiler: shader compiled in 40 ms
+   114 glLinkProgram: PROGDIR:1b42eba65c0537d2aef98b52.v3dp (1 variants, 480 bytes of code)
+   115 compiler: shader compiled in 40 ms
+   116 glLinkProgram: PROGDIR:5a8a3b064d9ae0fac42b920d.v3dp (1 variants, 304 bytes of code)
+   117 compiler: shader compiled in 40 ms
+   118 compiler: shader compiled in 40 ms
+   119 glLinkProgram: PROGDIR:43d750b068bf6eb022579d19.v3dp (5 variants, 1256 bytes of code)
+   120 compiler: shader compiled in 20 ms
+   121 compiler: shader compiled in 40 ms
+   122 glLinkProgram: PROGDIR:5116ed1c921eebce1d33a108.v3dp (5 variants, 752 bytes of code)
+   123 texture 0 sampled while incomplete (it reads black): no GPU copy, level 0 0x0, min filter 0x2702, level 1 of 1 missing or inconsistent (logged once a texture)
+   124 compiler: shader compiled in 40 ms
+   125 glLinkProgram: PROGDIR:cef4a0ba87458bb23b04a9e7.v3dp (1 variants, 696 bytes of code)
+   126 compiler: shader compiled in 40 ms
+   127 glLinkProgram: PROGDIR:ead0cd5be90acf6045dbddb6.v3dp (1 variants, 320 bytes of code)
+   128 compiler: shader compiled in 40 ms
+   129 glLinkProgram: PROGDIR:00e2191ab7dfbb10a67bf15b.v3dp (1 variants, 392 bytes of code)
+   130 compiler: shader compiled in 40 ms
+   131 glLinkProgram: PROGDIR:905e898af755c41a25cf8325.v3dp (1 variants, 1368 bytes of code)
+   132 compiler: shader compiled in 20 ms
+   133 compiler: shader compiled in 40 ms
+   134 glLinkProgram: PROGDIR:203e12054f997455c76a6833.v3dp (5 variants, 896 bytes of code)
+   135 compiler: shader compiled in 40 ms
+   136 compiler: program compiled in 40 ms, OGLES3Cache:5770c8f6a9af1028360bea5d.v3dp
+   137 glLinkProgram: OGLES3Cache:5770c8f6a9af1028360bea5d.v3dp (0 variants, 0 bytes of code)
+   138 compiler: shader compiled in 40 ms
+   139 compiler: program compiled in 40 ms, OGLES3Cache:c54e7214e4afe18e8a41e8eb.v3dp
+   140 glLinkProgram: OGLES3Cache:c54e7214e4afe18e8a41e8eb.v3dp (0 variants, 0 bytes of code)
+   141 compiler: shader compiled in 40 ms
+   142 compiler: program compiled in 40 ms, OGLES3Cache:927e9916aa348e45679851fb.v3dp
+   143 glLinkProgram: OGLES3Cache:927e9916aa348e45679851fb.v3dp (0 variants, 0 bytes of code)
+   144 compiler: program compiled in 120 ms, OGLES3Cache:3513b7da647e902f74c5ce73.v3dp
+   145 draw: OGLES3Cache:3513b7da647e902f74c5ce73.v3dx (5 variants)
+   146 aglDestroyContext: context 0x09231E74: freeing
+   147 device: context freed, 0 bytes of GPU memory still in use
+   148 aglDestroyContext: context 0x09231E74 (153 frames, 0 dropped, 0 binning blocks added)
+   149 timing: 153 jobs, each on average: 3247 us of CPU work before its flush, 7 us waiting for binning, 12 us for the render
+   150 timing: and in each flush 96 us building the render list, 69 us for the CPU cache before the GPU, 38 us after
+   151 display: application bitmap, 64x64, BGRA
+   152 device: context pools for 64x64, D16, 4x MSAA (32x32 tiles), 17524096 bytes of GPU memory in use
+   153 aglCreateContext2: context 0x09231E74, OpenGL ES 3.1, 64x64
+   154 glLinkProgram: PROGDIR:7ee13c2f34ea9e47f6cf8eb4.v3dp (5 variants, 584 bytes of code)
+   155 compiler: variants compiled in 120 ms, OGLES3Cache:7ee13c2f34ea9e47f6cf8eb4.v3dp
+   156 draw: OGLES3Cache:7ee13c2f34ea9e47f6cf8eb4.v3dx (2 variants)
+   157 compiler: variants compiled in 120 ms, OGLES3Cache:7ee13c2f34ea9e47f6cf8eb4.v3dp
+   158 draw: OGLES3Cache:7ee13c2f34ea9e47f6cf8eb4.v3dx (3 variants)
+   159 aglDestroyContext: context 0x09231E74: freeing
+   160 device: context freed, 0 bytes of GPU memory still in use
+   161 aglDestroyContext: context 0x09231E74 (5 frames, 0 dropped, 0 binning blocks added)
+   162 timing: 5 jobs, each on average: 48261 us of CPU work before its flush, 6 us waiting for binning, 14 us for the render
+   163 timing: and in each flush 72 us building the render list, 55 us for the CPU cache before the GPU, 48 us after

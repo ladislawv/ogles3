@@ -99,6 +99,24 @@ BOOL ogles2_state_dither(struct OGLES3Context *ctx)
 
 /* ---- capabilities ---- */
 
+/* The parts of the state (OGLES3_SG_*, draw.c's emit_state) a capability
+ * changes; ALL for one emit_state does not read itself. */
+static ULONG cap_group(GLenum cap)
+{
+    switch (cap) {
+    case GL_CULL_FACE:
+    case GL_DEPTH_TEST:
+    case GL_RASTERIZER_DISCARD:      return OGLES3_SG_CFG;
+    case GL_BLEND:                   return OGLES3_SG_CFG | OGLES3_SG_BLEND;
+    case GL_STENCIL_TEST:            return OGLES3_SG_CFG | OGLES3_SG_STENCIL;
+    case GL_SCISSOR_TEST:            return OGLES3_SG_WIN;
+    case GL_POLYGON_OFFSET_FILL:     return OGLES3_SG_CFG | OGLES3_SG_OFFSET;
+    case GL_SAMPLE_COVERAGE:
+    case GL_SAMPLE_MASK:             return OGLES3_SG_CFG | OGLES3_SG_SAMPLE;
+    default:                         return OGLES3_SG_ALL;
+    }
+}
+
 static void set_cap(struct OGLES3Context *ctx, GLenum cap, int on)
 {
     ULONG bit;
@@ -116,7 +134,7 @@ static void set_cap(struct OGLES3Context *ctx, GLenum cap, int on)
         ctx->state.caps |= bit;
     else
         ctx->state.caps &= ~bit;
-    ctx->state_ver++;
+    OGLES3_STATE_CHANGED(ctx, cap_group(cap));
 }
 
 void ogles2_glEnable(struct OGLES3Context *ctx, GLenum cap)
@@ -151,7 +169,7 @@ void ogles2_glDepthMask(struct OGLES3Context *ctx, GLboolean flag)
 {
     if (ogles2_context_valid(ctx)) {
         ctx->state.depth_mask = flag ? GL_TRUE : GL_FALSE;
-        ctx->state_ver++;
+        OGLES3_STATE_CHANGED(ctx, OGLES3_SG_CFG);
     }
 }
 
@@ -164,7 +182,7 @@ void ogles2_glColorMask(struct OGLES3Context *ctx, GLboolean red, GLboolean gree
     ctx->state.color_mask[1] = green ? GL_TRUE : GL_FALSE;
     ctx->state.color_mask[2] = blue ? GL_TRUE : GL_FALSE;
     ctx->state.color_mask[3] = alpha ? GL_TRUE : GL_FALSE;
-    ctx->state_ver++;
+    OGLES3_STATE_CHANGED(ctx, OGLES3_SG_MASK);
 }
 
 void ogles2_glClearColor(struct OGLES3Context *ctx, GLfloat red, GLfloat green, GLfloat blue,
@@ -202,7 +220,7 @@ void ogles2_glLineWidth(struct OGLES3Context *ctx, GLfloat width)
         return;
     }
     ctx->state.line_width = width;
-    ctx->state_ver++;
+    OGLES3_STATE_CHANGED(ctx, OGLES3_SG_LINE);
 }
 
 void ogles2_glDepthRangef(struct OGLES3Context *ctx, GLfloat n, GLfloat f)
@@ -211,7 +229,7 @@ void ogles2_glDepthRangef(struct OGLES3Context *ctx, GLfloat n, GLfloat f)
         return;
     ctx->state.depth_range[0] = clamp01(n);
     ctx->state.depth_range[1] = clamp01(f);
-    ctx->state_ver++;
+    OGLES3_STATE_CHANGED(ctx, OGLES3_SG_VIEW);
 }
 
 /* EXT_clip_control (M7, docs/M7_EXTENSIONS_PLAN.md step 4): the window
@@ -228,7 +246,7 @@ void ogles2_glClipControlEXT(struct OGLES3Context *ctx, GLenum origin, GLenum de
     }
     ctx->state.clip_origin = origin;
     ctx->state.clip_depth = depth;
-    ctx->state_ver++;
+    OGLES3_STATE_CHANGED(ctx, OGLES3_SG_VIEW | OGLES3_SG_CFG);
 }
 
 void ogles2_glPolygonOffset(struct OGLES3Context *ctx, GLfloat factor, GLfloat units)
@@ -237,7 +255,7 @@ void ogles2_glPolygonOffset(struct OGLES3Context *ctx, GLfloat factor, GLfloat u
         return;
     ctx->state.polygon_offset_factor = factor;
     ctx->state.polygon_offset_units = units;
-    ctx->state_ver++;
+    OGLES3_STATE_CHANGED(ctx, OGLES3_SG_OFFSET);
 }
 
 void ogles2_glSampleCoverage(struct OGLES3Context *ctx, GLfloat value, GLboolean invert)
@@ -246,7 +264,7 @@ void ogles2_glSampleCoverage(struct OGLES3Context *ctx, GLfloat value, GLboolean
         return;
     ctx->state.sample_coverage_value = clamp01(value);
     ctx->state.sample_coverage_invert = invert ? GL_TRUE : GL_FALSE;
-    ctx->state_ver++; /* the sample mask with 4x MSAA (draw.c) */
+    OGLES3_STATE_CHANGED(ctx, OGLES3_SG_CFG | OGLES3_SG_SAMPLE); /* the sample mask with 4x MSAA (draw.c) */
 }
 
 /* ES 3.1: the sample mask's word maskNumber (one word: 4 samples). */
@@ -259,7 +277,7 @@ void ogles2_glSampleMaski(struct OGLES3Context *ctx, GLuint maskNumber, GLbitfie
         return;
     }
     ctx->state.sample_mask = mask;
-    ctx->state_ver++;
+    OGLES3_STATE_CHANGED(ctx, OGLES3_SG_CFG | OGLES3_SG_SAMPLE);
 }
 
 /* ES 3.1: sample i's position in the pixel, in the draw framebuffer (Mesa's
@@ -439,7 +457,7 @@ void ogles2_glCullFace(struct OGLES3Context *ctx, GLenum mode)
         return;
     }
     ctx->state.cull_face_mode = mode;
-    ctx->state_ver++;
+    OGLES3_STATE_CHANGED(ctx, OGLES3_SG_CFG);
 }
 
 void ogles2_glFrontFace(struct OGLES3Context *ctx, GLenum mode)
@@ -451,7 +469,7 @@ void ogles2_glFrontFace(struct OGLES3Context *ctx, GLenum mode)
         return;
     }
     ctx->state.front_face = mode;
-    ctx->state_ver++;
+    OGLES3_STATE_CHANGED(ctx, OGLES3_SG_CFG);
 }
 
 /* AmigaOS 4's glPolygonMode: triangles drawn as their edges or corners
@@ -472,7 +490,7 @@ void ogles2_glPolygonMode(struct OGLES3Context *ctx, GLenum face, GLenum mode)
         return;
     }
     ctx->state.polygon_mode = mode;
-    ctx->state_ver++;
+    OGLES3_STATE_CHANGED(ctx, OGLES3_SG_CFG);
 }
 
 /* AmigaOS 4's glProvokingVertex (EXT_provoking_vertex): the vertex a flat
@@ -487,7 +505,7 @@ void ogles2_glProvokingVertex(struct OGLES3Context *ctx, GLenum mode)
         return;
     }
     ctx->state.provoking_vertex = mode;
-    ctx->state_ver++;
+    OGLES3_STATE_CHANGED(ctx, OGLES3_SG_CFG);
 }
 
 void ogles2_glDepthFunc(struct OGLES3Context *ctx, GLenum func)
@@ -499,7 +517,7 @@ void ogles2_glDepthFunc(struct OGLES3Context *ctx, GLenum func)
         return;
     }
     ctx->state.depth_func = func;
-    ctx->state_ver++;
+    OGLES3_STATE_CHANGED(ctx, OGLES3_SG_CFG);
 }
 
 static int blend_factor_ok(GLenum f, int is_dst, BOOL es3)
@@ -534,7 +552,7 @@ void ogles2_glBlendFuncSeparate(struct OGLES3Context *ctx, GLenum srcRGB, GLenum
     s->blend_dst_rgb = dstRGB;
     s->blend_src_alpha = srcAlpha;
     s->blend_dst_alpha = dstAlpha;
-    ctx->state_ver++;
+    OGLES3_STATE_CHANGED(ctx, OGLES3_SG_BLEND);
 }
 
 void ogles2_glBlendFunc(struct OGLES3Context *ctx, GLenum sfactor, GLenum dfactor)
@@ -558,7 +576,7 @@ void ogles2_glBlendEquationSeparate(struct OGLES3Context *ctx, GLenum modeRGB, G
     }
     ctx->state.blend_eq_rgb = modeRGB;
     ctx->state.blend_eq_alpha = modeAlpha;
-    ctx->state_ver++;
+    OGLES3_STATE_CHANGED(ctx, OGLES3_SG_BLEND);
 }
 
 void ogles2_glBlendEquation(struct OGLES3Context *ctx, GLenum mode)
@@ -577,7 +595,7 @@ void ogles2_glBlendColor(struct OGLES3Context *ctx, GLfloat red, GLfloat green, 
     c[1] = clamp01(green);
     c[2] = clamp01(blue);
     c[3] = clamp01(alpha);
-    ctx->state_ver++;
+    OGLES3_STATE_CHANGED(ctx, OGLES3_SG_BLEND);
 }
 
 /* ---- stencil ---- */
@@ -605,7 +623,7 @@ void ogles2_glStencilFuncSeparate(struct OGLES3Context *ctx, GLenum face, GLenum
             ctx->state.stencil_ref[i] = ref;
             ctx->state.stencil_value_mask[i] = mask;
         }
-    ctx->state_ver++;
+    OGLES3_STATE_CHANGED(ctx, OGLES3_SG_STENCIL | OGLES3_SG_CFG);
 }
 
 void ogles2_glStencilFunc(struct OGLES3Context *ctx, GLenum func, GLint ref, GLuint mask)
@@ -625,7 +643,7 @@ void ogles2_glStencilMaskSeparate(struct OGLES3Context *ctx, GLenum face, GLuint
     for (i = 0; i < 2; i++)
         if (f & (1 << i))
             ctx->state.stencil_write_mask[i] = mask;
-    ctx->state_ver++;
+    OGLES3_STATE_CHANGED(ctx, OGLES3_SG_STENCIL | OGLES3_SG_CFG);
 }
 
 void ogles2_glStencilMask(struct OGLES3Context *ctx, GLuint mask)
@@ -661,7 +679,7 @@ void ogles2_glStencilOpSeparate(struct OGLES3Context *ctx, GLenum face, GLenum s
             ctx->state.stencil_zfail[i] = dpfail;
             ctx->state.stencil_zpass[i] = dppass;
         }
-    ctx->state_ver++;
+    OGLES3_STATE_CHANGED(ctx, OGLES3_SG_STENCIL | OGLES3_SG_CFG);
 }
 
 void ogles2_glStencilOp(struct OGLES3Context *ctx, GLenum fail, GLenum zfail, GLenum zpass)

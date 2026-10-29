@@ -1,0 +1,17 @@
+Directory "M5R1:results" on Thursday 29-Oct-26
+00-progress.txt                 148 ----rwed Today     12:58:22
+1-fbo.txt                      2949 ----rwed Today     12:58:19
+ogles2.log                    19435 ----rwed Today     12:58:22
+1-stress-100k.txt               347 ----rwed Today     12:58:20
+1-depth.txt                     821 ----rwed Today     12:58:20
+1-setbitmap.txt                 789 ----rwed Today     12:58:20
+2-buffers.txt                  1959 ----rwed Today     12:58:20
+3-elements.txt                 1835 ----rwed Today     12:58:20
+4-link.txt                     4447 ----rwed Today     12:58:20
+5-texture.txt                  2418 ----rwed Today     12:58:20
+6-draw.txt                     1870 ----rwed Today     12:58:21
+7-share.txt                    1292 ----rwed Today     12:58:21
+7-tasks.txt                     620 ----rwed Today     12:58:22
+notes.txt                       366 ----rwed Today     12:58:22
+99-files.txt                    784 ----rwed Today     12:58:22
+15 files - 39K bytes - 99 blocks used

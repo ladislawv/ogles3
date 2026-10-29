@@ -5819,8 +5819,23 @@ static UBYTE wrap_mode(GLenum w)
 /* What a draw samples for t: t, or the view of its base level (chain_base;
  * Mesa lays a new resource out from the base level so), made again after
  * a change or for another base level, with t's parameters. */
-static struct OGLES3Texture *based_view(struct OGLES3Context *ctx, struct OGLES3TexState *ts,
-                                        struct OGLES3Texture *t)
+static struct OGLES3Texture *based_view_now(struct OGLES3Context *ctx, struct OGLES3TexState *ts,
+                                            struct OGLES3Texture *t);
+
+/* Inline the common case (no view, and chain_base 0 for its first reasons:
+ * a texture of GLES2's rules, immutable levels, base level 0): every
+ * sampler of every draw asks. */
+static inline struct OGLES3Texture *based_view(struct OGLES3Context *ctx, struct OGLES3TexState *ts,
+                                               struct OGLES3Texture *t)
+{
+    if (!t->view && (!t->es3_rules || t->immutable_levels || t->base_level <= 0))
+        return t;
+    return based_view_now(ctx, ts, t);
+}
+
+static __attribute__((noinline)) struct OGLES3Texture *based_view_now(struct OGLES3Context *ctx,
+                                                                      struct OGLES3TexState *ts,
+                                                                      struct OGLES3Texture *t)
 {
     struct OGLES3Texture *v = t->view;
     int b = chain_base(t), n, k, l;
@@ -5880,8 +5895,37 @@ static struct OGLES3Texture *based_view(struct OGLES3Context *ctx, struct OGLES3
  * kind, written into the job's state buffer (packing as PiStorm3D's
  * v3d_texture_emit_state; values as Mesa's v3dx_state.c). FALSE: out of
  * memory. */
+static __attribute__((noinline)) BOOL texture_state_build(struct OGLES3Context *ctx, int unit, int kind,
+                                                          ULONG *tex_state, ULONG *sampler_state);
+
+/* The records of the last draw with the unit's texture when they still
+ * hold (the check below, again, at texture_state_build's start); else
+ * texture_state_build. A small function for the common case: the big one's
+ * prologue and epilogue cost every sampler of every draw
+ * (tests/perf/drawbench). */
 BOOL ogles2_texture_state(struct OGLES3Context *ctx, int unit, int kind, ULONG *tex_state,
                           ULONG *sampler_state)
+{
+    struct OGLES3TexState *ts = ctx->tex;
+    struct OGLES3Texture *t;
+    struct OGLES3Sampler *so;
+    if (ts && kind != OGLES3_TEX_NONE && !(ctx->probe & OGLES3_PROBE_CPU_UPLOAD)) {
+        so = ts->unitsmp[unit];
+        t = based_view(ctx, ts, unit_texture(ts, kind, unit));
+        if (t->gpu && (t->st_own || (t->st_gen == g_v3d_cl_generation && t->st_ctx == ctx)) &&
+            t->st_mem == t->gpu->texture_mem.hostptr && t->st_pver == t->pver &&
+            t->st_sver == (so ? so->ver : 0)) {
+            t->used_serial = ctx->job_serial;
+            *tex_state = t->st_tex;
+            *sampler_state = t->st_smp;
+            return TRUE;
+        }
+    }
+    return texture_state_build(ctx, unit, kind, tex_state, sampler_state);
+}
+
+static BOOL texture_state_build(struct OGLES3Context *ctx, int unit, int kind, ULONG *tex_state,
+                                ULONG *sampler_state)
 {
     struct OGLES3TexState *ts = ts_get(ctx);
     struct OGLES3Texture *t;

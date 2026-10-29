@@ -492,7 +492,7 @@ void ogles2_glViewport(struct OGLES3Context *ctx, GLint x, GLint y, GLsizei widt
     ctx->viewport[1] = y;
     ctx->viewport[2] = width > OGLES3_MAX_VIEWPORT ? OGLES3_MAX_VIEWPORT : width;
     ctx->viewport[3] = height > OGLES3_MAX_VIEWPORT ? OGLES3_MAX_VIEWPORT : height;
-    ctx->state_ver++;
+    OGLES3_STATE_CHANGED(ctx, OGLES3_SG_WIN | OGLES3_SG_VIEW);
 }
 
 void ogles2_glScissor(struct OGLES3Context *ctx, GLint x, GLint y, GLsizei width, GLsizei height)
@@ -507,7 +507,7 @@ void ogles2_glScissor(struct OGLES3Context *ctx, GLint x, GLint y, GLsizei width
     ctx->scissor[1] = y;
     ctx->scissor[2] = width;
     ctx->scissor[3] = height;
-    ctx->state_ver++;
+    OGLES3_STATE_CHANGED(ctx, OGLES3_SG_WIN);
 }
 
 /* Retarget a bitmap context (OGLES3_CCT_BITMAP): the open frame is rendered

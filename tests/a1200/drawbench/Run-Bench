@@ -1,0 +1,79 @@
+; Run-Bench - drawbench: the CPU cost of GL calls, ogles2.library against
+; ogles3.library, on the same program. See ReadMe.txt.
+;   CD to this directory, then:   Execute Run-Bench
+;   Only some:                     Execute Run-Bench ONLY=3   (2, 3 or 3es2)
+;   Longer tests:                  Execute Run-Bench MS=1500
+;   One test:                      Execute Run-Bench TEST=draw_same
+;   With the PC sampler (bin/pc_sample, when the package has it):
+;                                  Execute Run-Bench PC=1 (results/<run>-pc.txt)
+; Nothing is installed: libs/ is added to LIBS: for the run and removed at the
+; end. Output goes to results/.
+.key ONLY/K,MS/K,TEST/K,PC/K
+.def ONLY all
+.def MS 700
+.def TEST all
+.def PC 0
+.bra {
+.ket }
+
+FailAt 21
+If NOT EXISTS bin/drawbench3
+  Echo "Please CD into the ogles2-drawbench directory first,"
+  Echo "then run:  Execute Run-Bench"
+  Quit 20
+EndIf
+Assign DBENCH: ""
+If NOT EXISTS DBENCH:results
+  MakeDir DBENCH:results
+EndIf
+Assign LIBS: DBENCH:libs ADD
+Avail FLUSH >NIL:
+List LIBS:ogles#? LIBS:v3dglslc#? >DBENCH:results/libs.txt
+Set DBT ""
+If NOT "{TEST}" EQ "all"
+  Set DBT "TEST={TEST}"
+EndIf
+Set DB2 0
+Set DB3 0
+Set DB3E 0
+If "{ONLY}" EQ "all"
+  Set DB2 1
+  Set DB3 1
+  Set DB3E 1
+EndIf
+If "{ONLY}" EQ "2"
+  Set DB2 1
+EndIf
+If "{ONLY}" EQ "3"
+  Set DB3 1
+EndIf
+If "{ONLY}" EQ "3es2"
+  Set DB3E 1
+EndIf
+
+If $DB2 EQ 1 VAL
+  If {PC} EQ 1 VAL
+    Run >NIL: DBENCH:bin/pc_sample drawbench2 DBENCH:results/2-pc.txt "" 60
+  EndIf
+  DBENCH:bin/drawbench2 MS={MS} $DBT >DBENCH:results/2.txt
+  Wait 2
+EndIf
+If $DB3 EQ 1 VAL
+  If {PC} EQ 1 VAL
+    Run >NIL: DBENCH:bin/pc_sample drawbench3 DBENCH:results/3-pc.txt "" 60
+  EndIf
+  DBENCH:bin/drawbench3 MS={MS} $DBT >DBENCH:results/3.txt
+  Wait 2
+EndIf
+If $DB3E EQ 1 VAL
+  DBENCH:bin/drawbench3 MS={MS} ES=20 $DBT >DBENCH:results/3es2.txt
+EndIf
+
+UnSet DBT
+UnSet DB2
+UnSet DB3
+UnSet DB3E
+Assign LIBS: DBENCH:libs REMOVE
+Avail FLUSH >NIL:
+Assign DBENCH:
+Echo "Done. Results are in results/."

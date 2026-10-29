@@ -1710,7 +1710,7 @@ void ogles2_glUseProgram(struct OGLES3Context *ctx, GLuint program)
             return;
         }
     }
-    if (ogles2_xfb_drawing(ctx)) { /* ES 3.0 2.15.2: not while transform feedback is active and not paused */
+    if (ctx->xfb && ogles2_xfb_drawing(ctx)) { /* ES 3.0 2.15.2: not while transform feedback is active and not paused */
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }

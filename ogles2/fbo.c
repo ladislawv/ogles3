@@ -1150,7 +1150,7 @@ void ogles2_glDrawBuffersEXT(struct OGLES3Context *ctx, GLsizei n, const GLenum 
             return;
         }
         if (ctx->v3d && ctx->v3d->frame_active && !ctx->job_fb && bufs[0] != ctx->default_draw_buffer)
-            ctx->state_ver++; /* the write masks follow it (draw.c) */
+            OGLES3_STATE_CHANGED(ctx, OGLES3_SG_ALL); /* the write masks follow it (draw.c) */
         ctx->default_draw_buffer = bufs[0];
         ogles2_fb_update(ctx);
         return;
@@ -1158,7 +1158,7 @@ void ogles2_glDrawBuffersEXT(struct OGLES3Context *ctx, GLsizei n, const GLenum 
     before_fb_change(ctx, fb);
     for (i = 0; i < OGLES3_MAX_DRAW_BUFFERS; i++)
         fb->draw_buf[i] = i < n ? bufs[i] : GL_NONE;
-    ctx->state_ver++;
+    OGLES3_STATE_CHANGED(ctx, OGLES3_SG_ALL);
     ogles2_fb_update(ctx);
 }
 

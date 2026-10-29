@@ -206,6 +206,14 @@ struct OGLES3Array
     ULONG fmt_key, fmt_ctype;
     UWORD fmt_in_bytes, fmt_dst_stride;
     UBYTE fmt_nconv, fmt_vsize, fmt_vtype, fmt_normalized, fmt_is_signed;
+    /* The last copy a draw made from a buffer's shadow (draw.c, copy_array):
+     * vertices [sc_first, + sc_count) at sc_addr in job sc_job's state
+     * buffer, of the buffer at data serial sc_serial, read at sc_ptr with
+     * stride sc_stride in format sc_key (sc_uid: the buffer's). A draw of the same job reading
+     * vertices within them from the same unchanged data reuses them. */
+    const void *sc_ptr;
+    ULONG sc_job, sc_uid, sc_serial, sc_key, sc_first, sc_count, sc_addr;
+    GLsizei sc_stride;
 };
 
 /* ---- program images (program.c, v3dp.c) ----
@@ -787,6 +795,10 @@ struct OGLES3Context
      * setters in state.c, glViewport and glScissor, glClear's override):
      * a draw with the same version as the last skips emit_state. */
     ULONG state_ver;
+    /* Which parts changed since emit_state last ran (OGLES3_SG_*): it
+     * recomputes those alone (tests/perf/drawbench; Quake III changes two
+     * or three between most of its draws). OGLES3_STATE_CHANGED sets both. */
+    ULONG state_dirty;
     ULONG p_draws;
     ULONG n_deletes;                /* glDelete* calls (probe T) */
     double p_frame, p_build, p_render, p_list, p_pre; /* the sums at the last probe P report */
@@ -1211,6 +1223,27 @@ GLuint ogles2_buffer_name(const struct OGLES3Buffer *b);
 ULONG ogles2_buffer_size(const struct OGLES3Buffer *b);
 const void *ogles2_buffer_indices(struct OGLES3Context *ctx, ULONG offset, ULONG bytes, BOOL *bad);
 const UBYTE *ogles2_buffer_stream(const struct OGLES3Buffer *b);
+/* Its data's serial (changes with every change) and *uid, the buffer's own
+ * (no other buffer, deleted or not, has it): together they name its data. */
+ULONG ogles2_buffer_serial(const struct OGLES3Buffer *b, ULONG *uid);
+/* The first members of buffer.c's struct OGLES3Buffer (it checks the
+ * layout), read inline where a draw asks for every array: */
+struct OGLES3BufferHead
+{
+    GLuint name;
+    GLenum usage;
+    ULONG size;
+    UBYTE *data;
+    ULONG serial, uid;
+};
+#define OGLES3_BH(b) ((const struct OGLES3BufferHead *)(const void *)(b))
+/* ogles2_buffer_stream inline: the shadow of a buffer the program changes
+ * as it draws, NULL for a static one */
+static inline const UBYTE *ogles2_buffer_stream_inl(const struct OGLES3Buffer *b)
+{
+    GLenum u = OGLES3_BH(b)->usage;
+    return u != GL_STATIC_DRAW && u != GL_STATIC_READ && u != GL_STATIC_COPY ? OGLES3_BH(b)->data : 0;
+}
 ULONG ogles2_buffer_copy(struct OGLES3Context *ctx, struct OGLES3Buffer *b, ULONG offset, GLint size,
                          GLenum type, GLboolean normalized, GLsizei stride, ULONG elem_bytes, ULONG out_stride,
                          ULONG *dst_stride, ULONG *vertices,
@@ -1282,6 +1315,24 @@ extern struct ExecBase *SysBase;
 extern struct DosLibrary *DOSBase;
 extern struct Library *UtilityBase;
 extern struct OGLES3Library *OGLES3LibBase;
+
+/* The parts of the state emit_state sends (draw.c): the clip window
+ * (viewport, scissor), the configuration bits (culling, depth, stencil and
+ * blending on, polygon offset and fill modes, sample masks: the most read),
+ * stencil, polygon offset values, line width, the viewport group (depth
+ * range, clip control), blending, the colour write masks, the sample
+ * state. A setter not sure what it touches says OGLES3_SG_ALL. */
+#define OGLES3_SG_WIN     0x001UL
+#define OGLES3_SG_CFG     0x002UL
+#define OGLES3_SG_STENCIL 0x004UL
+#define OGLES3_SG_OFFSET  0x008UL
+#define OGLES3_SG_LINE    0x010UL
+#define OGLES3_SG_VIEW    0x020UL
+#define OGLES3_SG_BLEND   0x040UL
+#define OGLES3_SG_MASK    0x080UL
+#define OGLES3_SG_SAMPLE  0x100UL
+#define OGLES3_SG_ALL     0xFFFFFFFFUL
+#define OGLES3_STATE_CHANGED(ctx, g) ((ctx)->state_ver++, (ctx)->state_dirty |= (g))
 
 /* Sets the sticky error if none is pending (GLES2 section 2.5). */
 void ogles2_error(struct OGLES3Context *ctx, GLenum error);

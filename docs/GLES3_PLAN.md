@@ -125,10 +125,80 @@ for no version): ogles2 1.3.2 8.19 ms a frame (122 fps), beta1 9.51 ms
   the calls outside the draws (the glue's profile, µs a frame:
   `glBufferSubData` 218 / 324, `glBufferData` 541 / 602, `glClear` 96 /
   138, `glVertexAttribPointer` 68 / 169).
-- **Next:** the vertex data and binning list stages (`copy_array`,
-  `emit_state` and what each ES3 check there costs, one at a time), the
-  buffer updates; a GLES2-only build to see how much is the ES3 state
-  itself.
+- **drawbench (2026-10-29): a benchmark of our own, to measure in seconds
+  what a game takes minutes for.** `tests/perf/drawbench.c`, package
+  `tests/a1200/drawbench` (`Run-Bench`; `ONLY=2|3|3es2`, `TEST=<name>`,
+  `MS=`, `PC=1` runs the Doom 3 port's `pc_sample` on it when the package
+  has one, `PC_SAMPLE` at build): the same program built against this
+  tree's `libogles3.a` and ogles2 1.3's SDK, run in turn (ogles3 in its
+  default ES 3.1 context and in an ES 2.0 one), about 10 s each; a line
+  per test, ns a call: the calls Quake III makes most, one at a time
+  (attribute pointers, enable, binds, uniforms, buffer updates), draws
+  (the same draw again, from client arrays, after a blend, blend
+  function, depth function, program or texture change, a mid-frame
+  depth clear, a new matrix and pointers into another part of the
+  buffers), and Quake III's frame by its counts (`frame_mix`). Probe P
+  (`ENV:OGLES3/Probe P`) on one test gives its stages; the PC sampler,
+  mapped through the link map and the objects' hunk symbols (static
+  functions too) and a `-g -dA` listing of `draw.c`, its functions and
+  source lines. Scripts in the session's scratchpad, not in the
+  repository: the method is what is kept here.
+- **What it found and what was done (all on the A1200, `drawbench` and
+  Quake III after each step):** draw.c's big functions cost their
+  prologues and register spills on the common paths (GCC kept loop
+  values in the frame): `emit_state` split (the "nothing changed" test
+  inline, `emit_state_all` the rest), `ogles2_texture_state` (the reuse
+  of a texture's records a small function, `texture_state_build` the
+  rest), `write_uniforms` (a kinds table and a small switch, the draw's
+  state values made before the loop; PiStorm3D's viewport sizes, the
+  built-in clears', in it), `convert_elems` (the conversions to float in
+  `convert_to_float`), the index scan (`scan_u16`, two indices a long
+  word: faster than 1.x's loop; inside `draw_elements` slower), the
+  16-bit index copy two a long word; `gpu_written` and `based_view` an
+  inline test before the work, `ogles2_job_begin`'s open-job case
+  inline at the draw, the buffer's first fields read inline
+  (`struct OGLES3BufferHead`, checked by `_Static_assert` in buffer.c),
+  `slot()` inline for GLES2's targets, `glVertexAttribPointer` direct
+  for GLES2's types, `glUseProgram`'s transform feedback test behind
+  `ctx->xfb`, the clear's attribute format kept (`fmt_keep`). **Caches
+  1.x has not:** a draw from a GL_DYNAMIC/STREAM buffer reuses the
+  vertices an earlier draw of the same job converted from the same data
+  (`sc_*` in the attribute; each buffer a `uid`, so a deleted one's
+  data never matches), and the last element buffer indices' range and
+  copy (`ir_*`, `ic_*` in the draw state). **The state emit by parts:**
+  every setter says which parts of the state it changed
+  (`OGLES3_STATE_CHANGED`, `OGLES3_SG_*`: clip window, configuration
+  bits, stencil, polygon offset, line width, viewport group, blending,
+  write masks, samples; unknown ones ALL), and `emit_state_all`
+  computes those again alone (all of them for a new list, pass,
+  framebuffer or primitive; a new fragment shader the configuration
+  bits). Tried and not kept: the vertex loop out of `draw_arrays` (every
+  draw slower), copy_array inlined there before the caches (no gain).
+- **Result** (`ogles2-drawbench-20261029-125253`, ns, ogles2 / ogles3):
+  the same draw 10,967 / **7,114**; after a blend change 14,287 /
+  **10,251**, blend function 14,925 / **10,482**, depth function 13,164 /
+  **8,960**, program 13,264 / **10,159**, texture 11,505 / **7,728**;
+  a draw and a mid-frame depth clear 33,010 / 33,733; from client arrays
+  10,566 / 11,593; new matrix and pointers 16,390 / 18,297; Quake III's
+  frame 24,426 / 28,991 a draw; calls: attribute pointer 184 / 243,
+  enable 250 / 307, uniform 547 / 495, matrix 1,013 / 1,082, buffer
+  update 1,181 / 1,365. Quake III (`ogles2-q3o2-20261029-125842`,
+  `-130006`; `-q3o3-20261029-125924`, `-130049`): ogles2 125.5 fps,
+  ogles3 **117** (105 at 1.0-beta1); its screenshot at frame 400 differs
+  from ogles2's by 0.15% of the pixels, as two ogles2 runs do. `m8-5`
+  58 and 204, `m7-6` 17, 1 and 1, `m5-1` all (257).
+- **`m5-1`'s GLES2 tests asked for no version** and so ran in ES 3.1
+  contexts since 1.0-beta1, where ES 3.0's rules differ (separate depth
+  and stencil renderbuffers unsupported, mixed sizes complete, transpose
+  allowed, more buffer usages, the default framebuffer's attachments
+  queried): seven checks failed the same with beta1's library. `m5_fbo`,
+  `m2_buffers` and `m2_link` now ask for ES 2.0
+  (`OGLES3_CCT_PISTORM_ES_VERSION`, 20).
+- **Next:** draws whose data changes every time (Quake III's): one pass
+  over the indices (copied as they are, the arrays' addresses moved back
+  by the smallest, as for gl_VertexID, instead of a scan and a rebased
+  copy), the attribute path's remaining cost on a miss, the buffer
+  updates (1,365 against 1,181 ns).
 
 **Status: plan (2026-10-18; revised eight times, research added and checked
 2026-10-19, every line citation and each stage reviewed for implementation
