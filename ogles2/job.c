@@ -241,7 +241,12 @@ void ogles2_job_begin(struct OGLES3Context *ctx)
     ctx->job_msaa = ctx->draw_fb ? !bad && tg.msaa : ctx->msaa;
     ctx->t_job_begin = ogles2_clock_us();
     ctx->job_discard = 0;
-    ctx->job_noload = ctx->draw_fb ? ogles2_fbo_take_discarded(ctx->draw_fb) : 0;
+    if (ctx->draw_fb) {
+        ctx->job_noload = ogles2_fbo_take_discarded(ctx->draw_fb);
+    } else {
+        ctx->job_noload = ctx->default_discarded; /* its colour discarded since its last job (fbo.c) */
+        ctx->default_discarded = 0;
+    }
     /* An object's job with several render targets (EXT_draw_buffers) or a
      * 64-bit one (EXT_color_buffer_half_float) has smaller tiles as well:
      * ogles2_fbo_target's. */
@@ -405,7 +410,7 @@ static void build_render(struct OGLES3Context *ctx, struct zs_save *store_zs)
         DoCommand(v, v3d_OP_INCREMENT_SEMAPHORE);
     DoCommand(v, v3d_OP_FLUSH);
 
-    /* Generic tile list: load colour unless it is cleared, store it to the
+    /* Generic tile list: load colour unless it is cleared or discarded, store it to the
      * render bitmap. Depth: early clear, no load, no store (see the top). */
     v->current_buf = &v->tile_list_buf[s];
     SetBuffer(v, &v->tile_list_buf[s]);
@@ -413,7 +418,7 @@ static void build_render(struct OGLES3Context *ctx, struct zs_save *store_zs)
     DoCommand(v, v3d_OP_TILE_COORDINATES_IMPLICIT);
     /* Probe Y: Flip Y on both, with the height it needs (Mesa's XML: "used
      * for y flip"). */
-    if (!clear_color)
+    if (!clear_color && !(ctx->job_noload & OGLES3_DISCARD_COLOR)) /* discarded at the frame's start (fbo.c) */
         LoadTileBufferGeneral(v, v3d_RENDER_TARGET_0, V3D_MEMORY_FORMAT_RASTER, flip_y,
                               V3D_DECIMATE_MODE_SAMPLE_0, V3D_OUTPUT_IMAGE_FORMAT_RGBA8, FALSE, FALSE,
                               d->rb_swap, d->bprow, flip_y ? height : 0, d->base);
@@ -467,9 +472,11 @@ static void build_render(struct OGLES3Context *ctx, struct zs_save *store_zs)
     argb = v->clear_color_value;
     abgr = (argb & 0xFF00FF00UL) | ((argb & 0x00FF0000UL) >> 16) | ((argb & 0x000000FFUL) << 16);
     TileRenderingModeCFGClearColorsPart1(v, 0, abgr);
-    if (ctx->probe & OGLES3_PROBE_LOG_CLEAR)
-        ogles2_log("job: frame %lu, clear %s, ARGB %08lx, packet ABGR %08lx", ctx->frames,
-                   clear_color ? "colour" : "no colour", argb, abgr);
+    if ((ctx->probe & OGLES3_PROBE_LOG_CLEAR) && !(ctx->frames & 255)) /* every 256th: a long run fits the log */
+        ogles2_log("job: frame %lu, clear %s, ARGB %08lx, packet ABGR %08lx; colour %s, early Z %s (state %ld)",
+                   ctx->frames, clear_color ? "colour" : "no colour", argb, abgr,
+                   clear_color ? "cleared" : (ctx->job_noload & OGLES3_DISCARD_COLOR) ? "discarded, not loaded" : "loaded",
+                   ez_off ? "off" : "on", (LONG)ez);
     TileRenderingModeCFGColor(v, 1, V3D_INTERNAL_BPP_32, V3D_INTERNAL_TYPE_8, 0);
     TileRenderingModeCFGZSClearValues(v, v->pending_clear_depth ? ctx->job_clear_stencil : 0,
                                       v->pending_clear_depth ? v->clear_depth_value : 1.0f);

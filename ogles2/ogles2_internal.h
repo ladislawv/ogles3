@@ -863,6 +863,8 @@ struct OGLES3Context
     UBYTE gles2_ext;                /* a GLES2 extension's entry is calling its ES 3.0 one (gles2_ext.c) */
     UBYTE job_discard;              /* EXT_discard_framebuffer: OGLES3_DISCARD_* the open job does not store */
     UBYTE job_noload;               /* and those it does not load (discarded before it began) */
+    UBYTE default_discarded;        /* the default framebuffer's colour discarded with no job open
+                                     * (OGLES3_DISCARD_COLOR): its next job does not load it */
     struct OGLES3VaoState *vao;     /* vao.c's (ES 3.0's vertex array objects), NULL until first used */
     struct OGLES3QueryState *query; /* query.c's (ES 3.0's query objects), NULL until first used */
     ULONG oq_addr;                  /* the active occlusion query's counter (0: none): job.c points new jobs at it */

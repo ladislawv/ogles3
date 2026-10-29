@@ -1043,10 +1043,15 @@ static BOOL discard_bits(struct OGLES3Context *ctx, const struct OGLES3Framebuff
  * 3.0 programs go on drawing after an invalidation), and with no job open
  * the next one does not load them (Mesa: the job's store and load masks).
  * The default framebuffer: depth and stencil are then not kept across a
- * mid-frame flush; its colour is always kept. */
+ * mid-frame flush; its colour, discarded with no job open (a program's
+ * frame start, after the swap), is not loaded by the next job: a frame that
+ * draws every pixel saves the read of the whole picture into the tiles
+ * (Doom 3 at 1920x1080: 8 MB a frame). Otherwise its colour is kept. */
 static void discard(struct OGLES3Context *ctx, struct OGLES3Framebuffer *fb, UBYTE bits)
 {
     if (!fb) { /* one D24S8 image: kept unless both go */
+        if ((bits & OGLES3_DISCARD_COLOR) && !(ctx->v3d && ctx->v3d->frame_active && !ctx->job_fb))
+            ctx->default_discarded |= OGLES3_DISCARD_COLOR;
         if ((bits & (OGLES3_DISCARD_DEPTH | OGLES3_DISCARD_STENCIL)) ==
             (OGLES3_DISCARD_DEPTH | OGLES3_DISCARD_STENCIL)) {
             if (ctx->v3d && ctx->v3d->frame_active && !ctx->job_fb)

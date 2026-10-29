@@ -27,6 +27,15 @@ user's goal: ogles3 30% faster than ogles2 1.3, ogles3 first).**
   - Folding draw_elements' argument checks and `ogles2_fb_update`'s
     compares into one branch each made Quake III's mix 5% slower, not
     faster (reverted): in a large function fewer branches can still cost.
+  - The default framebuffer's colour discarded with no job open
+    (`glDiscardFramebufferEXT(GL_COLOR_EXT)`, `glInvalidateFramebuffer`,
+    a program's frame start) is not loaded by its next job
+    (`ctx->default_discarded`, `job_noload`); programs that never discard
+    keep the colour as ogles2 does. Probe C logs every 256th job's clear,
+    colour load and early-Z state. Doom 3 gains nothing from it (it clears
+    the colour every frame, `r_clear 2`); at 1920x1080 its frame waits
+    7.8 ms for the GPU, whose time is the scene's shading (trilinear or
+    not, the same 19.0 fps): ogles3 cannot shorten it from the CPU's side.
   - Doom 3 (github.com/ladislawv/doom3-amiga, its `OGLES=3` build;
     `timeDemo demo1`, 1920x1080, low settings, 12 lights, Paula, 20 Hz):
     ogles3 17.6 fps against ogles2 1.3.2's 17.6 (`bench-20261029-213644`,
