@@ -309,13 +309,16 @@ def gen_table_c(table):
                  % ("" if void else "r = ", e.name, args, "" if void else "    return r;\n"))
         # the wrapper: the context (the first argument, above the return
         # address), its magic and share_lock tested, then a jump either way
-        # with the arguments as they are on the stack
+        # with the arguments as they are on the stack. A void entry returns
+        # at once for an invalid context (the entries' own test does nothing
+        # else), so its fast path needs no test of its own
+        # (ogles2_entry_valid); one with a value jumps in, for its own.
         L.append("%s ogles2_lk_%s(%s);\n" % (e.ret, e.name, e.lib_params()))
         L.append('__asm__("\\t.text\\n\\t.even\\n\\t.globl _ogles2_lk_%s\\n_ogles2_lk_%s:\\n"\n'
                  '        "\\tmove.l 4(%%sp),%%d0\\n\\tjeq 1f\\n\\tmove.l %%d0,%%a0\\n"\n'
                  '        "\\tcmp.l #0x474c4532,(%%a0)\\n\\tjne 1f\\n\\ttst.l 4(%%a0)\\n\\tjne 2f\\n"\n'
-                 '        "1:\\tjmp _ogles2_%s\\n2:\\tjmp _ogles2_sl_%s\\n");\n\n'
-                 % (e.name, e.name, e.name, e.name))
+                 '        "\\tjmp _ogles2_%s\\n2:\\tjmp _ogles2_sl_%s\\n1:\\t%s\\n");\n\n'
+                 % (e.name, e.name, e.name, e.name, "rts" if void else "jmp _ogles2_" + e.name))
     L += ["const struct OGLES3Dispatch ogles2_dispatch_table = {\n",
           "    .abiVersion = OGLES3_DISPATCH_ABI_VERSION,\n",
           "    .structSize = sizeof(struct OGLES3Dispatch),\n",

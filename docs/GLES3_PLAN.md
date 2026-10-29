@@ -1,5 +1,94 @@
 # OpenGL ES 3.0 and 3.1 on ogles2.library
 
+**Performance, the evening of 2026-10-29 (after the hand-off below; the
+user's goal: ogles3 30% faster than ogles2 1.3, ogles3 first).**
+- **Second round** (`ogles2-drawbench-20261029-195814`, ogles3 / ogles2):
+  glVertexAttribPointer 0.78, glUseProgram 0.69, glBindBuffer 0.67,
+  glBindTexture 0.69, glEnable 0.59, glUniform4f 0.85, matrix 0.87,
+  glBufferSubData 0.58, glBufferData 0.65; the same draw 0.56, after a
+  state change 0.58-0.63, depth clear 0.96, new matrix and pointers
+  0.80-0.91, client arrays 0.95-0.99, Quake III's mix 0.96-1.04 (that test
+  moves about 4% between a whole run and a run of it alone). Quake III
+  126.1 fps against 126.4 (`-q3o3-20261029-200315`; screenshot 0.07% of
+  the pixels apart); `m8-5`, `m7-6`, `m5-1` all passed (`-195923` on).
+  - The dispatch wrapper (`gen/gen_ogles2.py`) returns at once for an
+    invalid context when the entry is void (each one's own test returned
+    and nothing else; the ones with a value keep jumping in, two return
+    -1); the hot void entries' fast paths then test nothing
+    (`ogles2_entry_valid`): glUseProgram 234 to 152 ns, glBindBuffer 290
+    to 220.
+  - `scan_u16` eight indices a pass in two independent minimum/maximum
+    pairs (client indices: 1.98 us a draw before).
+  - Disabled attributes' current values reuse their block in the control
+    list, and an array's static-buffer copy lookup is kept for the job
+    (`bc_*`): no change measured in Quake III (probe P now counts the
+    draws' attributes by source: 1.37 current values, 1.42 stream copies,
+    1.32 static copies a draw there).
+  - Folding draw_elements' argument checks and `ogles2_fb_update`'s
+    compares into one branch each made Quake III's mix 5% slower, not
+    faster (reverted): in a large function fewer branches can still cost.
+  - Doom 3 (github.com/ladislawv/doom3-amiga, its `OGLES=3` build;
+    `timeDemo demo1`, 1920x1080, low settings, 12 lights, Paula, 20 Hz):
+    ogles3 17.6 fps against ogles2 1.3.2's 17.6 (`bench-20261029-213644`,
+    `-214036` there; 1.0-beta1 16.3). Its PLAN.md has the details.
+  - Quake III spends about 2.2 ms of its 7.9 ms frame in draws and most
+    of the rest in the game (the PC sampler: 5% of the ready samples in the
+    library): the library alone cannot make it 30% faster; its own calls
+    are where ogles3 leads.
+- **Where it stood after the first round** (`ogles2-drawbench-20261029-191826`, ns a call or
+  draw, ogles2 / ogles3): the same draw 10,815 / **6,393** (0.59); after a
+  blend, blend function, depth function, program or texture change
+  0.62-0.70; a draw and a depth clear 0.93; new matrix and pointers 0.92;
+  client arrays 1.03; Quake III's frame by its counts 1.03. Calls:
+  glVertexAttribPointer 0.90, glEnable 0.52, glBindBuffer 0.86,
+  glBindTexture 0.76, glUseProgram 1.07, glUniform4f 0.92, matrix 0.97,
+  glBufferSubData **0.56**, glBufferData 0.68. Quake III (`q3cmp.sh run 3`,
+  `ogles2-q3o2/-q3o3-20261029-191956` on): ogles2 126.2 fps, ogles3
+  **125.2** (was 117; its screenshot differs from ogles2's by 0.18% of the
+  pixels). `m8-5` 58 and 204, `m7-6` all, `m5-1` all 257
+  (`-20261029-191930`, `-191940`, `-191947`).
+- **`v3dcore/hw/v3d_hw.h` left `#pragma pack(push,1)` open** (1.x too):
+  every struct defined after an `#include` of it was packed (draw.c's,
+  buffer.c's, texture.c's...; `V3DTexture` a byte shorter in texture.c than
+  in v3d_texture.c), and a 32-bit member at an odd offset is read a byte
+  at a time. Popped at the file's end; nothing else changed layout
+  (sizes compared packed and natural for every header struct).
+- **Emu68 runs `muls.l`/`mulu.l #imm,Dn` then `lsr.l Dx,Dn` wrongly**: the
+  shift by a register count sees the product's upper half ((1 x
+  0x9E3779B1) >> 28 gave 0xFFFFFFF9; an immediate count, `swap` and each
+  instruction alone were right). The first multi-slot caches hashed so:
+  slots out of the tables, memory overwritten, the A1200 down twice.
+  `tools/check_mulshift.py` now runs with the float check (`fpcheck.ok`):
+  0 such pairs in the library. Hashes fold by shifts instead.
+- **Emu68 pays per branch:** the PC sampler's samples fall evenly on a
+  small function's basic blocks, so a call's cost is its branch count more
+  than its work. glVertexAttribPointer's checks as one value without
+  branches (a type-size table, comparisons ORed) took it from 301 to 164
+  ns. The same applies to glUseProgram (still 1.07) and the draw path.
+- **Changes:** `-O3 -fomit-frame-pointer` (2-40% on drawbench, the library
+  about 50% larger; `-fomit-frame-pointer` alone took 2-15%); the index
+  range, index copy and stream vertex copy caches of 16, 16 and 32 slots
+  (`draw.c`: a mesh drawn several times a frame from other offsets of the
+  same buffers: draw_matrix_pointers 1.11 to 0.92); the uniform streams'
+  state values made once per state change (`state_fx`: their float work
+  was 96% of `write_uniforms`); glEnable/glDisable by one table lookup;
+  `patch_copies` skipped for a buffer never copied (glBufferSubData 0.88 to
+  0.56); glVertexAttribPointer and glUseProgram fast paths;
+  `ogles2_fb_update` skips the default framebuffer's unchanged fields;
+  transform feedback asked about only once begun (`ctx->xfb_begun`); probe
+  P counts index scans and state packet updates.
+- **Measuring:** the PC sampler's function totals mislead around exec
+  calls (samples after Supervisor()'s return, 0xF80CC0) and `drawbench.sh
+  lines` maps lines wrongly at -O3 (its listing is compiled at -O2):
+  trust probe P's stages and `hotpc.py`'s offsets. A test package that
+  measures memory (m5-1's `destroy returns the memory`) can fail once right
+  after another package's run.
+- **Next:** Quake III's draw is the whole gap now (`q3cmp.sh probe`: vertex
+  data 11.7 against 9.8 us a draw, binning +0.7, textures +0.4): the
+  stream path's per-array copies, `emit_state_all` (3.7 KB, 2.9 us when the
+  state changed), the index scan of new indices; then fewer branches in
+  the draw path and glUseProgram.
+
 **Hand-off of 2026-10-29 (read this first; it continues on another machine
 and with another developer).** The work since 1.0-beta1 is making ogles3
 faster than ogles2 1.3 (the user's goal; §1's "The draw's CPU cost against

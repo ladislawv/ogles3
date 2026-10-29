@@ -62,6 +62,11 @@ struct OGLES3Buffer
     UBYTE *data;             /* shadow, AllocVec'd; NULL while size is 0 */
     ULONG serial;            /* bumped on every change of the data */
     ULONG uid;               /* unique to it among the library's buffers (ogles2_buffer_serial) */
+    /* Deleted while a vertex array object not bound uses it (ES 3.0
+     * appendix D.1.2): out of the name table, on the share group's list of
+     * them, freed when nothing uses it any more (ogles2_buffer_release). */
+    BOOL deleted;
+    BOOL copied;             /* a GPU copy was made once (ogles2_buffer_copy): patch_copies has work */
     BOOL bound_once;         /* a buffer object exists once bound (GLES 2.0 2.9) */
     BOOL mapped;             /* OES_mapbuffer: glMapBufferOES handed out the shadow */
     ULONG map_offset, map_length; /* the mapping (ES 3.0's glMapBufferRange; OES's: all of it) */
@@ -78,10 +83,6 @@ struct OGLES3Buffer
                               * shadow is stale until gpu_written (0: none) */
     BOOL cs_written;         /* a compute dispatch wrote its words (finished): the shadow is stale
                               * until gpu_written (ES 3.1 storage buffers, compute.c) */
-    /* Deleted while a vertex array object not bound uses it (ES 3.0
-     * appendix D.1.2): out of the name table, on the share group's list of
-     * them, freed when nothing uses it any more (ogles2_buffer_release). */
-    BOOL deleted;
     struct OGLES3Buffer *next_orphan;
 };
 
@@ -376,12 +377,17 @@ static BOOL table_room(struct OGLES3BufState *bs, GLuint name)
 static ULONG next_uid;
 
 /* The head draw.c reads inline (ogles2_internal.h) */
+_Static_assert(offsetof(struct OGLES3BufState, sh) == offsetof(struct OGLES3BufStateHead, sh) &&
+               offsetof(struct OGLES3BufState, array) == offsetof(struct OGLES3BufStateHead, array) &&
+               offsetof(struct OGLES3BufState, element) == offsetof(struct OGLES3BufStateHead, element),
+               "struct OGLES3BufState starts with struct OGLES3BufStateHead");
 _Static_assert(offsetof(struct OGLES3Buffer, name) == offsetof(struct OGLES3BufferHead, name) &&
                offsetof(struct OGLES3Buffer, usage) == offsetof(struct OGLES3BufferHead, usage) &&
                offsetof(struct OGLES3Buffer, size) == offsetof(struct OGLES3BufferHead, size) &&
                offsetof(struct OGLES3Buffer, data) == offsetof(struct OGLES3BufferHead, data) &&
                offsetof(struct OGLES3Buffer, serial) == offsetof(struct OGLES3BufferHead, serial) &&
-               offsetof(struct OGLES3Buffer, uid) == offsetof(struct OGLES3BufferHead, uid),
+               offsetof(struct OGLES3Buffer, uid) == offsetof(struct OGLES3BufferHead, uid) &&
+               offsetof(struct OGLES3Buffer, deleted) == offsetof(struct OGLES3BufferHead, deleted),
                "struct OGLES3Buffer starts with struct OGLES3BufferHead");
 
 static struct OGLES3Buffer *create(struct OGLES3BufState *bs, GLuint name)
@@ -513,7 +519,7 @@ void ogles2_glBindBuffer(struct OGLES3Context *ctx, GLenum target, GLuint buffer
 {
     struct OGLES3BufState *bs;
     struct OGLES3Buffer *b = 0, **at;
-    if (!ogles2_context_valid(ctx) || !(bs = bs_get(ctx)))
+    if (!ogles2_entry_valid(ctx) || !(bs = bs_get(ctx)))
         return;
     if (!(at = slot(ctx, bs, target))) {
         ogles2_error(ctx, GL_INVALID_ENUM);
@@ -551,7 +557,7 @@ static void buffer_data(struct OGLES3Context *ctx, GLenum target, GLsizeiptr siz
     struct OGLES3BufState *bs;
     struct OGLES3Buffer *b;
     UBYTE *shadow = 0;
-    if (!ogles2_context_valid(ctx) || !(bs = bs_get(ctx)))
+    if (!ogles2_entry_valid(ctx) || !(bs = bs_get(ctx)))
         return;
     if (!slot(ctx, bs, target)) {
         ogles2_error(ctx, GL_INVALID_ENUM);
@@ -627,7 +633,20 @@ static void swap_words(ULONG *dst, const UBYTE *src, ULONG size, ULONG from, ULO
  * job does not read re-converts the elements those bytes touch, in place;
  * a copy the open job reads is retired with it and rebuilt at its next use.
  * The data serial has been bumped already. */
-static void patch_copies(struct OGLES3Context *ctx, struct OGLES3Buffer *b, ULONG off, ULONG len)
+static __attribute__((noinline)) void patch_copies_now(struct OGLES3Context *ctx, struct OGLES3Buffer *b, ULONG off,
+                                                       ULONG len);
+
+/* The test inline: a buffer the program streams into (GL_DYNAMIC_DRAW,
+ * GL_STREAM_DRAW) never has a copy, nor words unless a uniform block read
+ * it, and its every glBufferSubData paid the loop over the copies
+ * (tests/perf/drawbench: 0.5 us a call). */
+static inline void patch_copies(struct OGLES3Context *ctx, struct OGLES3Buffer *b, ULONG off, ULONG len)
+{
+    if (b->copied || b->words.hostptr)
+        patch_copies_now(ctx, b, off, len);
+}
+
+static void patch_copies_now(struct OGLES3Context *ctx, struct OGLES3Buffer *b, ULONG off, ULONG len)
 {
     int k;
     for (k = 0; k < OGLES3_BUFFER_COPIES; k++) {
@@ -671,7 +690,7 @@ static void buffer_sub_data(struct OGLES3Context *ctx, GLenum target, GLintptr o
 {
     struct OGLES3BufState *bs;
     struct OGLES3Buffer *b;
-    if (!ogles2_context_valid(ctx) || !(bs = bs_get(ctx)))
+    if (!ogles2_entry_valid(ctx) || !(bs = bs_get(ctx)))
         return;
     if (!slot(ctx, bs, target)) {
         ogles2_error(ctx, GL_INVALID_ENUM);
@@ -1511,6 +1530,7 @@ ULONG ogles2_buffer_copy(struct OGLES3Context *ctx, struct OGLES3Buffer *b, ULON
     c->normalized = normalized;
     c->vertices = n;
     c->used_job = ctx->job_serial;
+    b->copied = TRUE;
     *dst_stride = c->dst_stride;
     *vertices = n - skip;
     return (ULONG)c->mem.hostptr + skip * c->dst_stride;

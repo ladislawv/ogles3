@@ -15,7 +15,9 @@ WORK=${PERF_WORK:-$HOME/ogles3-perf}
 TC=${TC:-$HOME/amiga-gcc-install}
 TC16=${TC16:-$HOME/amiga-gcc162-install}
 DOOM3_REPO=${DOOM3_REPO:-/mnt/c/GitHub/doom3}
-A="python3 $REPO/tools/amictl/amictl.py"
+# amictl (a function: the repository's path may hold spaces)
+A=amictl
+amictl() { python3 "$REPO/tools/amictl/amictl.py" "$@"; }
 mkdir -p "$WORK"
 
 # The PC sampler (the Doom 3 port's), built once into $WORK/pc_sample.

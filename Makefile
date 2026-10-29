@@ -20,8 +20,12 @@ PYTHON ?= python3
 CPU    := -mcpu=68020 -m68881 -fbbb=abcfhilmnprsz0
 # EXTRA_CFLAGS=-DOGLES3_LOG_SYNC: write every log line at once (hardware bring-up:
 # a hang loses nothing). Use its own B, e.g. B=~/ogles2-build/m68k-sync.
-CFLAGS := -std=gnu99 -O2 -Wall -Wextra -Wno-unused-parameter -fno-strict-aliasing $(CPU) -mcrt=clib2 \
-          $(EXTRA_CFLAGS)
+# -O3 and -fomit-frame-pointer (no link/unlk where a function needs no frame,
+# most entry points): drawbench's tests 2 to 40% faster than at -O2
+# (docs/GLES3_PLAN.md, the hand-off of 2026-10-29), the library about 50%
+# larger.
+CFLAGS := -std=gnu99 -O3 -Wall -Wextra -Wno-unused-parameter -fno-strict-aliasing $(CPU) -mcrt=clib2 \
+          -fomit-frame-pointer $(EXTRA_CFLAGS)
 # The release (ogles3.library 1.0): OpenGL ES 3.1 contexts, for 30 and 31
 # alike and when no version is asked for; 20 gives OpenGL ES 2.0.
 # ES3=1: a test build whose highest is OpenGL ES 3.0 (dEQP-GLES3 runs), its
@@ -78,8 +82,11 @@ $(GEN_LIB) $(GEN_CLIENT) $(B)/gen/tests/abi_layout.c: $(GEN_STAMP)
 gen: $(GEN_STAMP)
 
 # ---- float->integer check: everything in the library compiled to assembly,
-# no conversion without fintrz (see CPU above; tools/check_fpconv.py).
-$(B)/fpcheck.ok: $(LIB_SRC) $(V3D_SRC:%=v3dcore/hw/%.c) $(V3D_HDR) tools/check_fpconv.py $(GEN_STAMP) Makefile
+# no conversion without fintrz (see CPU above; tools/check_fpconv.py), and no
+# multiply followed by a shift by a register count (Emu68 runs that pair
+# wrongly; tools/check_mulshift.py).
+$(B)/fpcheck.ok: $(LIB_SRC) $(V3D_SRC:%=v3dcore/hw/%.c) $(V3D_HDR) tools/check_fpconv.py tools/check_mulshift.py \
+                 $(GEN_STAMP) Makefile
 	@mkdir -p $(B)/asm
 	@for f in $(LIB_SRC); do \
 	  $(CC) $(CFLAGS) $(INC) -Iv3dcore/include -Iv3dcore/hw -S $$f -o $(B)/asm/$$(basename $$f .c).s || exit 1; \
@@ -88,6 +95,7 @@ $(B)/fpcheck.ok: $(LIB_SRC) $(V3D_SRC:%=v3dcore/hw/%.c) $(V3D_HDR) tools/check_f
 	  $(CC) $(V3D_FLAGS) -S v3dcore/hw/$$f.c -o $(B)/asm/v3dcore_$$f.s || exit 1; \
 	done
 	$(PYTHON) tools/check_fpconv.py $(B)/asm/*.s
+	$(PYTHON) tools/check_mulshift.py $(B)/asm/*.s
 	@touch $@
 
 # ---- v3dcore

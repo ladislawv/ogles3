@@ -117,24 +117,68 @@ static ULONG cap_group(GLenum cap)
     }
 }
 
-static void set_cap(struct OGLES3Context *ctx, GLenum cap, int on)
+/* cap_bit's and cap_group's answers in one table, by a perfect hash of the
+ * capabilities' enums (CAP_SLOT: no two of them share a slot): glEnable and
+ * glDisable look once instead of through two switches' chains of compares
+ * (tests/perf/drawbench). es: the version a capability needs. A capability
+ * added to cap_bit needs a slot of its own here (else set_cap's slow path
+ * takes it). Shifts, no multiplication (Emu68's muls.l then lsr.l: draw.c,
+ * IC_SLOT). */
+#define CAP_SLOT(c) ((((ULONG)(c)) ^ ((ULONG)(c) >> 3) ^ ((ULONG)(c) >> 9)) & 15)
+static const struct cap_ent
 {
-    ULONG bit;
-    if (!ogles2_context_valid(ctx))
-        return;
-    bit = cap_bit(ctx, cap);
+    UWORD cap;
+    UBYTE es;
+    ULONG bit, group;
+} cap_tab[16] = {
+    [CAP_SLOT(GL_CULL_FACE)] = { GL_CULL_FACE, 0, OGLES3_CAP_CULL_FACE, OGLES3_SG_CFG },
+    [CAP_SLOT(GL_BLEND)] = { GL_BLEND, 0, OGLES3_CAP_BLEND, OGLES3_SG_CFG | OGLES3_SG_BLEND },
+    [CAP_SLOT(GL_DITHER)] = { GL_DITHER, 0, OGLES3_CAP_DITHER, OGLES3_SG_ALL },
+    [CAP_SLOT(GL_STENCIL_TEST)] = { GL_STENCIL_TEST, 0, OGLES3_CAP_STENCIL_TEST, OGLES3_SG_CFG | OGLES3_SG_STENCIL },
+    [CAP_SLOT(GL_DEPTH_TEST)] = { GL_DEPTH_TEST, 0, OGLES3_CAP_DEPTH_TEST, OGLES3_SG_CFG },
+    [CAP_SLOT(GL_SCISSOR_TEST)] = { GL_SCISSOR_TEST, 0, OGLES3_CAP_SCISSOR_TEST, OGLES3_SG_WIN },
+    [CAP_SLOT(GL_POLYGON_OFFSET_FILL)] = { GL_POLYGON_OFFSET_FILL, 0, OGLES3_CAP_POLYGON_OFFSET_FILL,
+                                           OGLES3_SG_CFG | OGLES3_SG_OFFSET },
+    [CAP_SLOT(GL_SAMPLE_ALPHA_TO_COVERAGE)] = { GL_SAMPLE_ALPHA_TO_COVERAGE, 0, OGLES3_CAP_SAMPLE_ALPHA_TO_COVERAGE,
+                                                OGLES3_SG_ALL },
+    [CAP_SLOT(GL_SAMPLE_COVERAGE)] = { GL_SAMPLE_COVERAGE, 0, OGLES3_CAP_SAMPLE_COVERAGE,
+                                       OGLES3_SG_CFG | OGLES3_SG_SAMPLE },
+    [CAP_SLOT(GL_PRIMITIVE_RESTART_FIXED_INDEX)] = { GL_PRIMITIVE_RESTART_FIXED_INDEX, 30,
+                                                     OGLES3_CAP_PRIMITIVE_RESTART, OGLES3_SG_ALL },
+    [CAP_SLOT(GL_RASTERIZER_DISCARD)] = { GL_RASTERIZER_DISCARD, 30, OGLES3_CAP_RASTERIZER_DISCARD, OGLES3_SG_CFG },
+    [CAP_SLOT(GL_SAMPLE_MASK)] = { GL_SAMPLE_MASK, 31, OGLES3_CAP_SAMPLE_MASK, OGLES3_SG_CFG | OGLES3_SG_SAMPLE },
+};
+
+static __attribute__((noinline)) void set_cap_slow(struct OGLES3Context *ctx, GLenum cap, int on)
+{
+    ULONG bit = cap_bit(ctx, cap);
     if (!bit) {
         if (!ogles2_debug_cap(ctx, cap, on, 0)) /* KHR_debug's two: asked only for a cap not above */
             ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
     if (!(ctx->state.caps & bit) == !on)
-        return; /* unchanged: gl4es disables what is off on every draw */
+        return;
     if (on)
         ctx->state.caps |= bit;
     else
         ctx->state.caps &= ~bit;
     OGLES3_STATE_CHANGED(ctx, cap_group(cap));
+}
+
+static void set_cap(struct OGLES3Context *ctx, GLenum cap, int on)
+{
+    const struct cap_ent *e = &cap_tab[CAP_SLOT(cap)];
+    if (!ogles2_context_valid(ctx))
+        return;
+    if (e->cap != cap || !e->bit || ctx->es_version < e->es) { /* !bit: an empty slot (cap 0) */
+        set_cap_slow(ctx, cap, on);
+        return;
+    }
+    if (!(ctx->state.caps & e->bit) == !on)
+        return; /* unchanged: gl4es disables what is off on every draw */
+    ctx->state.caps ^= e->bit;
+    OGLES3_STATE_CHANGED(ctx, e->group);
 }
 
 void ogles2_glEnable(struct OGLES3Context *ctx, GLenum cap)

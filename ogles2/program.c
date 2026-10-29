@@ -1697,7 +1697,30 @@ void ogles2_program_builtin_free(struct OGLES3Program *p)
     p->info_log = 0;
 }
 
+static __attribute__((noinline)) void use_program(struct OGLES3Context *ctx, GLuint program);
+
+/* A linked program by its name, transform feedback never begun, and no
+ * program deleted while in use to free: the switch alone, without a call,
+ * so no registers saved, and its checks as one value where they can be
+ * (Emu68 pays per branch; tests/perf/drawbench; a Quake III frame switches
+ * a few dozen times). Name 0's slot is always empty (new_name starts at 1).
+ * Anything else, errors included, goes to use_program. */
 void ogles2_glUseProgram(struct OGLES3Context *ctx, GLuint program)
+{
+    struct OGLES3Program *p, *old;
+    if (ogles2_entry_valid(ctx) && program < ctx->share->nobjects &&
+        (p = ctx->share->objects[program]) != 0) {
+        ULONG bad = (ULONG)(p->kind != OGLES3_OBJ_PROGRAM) | (ULONG)(p->linked == 0) | (ULONG)ctx->xfb_begun;
+        old = ctx->program;
+        if (!bad && (!old || !old->delete_pending || old == p)) {
+            ctx->program = p;
+            return;
+        }
+    }
+    use_program(ctx, program);
+}
+
+static void use_program(struct OGLES3Context *ctx, GLuint program)
 {
     struct OGLES3Program *p = 0, *old;
     if (!ogles2_context_valid(ctx))
@@ -3166,7 +3189,7 @@ static void set_uniform(struct OGLES3Context *ctx, GLint location, GLsizei count
     int ukind, ucomps, ucols, c, k, pl;
     UWORD e, first, ne;
     GLsizei i;
-    if (!ogles2_context_valid(ctx))
+    if (!ogles2_entry_valid(ctx))
         return;
     /* ES 3.1: without one in use, the bound pipeline's active program */
     if (!(p = ctx->program) && !(ctx->pipe && (p = ctx->pipe->active))) {
@@ -3343,7 +3366,7 @@ static void set_matrix(struct OGLES3Context *ctx, GLint location, GLsizei count,
     GLfloat *t;
     GLsizei i;
     int c, r;
-    if (!ogles2_context_valid(ctx))
+    if (!ogles2_entry_valid(ctx))
         return;
     if (transpose != GL_FALSE && !ogles2_es3(ctx)) { /* GLES 2.0: must be FALSE */
         ogles2_error(ctx, GL_INVALID_VALUE);

@@ -322,6 +322,7 @@ void ogles2_glBeginTransformFeedback(struct OGLES3Context *ctx, GLenum primitive
             return;
         }
     o->active = TRUE;
+    ctx->xfb_begun = TRUE;
     o->paused = FALSE;
     o->mode = primitiveMode;
     o->program = ctx->program;

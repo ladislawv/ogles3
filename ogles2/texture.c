@@ -729,7 +729,7 @@ void ogles2_glBindTexture(struct OGLES3Context *ctx, GLenum target, GLuint textu
 {
     struct OGLES3TexState *ts;
     struct OGLES3Texture *t;
-    if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
+    if (!ogles2_entry_valid(ctx) || !(ts = ts_get(ctx)))
         return;
     if (target != GL_TEXTURE_2D && target != GL_TEXTURE_CUBE_MAP && target != GL_TEXTURE_RECTANGLE &&
         target != GL_TEXTURE_3D && /* GLES2 contexts too: OES_texture_3D */

@@ -1362,6 +1362,15 @@ void ogles2_fb_update(struct OGLES3Context *ctx)
     struct OGLES3Framebuffer *fb = ctx->draw_fb;
     int a;
     if (!fb) {
+        /* The default framebuffer's again, as made at the last call: every
+         * draw asks (ogles2_fb_ready), and the stores were a sixth of its
+         * checks (tests/perf/drawbench). */
+        if (ctx->fb_default_made && ctx->fb_w == (UWORD)ctx->width && ctx->fb_h == (UWORD)ctx->height &&
+            ctx->fb_depth_bits == ctx->depth_bits && ctx->fb_stencil_bits == ctx->stencil_bits &&
+            ctx->fb_depth_format == ctx->depth_format &&
+            ctx->fb_draw_mask == (ctx->default_draw_buffer == GL_NONE ? 0 : 1))
+            return;
+        ctx->fb_default_made = TRUE;
         ctx->fb_w = (UWORD)ctx->width;
         ctx->fb_h = (UWORD)ctx->height;
         ctx->fb_flip = TRUE;
@@ -1382,6 +1391,7 @@ void ogles2_fb_update(struct OGLES3Context *ctx)
     }
     /* EXT_draw_buffers: the colour attachments drawn into, and the tile
      * buffer's render targets (output i goes to target i). */
+    ctx->fb_default_made = FALSE;
     ctx->fb_draw_mask = 0;
     ctx->fb_nrt = 1;
     ctx->fb_soft_blend = 0;

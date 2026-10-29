@@ -206,14 +206,14 @@ struct OGLES3Array
     ULONG fmt_key, fmt_ctype;
     UWORD fmt_in_bytes, fmt_dst_stride;
     UBYTE fmt_nconv, fmt_vsize, fmt_vtype, fmt_normalized, fmt_is_signed;
-    /* The last copy a draw made from a buffer's shadow (draw.c, copy_array):
-     * vertices [sc_first, + sc_count) at sc_addr in job sc_job's state
-     * buffer, of the buffer at data serial sc_serial, read at sc_ptr with
-     * stride sc_stride in format sc_key (sc_uid: the buffer's). A draw of the same job reading
-     * vertices within them from the same unchanged data reuses them. */
-    const void *sc_ptr;
-    ULONG sc_job, sc_uid, sc_serial, sc_key, sc_first, sc_count, sc_addr;
-    GLsizei sc_stride;
+    /* The last GPU copy of a static buffer this array was read from in job
+     * bc_job (draw.c, copy_array): the buffer's uid and data serial, read at
+     * bc_ptr with stride bc_stride in format bc_key; vertex 0 at bc_base,
+     * bc_dst_stride apart, bc_vertices of them. A copy a job read stays
+     * until the job is rendered, and a change of the data bumps the serial. */
+    const void *bc_ptr;
+    ULONG bc_job, bc_uid, bc_serial, bc_key, bc_base, bc_dst_stride, bc_vertices;
+    GLsizei bc_stride;
 };
 
 /* ---- program images (program.c, v3dp.c) ----
@@ -788,6 +788,8 @@ struct OGLES3Context
     ULONG t_stage;
     double stage[8], p_stage[8];
     double n_uwords, n_vbytes, n_indices; /* probe P: uniform stream words, vertex bytes, indices copied */
+    double n_scans, n_emits;        /* probe P: index scans, state packets made (emit_state_all) */
+    ULONG n_a_const, n_a_hit, n_a_stream, n_a_static, n_a_client; /* probe P: draws' attributes by source */
     /* draw.c: the state the uniform recipes read besides the constant
      * buffers, as at the last draw, and its version. */
     ULONG ustate[7], ustate_ver;
@@ -842,6 +844,7 @@ struct OGLES3Context
     struct OGLES3RtFormat fb_rt[OGLES3_MAX_DRAW_BUFFERS]; /* the drawn targets' formats (kind NONE: none) */
     UBYTE fb_soft_blend;            /* a drawn target the tile buffer cannot blend: the shader blends (Mesa) */
     UBYTE fb_wide;                  /* the drawn targets of 32 bits a channel (F32, INT, UINT): bit i */
+    BOOL fb_default_made;           /* the fb_ fields are the default framebuffer's, as fb_update made them */
     BOOL vab_moved;                 /* ES 3.1: glVertexAttribBinding gave an attribute another binding once */
     UBYTE draw_rts;                 /* the draw buffers a draw writes (ogles2_draw_clear: those it clears) */
     GLenum default_draw_buffer;     /* glDrawBuffersEXT on the default framebuffer: GL_BACK, GL_NONE */
@@ -864,6 +867,8 @@ struct OGLES3Context
     struct OGLES3QueryState *query; /* query.c's (ES 3.0's query objects), NULL until first used */
     ULONG oq_addr;                  /* the active occlusion query's counter (0: none): job.c points new jobs at it */
     struct OGLES3XfbState *xfb;     /* xfb.c's (ES 3.0's transform feedback objects), NULL until first used */
+    BOOL xfb_begun;                 /* glBeginTransformFeedback ran once: until then no draw asks xfb.c (a
+                                     * query or a binding makes xfb above without any feeding back) */
     BOOL job_xfb;                   /* the open job's binning list fed back: its end turns that off (xfb.c) */
     BOOL job_storage;               /* a draw of the open job stores into storage buffers (ES 3.1, draw.c) */
 };
@@ -1235,8 +1240,20 @@ struct OGLES3BufferHead
     ULONG size;
     UBYTE *data;
     ULONG serial, uid;
+    BOOL deleted;
 };
 #define OGLES3_BH(b) ((const struct OGLES3BufferHead *)(const void *)(b))
+/* The start of buffer.c's struct OGLES3BufState (asserted there): the
+ * GL_ARRAY_BUFFER binding without a call (glVertexAttribPointer) */
+struct OGLES3BufStateHead
+{
+    struct OGLES3Share *sh;
+    struct OGLES3Buffer *array, *element;
+};
+static inline struct OGLES3Buffer *ogles2_buffer_array_inl(const struct OGLES3Context *ctx)
+{
+    return ctx->buf ? ((const struct OGLES3BufStateHead *)(const void *)ctx->buf)->array : 0;
+}
 /* ogles2_buffer_stream inline: the shadow of a buffer the program changes
  * as it draws, NULL for a static one */
 static inline const UBYTE *ogles2_buffer_stream_inl(const struct OGLES3Buffer *b)
@@ -1341,6 +1358,16 @@ void ogles2_error(struct OGLES3Context *ctx, GLenum error);
 static inline BOOL ogles2_context_valid(struct OGLES3Context *ctx)
 {
     return ctx && ctx->magic == OGLES3_CONTEXT_MAGIC;
+}
+/* The context of a void entry the dispatch table reaches through its
+ * wrapper (gen_ogles2.py's ogles2_lk_*: it returns at once for an invalid
+ * one) and the library's own callers reach after their test: valid, nothing
+ * to test (a test is two branches, and Emu68 pays per branch;
+ * tests/perf/drawbench). For the hot entries' fast paths only. */
+static inline BOOL ogles2_entry_valid(const struct OGLES3Context *ctx)
+{
+    (void)ctx;
+    return TRUE;
 }
 /* The highest OpenGL ES version contexts may have: 3.0 and 3.1 only in test
  * builds until each is complete (Makefile, ES3=1 and ES31=1;
