@@ -108,9 +108,27 @@ for no version): ogles2 1.3.2 8.19 ms a frame (122 fps), beta1 9.51 ms
   `ports/ioq3-gl2` (link `-logles3`, `ogles3_dispatch.h`,
   `<libraries/ogles3.h>`); the three build, `m6-5` runs
   (`ogles2-m6-5-20261028-233733`).
-- **Next:** the draw path's remaining cost (`draw_arrays`, `emit_state`,
-  `copy_array` out of line; the buffer update path), then whether code
-  layout is the rest (a GLES2-only build to compare).
+- **Tried after that commit (2026-10-29), no gain, not kept:** one
+  `copy_array` call for every kind of array, inlined (6.02 ms a frame
+  against 5.94) or not (6.01-6.21); `slot()` inline for GLES2's two
+  targets and `gpu_written` only when it has work (in the same runs); the
+  whole library at `-O3` (673 KB; 5.95-6.07 ms): GCC's optimisation level
+  is not where the cost is. **Kept:** `glVertexAttribPointer` looks up the
+  vertex array object only for a client array and works the element size
+  out itself (the glue's profile: 191 -> 169 us a frame, 1.3.1 68; the
+  rest is ES 3.1's binding state it keeps); `m8-5` 58 and 204, `m7-6` 17,
+  1 and 1 again (`ogles2-m8-5-20261029-104934`, `-m7-6-20261029-104956`).
+  Probe P after it (µs a draw, ogles2 / ogles3): checks 4.61 / 5.46,
+  shaders 0.77 / 1.63, textures 2.17 / 3.07, uniforms 5.54 / 6.00, vertex
+  data 9.69 / 11.51, record 1.58 / 1.82, indices 1.45 / 1.75, binning list
+  4.31 / 6.01: about 7 µs a draw, half the frame's gap; the other half in
+  the calls outside the draws (the glue's profile, µs a frame:
+  `glBufferSubData` 218 / 324, `glBufferData` 541 / 602, `glClear` 96 /
+  138, `glVertexAttribPointer` 68 / 169).
+- **Next:** the vertex data and binning list stages (`copy_array`,
+  `emit_state` and what each ES3 check there costs, one at a time), the
+  buffer updates; a GLES2-only build to see how much is the ES3 state
+  itself.
 
 **Status: plan (2026-10-18; revised eight times, research added and checked
 2026-10-19, every line citation and each stage reviewed for implementation

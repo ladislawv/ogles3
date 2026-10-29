@@ -1,0 +1,60 @@
+m8_es31: OpenGL ES 3.1 contexts
+PASS: ES 3.1: the version strings and numbers
+PASS: buffers: the four targets bound and queried
+PASS: buffers: a storage buffer range at binding 31, the general binding too
+PASS: buffers: storage binding 32 is GL_INVALID_VALUE
+PASS: buffers: a storage offset of 2 is GL_INVALID_VALUE
+PASS: buffers: an atomic counter buffer at binding 15
+PASS: buffers: atomic counter binding 16 is GL_INVALID_VALUE
+PASS: buffers: deleted, unbound from every binding
+PASS: binding: refused with vertex array object 0 (GL_INVALID_OPERATION)
+PASS: binding: a buffer name glGenBuffers did not give
+PASS: binding: attribute 7 on binding 7, stride 16 (the initial state)
+PASS: binding: a buffer at offset 8, stride 12, on binding 3
+PASS: binding: attribute 0 reads binding 3 as 3 floats at relative offset 4
+PASS: binding: an integer format
+PASS: binding: binding 16 is GL_INVALID_VALUE
+PASS: binding: a stride of 2049 is GL_INVALID_VALUE
+PASS: binding: a relative offset of 2048 is GL_INVALID_VALUE
+PASS: binding: an integer format of floats is GL_INVALID_ENUM
+PASS: binding: attribute 0 on binding 16 is GL_INVALID_VALUE
+PASS: binding: glVertexAttribDivisor sets binding 2's divisor
+PASS: binding: glVertexAttribPointer puts attribute 5 on binding 5, stride 0 as 16 there
+PASS: binding: glVertexAttribPointer's stride of 2049 is GL_INVALID_VALUE
+PASS: binding: the buffer deleted, binding 3 and attribute 0 without it
+PASS: sample mask: off, all ones
+PASS: sample mask: enabled, word 0 set
+PASS: sample mask: word 1 is GL_INVALID_VALUE
+PASS: textures: GL_DEPTH_STENCIL_TEXTURE_MODE is GL_DEPTH_COMPONENT
+PASS: textures: set to GL_STENCIL_INDEX
+PASS: textures: GL_RGBA is GL_INVALID_ENUM
+PASS: textures: a 2D multisample texture bound, its swizzle and max level set
+PASS: textures: no sampler state for it (GL_INVALID_ENUM)
+PASS: textures: its base level 1 is GL_INVALID_OPERATION
+PASS: textures: glTexStorage2D of it is GL_INVALID_ENUM
+PASS: textures: a multisample name bound as 2D is GL_INVALID_OPERATION
+PASS: pipelines: 0 bound
+PASS: images: unit 255 unbound, GL_READ_ONLY, GL_R32UI
+PASS: images: unit 256 is GL_INVALID_VALUE
+PASS: images: GL_RGB8 is GL_INVALID_VALUE
+PASS: images: an access of GL_RGBA is GL_INVALID_ENUM
+PASS: images: a mutable texture is GL_INVALID_OPERATION
+PASS: level queries: an RGBA8 texture's levels, one not defined
+PASS: level queries: GL_TEXTURE_CUBE_MAP is GL_INVALID_ENUM
+PASS: level queries: level -1 is GL_INVALID_VALUE
+PASS: images: an immutable texture's level 1 bound to unit 3, every query
+PASS: images: the texture deleted, unit 3 unbound
+PASS: KHR_debug: offered
+PASS: KHR_debug: output off, its limits
+PASS: KHR_debug: an error is a message to the callback
+PASS: KHR_debug: without a callback the log, an inserted message
+PASS: KHR_debug: a push message, an error filtered in the group
+PASS: KHR_debug: the pop message, the filter gone with its group
+PASS: KHR_debug: a pop past the default group: GL_STACK_UNDERFLOW
+PASS: KHR_debug: a buffer's label
+PASS: KHR_debug: a label cut to the buffer given
+PASS: KHR_debug: a deleted buffer has no label (GL_INVALID_VALUE)
+PASS: KHR_debug: not an identifier: GL_INVALID_ENUM
+PASS: ES 3.1: no GL error left over
+PASS: ES 3.0 asked: 3.1 given (the highest)
+PASSED: 58 of 58

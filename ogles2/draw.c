@@ -175,7 +175,8 @@ static BOOL set_pointer(struct OGLES3Context *ctx, GLuint index, GLint size, GLe
                         GLsizei stride, const void *pointer, GLboolean integer)
 {
     struct OGLES3Array *a, *bnd;
-    struct OGLES3Buffer *old;
+    struct OGLES3Buffer *old, *nb;
+    int ts;
     if (!ogles2_context_valid(ctx))
         return FALSE;
     if (index >= OGLES3_MAX_VERTEX_ATTRIBS || size < 1 || size > 4 || stride < 0 ||
@@ -187,7 +188,7 @@ static BOOL set_pointer(struct OGLES3Context *ctx, GLuint index, GLint size, GLe
     BOOL half_oes = type == GL_HALF_FLOAT_OES && !integer;
     if (half_oes)
         type = GL_HALF_FLOAT;
-    if (!type_size(type) ||
+    if (!(ts = type_size(type)) ||
         (!ogles2_es3(ctx) && !half_oes &&
          (type == GL_HALF_FLOAT || type == GL_INT || type == GL_UNSIGNED_INT || packed_type(type)))) {
         ogles2_error(ctx, GL_INVALID_ENUM);
@@ -197,8 +198,11 @@ static BOOL set_pointer(struct OGLES3Context *ctx, GLuint index, GLint size, GLe
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return FALSE;
     }
-    /* ES 3.0 2.8: no client arrays in a vertex array object but 0 */
-    if (pointer && ogles2_vao_bound(ctx) && !ogles2_buffer_array(ctx)) {
+    /* ES 3.0 2.8: no client arrays in a vertex array object but 0 (the
+     * object asked for only for a client array: a Quake III frame sets 250
+     * pointers into buffers) */
+    nb = ogles2_buffer_array(ctx);
+    if (!nb && pointer && ogles2_vao_bound(ctx)) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return FALSE;
     }
@@ -212,9 +216,9 @@ static BOOL set_pointer(struct OGLES3Context *ctx, GLuint index, GLint size, GLe
     a->binding = (UBYTE)index;
     bnd = a; /* binding `index`'s state is slot index's */
     old = bnd->bbuffer;
-    bnd->bbuffer = ogles2_buffer_array(ctx); /* GLES 2.0 2.9: captured now */
+    bnd->bbuffer = nb; /* GLES 2.0 2.9: captured now */
     bnd->boffset = pointer;
-    bnd->bstride = stride ? stride : (GLsizei)elem_bytes(a);
+    bnd->bstride = stride ? stride : packed_type(type) ? 4 : ts * size; /* elem_bytes */
     if (!ctx->vab_moved) {
         /* Every attribute reads its own binding (no glVertexAttribBinding
          * moved one yet): this one alone takes the binding's state, as
