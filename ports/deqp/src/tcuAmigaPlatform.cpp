@@ -191,7 +191,11 @@ RenderContext::RenderContext(const glu::RenderConfig &config) : m_type(config.ty
     {
         const char *(*getString)(unsigned int) = (const char *(*)(unsigned int))aglGetProcAddress("glGetString");
         const char *version                    = getString ? getString(GL_VERSION) : nullptr;
-        if (!version || std::string(version).compare(0, 13, es31 ? "OpenGL ES 3.1" : "OpenGL ES 3.0") != 0)
+        /* dEQP-GLES3 runs in a 3.1 context as well: the release library
+         * gives one for 3.0 (its newest for 3.x), and a 3.1 context is a 3.0
+         * one and more (docs/GLES3_PLAN.md, the remaining gaps) */
+        if (!version || (std::string(version).compare(0, 13, "OpenGL ES 3.1") != 0 &&
+                         (es31 || std::string(version).compare(0, 13, "OpenGL ES 3.0") != 0)))
         {
             aglDestroyContext(m_ctx);
             m_ctx = nullptr;

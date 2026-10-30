@@ -872,6 +872,10 @@ struct OGLES3Context
     BOOL xfb_begun;                 /* glBeginTransformFeedback ran once: until then no draw asks xfb.c (a
                                      * query or a binding makes xfb above without any feeding back) */
     BOOL job_xfb;                   /* the open job's binning list fed back: its end turns that off (xfb.c) */
+    ULONG xfb_draws, xfb_waited;    /* draws that fed back in all, and their count at the last wait for
+                                     * them in the open job (draw.c, xfb_wait) */
+    BOOL draw_fed;                  /* the draw being built reads, as the GPU wrote them, words transform
+                                     * feedback wrote in the open job (draw.c: it waits for the feedback) */
     BOOL job_storage;               /* a draw of the open job stores into storage buffers (ES 3.1, draw.c) */
 };
 
@@ -1169,11 +1173,19 @@ UBYTE *ogles2_buffer_pixels(struct OGLES3Context *ctx, BOOL pack, ULONG offset, 
  * buffer binding `index`'s address and bytes (0: none bound). */
 ULONG ogles2_buffer_words(struct OGLES3Context *ctx, struct OGLES3Buffer *b);
 ULONG ogles2_buffer_uniform(struct OGLES3Context *ctx, ULONG index, ULONG *size);
+/* Uniform buffer binding `index`'s buffer was written by transform feedback
+ * in the open job (its GPU words, which a draw's block reads) */
+BOOL ogles2_buffer_uniform_fed_back(struct OGLES3Context *ctx, ULONG index);
 ULONG ogles2_buffer_storage(struct OGLES3Context *ctx, ULONG index, ULONG *size);
 ULONG ogles2_buffer_atomic(struct OGLES3Context *ctx, ULONG index, ULONG *size);
 ULONG ogles2_buffer_storage_draw(struct OGLES3Context *ctx, BOOL atomic, ULONG index, ULONG *size);
 GLenum ogles2_buffer_dispatch_indirect(struct OGLES3Context *ctx, GLintptr offset, ULONG *groups);
 GLenum ogles2_buffer_draw_indirect(struct OGLES3Context *ctx, GLintptr offset, ULONG bytes, ULONG *words);
+/* GPU-written buffers read by draws as the GPU wrote them (buffer.c) */
+ULONG ogles2_buffer_gpu_words(struct OGLES3Context *ctx, struct OGLES3Buffer *b, BOOL *fed, ULONG *size);
+ULONG ogles2_buffer_element_words(struct OGLES3Context *ctx, BOOL cpu, BOOL *fed, ULONG *size);
+GLenum ogles2_buffer_draw_indirect_gpu(struct OGLES3Context *ctx, GLintptr offset, ULONG bytes, ULONG *addr,
+                                       BOOL *fed);
 struct OGLES3Buffer *ogles2_buffer_array(struct OGLES3Context *ctx);
 /* The GL_ELEMENT_ARRAY_BUFFER binding, which a vertex array object holds (vao.c). */
 struct OGLES3Buffer *ogles2_buffer_element(struct OGLES3Context *ctx);

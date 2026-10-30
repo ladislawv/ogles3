@@ -1,0 +1,23 @@
+#version 310 es
+// m8_draw (docs/GLES3_PLAN.md, the remaining gaps, item 5): vertices, 32-bit
+// indices and indirect commands written on the GPU, for draws that read them
+// where they lie. Vertices 0-3 lie off the screen, 4-6 cover it; indices
+// 0-2 name 4-6, 3-5 name 0-2 (a base vertex of 4 moves them onto 4-6).
+layout(local_size_x = 1) in;
+layout(std430, binding = 0) writeonly buffer Verts { vec2 pos[]; };
+layout(std430, binding = 1) writeonly buffer Idx { uint idx[]; };
+layout(std430, binding = 2) writeonly buffer Cmd { uint cmd[]; };
+void main()
+{
+    for (int i = 0; i < 4; i++)
+        pos[i] = vec2(9.0, 9.0);
+    pos[4] = vec2(-1.0, -1.0);
+    pos[5] = vec2(3.0, -1.0);
+    pos[6] = vec2(-1.0, 3.0);
+    idx[0] = 4u; idx[1] = 5u; idx[2] = 6u;
+    idx[3] = 0u; idx[4] = 1u; idx[5] = 2u;
+    // DrawArraysIndirectCommand: 3 vertices from 4, 1 instance
+    cmd[0] = 3u; cmd[1] = 1u; cmd[2] = 4u; cmd[3] = 0u;
+    // DrawElementsIndirectCommand at byte 16: indices 3-5, base vertex 4
+    cmd[4] = 3u; cmd[5] = 1u; cmd[6] = 3u; cmd[7] = 4u; cmd[8] = 0u;
+}

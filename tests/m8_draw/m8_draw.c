@@ -985,6 +985,82 @@ static void test_xfb(void)
     glDeleteProgram(p);
 }
 
+/* A buffer fed back and read in the same job, before anything renders it:
+ * es3xfb writes 999 triangles (72 KB) with the rasterizer off, then
+ * es3tfub's vertex shader reads the last ones' words as its uniform block
+ * Fed (docs/GLES3_PLAN.md, the remaining gaps, item 2: the draw waits for
+ * the feedback; many vertices, so the feedback is still being written when
+ * an unwaited draw would read). The range starts at vertex 2976 (24 bytes
+ * a vertex: 71424 bytes, a multiple of 256). Fed.c is its bytes 16-31:
+ * vertex 2976's v_pos.w (2.0) and v_id (2976's bits: about 0 as a float),
+ * vertex 2977's v_twice (1.0) and v_pos.x (6.0): magenta once clamped.
+ * Unwaited, the zeros before. */
+#define TFUB_VERTS 2997
+#define TFUB_FIRST 2976
+static void test_xfb_ubo(void)
+{
+    static const char *const names[3] = { "v_twice", "v_pos", "v_id" };
+    static const GLfloat tri[6] = { -1, -1, 3, -1, -1, 3 };
+    static const GLfloat a3[3] = { 0.25f, 0.5f, 0.125f };
+    GLfloat *pos = malloc(TFUB_VERTS * 2 * sizeof(GLfloat)), *attr = malloc(TFUB_VERTS * sizeof(GLfloat));
+    GLubyte *zeros = calloc(TFUB_VERTS, 24);
+    GLuint p, pu, b;
+    GLint lp, la, align = 0, k;
+    xfb_names = names;
+    xfb_count = 3;
+    p = program("es3xfb");
+    xfb_names = 0;
+    xfb_count = 0;
+    pu = program("es3tfub");
+    glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &align);
+    if (!p || !pu || !pos || !attr || !zeros || align < 1 || (TFUB_FIRST * 24) % align) {
+        check(0, "feedback read in the job: es3xfb and es3tfub link, memory, an offset the alignment allows");
+        free(pos);
+        free(attr);
+        free(zeros);
+        return;
+    }
+    for (k = 0; k < TFUB_VERTS; k++) {
+        pos[2 * k] = tri[2 * (k % 3)];
+        pos[2 * k + 1] = tri[2 * (k % 3) + 1];
+        attr[k] = a3[k % 3];
+    }
+    glUniformBlockBinding(pu, glGetUniformBlockIndex(pu, "Fed"), 0);
+    glGenBuffers(1, &b);
+    glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, b);
+    glBufferData(GL_TRANSFORM_FEEDBACK_BUFFER, TFUB_VERTS * 24, zeros, GL_STREAM_COPY);
+    glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, b);
+    glClearColor(0, 0, 1, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+    lp = glGetAttribLocation(p, "pos");
+    la = glGetAttribLocation(p, "a");
+    glUseProgram(p);
+    glVertexAttribPointer((GLuint)lp, 2, GL_FLOAT, GL_FALSE, 0, pos);
+    glVertexAttribPointer((GLuint)la, 1, GL_FLOAT, GL_FALSE, 0, attr);
+    glEnableVertexAttribArray((GLuint)lp);
+    glEnableVertexAttribArray((GLuint)la);
+    glEnable(GL_RASTERIZER_DISCARD);
+    glBeginTransformFeedback(GL_TRIANGLES);
+    glDrawArrays(GL_TRIANGLES, 0, TFUB_VERTS);
+    glEndTransformFeedback();
+    glDisable(GL_RASTERIZER_DISCARD);
+    glDisableVertexAttribArray((GLuint)la);
+    glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, 0);
+    glBindBufferRange(GL_UNIFORM_BUFFER, 0, b, TFUB_FIRST * 24, 32);
+    draw_cover(pu); /* the same job: nothing has rendered it */
+    check(glGetError() == GL_NO_ERROR && pixel_is(32, 32, 255, 0, 255, 255, 2),
+          "feedback read in the job: the vertex shader's uniform block holds what feedback wrote (magenta)");
+    glBindBufferBase(GL_UNIFORM_BUFFER, 0, 0);
+    glClearColor(0, 0, 0, 0);
+    glUseProgram(0);
+    glDeleteBuffers(1, &b);
+    glDeleteProgram(p);
+    glDeleteProgram(pu);
+    free(pos);
+    free(attr);
+    free(zeros);
+}
+
 /* The colour es3wide samples from the bound 2D texture at (32, 32). */
 static int sampled_is(GLuint p, int r, int g, int b)
 {
@@ -2775,6 +2851,84 @@ static void test_vao2(int indirect)
     glDeleteProgram(p);
 }
 
+/* Buffers the GPU wrote, read by draws where they lie (docs/GLES3_PLAN.md,
+ * the remaining gaps, item 5): es31gpu writes vertices, 32-bit indices and
+ * both indirect commands into storage buffers; es3inst draws them (its
+ * colour the current value of col, magenta) through glDrawArrays first 4,
+ * glDrawElements of indices 0-2, glDrawArraysIndirect and
+ * glDrawElementsIndirect (indices 3-5, base vertex 4), each over the whole
+ * framebuffer; then the vertices read back by the CPU (the shadow made
+ * current from the GPU's words at that use). */
+static void test_gpu_written(void)
+{
+    static const GLubyte zeros[64];
+    GLuint p = program("es3inst"), c = compute_program("es31gpu"), b[3], vao;
+    GLint lp, lc;
+    const GLfloat *f;
+    if (!p || !c) {
+        check(0, "GPU-written buffers: es3inst and es31gpu link");
+        return;
+    }
+    glGenBuffers(3, b);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, b[0]);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, 56, zeros, GL_DYNAMIC_COPY);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, b[0]);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, b[1]);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, 24, zeros, GL_DYNAMIC_COPY);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, b[1]);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, b[2]);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, 36, zeros, GL_DYNAMIC_COPY);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, b[2]);
+    glUseProgram(c);
+    glDispatchCompute(1, 1, 1);
+    glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT | GL_ELEMENT_ARRAY_BARRIER_BIT | GL_COMMAND_BARRIER_BIT);
+    for (lp = 0; lp < 3; lp++)
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, (GLuint)lp, 0);
+
+    lp = glGetAttribLocation(p, "pos");
+    lc = glGetAttribLocation(p, "col");
+    glUseProgram(p);
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, b[0]);
+    glVertexAttribPointer((GLuint)lp, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray((GLuint)lp);
+    glDisableVertexAttribArray((GLuint)lc);
+    glVertexAttrib4f((GLuint)lc, 1, 0, 1, 1);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, b[1]);
+    glBindBuffer(GL_DRAW_INDIRECT_BUFFER, b[2]);
+
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawArrays(GL_TRIANGLES, 4, 3);
+    check(glGetError() == GL_NO_ERROR && pixel_is(32, 32, 255, 0, 255, 255, 0),
+          "GPU-written buffers: glDrawArrays from vertices a compute shader wrote");
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+    check(glGetError() == GL_NO_ERROR && pixel_is(32, 32, 255, 0, 255, 255, 0),
+          "GPU-written buffers: glDrawElements of 32-bit indices a compute shader wrote");
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawArraysIndirect(GL_TRIANGLES, 0);
+    check(glGetError() == GL_NO_ERROR && pixel_is(32, 32, 255, 0, 255, 255, 0),
+          "GPU-written buffers: glDrawArraysIndirect of a command a compute shader wrote");
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, (const void *)16);
+    check(glGetError() == GL_NO_ERROR && pixel_is(32, 32, 255, 0, 255, 255, 0),
+          "GPU-written buffers: glDrawElementsIndirect, base vertex 4, all GPU-written");
+    f = glMapBufferRange(GL_ARRAY_BUFFER, 0, 56, GL_MAP_READ_BIT);
+    check(f && f[0] == 9.0f && f[8] == -1.0f && f[9] == -1.0f && f[12] == -1.0f && f[13] == 3.0f,
+          "GPU-written buffers: the vertices read back by the CPU after the draws");
+    glUnmapBuffer(GL_ARRAY_BUFFER);
+
+    glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+    glBindVertexArray(0);
+    glDeleteVertexArrays(1, &vao);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glDeleteBuffers(3, b);
+    glUseProgram(0);
+    glDeleteProgram(p);
+    glDeleteProgram(c);
+}
+
 /* ES 3.1's indirect draws (GLES3 plan stage D item 3) with es3inst (the
  * triangle on the lower left of x + y < 0, instance i moved right by 32
  * pixels): glDrawArraysIndirect of 2 instances (green), then
@@ -3234,6 +3388,7 @@ int main(void)
     test_instanced_ext();
     test_attachment_queries();
     test_xfb();
+    test_xfb_ubo();
     test_msaa();
     {
         GLint minor = 0;
@@ -3255,6 +3410,8 @@ int main(void)
                 test_vao2(0);
             if (!skipped("vao2_indirect"))
                 test_vao2(1);
+            if (!skipped("gpu_written"))
+                test_gpu_written();
             if (!skipped("uniform_locations"))
                 test_uniform_locations();
             if (!skipped("images"))

@@ -83,6 +83,9 @@ struct OGLES3Buffer
                               * shadow is stale until gpu_written (0: none) */
     BOOL cs_written;         /* a compute dispatch wrote its words (finished): the shadow is stale
                               * until gpu_written (ES 3.1 storage buffers, compute.c) */
+    ULONG sto_job;           /* a job whose draws write it as a storage buffer (their fragment
+                              * shaders run at its render): no draw of that job reads its words
+                              * directly (ogles2_buffer_gpu_words). 0: none */
     struct OGLES3Buffer *next_orphan;
 };
 
@@ -167,6 +170,7 @@ static __attribute__((noinline)) void gpu_written_now(struct OGLES3Context *ctx,
     }
     b->xfb_job = 0;
     b->cs_written = FALSE;
+    b->sto_job = 0;
     if (!b->words.hostptr || !b->data || b->words_serial != b->serial)
         return;
     len = b->words_bytes;
@@ -581,6 +585,7 @@ static void buffer_data(struct OGLES3Context *ctx, GLenum target, GLsizeiptr siz
      * reads it (the GPU reads copies, and draws copy what they read), so
      * nothing waits; GL leaves the contents undefined without data. */
     b->xfb_job = 0; /* new contents: what transform feedback wrote is gone */
+    b->sto_job = 0;
     if (size && b->data && (ULONG)size == b->size && !b->mapped) {
         if (data)
             memcpy(b->data, data, (ULONG)size);
@@ -1052,6 +1057,12 @@ ULONG ogles2_buffer_uniform(struct OGLES3Context *ctx, ULONG index, ULONG *size)
     return a + r->offset;
 }
 
+BOOL ogles2_buffer_uniform_fed_back(struct OGLES3Context *ctx, ULONG index)
+{
+    struct OGLES3BufState *bs = ctx->buf;
+    return bs && index < MAX_UNIFORM_BINDINGS && bs->ubo[index].b && bs->ubo[index].b->xfb_job == ctx->job_serial;
+}
+
 /* Storage buffer binding `index` as a compute dispatch reads and writes it
  * (ES 3.1, compute.c): as ogles2_buffer_uniform; the dispatch is waited for,
  * so the buffer's shadow is then stale (gpu_written copies the words back
@@ -1108,11 +1119,78 @@ ULONG ogles2_buffer_storage_draw(struct OGLES3Context *ctx, BOOL atomic, ULONG i
     if (!r->b || r->offset >= r->b->size || !(a = ogles2_buffer_words(ctx, r->b)))
         return 0;
     r->b->xfb_job = ctx->job_serial;
+    r->b->sto_job = ctx->job_serial;
     ogles2_gpu_writes_seen = TRUE;
     *size = r->b->size - r->offset;
     if (r->size && r->size < *size)
         *size = r->size;
     return a + r->offset;
+}
+
+/* A buffer the GPU wrote (transform feedback, a compute shader, a draw's
+ * storage writes), read by a draw as the GPU wrote it: its words, with no
+ * wait for the render and no copy back into the shadow (docs/GLES3_PLAN.md,
+ * the remaining gaps, item 5). 0 when the GPU did not write it (its data are
+ * the shadow's), when a draw of the open job writes it as a storage buffer
+ * (those fragment shaders run at the render, after the binning that would
+ * read: the CPU path renders the job first), or without words. *fed:
+ * transform feedback wrote it in the open job (the draw waits for the
+ * feedback, draw.c). *size: the buffer's bytes. The open job reads the
+ * words from now: a CPU change renames them (ogles2_buffer_words). */
+ULONG ogles2_buffer_gpu_words(struct OGLES3Context *ctx, struct OGLES3Buffer *b, BOOL *fed, ULONG *size)
+{
+    if (!b || (!b->xfb_job && !b->cs_written) || !b->words.hostptr || b->words_serial != b->serial ||
+        (b->sto_job && b->sto_job == ctx->job_serial))
+        return 0;
+    *fed = b->xfb_job == ctx->job_serial;
+    *size = b->size;
+    b->words_job = ctx->job_serial;
+    return (ULONG)b->words.hostptr;
+}
+
+/* The element array buffer's words for a draw that reads indices on the
+ * GPU (draw.c, gpu_elements and the indirect draws): as the GPU wrote them
+ * (ogles2_buffer_gpu_words), or with `cpu` the shadow's in the GPU's order
+ * (ogles2_buffer_words; 32-bit indices only, which those words hold as
+ * the program gave them). 0: no buffer, none of those. */
+ULONG ogles2_buffer_element_words(struct OGLES3Context *ctx, BOOL cpu, BOOL *fed, ULONG *size)
+{
+    struct OGLES3BufState *bs = ctx->buf;
+    struct OGLES3Buffer *b = bs ? bs->element : 0;
+    ULONG a;
+    *fed = FALSE;
+    if (!b || !b->data)
+        return 0;
+    if ((a = ogles2_buffer_gpu_words(ctx, b, fed, size)) != 0 || !cpu)
+        return a;
+    if (b->xfb_job || b->cs_written)
+        return 0; /* GPU-written but not readable now: the CPU path */
+    *size = b->size;
+    return ogles2_buffer_words(ctx, b);
+}
+
+/* glDrawArraysIndirect's and glDrawElementsIndirect's command buffer when
+ * the GPU wrote it: the checks of ogles2_buffer_draw_indirect, then the
+ * command's address in the buffer's words for the hardware's indirect
+ * packets (*addr 0: the GPU did not write it, or it cannot be read so:
+ * the CPU reads the command). 0, or the error. */
+GLenum ogles2_buffer_draw_indirect_gpu(struct OGLES3Context *ctx, GLintptr offset, ULONG bytes, ULONG *addr,
+                                       BOOL *fed)
+{
+    struct OGLES3BufState *bs = bs_get(ctx);
+    struct OGLES3Buffer *b = bs ? bs->draw_indirect : 0;
+    ULONG w, size;
+    *addr = 0;
+    *fed = FALSE;
+    if (!b)
+        return GL_INVALID_OPERATION;
+    if (offset & 3)
+        return GL_INVALID_VALUE;
+    if (!b->data || (ULONG)offset > b->size || b->size - (ULONG)offset < bytes)
+        return GL_INVALID_OPERATION;
+    if ((w = ogles2_buffer_gpu_words(ctx, b, fed, &size)) != 0)
+        *addr = w + (ULONG)offset;
+    return 0;
 }
 
 /* glDispatchComputeIndirect's three work group counts at `offset` in the

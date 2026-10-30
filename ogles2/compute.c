@@ -11,9 +11,9 @@
  * into GPU memory of the context's own, which the next dispatch reuses.
  * Storage buffers are their words in GPU memory (buffer.c,
  * ogles2_buffer_storage), copied back into their shadows when the CPU or a
- * draw next uses them. Not yet: textures and images in a compute shader
- * (the dispatch is refused and logged), atomic counters (the compiler
- * refuses them).
+ * draw next uses them. Textures, images and atomic counters are read
+ * through the uniform stream's records (below; docs/GLES3_PLAN.md stage D
+ * items 1-2).
  */
 #include <exec/memory.h>
 #include <proto/exec.h>

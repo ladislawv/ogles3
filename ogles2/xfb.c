@@ -489,6 +489,7 @@ void ogles2_xfb_after_draw(struct OGLES3Context *ctx, GLenum mode, GLsizei count
     ULONG n = verts(mode, count) * (ULONG)instances;
     int k;
     DoCommand(ctx->v3d, v3d_OP_TRANSFORM_FEEDBACK_FLUSH_AND_COUNT);
+    ctx->xfb_draws++; /* a later draw of the job reading what it wrote waits (draw.c, xfb_wait) */
     for (k = 0; k < OGLES3_MAX_XFB_BUFFERS; k++)
         if (x->stride[k])
             o->written[k] += n;

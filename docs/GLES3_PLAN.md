@@ -1,5 +1,336 @@
 # OpenGL ES 3.0 and 3.1 on ogles2.library
 
+**Plan: the remaining gaps before the full dEQP runs (2026-10-30, the
+developer's request).** An audit of every "not yet" in this plan against
+the code and the later entries: most are stale. `glTexStorage2D/3D`,
+`glCopyTexSubImage3D`, `glCompressedTexImage3D`/`SubImage3D` and layers as
+framebuffer attachments were done in stage B item 8 and 11 (§5, after the
+note at "Not yet: `glCopyTexSubImage3D`"); ES 3.1's vertex array object form
+in stage D item 5; textures, images and atomic counters in compute shaders,
+and robust storage, image and shared access (Mesa patch 0017), in stage D
+items 1-2. Every dEQP-GLES31 group of `gles31-main` has passed on its own
+(§7's last entries); the "not supported" cases are ES 3.2 and extensions
+the library does not offer. What is really left, in order (items 1-5
+**done 2026-10-30**, below each):
+1. **The stale notes** (an hour): the "Not yet" sentences in §5 item 8, §5
+   item 3 ("not yet in ES 3.1's form"), §7 item 1, and `ogles2/compute.c`'s
+   header comment ("Not yet: textures and images in a compute shader...,
+   atomic counters") say what was done instead, with the entry that did it.
+   **Done:** each now says where the work was finished.
+2. **Transform feedback read by the GPU in the same job** (§6 item 1's open
+   point; a few days): a buffer written by transform feedback and read in
+   the same job as a uniform buffer is not waited for today (vertex and
+   index reads render the job first, through the CPU). Mesa's way:
+   `WAIT_FOR_TRANSFORM_FEEDBACK` and `TRANSFORM_FEEDBACK_FLUSH_AND_COUNT`
+   before such a draw (`v3d_emit_wait_for_tf_if_needed`,
+   `v3dx_draw.c:290-336`, Appendix B.3), the buffer's GPU copy the one
+   read. Test: an `m8_draw` case (feedback into a buffer, a uniform block
+   read of it by the next draw, checked by pixel), then dEQP-GLES3
+   `transform_feedback` again.
+   **Done:** `draw.c`'s `xfb_wait` (a draw whose vertex stage reads a
+   uniform block bound to a buffer fed back in the open job, after a
+   feedback draw since the last wait: `FLUSH_TRANSFORM_FEEDBACK_DATA`,
+   `WAIT_FOR_TRANSFORM_FEEDBACK` 255; `ctx->xfb_draws`, `xfb_waited`;
+   `ogles2_buffer_uniform_fed_back`). `m8_draw`'s `test_xfb_ubo`
+   (`es3tfub`: 999 triangles fed back with the rasterizer off, then the last
+   ones' words read as the vertex shader's block in the same job): `m8-5`
+   58 of 58, 205 of 205 (`ogles2-m8-5-20261030-135712`). On this A1200 the
+   test passed without the wait too (`-135624`, the wait off; the library
+   found the buffer fed back in the same job): the binner seems to finish a
+   draw's feedback before the next draw's vertex shaders. The wait stays,
+   as Mesa's: the hardware does not promise that order.
+3. **The compiler's state between programs** (§1, "Open points"; a day or
+   two to find): a program's default variants can depend on the program
+   the same `v3dglslc` process compiled before it (`es3uni` after
+   `es3tex`: 7 bytes differ). A cached binary must not depend on the order
+   of compiles. Find the state Mesa keeps across links in the server
+   (`tools/v3dglslc`), reset it per request, then `compare_v3dp.sh` with
+   the programs compiled in two orders.
+   **Done:** reproduced on the PC (`es3uni` alone against after `es3tex`
+   in one run: 9 bytes, `sampler_is_32b` 63 and 1 in its keys). The
+   key-state textures `bind_samplers` binds (32-bit ones for the wide
+   variants) stayed in the driver: the state tracker sends a stage's sampler
+   views only while its program reads samplers, so a program without any
+   kept the last one's, and V3D's key takes `sampler_is_32b` from the views
+   bound. `bind_samplers`' restore now drops every stage's views in the
+   driver (`set_sampler_views`, 0 views), as in a fresh process. The 42
+   test programs' files identical compiled alone, in one run and in one run
+   in reverse order. Both compilers rebuilt (host and m68k).
+4. **`derivate.dfdx.texture.basic.float_mediump`** (seen failing once, 12
+   pixels): run it 20 times; fix or document as a deviation.
+   **Done:** 20 of 20 passed (`ogles2-m8-2-20261030-140719` on): not
+   reproduced; watched in the full runs. On the way: the dEQP-GLES3
+   package ran nothing with the release library in `LIBS:` (it gives a 3.1
+   context for 3.0; the AmigaOS platform wanted "OpenGL ES 3.0" and threw
+   NotSupported): `ports/deqp/src/tcuAmigaPlatform.cpp` takes a 3.1
+   context for dEQP-GLES3 too.
+5. **GPU-written data used by the GPU** (performance, not conformance;
+   §8's risk "a full stall and a swap at every use"; a week): a buffer
+   written by transform feedback or a compute shader and then used as
+   vertices, indices or indirect commands waits for the render and is
+   swapped back by the CPU. The 32-bit words' GPU copy can be read as they
+   are (vertices of 32-bit types, 32-bit indices) and indirect commands by
+   the hardware's indirect packets (`INDIRECT_VERTEX_ARRAY_INSTANCED_PRIMS`,
+   `INDIRECT_INDEXED_INSTANCED_PRIM_LIST`): no wait, no swap. Only once
+   1-4 are done and the full runs pass.
+   **Done (the developer's call, before the full runs):**
+   - **Vertices:** an array in a buffer the GPU wrote (`xfb_job`,
+     `cs_written`) whose elements are whole 32-bit words read as they are
+     (float, fixed, integers read as integers, 10-10-10-2), at word
+     boundaries, is read from the buffer's words (`buffer.c`,
+     `ogles2_buffer_gpu_words`; `draw.c`, `gpu_array`, `gpu_source`):
+     no wait, no copy back. Smaller components lie byte-swapped in the
+     words, and integers read as floats are converted on the CPU: those
+     keep the CPU path. A buffer a draw of the open job writes as storage
+     (`sto_job`: those fragment shaders run at the render, after the
+     binning) keeps it too.
+   - **Indices:** 32-bit indices the GPU wrote, `glDrawElements*`
+     (`gpu_elements`): read where they lie, nothing rebased, the base
+     vertex in `INDEXED_PRIM_LIST`'s index offset, every array its whole
+     buffer from vertex 0 (`gpu_draw`, `arrays_whole`: the CPU does not know
+     which vertices are read; client arrays keep the CPU path).
+   - **Indirect commands** the GPU wrote (`gpu_indirect`): read by the
+     GPU, packets 33 and 37 (`indirect_packets`, one record, strides 20 and
+     16), whole arrays; 32-bit indices where they lie (the GPU's words or
+     the shadow's in the GPU's order), 8- and 16-bit ones the whole buffer
+     converted once a job (the CPU path's conversion).
+   - **Order:** transform feedback of the open job is waited for before
+     such a draw (`ctx->draw_fed`, `xfb_wait`); a compute dispatch is
+     already finished when it returns.
+   - **Tests:** `m8_draw`'s `test_gpu_written` (`es31gpu.comp` writes
+     vertices, indices and both commands; `glDrawArrays`,
+     `glDrawElements`, both indirect draws, then the CPU's read-back):
+     `m8-5` 58 of 58, 210 of 210 (`ogles2-m8-5-20261030-150317`), the log
+     naming each path once; `m7-6` all, `m5-1` 257 of 257 run alone
+     (`-150355`; after other packages its "destroy returns the memory"
+     fails, 27,853,056 bytes, as before this work). dEQP-GLES31
+     `draw_indirect` 203 of 203 (its `compute_interop` cases take these
+     paths; `-150436`), `compute` 195 of 195, dEQP-GLES3
+     `transform_feedback` 987 passed, 333 not supported, as before.
+   - **Speed:** the first version made draws on repeated data 15-20%
+     slower in drawbench (the same draw 7.1-7.4 us against the committed
+     build's 6.5, probe P's vertex and binning stages larger), though they
+     take none of these paths: the checks in `draw_arrays`' vertex loop
+     and binning part changed GCC's code there. The GPU cases now have a
+     loop of their own (`gpu_sources`, out of line, only once GPU writes
+     were seen or for a `gpu_draw`), the indirect packets too
+     (`indirect_packets`), the rest `__builtin_expect`ed: the same draw
+     6.55 us again, the state-change draws 0.62-0.68 of ogles2's as
+     yesterday. The committed build (`1040a1a`, the same draw code that
+     measured 6.08 on 2026-10-29) measures 6.48 today: the A1200 differs
+     by about 6% from day to day; this code and it agree.
+6. **The developer's decisions, not work:** the shader cache's single
+   drawer (subdrawers proposed); which of the extensions dEQP reports as
+   not supported to offer later (`EXT_texture_sRGB_decode`,
+   `OES_texture_stencil8`, `EXT_texture_border_clamp`, ...: ES 3.2's own).
+
+Then the full runs the beta skipped (§1's release note): dEQP-GLES2, -GLES3
+and -GLES31 whole, the GLES2 regression set (`m5-1` and the rest), the
+speed against 1.x (drawbench, `q3cmp.sh`, Doom 3's timedemo), and a
+1.0-beta2 with the speed work of 2026-10-29.
+
+**Plan: Boing Ocean for ogles3 (2026-10-30, the developer's request).** A
+copy, `release/examples/boingocean-ogles3.c` (with
+`boingocean-ogles3_shaders.h`), becomes the OpenGL ES 3 version of example 3:
+faster and better looking than `boingocean.c` can be on ogles2, which stays
+the GLES2 example. Nothing of it is written yet; the A1200 was off when this
+was planned, so the figures are the example's own.
+- **What Boing Ocean is now** (`boingocean.c`, `boingocean_shaders.h`): one
+  full-screen triangle whose fragment shader (about 1,300 instructions) does
+  everything: the view ray from the vertex shader, a slope-bounded march
+  over the water (at most 8 reads of a height texture), the water's normal
+  (the texture's slope plus three sine ripples), Fresnel, the sky (a table
+  texture), the sun, the ball (analytic sphere: a checkerboard from
+  `atan`/`asin` of its normal, Blinn highlight, reflection of the sky), the
+  ball reflected in and seen through the water near it, its waterline,
+  haze, ACES. Before it each frame: the coarse water (8 wave octaves with
+  their drag and slope by the chain rule) into a 160x160 RGBA8 texture,
+  height in red and the slope packed into green and blue (/4 + 0.5: 8 bits);
+  every 16th frame the sky into a 64x64 RGBA8 table stored as RGBM. The CPU
+  works out what is the same for every pixel (camera, sun, the ball's float
+  from 5 wave samples, its checker axes, the sky light) as 12 uniforms. Keys
+  1-4 draw it at 1/1..1/4 of the window into a texture brought up by a
+  second shader. 60 fps at 640x480 at 1/1 (`boing2026/ReadMe.txt`).
+- **What it shows of ogles3 against ogles2:** the same rules as Boing 2026's
+  plan (below): on the GPU half-float targets, several render targets,
+  `textureLod`, cube maps (seamless, mipmapped by the TFU from RGBA8), 3D
+  and array textures, instancing with `gl_InstanceID`/`gl_VertexID`, uniform
+  blocks written once a frame, vertex array objects, `glInvalidateFramebuffer`,
+  GLSL ES 3.00; never per frame `glBlitFramebuffer`, `glDispatchCompute`,
+  transform feedback or compute results as vertices, multisampled
+  framebuffer objects (their resolve is a blit), `glGenerateMipmap` of 3D or
+  float textures (the CPU makes those levels: draw them instead).
+- **Step 0, the baseline:** on the A1200 at 640x480 and 1280x720, scale 1/1
+  and 1/2, on ogles2 1.3.2 and on ogles3: the frame rate and, from probe P
+  and a `TIMING`-like split (`glFinish` between the passes), the height,
+  sky and scene passes; the shader's instruction count (`v3dglslc3`). Each
+  step below is measured against it.
+- **Faster:**
+  1. **The water as half floats:** the coarse water into RGBA16F: height and
+     slope as they are (no packing, no 8-bit steps in the slope, the
+     normal's banding gone), and in alpha the waves' folding (the
+     determinant of the drag's Jacobian `J`, which the shader already
+     carries) for foam (step 7). Read with `textureLod(..., 0.0)` in the
+     march: no implicit level of detail inside a loop whose rays diverge.
+  2. **The ripples from a texture:** the three sine ripples (three `cos` and
+     their sums per water pixel) replaced by two reads of a small tiling
+     RG16F ripple-slope texture drawn once a frame (more, finer ripples for
+     less), faded out with distance as now.
+  3. **The sky as a cube map:** the sky and the sun drawn into a small
+     RGBA16F cube map (6 faces of 64x64) when the sun has moved (every 16th
+     frame, as now), with its blurred levels drawn by a pass each (the
+     water's and the ball's rough reflections take a level by roughness
+     with `textureLod`): one read instead of the table's RGBM decode, the
+     `pow(d, 720)` sun and its tests in every reflection.
+  4. **The checkerboard from a cube map:** the ball's checker in a small
+     RGBA8 cube map (mipmapped by the TFU), read with the ball-space normal:
+     no `atan`/`asin` per ball pixel, and its edges filtered by the mips
+     (they alias now, and crawl as it turns).
+  5. **The CPU's share:** the frame's data in one uniform block (written once
+     a frame; the 12 `glUniform3f` calls gone), a vertex array object for
+     the triangle, `glInvalidateFramebuffer` on the scaled target after it
+     is brought up; the ball's 5 wave samples on the CPU stay (the float
+     must match the GPU's surface).
+- **Fantastic (new; each something a GLES2 program could not afford):**
+  6. **HDR and bloom:** the scene into an RGBA16F target (at the render
+     scale), then one pass to the window: ACES, the bloom of what is
+     brighter than white (the sun's glitter on the waves, the ball's
+     highlight, the sun) blurred at a quarter size, a soft vignette. The
+     sun's path on the water becomes a sparkling road (a high-exponent
+     glint per ripple, kept by the half floats instead of clipped).
+  7. **Foam on the crests:** where the waves fold (step 1's alpha) and
+     around the ball's waterline, white foam with its own ripple texture,
+     fading as the crest falls.
+  8. **Spray from the ball:** as it bobs and the crests hit it, droplets
+     thrown up and falling back: instanced quads whose path is worked out
+     in the vertex shader from `gl_InstanceID` and the hit's time and place
+     (a uniform block of the last few hits, found on the CPU from the
+     ball's float): no vertex data and no CPU work per droplet; lit by the
+     sun and the sky, refracting nothing, blooming where the sun catches
+     them. Drawn after the scene, hidden behind the ball by a test against
+     the sphere in the vertex shader (there is no depth buffer).
+  9. **Clouds:** a 3D noise texture (`sampler3D`, 32x32x32 RGBA8, made once
+     at start, its levels by drawing) drifting through the sky cube map's
+     faces as it is redrawn: clouds lit by the sun, reflected in the water
+     and the ball, at no cost per pixel of the scene.
+  10. **Caustics** on the ball under the water: a moving light pattern read
+      from the ripple texture where the refracted ray meets the ball.
+  11. **Comparing:** `E` switches the whole frame to the GLES2 way
+      (`boingocean.c`'s shaders and passes) with the frame rate in the
+      title, so the example shows the difference itself; keys for each new
+      effect, as Boing 2026's.
+- **Order:** step 0; 1-5 (speed, measured each); then 6 and 7 (the look),
+  8, 9, 10 within the frame time 1-5 freed; then 11. Each step's cost and
+  what it shows go into the example's header comment (as `boingocean.c`'s)
+  and the release ships its compiled shaders (`.v3dp`, `.v3ds`) as the
+  other examples'.
+- **Done when:** at 640x480, scale 1/1, it holds 60 fps with 6-10 on; at
+  1280x720 it runs faster than `boingocean.c` on ogles2 at the same scale,
+  on the A1200, measured against step 0.
+
+**Plan: Boing 2026 for ogles3 (2026-10-30, the developer's request).** A
+copy, `release/examples/boing2026-ogles3/`, becomes the example of what
+ogles3 does that ogles2 cannot: faster, and with effects an ES 2.0 program
+could not afford. `boing2026/` stays the GLES2 example (both run on ogles3;
+the copy needs it).
+- **What Boing 2026 is now** (`boing2026/ReadMe.txt`, `boing2026.c`): five
+  passes a frame: two 512x512 depth-texture shadow maps (the ball from each
+  light); the mirrored ball into a half-size texture (the floor's
+  reflection); the bloom: **the whole room and the ball drawn again at a
+  quarter size** with the room's shader (about 1,050 instructions) for its
+  bright parts, then two blurs each way; the room at the render scale into a
+  texture (most of the frame: 8.2 ms of it at 640x480); the window: the room
+  brought up to it with the bloom and the vignette, the ball over it with 4x
+  MSAA, a lens flare of 8 quads (8 draws). Shadows: 12 and 8 rotated taps
+  of nearest depth (GLES2 has no hardware comparison), only inside the
+  ball's footprint. The bright pass stores a quarter of the value (8-bit
+  targets clip at 1.0). About 40 uniform calls a frame. 60 fps at 640x480
+  and at 1280x720 with the room at 50%; 28 fps at 1280x720 with the room at
+  100%.
+- **What ogles3 gives, and what to keep away from** (this plan's §§, the
+  measurements above):
+  - On the GPU, at its speed: several render targets (`glDrawBuffers`, up to
+    4), half-float targets (RGBA16F, blended in the tile buffer), shadow
+    samplers (`sampler2DShadow`/`sampler2DArrayShadow`: the TMU compares
+    and, with `GL_LINEAR`, filters 2x2 taps in one read), texture arrays and
+    3D textures, instancing with `gl_InstanceID` and `gl_VertexID`, uniform
+    blocks, vertex array objects, `texelFetch`/`textureLod`/`textureSize`,
+    `glInvalidateFramebuffer`, GLSL ES 3.00 (integers, `flat`, loops with
+    bounds from uniforms).
+  - On the CPU or with a wait, so never per frame: `glBlitFramebuffer` (the
+    CPU reads and writes every pixel, a multisampled resolve too: so no
+    multisampled framebuffer objects in the frame), `glDispatchCompute` (it
+    waits for its job), transform feedback's and compute's results read as
+    vertices (a CPU wait and a byte swap). A uniform buffer rewritten after a
+    draw of the same frame read it is copied whole again: each frame's
+    blocks are written once, before the first draw, into ranges bound with
+    `glBindBufferRange`.
+- **Step 0, the baseline** (on the A1200, `TIMING`, 640x480 and 1280x720
+  with the room at 50% and 100%): the GLES2 program on ogles2 1.3.2 and on
+  ogles3, pass by pass; probe P for the CPU's share. Every step below is
+  measured against it and keeps the GLES2 path behind a key (`E`: the ES 2.0
+  way, for comparing in one run) where that is cheap.
+- **Faster:**
+  1. **The bloom's bright parts from the room's own pass (MRT):** the room
+     shader writes its colour and its bright part (HDR, RGBA16F) into two
+     targets at once; the bloom pass no longer draws the room again (the
+     quarter-size room was most of its 2.3 ms). The first blur reads the
+     bright target with a downsampling kernel into the quarter-size chain;
+     the ball keeps a small bright pass of its own (it covers little of the
+     screen) or writes its bright part into the same chain as it is drawn.
+  2. **HDR bloom:** RGBA16F bloom targets, no "store a quarter, multiply
+     back": brighter, cleaner glow, the neon and the highlights blooming by
+     their real values.
+  3. **Hardware shadow filtering:** both shadow maps in one
+     `GL_DEPTH_COMPONENT16` 2D array texture with `GL_TEXTURE_COMPARE_MODE`
+     and `GL_LINEAR`, read through one `sampler2DArrayShadow`: each tap a
+     2x2 comparison filtered by the TMU, so 4-6 taps give the softness of
+     12 nearest ones (fewer instructions where the shadow is, a smoother
+     penumbra); one shadow pass for both lights (layers of one framebuffer
+     each, the same program).
+  4. **Fewer calls on the 68k:** a uniform block of the frame's data (the
+     lights, their colours and matrices, the eye, the ball, the modes)
+     written once a frame and shared by the ball, the room and the flare;
+     vertex array objects for the sphere, the room, the screen triangle and
+     the quad; the flare as one instanced draw (`gl_InstanceID` picks the
+     piece from a constant array); `glInvalidateFramebuffer` where the
+     discard is now.
+  5. **Shaders in GLSL ES 3.00:** the shadow loop with a bound from a
+     uniform (no break on a float compare), `flat` where a value is constant
+     per triangle (the room's normal and albedo per wall), `textureLod` for
+     the reflection read; measured shader by shader with the compiler's
+     instruction counts (`v3dglslc3`).
+- **Fantastic (new, each one something GLES2 could only do on the CPU):**
+  6. **Sparks at every impact:** thousands of tiny additive HDR sparks
+     burst where the ball hits the floor or a wall, bounce once on the floor
+     and fade, lit by the two lights' colours: one instanced draw, the
+     positions computed in the vertex shader from `gl_InstanceID`, the
+     impact's time and place (a uniform block of the last impacts): no
+     vertex data and no CPU work per spark. Drawn into the reflection too,
+     and into the bloom's bright target (they glow).
+  7. **Dust in the light:** motes floating in the ceiling light's cone,
+     instanced point-like quads moved by a small 3D noise texture
+     (`sampler3D`, made once at start), lit only inside the cone and shadowed
+     by the ball (a shadow-sampler read each): the light's beam becomes
+     visible.
+  8. **Shadow-map quality:** with filtering in hardware, the maps' penumbra
+     can follow the distance from the ball (contact-hardening: sharp where
+     the ball touches the floor, soft as it rises) for the cost the 12 taps
+     had.
+  9. **TOUR stops for each of these**, saying what ES 3 feature it shows,
+     and `E` to switch the whole frame to the ES 2.0 way (the original
+     passes and shaders) with the frame rate in the title: the example
+     compares the two itself.
+- **Order:** step 0; then 1-4 (the speed, measured each); then 6, 7, 8 (the
+  new effects, each within the frame rate step 1-4 freed); then 5 and 9.
+  Each step: the copy's ReadMe says what it proves and costs, as the
+  GLES2 one does; the release ships the copy's compiled shaders (`make
+  shaders` with `v3dglslc3`) and their `.v3ds` records.
+- **Done when:** at 640x480 the copy runs at the display's 60 fps with all
+  of 6-8 on and the frame time to spare shown by `TIMING`; at 1280x720 with
+  the room at 100% clearly above the GLES2 program's 28 fps; on the A1200,
+  measured against step 0 with both libraries.
+
 **Performance, the evening of 2026-10-29 (after the hand-off below; the
 user's goal: ogles3 30% faster than ogles2 1.3, ogles3 first).**
 - **Second round** (`ogles2-drawbench-20261029-195814`, ogles3 / ogles2):
@@ -1820,8 +2151,8 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    `OES_vertex_array_object`'s issue "Should a vertex array object be allowed
    to encapsulate client vertex arrays? RESOLVED: No."); object 0 keeps them,
    so GLES2 programs are unchanged. The dEQP port's patch 0004 can then go.
-   **Done in ES3 contexts (2026-10-25, on the A1200), not yet in ES 3.1's
-   form:** `glGenVertexArrays`, `glDeleteVertexArrays`, `glIsVertexArray`
+   **Done in ES3 contexts (2026-10-25, on the A1200); ES 3.1's form
+   (vertex attribute binding) came with stage D item 5:** `glGenVertexArrays`, `glDeleteVertexArrays`, `glIsVertexArray`
    (once bound), `glBindVertexArray` (names `glGenVertexArrays` gave),
    `GL_VERTEX_ARRAY_BINDING`, in `vao.c`. An object holds the 16 arrays as
    the context does (`struct OGLES2Array`) and the element buffer; the bound
@@ -2066,9 +2397,10 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    slice size); `face_gpu` gives a slice of a level. 3D mipmaps are made
    on the CPU, each slice two of the level above. A depth comparison makes
    a sampler's return 16 bits (`ogles2_texture_wide`, as Mesa's
-   `v3d_get_tex_return_size`). Not yet: `glCopyTexSubImage3D`,
-   `glCompressedTexImage3D`, layers as framebuffer attachments (item 11),
-   immutable storage. `m8_draw`'s layers of a 2x2x4 array (and one
+   `v3d_get_tex_return_size`). Not yet at this point, all done since:
+   `glCopyTexSubImage3D` and `glCompressedTexImage3D` (below, 2026-10-26),
+   layers as framebuffer attachments (item 11), immutable storage (below,
+   `tex_storage`). `m8_draw`'s layers of a 2x2x4 array (and one
    replaced), slices of a 2x2x4 and a 64x64x8 3D texture (UIF levels) and
    their `glGenerateMipmap` levels, through `es3layer` and `es3vol`;
    `m8_es3`'s errors (`ogles2-m8-1-20261024-235209`: 22, 71, 31 of 31).
@@ -2682,10 +3014,11 @@ figures unchanged; **release 2.0** with the GLES2 extensions (§1).
    that job and swaps the words back (`gpu_written`). Tests: `m8_es3`'s
    state and errors (119 of 119 under vamos), `m8_draw`'s `test_xfb` (a
    triangle fed back and read by mapping, the query; with rasterizer
-   discard two triangles around a pause). Not yet: a buffer fed back and
-   read by the GPU in the same job (Mesa's `WAIT_FOR_TRANSFORM_FEEDBACK`;
-   the CPU path renders the job first for vertex and index reads, a
-   uniform buffer read waits for nothing).
+   discard two triangles around a pause). A buffer fed back and read by
+   the GPU in the same job: vertex and index reads go through the CPU,
+   which renders the job first; a uniform block read by the vertex stage
+   waits by Mesa's `FLUSH_TRANSFORM_FEEDBACK_DATA` and
+   `WAIT_FOR_TRANSFORM_FEEDBACK` (2026-10-30, the remaining gaps' item 2).
    **On the A1200 (2026-10-27), right the first time:** `m8-1` 27, 132
    (`m8_es3` with the GPU, its transform feedback draws), 139, 139, 139
    (`m8_draw` with `test_xfb`), `ogles2-m8-1-20261027-161353`; `m7-4` 23,
@@ -2874,9 +3207,9 @@ in the context's own GPU memory, storage buffers as their words
 back, as transform feedback's), shared variables for every work group
 that can be in memory at once (`shared_groups`: the dispatch's, at most
 2^(16 - local index bits)), a dispatch refused (logged) with a storage
-block without a buffer or with textures (not yet). Not yet: robust
-storage access (the No MMU point above), textures in compute shaders,
-atomic counters, images. Item 6's program interface queries
+block without a buffer or with textures (not yet at this point). Done
+since, below: robust storage, image and shared access (Mesa patch 0017),
+textures in compute shaders, atomic counters, images. Item 6's program interface queries
 (`glGetProgramInterfaceiv`, `glGetProgramResourceIndex`, `_Name`, `iv`,
 `_Location`, Mesa's names and properties: unsized arrays named `[0]` with
 size 0; a storage block's stages from the stage maps, Mesa leaves its

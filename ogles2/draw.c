@@ -929,6 +929,35 @@ static ULONG block_buffer(struct OGLES3Context *ctx, const struct OGLES3Program 
     return tst->zero_ubo;
 }
 
+/* A buffer transform feedback wrote earlier in the open job, read by the
+ * draw's vertex stage as a uniform block (its GPU words, which feedback
+ * writes): the feedback flushed and waited for first, Mesa's
+ * v3d_emit_wait_for_tf_if_needed (v3dx_draw.c). The fragment stage needs no
+ * wait: it runs after binning, feedback's included. Vertex and index reads
+ * of such a buffer go through the CPU, which renders the job first
+ * (gpu_written). One wait covers every feedback draw before it. */
+static void xfb_wait(struct OGLES3Context *ctx, const struct OGLES3Program *p)
+{
+    const struct OGLES3Image *im = p->image;
+    UBYTE *b;
+    UBYTE k;
+    if (!ctx->draw_fed) { /* else vertices, indices or a command fed back: read by the binner */
+        if (!p->block_binding)
+            return;
+        for (k = 0; k < im->stage_nblocks[0]; k++)
+            if (ogles2_buffer_uniform_fed_back(ctx, p->block_binding[im->stage_block[0][k]]))
+                break;
+        if (k == im->stage_nblocks[0])
+            return;
+    }
+    if (!(b = v3d_buffer_claim_memory(ctx->v3d->current_buf, 3)))
+        return;
+    b[0] = v3d_OP_FLUSH_TRANSFORM_FEEDBACK_DATA;
+    b[1] = v3d_OP_WAIT_FOR_TRANSFORM_FEEDBACK;
+    b[2] = 255; /* every outstanding block (Mesa's) */
+    ctx->xfb_waited = ctx->xfb_draws;
+}
+
 /* Register spilling (Mesa's QUNIFORM_SPILL_*): a shader that ran out of
  * registers keeps values in a scratch area through the TMU (dEQP-GLES2's
  * dynamically indexed arrays), a slice per QPU thread. The context's area,
@@ -1521,6 +1550,40 @@ static inline __attribute__((always_inline)) void fmt_current(struct OGLES3Array
         array_fmt(a, key);
 }
 
+/* An array the GPU wrote (transform feedback, a compute shader: buffer.c,
+ * ogles2_buffer_gpu_words) read by the GPU where it lies, no wait and no
+ * copy back (docs/GLES3_PLAN.md, the remaining gaps, item 5): its elements
+ * whole 32-bit words the attribute record reads as they are (floats, fixed,
+ * integers read as integers, the packed 10-10-10-2), at word boundaries.
+ * Smaller components lie byte-swapped in the words (the shadow's order is
+ * the program's), and integers read as floats are converted on the CPU:
+ * those keep the CPU path (gpu_written). The fmt_ fields current. *addr:
+ * vertex 0's address, *stride, *verts: the buffer's whole vertices. */
+static BOOL gpu_logged[3]; /* gpu_array's, gpu_elements' and gpu_indirect's first use, logged */
+
+static __attribute__((noinline)) BOOL gpu_array(struct OGLES3Context *ctx, const struct OGLES3Array *a, ULONG *addr,
+                                                 ULONG *stride, ULONG *verts)
+{
+    ULONG w, size, off = (ULONG)a->pointer, es = a->fmt_in_bytes, st;
+    BOOL fed;
+    if (a->fmt_ctype >= CONV_INT_FLOAT || (es & 3) || (off & 3) || ((ULONG)a->stride & 3) ||
+        (a->type != GL_FLOAT && a->type != GL_FIXED && a->type != GL_INT && a->type != GL_UNSIGNED_INT &&
+         !packed_type(a->type)) ||
+        !(w = ogles2_buffer_gpu_words(ctx, a->buffer, &fed, &size)))
+        return FALSE;
+    st = a->stride ? (ULONG)a->stride : es;
+    if (!gpu_logged[0]) {
+        gpu_logged[0] = TRUE;
+        ogles2_log("draw: vertices the GPU wrote read where they lie (logged once)");
+    }
+    *addr = w + off;
+    *stride = st;
+    *verts = off + es <= size ? (size - off - es) / st + 1 : 0;
+    if (fed)
+        ctx->draw_fed = TRUE;
+    return TRUE;
+}
+
 static inline __attribute__((always_inline)) BOOL copy_array(struct OGLES3Context *ctx, struct OGLES3Array *a,
                                                               GLint first, GLsizei count, struct attr_src *out,
                                                               BOOL probe_addr)
@@ -1636,6 +1699,29 @@ static __attribute__((noinline)) BOOL copy_array_again(struct OGLES3Context *ctx
                                                        GLsizei count, struct attr_src *out)
 {
     return copy_array(ctx, a, 0, count, out, FALSE);
+}
+
+/* copy_array for an array the GPU wrote, read where it lies (gpu_array):
+ * FALSE when it cannot be, and copy_array then takes it. Called from the
+ * draw's vertex loop only once a buffer was ever given to the GPU to write
+ * (ogles2_gpu_writes_seen), so copy_array stays as it was (inline, the
+ * draws' loop: tests/perf/drawbench). */
+static __attribute__((noinline)) BOOL gpu_source(struct OGLES3Context *ctx, struct OGLES3Array *a, GLint first,
+                                                  struct attr_src *out)
+{
+    ULONG ga, gs, gv;
+    fmt_current(a);
+    if (!gpu_array(ctx, a, &ga, &gs, &gv))
+        return FALSE;
+    out->divisor = 0;
+    out->read_int = a->integer;
+    out->vsize = a->fmt_vsize;
+    out->normalized = a->fmt_normalized;
+    out->is_signed = a->fmt_is_signed;
+    out->vtype = a->fmt_vtype;
+    out->address = ga + (ULONG)first * gs;
+    out->stride = gs;
+    return TRUE;
 }
 
 /* A disabled array reads the current generic attribute: 16 bytes, stride 0. */
@@ -2332,7 +2418,8 @@ static void put_le32(UBYTE *b, ULONG x)
  * theirs once (packets_ok). */
 static inline __attribute__((always_inline)) ULONG draw_packets(UBYTE *b, UBYTE vcm_cs, UBYTE vcm_vs, ULONG rec, int nrec,
                                                                  UBYTE mode,
-                          int itype, ULONG idx_addr, ULONG idx_size, ULONG count, ULONG first, ULONG instances)
+                          int itype, ULONG idx_addr, ULONG idx_size, ULONG count, ULONG first, ULONG instances,
+                          ULONG ioffset)
 {
     b[0] = v3d_OP_POINT_SIZE;
     put_le32(b + 1, 0x3F800000UL); /* 1.0f */
@@ -2349,10 +2436,10 @@ static inline __attribute__((always_inline)) ULONG draw_packets(UBYTE *b, UBYTE 
         put_le32(b + 23, count); /* bits 0-30 the length, bit 31 primitive restart (the caller's) */
         if (instances > 1) { /* ES 3.0's instances (Mesa's packet 34): then the index offset */
             put_le32(b + 27, instances);
-            put_le32(b + 31, 0);
+            put_le32(b + 31, ioffset);
             return 35;
         }
-        put_le32(b + 27, 0);
+        put_le32(b + 27, ioffset); /* the base vertex of indices read on the GPU (gpu_elements), else 0 */
         return 31;
     }
     if (instances > 1) { /* packet 38: the mode a byte, length, instances, first vertex */
@@ -2402,8 +2489,8 @@ static BOOL packets_ok(V3DContext *v)
     glShaderStateAttributeRecord(v, (APTR)0x08654320UL, TRUE, FALSE, FALSE, v3d_VEC_4, v3d_ATTRIBUTE_FLOAT,
                                  4, 1, 0x0203, 0x10, 0xFFFFFF); /* a divisor's bytes and read as int too */
     v->current_buf = saved;
-    n = draw_packets(mine, 3, 5, 0x12345660UL, 3, 4, v3d_INDEX_TYPE_16_BIT, 0x0ABCDEF4UL, 0x1236, 0x10203, 0, 1);
-    n += draw_packets(mine + n, 2, 1, 0x0FEDCBA0UL, 1, 5, -1, 0, 0, 0x30201, 0x4321, 1);
+    n = draw_packets(mine, 3, 5, 0x12345660UL, 3, 4, v3d_INDEX_TYPE_16_BIT, 0x0ABCDEF4UL, 0x1236, 0x10203, 0, 1, 0);
+    n += draw_packets(mine + n, 2, 1, 0x0FEDCBA0UL, 1, 5, -1, 0, 0, 0x30201, 0x4321, 1, 0);
     attr_record(mine + n, 0x08123456UL, TRUE, TRUE, v3d_VEC_3, v3d_ATTRIBUTE_SHORT, 3, 2, 0, 0x0C, 0xFFFFFF);
     n += 16;
     attr_record(mine + n, 0x08654320UL, 0x80, FALSE, v3d_VEC_4, v3d_ATTRIBUTE_FLOAT, 4, 1, 0x0203, 0x10, 0xFFFFFF);
@@ -2751,11 +2838,117 @@ static __attribute__((noinline)) void scan_u16(const UWORD *in, ULONG count, ULO
     *hi_out = (ULONG)h;
 }
 
+/* An indirect draw's packets: draw_packets' first 12 bytes, then (indexed)
+ * INDEX_BUFFER_SETUP and INDIRECT_INDEXED_INSTANCED_PRIM_LIST, or
+ * INDIRECT_VERTEX_ARRAY_INSTANCED_PRIMS: the GPU reads one command record
+ * at `ind` (Mesa's v3dx_draw.c; the callers checked packets_ok). Out of
+ * line: draw_arrays' body as small as it was (tests/perf/drawbench). */
+static __attribute__((noinline)) void indirect_packets(V3DContext *v, const struct OGLES3Variant *cs,
+                                                       const struct OGLES3Variant *vs, ULONG rec, int nslots,
+                                                       GLenum mode, const struct elements *el, GLenum itype_gl,
+                                                       ULONG idx_addr, ULONG idx_size, ULONG ind)
+{
+    UBYTE *b = v3d_buffer_claim_memory(v->current_buf, el ? 32 : 23);
+    if (!b)
+        return;
+    draw_packets(b, cs->vcm_cache_size, vs->vcm_cache_size, rec, nslots ? nslots : 1, (UBYTE)mode, -1, 0, 0, 0, 0, 1,
+                 0); /* bytes 0-11: point size, VCM cache, shader state */
+    if (el) {
+        b[12] = v3d_OP_INDEX_BUFFER_SETUP;
+        put_le32(b + 13, idx_addr);
+        put_le32(b + 17, idx_size);
+        b[21] = v3d_OP_INDIRECT_INDEXED_INSTANCED_PRIM_LIST;
+        b[22] = (UBYTE)(((itype_gl == GL_UNSIGNED_INT ? v3d_INDEX_TYPE_32_BIT
+                          : itype_gl == GL_UNSIGNED_SHORT ? v3d_INDEX_TYPE_16_BIT : v3d_INDEX_TYPE_8_BIT) << 6) |
+                        (mode & 63));
+        put_le32(b + 23, 1 | (el->restart ? 0x80000000UL : 0)); /* one record, primitive restart */
+        put_le32(b + 27, ind);
+        b[31] = 5; /* DrawElementsIndirectCommand: 20 bytes */
+    } else {
+        b[12] = v3d_OP_INDIRECT_VERTEX_ARRAY_INSTANCED_PRIMS;
+        b[13] = (UBYTE)mode;
+        put_le32(b + 14, 1);
+        put_le32(b + 18, ind);
+        b[22] = 4; /* DrawArraysIndirectCommand: 16 bytes */
+    }
+}
+
+/* A draw whose counts or indices the CPU does not read (docs/GLES3_PLAN.md,
+ * the remaining gaps, item 5): indices on the GPU (gpu_elements), or an
+ * indirect command (the indirect draws). Every array then covers its whole
+ * buffer from vertex 0 (`whole`: the CPU does not know which vertices are
+ * read), the GPU's words where it wrote them (gpu_array). */
+struct gpu_draw
+{
+    ULONG idx_addr, idx_bytes; /* 32-bit indices read where they lie (0: copied through `el`) */
+    ULONG ioffset;             /* the base vertex added to them (INDEXED_PRIM_LIST's index offset) */
+    ULONG ind_addr;            /* an indirect command's address (0: none) */
+    BOOL fed;                  /* transform feedback wrote one of them in the open job */
+};
+
+/* A gpu_draw's array: its buffer's whole vertices from the array's start.
+ * Out of line: draw_arrays' vertex loop stays as small as it was (the
+ * draws were 10-20% slower with it inline, tests/perf/drawbench). */
+static __attribute__((noinline)) GLsizei whole_vertices(struct OGLES3Array *arr)
+{
+    ULONG es, st, off = (ULONG)arr->pointer, size = OGLES3_BH(arr->buffer)->size;
+    fmt_current(arr);
+    es = arr->fmt_in_bytes;
+    st = arr->stride ? (ULONG)arr->stride : es;
+    return off + es <= size ? (GLsizei)((size - off - es) / st + 1) : 0;
+}
+
+/* draw_arrays' vertex sources once a buffer was ever given to the GPU to
+ * write (ogles2_gpu_writes_seen), or for a gpu_draw (`whole`: every array
+ * its whole buffer from vertex 0): the GPU's words read where they lie
+ * (gpu_source), else copy_array as in the usual loop. 1: done, 0: an array
+ * without a complete vertex (nothing drawn), -1: no memory. */
+static __attribute__((noinline)) int gpu_sources(struct OGLES3Context *ctx, struct OGLES3Program *p, int nslots,
+                                                 GLint first, GLsizei count, GLsizei instances, BOOL whole,
+                                                 struct attr_src *src)
+{
+    int i;
+    for (i = 0; i < nslots; i++) {
+        GLuint g = p->slot_attrib[i];
+        struct OGLES3Array *arr;
+        GLint f0 = first;
+        GLsizei n0 = count;
+        if (g >= OGLES3_MAX_VERTEX_ATTRIBS || !ctx->array[g].enabled) {
+            if (!constant_attrib(ctx, g >= OGLES3_MAX_VERTEX_ATTRIBS ? 0 : g, &src[i]))
+                return -1;
+            continue;
+        }
+        arr = &ctx->array[g];
+        if (arr->zero_stride) {
+            f0 = 0;
+            n0 = 1;
+        } else if (whole) {
+            /* the whole buffer, from vertex 0 (an instanced array's too: the
+             * instances may be unknown); the GPU's own words cost nothing */
+            f0 = 0;
+            if (!(n0 = whole_vertices(arr)))
+                return 0;
+        } else if (arr->divisor) {
+            f0 = 0;
+            n0 = (GLsizei)(((ULONG)instances + arr->divisor - 1) / arr->divisor);
+        }
+        if (!(arr->buffer && gpu_source(ctx, arr, f0, &src[i])) && !copy_array(ctx, arr, f0, n0, &src[i], FALSE))
+            return -1;
+        if (arr->zero_stride)
+            src[i].stride = 0;
+        else if (arr->divisor)
+            src[i].divisor = (UWORD)(arr->divisor > 0xffff ? 0xffff : arr->divisor);
+    }
+    return 1;
+}
+
 /* Draws with program p and the context's state; arguments are valid. The
  * vertices [first, first+count) are copied; without `el` they are drawn in
- * order, with it through its indices. */
+ * order, with it through its indices. With `gd` (gpu_draw), every array
+ * whole, from vertex 0. */
 static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLenum mode,
-                        GLint first, GLsizei count, const struct elements *el, GLsizei instances)
+                        GLint first, GLsizei count, const struct elements *el, GLsizei instances,
+                        const struct gpu_draw *gd)
 {
     const struct OGLES3Image *im = p->image;
     const struct OGLES3Variant *cs, *vs, *fs;
@@ -2772,7 +2965,7 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
     BOOL tg_made = FALSE;      /* tg holds them (vk_targets) */
     GLenum itype_gl; /* the indices' type as the GPU gets them */
     BOOL xfb;        /* it feeds back (transform feedback, xfb.c) */
-    ULONG unif[3], code[3], defattr, rec, idx_addr = 0, idx_size = 0;
+    ULONG unif[3], code[3], defattr, rec, idx_addr = 0, idx_size = 0, ioffset;
     int a, nslots = 0, i;
 
     /* GL_RASTERIZER_DISCARD: no fragments, and without transform feedback a
@@ -2925,6 +3118,8 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
     else
         ogles2_job_begin(ctx);
     vid = cs->uses_vid || vs->uses_vid;
+    if (__builtin_expect(gd != 0 || ogles2_gpu_writes_seen, 0))
+        ctx->draw_fed = gd && gd->fed; /* gpu_array adds the arrays' (stale without GPU writes: never read) */
     itype_gl = !el ? 0
              : vid && el->type != GL_UNSIGNED_INT &&
                        (ULONG)first + (ULONG)count - 1 > (el->type == GL_UNSIGNED_SHORT ? 0xffffUL : 0xffUL)
@@ -2979,42 +3174,52 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
         p->nslots = (UBYTE)nslots;
     }
     nslots = p->nslots;
-    for (i = 0; i < nslots; i++) {
-        GLuint g = p->slot_attrib[i];
-        struct OGLES3Array *arr;
-        GLint f0 = first;
-        GLsizei n0 = count;
-        if (g >= OGLES3_MAX_VERTEX_ATTRIBS || !ctx->array[g].enabled) {
-            /* a disabled array, or a slot no attribute claims (current value 0) */
-            if (!constant_attrib(ctx, g >= OGLES3_MAX_VERTEX_ATTRIBS ? 0 : g, &src[i]))
-                goto nomem;
-            continue;
-        }
-        /* One call for every kind of array: copy_array inlined here alone,
-         * as in 1.x (tests/perf/drawbench). */
-        arr = &ctx->array[g];
-        if (arr->zero_stride) {
-            /* ES 3.1: a binding of stride 0, every vertex its first element:
-             * one element read as a current value is (record stride 0) */
-            f0 = 0;
-            n0 = 1;
-        } else if (arr->divisor) {
-            /* ES 3.0's instanced arrays: an element per `divisor` instances,
-             * from element 0, whatever the vertices (the record's divisor,
-             * 16 bits: Mesa clamps, v3dx_state.c; a divisor at or above the
-             * instance count reads element 0 as the clamped one does but
-             * past 65535 instances, a deviation). */
-            f0 = 0;
-            n0 = (GLsizei)(((ULONG)instances + arr->divisor - 1) / arr->divisor);
-        }
-        if (!copy_array(ctx, arr, f0, n0, &src[i],
-                        i == 0 && !arr->zero_stride && !arr->divisor && (ctx->probe & OGLES3_PROBE_ADDR) &&
-                            ctx->probe_addr))
+    if (__builtin_expect(gd != 0 || ogles2_gpu_writes_seen, 0)) {
+        /* GPU-written buffers, or a gpu_draw's whole arrays: a loop of its
+         * own, so the usual one below stays as it was (tests/perf/drawbench) */
+        int r = gpu_sources(ctx, p, nslots, first, count, instances, gd != 0, src);
+        if (r < 0)
             goto nomem;
-        if (arr->zero_stride)
-            src[i].stride = 0;
-        else if (arr->divisor)
-            src[i].divisor = (UWORD)(arr->divisor > 0xffff ? 0xffff : arr->divisor);
+        if (!r)
+            return; /* an array without a complete vertex: nothing drawn */
+    } else {
+        for (i = 0; i < nslots; i++) {
+            GLuint g = p->slot_attrib[i];
+            struct OGLES3Array *arr;
+            GLint f0 = first;
+            GLsizei n0 = count;
+            if (g >= OGLES3_MAX_VERTEX_ATTRIBS || !ctx->array[g].enabled) {
+                /* a disabled array, or a slot no attribute claims (current value 0) */
+                if (!constant_attrib(ctx, g >= OGLES3_MAX_VERTEX_ATTRIBS ? 0 : g, &src[i]))
+                    goto nomem;
+                continue;
+            }
+            /* One call for every kind of array: copy_array inlined here alone,
+             * as in 1.x (tests/perf/drawbench). */
+            arr = &ctx->array[g];
+            if (arr->zero_stride) {
+                /* ES 3.1: a binding of stride 0, every vertex its first element:
+                 * one element read as a current value is (record stride 0) */
+                f0 = 0;
+                n0 = 1;
+            } else if (arr->divisor) {
+                /* ES 3.0's instanced arrays: an element per `divisor` instances,
+                 * from element 0, whatever the vertices (the record's divisor,
+                 * 16 bits: Mesa clamps, v3dx_state.c; a divisor at or above the
+                 * instance count reads element 0 as the clamped one does but
+                 * past 65535 instances, a deviation). */
+                f0 = 0;
+                n0 = (GLsizei)(((ULONG)instances + arr->divisor - 1) / arr->divisor);
+            }
+            if (!copy_array(ctx, arr, f0, n0, &src[i],
+                            i == 0 && !arr->zero_stride && !arr->divisor && (ctx->probe & OGLES3_PROBE_ADDR) &&
+                                ctx->probe_addr))
+                goto nomem;
+            if (arr->zero_stride)
+                src[i].stride = 0;
+            else if (arr->divisor)
+                src[i].divisor = (UWORD)(arr->divisor > 0xffff ? 0xffff : arr->divisor);
+        }
     }
     /* An integer array's missing components read the defaults: its w an
      * integer 1 (Mesa's v3d_vertex_state_create), not the shared block's
@@ -3065,6 +3270,11 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
         ULONG isize = (ULONG)el->count * index_size(itype_gl);
         UBYTE *ib;
         struct index_copy *ic = &d->ic[IC_SLOT(el->uid, el->indices, el->count)];
+        if (__builtin_expect(gd != 0, 0) && gd->idx_addr) { /* 32-bit, as they are: nothing rebased (the arrays are whole) */
+            ib = (UBYTE *)gd->idx_addr;
+            isize = gd->idx_bytes;
+            goto indices_done;
+        }
         if (el->uid && ic->job == ctx->job_serial && ic->uid == el->uid && ic->serial == el->serial &&
             ic->ptr == el->indices && ic->count == el->count && ic->type == el->type && ic->itype == itype_gl &&
             ic->restart == el->restart && ic->sub == sub) {
@@ -3143,12 +3353,20 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
     }
 
     /* Binning list. */
+    ioffset = __builtin_expect(gd != 0, 0) ? gd->ioffset : 0;
     mark(ctx, 6);
     v->current_buf = &v->binning_buf[v->build_slot];
     emit_state(ctx, &d->dd, (int)mode, fs);
     /* Transform feedback: its specs and buffers before the primitives, its
      * flush after them (xfb.c; never indexed: draw_elements refuses that). */
+    if (__builtin_expect(ctx->job_xfb, 0) && ctx->xfb_draws != ctx->xfb_waited)
+        xfb_wait(ctx, p);
     xfb = ctx->xfb_begun && ogles2_xfb_before_draw(ctx, mode, cs->writes_psiz); /* never begun: never used */
+    if (__builtin_expect(gd != 0, 0) && gd->ind_addr) {
+        indirect_packets(v, cs, vs, rec, nslots, mode, el, itype_gl, idx_addr, idx_size, gd->ind_addr);
+        mark(ctx, 7);
+        return;
+    }
     if (packets_ok(v)) {
         int itype = !el ? -1
                   : itype_gl == GL_UNSIGNED_INT ? v3d_INDEX_TYPE_32_BIT
@@ -3158,7 +3376,7 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
             draw_packets(b, cs->vcm_cache_size, vs->vcm_cache_size, rec, nslots ? nslots : 1, (UBYTE)mode,
                          itype, idx_addr, idx_size,
                          el ? ((ULONG)el->count & 0x7FFFFFFFUL) | (el->restart ? 0x80000000UL : 0) : (ULONG)count,
-                         vid ? (ULONG)first : 0, (ULONG)instances);
+                         vid ? (ULONG)first : 0, (ULONG)instances, ioffset);
         if (xfb)
             ogles2_xfb_after_draw(ctx, mode, count, instances);
         mark(ctx, 7);
@@ -3172,7 +3390,7 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
                                : itype_gl == GL_UNSIGNED_SHORT ? v3d_INDEX_TYPE_16_BIT : v3d_INDEX_TYPE_8_BIT) : -1,
                          idx_addr, idx_size,
                          el ? ((ULONG)el->count & 0x7FFFFFFFUL) | (el->restart ? 0x80000000UL : 0) : (ULONG)count,
-                         vid ? (ULONG)first : 0, (ULONG)instances);
+                         vid ? (ULONG)first : 0, (ULONG)instances, ioffset);
         if (xfb)
             ogles2_xfb_after_draw(ctx, mode, count, instances);
         mark(ctx, 7);
@@ -3242,8 +3460,11 @@ static BOOL arrays_ok(struct OGLES3Context *ctx, const struct OGLES3Program *p, 
             fmt_current(arr);
             es = arr->fmt_in_bytes;
             st = arr->stride ? (ULONG)arr->stride : es;
-            if (ogles2_gpu_writes_seen)
-                ogles2_buffer_cpu(ctx, arr->buffer); /* transform feedback's results, before the job is built */
+            if (ogles2_gpu_writes_seen) {
+                ULONG ga, gs, gv;
+                if (!gpu_array(ctx, arr, &ga, &gs, &gv))
+                    ogles2_buffer_cpu(ctx, arr->buffer); /* transform feedback's results, before the job is built */
+            }
             if (off + es > size || (size - off - es) / st + 1 < end_a) {
                 ogles2_log("%s: attribute %ld reads past the end of buffer %ld; nothing drawn",
                            (ULONG)fn, (ULONG)p->attrib_index[a], (ULONG)ogles2_buffer_name(arr->buffer));
@@ -3293,7 +3514,7 @@ static void draw_instances(struct OGLES3Context *ctx, GLenum mode, GLint first, 
         return;
     if (!arrays_ok(ctx, p, (ULONG)first + (ULONG)count, instances, "glDrawArrays"))
         return;
-    draw_arrays(ctx, p, mode, first, count, 0, instances);
+    draw_arrays(ctx, p, mode, first, count, 0, instances, 0);
     ctx->n_draws++;
     ctx->sum_draw += (double)(ULONG)(ogles2_clock_us() - t0);
 }
@@ -3314,6 +3535,72 @@ void ogles2_glDrawArraysInstancedEXT(struct OGLES3Context *ctx, GLenum mode, GLi
                                      GLsizei instancecount)
 {
     draw_instances(ctx, mode, first, count, instancecount);
+}
+
+/* A gpu_draw's arrays (draw_arrays' `g`): every one the program reads from
+ * a buffer, none from client memory (whose vertices the CPU must know).
+ * A GPU-written one the GPU cannot read where it lies has its shadow made
+ * current first (the CPU path's wait). FALSE: one is in client memory. */
+static BOOL arrays_whole(struct OGLES3Context *ctx, const struct OGLES3Program *p)
+{
+    int a;
+    for (a = 0; a < p->image->nattribs; a++) {
+        struct OGLES3Array *arr = &ctx->array[p->attrib_index[a]];
+        ULONG ga, gs, gv;
+        int k;
+        if (p->image->attribs[a].slot == 0xff)
+            continue;
+        for (k = 0; k < p->image->attribs[a].columns && p->attrib_index[a] + k < OGLES3_MAX_VERTEX_ATTRIBS; k++) {
+            arr = &ctx->array[p->attrib_index[a] + k]; /* a matrix's columns, generic attributes of their own */
+            if (!arr->enabled)
+                continue;
+            if (!arr->buffer)
+                return FALSE;
+            fmt_current(arr);
+            if (ogles2_gpu_writes_seen && !gpu_array(ctx, arr, &ga, &gs, &gv))
+                ogles2_buffer_cpu(ctx, arr->buffer);
+        }
+    }
+    return TRUE;
+}
+
+/* glDrawElements with 32-bit indices the GPU wrote (a compute shader,
+ * transform feedback) in the element array buffer: read where they lie,
+ * nothing rebased, the base vertex the packet's index offset, every array
+ * whole (gpu_draw); no wait for the render and no copy back
+ * (docs/GLES3_PLAN.md, the remaining gaps, item 5). FALSE: not so (the CPU
+ * path); TRUE: drawn, or nothing to draw (logged). The caller checked the
+ * arguments, the framebuffer and the program. */
+static BOOL gpu_elements(struct OGLES3Context *ctx, struct OGLES3Program *p, GLenum mode, GLsizei count,
+                         const void *indices, GLint basevertex, GLsizei instances, BOOL restart, const char *fn)
+{
+    struct gpu_draw g;
+    struct elements el;
+    ULONG w, size, off = (ULONG)indices;
+    BOOL fed;
+    if ((off & 3) || !packets_ok(ctx->v3d) || !(w = ogles2_buffer_element_words(ctx, FALSE, &fed, &size)) ||
+        !arrays_whole(ctx, p))
+        return FALSE;
+    if (off > size || (size - off) / 4 < (ULONG)count) {
+        ogles2_log("%s: the indices lie outside the element buffer; nothing drawn", (ULONG)fn);
+        return TRUE;
+    }
+    memset(&g, 0, sizeof(g));
+    memset(&el, 0, sizeof(el));
+    if (!gpu_logged[1]) {
+        gpu_logged[1] = TRUE;
+        ogles2_log("%s: 32-bit indices the GPU wrote read where they lie (logged once)", (ULONG)fn);
+    }
+    g.idx_addr = w + off;
+    g.idx_bytes = size - off;
+    g.ioffset = (ULONG)basevertex;
+    g.fed = fed;
+    el.type = GL_UNSIGNED_INT;
+    el.count = count;
+    el.restart = restart;
+    draw_arrays(ctx, p, mode, 0, 1, &el, instances, &g);
+    ctx->n_draws++;
+    return TRUE;
 }
 
 /* glDrawElements, and with a base vertex added to every index
@@ -3361,6 +3648,9 @@ static void draw_elements(struct OGLES3Context *ctx, GLenum mode, GLsizei count,
         return;
     }
     if (!p || !ctx->v3d || count == 0)
+        return;
+    if (ogles2_gpu_writes_seen && type == GL_UNSIGNED_INT &&
+        gpu_elements(ctx, p, mode, count, indices, basevertex, instances, restart, fn))
         return;
     {
         /* With an element buffer bound, `indices` is the offset into it. */
@@ -3487,7 +3777,7 @@ range_known:
     el.restart = restart;
     el.uid = uid;
     el.serial = serial;
-    draw_arrays(ctx, p, mode, (GLint)lo, (GLsizei)(hi - lo + 1), &el, instances);
+    draw_arrays(ctx, p, mode, (GLint)lo, (GLsizei)(hi - lo + 1), &el, instances, 0);
     ctx->n_draws++;
     ctx->sum_draw += (double)(ULONG)(ogles2_clock_us() - t0);
 }
@@ -3575,6 +3865,89 @@ static BOOL indirect_command(struct OGLES3Context *ctx, const void *indirect, UL
     return TRUE;
 }
 
+/* An indirect draw whose command the GPU wrote (a compute shader, transform
+ * feedback): read by the GPU's indirect packets, every array whole
+ * (gpu_draw); no wait for the render, no copy back (docs/GLES3_PLAN.md, the
+ * remaining gaps, item 5). `type` 0: glDrawArraysIndirect. The indices: 32-
+ * bit ones where they lie (the GPU's words, or the shadow's in the GPU's
+ * order), 8- and 16-bit ones the whole buffer copied (the CPU path's
+ * conversion). FALSE: not so, the CPU reads the command; TRUE: done (drawn,
+ * or the error set). */
+static BOOL gpu_indirect(struct OGLES3Context *ctx, GLenum mode, GLenum type, const void *indirect, ULONG bytes)
+{
+    struct OGLES3Program *p;
+    struct gpu_draw g;
+    struct elements el;
+    ULONG addr;
+    BOOL fed;
+    GLenum e;
+    int k;
+    if (!ogles2_vao_bound(ctx) || ogles2_xfb_drawing(ctx)) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return TRUE;
+    }
+    for (k = 0; k < OGLES3_MAX_VERTEX_ATTRIBS; k++)
+        if (ctx->array[k].enabled && !ctx->array[k].buffer) {
+            ogles2_error(ctx, GL_INVALID_OPERATION);
+            return TRUE;
+        }
+    if ((e = ogles2_buffer_draw_indirect_gpu(ctx, (GLintptr)indirect, bytes, &addr, &fed)) != 0) {
+        ogles2_error(ctx, e);
+        return TRUE;
+    }
+    if (!addr || !ctx->v3d || !packets_ok(ctx->v3d))
+        return FALSE;
+    /* draw_instances' checks */
+    if (!ogles2_fb_ready(ctx))
+        return TRUE;
+    p = ctx->program;
+    if (p && p->image && (p->image->compute || p->image->stages != 0x11)) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return TRUE;
+    }
+    if (!p && ctx->pipe && !(p = ogles2_pipeline_program(ctx, FALSE))) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return TRUE;
+    }
+    if (!p)
+        return TRUE;
+    memset(&g, 0, sizeof(g));
+    memset(&el, 0, sizeof(el));
+    g.ind_addr = addr;
+    g.fed = fed;
+    if (type) {
+        struct OGLES3Buffer *eb = ogles2_buffer_element(ctx);
+        ULONG size = ogles2_buffer_size(eb), w;
+        BOOL efed = FALSE, bad;
+        el.type = type;
+        el.restart = (ctx->state.caps & OGLES3_CAP_PRIMITIVE_RESTART) != 0;
+        if (type == GL_UNSIGNED_INT) {
+            if (!(w = ogles2_buffer_element_words(ctx, TRUE, &efed, &size)))
+                return FALSE;
+            g.idx_addr = w;
+            g.idx_bytes = size;
+            g.fed |= efed;
+        } else {
+            /* the whole buffer converted, as the CPU path converts a draw's
+             * indices (made current first if the GPU wrote it) */
+            if (!size || !(el.indices = ogles2_buffer_indices(ctx, 0, size, &bad)) || bad)
+                return TRUE; /* nothing to draw from */
+            el.count = (GLsizei)(size / index_size(type));
+            el.uid = OGLES3_BH(eb)->uid;
+            el.serial = OGLES3_BH(eb)->serial;
+        }
+    }
+    if (!arrays_whole(ctx, p))
+        return FALSE;
+    if (!gpu_logged[2]) {
+        gpu_logged[2] = TRUE;
+        ogles2_log("indirect draw: a command the GPU wrote read by the GPU (logged once)");
+    }
+    draw_arrays(ctx, p, mode, 0, 1, type ? &el : 0, 1, &g);
+    ctx->n_draws++;
+    return TRUE;
+}
+
 /* DrawArraysIndirectCommand: count, instance count, first, a reserved word
  * (base instance, 0 in ES). Counts past GLsizei's range or a reserved word
  * not 0: undefined, nothing drawn (logged). */
@@ -3587,6 +3960,8 @@ void ogles2_glDrawArraysIndirect(struct OGLES3Context *ctx, GLenum mode, const v
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
+    if (ogles2_gpu_writes_seen && gpu_indirect(ctx, mode, 0, indirect, sizeof(cmd)))
+        return;
     if (!indirect_command(ctx, indirect, sizeof(cmd), cmd))
         return;
     if ((cmd[0] | cmd[1] | cmd[2]) > 0x7fffffffUL || cmd[3]) {
@@ -3615,6 +3990,8 @@ void ogles2_glDrawElementsIndirect(struct OGLES3Context *ctx, GLenum mode, GLenu
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
+    if (ogles2_gpu_writes_seen && gpu_indirect(ctx, mode, type, indirect, sizeof(cmd)))
+        return;
     if (!indirect_command(ctx, indirect, sizeof(cmd), cmd))
         return;
     size = index_size(type);
@@ -3768,7 +4145,7 @@ BOOL ogles2_draw_copy(struct OGLES3Context *ctx, struct OGLES3Texture *src, cons
     OGLES3_STATE_CHANGED(ctx, OGLES3_SG_ALL); /* the override above */
     mark(ctx, -1);
     ogles2_query_pause(ctx, TRUE); /* a copy counts no samples */
-    draw_arrays(ctx, p, GL_TRIANGLE_STRIP, 0, 4, 0, 1);
+    draw_arrays(ctx, p, GL_TRIANGLE_STRIP, 0, 4, 0, 1, 0);
     ogles2_query_pause(ctx, FALSE);
 
     ogles2_texture_unit0(ctx, saved_tex);
@@ -3889,7 +4266,7 @@ void ogles2_draw_clear(struct OGLES3Context *ctx, GLbitfield mask, UBYTE rts, co
     if (ctx->oq_addr) /* its test, without the call */
         ogles2_query_pause(ctx, TRUE); /* nor a clear */
     ctx->draw_rts = rts; /* glClearBuffer*: one draw buffer */
-    draw_arrays(ctx, quad, GL_TRIANGLE_STRIP, 0, 4, 0, 1);
+    draw_arrays(ctx, quad, GL_TRIANGLE_STRIP, 0, 4, 0, 1, 0);
     /* The format the draw worked out stays with the array (its key says
      * which): the next clear's needs no array_fmt again
      * (tests/perf/drawbench; Quake III clears mid-frame). */
