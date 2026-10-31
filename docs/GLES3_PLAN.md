@@ -529,6 +529,87 @@ the copy needs it).
   of 6-8 on and the frame time to spare shown by `TIMING`; at 1280x720 with
   the room at 100% clearly above the GLES2 program's 28 fps; on the A1200,
   measured against step 0 with both libraries.
+- **Written 2026-10-31: steps 0-9 in `release/examples/boing2026-ogles3/`**
+  (its `ReadMe.txt` says what each proves and costs), measured by package
+  `b26` (`tests/a1200/b26`: `Run-B26 ONLY=2|3|3n|3e`, `ONLY=3t` the timed
+  tour); shipped by `build_release.sh` (`Examples/boing2026-ogles3`, its
+  shaders in `Examples/shaders/`, the sources in the SDK). Not yet done:
+  the targets above (below).
+  - **Step 0** (`ogles2-b26-20261031-205647`, full screen, 4x MSAA,
+    `TIMING`): ogles2 1.3.2 / ogles3, the GLES2 program: 640x480 61.1 /
+    60.2 fps, 1280x720 at 50% 60.4 / 59.6, at 100% 24.7 / 24.8 (not the
+    ReadMe's 28). The room pass is the frame: 10.3 ms at 640x480, 31 ms at
+    720p 100%; bloom 2.4, window 2.9, shadows 1.0-1.7, reflection 0.6.
+  - **Now** (`-212525`, `-212741`, ogles3; the copy's ES 2.0 way in the
+    same runs 59.5 / 58.4 / 24.5): the ES 3 way, sparks, dust and
+    contact-hardening on, 61.4-63.4 fps at 640x480, 56.5-59.9 at 720p 50%,
+    25.1-26.3 at 720p 100% (runs differ by about 3%). Passes at 640x480:
+    shadows 0.9 ms (1.0), reflection 0.9 (0.6: the sparks), room 9.7
+    (10.4), bloom 2.2 (2.5), window 3.4 (2.8: sparks, dust).
+  - **What the steps gave, measured:** MRT with the bright part in RGBA16F
+    first made the room pass *slower* (11.5 against 10.3 ms) and the bloom
+    no faster; R11F_G11F_B10F for the bright part and the bloom chain
+    (half the store) brought the bloom to 2.1. Step 5's "loop bound from a
+    uniform" is a pessimisation on V3D: the loop stays a loop (5 loops, 118
+    nops, each shadow read waited for); a constant count is unrolled: 0.7
+    ms off the room. What made the ES 3 way faster than the GLES2 one is
+    not in the plan's list: the floor a program of its own (`floor3.frag`,
+    constant normal; the walls' `room3.frag` 1,167 instructions against
+    the one room shader's 1,451): room 10.7 to 9.7 ms. The sparks cost
+    about 0.5 ms a draw until only the live impacts' instances are drawn
+    (the CPU puts those first in the block): about 0.2. Dust: 512 motes in
+    a column that follows the light (each stays put in the room), 0.2 ms.
+    `glInvalidateFramebuffer` on the window measured the same as
+    `glClear`: the copy clears it.
+  - **Changed from the plan:** both shadow maps in the halves of one
+    1024x512 depth texture (one pass, one `sampler2DShadow`), not a depth
+    array: **the library attaches no layer of a depth array texture**
+    (`glFramebufferTextureLayer` to `GL_DEPTH_ATTACHMENT`: the framebuffer
+    is `INCOMPLETE_ATTACHMENT`, as `ogles2_texture_depth` in `texture.c`
+    takes 2D textures only). A conformance gap to look at with dEQP-GLES3's
+    `fbo` groups. The reflection and the bright parts are held at 4 and 6
+    above white: unclipped, the clear-coat's peaks bloomed into blots.
+  - **Later the same evening (the developer):** the dust removed (it did
+    not look good); sparks 640 an impact, thinner (1.5 pixels) and shorter,
+    the reflection and the bloom drawing each impact's first 128 (instance
+    i: impact i % live, spark i / live). `-213828`: 60.7 fps at 640x480,
+    55.6 at 720p 50%, 25.0 at 720p 100%; window pass 3.7 ms.
+  - **Water on the floor (key 9, the developer's request):** ripples
+    simulated on the GPU in two 128x128 RGBA16F textures swapped each frame
+    (`water3.frag`, the ball pushing where it squashes), the floor's normal,
+    refracted grid and reflections from their slope; floor hits throw drops
+    (`spark3.vert`, the impact's w). `-214742`, water on: 55.7 fps at
+    640x480, 52.5 at 720p 50%, 23.5 at 720p 100% (room +1 ms, the step and
+    the drops +0.4 ms). Its cost with the water off not measured yet (the
+    floor's normal is no longer a constant to the compiler).
+    Then deeper (refraction 0.8 units), caustics on the bottom (the slope's
+    divergence where the lamp's refracted ray met the surface, 2x2-averaged
+    reads) and bounced onto the walls (the water point mirroring the lamp),
+    the finest ripple smoothed in the step, livelier (push 6, damping
+    0.996): `-215546` 52.2 fps at 640x480, 49.9 at 720p 50%, 21.3 at 100%.
+  - **The water grown into a pool (2026-10-31/11-01, the developer's
+    requests):** a bowl (none at the walls, `[` `]` its depth in the middle),
+    the ceiling lamp off with it; the ball dives in (no squash; seen
+    through the water below the surface), its motion pushing the waves;
+    traced caustics on the bottom (`caust3.vert`: a 96x96 surface mesh from
+    `gl_VertexID`, refracted rays, area by `dFdx`/`dFdy`, added into an
+    RGBA16F texture) and traced reflected light on the walls and ceiling
+    (`refl3.vert`: a 64x64 mesh, each vertex working out its whole triangle
+    so misses and stretched ones are dropped before any pixel; `+` `-` the
+    waves' tilt it sees, default 0.02); the coloured light follows the
+    mouse (back to its flight 5 s after); camera swing 3x faster; sound off
+    by default (`SOUND`). **Found:** a program drawing into one of two
+    attached targets needs another fragment variant, which the shipped
+    binaries lack: the on-Amiga compiler ran 15 s mid-frame (the copy keeps
+    both draw buffers); triangles rejected only per pixel cost 25-60 ms.
+    About 35 fps at 640x480 with the water on (its passes about 9 ms).
+  - **Next, for the targets:** the room shader is still 9.7 ms of a
+    16 ms frame at 640x480 (2 threads, 50-62 registers): fewer registers
+    (4 threads) or the shadow taps only where the penumbra is (the 6
+    taps run wherever the ball's footprint is, 2.2 ms with both lights);
+    the window pass (3.4 ms, 6.5 at 720p) has the composite's full-size
+    read and the ball with MSAA as before. A run with `VSYNC` for the
+    display's 60 at 640x480 and the frame time to spare.
 
 **Performance, the evening of 2026-10-29 (after the hand-off below; the
 user's goal: ogles3 30% faster than ogles2 1.3, ogles3 first).**

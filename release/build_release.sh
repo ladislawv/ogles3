@@ -111,6 +111,14 @@ for f in Makefile ReadMe.txt boing2026.c boing2026_shaders.h tools/embed_shaders
     text "$B26/$f" "$R/SDK/examples/boing2026/$f"
 done
 for f in "$B26"/shaders/*; do text "$f" "$R/SDK/examples/boing2026/shaders/$(basename "$f")"; done
+# Boing 2026 for OpenGL ES 3: the same, its GLSL ES 3.00 shaders beside
+# Boing 2026's own (its ES 2.0 way)
+B3=$HERE/examples/boing2026-ogles3
+mkdir -p "$R/SDK/examples/boing2026-ogles3/shaders" "$R/SDK/examples/boing2026-ogles3/tools"
+for f in Makefile ReadMe.txt boing2026-ogles3.c boing2026-ogles3_shaders.h tools/embed_shaders.py; do
+    text "$B3/$f" "$R/SDK/examples/boing2026-ogles3/$f"
+done
+for f in "$B3"/shaders/*; do text "$f" "$R/SDK/examples/boing2026-ogles3/shaders/$(basename "$f")"; done
 
 # ---- the examples' shader binaries: the GLSL byte for byte as the programs
 # pass it, compiled by the offline compiler, named by hash
@@ -138,6 +146,12 @@ cp "$W"/v3dp-b26/* "$R/Examples/shaders/"
 # not (1.3 shipped none: the examples started it after every boot).
 python3 "$REPO/v3dp/v3ds_record.py" "$R/Examples/shaders" "$W"/src/*.vert "$W"/src/*.frag \
     "$R"/SDK/examples/boing2026/shaders/* > "$W/v3ds.txt"
+# Boing 2026 for OpenGL ES 3's, binaries and records, by its own Makefile
+# from its shaders/ as shipped (its ES 2.0 programs are Boing 2026's, the
+# same files again).
+make -C "$R/SDK/examples/boing2026-ogles3" shaders V3DGLSLC="$V/host/v3dglslc" OGLES3="$REPO" \
+    BUILD="$W/v3dp-b3" > "$W/v3dglslc-b3.txt" 2>&1 || { cat "$W/v3dglslc-b3.txt"; exit 1; }
+cp "$W"/v3dp-b3/* "$R/Examples/shaders/"
 
 # ---- the examples, built from the SDK as shipped (GCC; vbcc to check)
 cp -r "$R/SDK/." "$W/sdk/"
@@ -149,6 +163,10 @@ done
 make -C "$W/sdk/examples/boing2026" CC="$TC/bin/m68k-amigaos-gcc" boing2026 >> "$W/examples-gcc.txt"
 $TC/bin/m68k-amigaos-strip -o "$R/Examples/boing2026" "$W/sdk/examples/boing2026/boing2026" && chmod 755 "$R/Examples/boing2026"
 text "$B26/ReadMe.txt" "$R/Examples/boing2026.txt"
+make -C "$W/sdk/examples/boing2026-ogles3" CC="$TC/bin/m68k-amigaos-gcc" >> "$W/examples-gcc.txt"
+$TC/bin/m68k-amigaos-strip -o "$R/Examples/boing2026-ogles3" "$W/sdk/examples/boing2026-ogles3/boing2026-ogles3" &&
+    chmod 755 "$R/Examples/boing2026-ogles3"
+text "$B3/ReadMe.txt" "$R/Examples/boing2026-ogles3.txt"
 mkdir -p "$W/sdk-vbcc" && cp -r "$R/SDK/." "$W/sdk-vbcc/"
 PATH=$VBCC/bin:$PATH VBCC=$VBCC make -C "$W/sdk-vbcc/examples" vbcc \
     VC="$VBCC/bin/vc +aos68k" VCFLAGS="-c99 -cpu=68020 -fpu=68881 -O1 -I$TC/m68k-amigaos/ndk-include" \

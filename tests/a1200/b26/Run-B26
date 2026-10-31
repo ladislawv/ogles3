@@ -1,0 +1,107 @@
+; Run-B26 - Boing 2026 measured: the GLES2 example on ogles2 1.3.2 and on
+; ogles3, and the ES 3 copy (boing2026-ogles3) in its own way and the ES 2.0
+; way (E). See ReadMe.txt.
+;   CD to this directory, then:   Execute Run-B26
+;   Only some:                     Execute Run-B26 ONLY=2   (2, 3, 3n or 3e)
+;   The copy's tour, timed:        Execute Run-B26 ONLY=3t FRAMES=4000
+;   Longer runs:                   Execute Run-B26 FRAMES=600
+;   Other arguments for each run:  Execute Run-B26 ARGS="TOUR"
+; Nothing is installed: libs/ is added to LIBS: for the run and removed at the
+; end. Output goes to results/.
+.key ONLY/K,FRAMES/K,ARGS/K
+.def ONLY all
+.def FRAMES 300
+.def ARGS ""
+.bra {
+.ket }
+
+FailAt 21
+If NOT EXISTS bin2/boing2026
+  Echo "Please CD into the ogles2-b26 directory first,"
+  Echo "then run:  Execute Run-B26"
+  Quit 20
+EndIf
+Assign B26: ""
+If NOT EXISTS B26:results
+  MakeDir B26:results
+EndIf
+Assign LIBS: B26:libs ADD
+Avail FLUSH >NIL:
+List LIBS:ogles#? LIBS:v3dglslc#? >B26:results/libs.txt
+Set R2 0
+Set R3 0
+Set R3N 0
+Set R3E 0
+If "{ONLY}" EQ "all"
+  Set R2 1
+  Set R3 1
+  Set R3N 1
+  Set R3E 1
+EndIf
+If "{ONLY}" EQ "2"
+  Set R2 1
+EndIf
+If "{ONLY}" EQ "3"
+  Set R3 1
+EndIf
+If "{ONLY}" EQ "3n"
+  Set R3N 1
+EndIf
+If "{ONLY}" EQ "3e"
+  Set R3E 1
+EndIf
+If NOT EXISTS B26:bin3/boing2026-ogles3
+  Set R3N 0
+  Set R3E 0
+EndIf
+
+; Each program at 640x480 (the room at 100%) and 1280x720 with the room at
+; 50% and 100%, full screen, 4x MSAA, frames not limited, the passes timed
+; every 120 frames.
+If $R2 EQ 1 VAL
+  CD B26:bin2
+  boing2026 FULLSCREEN NOSOUND TIMING FRAMES={FRAMES} {ARGS} >B26:results/2-640.txt
+  Avail FLUSH >NIL:
+  boing2026 FULLSCREEN NOSOUND TIMING FRAMES={FRAMES} WIDTH=1280 HEIGHT=720 SCALE=50 {ARGS} >B26:results/2-720-50.txt
+  Avail FLUSH >NIL:
+  boing2026 FULLSCREEN NOSOUND TIMING FRAMES={FRAMES} WIDTH=1280 HEIGHT=720 SCALE=100 {ARGS} >B26:results/2-720-100.txt
+  Avail FLUSH >NIL:
+  CD B26:
+EndIf
+If $R3 EQ 1 VAL
+  CD B26:bin3
+  boing2026 FULLSCREEN NOSOUND TIMING FRAMES={FRAMES} {ARGS} >B26:results/3-640.txt
+  boing2026 FULLSCREEN NOSOUND TIMING FRAMES={FRAMES} WIDTH=1280 HEIGHT=720 SCALE=50 {ARGS} >B26:results/3-720-50.txt
+  boing2026 FULLSCREEN NOSOUND TIMING FRAMES={FRAMES} WIDTH=1280 HEIGHT=720 SCALE=100 {ARGS} >B26:results/3-720-100.txt
+  CD B26:
+EndIf
+If $R3N EQ 1 VAL
+  CD B26:bin3
+  boing2026-ogles3 FULLSCREEN NOSOUND TIMING FRAMES={FRAMES} {ARGS} >B26:results/3n-640.txt
+  boing2026-ogles3 FULLSCREEN NOSOUND TIMING FRAMES={FRAMES} WIDTH=1280 HEIGHT=720 SCALE=50 {ARGS} >B26:results/3n-720-50.txt
+  boing2026-ogles3 FULLSCREEN NOSOUND TIMING FRAMES={FRAMES} WIDTH=1280 HEIGHT=720 SCALE=100 {ARGS} >B26:results/3n-720-100.txt
+  CD B26:
+EndIf
+; 3t (only when asked): the copy's TOUR at 640x480, timed every 120 frames:
+; what each effect costs (FRAMES=4000 covers the 12 stops once).
+If "{ONLY}" EQ "3t"
+  CD B26:bin3
+  boing2026-ogles3 FULLSCREEN NOSOUND TIMING TOUR FRAMES={FRAMES} {ARGS} >B26:results/3t-640.txt
+  CD B26:
+EndIf
+If $R3E EQ 1 VAL
+  CD B26:bin3
+  boing2026-ogles3 FULLSCREEN NOSOUND TIMING FRAMES={FRAMES} ES2 {ARGS} >B26:results/3e-640.txt
+  boing2026-ogles3 FULLSCREEN NOSOUND TIMING FRAMES={FRAMES} WIDTH=1280 HEIGHT=720 SCALE=50 ES2 {ARGS} >B26:results/3e-720-50.txt
+  boing2026-ogles3 FULLSCREEN NOSOUND TIMING FRAMES={FRAMES} WIDTH=1280 HEIGHT=720 SCALE=100 ES2 {ARGS} >B26:results/3e-720-100.txt
+  CD B26:
+EndIf
+
+UnSet R2
+UnSet R3
+UnSet R3N
+UnSet R3E
+Assign LIBS: B26:libs REMOVE
+Avail FLUSH >NIL:
+Assign B26:
+Echo "Done. Results are in results/."

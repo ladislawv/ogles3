@@ -105,6 +105,11 @@ The examples
                       antialiasing and its "boing" on Paula; "boing2026
                       TOUR" shows each effect in turn. Its keys and
                       options: Examples/boing2026.txt
+  Examples/boing2026-ogles3
+                      Boing 2026 in OpenGL ES 3: faster, with sparks where
+                      the ball hits, dust in the light's beam and shadows
+                      that harden where it touches; key E switches to the
+                      ES 2.0 way to compare. Examples/boing2026-ogles3.txt
 Close the window or press Esc to quit. Their .v3dp files are in
 Examples/shaders/: they run without the compiler.
 
