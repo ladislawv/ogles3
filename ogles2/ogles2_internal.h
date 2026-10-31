@@ -162,6 +162,7 @@ struct OGLES3State
     GLenum blend_src_rgb, blend_dst_rgb, blend_src_alpha, blend_dst_alpha;
     GLenum blend_eq_rgb, blend_eq_alpha;
     GLfloat blend_color[4];
+    GLfloat bounding_box[8];        /* OES_primitive_bounding_box: kept, never used */
     /* stencil, [0] front and [1] back */
     GLenum stencil_func[2], stencil_fail[2], stencil_zfail[2], stencil_zpass[2];
     GLint stencil_ref[2];

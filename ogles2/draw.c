@@ -3466,13 +3466,15 @@ static BOOL arrays_ok(struct OGLES3Context *ctx, const struct OGLES3Program *p, 
                     ogles2_buffer_cpu(ctx, arr->buffer); /* transform feedback's results, before the job is built */
             }
             if (off + es > size || (size - off - es) / st + 1 < end_a) {
-                ogles2_log("%s: attribute %ld reads past the end of buffer %ld; nothing drawn",
-                           (ULONG)fn, (ULONG)p->attrib_index[a], (ULONG)ogles2_buffer_name(arr->buffer));
+                if (fn)
+                    ogles2_log("%s: attribute %ld reads past the end of buffer %ld; nothing drawn",
+                               (ULONG)fn, (ULONG)p->attrib_index[a], (ULONG)ogles2_buffer_name(arr->buffer));
                 return FALSE;
             }
         } else if (!arr->pointer) {
-            ogles2_log("%s: attribute %ld is enabled without an array; nothing drawn", (ULONG)fn,
-                       (ULONG)p->attrib_index[a]);
+            if (fn)
+                ogles2_log("%s: attribute %ld is enabled without an array; nothing drawn", (ULONG)fn,
+                           (ULONG)p->attrib_index[a]);
             return FALSE;
         }
     }
@@ -3679,6 +3681,7 @@ static void draw_elements(struct OGLES3Context *ctx, GLenum mode, GLsizei count,
         hi = ir->hi;
         goto range_known;
     }
+scan:
     ctx->n_scans++;
     /* Mesa's state tracker: copy only the range the indices use. Without
      * branches (Emu68 runs a loop with two of them a pass at a third of the
@@ -3768,8 +3771,15 @@ range_known:
     }
     lo += (ULONG)basevertex;
     hi += (ULONG)basevertex;
-    if (!arrays_ok(ctx, p, hi + 1, instances, fn))
-        return;
+    if (!arrays_ok(ctx, p, hi + 1, instances, range ? 0 : fn)) { /* 0: quiet */
+        if (!range)
+            return;
+        /* A range wider than the arrays (it need only hold the indices,
+         * ES 3.2 10.4; dEQP's draw_range_elements_base_vertex): the
+         * indices' own. */
+        range = 0;
+        goto scan;
+    }
     el.indices = indices;
     el.type = type;
     el.count = count;
@@ -3817,6 +3827,75 @@ void ogles2_glDrawElementsBaseVertexOES(struct OGLES3Context *ctx, GLenum mode, 
                                         GLenum type, const void *indices, GLint basevertex)
 {
     draw_elements(ctx, mode, count, type, indices, basevertex, 0, 1, "glDrawElementsBaseVertexOES");
+}
+
+/* OES_ and EXT_draw_elements_base_vertex's other entries (the EXT names
+ * the same commands): the range is of the indices, before basevertex is
+ * added (as glDrawRangeElements'). */
+void ogles2_glDrawRangeElementsBaseVertexOES(struct OGLES3Context *ctx, GLenum mode, GLuint start, GLuint end,
+                                             GLsizei count, GLenum type, const void *indices, GLint basevertex)
+{
+    ULONG range[2];
+    if (!ogles2_context_valid(ctx))
+        return;
+    if (end < start) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    range[0] = start;
+    range[1] = end;
+    draw_elements(ctx, mode, count, type, indices, basevertex, range, 1, "glDrawRangeElementsBaseVertex");
+}
+
+void ogles2_glDrawElementsInstancedBaseVertexOES(struct OGLES3Context *ctx, GLenum mode, GLsizei count,
+                                                 GLenum type, const void *indices, GLsizei instancecount,
+                                                 GLint basevertex)
+{
+    if (!ogles2_context_valid(ctx))
+        return;
+    if (instancecount < 0) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    if (instancecount)
+        draw_elements(ctx, mode, count, type, indices, basevertex, 0, instancecount,
+                      "glDrawElementsInstancedBaseVertex");
+}
+
+void ogles2_glDrawElementsBaseVertexEXT(struct OGLES3Context *ctx, GLenum mode, GLsizei count, GLenum type,
+                                        const void *indices, GLint basevertex)
+{
+    draw_elements(ctx, mode, count, type, indices, basevertex, 0, 1, "glDrawElementsBaseVertexEXT");
+}
+
+void ogles2_glDrawRangeElementsBaseVertexEXT(struct OGLES3Context *ctx, GLenum mode, GLuint start, GLuint end,
+                                             GLsizei count, GLenum type, const void *indices, GLint basevertex)
+{
+    ogles2_glDrawRangeElementsBaseVertexOES(ctx, mode, start, end, count, type, indices, basevertex);
+}
+
+void ogles2_glDrawElementsInstancedBaseVertexEXT(struct OGLES3Context *ctx, GLenum mode, GLsizei count,
+                                                 GLenum type, const void *indices, GLsizei instancecount,
+                                                 GLint basevertex)
+{
+    ogles2_glDrawElementsInstancedBaseVertexOES(ctx, mode, count, type, indices, instancecount, basevertex);
+}
+
+/* With EXT_multi_draw_arrays (offered): one draw after another. */
+void ogles2_glMultiDrawElementsBaseVertexEXT(struct OGLES3Context *ctx, GLenum mode, const GLsizei *count,
+                                             GLenum type, const void *const *indices, GLsizei drawcount,
+                                             const GLint *basevertex)
+{
+    GLsizei k;
+    if (!ogles2_context_valid(ctx))
+        return;
+    if (drawcount < 0) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    for (k = 0; k < drawcount; k++)
+        draw_elements(ctx, mode, count[k], type, indices[k], basevertex[k], 0, 1,
+                      "glMultiDrawElementsBaseVertexEXT");
 }
 
 /* GLES 3.0's glDrawRangeElements, offered to GLES2 programs through

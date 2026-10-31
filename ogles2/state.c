@@ -80,6 +80,8 @@ void ogles2_state_init(struct OGLES3Context *ctx)
     s->blend_eq_rgb = s->blend_eq_alpha = GL_FUNC_ADD;
     for (i = 0; i < 4; i++)
         s->blend_color[i] = 0.0f;
+    for (i = 0; i < 8; i++)
+        s->bounding_box[i] = i == 3 || i >= 4 ? 1.0f : -1.0f; /* (-1, -1, -1, 1), (1, 1, 1, 1) */
     for (i = 0; i < 2; i++) {
         s->stencil_func[i] = GL_ALWAYS;
         s->stencil_fail[i] = s->stencil_zfail[i] = s->stencil_zpass[i] = GL_KEEP;
@@ -628,6 +630,26 @@ void ogles2_glBlendEquation(struct OGLES3Context *ctx, GLenum mode)
     ogles2_glBlendEquationSeparate(ctx, mode, mode);
 }
 
+/* OES_ and EXT_primitive_bounding_box (ES 3.1 contexts): the box a
+ * tessellation or geometry stage would bound its primitives by, a hint for
+ * tiled GPUs; V3D bins what it is given, so it is kept for the queries. */
+void ogles2_glPrimitiveBoundingBoxOES(struct OGLES3Context *ctx, GLfloat minX, GLfloat minY, GLfloat minZ,
+                                      GLfloat minW, GLfloat maxX, GLfloat maxY, GLfloat maxZ, GLfloat maxW)
+{
+    GLfloat *b;
+    if (!ogles2_es31_entry(ctx))
+        return;
+    b = ctx->state.bounding_box;
+    b[0] = minX; b[1] = minY; b[2] = minZ; b[3] = minW;
+    b[4] = maxX; b[5] = maxY; b[6] = maxZ; b[7] = maxW;
+}
+
+void ogles2_glPrimitiveBoundingBoxEXT(struct OGLES3Context *ctx, GLfloat minX, GLfloat minY, GLfloat minZ,
+                                      GLfloat minW, GLfloat maxX, GLfloat maxY, GLfloat maxZ, GLfloat maxW)
+{
+    ogles2_glPrimitiveBoundingBoxOES(ctx, minX, minY, minZ, minW, maxX, maxY, maxZ, maxW);
+}
+
 void ogles2_glBlendColor(struct OGLES3Context *ctx, GLfloat red, GLfloat green, GLfloat blue,
                          GLfloat alpha)
 {
@@ -1074,6 +1096,13 @@ static int lookup(struct OGLES3Context *ctx, GLenum pname, struct value *v)
         v->kind = K_NFLOAT; v->n = 4;
         for (k = 0; k < 4; k++)
             v->f[k] = s->blend_color[k];
+        return 1;
+    case GL_PRIMITIVE_BOUNDING_BOX_OES:
+        if (!ogles2_es31(ctx))
+            return 0;
+        v->kind = K_FLOAT; v->n = 8;
+        for (k = 0; k < 8; k++)
+            v->f[k] = s->bounding_box[k];
         return 1;
     case GL_STENCIL_FUNC:
     case GL_STENCIL_BACK_FUNC:

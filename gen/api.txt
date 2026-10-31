@@ -131,3 +131,13 @@ command glGetQueryivEXT
 command glGetQueryObjectuivEXT
 command glMultiDrawArraysEXT
 command glMultiDrawElementsEXT
+# OES_ and EXT_draw_elements_base_vertex whole (every context), OES_ and
+# EXT_primitive_bounding_box (ES 3.1 contexts: the box is kept, never used)
+command glDrawRangeElementsBaseVertexOES
+command glDrawElementsInstancedBaseVertexOES
+command glDrawElementsBaseVertexEXT
+command glDrawRangeElementsBaseVertexEXT
+command glDrawElementsInstancedBaseVertexEXT
+command glMultiDrawElementsBaseVertexEXT
+command glPrimitiveBoundingBoxOES
+command glPrimitiveBoundingBoxEXT

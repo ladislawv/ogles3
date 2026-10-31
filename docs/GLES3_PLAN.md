@@ -1,5 +1,118 @@
 # OpenGL ES 3.0 and 3.1 on ogles2.library
 
+**Plan: OpenGL ES 3.2's features the Pi 4's GPU has (2026-10-31, the
+developer's request).** What V3D 4.2 can do comes from Mesa's driver for
+it (`src/gallium/drivers/v3d/v3d_screen.c`, `v3dx_format_table.c`, the
+reference tree in `~/fetch-ext-test/reference/mesa`): geometry shaders
+(up to 256 output vertices, 32 invocations), texture buffers (RGBA views
+only), cube map arrays, independent blending per render target,
+framebuffer fetch (coherent), sample shading, ASTC LDR (all block sizes,
+linear and sRGB), robust buffer access, a reset counter. **Not:**
+tessellation (no stage; Mesa's v3d stops at GLSL ES 3.10 for that reason).
+ES 3.2 needs tessellation, so the library cannot report version 3.2 (the
+`ES_VERSION` 32 request stays refused); it offers ES 3.2's parts as the
+extensions ES 3.2 was made of, in ES 3.1 contexts, as Mesa does on this
+GPU. Tessellation emulated with compute shaders is not planned (a week at
+least, slow, no program on the Amiga wants it).
+
+The dEQP-GLES31 run of 2026-10-31 reported 24,056 cases not supported;
+each item names the groups it should turn into passes. In order, cheapest
+and most used first:
+1. **Names for what exists** (a day): `EXT_draw_elements_base_vertex`
+   (the OES one's entry points under EXT names; `draw_base_vertex` 114);
+   `OES_primitive_bounding_box` / `EXT_primitive_bounding_box` (the
+   bounding box is a hint: kept and queried, never used;
+   `primitive_bounding_box` 227); `EXT_shader_implicit_conversions` and
+   `EXT_shader_io_blocks` (compiler only: the extension flags in
+   `v3dglslc`'s Mesa context; `shaders-implicit_conversions` 2,068,
+   parts of `shaders-linkage`).
+   **Base vertex and bounding box done 2026-10-31:** the extension
+   offered only `glDrawElementsBaseVertexOES`; now its Range and Instanced
+   entries too, all of them under the EXT names, and
+   `glMultiDrawElementsBaseVertexEXT` (`draw.c`); `GL_EXT_draw_elements_
+   base_vertex` in every context. `glPrimitiveBoundingBoxOES`/`EXT` keep
+   the box (`state.bounding_box`, default (-1,-1,-1,1), (1,1,1,1)),
+   `GL_PRIMITIVE_BOUNDING_BOX_OES` answers it; both names in ES 3.1
+   contexts. **Found on the way:** a draw range wider than the vertex
+   arrays (legal: it need only hold the indices) drew nothing; now the
+   indices' own range is scanned then (`draw_elements`, `arrays_ok` quiet
+   with no name). dEQP-GLES31 `draw_base_vertex` 114 of 114
+   (`ogles2-m8-3-20261031-173812`), `primitive_bounding_box` 45 passed, 182
+   not supported (geometry and tessellation stages); dEQP-GLES3 `draw` 323
+   of 323; `m8-5` 270, `m5-1` all but its known one; drawbench as before
+   (the same draw 6.48 us, `ogles2-drawbench-20261031-174119`).
+   **The compiler's two done the same day:** Mesa's compiler takes
+   `EXT_shader_implicit_conversions` and `EXT_`/`OES_shader_io_blocks` in
+   ES 3.1 already (`dummy_true`; a test program with both compiled and
+   linked); the library names them (ES 3.1 contexts). dEQP-GLES31
+   `shaders-implicit_conversions` 1,034 passed (the other 1,034 its ES 3.2
+   cases), `shaders-linkage` 131 (121 before), `shaders-arrays_of_arrays`
+   292 and `shaders-uniform_block` 142 as before, none failed
+   (`ogles2-m8-3-20261031-203203` on). **Item 1 done.**
+   **A freeze again:** the first run stopped the whole A1200 on
+   `implicit_conversions...div.int_to_vec2_fragment` (19:39, reset by
+   hand), a division like the 2026-10-30 freeze; its 168 division cases
+   three times since and the whole group: no freeze. Not tied to the
+   case: the A1200 had run 8 hours since its reboot (the other one 3.5).
+   To watch.
+2. **Sampler state** (2-3 days): `EXT_texture_sRGB_decode` (the sampler's
+   or texture's `SKIP_DECODE`: the linear format in the texture state;
+   `srgb_texture_decode` 21); `EXT_texture_border_clamp` (V3D 4.2's border
+   colour words in the sampler state, `CLAMP_TO_BORDER`; parts of
+   `texture`); `OES_texture_stencil8` (STENCIL_INDEX8 textures, the S8
+   image `ogles2_texture_s8_surface` already keeps for D32F_S8;
+   `stencil_texturing`, `fbo`).
+3. **Per-target blending** (2 days): `EXT_draw_buffers_indexed`
+   (`glEnablei`, `glBlendFunci`, `glBlendEquationi`, `glColorMaski`: the
+   render list's per-target blend and mask, today one for all;
+   dEQP-GLES3 `draw_buffers_indexed` 76).
+4. **Textures the GPU reads as they are** (a week):
+   `EXT_texture_cube_map_array` (the TMU's cube arrays, `samplerCubeArray`,
+   images), `EXT_texture_buffer` (a buffer's words as a 1D texel array;
+   formats other than RGBA through the swizzle as Mesa does),
+   `OES_texture_storage_multisample_2d_array`, `KHR_texture_compression_
+   astc_ldr` (blocks given to the GPU as they are, no CPU decoding; ASTC
+   HDR not). Parts of `texture` (most of its 2,098), `image_load_store`,
+   `state_query`.
+5. **Copies** (3 days): `EXT_copy_image` (`glCopyImageSubData`: the CPU's
+   copy between the GPU images, uncompressed and compressed, the TFU where
+   it fits; `copy_image` 12,395, a third of dEQP-GLES31).
+6. **Multisampling's shader parts** (a week): `OES_sample_shading`,
+   `OES_sample_variables` (`gl_SampleID`, `gl_SamplePosition`,
+   `gl_SampleMaskIn`, `gl_SampleMask`), `OES_shader_multisample_
+   interpolation` (`interpolateAtSample`/`Offset`/`Centroid`): the
+   fragment shader run per sample (the V3D state's per-sample flag, the
+   compiler's keys); needs the MSAA contexts of §6 (`sample_shading` 28,
+   `sample_variables` 207, `multisample_interpolation` 169; run with
+   `MSAA=1`).
+7. **Framebuffer fetch and advanced blending** (a week):
+   `EXT_shader_framebuffer_fetch` (the TLB read, Mesa's `fbfetch`; not ES
+   3.2 core but what the next one is built on), then
+   `KHR_blend_equation_advanced` (the advanced equations in the fragment
+   shader on the fetched colour, Mesa's NIR lowering;
+   `blend_equation_advanced` 102, `shaders-framebuffer_fetch` 44).
+8. **Robustness** (2 days): `KHR_robustness` / `EXT_robustness`
+   (`glGetGraphicsResetStatus` from the GPU resets `device.c` already
+   counts, the `glReadnPixels`/`glGetnUniform*` entries; robust buffer
+   access the GPU gives).
+9. **Geometry shaders** (3-4 weeks, the large one): `EXT_geometry_shader`
+   (and `EXT_gpu_shader5`'s parts the GPU has: `precise`, `fma`, sampler
+   array indexing, gather offsets). The compiler: Mesa's v3d GS stage
+   (`v3d_compile` for `MESA_SHADER_GEOMETRY`), a new variant kind in the
+   `.v3dx` images; the library: the GS state record and the pipeline's
+   vertex-GS-binning order (Mesa's `v3dx_draw.c`, `GEOMETRY_SHADER_STATE`),
+   the primitive types `*_ADJACENCY`, layered rendering
+   (`glFramebufferTexture`, `gl_Layer`), the queries. dEQP
+   `geometry_shading` 207 and the geometry variants in
+   `shaders-builtin_functions`, `program_interface_query`, `layout_binding`
+   and others.
+
+Each item: its dEQP groups whole, then `m8-5`/`m8-1` (a test of its own
+there), and the speed of drawbench unchanged (none of these may touch the
+draw path's common case). About 9-10 weeks in all, item 9 half of it.
+After them dEQP-GLES31's not-supported cases should be tessellation's and
+ASTC HDR's only.
+
 **Plan: the remaining gaps before the full dEQP runs (2026-10-30, the
 developer's request).** An audit of every "not yet" in this plan against
 the code and the later entries: most are stale. `glTexStorage2D/3D`,

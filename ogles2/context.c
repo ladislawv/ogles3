@@ -384,6 +384,13 @@ static const struct { const char *name; UBYTE in; } extensions[] = {
     /* ES 3.1's image atomics (Mesa offers it in every ES 3.1 context;
      * GLES3 plan stage D item 2) */
     {"GL_OES_shader_image_atomic", EXT_ES31},
+    /* The OES name's entries under EXT's (draw.c) */
+    {"GL_EXT_draw_elements_base_vertex", EXT_ALL},
+    /* ES 3.1 contexts: the box is kept for the queries, never used (state.c) */
+    {"GL_OES_primitive_bounding_box", EXT_ES31}, {"GL_EXT_primitive_bounding_box", EXT_ES31},
+    /* The compiler's (Mesa's dummy_true in ES 3.1 contexts) */
+    {"GL_EXT_shader_io_blocks", EXT_ES31}, {"GL_OES_shader_io_blocks", EXT_ES31},
+    {"GL_EXT_shader_implicit_conversions", EXT_ES31},
 };
 #define NUM_EXTENSIONS (sizeof(extensions) / sizeof(extensions[0]))
 
