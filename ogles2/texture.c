@@ -1605,8 +1605,8 @@ static int pixel_size(GLenum format, GLenum type, GLenum *err)
             return components(format);
         *err = components(format) ? GL_INVALID_OPERATION : GL_INVALID_ENUM;
         return 0;
-    case GL_UNSIGNED_INT_2_10_10_10_REV:
-        if (format == GL_RGBA)
+    case GL_UNSIGNED_INT_2_10_10_10_REV: /* RGB: EXT_texture_type_2_10_10_10_REV's (offered to ES 3 contexts too, as Mesa) */
+        if (format == GL_RGBA || format == GL_RGB)
             return 4;
         *err = components(format) ? GL_INVALID_OPERATION : GL_INVALID_ENUM;
         return 0;
@@ -1743,7 +1743,7 @@ static void convert_float(UBYTE *dst, ULONG dst_stride, const UBYTE *src, GLenum
                 memcpy(&wd, s, 4);
                 s += 4;
                 unpack_word(type, wd, v);
-                d[0] = v[0]; d[1] = v[1]; d[2] = v[2]; d[3] = v[3];
+                d[0] = v[0]; d[1] = v[1]; d[2] = v[2]; d[3] = format == GL_RGB ? 1.0f : v[3];
                 continue;
             }
             for (c = 0; c < n; c++, s += bpc) {
@@ -2352,6 +2352,8 @@ static void storage_of(struct OGLES3Texture *t)
         type = V3D_TEXTURE_DATA_FORMAT_RGB9E5; cpp = 4; sw[3] = O;
     } else if (ty == GL_UNSIGNED_INT_2_10_10_10_REV) {
         type = V3D_TEXTURE_DATA_FORMAT_RGB10A2; cpp = 4;
+        if (f == GL_RGB)
+            sw[3] = O;
     } else if (ty == GL_BYTE) { /* signed normalized */
         type = f == GL_RED ? V3D_TEXTURE_DATA_FORMAT_R8_SNORM
              : f == GL_RG ? V3D_TEXTURE_DATA_FORMAT_RG8_SNORM : V3D_TEXTURE_DATA_FORMAT_RGBA8_SNORM;
@@ -3246,6 +3248,7 @@ static int rt_out(const struct OGLES3Texture *t, const struct OGLES3Face *f, int
 {
     GLenum fm = f->format[l], ty = f->type[l];
     BOOL es3 = t->es3_rules && (f->sized_given & (1UL << l)); /* ES 3.0 4.4.4: sized formats only */
+    BOOL rg_ext = es3 || !t->es3_rules; /* GLES2: EXT_texture_rg's RED and RG bytes, sized or not */
     switch (t->hw_type) {
     case V3D_TEXTURE_DATA_FORMAT_RGBA8:
         if (ty != GL_UNSIGNED_BYTE || f->sized[l] == GL_SRGB8)
@@ -3260,9 +3263,9 @@ static int rt_out(const struct OGLES3Texture *t, const struct OGLES3Face *f, int
     case V3D_TEXTURE_DATA_FORMAT_RGB5A1:
         return ty == GL_UNSIGNED_SHORT_5_5_5_1 ? V3D_OUTPUT_IMAGE_FORMAT_ABGR1555 : -1;
     case V3D_TEXTURE_DATA_FORMAT_R8:
-        return es3 && fm == GL_RED && ty == GL_UNSIGNED_BYTE ? V3D_OUTPUT_IMAGE_FORMAT_R8 : -1;
+        return rg_ext && fm == GL_RED && ty == GL_UNSIGNED_BYTE ? V3D_OUTPUT_IMAGE_FORMAT_R8 : -1;
     case V3D_TEXTURE_DATA_FORMAT_RG8:
-        return es3 && fm == GL_RG && ty == GL_UNSIGNED_BYTE ? V3D_OUTPUT_IMAGE_FORMAT_RG8 : -1;
+        return rg_ext && fm == GL_RG && ty == GL_UNSIGNED_BYTE ? V3D_OUTPUT_IMAGE_FORMAT_RG8 : -1;
     case V3D_TEXTURE_DATA_FORMAT_RGB10A2:
         return es3 ? V3D_OUTPUT_IMAGE_FORMAT_RGB10A2 : -1;
     case V3D_TEXTURE_DATA_FORMAT_R11FG11FB10F:
@@ -3955,6 +3958,8 @@ static GLenum sized_base(GLenum ifmt, GLenum format, GLenum type)
     case GL_SRGB8: return format == GL_RGB && type == GL_UNSIGNED_BYTE ? format : NOT_FILLED;
     case GL_SRGB8_ALPHA8: return format == GL_RGBA && type == GL_UNSIGNED_BYTE ? format : NOT_FILLED;
     case GL_RGB10_A2: return format == GL_RGBA && type == GL_UNSIGNED_INT_2_10_10_10_REV ? format : NOT_FILLED;
+    case GL_RGB10_EXT: /* EXT_texture_type_2_10_10_10_REV with OES_required_internalformat */
+        return format == GL_RGB && type == GL_UNSIGNED_INT_2_10_10_10_REV ? format : NOT_FILLED;
     case GL_R11F_G11F_B10F:
         return format == GL_RGB && (type == GL_UNSIGNED_INT_10F_11F_11F_REV || type == GL_HALF_FLOAT_OES ||
                                     type == GL_FLOAT) ? format : NOT_FILLED;
@@ -4026,10 +4031,13 @@ static void tex_image(struct OGLES3Context *ctx, GLenum target, GLint level, GLi
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
-    /* GLES2 contexts: ES 3.0's sized formats are none of theirs (and
-     * DEPTH_COMPONENT24 needs OES_depth24, not offered), as in 1.3: dEQP-GLES2
-     * expects them refused (fbo.completeness.renderable) */
-    if (!ogles2_es3(ctx) && (es3_sized((GLenum)internalformat) || (GLenum)internalformat == GL_DEPTH_COMPONENT24)) {
+    /* GLES2 contexts: ES 3.0's sized formats are none of theirs but those
+     * of the extensions offered with OES_required_internalformat (dEQP-GLES2
+     * fbo.completeness.renderable): EXT_texture_rg's R8 and RG8,
+     * EXT_texture_type_2_10_10_10_REV's RGB10_A2 (and RGB10, not ES 3.0's),
+     * OES_depth24's DEPTH_COMPONENT24 */
+    if (!ogles2_es3(ctx) && es3_sized((GLenum)internalformat) && (GLenum)internalformat != GL_R8 &&
+        (GLenum)internalformat != GL_RG8 && (GLenum)internalformat != GL_RGB10_A2) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }

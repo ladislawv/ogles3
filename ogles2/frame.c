@@ -369,7 +369,7 @@ static void clear(struct OGLES3Context *ctx, GLbitfield mask, UBYTE rts, const U
     }
     for (k = 0; k < 4; k++) {
         union { ULONG u; GLfloat f; } x;
-        x.u = cv[k];
+        x.u = cv ? cv[k] : 0; /* depth and stencil clears pass none (-O3 inlined it here: a NULL read GCC made a trap) */
         color[k] = is_int ? (GLfloat)(LONG)cv[k] : x.f;
         /* beside a 32-bit float or integer target every target: the
          * built-in clears for several targets would write it too, at the

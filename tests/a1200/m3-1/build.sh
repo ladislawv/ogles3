@@ -75,7 +75,7 @@ If NOT EXISTS M3R1:cache
 EndIf
 ; A run from the start compiles everything again: empty the cache.
 If NOT {FROM} GT 1 VAL
-  Delete M3R1:cache/#? QUIET >NIL:
+  Delete M3R1:cache/#? ALL QUIET >NIL:
 EndIf
 Echo "ogles2 M3 run 1, starting at step {FROM}" >>M3R1:results/00-progress.txt
 Date >>M3R1:results/00-progress.txt

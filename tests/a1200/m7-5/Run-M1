@@ -43,7 +43,7 @@ If NOT {FROM} GT 2 VAL
   If NOT EXISTS M7R5:cache
     MakeDir M7R5:cache
   EndIf
-  Delete M7R5:cache/#? QUIET >NIL:
+  Delete M7R5:cache/#? ALL QUIET >NIL:
   Assign OGLES3Cache: M7R5:cache
   Assign LIBS: M7R5:compiler ADD
   M7R5:bin/m7_half >M7R5:results/2-half.txt

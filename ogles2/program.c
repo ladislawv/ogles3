@@ -515,7 +515,7 @@ void ogles2_glCompileShader(struct OGLES3Context *ctx, GLuint shader)
     shader_record_path(path, "PROGDIR:shaders/", s);
     rc = read_record(path, compiler, &s->info_log);
     if (rc < 0) {
-        shader_record_path(path, ogles2_cache_dir(), s);
+        shader_record_path(path, 0, s);
         rc = read_record(path, compiler, &s->info_log);
     }
     if (rc >= 0) {
@@ -936,6 +936,7 @@ static void shader_record_path(char *path, const char *dir, const struct OGLES3S
     static const char digits[] = "0123456789abcdef";
     struct blake3 h;
     UBYTE out[32], w[8];
+    char sub[16];
     ULONG stage = s->type == GL_FRAGMENT_SHADER ? 4 : s->type == GL_COMPUTE_SHADER ? 5 : 0, len = str_len(s->source), i;
     char *q;
     blake3_init(&h);
@@ -946,7 +947,7 @@ static void shader_record_path(char *path, const char *dir, const struct OGLES3S
     blake3_update(&h, w, 8);
     blake3_update(&h, s->source, len);
     blake3_final(&h, out);
-    strcpy(path, dir);
+    strcpy(path, dir ? dir : ogles2_cache_subdir(sub, digits[out[0] >> 4])); /* NULL: the cache */
     q = path + str_len(path);
     for (i = 0; i < 12; i++) { /* 24 digits + ".v3ds": FFS's 30 characters */
         *q++ = digits[out[i] >> 4];
@@ -1035,7 +1036,7 @@ static void mark_compiled(const struct OGLES3Shader *s)
         FreeVec(log);
     if (rc == 1)
         return;
-    shader_record_path(path, ogles2_cache_dir(), s);
+    shader_record_path(path, 0, s);
     rc = read_record(path, ogles2_compiler_id(), &log);
     if (log)
         FreeVec(log);
@@ -1139,15 +1140,16 @@ static void file_path(char *path, const char *dir, const char *hex)
 static struct OGLES3Image *load_image(struct OGLES3Program *p, const UBYTE *hash, const char *hex,
                                       const char *bindings)
 {
-    char path[96];
+    char path[96], sub[16];
     struct OGLES3Image *im;
     BOOL refused, any_refused = FALSE;
-    const char *dirs[3];
+    const char *dirs[4];
     int d;
     dirs[0] = "PROGDIR:shaders/";
     dirs[1] = "PROGDIR:";
-    dirs[2] = ogles2_cache_dir();
-    for (d = 0; d < 3; d++) {
+    dirs[2] = ogles2_cache_subdir(sub, hex[0]);
+    dirs[3] = ogles2_cache_dir(); /* a cache from before its subdrawers (read only) */
+    for (d = 0; d < (dirs[3] == dirs[2] ? 3 : 4); d++) {
         file_path(path, dirs[d], hex);
         if ((im = try_file(p, hash, path, &refused)))
             return im;
@@ -1221,8 +1223,8 @@ static struct OGLES3Image *extra_image(struct OGLES3Image *im, struct OGLES3Imag
                                        BOOL (*compile)(const char *, const char *, const char *, char *, ULONG))
 {
     static const char digits[] = "0123456789abcdef";
-    char hex[FILE_HASH_DIGITS + 1], path[96];
-    const char *dirs[3];
+    char hex[FILE_HASH_DIGITS + 1], path[96], sub[16];
+    const char *dirs[4];
     int d, k;
     if (*slot || *tried)
         return *slot;
@@ -1234,13 +1236,17 @@ static struct OGLES3Image *extra_image(struct OGLES3Image *im, struct OGLES3Imag
     hex[FILE_HASH_DIGITS] = 0;
     dirs[0] = "PROGDIR:shaders/";
     dirs[1] = "PROGDIR:";
-    dirs[2] = ogles2_cache_dir();
-    for (d = 0; d < 3 && !*slot; d++) {
+    dirs[2] = ogles2_cache_subdir(sub, hex[0]);
+    dirs[3] = ogles2_cache_dir(); /* a cache from before its subdrawers (read only) */
+    for (d = 0; d < (dirs[3] == dirs[2] ? 3 : 4) && !*slot; d++) {
         strcpy(path, dirs[d]);
         strcat(path, hex);
         strcat(path, ext);
         *slot = try_wide(im->hash, path);
     }
+    strcpy(path, dirs[2]); /* the compiler writes into the subdrawer */
+    strcat(path, hex);
+    strcat(path, ext);
     if (!compile) /* the files only (ogles2_image_wide_file): quiet either way */
         return *slot;
     if (!*slot && im->vs_src && im->fs_src && ogles2_compiler_installed()) {
@@ -1348,11 +1354,18 @@ const struct OGLES3Image *ogles2_image_x(struct OGLES3Image *im, BOOL cache)
     image_hex(im, hex);
     if (cache) {
         if (!im->xc_tried) {
+            char sub[16];
+            const char *sd = ogles2_cache_subdir(sub, hex[0]);
             im->xc_tried = TRUE;
-            strcpy(path, ogles2_cache_dir());
+            strcpy(path, sd);
             strcat(path, hex);
             strcat(path, ".v3dx");
-            im->xc = try_x(im, path);
+            if (!(im->xc = try_x(im, path)) && sd != ogles2_cache_dir()) {
+                strcpy(path, ogles2_cache_dir()); /* a cache from before its subdrawers */
+                strcat(path, hex);
+                strcat(path, ".v3dx");
+                im->xc = try_x(im, path);
+            }
         }
         return im->xc;
     }
@@ -1380,7 +1393,10 @@ BOOL ogles2_image_compile_variants(struct OGLES3Context *ctx, struct OGLES3Image
     if (!(log = AllocVec(1024, MEMF_ANY | MEMF_CLEAR)))
         return FALSE;
     image_hex(im, hex);
-    file_path(path, ogles2_cache_dir(), hex);
+    {
+        char sub[16];
+        file_path(path, ogles2_cache_subdir(sub, hex[0]), hex);
+    }
     rc = ogles2_compile_variants(im->vs_src, im->fs_src, im->bind_src, keys, keys_len, im->layout_crc, path,
                                  log, 1024);
     if (rc < 0) {
@@ -2648,8 +2664,9 @@ static struct OGLES3Image *pair_image(struct OGLES3Context *ctx, const struct OG
         return im;
     if (!(x = ogles2_image_x(im, FALSE)) && !(x = ogles2_image_x(im, TRUE)) && ogles2_compiler_installed()) {
         char *log = AllocVec(1024, MEMF_ANY | MEMF_CLEAR);
+        char sub[16];
         image_hex(im, hex);
-        file_path(path, ogles2_cache_dir(), hex);
+        file_path(path, ogles2_cache_subdir(sub, hex[0]), hex);
         if (log && ogles2_compile_pipeline(im->vs_src, im->fs_src, im->bind_src, im->layout_crc, path, log, 1024)) {
             im->xc_tried = FALSE;
             x = ogles2_image_x(im, TRUE);

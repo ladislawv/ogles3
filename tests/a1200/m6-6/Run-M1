@@ -67,7 +67,7 @@ If NOT {FROM} GT 5 VAL
   If NOT EXISTS M6R6:cache
     MakeDir M6R6:cache
   EndIf
-  Delete M6R6:cache/#? QUIET >NIL:
+  Delete M6R6:cache/#? ALL QUIET >NIL:
   Assign OGLES3Cache: M6R6:cache
   Assign LIBS: M6R6:compiler ADD
   M6R6:bin2/m6_ext COMPILED >M6R6:results/5-ext-compiled.txt

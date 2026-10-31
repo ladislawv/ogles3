@@ -88,8 +88,11 @@ Avail FLUSH >NIL:
 ; .v3dx files (from step 5) moved to PROGDIR:, still without the compiler.
 If NOT {FROM} GT 7 VAL
   Echo "Step 7 of 7: the same with the variants shipped beside it, a second."
-  Copy M8R1:cache/#?.v3dx M8R1:bin/ QUIET
-  Delete M8R1:cache/#?.v3dx QUIET >NIL:
+  ; the cache's files are in its subdrawers (OGLES3Cache:<digit>/)
+  List M8R1:cache ALL FILES PAT=#?.v3dx LFORMAT "Copy %P%N M8R1:bin/ QUIET" >T:m8r1-v3dx
+  List M8R1:cache ALL FILES PAT=#?.v3dx LFORMAT "Delete %P%N QUIET" >>T:m8r1-v3dx
+  Execute T:m8r1-v3dx
+  Delete T:m8r1-v3dx QUIET >NIL:
   M8R1:bin/m8_draw >M8R1:results/7-m8_draw-shipped.txt
   List M8R1:cache >M8R1:results/7-cache.txt
   List M8R1:bin/#?.v3dx >M8R1:results/7-shipped.txt

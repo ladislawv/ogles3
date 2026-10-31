@@ -55,10 +55,32 @@ BOOL ogles2_cache_assigned(void)
 }
 
 /* Where compiled programs go: OGLES3Cache: if assigned (kept), else T:
- * (until the next reboot). */
+ * (until the next reboot). The cache's own files are in its subdrawers
+ * (ogles2_cache_subdir); this is its top, where caches before 1.0-beta2
+ * kept them flat (still read). */
 const char *ogles2_cache_dir(void)
 {
     return ogles2_cache_assigned() ? "OGLES3Cache:" : "T:";
+}
+
+/* The drawer a cache file whose name begins with hex digit `d` goes in:
+ * OGLES3Cache:<d>/, made when missing (16 subdrawers: a dEQP run leaves tens
+ * of thousands of files, and a lookup in one drawer of them all was slow;
+ * the developer's call, docs/GLES3_PLAN.md, the remaining gaps); T: as it
+ * is without the assign. Into `buf` (at least 16 bytes). */
+const char *ogles2_cache_subdir(char *buf, char d)
+{
+    BPTR l;
+    if (!ogles2_cache_assigned() || !((d >= '0' && d <= '9') || (d >= 'a' && d <= 'f')))
+        return ogles2_cache_dir();
+    strcpy(buf, "OGLES3Cache:");
+    buf[12] = d;
+    buf[13] = 0;
+    if ((l = Lock((STRPTR)buf, SHARED_LOCK)) != 0 || (l = CreateDir((STRPTR)buf)) != 0)
+        UnLock(l);
+    buf[13] = '/';
+    buf[14] = 0;
+    return buf;
 }
 
 /* The compiler (compiler_where's first): its size and build stamp, hashed

@@ -119,15 +119,101 @@ the library does not offer. What is really left, in order (items 1-5
      yesterday. The committed build (`1040a1a`, the same draw code that
      measured 6.08 on 2026-10-29) measures 6.48 today: the A1200 differs
      by about 6% from day to day; this code and it agree.
-6. **The developer's decisions, not work:** the shader cache's single
-   drawer (subdrawers proposed); which of the extensions dEQP reports as
-   not supported to offer later (`EXT_texture_sRGB_decode`,
-   `OES_texture_stencil8`, `EXT_texture_border_clamp`, ...: ES 3.2's own).
+6. **The developer's decisions:** the extensions dEQP reports as not
+   supported (`EXT_texture_sRGB_decode`, `OES_texture_stencil8`,
+   `EXT_texture_border_clamp`, ...: ES 3.2's own) come later, after the
+   full runs (decided 2026-10-30).
+   **The shader cache in subdrawers: done 2026-10-30.** A file goes in
+   `OGLES3Cache:<d>/`, `d` the first hex digit of its name (16 drawers,
+   made when missing; `compiler.c`, `ogles2_cache_subdir`): images,
+   variants, pipelines and shader records (`program.c`). Lookups try the
+   subdrawer, then the cache's top, where caches before it kept their
+   files flat (read, never written; a file refused there is compiled again
+   into the subdrawer). Without the assign, `T:` stays flat. The test
+   packages that empty their cache now `Delete cache/#? ALL`; `m8-1`'s
+   step 7 collects the `.v3dx` files with `List ... ALL FILES`. Checked:
+   `m8-1` (16 subdrawers, an old flat file refused and replaced, step 7
+   210 of 210), `m8-5` 210 of 210, `m5-1`.
 
 Then the full runs the beta skipped (§1's release note): dEQP-GLES2, -GLES3
 and -GLES31 whole, the GLES2 regression set (`m5-1` and the rest), the
 speed against 1.x (drawbench, `q3cmp.sh`, Doom 3's timedemo), and a
 1.0-beta2 with the speed work of 2026-10-29.
+
+**The full runs of 2026-10-30** (`ports/deqp/run_full.sh`, every case list
+of a package, one watched run each, every shader compiled on the PC:
+`compile_bridge.py` and the A1200's `v3dglslc-remote WAIT NOFALLBACK`).
+dEQP-GLES31 is left for the next day (the developer's call).
+- **dEQP-GLES2** (`m7-1`, 17,165 cases, 88 minutes, the build before the
+  fixes below; `ogles2-m7-1-20261030-153825` to `-170110`): 17,091 passed,
+  44 failed, 9 quality and 3 timing warnings (`flush_finish`), 18 not
+  supported (`multisample`: no MSAA context in this run). The failures:
+  the 25 cube cases of the documented deviation (seamless filtering,
+  DEVELOPMENT_PLAN §13); 18 `fbo.completeness.renderable` cases (below,
+  fixed); `texture.format.rgb888_cube_pot` (below, intermittent).
+- **dEQP-GLES3** (`m8-2`, 44,768 cases, 17:53-23:37, the fixed build;
+  `ogles2-m8-2-20261030-175334` to `-233015`): 42,860 passed, 2 failed, 1
+  froze, 1,892 not supported (extensions left for later, compressed
+  formats, multisampling), 11 quality and 2 timing warnings. `fbo` 2025,
+  `fragment_ops` 3174, `state_query` 943 (its old failures gone), `ubo`
+  2357, `texture` 4500 of 5895. The failures: `derivate.dfdx.texture.basic.
+  float_mediump` (item 4 above, 12 pixels again, in the whole group) and
+  `texture.format.unsized.luminance_alpha_cube_pot` (below). The freeze:
+  `shaders.operator.binary_operator.div_assign_effect.highp_uvec3_uint_vertex`
+  (21:19, the whole A1200 stopped, no requester; reset by hand, the list
+  went on after it).
+- **Fixed on the way:**
+  - **A crash in `glClearBufferfv`/`iv`/`fi`** (`frame.c`, `clear`): the
+    colour loop read `cv[0..3]`, which depth and stencil clears pass as
+    NULL; since `-O3` (2026-10-29) GCC inlines `clear` there and made the
+    NULL read a `trap #7` (SmartCrash "trap instruction #7" in
+    `fragment_ops.scissor.clear_fixed_buffer`, a scissored depth clear).
+    No colour is read without one now; `frame.s` has no `trap #7` left.
+    `program.s` keeps five, in `glGetProgramiv` and
+    `glGetActiveUniformsiv`: GCC's copies of `active_attrib`/
+    `active_uniform` lookups the loop condition already found, never run.
+    **Trap:** after a GCC flag change, `grep "trap #7" $B/asm/*.s`.
+  - **GLES2 contexts' sized formats** (`texture.c`): `e58b872` offers
+    `EXT_texture_rg`, `OES_depth24`, `EXT_texture_type_2_10_10_10_REV` and
+    `OES_required_internalformat` to GLES2, but `glTexImage2D` still
+    refused their formats there: R8, RG8, RGB10_A2, RGB10 (new,
+    `sized_base`), DEPTH_COMPONENT24, and RGB in 2_10_10_10_REV words (in
+    ES3 contexts too, as Mesa: the extension is offered to both; stored as
+    RGB10A2, alpha one). R8 and RG8 of a GLES2 context are
+    colour-renderable (`rt_out`, `EXT_texture_rg`). dEQP-GLES2 `fbo` 705
+    of 709 and 4 quality warnings (float RED/RG, which GLES2 cannot render
+    to; `ogles2-m7-1-20261031-000757`), `negative_api` 246 of 246;
+    dEQP-GLES3 `fbo` 2025 as before, `negative_api` 310 and 4 not
+    supported.
+  - **`run_full.sh`:** `m7-1`'s `Run-M1` takes `PROGRESS=1` (the watcher's
+    progress file, as `m8-2`'s); a dEQP that crashed (its requester keeps
+    the task and its open result file, so every later list lost its
+    results: `fragment_ops.qpa` "not found") is logged `CRASHED`, the A1200
+    rebooted, and the list goes on after the case.
+- **Intermittent, not reproduced:** the two cube format cases (one face
+  wrong by up to 193, the other five right; alone 2 x 18 and 2 x 146
+  passed, GLES2's whole `texture` twice with only the deviation's 24),
+  the derivate case (40 cases 3 times, the whole group 3 times, 556 of
+  556), the freeze (the 42 unsigned divisions twice). The library logs
+  show no GPU reset near them. Each came hours into a run; to look at if
+  they recur (a face's upload, the A1200 itself).
+- **Regression:** `m8-5` 270 of 270, `m7-6` all, `m5-1` all but its
+  known "destroy returns the memory" after other packages
+  (`ogles2-m8-5-20261031-002107` on).
+- **dEQP-GLES31** (`m8-3`, 37,802 cases, 2026-10-31 11:23-14:18, the
+  fixed build; `ogles2-m8-3-20261031-112347` to `-141806`): 13,746
+  passed, **none failed**, 24,056 not supported (`copy_image` 12,395,
+  `shaders-implicit_conversions` 2,068, `program_interface_query` 1,913,
+  `texture` 2,098, `shaders-builtin_functions` 1,342, tessellation,
+  geometry shaders, bounding boxes, advanced blending, sample shading and
+  the multisample groups: ES 3.2's and the extensions left for later), no
+  hang, no crash. `draw_indirect`'s 203 passed and 18 not supported are
+  from its `.txt` (the `.qpa`'s transfer timed out). `draw_base_vertex`'s
+  114 are not supported though GLES2 contexts offer
+  `OES_draw_elements_base_vertex`: dEQP-GLES31 looks for
+  `EXT_draw_elements_base_vertex` (or ES 3.2); to look at with the
+  extensions.
+- **Next:** the 1.0-beta2.
 
 **Plan: Boing Ocean for ogles3 (2026-10-30, the developer's request).** A
 copy, `release/examples/boingocean-ogles3.c` (with
@@ -947,8 +1033,8 @@ Mesa's driver, so they could follow later as an extension
       depend on the program the same compiler process compiled before it
       (`es3uni` after `es3tex`, "Compiling on the PC"); a buffer fed back
       and read as a uniform buffer in the same job is not waited for (§6
-      item 1); the library's cache in one drawer (subdrawers proposed, the
-      developer to decide).
+      item 1); the library's cache in one drawer (in 16 subdrawers since
+      2026-10-30, "Plan: the remaining gaps" item 6).
     - **Tools:** `ports/deqp/run_pc.sh` (cases with PC compiles),
       `tools/amictl/compile_bridge.py`, `ports/deqp/summary.py`,
       `failed_list.py`, `qpa_images.py` (`ports/deqp/README.md`);

@@ -42,7 +42,7 @@ If NOT {FROM} GT 2 VAL
   If NOT EXISTS M7R3:cache
     MakeDir M7R3:cache
   EndIf
-  Delete M7R3:cache/#? QUIET >NIL:
+  Delete M7R3:cache/#? ALL QUIET >NIL:
   Assign OGLES3Cache: M7R3:cache
   Assign LIBS: M7R3:compiler ADD
   M7R3:bin/m7_clip >M7R3:results/2-clip.txt

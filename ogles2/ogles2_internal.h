@@ -1124,6 +1124,7 @@ ULONG ogles2_format(char *buf, ULONG size, const char *fmt, ...); /* log.c: RawD
 /* compiler.c: the on-target shader compiler (plan 8.4) */
 BOOL ogles2_cache_assigned(void);   /* OGLES3Cache: exists */
 const char *ogles2_cache_dir(void); /* where compiled programs go: OGLES3Cache: or T: */
+const char *ogles2_cache_subdir(char *buf, char d); /* its subdrawer for names from hex digit d */
 BOOL ogles2_compiler_installed(void);
 ULONG ogles2_compiler_id(void); /* the installed compiler's size and date, hashed; 0: none */
 BOOL ogles2_compile_program(const char *vs, const char *fs, const char *path, char *log,

@@ -42,7 +42,7 @@ If NOT {FROM} GT 2 VAL
   If NOT EXISTS M7R4:cache
     MakeDir M7R4:cache
   EndIf
-  Delete M7R4:cache/#? QUIET >NIL:
+  Delete M7R4:cache/#? ALL QUIET >NIL:
   Assign OGLES3Cache: M7R4:cache
   Assign LIBS: M7R4:compiler ADD
   M7R4:bin/m7_mrt >M7R4:results/2-mrt.txt
