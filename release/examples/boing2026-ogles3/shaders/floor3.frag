@@ -239,7 +239,10 @@ void main()
 
     float nv = max(dot(n, vd), 0.0);
     float fres = mix(0.30, 1.0, pow(1.0 - nv, 5.0)) * 0.85;
-    fres *= u_wateron == 1 ? 0.35 : 1.0; // water reflects less than the lacquer
+    // Water reflects less than the lacquer, but the ball keeps most of its
+    // mirror image clearly (fball: at least 75%, more at glancing angles).
+    float fball = u_wateron == 1 ? 0.75 + 0.25 * pow(1.0 - nv, 5.0) : fres;
+    fres *= u_wateron == 1 ? 0.35 : 1.0;
     // The back wall's grid and the ceiling's light panel, by tracing the
     // mirrored view ray to them.
     vec3 r = reflect(-vd, n);
@@ -261,8 +264,8 @@ void main()
     }
     if (f_mode.y > 0.5) {
         // One bilinear read of the half-size, half-float texture.
-        vec4 rc = textureLod(u_refl, gl_FragCoord.xy * f_post.zw + n.xz * 0.15, 0.0);
-        col = col * (1.0 - rc.a * fres * 0.8) + rc.rgb * fres;
+        vec4 rc = textureLod(u_refl, gl_FragCoord.xy * f_post.zw + n.xz * 0.08, 0.0);
+        col = col * (1.0 - rc.a * fball) + rc.rgb * fball;
     }
 
     // Light fades into the depth of the room.
