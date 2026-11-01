@@ -30,6 +30,13 @@ scripts and the tools follow; the library builds byte for byte the same.
 Older entries below name `ogles2/` paths: they are now in `ogles3/`.
 `tools/perf/q3cmp.sh` takes ogles2 1.3.2's archive from the 1.x copy
 (`OGLES2_LHA`).
+**Quake III again (2026-11-01, `q3cmp.sh run 3` after a warm-up, the
+renamed tree's build):** ogles2 1.3.2 7.88 ms a frame (126.8 fps), ogles3
+**7.88 ms (126.8 fps)**, back end 4.98 / 5.00 ms; a run's spread about
+1.5% (`ogles2-q3o2/-q3o3-20261101-181822` to `-182147`). On 2026-10-29
+126.2 / 125.2: ogles3 now level with 1.x. The game from
+`~/ioq3-amiga-ogles3` (the fork at `5e6a9ea`), the script's default since
+(`C:\GitHub\ioq3-amiga`, the old one, is gone).
 
 **Plan: OpenGL ES 3.2's features the Pi 4's GPU has (2026-10-31, the
 developer's request).** What V3D 4.2 can do comes from Mesa's driver for

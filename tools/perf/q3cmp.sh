@@ -7,7 +7,7 @@
 #   bash tools/perf/q3cmp.sh probe      probe P's per-draw stages, both
 #   bash tools/perf/q3cmp.sh pc         the PC sampler, by library function, both
 #   bash tools/perf/q3cmp.sh shot       the last runs' screenshots (frame 400) compared
-# The game: IOQ3_SRC (default /mnt/c/GitHub/ioq3-amiga, a clone of
+# The game: IOQ3_SRC (default ~/ioq3-amiga-ogles3, a working clone of
 # github.com/ladislawv/ioq3-amiga-ogles3, forked from RTyp3r's), built by its build_ioq3_ogles2_wsl.sh
 # against OGLES2_SDK (default ~/ogles2-build/release/ogles2/SDK) and its
 # build_ioq3_ogles3_wsl.sh against OGLES3_SDK (default this copy's release
@@ -24,7 +24,7 @@ set -eu
 . "$(dirname "$0")/common.sh"
 cmd=${1:-run}
 shift || true
-IOQ3=${IOQ3_SRC:-/mnt/c/GitHub/ioq3-amiga}
+IOQ3=${IOQ3_SRC:-$HOME/ioq3-amiga-ogles3}
 SDK2=${OGLES2_SDK:-$HOME/ogles2-build/release/ogles2/SDK}
 SDK3=${OGLES3_SDK:-$HOME/ogles3-build/release/ogles3/SDK}
 LHA=${LHA:-$(command -v lha || echo "$HOME/tools/bin/lha")}
