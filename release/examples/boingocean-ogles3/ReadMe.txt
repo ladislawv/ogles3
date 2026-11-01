@@ -28,9 +28,9 @@ average frame rate, TIMING the time of the passes.
 Keys: E the ES 2.0 way or OpenGL ES 3  R ripples from a texture or from
       sines  G glints  C clouds  U caustics on the ball  B bloom
       1-4 the render scale (1/1..1/4)  0 the ES 3 way at 75%  Esc quit.
-      Drag with the left mouse button to turn and raise the camera; it
-      also circles the ball by itself. The window's title shows the frame
-      rate and what is on.
+      Drag with the left mouse button to turn the camera round the ball
+      (its height stays); it also circles the ball by itself. The window's
+      title shows the frame rate and what is on.
 
 
 How fast

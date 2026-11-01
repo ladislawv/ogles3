@@ -21,7 +21,8 @@
  *       by the pass that tone maps it and adds the bloom
  *
  * Boing Ocean's own description follows; its keys and arguments still hold
- * (and ES2 starts the ES 2.0 way).
+ * (and ES2 starts the ES 2.0 way), but dragging only turns the camera round
+ * the ball: its height stays.
  *
  * ogles3.library example 3: Boing Ocean. The Amiga Boing ball floating on a
  * ray-marched ocean, drawn entirely by one fragment shader.
@@ -353,12 +354,8 @@ static void events(struct Window *w, struct input *in)
             break;
         case IDCMP_MOUSEMOVE:
             if (in->dragging) {
+                /* Round the ball only: the camera keeps its height. */
                 in->yaw += (m->MouseX - in->last_x) * 0.01f;
-                in->my -= (m->MouseY - in->last_y) * 0.004f;
-                if (in->my < 0.0f)
-                    in->my = 0.0f;
-                if (in->my > 1.0f)
-                    in->my = 1.0f;
                 in->last_x = m->MouseX;
                 in->last_y = m->MouseY;
             }
