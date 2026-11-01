@@ -92,9 +92,9 @@ If "{ONLY}" EQ "oc"
   CD B26:bin3
   boingocean FULLSCREEN FRAMES={FRAMES} >B26:results/oc-3-640.txt
   boingocean FULLSCREEN FRAMES={FRAMES} WIDTH=1280 HEIGHT=720 >B26:results/oc-3-720.txt
-  boingocean-ogles3 FULLSCREEN FRAMES={FRAMES} >B26:results/oc-3n-640.txt
+  boingocean-ogles3 FULLSCREEN FRAMES={FRAMES} WIDTH=640 HEIGHT=480 >B26:results/oc-3n-640.txt
   boingocean-ogles3 FULLSCREEN FRAMES={FRAMES} WIDTH=1280 HEIGHT=720 >B26:results/oc-3n-720.txt
-  boingocean-ogles3 FULLSCREEN FRAMES={FRAMES} ES2 >B26:results/oc-3e-640.txt
+  boingocean-ogles3 FULLSCREEN FRAMES={FRAMES} WIDTH=640 HEIGHT=480 ES2 >B26:results/oc-3e-640.txt
   boingocean-ogles3 FULLSCREEN FRAMES={FRAMES} WIDTH=1280 HEIGHT=720 ES2 >B26:results/oc-3e-720.txt
   CD B26:
 EndIf

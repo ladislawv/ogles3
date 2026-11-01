@@ -112,6 +112,12 @@ The examples
                       the light. Key 9 the dry floor with sparks, E the
                       ES 2.0 way to compare. FULLSCREEN: 1280 x 720.
                       Its keys and options: Examples/boing2026-ogles3.txt
+  Examples/boingocean-ogles3
+                      Boing Ocean in OpenGL ES 3: in high dynamic range,
+                      with clouds, blooming sun glints, a checkerboard that
+                      no longer crawls and caustics on the ball; key E the
+                      ES 2.0 way to compare. FULLSCREEN: 1280 x 720. Its
+                      keys and options: Examples/boingocean-ogles3.txt
 Close the window or press Esc to quit. Their .v3dp files are in
 Examples/shaders/: they run without the compiler.
 

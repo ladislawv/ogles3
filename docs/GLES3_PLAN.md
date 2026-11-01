@@ -427,6 +427,8 @@ was planned, so the figures are the example's own.
   1280x720 it runs faster than `boingocean.c` on ogles2 at the same scale,
   on the A1200, measured against step 0.
 
+- **Made ready for the release (2026-11-01):** `release/examples/boingocean-ogles3/` with its ReadMe, in `build_release.sh` (`Examples/boingocean-ogles3`), the ES 3 way with every effect on at start, `FULLSCREEN` 1280x720 by default. `ogles2-b26-20261101-161226` (`Run-B26 ONLY=oc`, full screen, scale 1/1): Boing Ocean on ogles2 1.3.2 59.5 / 20.9 fps at 640x480 / 1280x720, on ogles3 59.1 / 20.9; the copy's ES 2.0 way 61.6 / 21.3, its ES 3 way 49.5 / 19.7. **Not met:** the plan's "60 fps at 640x480 with 6-10 on" (the ES 3 way's effects cost about 4 ms).
+
 **Plan: Boing 2026 for ogles3 (2026-10-30, the developer's request).** A
 copy, `release/examples/boing2026-ogles3/`, becomes the example of what
 ogles3 does that ogles2 cannot: faster, and with effects an ES 2.0 program

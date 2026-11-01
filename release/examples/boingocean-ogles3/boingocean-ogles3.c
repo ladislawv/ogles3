@@ -307,7 +307,7 @@ struct input {
     BOOL quit, resized, dragging;
     BOOL es2, ripples, glints, clouds, caustics, bloom;
     int div;           /* render scale: the window's size / div */
-    int pct;           /* the ES 3 way's render scale, percent (75 at start) */
+    int pct;           /* the ES 3 way's render scale, percent (100 at start) */
     WORD last_x, last_y;
     float yaw, my;     /* the camera, from dragging */
 };
@@ -329,7 +329,7 @@ static void events(struct Window *w, struct input *in)
                 in->div = m->Code - '0';
                 in->pct = 100 / in->div;
                 in->resized = TRUE;
-            } else if (m->Code == '0') { /* the ES 3 way at 75%, as it starts */
+            } else if (m->Code == '0') { /* the ES 3 way at 75% */
                 in->pct = 75;
                 in->resized = TRUE;
             } else {
@@ -953,6 +953,9 @@ int main(void)
     if (args[3])
         max_frames = *(LONG *)args[3];
     full = args[4] != 0;
+    /* Full screen: 1280 x 720 unless a size is given; a window 640 x 480. */
+    if (full && !args[0] && !args[1])
+        w0 = 1280, h0 = 720;
     in.es2 = args[5] != 0;
     timing = args[6] != 0;
     FreeArgs(rda);
