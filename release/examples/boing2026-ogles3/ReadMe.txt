@@ -2,12 +2,13 @@ Boing 2026 for OpenGL ES 3
 ==========================
 
 Boing 2026 (Examples/boing2026.txt) remade with what ogles3.library's
-OpenGL ES 3.0 contexts give that OpenGL ES 2.0 has not: it runs faster than
-the ES 2.0 program while it draws more. Sparks fly where the ball hits,
-and the shadows harden where the ball touches the floor. Key 9 floods the
-floor: a pool whose waves, caustics and reflected light are all worked out
-on the GPU. Boing 2026's own passes and shaders are inside it too: key E
-switches between the two ways, so it compares them itself.
+OpenGL ES 3.0 contexts give that OpenGL ES 2.0 has not. It opens on a pool: the
+ball dives into water whose waves, caustics on the bottom and light thrown
+on the walls are all worked out on the GPU, lit by a coloured light that
+flies round the ball or follows the mouse. Key 9 drains it to Boing 2026's
+lacquered floor, where sparks fly at each hit and the shadows harden where
+the ball touches. Boing 2026's own passes and shaders are inside it too:
+key E switches between the two ways, so it compares them itself.
 
 
 Running it
@@ -18,22 +19,25 @@ compiler is not needed.
 
     boing2026-ogles3 [WIDTH=w] [HEIGHT=h] [FRAMES=n] [NOMSAA] [NOSOUND]
                      [FULLSCREEN] [TIMING] [SHOWMAP] [VSYNC] [TOUR]
-                     [SCALE=percent] [ES2] [WATER] [SOUND]
+                     [SCALE=percent] [ES2] [DRY] [SOUND]
+
+In a 640 x 480 window by default; FULLSCREEN opens a 1280 x 720 screen of
+its own (WIDTH and HEIGHT for another size).
 
   TOUR       switches the effects off and on one by one, every 5 seconds, and
              says in the window's title what each one proves. Start here.
   ES2        starts the ES 2.0 way (key E)
-  WATER      starts with water on the floor (key 9)
+  DRY        starts with the lacquered floor instead of the pool (key 9)
   SOUND      plays the boing on Paula (silent by default)
-  The others as Boing 2026's: FULLSCREEN a screen of its own, TIMING the
-  time of each pass every 120 frames, SHOWMAP the shadow maps (key M), VSYNC
-  waits for the display, SCALE the size the room is drawn at (by default
-  100% up to 640 x 480; 50% at 1280 x 720), NOMSAA. NOSOUND is still
-  taken (silent anyway).
+  The others as Boing 2026's: TIMING the time of each pass every 120
+  frames, SHOWMAP the shadow maps (key M), VSYNC waits for the display,
+  SCALE the size the room is drawn at (by default 100% up to 640 x 480;
+  50% at 1280 x 720), NOMSAA. NOSOUND is still taken (silent anyway).
 
 Keys: 1 shadow  2 reflection  3 bloom  4 per-pixel / per-vertex light
       5 checker antialiasing  6 the 1984 look  7 sparks
-      8 contact-hardening shadows  9 water on the floor  E the ES 2.0 way
+      8 contact-hardening shadows  9 the pool or the dry floor
+      E the ES 2.0 way
       [ ] the water's depth in the middle  + - the waves' tilt in the light
       the water reflects on the walls (fine steps)  M shadow maps
       T time the passes  L stop or start the lights  Space pause  Esc quit.
@@ -46,15 +50,21 @@ How fast
 Measured on a Raspberry Pi 4 in an A1200's PiStorm, ogles3.library 1.0,
 full screen, 4x MSAA, frames not limited (no VSYNC), every effect on:
 
-                                  Boing 2026   ES 2.0 way   ES 3 way
-    640 x 480    room at 100%     60.2         59.5         60.7
-    1280 x 720   room at 50%      59.6         58.4         55.6
-    1280 x 720   room at 100%     24.8         24.5         25.0
+                                  Boing 2026   ES 2.0 way   ES 3 way   ES 3 way
+                                                            dry floor  the pool
+    640 x 480    room at 100%     60.2         60.1         54.3       33.9
+    1280 x 720   room at 50%      59.6         59.1         52.5       34.8
+    1280 x 720   room at 100%     24.8         24.7         22.6       17.2
                                   frames a second
 
-The ES 3 way draws the sparks and the contact-hardening shadows
-on top; the others draw none. Its passes at 640 x 480 (TIMING, the GPU
-finishing each), against the ES 2.0 way's:
+The ES 3 way on the dry floor draws the sparks and the contact-hardening
+shadows on top; the others draw none. The pool's passes (its waves, its
+caustics and the light it throws on the walls, about 9 ms at 640 x 480) are
+what it costs: its room shaders carry the water's code even when the floor
+is dry, which is why the dry floor runs below the ES 2.0 way. With VSYNC it
+is held to the display's rate. The passes on the dry floor at 640 x 480 as
+first measured, before the pool (TIMING, the GPU finishing each), against
+the ES 2.0 way's:
 
     shadow maps    0.9 ms   (1.0)    both in one pass
     reflection     0.9 ms   (0.6)    the ball and the sparks, half floats

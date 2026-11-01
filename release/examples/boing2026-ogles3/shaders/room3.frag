@@ -47,17 +47,20 @@ layout(location = 0) out vec4 o_col;
 layout(location = 1) out vec4 o_bright;
 
 const vec3 NEON = vec3(1.0, 0.10, 0.85);
+const vec3 HAZE = vec3(0.12, 0.35, 1.3);  // the glow round the lines: blue
 const int TAPS = 6;         // each 2x2 depths, compared and filtered
 
 // Grid lines: x the sharp line (about 1.5 pixels), y its glow (in cells,
-// the same at every resolution).
-vec2 grid(vec2 p)
+// the same at every resolution), z a faint soft glow round both, coloured
+// apart (HAZE): a tenth of a Gaussian over about 3 pixels and of a wide halo.
+vec3 grid(vec2 p)
 {
     vec2 d = abs(fract(p - 0.5) - 0.5);
     vec2 px = d / max(fwidth(p), 1e-4);
-    float line = clamp(1.3 - min(px.x, px.y), 0.0, 1.0);
-    float glow = exp(-min(d.x, d.y) * 28.0);
-    return vec2(line, glow);
+    float m = min(px.x, px.y), dm = min(d.x, d.y);
+    float line = clamp(1.3 - m, 0.0, 1.0), glow = exp(-dm * 28.0);
+    float haze = 0.125 * exp(-m * m * 0.22) + 0.0135 * exp(-dm * 9.0);
+    return vec3(line, glow, haze);
 }
 
 // Light k's shadow at this point (lpos: the point in its map's space).
@@ -135,7 +138,7 @@ void main()
     }
     vec3 n = v_n;
     vec2 uv = abs(n.y) > 0.5 ? v_wpos.xz : (abs(n.z) > 0.5 ? v_wpos.xy : v_wpos.zy);
-    vec2 g = grid(uv);
+    vec3 g = grid(uv);
 
     if (f_mode.z > 0.5) {
         // 1984: grey room, purple lines, a flat shadow.
@@ -173,7 +176,7 @@ void main()
     vec3 l2 = t2 * inversesqrt(d2);
     float nl2 = max(dot(n, l2), 0.0), at2 = 14.0 / (d2 + 1.0);
     col += albedo * f_light2col.rgb * nl2 * at2 * ao * sh2;
-    col += NEON * (g.x * 1.25 + g.y * 0.30) * mix(0.12, 1.0, sh) * mix(0.35, 1.0, sh2) * ao;
+    col += (NEON * g.x * 1.25 + HAZE * (g.y * 0.30 + g.z)) * mix(0.12, 1.0, sh) * mix(0.35, 1.0, sh2) * ao;
 
     // Water (key 9): the second light (flying round the ball) reflected off
     // the pool onto the walls and the ceiling, traced (refl3.vert): its

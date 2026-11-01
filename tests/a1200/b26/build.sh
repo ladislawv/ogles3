@@ -23,9 +23,9 @@ mkdir -p "$PKG/libs" "$PKG/bin2/shaders" "$PKG/bin3/shaders"
 cp "$OGLES2_REL/Libs/ogles2.library" "$OGLES2_REL/Libs/v3dglslc" "$PKG/libs/"
 cp "$B/ogles3.library" "$PKG/libs/"
 cp "$V/v3dglslc.stripped" "$PKG/libs/v3dglslc3"
-cp "$OGLES2_REL/Examples/boing2026" "$PKG/bin2/"
+cp "$OGLES2_REL/Examples/boing2026" "$OGLES2_REL/Examples/boingocean" "$PKG/bin2/"
 cp "$OGLES2_REL"/Examples/shaders/* "$PKG/bin2/shaders/"
-cp "$OGLES3_REL/Examples/boing2026" "$PKG/bin3/"
+cp "$OGLES3_REL/Examples/boing2026" "$OGLES3_REL/Examples/boingocean" "$PKG/bin3/"
 cp "$OGLES3_REL"/Examples/shaders/* "$PKG/bin3/shaders/"
 
 # The ES 3 copy, built from the SDK the ogles3 release made and this tree's
@@ -40,3 +40,13 @@ make -C "$E" -s CC="$TC/bin/m68k-amigaos-gcc" SDK="$OGLES3_REL/SDK" \
 $TC/bin/m68k-amigaos-strip -o "$PKG/bin3/boing2026-ogles3" "$W/boing2026-ogles3"
 make -C "$E" -s shaders V3DGLSLC="$V/host/v3dglslc" OGLES3="$REPO" BUILD="$W/v3dp" > /dev/null
 cp "$W"/v3dp/* "$PKG/bin3/shaders/"
+
+# Boing Ocean's ES 3 copy, release/examples/boingocean-ogles3, the same way
+# (its ES 2.0 way's binaries are the release's Examples/shaders/, in bin3).
+O=$REPO/release/examples/boingocean-ogles3
+make -C "$O" -s CC="$TC/bin/m68k-amigaos-gcc" SDK="$OGLES3_REL/SDK" \
+    CFLAGS="-O2 -m68020 -m68881 -mcrt=clib2 -fno-builtin -fbbb=abcfhilmnprsz0 -Wall -I$B/gen/include -I$REPO/include" \
+    LIBDIR="$B" OUTDIR="$W" "$W/boingocean-ogles3"
+$TC/bin/m68k-amigaos-strip -o "$PKG/bin3/boingocean-ogles3" "$W/boingocean-ogles3"
+make -C "$O" -s shaders V3DGLSLC="$V/host/v3dglslc" OGLES3="$REPO" BUILD="$W/v3dp-o" > /dev/null
+cp "$W"/v3dp-o/* "$PKG/bin3/shaders/"

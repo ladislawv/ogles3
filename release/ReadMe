@@ -106,10 +106,12 @@ The examples
                       TOUR" shows each effect in turn. Its keys and
                       options: Examples/boing2026.txt
   Examples/boing2026-ogles3
-                      Boing 2026 in OpenGL ES 3: faster, with sparks where
-                      the ball hits, dust in the light's beam and shadows
-                      that harden where it touches; key E switches to the
-                      ES 2.0 way to compare. Examples/boing2026-ogles3.txt
+                      Boing 2026 in OpenGL ES 3: the ball dives into a pool
+                      whose waves, caustics and the light they throw on
+                      the walls are worked out on the GPU; the mouse moves
+                      the light. Key 9 the dry floor with sparks, E the
+                      ES 2.0 way to compare. FULLSCREEN: 1280 x 720.
+                      Its keys and options: Examples/boing2026-ogles3.txt
 Close the window or press Esc to quit. Their .v3dp files are in
 Examples/shaders/: they run without the compiler.
 

@@ -603,6 +603,14 @@ the copy needs it).
     binaries lack: the on-Amiga compiler ran 15 s mid-frame (the copy keeps
     both draw buffers); triangles rejected only per pixel cost 25-60 ms.
     About 35 fps at 640x480 with the water on (its passes about 9 ms).
+  - **Made the release default (2026-11-01):** the pool is the scene it
+    opens on (`DRY` for the dry floor, key 9 either way), full screen at
+    1280x720 by default (a window 640x480), the grid's glow blue round
+    magenta lines, the ball's reflection on the water clearer.
+    `ogles2-b26` (full screen): the pool 33.9 fps at 640x480, 34.8 at 720p
+    50%, 17.2 at 720p 100%; the dry floor 54.3 / 52.5 / 22.6 (below the
+    ES 2.0 way's 60.1 / 59.1 / 24.7: the room shaders carry the water's
+    code when it is off; to look at).
   - **Next, for the targets:** the room shader is still 9.7 ms of a
     16 ms frame at 640x480 (2 threads, 50-62 registers): fewer registers
     (4 threads) or the shadow taps only where the penumbra is (the 6

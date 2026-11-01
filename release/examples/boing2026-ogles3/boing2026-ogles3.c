@@ -39,12 +39,13 @@
  * Drag with the left mouse button to turn and raise the camera.
  *
  *   boing2026-ogles3 [WIDTH=w] [HEIGHT=h] [FRAMES=n] [NOMSAA] [NOSOUND] [FULLSCREEN]
- *                    [TIMING] [SHOWMAP] [VSYNC] [TOUR] [SCALE=percent] [ES2] [WATER] [SOUND]
- * TIMING times each pass every 120 frames, as T does; SHOWMAP starts as M;
- * ES2 starts as E, WATER with the water on (key 9); SOUND plays the boing
- * (silent by default). Frames are not
- * limited: VSYNC waits for the display (no tearing). TOUR switches the effects off and on one by one, saying in the
- * title what each proves.
+ *                    [TIMING] [SHOWMAP] [VSYNC] [TOUR] [SCALE=percent] [ES2] [DRY] [SOUND]
+ * It starts on the pool (key 9), in a 640 x 480 window or, with FULLSCREEN,
+ * on a 1280 x 720 screen (WIDTH and HEIGHT for another). TIMING times each
+ * pass every 120 frames, as T does; SHOWMAP starts as M; ES2 starts as E;
+ * DRY without the water; SOUND plays the boing (silent by default). Frames
+ * are not limited: VSYNC waits for the display (no tearing). TOUR switches
+ * the effects off and on one by one, saying in the title what each proves.
  *
  * Built on the ogles3 SDK's Boing 2026 example. MIT License.
  */
@@ -725,7 +726,7 @@ struct tour_stop {
 };
 
 static const struct tour_stop tour_stops[] = {
-    {"OpenGL ES 3: every effect on", {1, 1, 1, 0, 1, 0, 1, 1, 0}, 0, 0},
+    {"OpenGL ES 3: the pool, every effect on", {1, 1, 1, 0, 1, 0, 1, 1, 1}, 0, 0},
     {"the ES 2.0 way: Boing 2026's own passes and shaders", {1, 1, 1, 0, 1, 0, 1, 1, 0}, 0, 1},
     {"sparks: 640 instanced streaks a hit, no vertex data", {1, 1, 1, 0, 1, 0, 1, 1, 0}, 0, 0},
     {"no sparks", {1, 1, 1, 0, 1, 0, 0, 1, 0}, 0, 0},
@@ -1478,7 +1479,7 @@ int main(void)
     static const GLfloat tri[] = {-1, -1, 3, -1, -1, 3};
     static char title[160];
     static struct es3 e3;
-    LONG args[14] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    LONG args[15] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     struct RDArgs *rda;
     struct Window *win = NULL, *iw = NULL;
     void *ctx = NULL;
@@ -1515,15 +1516,18 @@ int main(void)
     memset(&fp, 0, sizeof(fp));
 
     rda = ReadArgs((STRPTR) "WIDTH/N,HEIGHT/N,FRAMES/N,NOMSAA/S,NOSOUND/S,FULLSCREEN/S,TIMING/S,SHOWMAP/S,VSYNC/S,TOUR/S,"
-                            "SCALE/N,ES2/S,WATER/S,SOUND/S",
+                            "SCALE/N,ES2/S,WATER/S,SOUND/S,DRY/S",
                    args, NULL);
     if (!rda) {
         printf("usage: boing2026-ogles3 [WIDTH=w] [HEIGHT=h] [FRAMES=n] [NOMSAA] [NOSOUND] [FULLSCREEN] [TIMING] "
-               "[SHOWMAP] [VSYNC] [TOUR] [SCALE=percent] [ES2]\n");
+               "[SHOWMAP] [VSYNC] [TOUR] [SCALE=percent] [ES2] [DRY] [SOUND]\n");
         return 20;
     }
     in.es2 = args[11] != 0;
-    in.flag[F_WATER] = water_arg = args[12] != 0;
+    /* The pool is the default scene; DRY starts with the lacquered floor.
+     * WATER (the default anyway) keeps it on through TOUR. */
+    water_arg = args[12] != 0;
+    in.flag[F_WATER] = !args[14];
     if (args[0])
         w0 = *(LONG *)args[0];
     if (args[1])
@@ -1533,6 +1537,9 @@ int main(void)
     msaa = !args[3];
     sound = args[13] && !args[4]; /* silent unless SOUND (NOSOUND still taken) */
     full = args[5] != 0;
+    /* Full screen: 1280 x 720 unless a size is given; a window 640 x 480. */
+    if (full && !args[0] && !args[1])
+        w0 = 1280, h0 = 720;
     auto_timing = args[6] != 0;
     in.show_map = args[7] != 0;
     vsync = args[8] != 0;

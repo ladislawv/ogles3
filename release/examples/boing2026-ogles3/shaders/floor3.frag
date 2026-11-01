@@ -48,17 +48,20 @@ layout(location = 0) out vec4 o_col;
 layout(location = 1) out vec4 o_bright;
 
 const vec3 NEON = vec3(1.0, 0.10, 0.85);
+const vec3 HAZE = vec3(0.12, 0.35, 1.3);  // the glow round the lines: blue
 const int TAPS = 6;         // each 2x2 depths, compared and filtered
 
 // Grid lines: x the sharp line (about 1.5 pixels), y its glow (in cells,
-// the same at every resolution).
-vec2 grid(vec2 p)
+// the same at every resolution), z a faint soft glow round both, coloured
+// apart (HAZE): a tenth of a Gaussian over about 3 pixels and of a wide halo.
+vec3 grid(vec2 p)
 {
     vec2 d = abs(fract(p - 0.5) - 0.5);
     vec2 px = d / max(fwidth(p), 1e-4);
-    float line = clamp(1.3 - min(px.x, px.y), 0.0, 1.0);
-    float glow = exp(-min(d.x, d.y) * 28.0);
-    return vec2(line, glow);
+    float m = min(px.x, px.y), dm = min(d.x, d.y);
+    float line = clamp(1.3 - m, 0.0, 1.0), glow = exp(-dm * 28.0);
+    float haze = 0.125 * exp(-m * m * 0.22) + 0.0135 * exp(-dm * 9.0);
+    return vec3(line, glow, haze);
 }
 
 // Light k's shadow at this point (lpos: the point in its map's space).
@@ -177,7 +180,7 @@ void main()
         }
         bottom += refr;
     }
-    vec2 g = grid(bottom);
+    vec3 g = grid(bottom);
 
     if (f_mode.z > 0.5) {
         // 1984: grey floor, purple lines, a flat shadow.
@@ -220,7 +223,7 @@ void main()
     vec3 l2 = t2 * inversesqrt(d2);
     float nl2 = max(l2.y, 0.0), at2 = 14.0 / (d2 + 1.0);
     col += albedo * f_light2col.rgb * nl2 * at2 * ao * sh2 * ca;
-    col += NEON * (g.x * 1.25 + g.y * 0.30) * mix(0.12, 1.0, sh) * mix(0.35, 1.0, sh2) * ao;
+    col += (NEON * g.x * 1.25 + HAZE * (g.y * 0.30 + g.z)) * mix(0.12, 1.0, sh) * mix(0.35, 1.0, sh2) * ao;
     if (u_wateron == 1) // seen through the water: the deep tinted, the caustics on the bottom
         col = col * mix(vec3(1.0), vec3(0.45, 0.75, 1.0), min(deep * 0.8, 1.0)) + f_light2col.rgb * at2 * sh2 * max(ca - 1.0, 0.0) * 0.06;
 
@@ -258,8 +261,8 @@ void main()
         float t = (f_shadow.w - v_wpos.z) / r.z;
         vec3 hit = v_wpos + r * t;
         if (hit.y < 7.0) {
-            vec2 gw = grid(hit.xy);
-            col += NEON * (gw.x * 1.1 + gw.y * 0.25) * fres * exp(-t * 0.08);
+            vec3 gw = grid(hit.xy);
+            col += (NEON * gw.x * 1.1 + HAZE * (gw.y * 0.25 + gw.z)) * fres * exp(-t * 0.08);
         }
     }
     if (f_mode.y > 0.5) {

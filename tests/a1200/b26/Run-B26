@@ -77,21 +77,37 @@ If $R3 EQ 1 VAL
 EndIf
 If $R3N EQ 1 VAL
   CD B26:bin3
-  boing2026-ogles3 FULLSCREEN NOSOUND TIMING FRAMES={FRAMES} {ARGS} >B26:results/3n-640.txt
+  boing2026-ogles3 FULLSCREEN NOSOUND TIMING FRAMES={FRAMES} WIDTH=640 HEIGHT=480 {ARGS} >B26:results/3n-640.txt
   boing2026-ogles3 FULLSCREEN NOSOUND TIMING FRAMES={FRAMES} WIDTH=1280 HEIGHT=720 SCALE=50 {ARGS} >B26:results/3n-720-50.txt
   boing2026-ogles3 FULLSCREEN NOSOUND TIMING FRAMES={FRAMES} WIDTH=1280 HEIGHT=720 SCALE=100 {ARGS} >B26:results/3n-720-100.txt
+  CD B26:
+EndIf
+; oc (only when asked): Boing Ocean: the example on ogles2 1.3.2 and on
+; ogles3, and its ES 3 copy both ways, at 640x480 and 1280x720.
+If "{ONLY}" EQ "oc"
+  CD B26:bin2
+  boingocean FULLSCREEN FRAMES={FRAMES} >B26:results/oc-2-640.txt
+  boingocean FULLSCREEN FRAMES={FRAMES} WIDTH=1280 HEIGHT=720 >B26:results/oc-2-720.txt
+  Avail FLUSH >NIL:
+  CD B26:bin3
+  boingocean FULLSCREEN FRAMES={FRAMES} >B26:results/oc-3-640.txt
+  boingocean FULLSCREEN FRAMES={FRAMES} WIDTH=1280 HEIGHT=720 >B26:results/oc-3-720.txt
+  boingocean-ogles3 FULLSCREEN FRAMES={FRAMES} >B26:results/oc-3n-640.txt
+  boingocean-ogles3 FULLSCREEN FRAMES={FRAMES} WIDTH=1280 HEIGHT=720 >B26:results/oc-3n-720.txt
+  boingocean-ogles3 FULLSCREEN FRAMES={FRAMES} ES2 >B26:results/oc-3e-640.txt
+  boingocean-ogles3 FULLSCREEN FRAMES={FRAMES} WIDTH=1280 HEIGHT=720 ES2 >B26:results/oc-3e-720.txt
   CD B26:
 EndIf
 ; 3t (only when asked): the copy's TOUR at 640x480, timed every 120 frames:
 ; what each effect costs (FRAMES=4000 covers the 12 stops once).
 If "{ONLY}" EQ "3t"
   CD B26:bin3
-  boing2026-ogles3 FULLSCREEN NOSOUND TIMING TOUR FRAMES={FRAMES} {ARGS} >B26:results/3t-640.txt
+  boing2026-ogles3 FULLSCREEN NOSOUND TIMING TOUR FRAMES={FRAMES} WIDTH=640 HEIGHT=480 {ARGS} >B26:results/3t-640.txt
   CD B26:
 EndIf
 If $R3E EQ 1 VAL
   CD B26:bin3
-  boing2026-ogles3 FULLSCREEN NOSOUND TIMING FRAMES={FRAMES} ES2 {ARGS} >B26:results/3e-640.txt
+  boing2026-ogles3 FULLSCREEN NOSOUND TIMING FRAMES={FRAMES} WIDTH=640 HEIGHT=480 ES2 {ARGS} >B26:results/3e-640.txt
   boing2026-ogles3 FULLSCREEN NOSOUND TIMING FRAMES={FRAMES} WIDTH=1280 HEIGHT=720 SCALE=50 ES2 {ARGS} >B26:results/3e-720-50.txt
   boing2026-ogles3 FULLSCREEN NOSOUND TIMING FRAMES={FRAMES} WIDTH=1280 HEIGHT=720 SCALE=100 ES2 {ARGS} >B26:results/3e-720-100.txt
   CD B26:
