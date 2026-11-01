@@ -1,5 +1,26 @@
 # OpenGL ES 3.0 and 3.1 on ogles2.library
 
+**The 1.0-beta1 archives rebuilt (2026-11-01, the developer's call: the
+same release name and library version 1.0, dated 01.11.2026).** The
+ReadMe, `ogles3.doc` (the new extensions, CONFORMANCE) and README.md have
+the full runs' results; both compilers rebuilt (`v3dglslc3 1.0
+(01.11.2026)`, 34 of 34 programs identical); the two ES 3 examples'
+Makefiles quote `$(OGLES3)` (the release builder's path has a space).
+`build_release.sh dist sdl`: all five archives in `release/dist/`, the
+examples built with GCC and vbcc. Tested from `ogles3-1.0-beta1.lha` on
+the A1200: unpacked with its LhA, `Execute Install-ogles3 ALL`
+(`ogles3.library 1.0`, `v3dglslc3 1.0`), the six examples each running
+(Boing 2026 ES3 33 fps, Boing Ocean ES3 47 fps at 640x480). **Trap:**
+the compiler scripts' `OUT` defaults to `~/ogles2-build` (local.env's
+note): a build without it overwrote the 1.x line's host compiler, rebuilt
+from `C:\- CPP\ogles2` since (8 of 8 identical).
+**The repository trimmed (the developer's call):** ogles2 1.3.2's archives
+left `release/dist/` (they are the ogles2 repository's), and the 541
+result folders up to 2026-10-19 (ogles2's work, 162 MB, all in the ogles2
+repository) left `tests/a1200/results/`; the history rewritten without
+them (git filter-repo) and force-pushed. Results cited before 2026-10-20
+are in github.com/ladislawv/ogles2.
+
 **Plan: OpenGL ES 3.2's features the Pi 4's GPU has (2026-10-31, the
 developer's request).** What V3D 4.2 can do comes from Mesa's driver for
 it (`src/gallium/drivers/v3d/v3d_screen.c`, `v3dx_format_table.c`, the

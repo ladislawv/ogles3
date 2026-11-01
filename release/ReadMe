@@ -9,10 +9,10 @@ multisampled framebuffers, GLSL ES 3.10 and 3.00, and everything of
 OpenGL ES 2.0. The agl* context calls are those of AmigaOS 4's
 ogles2.library.
 
-This is a beta. Every part of the Khronos conformance tests for OpenGL
-ES 3.1 that applies passes on an A1200, group by group; the complete runs
-of the OpenGL ES 2.0, 3.0 and 3.1 lists are still to come (see
-"Conformance"). Please report what goes wrong.
+This is a beta. The complete Khronos conformance runs of OpenGL ES 2.0,
+3.0 and 3.1 have been made on an A1200 (see "Conformance"); a few rare
+problems seen there are still being looked at. Please report what goes
+wrong.
 
 ogles3 and ogles2
 -----------------
@@ -156,12 +156,16 @@ included, is at https://github.com/ladislawv/ogles3.
 
 Conformance
 -----------
-The Khronos dEQP-GLES31 tests, run group by group on an A1200: every case
-that applies passes; those of OpenGL ES 3.2 and of extensions the library
-does not offer report "not supported". dEQP-GLES3 passed group by group
-while OpenGL ES 3.0 was built, and the whole dEQP-GLES2 list passed in
-ogles2.library 1.3. The complete runs of the three lists, and the speed
-comparison with ogles2 1.3, come before the final 1.0. The SDK's
+The Khronos dEQP conformance lists, each run whole on an A1200 (October
+2026, every shader compiled by this library's compiler):
+  dEQP-GLES31  13,746 passed, none failed (24,056 cases are OpenGL ES
+               3.2's or of extensions not offered: "not supported")
+  dEQP-GLES3   42,860 passed, 2 failed once (not seen again in reruns),
+               1,892 not supported
+  dEQP-GLES2   17,091 passed, 25 cube map cases fail by design (below);
+               the other failures of that run are fixed in this release
+Twice in those runs the whole Amiga stopped, hours into a run, on a case
+that passes when run again; that is still being looked at. The SDK's
 ogles3.doc lists the deviations: cube maps always filter seamlessly,
 multisampling is always 4x, 32-bit float textures filter nearest, and
 there are no geometry or tessellation shaders (OpenGL ES 3.2).

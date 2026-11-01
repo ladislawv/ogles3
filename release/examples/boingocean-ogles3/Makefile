@@ -47,8 +47,8 @@ header: $(SHADERS) tools/embed_shaders.py
 shaders: $(SHADERS)
 	rm -rf $(BUILD) && mkdir -p $(BUILD)
 	cd shaders && $(V3DGLSLC) -o $(abspath $(BUILD)) $(PAIRS)
-	python3 -I $(OGLES3)/v3dp/v3dp_hashname.py $(BUILD)/*
-	python3 -I $(OGLES3)/v3dp/v3ds_record.py $(BUILD) $(SHADERS)
+	python3 -I "$(OGLES3)/v3dp/v3dp_hashname.py" $(BUILD)/*
+	python3 -I "$(OGLES3)/v3dp/v3ds_record.py" $(BUILD) $(SHADERS)
 
 clean:
 	rm -rf boingocean-ogles3 build

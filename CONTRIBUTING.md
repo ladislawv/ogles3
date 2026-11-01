@@ -114,7 +114,10 @@ line `device: context freed, 0 bytes of GPU memory still in use`).
 
 **Results** go to `tests/a1200/results/ogles2-<name>-<date>-<time>/` and are committed: the
 plan cites them as evidence. Screenshots of the test machine's screen (`shots/`, `.png`,
-`.jpg`) stay local: they show the owner's desktop (`.gitignore`).
+`.jpg`) stay local: they show the owner's desktop (`.gitignore`). A run's rendered images
+(`.ppm`, the `IMAGES=1` dEQP logs) are committed only when the plan needs them as evidence:
+the same picture again in every run is what made the repository large. The results of the
+ogles2.library 1.x work (up to 2026-10-19) are in the ogles2 repository, not here.
 
 **The release** is tested from its archive, unpacked on the Amiga with its LhA: once with
 nothing installed (the examples run with `ogles2.library`, and `v3dglslc` if they need it, in

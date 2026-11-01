@@ -9,9 +9,9 @@ It is the same API that phones, browsers and game engines use, and the same `agl
 AmigaOS 4's ogles2.library has: OpenGL ES 2.0, 3.0 and 3.1 code from Linux, Android, the web or
 OS4 compiles and runs on the classic Amiga.
 
-**Version 1.0, release 1.0-beta1.** A beta: everything the conformance tests check passes,
-group by group (see below); the complete test runs come before the final 1.0. Please report what
-goes wrong.
+**Version 1.0, release 1.0-beta1.** A beta: the complete conformance runs of OpenGL ES 2.0, 3.0
+and 3.1 are made (dEQP-GLES31: none failed; see below); two rare freezes seen in them are still
+being looked at. Please report what goes wrong.
 
 ogles3.library is the successor of [ogles2.library](https://github.com/ladislawv/ogles2) 1.x
 (OpenGL ES 2.0), built from the same source, as a library of its own: both can be installed at
@@ -64,12 +64,12 @@ code.
 
 | Archive | For | Contents |
 |---|---|---|
-| `ogles3-1.0-beta1.lha` | users | the library, the shader compiler, `Install-ogles3`, `OGLES3Log`, four examples |
+| `ogles3-1.0-beta1.lha` | users | the library, the shader compiler, `Install-ogles3`, `OGLES3Log`, six examples |
 | `ogles3-1.0-beta1-sdk.lha` | Amiga programmers | the same plus the SDK: headers, import libraries for GCC and vbcc, the autodoc `ogles3.doc`, the guide `GettingStarted.txt`, example sources |
 | `ogles3-1.0-beta1-sdk.zip` | cross-development on a PC | the SDK alone |
 | `ogles3-1.0-beta1-sdl.lha` / `.zip` | SDL programmers | SDL2 and SDL3 with the ogles3 backend, the MiniGL SDK SDL links, two examples; unpacks over the SDK |
 
-ogles2.library 1.3's archives are in [`release/dist/`](release/dist/).
+The current archives are in [`release/dist/`](release/dist/). ogles2.library 1.3's are in [its repository](https://github.com/ladislawv/ogles2).
 
 ### Requirements
 
@@ -162,7 +162,7 @@ run its `Run-*` script, send back `results/`) or remotely through the test stati
 `tools/amictl` (a small server on the Amiga, reached over the LAN with a token and an address
 allow list). Each package's `ReadMe.txt` says what it does and what to look for; the results of
 every run are in `tests/a1200/results/`. The dEQP conformance tests run watched from the PC
-(`ports/deqp/run_pc.sh`, `tools/amictl/deqp_watch.py`), with the shaders compiled on the PC.
+(`ports/deqp/run_pc.sh`, `ports/deqp/run_full.sh` for whole lists, `tools/amictl/deqp_watch.py`), with the shaders compiled on the PC.
 Real programs are checked against Mesa's reference images (`tests/corpus`).
 [CONTRIBUTING.md](CONTRIBUTING.md) describes the workflow, and
 [the OpenGL ES 3 plan](docs/GLES3_PLAN.md) the work and its state.
@@ -183,7 +183,7 @@ Real programs are checked against Mesa's reference images (`tests/corpus`).
 | `tests/` | Unit and hardware tests, `a1200/` test packages and results, `corpus/` (real programs against reference images) |
 | `cmd/` | `OGLES3Log` |
 | `dev/` | Build-machine setup (`host-setup/`), the reference sources fetcher, the compiler's feasibility study (`spike-c/`) |
-| `release/` | The release builder, ReadMe, installer, autodoc, guide, examples, and ogles2's archives (`dist/`) |
+| `release/` | The release builder, ReadMe, installer, autodoc, guide, examples, and the current archives (`dist/`) |
 | `docs/` | The development plans (ogles2's, OpenGL ES 3's), the SDL guide |
 | `licences/` | Licence texts and third-party notices |
 
