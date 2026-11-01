@@ -901,7 +901,7 @@ static void add_impact(float x, float y, float z, float nx, float ny, float t, B
 }
 
 struct es3 {
-    GLuint ball, room, floor, down, blur, comp, shadow, flare, spark, mapview, water, caust, rcaust;
+    GLuint ball, room, floor, pool, poolroom, down, blur, comp, shadow, flare, spark, mapview, water, caust, rcaust;
     GLint ball_out, room_out, room_water, room_depth, floor_out, floor_water, floor_depth, spark_out, shadow_k,
         blur_dir, water_drop, water_drip, water_depth, caust_depth, ball_water, rcaust_surf, rcaust_tilt;
     GLuint ubo, vao_sphere, vao_room, vao_none;
@@ -1009,6 +1009,7 @@ static BOOL es3_setup(struct es3 *e, int sw, int sh, const char *ext)
 
     if (!(e->ball = link3(ball3_vert, ball3_frag)) || !(e->room = link3(room3_vert, room3_frag)) ||
         !(e->floor = link3(room3_vert, floor3_frag)) ||
+        !(e->pool = link3(room3_vert, pool3_frag)) || !(e->poolroom = link3(room3_vert, poolroom3_frag)) ||
         !(e->down = link3(screen3_vert, down3_frag)) || !(e->blur = link3(screen3_vert, blur3_frag)) ||
         !(e->comp = link3(screen3_vert, composite3_frag)) || !(e->mapview = link3(screen3_vert, mapview3_frag)) ||
         !(e->shadow = link3(shadow3_vert, shadow3_frag)) || !(e->flare = link3(flare3_vert, flare3_frag)) ||
@@ -1018,12 +1019,13 @@ static BOOL es3_setup(struct es3 *e, int sw, int sh, const char *ext)
         !(e->rcaust = link3(refl3_vert, refl3_frag)))
         return FALSE;
     e->ball_out = glGetUniformLocation(e->ball, "u_out");
+    /* u_out at the same place in all four room programs (one source each). */
     e->room_out = glGetUniformLocation(e->room, "u_out");
     e->floor_out = glGetUniformLocation(e->floor, "u_out");
-    e->floor_water = glGetUniformLocation(e->floor, "u_wateron");
-    e->room_water = glGetUniformLocation(e->room, "u_wateron");
-    e->room_depth = glGetUniformLocation(e->room, "u_depth");
-    e->floor_depth = glGetUniformLocation(e->floor, "u_depth");
+    e->room_water = glGetUniformLocation(e->poolroom, "u_out");
+    e->floor_water = glGetUniformLocation(e->pool, "u_out");
+    e->room_depth = glGetUniformLocation(e->poolroom, "u_depth");
+    e->floor_depth = glGetUniformLocation(e->pool, "u_depth");
     e->water_drop = glGetUniformLocation(e->water, "u_drop");
     e->water_drip = glGetUniformLocation(e->water, "u_drip");
     e->caust_depth = glGetUniformLocation(e->caust, "u_depth");
@@ -1040,13 +1042,16 @@ static BOOL es3_setup(struct es3 *e, int sw, int sh, const char *ext)
     sampler_unit(e->room, "u_shadow", 3);
     sampler_unit(e->floor, "u_shadow", 3);
     sampler_unit(e->floor, "u_refl", 1);
-    sampler_unit(e->floor, "u_water", 5);
-    sampler_unit(e->room, "u_water", 5);
+    sampler_unit(e->poolroom, "u_shadow", 3);
+    sampler_unit(e->pool, "u_shadow", 3);
+    sampler_unit(e->pool, "u_refl", 1);
+    sampler_unit(e->pool, "u_water", 5);
+    sampler_unit(e->poolroom, "u_water", 5);
     sampler_unit(e->water, "u_tex", 0);
     sampler_unit(e->caust, "u_wave", 0);
-    sampler_unit(e->floor, "u_caus", 6);
+    sampler_unit(e->pool, "u_caus", 6);
     sampler_unit(e->rcaust, "u_wave", 0);
-    sampler_unit(e->room, "u_rcaus", 7);
+    sampler_unit(e->poolroom, "u_rcaus", 7);
     sampler_unit(e->down, "u_tex", 0);
     sampler_unit(e->blur, "u_tex", 0);
     sampler_unit(e->comp, "u_scene", 0);
@@ -1110,7 +1115,7 @@ static BOOL es3_setup(struct es3 *e, int sw, int sh, const char *ext)
 
 static void es3_free(struct es3 *e)
 {
-    GLuint *p[] = {&e->ball, &e->room, &e->floor, &e->down, &e->blur, &e->comp, &e->shadow, &e->flare, &e->spark,
+    GLuint *p[] = {&e->ball, &e->room, &e->floor, &e->pool, &e->poolroom, &e->down, &e->blur, &e->comp, &e->shadow, &e->flare, &e->spark,
                    &e->mapview, &e->water, &e->caust, &e->rcaust};
     int i;
     for (i = 0; i < (int)(sizeof(p) / sizeof(p[0])); i++)
@@ -1386,14 +1391,14 @@ static void es3_frame(struct es3 *e, const struct scene *s, const struct view *v
     glDrawBuffers(2, both);
     glInvalidateFramebuffer(GL_FRAMEBUFFER, 2, both);
     glBindVertexArray(e->vao_room);
-    glUseProgram(e->floor);
-    glUniform1i(e->floor_out, in->show_map ? 3 : 0);
-    glUniform1i(e->floor_water, water);
+    /* The pool's programs or the dry floor's (the water's code compiled
+     * out of these). */
+    glUseProgram(water ? e->pool : e->floor);
+    glUniform1i(water ? e->floor_water : e->floor_out, in->show_map ? 3 : 0);
     glUniform1f(e->floor_depth, in->depth);
     glDrawArrays(GL_TRIANGLES, 0, 6);
-    glUseProgram(e->room);
-    glUniform1i(e->room_out, in->show_map ? 3 : 0);
-    glUniform1i(e->room_water, water);
+    glUseProgram(water ? e->poolroom : e->room);
+    glUniform1i(water ? e->room_water : e->room_out, in->show_map ? 3 : 0);
     glUniform1f(e->room_depth, in->depth);
     glDrawArrays(GL_TRIANGLES, 6, 24);
     ms[2] = mark(timing);

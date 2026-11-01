@@ -607,10 +607,15 @@ the copy needs it).
     opens on (`DRY` for the dry floor, key 9 either way), full screen at
     1280x720 by default (a window 640x480), the grid's glow blue round
     magenta lines, the ball's reflection on the water clearer.
-    `ogles2-b26` (full screen): the pool 33.9 fps at 640x480, 34.8 at 720p
-    50%, 17.2 at 720p 100%; the dry floor 54.3 / 52.5 / 22.6 (below the
-    ES 2.0 way's 60.1 / 59.1 / 24.7: the room shaders carry the water's
-    code when it is off; to look at).
+    `ogles2-b26` (full screen): the pool 35.1 fps at 640x480, 35.2 at 720p
+    50%, 17.6 at 720p 100%; the dry floor 59.3 / 56.2 / 24.6 (the ES 2.0
+    way 60.1 / 59.1 / 24.7). The dry floor had been 54.3 / 52.5 / 22.6:
+    its room shaders carried the water's code behind a uniform (floor 1,617
+    instructions, room pass 11.9 ms); now the floor's and the walls'
+    shaders are compiled twice, the pool's with `POOL` defined (`pool3.frag`,
+    `poolroom3.frag`, made by the Makefile), key 9 picking the programs:
+    room pass 10.4 ms dry (9.7 before the pool; the rest is the grid's blue
+    glow).
   - **Next, for the targets:** the room shader is still 9.7 ms of a
     16 ms frame at 640x480 (2 threads, 50-62 registers): fewer registers
     (4 threads) or the shadow taps only where the penumbra is (the 6

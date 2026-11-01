@@ -38,7 +38,14 @@ uniform int u_out;
 uniform highp sampler2DShadow u_shadow;
 uniform sampler2D u_refl;
 uniform sampler2D u_water; // the ripples (water3.frag): z, w the slope
-uniform int u_wateron;
+// The pool (key 9) or the dry floor: the same source compiled twice, its
+// pool form (pool3.frag, poolroom3.frag: made by the Makefile) with POOL
+// defined; the dry one then carries none of the water's code.
+#ifdef POOL
+const bool WATER = true;
+#else
+const bool WATER = false;
+#endif
 uniform sampler2D u_caus;  // the caustics on the bottom (caust3.frag)
 uniform float u_depth;    // the water's depth in the middle (keys + and -)
 in vec3 v_wpos;
@@ -165,7 +172,7 @@ void main()
     vec3 n = vec3(0.0, 1.0, 0.0);
     vec2 refr = vec2(0.0), bottom = v_wpos.xz;
     float deep = 0.0; // the water's depth where the view ray meets the bottom
-    if (u_wateron == 1) {
+    if (WATER) {
         // The view ray, bent by the water (about 3/4), to the curved
         // bottom: three steps closer to where it meets it.
         vec2 dir = vd.xz / max(vd.y, 0.25) * 0.75;
@@ -198,7 +205,7 @@ void main()
     // Under water the second light (flying round the ball) reaches the
     // bottom through the waves, gathered and spread: the caustics there.
     float ca = 1.0;
-    if (u_wateron == 1)
+    if (WATER)
         ca = caustic(bottom);
     float sh = shadow(0, v_lpos);
     float sh2 = shadow(1, v_lpos2);
@@ -212,8 +219,8 @@ void main()
     // A pool of light that the shadow cuts. Under water the bottom is a
     // lighter tile, so the caustics show as they focus and spread the light;
     // the surface reflects less (sur).
-    vec3 albedo = u_wateron == 1 ? vec3(0.07, 0.08, 0.085) : vec3(0.06, 0.055, 0.07);
-    float sur = u_wateron == 1 ? 0.3 : 1.0;
+    vec3 albedo = WATER ? vec3(0.07, 0.08, 0.085) : vec3(0.06, 0.055, 0.07);
+    float sur = WATER ? 0.3 : 1.0;
     vec3 col = albedo * (f_lightcol.rgb * nl * atten * sh + vec3(0.05, 0.02, 0.10) * ao);
     col += vec3(1.0, 0.2, 0.2) * occ * 0.10 * sh; // red light bounced off the ball
 
@@ -224,13 +231,13 @@ void main()
     float nl2 = max(l2.y, 0.0), at2 = 14.0 / (d2 + 1.0);
     col += albedo * f_light2col.rgb * nl2 * at2 * ao * sh2 * ca;
     col += (NEON * g.x * 1.25 + HAZE * (g.y * 0.30 + g.z)) * mix(0.12, 1.0, sh) * mix(0.35, 1.0, sh2) * ao;
-    if (u_wateron == 1) // seen through the water: the deep tinted, the caustics on the bottom
+    if (WATER) // seen through the water: the deep tinted, the caustics on the bottom
         col = col * mix(vec3(1.0), vec3(0.45, 0.75, 1.0), min(deep * 0.8, 1.0)) + f_light2col.rgb * at2 * sh2 * max(ca - 1.0, 0.0) * 0.06;
 
     // Polished: a sharp highlight and the reflections.
     vec3 h = normalize(l + vd);
     // Water is smoother than the lacquer: its highlight a sharp glint.
-    float rough = u_wateron == 1 ? 0.02 : 0.08;
+    float rough = WATER ? 0.02 : 0.08;
     float a = rough * rough, nh = max(dot(n, h), 0.0);
     float d = nh * nh * (a - 1.0) + 1.0;
     col += f_lightcol.rgb * a / (3.14159 * d * d) * 0.06 * max(dot(n, l), 0.0) * atten * sh * sur;
@@ -238,14 +245,14 @@ void main()
     float nh2 = max(dot(n, h2), 0.0), dh2 = nh2 * nh2 * (a - 1.0) + 1.0;
     // On water its glint (the light flying round the ball) is bright: sharp
     // points of light dancing on the ripples.
-    col += f_light2col.rgb * a / (3.14159 * dh2 * dh2) * 0.06 * nl2 * at2 * sh2 * (u_wateron == 1 ? 5.0 : 1.0);
+    col += f_light2col.rgb * a / (3.14159 * dh2 * dh2) * 0.06 * nl2 * at2 * sh2 * (WATER ? 5.0 : 1.0);
 
     float nv = max(dot(n, vd), 0.0);
     float fres = mix(0.30, 1.0, pow(1.0 - nv, 5.0)) * 0.85;
     // Water reflects less than the lacquer, but the ball keeps most of its
     // mirror image clearly (fball: at least 75%, more at glancing angles).
-    float fball = u_wateron == 1 ? 0.75 + 0.25 * pow(1.0 - nv, 5.0) : fres;
-    fres *= u_wateron == 1 ? 0.35 : 1.0;
+    float fball = WATER ? 0.75 + 0.25 * pow(1.0 - nv, 5.0) : fres;
+    fres *= WATER ? 0.35 : 1.0;
     // The back wall's grid and the ceiling's light panel, by tracing the
     // mirrored view ray to them.
     vec3 r = reflect(-vd, n);
@@ -253,7 +260,7 @@ void main()
     {
         vec3 c = v_wpos + r * ((f_cam.w - v_wpos.y) / r.y);
         vec2 q = abs(c.xz - f_light.xz);
-        float e = u_wateron == 1 ? 0.02 : 0.15; // the panel's edge: sharp on water
+        float e = WATER ? 0.02 : 0.15; // the panel's edge: sharp on water
         float panel = (1.0 - smoothstep(1.45 - e, 1.45 + e, q.x)) * (1.0 - smoothstep(0.75 - e, 0.75 + e, q.y));
         col += f_lightcol.rgb * panel * fres * 1.2 * sh * sur;
     }
@@ -276,6 +283,6 @@ void main()
 
     // Held as the ball's (ball3.frag); the water's much less, so its glints
     // and caustics stay sharp instead of blooming into a haze.
-    o_bright = vec4(min(max(col - 1.0, 0.0), 6.0) * (u_wateron == 1 ? 0.15 : 1.0), 1.0);
+    o_bright = vec4(min(max(col - 1.0, 0.0), 6.0) * (WATER ? 0.15 : 1.0), 1.0);
     o_col = vec4(pow(aces(col), vec3(1.0 / 2.2)), 1.0);
 }

@@ -29,7 +29,7 @@ ES3      := shaders/ball3.vert shaders/ball3.frag shaders/room3.vert shaders/roo
             shaders/mapview3.frag shaders/shadow3.vert shaders/shadow3.frag \
             shaders/flare3.vert shaders/flare3.frag shaders/spark3.vert shaders/spark3.frag \
             shaders/water3.frag shaders/caust3.vert shaders/caust3.frag \
-            shaders/refl3.vert shaders/refl3.frag
+            shaders/refl3.vert shaders/refl3.frag shaders/pool3.frag shaders/poolroom3.frag
 SHADERS  := $(ES2) $(ES3)
 # vertex + fragment shader of each program, as link_program() pairs them
 PAIRS    := ball.vert ball.frag room.vert room.frag screen.vert blur.frag \
@@ -37,12 +37,20 @@ PAIRS    := ball.vert ball.frag room.vert room.frag screen.vert blur.frag \
             ball3.vert ball3.frag room3.vert room3.frag room3.vert floor3.frag screen3.vert down3.frag \
             screen3.vert blur3.frag screen3.vert composite3.frag screen3.vert mapview3.frag \
             shadow3.vert shadow3.frag flare3.vert flare3.frag spark3.vert spark3.frag \
-            screen3.vert water3.frag caust3.vert caust3.frag refl3.vert refl3.frag
+            screen3.vert water3.frag caust3.vert caust3.frag refl3.vert refl3.frag \
+            room3.vert pool3.frag room3.vert poolroom3.frag
 
 all: $(OUTDIR)/boing2026-ogles3
 
 $(OUTDIR)/boing2026-ogles3: boing2026-ogles3.c boing2026-ogles3_shaders.h
 	$(CC) $(CFLAGS) -I$(SDK)/include boing2026-ogles3.c -L$(LIBDIR) -logles3 -lm881 -o $@
+
+# The pool's forms of the floor's and the walls' shaders: the same source
+# with POOL defined, so the dry floor's programs carry none of the water.
+shaders/pool3.frag: shaders/floor3.frag
+	sed '1a #define POOL' $< > $@
+shaders/poolroom3.frag: shaders/room3.frag
+	sed '1a #define POOL' $< > $@
 
 header: $(SHADERS) tools/embed_shaders.py
 	python3 -I tools/embed_shaders.py boing2026-ogles3_shaders.h $(SHADERS)

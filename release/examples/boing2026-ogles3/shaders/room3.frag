@@ -37,7 +37,14 @@ layout(std140) uniform Frame {
 uniform int u_out;
 uniform highp sampler2DShadow u_shadow;
 uniform sampler2D u_water; // the ripples (water3.frag): z, w the slope
-uniform int u_wateron;
+// The pool (key 9) or the dry floor: the same source compiled twice, its
+// pool form (pool3.frag, poolroom3.frag: made by the Makefile) with POOL
+// defined; the dry one then carries none of the water's code.
+#ifdef POOL
+const bool WATER = true;
+#else
+const bool WATER = false;
+#endif
 uniform sampler2D u_rcaus; // the light the water reflects, a quarter a surface (refl3.frag)
 in vec3 v_wpos;
 flat in vec3 v_n;
@@ -182,7 +189,7 @@ void main()
     // the pool onto the walls and the ceiling, traced (refl3.vert): its
     // strength as from the light's mirror image under the water, its lines
     // where the waves focus the reflection; dark where none reaches.
-    if (u_wateron == 1) {
+    if (WATER) {
         vec3 lm = f_light2.xyz * vec3(1.0, -1.0, 1.0);
         vec3 tm = lm - v_wpos;
         float face = max(dot(n, tm) * inversesqrt(dot(tm, tm)), 0.0);

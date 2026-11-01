@@ -52,16 +52,16 @@ full screen, 4x MSAA, frames not limited (no VSYNC), every effect on:
 
                                   Boing 2026   ES 2.0 way   ES 3 way   ES 3 way
                                                             dry floor  the pool
-    640 x 480    room at 100%     60.2         60.1         54.3       33.9
-    1280 x 720   room at 50%      59.6         59.1         52.5       34.8
-    1280 x 720   room at 100%     24.8         24.7         22.6       17.2
+    640 x 480    room at 100%     60.2         60.1         59.3       35.1
+    1280 x 720   room at 50%      59.6         59.1         56.2       35.2
+    1280 x 720   room at 100%     24.8         24.7         24.6       17.6
                                   frames a second
 
 The ES 3 way on the dry floor draws the sparks and the contact-hardening
 shadows on top; the others draw none. The pool's passes (its waves, its
 caustics and the light it throws on the walls, about 9 ms at 640 x 480) are
-what it costs: its room shaders carry the water's code even when the floor
-is dry, which is why the dry floor runs below the ES 2.0 way. With VSYNC it
+what it costs; the dry floor's programs are its shaders compiled without
+the water's code (POOL undefined), so it pays nothing for it. With VSYNC it
 is held to the display's rate. The passes on the dry floor at 640 x 480 as
 first measured, before the pool (TIMING, the GPU finishing each), against
 the ES 2.0 way's:
