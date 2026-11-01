@@ -6,7 +6,7 @@
  * An Amiga program, run under vamos at build time (make builtin-shaders):
  * the assembler is m68k code with Amiga types, and running it unchanged
  * means the bytes are exactly those PiStorm3D assembles on the A1200. The
- * output, ogles2/builtin_shaders.h, is checked in; the library does not
+ * output, ogles3/builtin_shaders.h, is checked in; the library does not
  * carry the assembler or its 95 shader sources.
  *
  * The program is PiStorm3D's smooth-shaded, untextured pairing (plan

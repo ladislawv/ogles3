@@ -29,9 +29,9 @@ ours = subprocess.run(["git", "rev-parse", "--short=12", "HEAD"], cwd=h,
 dirty = subprocess.run(["git", "diff", "--quiet", "HEAD"], cwd=h).returncode != 0
 stamp = "%s %s%s mesa %s" % (time.strftime("%Y%m%d-%H%M%S", time.gmtime()), ours,
                              "+" if dirty else "", commit)
-# Its $VER: the library's version.revision and date (ogles2_internal.h).
+# Its $VER: the library's version.revision and date (ogles3_internal.h).
 import re
-lib = open(os.path.join(os.path.dirname(os.path.dirname(h)), "ogles2", "ogles2_internal.h")).read()
+lib = open(os.path.join(os.path.dirname(os.path.dirname(h)), "ogles3", "ogles3_internal.h")).read()
 ver = "%s.%s (%s)" % tuple(re.search(r"#define OGLES3_LIB_%s\s+\"?([^\"\s]+)" % n, lib).group(1)
                            for n in ("VERSION", "REVISION", "DATE"))
 rc = 0

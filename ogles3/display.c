@@ -40,7 +40,7 @@
 #include <proto/cybergraphics.h>
 #include <proto/utility.h>
 #include <libraries/ogles3.h>
-#include "ogles2_internal.h"
+#include "ogles3_internal.h"
 
 #define NO_MODE ((ULONG)INVALID_ID)
 

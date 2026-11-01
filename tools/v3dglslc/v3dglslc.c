@@ -77,7 +77,7 @@ int fake_drm_open(void);
 __attribute__((used)) char v3dglslc_stamp[] = "$V3DGLSLC-STAMP:" V3DGLSLC_STAMP "$";
 
 /* The release's version, for AmigaDOS' Version command: the library's
- * version.revision and date (ogles2/ogles2_internal.h), which build_m68k.sh
+ * version.revision and date (ogles3/ogles3_internal.h), which build_m68k.sh
  * and build_host.sh pass. Install-ogles3 replaces an older LIBS:v3dglslc3, or
  * one without it (1.x), whenever it installs the library (docs/GLES3_PLAN.md
  * section 3). Beside the stamp in the data hunk, so the file's tail still

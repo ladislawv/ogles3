@@ -12,7 +12,7 @@
 #include <exec/memory.h>
 #include <proto/exec.h>
 #include <string.h>
-#include "ogles2_internal.h"
+#include "ogles3_internal.h"
 
 struct OGLES3VertexArray
 {

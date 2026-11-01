@@ -1,5 +1,5 @@
 /*
- * Checks ogles2/blake3.c against Mesa's BLAKE3 (the one v3dglslc uses), on
+ * Checks ogles3/blake3.c against Mesa's BLAKE3 (the one v3dglslc uses), on
  * the host: every length from 0 to 5000 bytes and a few large ones, fed in
  * one piece and in uneven pieces. Built and run by `make blake3-test`.
  */

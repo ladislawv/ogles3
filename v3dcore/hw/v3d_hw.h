@@ -1999,7 +1999,7 @@ void v3d_store_tiled_image(void *dst, v3d_u32 dst_stride,
 // texture.c's...): a 32-bit member at an odd offset is read and written a
 // byte at a time, four accesses and shifts for one under Emu68 (draw_elements'
 // index cache, tests/perf/drawbench), and V3DTexture was a byte shorter in
-// ogles2/texture.c (v3d_texture.h after this file) than in v3d_texture.c.
+// ogles3/texture.c (v3d_texture.h after this file) than in v3d_texture.c.
 #pragma pack(pop)
 
 //

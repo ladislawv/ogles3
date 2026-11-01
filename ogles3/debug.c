@@ -6,7 +6,7 @@
  * program's own structure. A pop without a push is ignored, as the
  * extension says; the depth is kept per context, at most 64 groups deep.
  */
-#include "ogles2_internal.h"
+#include "ogles3_internal.h"
 
 #define MAX_GROUP_DEPTH 64
 

@@ -46,7 +46,7 @@
 #include <proto/bsdsocket.h>
 #include "v3dglsl_port.h"
 
-#define COMPILER_STACK (4UL * 1024 * 1024) /* as ogles2/compiler.c starts it */
+#define COMPILER_STACK (4UL * 1024 * 1024) /* as ogles3/compiler.c starts it */
 
 struct Library *SocketBase;
 

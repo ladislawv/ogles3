@@ -18,7 +18,7 @@ jobs:
 
       - name: Generator runs; abi_order.txt is complete (append-only, committed)
         run: |
-          python3 gen/gen_ogles2.py --out build/gen --impl-dir ogles2
+          python3 gen/gen_ogles2.py --out build/gen --impl-dir ogles3
           git diff --exit-code gen/abi_order.txt
 
       - name: Remote test station (amictld host build + amictl client)

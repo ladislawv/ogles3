@@ -111,7 +111,7 @@ def main():
         target = h["relocs"][slot]
         value = struct.unpack_from(">I", h["data"], slot)[0]
         got = names.get((target, value), "?")
-        # the function itself, or its share-group wrapper (ogles2/share.c)
+        # the function itself, or its share-group wrapper (ogles3/share.c)
         if got not in ("_ogles2_" + entry, "_ogles2_lk_" + entry):
             errors.append("slot %d: %s, expected _ogles2_%s" % (i, got, entry))
     if errors:

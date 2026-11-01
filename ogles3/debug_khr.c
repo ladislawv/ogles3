@@ -21,7 +21,7 @@
 #include <exec/memory.h>
 #include <proto/exec.h>
 #include <string.h>
-#include "ogles2_internal.h"
+#include "ogles3_internal.h"
 
 #define LOG_MAX     64  /* GL_MAX_DEBUG_LOGGED_MESSAGES */
 #define MESSAGE_MAX 256 /* GL_MAX_DEBUG_MESSAGE_LENGTH */

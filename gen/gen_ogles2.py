@@ -7,7 +7,7 @@ with it (plan section 6.6), from one source:
   abi_order.txt              the table order: append-only, checked in
 
 Usage:
-  gen_ogles2.py --out DIR [--impl-dir ogles2] [--append]
+  gen_ogles2.py --out DIR [--impl-dir ogles3] [--append]
 
 --append adds API entries missing from abi_order.txt at its end; without it a
 missing entry is an error. Entries are never reordered or removed: a line
@@ -16,9 +16,9 @@ missing entry is an error. Entries are never reordered or removed: a line
 Writes, under DIR:
   include/libraries/ogles3_dispatch.h  struct OGLES3Dispatch
   include/proto/ogles3.h               client wrappers (static inline + macro)
-  ogles2/ogles2_api.h                  prototypes of the library's ogles2_* functions
-  ogles2/dispatch_table.c              the table, with designated initialisers
-  ogles2/stubs.c                       stubs for entries --impl-dir does not define
+  ogles3/ogles2_api.h                  prototypes of the library's ogles2_* functions
+  ogles3/dispatch_table.c              the table, with designated initialisers
+  ogles3/stubs.c                       stubs for entries --impl-dir does not define
   client/agl_gen.c                     generated agl* import-library functions
   client/procaddr.c                    aglGetProcAddress: thunks + sorted name table
   tests/abi_layout.c                   compile-time check of every field's offset
@@ -286,11 +286,11 @@ def wrapped(e):
 
 
 def gen_table_c(table):
-    L = [HEADER, '#include <proto/exec.h>\n#include "ogles2_internal.h"\n\n',
+    L = [HEADER, '#include <proto/exec.h>\n#include "ogles3_internal.h"\n\n',
          "_Static_assert(sizeof(struct OGLES3Dispatch) == 16 + 4 * %d, \"table size\");\n\n"
          % len(table),
          "/* Every entry that takes the context runs under its share group's\n"
-         " * semaphore while the group has two members or more (ogles2/share.c).\n"
+         " * semaphore while the group has two members or more (ogles3/share.c).\n"
          " * Both calls are tail calls: alone, the wrapper tests and jumps. */\n"]
     L.append("_Static_assert(__builtin_offsetof(struct OGLES3Context, share_lock) == 4, \"share_lock at 4\");\n"
              "_Static_assert(OGLES3_CONTEXT_MAGIC == 0x474c4532UL, \"the wrappers' magic\");\n\n")
@@ -409,7 +409,7 @@ def gen_abi_layout_c(table):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", required=True)
-    ap.add_argument("--impl-dir", default=os.path.join(os.path.dirname(HERE), "ogles2"))
+    ap.add_argument("--impl-dir", default=os.path.join(os.path.dirname(HERE), "ogles3"))
     ap.add_argument("--append", action="store_true")
     a = ap.parse_args()
 
@@ -424,10 +424,10 @@ def main():
 
     write(a.out, "include/libraries/ogles3_dispatch.h", gen_dispatch_h(table))
     write(a.out, "include/proto/ogles3.h", gen_proto_h(table))
-    write(a.out, "ogles2/ogles2_api.h", gen_api_h(table))
-    write(a.out, "ogles2/dispatch_table.c", gen_table_c(table))
+    write(a.out, "ogles3/ogles2_api.h", gen_api_h(table))
+    write(a.out, "ogles3/dispatch_table.c", gen_table_c(table))
     stubs, nstubs = gen_stubs_c(table, done)
-    write(a.out, "ogles2/stubs.c", stubs)
+    write(a.out, "ogles3/stubs.c", stubs)
     write(a.out, "client/agl_gen.c", gen_agl_c(table))
     write(a.out, "client/procaddr.c", gen_procaddr_c(table))
     write(a.out, "tests/abi_layout.c", gen_abi_layout_c(table))

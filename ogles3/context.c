@@ -11,7 +11,7 @@
 #include <proto/dos.h>
 #include <string.h>
 #include <libraries/ogles3.h>
-#include "ogles2_internal.h"
+#include "ogles3_internal.h"
 
 void ogles2_error(struct OGLES3Context *ctx, GLenum error)
 {

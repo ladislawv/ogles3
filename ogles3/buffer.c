@@ -22,7 +22,7 @@
 #include <proto/exec.h>
 #include <stddef.h>
 #include <string.h>
-#include "ogles2_internal.h"
+#include "ogles3_internal.h"
 #include "v3d_context.h"
 #include "v3d_frame.h"
 #include "v3d_hw.h"
@@ -380,7 +380,7 @@ static BOOL table_room(struct OGLES3BufState *bs, GLuint name)
 
 static ULONG next_uid;
 
-/* The head draw.c reads inline (ogles2_internal.h) */
+/* The head draw.c reads inline (ogles3_internal.h) */
 _Static_assert(offsetof(struct OGLES3BufState, sh) == offsetof(struct OGLES3BufStateHead, sh) &&
                offsetof(struct OGLES3BufState, array) == offsetof(struct OGLES3BufStateHead, array) &&
                offsetof(struct OGLES3BufState, element) == offsetof(struct OGLES3BufStateHead, element),

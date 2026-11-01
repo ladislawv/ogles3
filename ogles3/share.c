@@ -26,7 +26,7 @@
 #include <exec/memory.h>
 #include <proto/exec.h>
 #include <string.h>
-#include "ogles2_internal.h"
+#include "ogles3_internal.h"
 #include "v3d_context.h"
 
 /* Every member takes the group's semaphore while there are two or more. */

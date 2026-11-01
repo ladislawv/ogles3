@@ -20,7 +20,7 @@
 #include <exec/memory.h>
 #include <proto/exec.h>
 #include <string.h>
-#include "ogles2_internal.h"
+#include "ogles3_internal.h"
 
 /* An sRGB-encoded value in [0, 1] as linear (ES 3.0 3.8.16): x^2.4 is
  * x^2 times the fifth root of x^2, by Newton's method (no libm). */

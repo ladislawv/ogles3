@@ -2,7 +2,7 @@ ogles3.library licensing
 ========================
 
 (ogles3.library is built from the ogles2 project's source: the library's
-source files are in ogles2/.)
+source files are in ogles3/.)
 
 This repository holds code under two licences, plus third-party code that
 keeps its own. The licence decision is D6 in docs/DEVELOPMENT_PLAN.md
@@ -15,9 +15,9 @@ keeps its own. The licence decision is D6 in docs/DEVELOPMENT_PLAN.md
    be published to the Amiga developer community. The files under that
    licence:
    - v3dcore/ (the backend);
-   - the front-end files that adapt PiStorm3D code: ogles2/job.c,
-     ogles2/display.c, ogles2/draw.c, ogles2/program.c, ogles2/texture.c,
-     ogles2/builtin_shaders.h;
+   - the front-end files that adapt PiStorm3D code: ogles3/job.c,
+     ogles3/display.c, ogles3/draw.c, ogles3/program.c, ogles3/texture.c,
+     ogles3/builtin_shaders.h;
    - tools/builtin_shaders/ (assembles the built-in shaders with the
      backend's assembler).
 
@@ -27,9 +27,9 @@ keeps its own. The licence decision is D6 in docs/DEVELOPMENT_PLAN.md
      include/libraries/, include/clib/ (they contain no MiniGL code, so a
      program of any licence, GPL included, may link them; the library
      itself is opened at run time with OpenLibrary);
-   - the other front-end files: ogles2/buffer.c, compiler.c, context.c,
+   - the other front-end files: ogles3/buffer.c, compiler.c, context.c,
      debug.c, debug_khr.c, gles2_ext.c, device.c, etc1.c, etc1.h, fbo.c, frame.c, library.c, log.c,
-     ogles2_internal.h, runtime.c, share.c, start.s, state.c, v3dp.c,
+     ogles3_internal.h, runtime.c, share.c, start.s, state.c, v3dp.c,
      clear_mrt_v3dp.h;
    - cmd/, tests/, v3dp/, gen/ (except gen/khronos/), dev/, docs/, release/;
    - tools/v3dglslc/, tools/amictl/, tools/v3dp_tests/, tools/blake3_test/,
@@ -47,7 +47,7 @@ keeps its own. The licence decision is D6 in docs/DEVELOPMENT_PLAN.md
    - v3dcore/: code by Macoy Madson and code derived from Mesa (Broadcom,
      VMware), MIT: licences/License_V3D_ThirdParty.txt. These notices must
      ship with the library.
-   - ogles2/blake3.c, ogles2/blake3.h follow the BLAKE3 reference
+   - ogles3/blake3.c, ogles3/blake3.h follow the BLAKE3 reference
      implementation (CC0 / Apache-2.0).
    - tools/v3dglslc builds Mesa (MIT, with the patches in
      tools/v3dglslc/patches); the compiler shipped as LIBS:v3dglslc3 is Mesa

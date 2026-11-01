@@ -60,7 +60,7 @@ CD M6R5:bin
 Echo "Quake III's demo 'four' as a timedemo, full screen 640x480, with"
 Echo "  ioquake3's GLES2 renderer (its shaders come compiled in cache/). The"
 Echo "  demo plays as fast as it can and the game quits."
-; Probes T and P (ogles2_internal.h): the deletes and the context's end
+; Probes T and P (ogles3_internal.h): the deletes and the context's end
 ; step by step, and the timing every 256 frames.
 SetEnv OGLES3/Probe TP
 ; Silent by default, as the earlier timedemo figures (MiniGL's too).

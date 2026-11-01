@@ -70,7 +70,7 @@ static int report(const char *what, UBYTE got[4][256], int nchk)
     return bad;
 }
 
-static UBYTE to_byte(float f) /* as ogles2/job.c */
+static UBYTE to_byte(float f) /* as ogles3/job.c */
 {
     return (UBYTE)(f * 255.0f + 0.5f);
 }

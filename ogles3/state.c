@@ -9,7 +9,7 @@
  * from both GCC and vbcc programs (plan section 6.3).
  */
 #include <string.h>
-#include "ogles2_internal.h"
+#include "ogles3_internal.h"
 
 
 static ULONG cap_bit(const struct OGLES3Context *ctx, GLenum cap)

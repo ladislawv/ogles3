@@ -28,9 +28,9 @@ ref = next(e for e in cc if e["file"].endswith("state_tracker/st_manager.c"))
 base = shlex.split(ref["command"])
 commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=src_root,
                         capture_output=True, text=True).stdout.strip()[:12]
-# $VER: the library's version.revision and date (ogles2_internal.h), as build_m68k.sh.
+# $VER: the library's version.revision and date (ogles3_internal.h), as build_m68k.sh.
 import re
-lib = open(os.path.join(os.path.dirname(os.path.dirname(h)), "ogles2", "ogles2_internal.h")).read()
+lib = open(os.path.join(os.path.dirname(os.path.dirname(h)), "ogles3", "ogles3_internal.h")).read()
 ver = "%s.%s (%s)" % tuple(re.search(r"#define OGLES3_LIB_%s\s+\"?([^\"\s]+)" % n, lib).group(1)
                            for n in ("VERSION", "REVISION", "DATE"))
 rc = 0

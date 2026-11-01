@@ -20,6 +20,16 @@ result folders up to 2026-10-19 (ogles2's work, 162 MB, all in the ogles2
 repository) left `tests/a1200/results/`; the history rewritten without
 them (git filter-repo) and force-pushed. Results cited before 2026-10-20
 are in github.com/ladislawv/ogles2.
+**The source drawer renamed (2026-11-01, the developer's call):** `ogles2/`
+is `ogles3/`, and its header `ogles2_internal.h` is `ogles3_internal.h`
+(`git mv`: `git log --follow` keeps their history). The `ogles2_` prefix of
+the library's functions and the generated `ogles2_api.h` stay: no program
+sees them, and fixes from the 1.x line still port. The Makefile, the
+generator (its output in `$(B)/gen/ogles3/`), CI, the compiler and release
+scripts and the tools follow; the library builds byte for byte the same.
+Older entries below name `ogles2/` paths: they are now in `ogles3/`.
+`tools/perf/q3cmp.sh` takes ogles2 1.3.2's archive from the 1.x copy
+(`OGLES2_LHA`).
 
 **Plan: OpenGL ES 3.2's features the Pi 4's GPU has (2026-10-31, the
 developer's request).** What V3D 4.2 can do comes from Mesa's driver for
@@ -147,7 +157,7 @@ items 1-2. Every dEQP-GLES31 group of `gles31-main` has passed on its own
 the library does not offer. What is really left, in order (items 1-5
 **done 2026-10-30**, below each):
 1. **The stale notes** (an hour): the "Not yet" sentences in §5 item 8, §5
-   item 3 ("not yet in ES 3.1's form"), §7 item 1, and `ogles2/compute.c`'s
+   item 3 ("not yet in ES 3.1's form"), §7 item 1, and `ogles3/compute.c`'s
    header comment ("Not yet: textures and images in a compute shader...,
    atomic counters") say what was done instead, with the entry that did it.
    **Done:** each now says where the work was finished.
@@ -782,7 +792,7 @@ faster than ogles2 1.3 (the user's goal; §1's "The draw's CPU cost against
   cmpprof, dbcmp, tgacmp) say what they do at their tops. Not tried on
   the A1200 in this form (it was offline when they were written): first
   run them once and fix what a path or name gets wrong.
-- **Quake III for these comparisons:** github.com/RTyp3r/ioq3-amiga-ogles3
+- **Quake III for these comparisons:** github.com/ladislawv/ioq3-amiga-ogles3 (a fork of github.com/RTyp3r/ioq3-amiga-ogles3, made 2026-11-01)
   (ioq3-amiga with `build_ioq3_ogles3_wsl.sh`, commit 5e6a9ea; clone it to
   `C:\GitHub\ioq3-amiga` or set `IOQ3_SRC`). Benchmarks run at most 10 s or
   400 frames a test (the user's rule).
@@ -818,7 +828,7 @@ decisions):** the work ships as a library of its own, `ogles3.library`
 `ogles3.doc` (the source directory and the internal `ogles2_` names stay).
 A context asked for no version is OpenGL ES 3.1; the default build has ES
 3.0 and 3.1 contexts (`ES3=1` caps a test build at 3.0). GLES2 contexts
-offer ES 3.0's features as GLES2 extensions (`ogles2/gles2_ext.c`:
+offer ES 3.0's features as GLES2 extensions (`ogles3/gles2_ext.c`:
 `OES_texture_3D`, `EXT_texture_storage`, `EXT_texture_rg`, `OES_depth24`,
 `EXT_map_buffer_range`, `EXT_occlusion_query_boolean`,
 `EXT_shadow_samplers`, `EXT_unpack_subimage`, `OES_vertex_half_float`,
@@ -1095,7 +1105,7 @@ Mesa's driver, so they could follow later as an extension
     $V3DGLSLC <dir> <vs> <fs>` for each test program (every variant
     compiled again from its key alone, byte for byte, and each fragment
     variant with its vertex variant in one request: the draw-time
-    variants' ground); after a change to the keys (`ogles2/variant_key.c`)
+    variants' ground); after a change to the keys (`ogles3/variant_key.c`)
     or the compiler `make variant-key-test` (the library's keys against
     Mesa's, 486 checks); and after a Mesa change the m68k compiler again
     (`replay.py`, `build_m68k.sh`: the Mesa objects are replayed from the
@@ -1393,7 +1403,7 @@ Mesa's driver, so they could follow later as an extension
     (§3). 1.4 corrects both texts.
   - **`FORMAT.md`'s hash order.** It says the shaders are hashed "in attach
     order"; the library and the compiler hash the vertex shader, then the
-    fragment shader, then the bindings (`ogles2/program.c:683-685`,
+    fragment shader, then the bindings (`ogles3/program.c:683-685`,
     `tools/v3dglslc/v3dglslc.c:377-379`). 1.4 corrects `FORMAT.md`, and with it
     the table row that a line break inside `<index> <name>` splits
     (`FORMAT.md:75-76`).
@@ -1609,7 +1619,7 @@ Mesa's driver, so they could follow later as an extension
   the draw computes" is the format's intent, not what 1.3 does.
 - **`.v3dp` format 1.0** (`v3dp/FORMAT.md`): stages vertex, binning and
   fragment; uniform recipe types are Mesa's enum values (0-46). The reader
-  (`ogles2/v3dp.c`) refuses an unknown major version, an unknown stage,
+  (`ogles3/v3dp.c`) refuses an unknown major version, an unknown stage,
   recipe types it does not implement (`recipe_ok`), uniform blocks other than
   the default one, anything but a vertex and fragment program, and more
   than 64 sections (`:169`, `:193`). It accepts any minor version and skips
@@ -2017,7 +2027,7 @@ The base everything else stands on.
    `V3DGLSL_COMPILE_VARIANT` with item 5. **The `$VER:` string done
    (2026-10-23, on the A1200):** `v3dglslc` carries `$VER: v3dglslc
    <version>.<revision> (<date>) PiStorm V3D 4.2`, the library's
-   (`OGLES2_LIB_VERSION`, `_REVISION`, `_DATE` in `ogles2_internal.h`, which
+   (`OGLES2_LIB_VERSION`, `_REVISION`, `_DATE` in `ogles3_internal.h`, which
    `build_m68k.sh` and `build_host.sh` read and pass as `V3DGLSLC_VER`),
    in the data hunk beside the stamp (still in the file's last 64 KB, which
    `ogles2_compiler_id` reads). `Install-ogles2`, after installing the
@@ -2045,7 +2055,7 @@ The base everything else stands on.
    (`mat2x3` ... `mat4x3`: their columns, as the writer already stores every
    matrix's column mask, `v3dp_writer.c:473-489`); every sampler type of GLSL
    ES 3.00 as a uniform (`type_shape` and `ogles2_sampler_kind`,
-   `ogles2_internal.h:654`, know 2D, cube and rectangle samplers only, and
+   `ogles3_internal.h:654`, know 2D, cube and rectangle samplers only, and
    take the rest for 2D): until stage B item 8 brings their textures, 3D,
    array, shadow and integer samplers read the incomplete texture's (0, 0, 0,
    1); the draw's side of integer samplers (the TMU's integer return; 32 bits
@@ -2249,7 +2259,7 @@ The base everything else stands on.
      before (`v3dp_last_fs_inputs`, from the capture hook: no Mesa change);
      the program's last choice is kept by the sampler bits and alpha to
      coverage too (`var_bits`, `var_a2c`). The keys are computed and matched
-     in `ogles2/variant_key.c`, which the host test
+     in `ogles3/variant_key.c`, which the host test
      `make variant-key-test` (`tools/variant_key_test`) checks against
      Mesa's own keys in the host compiler's `.v3dp`, `.v3dw` and `.v3da`
      (`v3dglslc -a`, new) of 15 test programs: every key computed from its
@@ -2873,7 +2883,7 @@ ES3 contexts the core names, with `VERTEX_ATTRIB_ARRAY_INTEGER`,
    `GL_INVALID_OPERATION`, ES 3.0 3.8.6); `GL_COMPRESSED_TEXTURE_FORMATS`
    15 in ES3 contexts (ETC1 first), 5 in GLES2 ones. ETC1 is no longer
    decoded: kept and sampled as `RGB8_ETC2` in both kinds of context, and
-   `ogles2/etc1.c`, its host test and CI step are gone (still refused by
+   `ogles3/etc1.c`, its host test and CI step are gone (still refused by
    the sub-image entries, as the extension says). `m8_draw`'s solid block
    of each format and a compressed array, a layer replaced
    (`ogles2-m8-1-20261025-211103`: 25, 100, 81 of 81; the smoke test
@@ -4172,7 +4182,7 @@ stopped.
    406, `copy_image` 12,395. Every group of `gles31-main` has now run on the
    A1200 at least once; `draw_indirect` 203 of 203 once its double free
    was found (above). **`GL_KHR_debug` (2026-10-28, the developer's call):**
-   `ogles2/debug_khr.c`, offered in every context version (Mesa's way):
+   `ogles3/debug_khr.c`, offered in every context version (Mesa's way):
    the 11 `KHR` entries (appended to the table), `GL_DEBUG_OUTPUT` (off: no
    context is a debug one) and `_SYNCHRONOUS` (messages are always given
    in the call), a log of 64 messages of at most 256 characters, the
@@ -4498,10 +4508,10 @@ search for.
   (`:546-790`, at most 8 values, `struct value` at `:544`), then
   `ogles2_texture_query` (`texture.c:679-702`), `ogles2_buffer_query`,
   `ogles2_fbo_query` (`fbo.c:1337`); clear and blend colours clamped at
-  `state.c:157-160`, `:435`; defines in `ogles2_internal.h`
+  `state.c:157-160`, `:435`; defines in `ogles3_internal.h`
   (`OGLES2_MAX_VERTEX_ATTRIBS` 16, `_TEXTURE_UNITS` 32, `_STAGE_SAMPLERS` 16,
   `_DRAW_BUFFERS` 4, `_IMAGE_ATTRIBS` 64); `struct OGLES2Context`
-  (`ogles2_internal.h:442-533`; `share_lock` must stay at offset 4);
+  (`ogles3_internal.h:442-533`; `share_lock` must stay at offset 4);
   `struct OGLES2Share` (`:61-76`). `OGLES2_CCT_PISTORM_MIN + 6` is free
   (`include/libraries/ogles2.h:68`).
 - **Draws** (`draw.c`): `ogles2_glDrawArrays` (`:1710`), `draw_elements`
@@ -4562,7 +4572,7 @@ search for.
   (`:351-381`), `glMapBufferOES` (`:455`, write-only, the CPU copy),
   `ogles2_buffer_copy` (`:576-634`).
 - **Programs:** `struct OGLES2Program`, `OGLES2Image`, `OGLES2Variant`
-  (`ogles2_internal.h:181-364`; a variant keeps only `per_vertex_point_size`,
+  (`ogles3_internal.h:181-364`; a variant keeps only `per_vertex_point_size`,
   `is_points`, `is_lines`, `cbufs` of its key); `program_hash`
   (`program.c:677-700`: vertex, fragment, then "BIND"); `load_image`
   (`:913-955`, the lookup that stops at a refused file at `:926`),
@@ -4600,7 +4610,7 @@ search for.
   across contexts.
 - **Generator:** `gen/gen_ogles2.py` (`read_gl`, `resolve_order`
   `:141-164`, which exits when `abi_order.txt` lacks an entry unless
-  `--append` is given, `implemented` by a regex over `ogles2/*.c`, stubs
+  `--append` is given, `implemented` by a regex over `ogles3/*.c`, stubs
   calling `ogles2_unimplemented`, `client/procaddr.c`: thunks and a sorted
   name table in the client), `gen/verify_table.py`; the client's
   `OGLES2Open` (`client/ogles2_open.c:43-70`: `OpenLibrary` with the
@@ -4610,7 +4620,7 @@ search for.
   compiler `:38-53`), `ogles2.doc` (EXTENSIONS `:73`, LIMITS `:113`,
   deviations `:183`, `OGLES2Open` and `OGLES2_VERSION` `:210-246`,
   `aglCreateContext2` `:265`), `OGLES2_LIB_VERSION` and `_REVISION`
-  (`ogles2_internal.h:21-23`).
+  (`ogles3_internal.h:21-23`).
 
 ### B.3 The GPU for ES 3.0 (Mesa's V3D driver, version 42)
 

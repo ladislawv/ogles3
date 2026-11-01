@@ -8,7 +8,7 @@
 #include <proto/exec.h>
 #include <proto/utility.h>
 #include <libraries/ogles3.h>
-#include "ogles2_internal.h"
+#include "ogles3_internal.h"
 
 /* A state-only (test) context has no surface: frame entries do nothing. */
 static BOOL has_surface(struct OGLES3Context *ctx)

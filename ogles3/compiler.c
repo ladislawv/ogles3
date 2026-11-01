@@ -19,7 +19,7 @@
 #include <proto/exec.h>
 #include <proto/dos.h>
 #include <string.h>
-#include "ogles2_internal.h"
+#include "ogles3_internal.h"
 #include "../v3dp/v3dglsl_port.h"
 
 /* Where the compiler is looked for: installed, then beside the program

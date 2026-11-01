@@ -5,7 +5,7 @@
 ;   Another window size:           Execute Run-M1 SIZE=640x480
 ;   One benchmark:                 Execute Run-M1 BENCH=shading:shading=phong
 ;   glmark2's debug messages:      Execute Run-M1 DEBUG=1
-;   Library probes (ogles2_internal.h): Execute Run-M1 PROBE=P
+;   Library probes (ogles3_internal.h): Execute Run-M1 PROBE=P
 ; Nothing is installed. Output goes to results/.
 .key DURATION/K,SIZE/K,BENCH/K,DEBUG/K,PROBE/K
 .def DURATION 2

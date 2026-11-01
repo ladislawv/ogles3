@@ -171,7 +171,7 @@ Real programs are checked against Mesa's reference images (`tests/corpus`).
 
 | Path | What |
 |---|---|
-| `ogles2/` | The library's source: contexts, state, programs, uniforms, draws, compute, textures, buffers, framebuffers, jobs, display, KHR_debug |
+| `ogles3/` | The library's source: contexts, state, programs, uniforms, draws, compute, textures, buffers, framebuffers, jobs, display, KHR_debug |
 | `v3dcore/` | PiStorm3D's V3D layer (control lists, memory, textures, submission), see `v3dcore/PROVENANCE.md` |
 | `client/` | `libogles3.a`, the import library: `OGLES3Open/Close`, current context, `agl*` |
 | `include/` | Public headers: `libraries/ogles3.h`, `clib/ogles3_protos.h`; Khronos `GLES2/`, `GLES3/` and `KHR/` |

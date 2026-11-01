@@ -44,7 +44,7 @@ Echo "  for a minute. Then the demo plays as fast as it can and the game quits."
 ; Cowcat's) splits each batch into triangle strips, a draw each: about
 ; 2,100 draws a frame of a few indices, which MiniGL takes cheaply and gl4es
 ; and ogles2 do not (M6).
-; Probes T and P (ogles2_internal.h): the deletes and the context's end
+; Probes T and P (ogles3_internal.h): the deletes and the context's end
 ; step by step, and the timing every 256 frames.
 SetEnv OGLES3/Probe TP
 ; gl4es's calls into ogles3.library, timed (ports/gl4es/gen_glue.py).

@@ -1,13 +1,14 @@
 # The Quake III sources ports/ioq3 and ports/ioq3-gl2 build from; sourced by
 # their build.sh. Each is a clone at a pinned commit in ~, made on first use:
 #   IOQ3_SRC     the AmigaOS 3 engine: Cowcat's ioquake3 port with the
-#                PiStorm changes and ogles3 (github.com/RTyp3r/ioq3-amiga-ogles3)
+#                PiStorm changes and ogles3 (github.com/ladislawv/ioq3-amiga-ogles3, a fork of
+#                github.com/RTyp3r/ioq3-amiga-ogles3)
 #   IOQ3_UP_SRC  upstream ioquake3 (github.com/ioquake/ioq3), for
 #                renderergl2 (ports/ioq3-gl2 only)
 # Set either to a tree of your own (a working copy with changes, say) and it
 # is used as it is: nothing is cloned or checked out there.
 
-IOQ3_AMIGA_URL=${IOQ3_AMIGA_URL:-https://github.com/RTyp3r/ioq3-amiga-ogles3.git}
+IOQ3_AMIGA_URL=${IOQ3_AMIGA_URL:-https://github.com/ladislawv/ioq3-amiga-ogles3.git}
 IOQ3_AMIGA_COMMIT=5e6a9eabe31253cea74d7dfd33ec43d75bd26925 # its head of 2026-10-29 (build_ioq3_ogles3_wsl.sh)
 IOQ3_UP_URL=${IOQ3_UP_URL:-https://github.com/ioquake/ioq3.git}
 IOQ3_UP_COMMIT=83a776283bdb958f82db25554b5ed0966aaf6e49 # 2026-09-17

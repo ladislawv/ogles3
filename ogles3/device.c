@@ -10,7 +10,7 @@
 #include <exec/execbase.h>
 #include <proto/exec.h>
 #include <proto/dos.h>
-#include "ogles2_internal.h"
+#include "ogles3_internal.h"
 #include <exec/memory.h>
 #include "v3d_device.h"
 #include "v3d_context.h"

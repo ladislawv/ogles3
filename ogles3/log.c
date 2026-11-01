@@ -12,7 +12,7 @@
 #include <dos/var.h>
 #include <proto/exec.h>
 #include <proto/dos.h>
-#include "ogles2_internal.h"
+#include "ogles3_internal.h"
 
 #define LOG_SIZE 32768 /* bytes of buffered lines */
 #define LINE_MAX 240

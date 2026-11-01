@@ -36,7 +36,7 @@ CFLAGS += -DOGLES3_ES3_CONTEXTS
 else
 CFLAGS += -DOGLES3_ES3_CONTEXTS -DOGLES3_ES31_CONTEXTS
 endif
-INC    := -Iinclude -I$(B)/gen/include -Iogles2 -I$(B)/gen/ogles2
+INC    := -Iinclude -I$(B)/gen/include -Iogles3 -I$(B)/gen/ogles3
 # Library objects must not pull C library or startup code.
 LIBLINK := $(CPU) -mcrt=clib2 -nostdlib -nostartfiles -nodefaultlibs -noixemul
 
@@ -50,19 +50,19 @@ V3D_OBJ   := $(V3D_SRC:%=$(B)/obj/v3dcore/%.o)
 V3D_HDR   := $(wildcard v3dcore/include/*.h v3dcore/hw/*.h)
 
 GEN_STAMP := $(B)/gen/.stamp
-LIB_SRC   := ogles2/library.c ogles2/log.c ogles2/context.c ogles2/device.c ogles2/runtime.c \
-             ogles2/state.c ogles2/display.c ogles2/job.c ogles2/frame.c ogles2/program.c \
-             ogles2/draw.c ogles2/v3dp.c ogles2/blake3.c ogles2/texture.c \
-             ogles2/buffer.c ogles2/compiler.c ogles2/fbo.c ogles2/copy.c ogles2/share.c \
-             ogles2/debug.c ogles2/debug_khr.c ogles2/gles2_ext.c ogles2/variant_key.c ogles2/vao.c ogles2/sync.c ogles2/query.c ogles2/blit.c ogles2/xfb.c \
-             ogles2/compute.c
+LIB_SRC   := ogles3/library.c ogles3/log.c ogles3/context.c ogles3/device.c ogles3/runtime.c \
+             ogles3/state.c ogles3/display.c ogles3/job.c ogles3/frame.c ogles3/program.c \
+             ogles3/draw.c ogles3/v3dp.c ogles3/blake3.c ogles3/texture.c \
+             ogles3/buffer.c ogles3/compiler.c ogles3/fbo.c ogles3/copy.c ogles3/share.c \
+             ogles3/debug.c ogles3/debug_khr.c ogles3/gles2_ext.c ogles3/variant_key.c ogles3/vao.c ogles3/sync.c ogles3/query.c ogles3/blit.c ogles3/xfb.c \
+             ogles3/compute.c
 # Library files that use v3dcore directly
 V3D_USERS := device job draw v3dp texture buffer fbo share sync query xfb compute
-GEN_LIB   := $(B)/gen/ogles2/dispatch_table.c $(B)/gen/ogles2/stubs.c
+GEN_LIB   := $(B)/gen/ogles3/dispatch_table.c $(B)/gen/ogles3/stubs.c
 CLIENT_SRC := client/ogles3_open.c client/agl.c
 GEN_CLIENT := $(B)/gen/client/agl_gen.c $(B)/gen/client/procaddr.c
 
-LIB_OBJ    := $(B)/obj/ogles2/start.o $(patsubst %.c,$(B)/obj/%.o,$(LIB_SRC)) \
+LIB_OBJ    := $(B)/obj/ogles3/start.o $(patsubst %.c,$(B)/obj/%.o,$(LIB_SRC)) \
               $(B)/obj/gen/dispatch_table.o $(B)/obj/gen/stubs.o
 CLIENT_OBJ := $(patsubst %.c,$(B)/obj/%.o,$(CLIENT_SRC)) $(B)/obj/client/lvo.o \
               $(B)/obj/gen/agl_gen.o $(B)/obj/gen/procaddr.o
@@ -76,7 +76,7 @@ all: $(B)/fpcheck.ok $(B)/libv3dcore.a $(B)/ogles3.library $(B)/libogles3.a $(B)
 # ---- generated code (plan section 6.6). Re-run when the inputs or the set of
 # implemented ogles2_* functions change.
 $(GEN_STAMP): gen/gen_ogles2.py gen/api.txt gen/agl.txt gen/abi_order.txt gen/khronos/gl.xml $(LIB_SRC)
-	$(PYTHON) gen/gen_ogles2.py --out $(B)/gen --impl-dir ogles2
+	$(PYTHON) gen/gen_ogles2.py --out $(B)/gen --impl-dir ogles3
 	@touch $@
 $(GEN_LIB) $(GEN_CLIENT) $(B)/gen/tests/abi_layout.c: $(GEN_STAMP)
 gen: $(GEN_STAMP)
@@ -110,16 +110,16 @@ $(B)/libv3dcore.a: $(V3D_OBJ)
 	$(AR) rcs $@ $^
 
 # ---- library
-$(V3D_USERS:%=$(B)/obj/ogles2/%.o): $(B)/obj/ogles2/%.o: ogles2/%.c ogles2/ogles2_internal.h $(V3D_HDR) $(GEN_STAMP) Makefile
+$(V3D_USERS:%=$(B)/obj/ogles3/%.o): $(B)/obj/ogles3/%.o: ogles3/%.c ogles3/ogles3_internal.h $(V3D_HDR) $(GEN_STAMP) Makefile
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(INC) -Iv3dcore/include -Iv3dcore/hw -c $< -o $@
-$(B)/obj/ogles2/start.o: ogles2/start.s
+$(B)/obj/ogles3/start.o: ogles3/start.s
 	@mkdir -p $(dir $@)
 	$(CC) $(CPU) -c $< -o $@
-$(B)/obj/ogles2/%.o: ogles2/%.c ogles2/ogles2_internal.h $(GEN_STAMP) Makefile
+$(B)/obj/ogles3/%.o: ogles3/%.c ogles3/ogles3_internal.h $(GEN_STAMP) Makefile
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(INC) -c $< -o $@
-$(B)/obj/gen/%.o: $(B)/gen/ogles2/%.c $(GEN_STAMP) Makefile
+$(B)/obj/gen/%.o: $(B)/gen/ogles3/%.c $(GEN_STAMP) Makefile
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(INC) -c $< -o $@
 
@@ -358,8 +358,8 @@ $(B)/tools/mkshaders: tools/builtin_shaders/mkshaders.c $(B)/libv3dcore.a
 	$(CC) $(CFLAGS) -Iv3dcore/include $< -L$(B) -lv3dcore -o $@
 .PHONY: builtin-shaders
 builtin-shaders: $(B)/tools/mkshaders
-	cd $(dir $<) && $(VAMOS) -C 68020 -- mkshaders > "$(CURDIR)/ogles2/builtin_shaders.h.new"
-	mv ogles2/builtin_shaders.h.new ogles2/builtin_shaders.h
+	cd $(dir $<) && $(VAMOS) -C 68020 -- mkshaders > "$(CURDIR)/ogles3/builtin_shaders.h.new"
+	mv ogles3/builtin_shaders.h.new ogles3/builtin_shaders.h
 
 # ---- the test programs' binaries (plan 8.2): the GLSL of tests/common,
 # compiled by v3dglslc (host build) and named <hash>.v3dp, as the runtime
@@ -389,15 +389,15 @@ $(B)/v3dp/.stamp: $(wildcard tests/common/*.h) tools/v3dp_tests/emit.c v3dp/v3dp
 	$(PYTHON) v3dp/v3dp_hashname.py $(B)/v3dp/*.v3dp $$(ls $(B)/v3dp/*.v3dw 2>/dev/null)
 	touch $@
 
-# ---- host check of ogles2/variant_key.c (the draw-time variants' keys)
+# ---- host check of ogles3/variant_key.c (the draw-time variants' keys)
 # against the keys Mesa computed for the same states: the host compiler's
 # .v3dp, .v3dw and (-a) .v3da files of the test programs.
 VKEY_PROGS := es3 es3block es3flat es3inst es3int es3itex es3layer es3out es3rt es3size es3tex es3uni es3utex es3vid es3vol es3wide es3old light mrt skin state tex
 .PHONY: variant-key-test
 variant-key-test:
 	@mkdir -p $(B)/host/vkey/src
-	gcc -O2 -Wall -Wextra -DVARIANT_KEY_HOST_TEST -Iogles2 tools/variant_key_test/variant_key_test.c \
-	    ogles2/variant_key.c -o $(B)/host/variant_key_test
+	gcc -O2 -Wall -Wextra -DVARIANT_KEY_HOST_TEST -Iogles3 tools/variant_key_test/variant_key_test.c \
+	    ogles3/variant_key.c -o $(B)/host/variant_key_test
 	cd $(B)/host/vkey && rm -f *.v3dp *.v3dw *.v3da && \
 	    for n in $(VKEY_PROGS); do sed 's/\r$$//' "$(CURDIR)/tools/v3dglslc/test/shaders/$$n.vert" > src/$$n.vert; \
 	        sed 's/\r$$//' "$(CURDIR)/tools/v3dglslc/test/shaders/$$n.frag" > src/$$n.frag; \
@@ -405,15 +405,15 @@ variant-key-test:
 	        $(V3DGLSLC) -a -o . src/$$n.vert src/$$n.frag > /dev/null 2>&1 || exit 1; done
 	$(B)/host/variant_key_test $(B)/host/vkey $(foreach n,$(VKEY_PROGS),$(n)-$(n))
 
-# ---- host check of ogles2/blake3.c against Mesa's BLAKE3
+# ---- host check of ogles3/blake3.c against Mesa's BLAKE3
 MESA ?= $(HOME)/mesa-build/mesa
 MESA_SRC ?= $(MESA)/src
 .PHONY: blake3-test
 blake3-test:
 	@mkdir -p $(B)/host
 	gcc -O2 -DBLAKE3_HOST_TEST -DBLAKE3_NO_SSE2 -DBLAKE3_NO_SSE41 -DBLAKE3_NO_AVX2 \
-	    -DBLAKE3_NO_AVX512 -DBLAKE3_USE_NEON=0 -Iogles2 -I$(MESA_SRC) -I$(MESA_SRC)/util/blake3 \
-	    tools/blake3_test/blake3_test.c ogles2/blake3.c $(MESA_SRC)/util/blake3/blake3.c \
+	    -DBLAKE3_NO_AVX512 -DBLAKE3_USE_NEON=0 -Iogles3 -I$(MESA_SRC) -I$(MESA_SRC)/util/blake3 \
+	    tools/blake3_test/blake3_test.c ogles3/blake3.c $(MESA_SRC)/util/blake3/blake3.c \
 	    $(MESA_SRC)/util/blake3/blake3_dispatch.c $(MESA_SRC)/util/blake3/blake3_portable.c \
 	    -o $(B)/host/blake3_test
 	$(B)/host/blake3_test

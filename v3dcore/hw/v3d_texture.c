@@ -823,7 +823,7 @@ void v3d_texture_store(V3DDevice* device, V3DTexture* tex, v3d_u8 level, const v
                           tex->levels[level].padded_h, &box);
     /* ogles2: no CachePreDMA here (an exec call, about 40 us, for every
      * level): every job cleans the whole data cache before the GPU starts
-     * (ogles2/job.c, clean_all), and only a job reads a texture. */
+     * (ogles3/job.c, clean_all), and only a job reads a texture. */
     (void)len;
     if (level > tex->max_level_uploaded)
         tex->max_level_uploaded = level;

@@ -166,7 +166,7 @@ PC, binding framebuffer 0 binds the object the capture reads (`host_hooks.h`).
 ## Conventions
 
 - **C:** `gnu99` for the library and tests, `-Wall -Wextra` clean. The library is
-  freestanding: no C library (`ogles2/runtime.c` has the few string functions it needs), exec
+  freestanding: no C library (`ogles3/runtime.c` has the few string functions it needs), exec
   and DOS directly, every allocation freed by the context that made it.
 - **Comments** say why, and cite the plan (`plan 7.5`) or the Mesa function a piece of logic
   follows; the GLES 2.0 spec section for API rules. Match the density of the file you edit.
@@ -174,7 +174,7 @@ PC, binding framebuffer 0 binds the object the capture reads (`host_hooks.h`).
   `LIB_SRC`; the generator finds it and replaces the stub. `gen/abi_order.txt` is
   append-only: never reorder or delete (retire an entry as `-name`). An extension's entry
   point also needs a `command <name>` line in `gen/api.txt`, and one run of
-  `python3 gen/gen_ogles2.py --out <dir> --impl-dir ogles2 --append` to add it to the order.
+  `python3 gen/gen_ogles2.py --out <dir> --impl-dir ogles3 --append` to add it to the order.
 - **GPU data** is written little-endian (`le32`/`LE32`); the 68k is big-endian.
 - **Logging:** `ogles2_log()` for anything a tester or developer would need after the fact,
   once per cause for things that can repeat every frame.

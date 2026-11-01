@@ -10,7 +10,7 @@
  */
 #include <exec/memory.h>
 #include <proto/exec.h>
-#include "ogles2_internal.h"
+#include "ogles3_internal.h"
 #include "v3d_context.h"
 
 struct OGLES3Sync

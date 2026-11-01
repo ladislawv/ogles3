@@ -1,5 +1,5 @@
 /*
- * Host check of ogles2/variant_key.c (docs/GLES3_PLAN.md stage A item 5):
+ * Host check of ogles3/variant_key.c (docs/GLES3_PLAN.md stage A item 5):
  * the keys the library computes for a draw against the keys Mesa computed
  * for the same states, as v3dglslc stores them. For each program DIR/NAME
  * holds NAME.v3dp (the default key states, RGBA8 targets), NAME.v3dw (every

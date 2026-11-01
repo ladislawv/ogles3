@@ -8,7 +8,7 @@
 #   bash tools/perf/q3cmp.sh pc         the PC sampler, by library function, both
 #   bash tools/perf/q3cmp.sh shot       the last runs' screenshots (frame 400) compared
 # The game: IOQ3_SRC (default /mnt/c/GitHub/ioq3-amiga, a clone of
-# github.com/RTyp3r/ioq3-amiga-ogles3), built by its build_ioq3_ogles2_wsl.sh
+# github.com/ladislawv/ioq3-amiga-ogles3, forked from RTyp3r's), built by its build_ioq3_ogles2_wsl.sh
 # against OGLES2_SDK (default ~/ogles2-build/release/ogles2/SDK) and its
 # build_ioq3_ogles3_wsl.sh against OGLES3_SDK (default this copy's release
 # SDK, ~/ogles3-build/release/ogles3/SDK: release/build_release.sh). The
@@ -53,7 +53,9 @@ build)
         { tail "$WORK/m6-5.log"; exit 1; }
     rm -rf "$WORK/rel2"
     mkdir -p "$WORK/rel2" "$WORK/pkg"
-    (cd "$WORK/rel2" && "$LHA" -xq "$REPO/release/dist/ogles2-1.3.2.lha")
+    # ogles2 1.3.2's archive, from the 1.x copy (OGLES2_LHA; this repository's
+    # release/dist/ holds ogles3's only)
+    (cd "$WORK/rel2" && "$LHA" -xq "${OGLES2_LHA:-/mnt/c/- CPP/ogles2/release/dist/ogles2-1.3.2.lha}")
     L2=$(find "$WORK/rel2" -name ogles2.library | head -1)
     pc_sample || true
     for v in o2 o3; do

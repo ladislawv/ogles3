@@ -60,11 +60,11 @@ profile)
     python3 -I "$PERF/cmpprof.py" --per "$n2" "$n3" "$d/results/2-prof.txt" -- "$d/results/3-prof.txt"
     ;;
 lines)
-    bash "$PERF/listing.sh" ogles2/draw.c > /dev/null
+    bash "$PERF/listing.sh" ogles3/draw.c > /dev/null
     pc=$1/3-pc.txt
     [ -f "$pc" ] || pc=$1/pc.txt
     python3 -I "$PERF/hotpc.py" "$pc" "$B/ogles3.library.map" ogles3.library "$2" > "$WORK/hot.txt"
-    python3 -I "$PERF/hotline.py" "$WORK/draw.lst" "$WORK/draw.s" "$REPO/ogles2/draw.c" "$2" "$WORK/hot.txt" 30
+    python3 -I "$PERF/hotline.py" "$WORK/draw.lst" "$WORK/draw.s" "$REPO/ogles3/draw.c" "$2" "$WORK/hot.txt" 30
     ;;
 *)
     sed -n '2,14p' "$0"

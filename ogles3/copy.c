@@ -22,7 +22,7 @@
  * target can hold (LUMINANCE, ALPHA, LUMINANCE_ALPHA), a cube face or a
  * mip level as the source, a texture copied into itself.
  */
-#include "ogles2_internal.h"
+#include "ogles3_internal.h"
 
 BOOL ogles2_copy_gpu(struct OGLES3Context *ctx, struct OGLES3Texture *t, int k, int level, GLint xoffset,
                      GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height)

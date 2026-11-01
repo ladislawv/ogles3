@@ -29,7 +29,7 @@
 #include <proto/exec.h>
 #include <proto/dos.h>
 #include <string.h>
-#include "ogles2_internal.h"
+#include "ogles3_internal.h"
 #include "builtin_shaders.h"
 #include "blake3.h"
 #include "../v3dp/v3dglsl_port.h" /* V3DGLSL_SEPA_MARK */

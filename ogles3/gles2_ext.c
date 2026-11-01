@@ -8,7 +8,7 @@
  *   OES_texture_3D, EXT_texture_storage, EXT_map_buffer_range,
  *   EXT_occlusion_query_boolean, EXT_multi_draw_arrays
  */
-#include "ogles2_internal.h"
+#include "ogles3_internal.h"
 
 #define AS_ES3(ctx, call)                  \
     do {                                   \

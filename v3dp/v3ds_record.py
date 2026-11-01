@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Writes the shader records (<24 hex digits>.v3ds) that glCompileShader
-looks for in a program's shaders/ drawer (ogles2/program.c, plan 8.4): with
+looks for in a program's shaders/ drawer (ogles3/program.c, plan 8.4): with
 the compiler installed, a shader without a record starts it, even when the
 program ships its .v3dp binaries. A record names the shader by BLAKE3 over
 its stage (4 bytes, little-endian: 0 vertex, 4 fragment), its length (4
@@ -15,7 +15,7 @@ import struct
 import sys
 
 # BLAKE3, hash mode, 32-byte output (the specification's reference_impl.rs),
-# as ogles2/blake3.c implements it on the Amiga.
+# as ogles3/blake3.c implements it on the Amiga.
 IV = (0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
       0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19)
 PERM = (2, 6, 3, 10, 7, 0, 4, 13, 1, 11, 12, 5, 9, 14, 15, 8)

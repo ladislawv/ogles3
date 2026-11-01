@@ -37,11 +37,11 @@ for a in "$@"; do
     esac
 done
 
-VER=$(sed -n 's/^#define OGLES3_LIB_VERSION *\([0-9]*\).*/\1/p' "$REPO/ogles2/ogles2_internal.h")
-REV=$(sed -n 's/^#define OGLES3_LIB_REVISION *\([0-9]*\).*/\1/p' "$REPO/ogles2/ogles2_internal.h")
+VER=$(sed -n 's/^#define OGLES3_LIB_VERSION *\([0-9]*\).*/\1/p' "$REPO/ogles3/ogles3_internal.h")
+REV=$(sed -n 's/^#define OGLES3_LIB_REVISION *\([0-9]*\).*/\1/p' "$REPO/ogles3/ogles3_internal.h")
 VERSION=$VER.$REV
 # the archives' name: the release (OGLES3_RELEASE), which may be newer than the library's version.revision
-RELEASE=$(sed -n 's/^#define OGLES3_RELEASE *"\([^"]*\)".*/\1/p' "$REPO/ogles2/ogles2_internal.h")
+RELEASE=$(sed -n 's/^#define OGLES3_RELEASE *"\([^"]*\)".*/\1/p' "$REPO/ogles3/ogles3_internal.h")
 RELEASE=${RELEASE:-$VERSION}
 R=$OUT/ogles3
 echo "ogles3 $RELEASE (library $VERSION) -> $R"

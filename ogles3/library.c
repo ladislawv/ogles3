@@ -13,7 +13,7 @@
 #include <exec/libraries.h>
 #include <proto/exec.h>
 #include <proto/dos.h>
-#include "ogles2_internal.h"
+#include "ogles3_internal.h"
 
 #if defined(__GNUC__)
 #define REG(reg, type, name) register type name __asm(reg)
