@@ -6,7 +6,7 @@
 # boingswarm-ogles3_shaders.h holds them as C strings (make it again with
 # "make header" after editing them: python3). The program needs their
 # compiled forms (.v3dp/.v3dw) in a shaders/ drawer beside it, or the shader
-# compiler: the release ships them, with the draw's records (.v3ds), which
+# compiler: the release ships them, with every shader's record (.v3ds), which
 # keep an installed compiler from starting. "make shaders" makes them with
 # the offline compiler of the ogles3 source (OGLES3, V3DGLSLC) into
 # build/v3dp.
@@ -45,7 +45,7 @@ shaders: $(SHADERS)
 	rm -rf $(BUILD) && mkdir -p $(BUILD)
 	cd shaders && $(V3DGLSLC) -o $(abspath $(BUILD)) $(PAIRS)
 	python3 -I "$(OGLES3)/v3dp/v3dp_hashname.py" $(BUILD)/*
-	python3 -I "$(OGLES3)/v3dp/v3ds_record.py" $(BUILD) $(DRAWS)
+	python3 -I "$(OGLES3)/v3dp/v3ds_record.py" $(BUILD) $(SHADERS)
 
 clean:
 	rm -rf boingswarm-ogles3 build

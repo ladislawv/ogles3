@@ -164,9 +164,9 @@ static GLuint link(GLuint a, GLuint b)
     if (b)
         glAttachShader(p, b);
     /* the ES 2.0 way's and the text's client arrays (names a program lacks are
-     * ignored) */
+     * ignored; no two names on one slot: an aliased program's binary is named
+     * by its bindings too, which the shipped binaries are not) */
     glBindAttribLocation(p, 0, "a_pos");
-    glBindAttribLocation(p, 0, "a_xz");
     glBindAttribLocation(p, 1, "a_uv");
     glBindAttribLocation(p, 2, "a_col");
     glLinkProgram(p);

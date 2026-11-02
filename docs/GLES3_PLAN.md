@@ -715,8 +715,24 @@ and capture mode, 7 release). Success: 8192 boids at 30 fps or better, the
   sharp trails added back in the bloom's second blur (`u_add`, 0.6: still
   one read on the screen), the screen's weight 0.09 for the longer sum.
   The murmuration 56-58 fps (the blur's extra read).
-- **Next:** step 7, polish and release: tuning on the A1200, the release
-  build (`build_release.sh`, its examples and the demo zip), a video; and
+- **In the release (2026-11-02, the developer's request):** `build_release.sh`
+  ships Boing Swarm as Boing Ocean is (`SDK/examples/boingswarm-ogles3`,
+  `Examples/boingswarm-ogles3` with its .txt and shaders); the 1.0-beta1
+  archives rebuilt (`sdl dist`; this machine's PiStorm3D SDK:
+  `PISTORM3D_SDK=/mnt/c/GitHub/pistorm3d/SDK`). `ogles3-1.0-beta1-demos.zip`
+  remade by hand with it (three demos, 145 shader files; the library and the
+  other two byte for byte as before). Checked with an empty `OGLES3Cache:`
+  (assigned to a RAM: drawer for the run): at first the draw programs all
+  compiled at start: `link()` bound `a_pos` and `a_xz` both to slot 0, and
+  an aliased program's binary is named by its bindings too (FORMAT.md), so
+  none of the shipped ones matched (es2floor.vert's `a_xz` now `a_pos`); the
+  compute shaders had no records (`v3ds_record.py` takes `.comp`, stage 5,
+  and the Makefile records every shader); one draw-time variant set the
+  defaults lack (the lights, `variants/d2004d2df7213872c9dfec1f.v3dx`, made
+  by the library on the A1200, shipped in `shaders/`; make it again when the
+  shaders change). Then a first start compiles nothing: 13 programs from
+  `PROGDIR:shaders`, nothing written to the cache, the ES 2 way too.
+- **Next:** step 7, polish and release: tuning on the A1200, a video; and
   the ogles3 waits on the 68k (above).
 - (Step 1's "next", done below otherwise: 16384 boids stayed the default,
   the grid made cheaper by a smaller grid instead of a wider scan.)

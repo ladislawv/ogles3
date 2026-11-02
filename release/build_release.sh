@@ -127,6 +127,13 @@ for f in Makefile ReadMe.txt boingocean-ogles3.c boingocean-ogles3_shaders.h too
     text "$O3/$f" "$R/SDK/examples/boingocean-ogles3/$f"
 done
 for f in "$O3"/shaders/*; do text "$f" "$R/SDK/examples/boingocean-ogles3/shaders/$(basename "$f")"; done
+# Boing Swarm for OpenGL ES 3.1: the same (its ES 2.0 way in its own shaders)
+S3=$HERE/examples/boingswarm-ogles3
+mkdir -p "$R/SDK/examples/boingswarm-ogles3/shaders" "$R/SDK/examples/boingswarm-ogles3/tools"
+for f in Makefile ReadMe.txt boingswarm-ogles3.c boingswarm-ogles3_shaders.h tools/embed_shaders.py; do
+    text "$S3/$f" "$R/SDK/examples/boingswarm-ogles3/$f"
+done
+for f in "$S3"/shaders/*; do text "$f" "$R/SDK/examples/boingswarm-ogles3/shaders/$(basename "$f")"; done
 
 # ---- the examples' shader binaries: the GLSL byte for byte as the programs
 # pass it, compiled by the offline compiler, named by hash
@@ -163,6 +170,13 @@ cp "$W"/v3dp-b3/* "$R/Examples/shaders/"
 make -C "$R/SDK/examples/boingocean-ogles3" shaders V3DGLSLC="$V/host/v3dglslc" OGLES3="$REPO" \
     BUILD="$W/v3dp-o3" > "$W/v3dglslc-o3.txt" 2>&1 || { cat "$W/v3dglslc-o3.txt"; exit 1; }
 cp "$W"/v3dp-o3/* "$R/Examples/shaders/"
+make -C "$R/SDK/examples/boingswarm-ogles3" shaders V3DGLSLC="$V/host/v3dglslc" OGLES3="$REPO" \
+    BUILD="$W/v3dp-s3" > "$W/v3dglslc-s3.txt" 2>&1 || { cat "$W/v3dglslc-s3.txt"; exit 1; }
+cp "$W"/v3dp-s3/* "$R/Examples/shaders/"
+# and the draw-time variants its lights need that the default ones lack (the
+# library made them on the A1200, a first run with an empty cache: shipped,
+# a first start compiles nothing). Made again when its shaders change.
+cp "$S3"/variants/*.v3dx "$R/Examples/shaders/"
 
 # ---- the examples, built from the SDK as shipped (GCC; vbcc to check)
 cp -r "$R/SDK/." "$W/sdk/"
@@ -182,6 +196,10 @@ make -C "$W/sdk/examples/boingocean-ogles3" CC="$TC/bin/m68k-amigaos-gcc" >> "$W
 $TC/bin/m68k-amigaos-strip -o "$R/Examples/boingocean-ogles3" "$W/sdk/examples/boingocean-ogles3/boingocean-ogles3" &&
     chmod 755 "$R/Examples/boingocean-ogles3"
 text "$O3/ReadMe.txt" "$R/Examples/boingocean-ogles3.txt"
+make -C "$W/sdk/examples/boingswarm-ogles3" CC="$TC/bin/m68k-amigaos-gcc" >> "$W/examples-gcc.txt"
+$TC/bin/m68k-amigaos-strip -o "$R/Examples/boingswarm-ogles3" "$W/sdk/examples/boingswarm-ogles3/boingswarm-ogles3" &&
+    chmod 755 "$R/Examples/boingswarm-ogles3"
+text "$S3/ReadMe.txt" "$R/Examples/boingswarm-ogles3.txt"
 mkdir -p "$W/sdk-vbcc" && cp -r "$R/SDK/." "$W/sdk-vbcc/"
 PATH=$VBCC/bin:$PATH VBCC=$VBCC make -C "$W/sdk-vbcc/examples" vbcc \
     VC="$VBCC/bin/vc +aos68k" VCFLAGS="-c99 -cpu=68020 -fpu=68881 -O1 -I$TC/m68k-amigaos/ndk-include" \

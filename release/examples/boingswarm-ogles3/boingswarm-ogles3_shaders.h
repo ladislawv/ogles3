@@ -226,14 +226,14 @@ static const char es2boid_frag[] =
 
 static const char es2floor_vert[] =
     "// The ES 2.0 way's floor: 28 x 28 units at y = 0, from a client array.\n"
-    "attribute vec2 a_xz;\n"
+    "attribute vec2 a_pos;\n"
     "uniform mat4 u_vp;\n"
     "varying vec2 v_xz;\n"
     "\n"
     "void main()\n"
     "{\n"
-    "    v_xz = a_xz;\n"
-    "    gl_Position = u_vp * vec4(a_xz.x, 0.0, a_xz.y, 1.0);\n"
+    "    v_xz = a_pos;\n"
+    "    gl_Position = u_vp * vec4(a_pos.x, 0.0, a_pos.y, 1.0);\n"
     "}\n"
     ;
 

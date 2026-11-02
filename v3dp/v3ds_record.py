@@ -3,13 +3,13 @@
 looks for in a program's shaders/ drawer (ogles3/program.c, plan 8.4): with
 the compiler installed, a shader without a record starts it, even when the
 program ships its .v3dp binaries. A record names the shader by BLAKE3 over
-its stage (4 bytes, little-endian: 0 vertex, 4 fragment), its length (4
+its stage (4 bytes, little-endian: 0 vertex, 4 fragment, 5 compute), its length (4
 bytes, little-endian) and its text, and holds "v3ds 1\\n" followed by the
 compiler's info log: here none, as the Amiga's compiler writes for a shader
 it accepts without messages. Each file must hold the shader byte for byte
 as the program passes it to glShaderSource (LF line ends, nothing added).
 usage: v3ds_record.py OUTDIR SHADER... (stage by extension: .vert or .vs
-vertex, .frag or .fs fragment)"""
+vertex, .frag or .fs fragment, .comp compute)"""
 import os
 import struct
 import sys
@@ -98,10 +98,12 @@ def main():
         ext = os.path.splitext(path)[1]
         if ext in (".vert", ".vs"):
             stage = 0
+        elif ext == ".comp":
+            stage = 5
         elif ext in (".frag", ".fs"):
             stage = 4
         else:
-            raise SystemExit("%s: neither .vert/.vs nor .frag/.fs" % path)
+            raise SystemExit("%s: not .vert/.vs, .frag/.fs or .comp" % path)
         text = open(path, "rb").read()
         name = record_name(stage, text)
         with open(os.path.join(out, name), "wb") as f:
