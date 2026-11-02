@@ -53,9 +53,9 @@ build)
         { tail "$WORK/m6-5.log"; exit 1; }
     rm -rf "$WORK/rel2"
     mkdir -p "$WORK/rel2" "$WORK/pkg"
-    # ogles2 1.3.2's archive, from the 1.x copy (OGLES2_LHA; this repository's
+    # ogles2 1.3.3's archive, from the 1.x copy (OGLES2_LHA; this repository's
     # release/dist/ holds ogles3's only)
-    (cd "$WORK/rel2" && "$LHA" -xq "${OGLES2_LHA:-/mnt/c/- CPP/ogles2/release/dist/ogles2-1.3.2.lha}")
+    (cd "$WORK/rel2" && "$LHA" -xq "${OGLES2_LHA:-/mnt/c/- CPP/ogles2/release/dist/ogles2-1.3.3.lha}")
     L2=$(find "$WORK/rel2" -name ogles2.library | head -1)
     pc_sample || true
     for v in o2 o3; do

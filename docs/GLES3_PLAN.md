@@ -38,6 +38,29 @@ renamed tree's build):** ogles2 1.3.2 7.88 ms a frame (126.8 fps), ogles3
 `~/ioq3-amiga-ogles3` (the fork at `5e6a9ea`), the script's default since
 (`C:\GitHub\ioq3-amiga`, the old one, is gone).
 
+**The demos' keyboard (2026-11-02, a user's report).** Started from a
+launcher (Caffeine OS) or an icon, Boing 2026 ES3 took no Esc or E, Boing
+Ocean ES3's E switched to ES 2 and not back, and its FULLSCREEN could not
+be quit, the launcher's console coming back after every close at 100% CPU.
+Their status lines (printf) went to a console window, which takes the
+keyboard when it opens: Boing 2026 printed at its start, Boing Ocean at E
+and, in FULLSCREEN, its title once a second. From a real Workbench start
+`ReadArgs` waited for a command line in libnix's console and the window
+never opened (the ES 2 examples too). Now: status lines through `say()`
+(printed, the window with the keys activated again; nothing from
+Workbench), the fullscreen title not printed, a fullscreen backdrop window
+activated whenever its screen is in front, no `ReadArgs` without a Shell
+(the ES 2 `boingocean` and `boing2026` too), the run's summary only for
+`FRAMES`/`TIMING`. Checked on the A1200 started both ways (`Run` with an
+`AUTO` console, `WBRun`), keys from `amictl key`: E switches ES 3, ES 2,
+ES 3, Esc quits, window and FULLSCREEN; no console left. The
+1.0-beta1 archives rebuilt (`release/dist/`). Beside them
+`ogles3-1.0-beta1-demos.zip`: the two ES 3 demos with `libs/ogles3.library`
+and their 104 shader binaries (work/v3dp-b3, -o3 and the ES 2.0 Boing
+Ocean's four their E mode draws with), no compiler; unzipped on the A1200,
+all 14 and 21 programs from its `shaders/`, none compiled. Made by hand,
+not by `build_release.sh`.
+
 **Plan: OpenGL ES 3.2's features the Pi 4's GPU has (2026-10-31, the
 developer's request).** What V3D 4.2 can do comes from Mesa's driver for
 it (`src/gallium/drivers/v3d/v3d_screen.c`, `v3dx_format_table.c`, the

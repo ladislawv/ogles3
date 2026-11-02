@@ -839,8 +839,9 @@ int main(void)
     memset(&rp, 0, sizeof(rp));
     memset(&fp, 0, sizeof(fp));
 
-    rda = ReadArgs((STRPTR) "WIDTH/N,HEIGHT/N,FRAMES/N,NOMSAA/S,NOSOUND/S,FULLSCREEN/S,TIMING/S,SHOWMAP/S,VSYNC/S,TOUR/S,SCALE/N", args, NULL);
-    if (!rda) {
+    rda = !Cli() ? NULL : /* no Shell (Workbench): the defaults; ReadArgs would wait on a console */
+          ReadArgs((STRPTR) "WIDTH/N,HEIGHT/N,FRAMES/N,NOMSAA/S,NOSOUND/S,FULLSCREEN/S,TIMING/S,SHOWMAP/S,VSYNC/S,TOUR/S,SCALE/N", args, NULL);
+    if (!rda && Cli()) {
         printf("usage: boing2026 [WIDTH=w] [HEIGHT=h] [FRAMES=n] [NOMSAA] [NOSOUND] [FULLSCREEN] [TIMING] [SHOWMAP] "
                "[VSYNC] [TOUR] [SCALE=percent]\n");
         return 20;
@@ -860,7 +861,8 @@ int main(void)
     tour = args[9] != 0;
     if (args[10])
         scale = *(LONG *)args[10];
-    FreeArgs(rda);
+    if (rda)
+        FreeArgs(rda);
 
     if (!(IntuitionBase = (struct IntuitionBase *)OpenLibrary((STRPTR) "intuition.library", 39))) {
         printf("needs intuition.library 39\n");

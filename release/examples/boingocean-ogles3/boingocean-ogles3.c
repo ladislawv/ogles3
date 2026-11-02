@@ -59,6 +59,7 @@
  * Copyright (c) 2017-2024 afl_ext); see boingocean_shaders.h.
  */
 #include <stdio.h>
+#include <stdarg.h>
 #include <math.h>
 #include <exec/types.h>
 #include <intuition/intuition.h>
@@ -313,11 +314,36 @@ struct input {
     float yaw, my;     /* the camera, from dragging */
 };
 
+/* Status lines: printed, then the window with the keys made active again.
+ * Started from an icon or a launcher, stdout is a console window that the
+ * first line opens (and opens again after it is closed), and an opened
+ * console takes the keyboard: the keys (Esc, E) went to it, not here.
+ * Errors stay plain printf. */
+static struct Window *key_window; /* set once the window with the keys is open */
+
+static void say(const char *fmt, ...)
+{
+    va_list ap;
+    if (!Cli())
+        return; /* from Workbench: no one reads it (libnix's console would open and wait) */
+    va_start(ap, fmt);
+    vprintf(fmt, ap);
+    va_end(ap);
+    fflush(stdout);
+    if (key_window)
+        ActivateWindow(key_window);
+}
+
 static void events(struct Window *w, struct input *in)
 {
     struct IntuiMessage *m;
     if (SetSignal(0, SIGBREAKF_CTRL_C) & SIGBREAKF_CTRL_C)
         in->quit = TRUE;
+    /* Full screen (the library's backdrop window on a screen of its own):
+     * while that screen is in front, the keys are ours. A console a
+     * launcher opened on the Workbench took them, and with them Esc. */
+    if ((w->Flags & WFLG_BACKDROP) && !(w->Flags & WFLG_WINDOWACTIVE) && w->WScreen == IntuitionBase->FirstScreen)
+        ActivateWindow(w);
     while ((m = (struct IntuiMessage *)GetMsg(w->UserPort))) {
         switch (m->Class) {
         case IDCMP_CLOSEWINDOW:
@@ -335,7 +361,7 @@ static void events(struct Window *w, struct input *in)
                 in->resized = TRUE;
             } else {
                 switch (m->Code | 0x20) { /* either case */
-                case 'e': in->es2 = !in->es2; printf("%s\n", in->es2 ? "the ES 2.0 way" : "OpenGL ES 3"); break;
+                case 'e': in->es2 = !in->es2; say("%s\n", in->es2 ? "the ES 2.0 way" : "OpenGL ES 3"); break;
                 case 'r': in->ripples = !in->ripples; break;
                 case 'g': in->glints = !in->glints; break;
                 case 'c': in->clouds = !in->clouds; break;
@@ -936,8 +962,9 @@ int main(void)
     in.div = 1, in.pct = 100, in.my = 0.3f;
     in.ripples = in.glints = in.clouds = in.caustics = in.bloom = TRUE;
 
-    rda = ReadArgs((STRPTR) "WIDTH/N,HEIGHT/N,SCALE/N,FRAMES/N,FULLSCREEN/S,ES2/S,TIMING/S", args, NULL);
-    if (!rda) {
+    rda = !Cli() ? NULL : /* no Shell (Workbench): the defaults; ReadArgs would wait on a console */
+          ReadArgs((STRPTR) "WIDTH/N,HEIGHT/N,SCALE/N,FRAMES/N,FULLSCREEN/S,ES2/S,TIMING/S", args, NULL);
+    if (!rda && Cli()) {
         printf("usage: boingocean-ogles3 [WIDTH=w] [HEIGHT=h] [SCALE=1..4] [FRAMES=n] [FULLSCREEN] [ES2]\n");
         return 20;
     }
@@ -955,7 +982,8 @@ int main(void)
         w0 = 1280, h0 = 720;
     in.es2 = args[5] != 0;
     timing = args[6] != 0;
-    FreeArgs(rda);
+    if (rda)
+        FreeArgs(rda);
 
     if (!(IntuitionBase = (struct IntuitionBase *)OpenLibrary((STRPTR) "intuition.library", 39))) {
         printf("needs intuition.library 39\n");
@@ -1022,6 +1050,8 @@ int main(void)
     }
     iw = win;
     }
+    key_window = iw;
+    ActivateWindow(iw); /* a launcher's console may hold the keyboard */
     aglMakeCurrent(ctx);
     if (!(sea = link_program(boingocean_vs, boingocean_fs)) || !(blit = link_program(blit_vs, blit_fs)) ||
         !(hprog = link_program(blit_vs, height_fs)) || !(sprog = link_program(blit_vs, sky_fs)))
@@ -1141,7 +1171,7 @@ int main(void)
     shown:
         aglSwapBuffers();
         if (timing_now) {
-            printf("%s ms: water and sky %.2f  scene %.2f (ball's rectangle %.0f%%)  bloom %.2f  to the window %.2f  swap %.2f\n",
+            say("%s ms: water and sky %.2f  scene %.2f (ball's rectangle %.0f%%)  bloom %.2f  to the window %.2f  swap %.2f\n",
                    in.es2 ? "es2" : "es3", ms[0], ms[1], near_share * 100.0f, ms[2], ms[3], mark());
         }
         timing_now = timing && frames % 120 == 60;
@@ -1156,9 +1186,9 @@ int main(void)
                     in.es2 ? "ES2" : "ES3", title_frames / (n - last_title), target_w, target_h, in.ripples ? "texture" : "sines",
                     in.glints ? "on" : "off", in.clouds ? "on" : "off", in.caustics ? "on" : "off",
                     in.bloom ? "on" : "off");
-            if (full)
-                printf("%s\n", title);
-            else
+            /* Fullscreen has no title bar: nothing (a line a second to a
+             * launcher's console kept opening it and took the keyboard). */
+            if (!full)
                 SetWindowTitles(win, (UBYTE *)title, (UBYTE *)-1);
             last_title = n;
             title_frames = 0;
@@ -1166,9 +1196,11 @@ int main(void)
         if (max_frames && frames >= max_frames)
             break;
     }
-    if (frames) {
+    /* The run's summary when it was asked for (a benchmark): a launcher's
+     * console would open for it after the window closed, and wait. */
+    if (frames && (max_frames || timing)) {
         double s = now_s() - start;
-        printf("%lu frames in %.1f s: %.2f fps at %dx%d (%s %lux%lu)\n", frames, s, frames / s, target_w, target_h,
+        say("%lu frames in %.1f s: %.2f fps at %dx%d (%s %lux%lu)\n", frames, s, frames / s, target_w, target_h,
                full ? "screen" : "window", (unsigned long)width, (unsigned long)height);
     }
     rc = 0;

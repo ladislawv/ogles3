@@ -50,6 +50,7 @@
  * Built on the ogles3 SDK's Boing 2026 example. MIT License.
  */
 #include <stdio.h>
+#include <stdarg.h>
 #include <string.h>
 #include <math.h>
 #include <exec/types.h>
@@ -574,11 +575,36 @@ struct input {
     double mouse_t;      /* when it last moved (now_s), 0: never */
 };
 
+/* Status lines: printed, then the window with the keys made active again.
+ * Started from an icon or a launcher, stdout is a console window that the
+ * first line opens (and opens again after it is closed), and an opened
+ * console takes the keyboard: the keys (Esc, E) went to it, not here.
+ * Errors stay plain printf. */
+static struct Window *key_window; /* set once the window with the keys is open */
+
+static void say(const char *fmt, ...)
+{
+    va_list ap;
+    if (!Cli())
+        return; /* from Workbench: no one reads it (libnix's console would open and wait) */
+    va_start(ap, fmt);
+    vprintf(fmt, ap);
+    va_end(ap);
+    fflush(stdout);
+    if (key_window)
+        ActivateWindow(key_window);
+}
+
 static void events(struct Window *w, struct input *in)
 {
     struct IntuiMessage *m;
     if (SetSignal(0, SIGBREAKF_CTRL_C) & SIGBREAKF_CTRL_C)
         in->quit = TRUE;
+    /* Full screen (the library's backdrop window on a screen of its own):
+     * while that screen is in front, the keys are ours. A console a
+     * launcher opened on the Workbench took them, and with them Esc. */
+    if ((w->Flags & WFLG_BACKDROP) && !(w->Flags & WFLG_WINDOWACTIVE) && w->WScreen == IntuitionBase->FirstScreen)
+        ActivateWindow(w);
     while ((m = (struct IntuiMessage *)GetMsg(w->UserPort))) {
         switch (m->Class) {
         case IDCMP_CLOSEWINDOW:
@@ -600,14 +626,14 @@ static void events(struct Window *w, struct input *in)
             else if (m->Code == '+' || m->Code == '=' || m->Code == '-') {
                 in->tilt += m->Code == '-' ? -0.005f : 0.005f;
                 in->tilt = in->tilt < 0.0f ? 0.0f : in->tilt > 1.5f ? 1.5f : in->tilt;
-                printf("waves' tilt in the reflections %.3f\n", in->tilt);
+                say("waves' tilt in the reflections %.3f\n", in->tilt);
             } else if (m->Code == '[' || m->Code == ']') {
                 in->depth += m->Code == '[' ? -0.2f : 0.2f;
                 in->depth = in->depth < 0.2f ? 0.2f : in->depth > 3.0f ? 3.0f : in->depth;
-                printf("water depth in the middle %.1f\n", in->depth);
+                say("water depth in the middle %.1f\n", in->depth);
             } else if (m->Code == 'e' || m->Code == 'E') {
                 in->es2 = !in->es2;
-                printf("%s\n", in->es2 ? "the ES 2.0 way: Boing 2026's own passes" : "OpenGL ES 3");
+                say("%s\n", in->es2 ? "the ES 2.0 way: Boing 2026's own passes" : "OpenGL ES 3");
             }
             break;
         case IDCMP_MOUSEBUTTONS:
@@ -1090,7 +1116,7 @@ static BOOL es3_setup(struct es3 *e, int sw, int sh, const char *ext)
     if (ext && strstr(ext, "GL_EXT_color_buffer_float"))
         glow = GL_R11F_G11F_B10F;
     else if (!ext || !strstr(ext, "GL_EXT_color_buffer_half_float")) {
-        printf("no float render targets: the bloom in 8 bits\n");
+        say("no float render targets: the bloom in 8 bits\n");
         glow = refl = GL_RGBA8;
     }
     if (!es3_targets(e, sw, sh, glow, refl)) {
@@ -1520,10 +1546,11 @@ int main(void)
     memset(&rp, 0, sizeof(rp));
     memset(&fp, 0, sizeof(fp));
 
-    rda = ReadArgs((STRPTR) "WIDTH/N,HEIGHT/N,FRAMES/N,NOMSAA/S,NOSOUND/S,FULLSCREEN/S,TIMING/S,SHOWMAP/S,VSYNC/S,TOUR/S,"
+    rda = !Cli() ? NULL : /* no Shell (Workbench): the defaults; ReadArgs would wait on a console */
+          ReadArgs((STRPTR) "WIDTH/N,HEIGHT/N,FRAMES/N,NOMSAA/S,NOSOUND/S,FULLSCREEN/S,TIMING/S,SHOWMAP/S,VSYNC/S,TOUR/S,"
                             "SCALE/N,ES2/S,WATER/S,SOUND/S,DRY/S",
                    args, NULL);
-    if (!rda) {
+    if (!rda && Cli()) {
         printf("usage: boing2026-ogles3 [WIDTH=w] [HEIGHT=h] [FRAMES=n] [NOMSAA] [NOSOUND] [FULLSCREEN] [TIMING] "
                "[SHOWMAP] [VSYNC] [TOUR] [SCALE=percent] [ES2] [DRY] [SOUND]\n");
         return 20;
@@ -1551,7 +1578,8 @@ int main(void)
     tour = args[9] != 0;
     if (args[10])
         scale = *(LONG *)args[10];
-    FreeArgs(rda);
+    if (rda)
+        FreeArgs(rda);
 
     if (!(IntuitionBase = (struct IntuitionBase *)OpenLibrary((STRPTR) "intuition.library", 39))) {
         printf("needs intuition.library 39\n");
@@ -1611,12 +1639,14 @@ int main(void)
         }
         iw = win;
     }
+    key_window = iw;
+    ActivateWindow(iw); /* a launcher's console may hold the keyboard */
     aglMakeCurrent(ctx);
 
     /* The ES 2.0 way's extensions (depth textures, fwidth, discarding) are
      * all core in OpenGL ES 3.0. */
     ext = (const char *)glGetString(GL_EXTENSIONS);
-    printf("Boing 2026 for OpenGL ES 3 on %s (%s), %lux%lu, MSAA %s\n", (const char *)glGetString(GL_RENDERER),
+    say("Boing 2026 for OpenGL ES 3 on %s (%s), %lux%lu, MSAA %s\n", (const char *)glGetString(GL_RENDERER),
            (const char *)glGetString(GL_VERSION), (unsigned long)width, (unsigned long)height, msaa ? "4x" : "off");
 
     if (!(bp.p = link_program(ball_vert, ball_frag)) || !(rp.p = link_program(room_vert, room_frag)) ||
@@ -1696,7 +1726,7 @@ int main(void)
         scale = 100;
     sw = width * scale / 100;
     sh = height * scale / 100;
-    printf("render scale %d%%: the room at %dx%d\n", scale, sw, sh);
+    say("render scale %d%%: the room at %dx%d\n", scale, sw, sh);
     if (!make_shadow(0) || !make_shadow(1) || !make_rt(&scene_rt, sw, sh) || !make_rt(&refl, sw / 2, sh / 2) ||
         !make_rt(&bloom_a, sw / 4, sh / 4) || !make_rt(&bloom_b, sw / 4, sh / 4))
         goto out;
@@ -1709,7 +1739,7 @@ int main(void)
     glCullFace(GL_BACK);
 
     if (sound && !sound_open()) {
-        printf("no audio channels: playing without the boing\n");
+        say("no audio channels: playing without the boing\n");
         sound_close();
         snd = NULL, snd_port = NULL, snd_alloc = NULL;
     }
@@ -1746,7 +1776,7 @@ int main(void)
             in.flag[F_WATER] |= water_arg; /* WATER: on all the way */
             in.show_map = ts->map;
             in.es2 = ts->es2;
-            printf("tour %d: %s\n", tour_step + 1, ts->say);
+            say("tour %d: %s\n", tour_step + 1, ts->say);
             last_title = 0.0; /* the title at once */
         }
         if (dt > 0.05f)
@@ -1962,10 +1992,10 @@ int main(void)
         aglSwapBuffers();
         ms[5] = mark(timing);
         if (timing && in.es2)
-            printf("es2 ms: shadow %.2f  reflection %.2f  bloom %.2f  scene %.2f  composite %.2f  swap %.2f\n", ms[0],
+            say("es2 ms: shadow %.2f  reflection %.2f  bloom %.2f  scene %.2f  composite %.2f  swap %.2f\n", ms[0],
                    ms[1], ms[2], ms[3], ms[4], ms[5]);
         else if (timing)
-            printf("es3 ms: shadow %.2f  reflection %.2f  scene %.2f  bloom %.2f  window %.2f  swap %.2f\n", ms[0],
+            say("es3 ms: shadow %.2f  reflection %.2f  scene %.2f  bloom %.2f  window %.2f  swap %.2f\n", ms[0],
                    ms[1], ms[2], ms[3], ms[4], ms[5]);
 
         frames++;
@@ -1993,9 +2023,11 @@ int main(void)
         if (max_frames && frames >= max_frames)
             break;
     }
-    if (frames) {
+    /* The run's summary when it was asked for (a benchmark): a launcher's
+     * console would open for it after the window closed, and wait. */
+    if (frames && (max_frames || auto_timing)) {
         double s = now_s() - start;
-        printf("%lu frames in %.1f s: %.2f fps at %lux%lu\n", frames, s, frames / s, (unsigned long)width,
+        say("%lu frames in %.1f s: %.2f fps at %lux%lu\n", frames, s, frames / s, (unsigned long)width,
                (unsigned long)height);
     }
     rc = 0;

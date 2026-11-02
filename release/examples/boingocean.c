@@ -341,8 +341,9 @@ int main(void)
     int w0 = 640, h0 = 480, rc = 20;
     BOOL timer_open = FALSE;
 
-    rda = ReadArgs((STRPTR) "WIDTH/N,HEIGHT/N,SCALE/N,FRAMES/N,FULLSCREEN/S", args, NULL);
-    if (!rda) {
+    rda = !Cli() ? NULL : /* no Shell (Workbench): the defaults; ReadArgs would wait on a console */
+          ReadArgs((STRPTR) "WIDTH/N,HEIGHT/N,SCALE/N,FRAMES/N,FULLSCREEN/S", args, NULL);
+    if (!rda && Cli()) {
         printf("usage: boingocean [WIDTH=w] [HEIGHT=h] [SCALE=1..4] [FRAMES=n] [FULLSCREEN]\n");
         return 20;
     }
@@ -355,7 +356,8 @@ int main(void)
     if (args[3])
         max_frames = *(LONG *)args[3];
     full = args[4] != 0;
-    FreeArgs(rda);
+    if (rda)
+        FreeArgs(rda);
 
     if (!(IntuitionBase = (struct IntuitionBase *)OpenLibrary((STRPTR) "intuition.library", 39))) {
         printf("needs intuition.library 39\n");
