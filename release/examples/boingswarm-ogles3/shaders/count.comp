@@ -1,0 +1,21 @@
+#version 310 es
+// The neighbour grid's first count (the first frame only; after that
+// sim.comp counts each boid where it moved): each boid counted into its
+// cell (16^3 cells of 0.5, wrapping), its rank in the cell kept for the
+// scatter.
+layout(local_size_x = 128) in;
+struct Boid { vec4 pos; vec4 vel; };
+layout(std430, binding = 0) readonly buffer Src { Boid b[]; } src;
+layout(std430, binding = 2) buffer Counts { uint c[]; } counts;
+layout(std430, binding = 4) writeonly buffer Cells { uvec2 cr[]; } cells;
+uniform int u_n;
+
+void main()
+{
+    int i = int(gl_GlobalInvocationID.x);
+    if (i >= u_n)
+        return;
+    ivec3 g = ivec3(floor(src.b[i].pos.xyz * 2.0)) & 15;
+    uint c = uint(g.x + 16 * (g.y + 16 * g.z));
+    cells.cr[i] = uvec2(c, atomicAdd(counts.c[c], 1u));
+}

@@ -1,0 +1,242 @@
+#version 310 es
+// Boing Swarm: one step of every boid. The forces, each scaled by the show
+// (boingswarm-ogles3.c, the timeline):
+//   u_pull   to the boid's place on the spinning ball (0: free, 1: held)
+//   u_flow   along a flowing field round a wandering centre (the
+//            murmuration's great shapes)
+//   u_burst  a kick outwards from the ball's centre (one frame)
+//   the skin: wave.comp's water over the ball's surface (a landing's
+//            drops ripple it at random places); each held boid is shown
+//            lifted by its height (in the image only: at once, sharp)
+//   u_stripe the return stripe by stripe (0..1; < 0: not returning): each
+//            boid's pull rises with its band of the ball, bottom first, so
+//            red boids find red places and white ones white
+//   u_hawk   the mouse (xyz; w: 1 while it moves): boids near it flee
+//   the floor (y = 0): boids slide along it
+//   flocking stay apart, match speed, keep together: the neighbours from
+//            the grid (scan.comp, scatter.comp) over the 27 cells round the
+//            boid, at most u_max looked at; a u_every-th of the boids look a
+//            frame (whole work groups in turn), with u_every times the steer
+// The grid wraps (16^3 cells of 0.5, a cell's coordinates modulo 16), so
+// the swarm flies anywhere; boids of far cells sharing an index are left
+// out by their distance. Each boid is then counted into its new cell for
+// the next frame's grid, and its position written into the image the draw
+// reads (w: 1 on a red check, plus a share of its speed).
+layout(local_size_x = 128) in;
+struct Boid { vec4 pos; vec4 vel; };
+layout(std430, binding = 0) readonly buffer Src { Boid b[]; } src;
+layout(std430, binding = 1) writeonly buffer Dst { Boid b[]; } dst;
+layout(std430, binding = 2) buffer Counts { uint c[]; } counts;
+layout(std430, binding = 3) readonly buffer Starts { uint s[]; } starts;
+layout(std430, binding = 4) writeonly buffer Cells { uvec2 cr[]; } cells;
+layout(std430, binding = 5) readonly buffer Sorted { uint i[]; } sorted;
+layout(std430, binding = 7) readonly buffer Skin { vec2 c[]; } skin; // wave.comp's newest
+layout(rgba32f, binding = 0) writeonly uniform highp image2D u_img;
+uniform int u_n;
+uniform int u_ball; // the boids of the ball (the first); the rest spell the text
+uniform float u_einv; // 1 / u_every
+uniform int u_look;   // the work groups looking round this frame (frame modulo u_every)
+uniform int u_count;  // 0: no boid looks round next frame: not counted into the grid
+uniform float u_orbit; // the text ring's turn
+uniform float u_ring;  // 0: the text; 1: Saturn's rings (text_home)
+uniform float u_ringt; // the rings' time
+uniform float u_storm; // 0..1: the text boids let go into a storm round the ball
+uniform float u_tpull; // the text boids' pull (0..1: forming as the text scrolls in)
+uniform highp sampler2D u_text; // each text boid's place on the ring (angle, height, depth)
+uniform int u_max;
+uniform int u_every;
+uniform float u_dt;
+uniform float u_time;
+uniform float u_spin;
+uniform float u_pull;
+uniform float u_flow;
+uniform float u_burst;
+uniform float u_stripe;
+uniform vec4 u_hawk;
+uniform float u_skin; // how much the skin shows: 0..1, faded in once the ball has formed
+uniform vec3 u_centre;   // the ball's
+uniform vec3 u_wander;   // the murmuration's
+
+// The skin's height at the unit direction d from the ball's centre: its
+// four nearest cells mixed (128 round, 64 from the bottom pole up).
+float skin_at(vec3 d)
+{
+    float u = (atan(d.z, d.x) / 6.2831853 + 0.5) * 128.0 - 0.5;
+    float v = (asin(clamp(d.y, -1.0, 1.0)) / 3.1415927 + 0.5) * 64.0 - 0.5;
+    int i = int(floor(u)), j = int(floor(v));
+    float fu = u - float(i), fv = v - float(j);
+    int j0 = clamp(j, 0, 63), j1 = clamp(j + 1, 0, 63), i0 = i & 127, i1 = (i + 1) & 127;
+    return mix(mix(skin.c[j0 * 128 + i0].x, skin.c[j0 * 128 + i1].x, fu),
+               mix(skin.c[j1 * 128 + i0].x, skin.c[j1 * 128 + i1].x, fu), fv);
+}
+
+// Boid i's place on a ball of radius 3 (a Fibonacci sphere), spun about the
+// tilted axis; w: 1 for a red check (16 across, 8 down), 0 for a white one.
+vec4 home(int i)
+{
+    float y = 1.0 - 2.0 * (float(i) + 0.5) / float(u_ball);
+    float r = sqrt(max(1.0 - y * y, 0.0));
+    float phi = mod(float(i) * 2.3999632, 6.2831853);
+    float lon = mod(phi + u_spin, 6.2831853);
+    float check = mod(floor(phi * 2.5464791) + floor((y + 1.0) * 4.0), 2.0);
+    vec3 p = vec3(cos(lon) * r, y, sin(lon) * r) * 3.0;
+    float c = 0.9553365, s = 0.2955202; // the 1984 ball's tilt, 0.3 rad
+    vec3 w = vec3(c * p.x - s * p.y, s * p.x + c * p.y, p.z);
+    return vec4(u_centre + w, check);
+}
+
+// Text boid i's place: OGLES3 in lights on a ring of radius 5.4 round the
+// ball, turning (u_orbit); its angle, height and depth from u_text (made by
+// the 68k once from the stats' font). White.
+// Once the ball has been whole a while the text turns into Saturn's rings
+// (u_ring 0..1): in the ball's tilted equator, an inner band (3.7-4.85)
+// and an outer one (5.1-5.75) with a gap between, each boid orbiting as a
+// moon does (the inner faster; u_ringt the rings' time).
+vec4 text_home(int i)
+{
+    int k = i - u_ball;
+    vec4 t = texelFetch(u_text, ivec2(k & 127, k >> 7), 0);
+    float a = t.x + u_orbit, rr = 5.4 + t.z;
+    vec3 txt = vec3(cos(a) * rr, t.y, sin(a) * rr);
+    if (u_ring <= 0.0)
+        return vec4(u_centre + txt, 0.0);
+    float u = fract(float(k) * 0.7548777), v = fract(float(k) * 0.5698403), w = fract(float(k) * 0.6180340);
+    float r = u < 0.62 ? 3.7 + 1.15 * (u / 0.62) : 5.1 + 0.65 * ((u - 0.62) / 0.38);
+    float ra = v * 6.2831853 + u_ringt * pow(3.7 / r, 1.5);
+    vec3 q = vec3(cos(ra) * r, (w - 0.5) * 0.06, sin(ra) * r);
+    float c = 0.9553365, s = 0.2955202; // the ball's tilt
+    q = vec3(c * q.x - s * q.y, s * q.x + c * q.y, q.z);
+    return vec4(u_centre + mix(txt, q, u_ring), 0.0);
+}
+
+// The murmuration's flow: a swirl round the vertical axis through c
+// (u_wander; the ball's centre for the text's storm), folded by slow waves,
+// and drawn back towards it beyond a radius of 6.
+vec3 flow(vec3 p, vec3 c)
+{
+    vec3 d = p - c;
+    vec3 swirl = normalize(vec3(-d.z, 0.0, d.x) + vec3(0.0001));
+    vec3 wave = vec3(sin(p.y * 0.9 + u_time * 0.7), sin(p.z * 0.8 - u_time * 0.5) * 0.8,
+                     cos(p.x * 0.7 + u_time * 0.6));
+    float far = max(length(d) - 6.0, 0.0);
+    return (swirl * 2.0 + wave * 2.8) - d * far * 0.3;
+}
+
+uint cell_of(vec3 p)
+{
+    ivec3 g = ivec3(floor(p * 2.0)) & 15;
+    return uint(g.x + 16 * (g.y + 16 * g.z));
+}
+
+void main()
+{
+    int i = int(gl_GlobalInvocationID.x);
+    if (i >= u_n)
+        return;
+    vec3 p = src.b[i].pos.xyz, v = src.b[i].vel.xyz;
+    vec3 r = fract(vec3(float(i) * 0.6180340, float(i) * 0.7548777, float(i) * 0.5698403)) - 0.5;
+    bool text = i >= u_ball;
+    vec4 h = text ? text_home(i) : home(i);
+    float pull = u_pull, fl = u_flow;
+    if (u_stripe >= 0.0) { // the return: band by band, from the bottom (the text last)
+        float band = text ? 0.875 : floor((2.0 - 2.0 * (float(i) + 0.5) / float(u_ball)) * 4.0) / 8.0;
+        pull = smoothstep(band * 0.75, band * 0.75 + 0.25, u_stripe);
+        fl = 1.0 - pull;
+    }
+    // The text forms on its own clock, in 1.5 s, as it scrolls (u_tpull);
+    // in its storm (u_storm 0..1, after the rings) it is let go into the
+    // murmuration's flow round the ball, kept out of it.
+    vec3 fc = u_wander;
+    if (text)
+        pull = u_tpull, fl = 1.0 - pull;
+    bool storm = text && u_storm > 0.0;
+    if (storm) {
+        fl += pull * u_storm;
+        pull *= 1.0 - u_storm;
+        fc = u_centre;
+    }
+    vec3 a = (h.xyz - p) * (9.0 * pull) - v * (0.8 + 3.2 * pull);
+    if (fl > 0.0) // (the flow's sines skipped on the held ball)
+        a += (flow(p, fc) - v) * (1.2 * fl);
+    if (storm) {
+        vec3 d = p - u_centre;
+        float l = length(d) + 0.001;
+        if (l < 3.8)
+            a += d / l * ((3.8 - l) * 30.0 * u_storm);
+    }
+    if (u_hawk.w > 0.0) { // flee the mouse
+        vec3 d = p - u_hawk.xyz;
+        float l = length(d);
+        if (l < 2.2)
+            a += d / (l + 0.05) * (60.0 * (1.0 - l / 2.2) * u_hawk.w);
+    }
+    if (u_burst > 0.0) {
+        vec3 d = p - u_centre;
+        // outwards, each boid a little off its own way and speed: a storm,
+        // not a growing ball
+        v += normalize(normalize(d + vec3(0.0001)) + r * 1.4) * u_burst * (0.4 + 0.6 * fract(float(i) * 0.4142136));
+    }
+    // A u_every-th of the boids look round, by work group (the GPU runs 16
+    // boids side by side): the group's turn by a float product, not an
+    // integer modulo (the QPU has no division). The ball's boids and the
+    // text's flock apart. Held fast (pull 1: the formed ball, the text) the
+    // spring alone places a boid: no looking round then. A boid looks in the
+    // 8 cells on its side of its own (its octant's), not all 27: at most
+    // u_max are looked at anyway, and each cell costs two chained reads.
+    int grp = i >> 7;
+    if (pull < 0.999 && grp - int((float(grp) + 0.5) * u_einv) * u_every == u_look) {
+        vec3 sep = vec3(0.0), avel = vec3(0.0), apos = vec3(0.0);
+        float seen = 0.0;
+        int looked = 0;
+        ivec3 g = ivec3(floor(p * 2.0)), o = ivec3(step(0.5, fract(p * 2.0))) * 2 - 1;
+        for (int dz = 0; dz < 2 && looked < u_max; dz++)
+            for (int dy = 0; dy < 2 && looked < u_max; dy++)
+                for (int dx = 0; dx < 2 && looked < u_max; dx++) {
+                    ivec3 q = (g + ivec3(dx, dy, dz) * o) & 15;
+                    uint c = uint(q.x + 16 * (q.y + 16 * q.z));
+                    uint k = starts.s[c], e = starts.s[c + 1u];
+                    for (; k < e && looked < u_max; k++, looked++) {
+                        uint j = sorted.i[k];
+                        vec3 d = src.b[j].pos.xyz - p;
+                        float d2 = dot(d, d);
+                        if (j == uint(i) || d2 > 0.25 || (int(j) >= u_ball) != text)
+                            continue;
+                        sep -= d / (d2 + 0.01);
+                        avel += src.b[j].vel.xyz;
+                        apos += d;
+                        seen += 1.0;
+                    }
+                }
+        if (seen > 0.0)
+            a += (sep * 0.02 + (avel / seen - v) * 0.5 + apos / seen * 0.5) * float(u_every);
+    }
+    v += a * u_dt;
+    float s = length(v); // free boids fly at most 9 units a second
+    if (s > 9.0)
+        v *= 9.0 / s;
+    p += v * u_dt;
+    if (p.y < 0.05) { // the floor: slide along it
+        p.y = 0.05;
+        v.y = abs(v.y) * 0.3;
+        v.xz *= 1.0 - 1.5 * u_dt;
+    }
+    dst.b[i].pos = vec4(p, h.w);
+    dst.b[i].vel = vec4(v, 0.0);
+    // w for the draw: the check (1 red) plus the speed's share of 12 units a
+    // second (fast boids glow brighter and whiter)
+    // Shown lifted by the skin (held boids: by the pull), at once: the pull
+    // alone would smooth a quick ripple away. The skin turns with the ball
+    // (read at the boid's own unspun place, so a ripple stays where its drop
+    // fell), lifted along its home's normal (not its lagging position's: the
+    // waves would slide as the ball rises and falls). Crests glow brighter.
+    float oy = 1.0 - 2.0 * (float(i) + 0.5) / float(u_ball), ophi = float(i) * 2.3999632;
+    float orr = sqrt(max(1.0 - oy * oy, 0.0));
+    float sk = 0.0;
+    if (!text && pull * u_skin > 0.0) // (the skin read only where it shows)
+        sk = skin_at(vec3(cos(ophi) * orr, oy, sin(ophi) * orr)) * pull * u_skin;
+    imageStore(u_img, ivec2(i & 127, i >> 7),
+               vec4(p + (h.xyz - u_centre) * (0.2 / 3.0 * sk),
+                    h.w + min(length(v) / 12.0 + max(sk, 0.0) * 0.3, 0.99)));
+    uint c = cell_of(p);
+    cells.cr[i] = uvec2(c, u_count != 0 ? atomicAdd(counts.c[c], 1u) : 0u);
+}

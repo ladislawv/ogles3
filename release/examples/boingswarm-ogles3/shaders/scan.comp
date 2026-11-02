@@ -1,0 +1,33 @@
+#version 310 es
+// The neighbour grid, 1 of 2: the cells' first places (an exclusive prefix
+// sum of the 4096 counts, one work group, in shared memory); the counts
+// zeroed for the next count. starts has one entry more than cells: the
+// total.
+layout(local_size_x = 128) in;
+layout(std430, binding = 2) buffer Counts { uint c[]; } counts;
+layout(std430, binding = 3) writeonly buffer Starts { uint s[]; } starts;
+shared uint part[128];
+
+void main()
+{
+    uint t = gl_LocalInvocationID.x, base = t * 32u, sum = 0u, k, d;
+    for (k = 0u; k < 32u; k++)
+        sum += counts.c[base + k];
+    part[t] = sum;
+    barrier();
+    for (d = 1u; d < 128u; d <<= 1) { // inclusive scan of the 128 sums
+        uint v = t >= d ? part[t - d] : 0u;
+        barrier();
+        part[t] += v;
+        barrier();
+    }
+    sum = part[t] - sum; // exclusive: this run's start
+    for (k = 0u; k < 32u; k++) {
+        uint c = counts.c[base + k];
+        starts.s[base + k] = sum;
+        counts.c[base + k] = 0u;
+        sum += c;
+    }
+    if (t == 127u)
+        starts.s[4096] = sum;
+}

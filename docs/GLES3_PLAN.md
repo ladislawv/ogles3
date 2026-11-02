@@ -389,6 +389,338 @@ dEQP-GLES31 is left for the next day (the developer's call).
   extensions.
 - **Next:** the 1.0-beta2.
 
+**Plan: Boing Swarm (2026-11-02, the developer's request).** A new ES 3.1
+demo: thousands of boids that flock into a spinning Boing ball, burst apart
+on a bounce and swarm back; the design is the developer's
+`BOING_SWARM_PLAN.md` (outside the repository): its show, look, the ES 3.1
+feature for each job, a budget of 14-16 ms at 640x480, and the build order
+(1 measure, 2 the ball, 3 the flock, 4 the show, 5 the look, 6 the ES 2 way
+and capture mode, 7 release). Success: 8192 boids at 30 fps or better, the
+68k under 20% busy.
+- **Step 1, the compute benchmark (done 2026-11-02):**
+  `tests/perf/swarmbench/` (its shaders in `shaders/`, compiled offline,
+  `.comp` included) and the package `tests/a1200/swarm` (`Run-Swarm`). The
+  boids live in two storage buffers (position and velocity, swapped each
+  frame); the simulation writes positions into an RGBA32F image too, which
+  the boids' draw (one instanced draw of 4-vertex strips, lit balls in the
+  fragment shader) reads with `texelFetch`. The neighbour grid: 32^3 cells
+  of 0.5; count (`atomicAdd`, each boid's rank kept), scan (one group of 128,
+  shared memory; it also zeroes the counts), scatter, then flocking over
+  the 27 cells, at most `MAX` neighbours looked at. A1200, 640x480 full
+  screen, 4x MSAA, 300 frames:
+
+  | Run | fps | Simulation a frame |
+  |---|---|---|
+  | free (pull only), 4096 / 8192 / 16384 | 202 / 152 / 105 | 0.97 / 1.52 / 2.76 ms |
+  | grid + flocking, MAX 24: 4096 / 8192 / 16384 | 78.1 / 50.1 / 29.3 | 8.8 / 14.9 / 27.2 ms |
+  | grid, 16384, MAX 12 / 8 | 37.5 / 41.3 | 20.0 / 17.4 ms |
+  | vbo (free's buffer drawn as vertices), 16384 | 103 | 2.79 ms |
+
+  Findings: (1) the GPU runs the pull alone at 170 ns a boid; a dispatch
+  costs about 0.5 ms however small (scatter 0.6-0.9, count 0.8-1.6). (2)
+  Flocking is the cost: 1.4 us a boid at 24 neighbours, 0.8 at 8; the grid's
+  three passes 3.6-4 ms whatever the count (the scan 1.5 ms alone, one
+  group: to make wider). (3) The storage buffer drawn as an instanced
+  array costs nothing measurable over the image (the copy back through the
+  68k of 512 KB is hidden in the dispatch's wait), so both ways are open.
+  (4) The draw of 16384 lit balls: about 1.5 ms plus the render (`finish`
+  5 ms with the simulation, 9 ms in `draw`, where the image was never
+  written and every boid lies at the origin: overdraw, not a measure).
+  So: 8192 flocking boids at 50 fps meets the target with room for the
+  look; 16384 reach 30 only with the free flight or flocking at half rate.
+  The picture (8192, grid) already reads as the ball, red and white checks
+  of boids; it is a little taller than wide, to look at in step 2. Then
+  (the developer's request) each boid as wide as its share of the surface
+  and see-through (premultiplied alpha, soft edge, no depth test), so the
+  far side shows through: the draw's cost unchanged (16384, MAX 8: 41.9
+  fps). The blended draw needs a shader variant the offline compiler does
+  not make: the first run compiles it on the Amiga (12.5 ms a frame in
+  that run's average), the cache has it after. Then the boids as lights
+  (the developer's request): a small white-hot core in the boid's colour
+  and a faint glow, added (`GL_ONE, GL_ONE`), the glow 1.6 times a boid's
+  share of the surface. Added lights cost fill: 16384, MAX 8: 35.8 fps
+  (the render 7 ms against 4.7 with the balls). The near side brighter
+  than the far (the vertex shader's `v_bright`, from 0.2 at the ball's back
+  to 1 at its front): the front's checks read over the back's (35.1 fps).
+  A star on each light (four rays and two fainter diagonals, a fifth of the
+  core): at 640x480 a boid's square is about 8 pixels, so the rays show as
+  a sparkle more than a shape; five more `exp` a pixel cost 3 ms of render
+  (31.9 fps). Then billboards with a texture (the developer's request):
+  the light made once by the program into a 64x64 RGBA8 texture, mipmapped
+  (red the core and its star, green the glow), each boid a square along
+  the camera's right and up (`u_right`, `u_up`) sampling it: one texture
+  read instead of the `exp`s, 36.1 fps (16384, MAX 8). Trap: the program
+  must link `-lm881` (the examples' maths library) with `-m68881`; `-lm`
+  gave `exp` garbage, every texel bright, the ball solid white. The front
+  3x brighter (`v_bright` 0.2 at the back to 3 at the front); then all of
+  it half as bright (the fragment shader's factor 1.6 -> 0.8). Fixed: the
+  checker came from the spun longitude, so it stood still while the boids
+  orbited through it; now from each boid's own (`phi`), it turns with them.
+- **Optimised to 60 fps and more (2026-11-02, the developer's request; the
+  spin also halved):** 16384 boids flocking, 640x480, from 34 to **70.0
+  fps** (14.3 ms a frame). What each step gave (`TIMING`):
+  1. MSAA off by default (`MSAA` turns it on): lights added up need none;
+     the render 8.3 -> 6.5 ms (38.9 fps).
+  2. The grid 16^3 cells of 0.5 over -4..4 (was 32^3 over -8..8): the scan
+     1.5 -> 0.55 ms. The count folded into flocking (each boid counted
+     into the cell it moved to, for the next frame; a count pass only on
+     the first frame): one dispatch less, 1.6 ms (45.5 fps).
+  3. Half the boids look for neighbours a frame, with twice the steer: by
+     whole work groups (`(i >> 7)`), not by boid: the GPU runs 16 boids side
+     by side, so alternate boids saved nothing (13.3 -> 12.0 ms), whole
+     groups did (8.8 ms; 53.8 fps). The search stops at `MAX` found, also
+     between cells (8.0 ms; 56.4 fps).
+  4. `EVERY=n` (default 3): an n-th of the groups look a frame, n times the
+     steer: 6.8 ms (60.5 fps; 4: 63.2).
+  5. Only the light's inner 70% drawn (its faint outer glow cut, the light
+     on screen the same size): the render was fill (`SIZE=50`: 6.5 -> 3.2
+     ms), now 4.4 ms: **70.0 fps** with `EVERY=3`, 64.2 with 2.
+  Tried and dropped: the homes read from a buffer made once instead of
+  computed (the pull pass 2.7 -> 3.1 ms: the GPU computes faster than it
+  reads); no `glFinish` after the swap (the next dispatch waits for the
+  render instead: the same 60.6 fps; it is now `TIMING` only). A frame
+  now: scan 0.55, scatter 0.8, flocking 6.8, draw calls and swap 1.7,
+  render 4.4 ms, one after another (each dispatch waits for the render
+  before it). The ball is round now (the taller shape is gone with the
+  old grid's flocking).
+- **Steps 2-3, the program (2026-11-02):** `release/examples/boingswarm-ogles3/`
+  (`boingswarm-ogles3.c`, `shaders/`, `Makefile`, `ReadMe.txt`; built into
+  the `swarm` package's `bin/` by its `build.sh`). The benchmark's passes
+  (count once, scan, scatter) and one simulation shader, `sim.comp`, whose
+  forces the show scales: the pull to the ball (`u_pull`), a flow round a
+  wandering centre for the murmuration (`u_flow`: a swirl, slow waves, a
+  pull back beyond 6 units), a burst kick (one frame, each boid a little
+  off its own direction and speed: a storm, not a growing ball), flocking
+  (8 neighbours, every 3rd frame). The grid wraps (cell coordinates modulo
+  16), so the swarm flies anywhere without piling into border cells. The
+  camera circles (a real look-at; the billboards face it, brightness by
+  distance to the eye). The timeline: the gathering (0-12 s, from a shell
+  14-20 units out), the Boing (to 35), the burst (35), the murmuration
+  (37-55), the return (55-65), then again from the Boing; Space pauses.
+  Defaults: 16384 boids, no MSAA, a 640x480 window, 1280x720 full screen.
+  A1200, the whole show: **74.6 fps** at 640x480, **65.7** at 1280x720
+  (sim 7.1, scan 0.6, scatter 0.8, draw calls 1.6, render 3.1/5.0 ms).
+- **Step 4, the show (2026-11-02; the developer: no 60 fps limit for now,
+  optimised later):** the ball bounces as in 1984 (across x = +-4, a bounce
+  every 1.4 s, 3 high; its centre `u_centre`) over a floor (`floor.vert`,
+  `floor.frag`: dark checks of 1.5 with faint violet lines, fading out
+  beyond 9 units, and the ball's soft shadow, fainter and wider as it
+  rises, faded with the pull). Boids slide on the floor (y = 0). Each held
+  landing (`u_hit`) knocks about 65 boids loose (0.4%), free of the pull
+  for 0.9 s (`vel.w` counts it down) and falling as sparks. The burst comes
+  on the first landing from 35 s. The mouse is a hawk (`u_hawk`: its ray
+  met with the plane 2.6 units before the ball's centre, facing the
+  camera, so it reaches the seen side; boids within 2.2 flee; for 1.5 s
+  after the mouse last moved; it needed that plane: through the centre it
+  touched no boid). The return goes stripe by stripe (`u_stripe`: each
+  boid's pull rises with its band of the ball, bottom first). A boid's
+  speed (its share of 12 units/s, in the image's w beside the check)
+  makes it whiter and brighter: the burst flashes white and cools. SOUND
+  (off by default): the boing on each held landing, panned by the ball's
+  x, and a whoosh (falling low-passed noise, 1.5 s) at the burst. The
+  camera at 17 units, 6 high, looking at (0, 3.5, 0). 69.7-69.9 fps at
+  640x480 (full screen).
+- **The ripple (2026-11-02, the developer's request):** the knocked-loose
+  boids dropped (the Fibonacci order put them on one line: "loses one line
+  of particles"); instead each landing ripples the ball's skin, a wave
+  simulation on the GPU (`wave.comp`): 64 x 32 cells over the surface
+  (longitude, latitude; fixed in the world, the ball spins through it),
+  (height, height a step before) in two storage buffers swapped each step,
+  two steps a frame (0.9 ms). A held landing kicks the bottom three rings
+  for 3 frames; the ring wave runs up and meets itself at the top. Each
+  boid's place is lifted by the height there (`skin_at`, the 4 nearest
+  cells mixed; 0.3 of the radius per unit). The hawk also dents the skin
+  where it touches. The mouse worked in amictl's tests at 640x480 and
+  1280x720 (`amictl move` sweeps: the window gets IDCMP_MOUSEMOVE, the
+  boids part); the developer saw nothing with the real mouse, not yet
+  explained. 63.5 fps at 640x480 (sim 7.6, wave 0.9 ms). Then tuned with
+  the developer watching ("invisible", then "too fast and too high", "drop
+  at random places"): the skin 128 x 64; the boids shown lifted by the
+  skin in the image only (0.4 of a unit per height unit, times the pull;
+  the pull alone smoothed a quick ripple away), crests a little brighter;
+  one step a frame at a wave speed of 0.08 (was 0.45, two steps), damped
+  0.99 a step and more within 4 rows of a pole (the rings shrink there:
+  waves heaped into spikes); drops (`u_drop`: a Gaussian of strength 1)
+  at random cells every 0.1-0.4 s, and one under the ball at a held
+  landing. 62.3 fps at 640x480 (wave 0.8 ms). Then ("too high", "waves
+  scroll as the ball goes up or down", "not like water"): the lift halved
+  (0.2); the skin turns with the ball (read at the boid's unspun place, so
+  a ripple stays where its drop fell, not the checks sliding under it); the
+  lift along the home's normal, not the lagging position's (its lag behind
+  the bouncing home slid the sampled place: the scrolling). 62.6 fps.
+  Then ("less drops: one a second that travels across the ball"): a drop
+  of strength 1.5 at a random place every second (then every 3 s, the
+  developer's next ask), none at the landings;
+  damped 0.997 a step (was 0.99), so its ring runs across the ball (at
+  about 0.28 cells a step, some 4 s round to the far side).
+  The waves wait for the ball: drops only once it has been whole (held,
+  not returning) for 3 s, the skin's lift faded in over the next 2 s
+  (`u_skin`).
+- **Step 5, the look (2026-11-02):** five passes after the simulation.
+  (1) The swarm's shadow: every boid a soft spot seen from above
+  (`shadow.vert/frag`, wider and fainter the higher), added into a 256x256
+  RGBA8 texture over the floor's 28 x 28 units; the floor darkens by
+  `exp(-1.5 x sum)`, so the ball and the free swarm alike cast shadows
+  (instead of the ball's analytic shadow, and of the plan's shadow sampler:
+  a swarm has no surface to map). (2) The scene into two RGBA16F targets at
+  once (`glDrawBuffers`): the floor and the lights, and the lights alone
+  (the glow). (3) Trails at half size: the glow added to the last frame's
+  trails faded by 0.8 (`trail.frag`, two targets swapped). (4) The bloom
+  at quarter size: the trails blurred across and down (`blur.frag`, 9
+  taps). (5) The picture (`comp.frag`): scene + trails x 0.15 + bloom x 0.3,
+  tone-mapped (`1 - exp(-1.1 c)`), graded (a touch of warmth in the
+  lights), vignetted. The first try (bloom 0.9, a blue lift) washed the
+  ball out and turned the black navy. 36.5 fps at 640x480: the draw's CPU
+  time 1.9 -> 15.6 ms (the passes' framebuffer changes: each render is
+  waited for before the next reads it), to optimise later (the
+  developer: no frame-rate limit for now).
+- **The look's cost, and the trails only while the shape changes
+  (2026-11-02, the developer's request):** `TIMING` now finishes and times
+  each draw pass. At first: shadow 8.2, scene 6.2, trails and blur 1.6,
+  picture 1.8 ms. The shadow from every 4th boid (`u_step`, each spot 4x
+  as dark, 0.55 wide) into 128x128, every other frame: 1.2 ms. The trails
+  and the bloom fade out over 2 s once the ball has formed (`u_fx` in
+  `comp.frag`; "too much for the ball") and are skipped while out, the
+  scene then drawn into its texture alone (`scene1_fbo`: one target, no
+  glow); back from that the stale trails are cleared. The scene and glow
+  in R11F_G11F_B10F (was RGBA16F): scene 6.1 -> 5.7 ms (the rest is the
+  lights' overdraw). 640x480: 36.5 -> **53.1 fps**. Then the swarm's
+  shadow taken out (the developer's request: no shadow on the floor):
+  `shadow.vert/frag`, its texture and pass gone, the floor plain. 55.5 fps.
+  The trails' fade then moved earlier ("fade faster, before the ball
+  forms"): `1 - smoothstep(0.6, 0.9, pull)` (the return: its stripe
+  progress), gone before the ball is whole.
+  Then the lights'
+  reflection in the floor (the developer's request): the instanced draw
+  again with `u_mirror` (y mirrored, brightness x 0.25 x exp(-0.25 y)).
+- **Step 6, the ES 2 way, the stats, capture (2026-11-02):**
+  - Key E (`ES2` to start so): the same show with 256 boids (`N2`)
+    simulated by the 68k (`cpu_step`: sim.comp's forces, flocking with
+    every other boid, N2^2 looks), their squares built by the CPU each frame
+    (`cpu_verts`, six vertices a boid) and drawn from client arrays with
+    GLSL ES 1.00 shaders (`es2boid`, `es2floor`: no fwidth) straight to the
+    screen: no compute, instancing, float targets or bloom.
+    Later (2026-11-02) as many boids as the GPU's (N, 16384), with
+    sim.comp's grid on the 68k (count, sum, scatter; 27 cells, at most 8
+    looks; an EVERY-th a frame): 1280x720 full screen 18 fps, the 68k
+    50 ms a frame (91%).
+  - Key F (`NOFLOOR` to start so): the floor and the lights' reflection
+    off and on, in both ways; without them 47 fps at 1280x720 (ES 3.1).
+    The ES 2 way's reflection too (`es2boid.vert` u_mirror, a second draw).
+  - The text ring (the default for the last eighth of the boids, 2048:
+    a quarter was too dense): they spell OGLES3 in lights on a ring of
+    radius 5.4 round the ball, on the camera's side; from the start of its
+    forming it scrolls round it, 20 degrees a second, from 60 degrees right
+    (the text forms on its own clock, from the ball's pull 0.1, in 1.5 s:
+    `u_tpull`, `tx_pull`; sharp from about 30 right) past the front to
+    45 left at 5.25 s and on the same way, the rings' way, while it becomes the
+    rings (`tx_orbit`; first tries: a whole turn, slow in front and fast
+    behind; a sway of 60, then 45 degrees left and right; a clock from the
+    ball whole or half formed, then from 135 degrees right at 30/s: there, side on, it moved
+    towards the camera, not across: each looked standing; then from 75 right
+    at the gathering's start: it first showed in front; formed by the
+    ball's slow pull it stood or came sharp only past the front), held
+    as the ball's boids are. Their places (angle, height, depth) are made
+    once by the 68k from the stats' 5x7 font (`text_init`: 0.15 a font
+    pixel, each pixel an s x s grid (5x5 at 2048 boids) of places in line with its neighbours',
+    the places a boid short spread evenly; first tries: 0.3 a pixel and
+    places by a hash of the boid's index fell in clumps and stripes) into a
+    table for the ES 2 way and an RGBA32F texture that
+    sim.comp reads (`text_home`, `u_text` on unit 6). 1280x720: 35 fps.
+    From 5.25 s the text turns (over 2 s) into Saturn's
+    rings (`u_ring`, `tx_ring`): in the ball's tilted equator, an inner band
+    3.7-4.85 and an outer 5.1-5.75 with a gap, each boid orbiting as a moon
+    (the inner faster). Held 0.5 s, they are let go (over 1.5 s,
+    `u_storm`, `tx_storm`) into the murmuration's flow centred on the ball
+    (`flow(p, c)`), kept out of it: a storm of streams round the ball until
+    the burst. After the burst and return, the text again first.
+    (1280x720 then: 35 fps.)
+  - The schools of fish (key T, `FISH`; 2026-11-02), a quarter, then an
+    eighth of the boids as four schools round the ball with leaders the 68k
+    steered (they turned back when two met): taken out again (the
+    developer: "drop fish code"). Tried: a ring of fixed places (a
+    lattice), free steering forces (flies), lanes behind one leader (a box),
+    leaders with fish that keep their speed and turn in arcs (better, but
+    not fish). Their code had cost sim.comp 2 ms a frame (registers).
+  - Full screen shows the pointer (ogles3 hides it on its own screen,
+    `display.c` blank_pointer; the hawk needs it): ClearPointer on the
+    library's window unless in capture mode. The hawk works there as in a
+    window (the screen's pointer position read each frame).
+  - Key S: the stats, a 5x7 font of capitals made into a texture once
+    (`make_font`, `draw_text`, `text.vert/frag`; scale 2 from 600 lines, 1 below: whole numbers, as 1.8 and 1.2 drew uneven pixels): who simulates how many
+    boids, frames a second, the 68k's own work a frame (the show and the
+    camera; in the ES 2 way the swarm too). ES 3.1: 16384 boids, the 68k
+    0.1 ms a frame (0%); the ES 2 way: 256 boids, 5.3 ms a frame (86% at
+    162 fps). The plan's "68k busy" by an idle task at priority -127
+    (`idle_entry`, an idle 68k's count calibrated over 0.6 s at the start)
+    reads 100% in both ways, with VSYNC too: **ogles3 waits for the GPU on
+    the 68k** (the dispatches' and the swap's waits poll, they do not
+    sleep), so the 68k is never idle while a frame is in flight; the
+    overlay shows the own work instead, the idle measure is printed at the
+    end. A library change to look at: waiting by an interrupt or a Wait()
+    would free the 68k.
+  - Key C (`CAPTURE`): no text, no pointer (an empty sprite), every frame
+    1/60 s of the show. `VSYNC` added.
+  - The mouse, at last: the pointer read from the screen each frame
+    (`WScreen->MouseX/Y`) instead of IDCMP_MOUSEMOVE: the developer's
+    mouse moved it without the window getting events (amictl's `move` did
+    send them, so the tests passed).
+  - 640x480 full screen: about 50 fps on the ball (the reflection: a
+    second instanced draw), the ES 2 way 160 fps.
+- **60 fps at 1280x720 full screen (2026-11-02, the developer's request:
+  "the trails slowed it down").** `TIMING` now also prints each part of the
+  show's frame rate and passes (`part_pass`). At the start (text, rings,
+  storm, fish code in): 30 fps, the passes (TIMING, each finished) sim 10.4,
+  scene 12.2, picture 4.8, trails 1.2-3.2 ms. Measured one change at a time:
+  - sim.comp: the fish code out (10 -> 8.2 ms: its registers; the shader
+    runs 2 threads at 66 registers, 1048 instructions, and splitting the
+    ball's and the text's paths would not reach 4 threads); the murmuration
+    flow's sines only where flowing, the skin read only where it shows, the
+    work group's turn by a float product (`u_einv`, `u_look`) instead of
+    an integer modulo (the QPU has no division); no looking round when held
+    fast (pull 1: the formed ball, the text), and then no grid either
+    (`u_count`: sim.comp counts no boid, scan and scatter skipped; the first
+    frame looking round again uses the last grid); looking round in the 8
+    cells of the boid's octant, not 27 (two chained reads a cell), at most
+    6 (was 8), EVERY 4 (was 3; the steer scaled by it); the atomic count
+    0.75 ms, the skin 0.3 (kept); wave.comp only once its skin can show.
+  - The lights as point sprites (`gl_PointSize`, `gl_PointCoord`; a vertex a
+    boid) instead of 4-vertex instanced billboards: scene 12.8 -> 8.9 ms
+    (half-size lights showed some 3.5 ms in the vertices alone).
+  - The floor made once into a 1024x1024 mipmapped texture by the 68k
+    (`make_floor`): 8.9 -> 7.6 ms (its per-pixel grid with fwidth, 3 ms).
+  - The scene straight to the screen (8-bit: the saturating adds are the
+    picture's clamp; the gain and vignette in floor.frag and boid.frag),
+    no float scene, no picture pass: a full-screen pass costs some 3.5 ms
+    here whatever its shader (the memory). While the trails show: the
+    lights drawn again, small (every 4th, 4 times as bright, `u_step`),
+    into a quarter-size glow, the trails and the bloom at quarter size
+    before the screen's pass, which then runs unbroken and ends with the
+    bloom added (comp.frag: one read, the trails' own term dropped). The
+    reflection from every 2nd boid. The tone curve and grade dropped (the
+    developer: an exp and three pows a pixel).
+  Then (A1200, 1280x720, full screen, without TIMING): the gathering 62,
+  the Boing 76, the burst 59, the murmuration 60, the whole show 66 fps
+  (was 30-35).
+- **The look after (2026-11-02, the developer's requests):** the lights
+  "burnt white" with the trails: dimmer while the trails show (`u_gain`
+  1 - 0.45 fx), fast lights brighter by up to 1.6 (was 3) and whiter by
+  half (was 0.8), the bloom 0.28 (was trails 0.15 + bloom 0.3). The bounce
+  ("the boids are slow to react"): the ball glides round instead (0.55
+  rad/s, on a radius swelling and shrinking 1.5-4.5, rising and sinking
+  4.3 +- 1.1), the boing at each sink's low point, the burst at 35 s.
+  Then ("the ES 2 way should say OGLES2"; "trails lost or very short"): a
+  second table of places, OGLES2, for the 68k (`text_places`, `tx_place[1]`);
+  the trails fade by 0.92 a frame (was 0.8: lost at quarter size), the
+  sharp trails added back in the bloom's second blur (`u_add`, 0.6: still
+  one read on the screen), the screen's weight 0.09 for the longer sum.
+  The murmuration 56-58 fps (the blur's extra read).
+- **Next:** step 7, polish and release: tuning on the A1200, the release
+  build (`build_release.sh`, its examples and the demo zip), a video; and
+  the ogles3 waits on the 68k (above).
+- (Step 1's "next", done below otherwise: 16384 boids stayed the default,
+  the grid made cheaper by a smaller grid instead of a wider scan.)
+
 **Plan: Boing Ocean for ogles3 (2026-10-30, the developer's request).** A
 copy, `release/examples/boingocean-ogles3.c` (with
 `boingocean-ogles3_shaders.h`), becomes the OpenGL ES 3 version of example 3:

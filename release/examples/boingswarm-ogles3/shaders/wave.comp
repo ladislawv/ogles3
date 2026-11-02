@@ -1,0 +1,44 @@
+#version 310 es
+// The ball's skin as water: a height field over the ball's surface (128
+// cells round by 64 from the bottom pole to the top, turning with the ball,
+// so a ripple stays where its drop fell), one step of the wave equation a
+// dispatch.
+// Each cell keeps (height, the height a step before); a step reads `src`
+// and writes `dst` (the program swaps them, a step a frame). Drops fall
+// on it at random places (u_drop), each spreading as a ring; the mouse
+// (u_poke: its cell, and strength) dents the skin where it touches.
+// sim.comp shows each boid lifted by the height there.
+layout(local_size_x = 128) in;
+layout(std430, binding = 6) readonly buffer Src { vec2 c[]; } src;
+layout(std430, binding = 7) writeonly buffer Dst { vec2 c[]; } dst;
+uniform vec3 u_drop; // a drop: its lon and lat cell, strength (0: none)
+uniform vec3 u_poke; // lon and lat cell, strength (0: none)
+
+float h(int i, int j)
+{
+    // up and down past a pole: reflect (the pole rows are its neighbours)
+    j = clamp(j, 0, 63);
+    return src.c[j * 128 + (i & 127)].x;
+}
+
+void main()
+{
+    int i = int(gl_LocalInvocationID.x), j = int(gl_WorkGroupID.x);
+    vec2 c = src.c[j * 128 + i];
+    float lap = h(i + 1, j) + h(i - 1, j) + h(i, j + 1) + h(i, j - 1) - 4.0 * c.x;
+    // damped, more near the poles (the grid's rings shrink there: the
+    // waves would heap up into spikes)
+    float pole = min(float(j), float(63 - j));
+    float n = (2.0 * c.x - c.y + 0.08 * lap) * (pole < 4.0 ? 0.9 + 0.02 * pole : 0.997);
+    if (u_drop.z != 0.0) {
+        vec2 d = vec2(float(i) - u_drop.x, float(j) - u_drop.y);
+        d.x -= 128.0 * round(d.x / 128.0);
+        n += u_drop.z * exp(-dot(d, d) * 0.35);
+    }
+    if (u_poke.z != 0.0) {
+        vec2 d = vec2(float(i) - u_poke.x, float(j) - u_poke.y);
+        d.x -= 128.0 * round(d.x / 128.0); // round the ball
+        n -= u_poke.z * exp(-dot(d, d) * 0.25);
+    }
+    dst.c[j * 128 + i] = vec2(clamp(n, -4.0, 4.0), c.x);
+}

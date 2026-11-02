@@ -1,0 +1,42 @@
+; Run-Swarm - Boing Swarm's step 1: the compute benchmark (swarmbench).
+; See ReadMe.txt.
+;   CD to this directory, then:   Execute Run-Swarm
+;   Longer runs:                   Execute Run-Swarm FRAMES=600
+; Nothing is installed: libs/ is added to LIBS: for the run and removed at the
+; end. Output goes to results/.
+.key FRAMES/K
+.def FRAMES 300
+.bra {
+.ket }
+
+FailAt 21
+If NOT EXISTS bin/swarmbench
+  Echo "Please CD into the ogles2-swarm directory first,"
+  Echo "then run:  Execute Run-Swarm"
+  Quit 20
+EndIf
+Assign SW: ""
+If NOT EXISTS SW:results
+  MakeDir SW:results
+EndIf
+Assign LIBS: SW:libs ADD
+Avail FLUSH >NIL:
+List LIBS:ogles#? LIBS:v3dglslc#? >SW:results/libs.txt
+CD SW:bin
+
+; The draw alone, then the free flight, at each boid count; then the grid
+; and flocking; then the storage buffer drawn as vertices (through the 68k).
+swarmbench FULLSCREEN TIMING MODE=draw N=16384 FRAMES={FRAMES} >SW:results/draw-16k.txt
+swarmbench FULLSCREEN TIMING MODE=free N=4096 FRAMES={FRAMES} >SW:results/free-4k.txt
+swarmbench FULLSCREEN TIMING MODE=free N=8192 FRAMES={FRAMES} >SW:results/free-8k.txt
+swarmbench FULLSCREEN TIMING MODE=free N=16384 FRAMES={FRAMES} >SW:results/free-16k.txt
+swarmbench FULLSCREEN TIMING MODE=grid N=4096 FRAMES={FRAMES} >SW:results/grid-4k.txt
+swarmbench FULLSCREEN TIMING MODE=grid N=8192 FRAMES={FRAMES} >SW:results/grid-8k.txt
+swarmbench FULLSCREEN TIMING MODE=grid N=16384 FRAMES={FRAMES} >SW:results/grid-16k.txt
+swarmbench FULLSCREEN TIMING MODE=vbo N=16384 FRAMES={FRAMES} >SW:results/vbo-16k.txt
+
+CD SW:
+Assign LIBS: SW:libs REMOVE
+Avail FLUSH >NIL:
+Assign SW:
+Echo "Done. Results are in results/."
