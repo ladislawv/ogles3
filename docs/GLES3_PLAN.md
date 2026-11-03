@@ -839,6 +839,9 @@ order written, checked on a PC; nothing measured on the Amiga yet.
 - **Next:** the full-size 2026 picture (27 fps: the reflected rays still
   go through the objects; a grid for them, or fewer bounces); lower the
   front throws; a video.
+- **Docs (2026-11-03):** README.md gained "The demos" (the four ES 3 demos, compute shaders)
+  and says eight examples; release/ReadMe lists Boing Swarm and Juggler RT; the
+  archives rebuilt (`sdl dist`, the demos zip kept).
 
 **Plan: Boing Ocean for ogles3 (2026-10-30, the developer's request).** A
 copy, `release/examples/boingocean-ogles3.c` (with

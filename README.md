@@ -49,6 +49,24 @@ once, and programs written for ogles2 keep using it.
 - **Easy to ship.** No installation needed: a program can carry `ogles3.library` and the shader
   compiler in its own drawer. Or install them once with the included installer.
 
+## The demos
+
+Four demos made for OpenGL ES 3 come with the library (and in `ogles3-1.0-beta1-demos.zip`):
+
+- **Juggler RT**: Eric Graham's 1987 Juggler ray traced in real time. In 1987 one picture took
+  his Amiga about an hour; here compute shaders trace every pixel of every frame, with shadows
+  and mirror balls, at 60 fps (640x480 on an A1200), from his own sums and scene files. The
+  original 320x200 HAM look, or 2026's smooth edges and soft shadows.
+- **Boing Swarm**: 16,384 boids, each simulated on the GPU by compute shaders and drawn with
+  instancing; the 68k only sends the time.
+- **Boing 2026**: the ball dives into a pool with real waves; caustics shimmer underwater and on
+  the walls.
+- **Boing Ocean**: the ball floats on an HDR sea with clouds and sun glints.
+
+Compute shaders are what make them possible: general programs on the GPU, not only for drawing
+pixels. Physics, particles, animation and ray tracing run on the V3D in parallel, leaving the 68k
+free. Each demo also has its ES 2.0 way (key E) to compare.
+
 ## What it opens up
 
 Most graphics software written in the last fifteen years targets OpenGL ES or something it maps
@@ -64,7 +82,7 @@ code.
 
 | Archive | For | Contents |
 |---|---|---|
-| `ogles3-1.0-beta1.lha` | users | the library, the shader compiler, `Install-ogles3`, `OGLES3Log`, six examples |
+| `ogles3-1.0-beta1.lha` | users | the library, the shader compiler, `Install-ogles3`, `OGLES3Log`, eight examples |
 | `ogles3-1.0-beta1-sdk.lha` | Amiga programmers | the same plus the SDK: headers, import libraries for GCC and vbcc, the autodoc `ogles3.doc`, the guide `GettingStarted.txt`, example sources |
 | `ogles3-1.0-beta1-sdk.zip` | cross-development on a PC | the SDK alone |
 | `ogles3-1.0-beta1-sdl.lha` / `.zip` | SDL programmers | SDL2 and SDL3 with the ogles3 backend, the MiniGL SDK SDL links, two examples; unpacks over the SDK |

@@ -118,6 +118,19 @@ The examples
                       no longer crawls and caustics on the ball; key E the
                       ES 2.0 way to compare. FULLSCREEN: 1280 x 720. Its
                       keys and options: Examples/boingocean-ogles3.txt
+  Examples/boingswarm-ogles3
+                      Boing Swarm, OpenGL ES 3.1: 16384 boids, each one
+                      simulated on the GPU by compute shaders and drawn
+                      with instancing; the 68k only sends the time. Its
+                      keys and options: Examples/boingswarm-ogles3.txt
+  Examples/juggler-ogles3
+                      Juggler RT, OpenGL ES 3.1: Eric Graham's 1987
+                      Juggler ray traced in real time by compute shaders,
+                      every pixel of every frame, with shadows and mirror
+                      balls, from his own sums and scene files. Key M the
+                      1987 HAM look or 2026's smooth edges and soft
+                      shadows, E the ES 2.0 way. Its keys and options:
+                      Examples/juggler-ogles3.txt
 Close the window or press Esc to quit. Their .v3dp files are in
 Examples/shaders/: they run without the compiler.
 
