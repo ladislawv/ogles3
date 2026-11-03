@@ -1,0 +1,91 @@
+#version 310 es
+// The shadows' grid, one work group a frame. The lamp is a point, so a
+// shadow ray, from a point to the lamp, is a line through the lamp: seen
+// from the lamp it is a single point. Each sphere seen from the lamp is a
+// disc; a grid of G x G cells over them lists in each cell the spheres
+// whose disc reaches it (the spheres themselves, CAP at most: more, the
+// cell is -1 and the tracer looks through the objects). A shadow ray then
+// tests only its cell's spheres, a cell outside the grid none.
+//
+// The view from the lamp: x = q / dot(q, ax) along bu and bv, q a point's
+// place from the lamp. A sphere's disc there: its centre's, radius
+// r / (z - r) (z its depth): wider than the true one, never narrower.
+precision highp float;
+precision highp int;
+#define G 16     // trace.comp's too
+#define CAP 48
+#define MAXS 512 // J_MAX_SPHERES
+layout(local_size_x = 256) in;
+struct Sphere { vec4 p; vec4 c; };
+layout(std430, binding = 0) readonly buffer Spheres { Sphere s[]; } sp;
+layout(std430, binding = 3) writeonly buffer Grid {
+    vec4 lamp; // w 1: a sphere round the lamp or behind it, no grid
+    vec4 ax, bu, bv;
+    vec4 box;  // the grid's corner, cells per unit
+    int cnt[G * G];
+} gr;
+layout(std430, binding = 4) writeonly buffer Cells { vec4 s[]; } ce;
+uniform vec4 u_lamp;
+uniform vec3 u_lampoff, u_centre;
+uniform int u_ns;
+shared vec4 disc[MAXS]; // centre, radius
+shared vec4 s_box;
+shared int s_bad;
+
+void main()
+{
+    int i = int(gl_LocalInvocationID.x), k;
+    vec3 L = u_lamp.xyz + u_lampoff, ax = normalize(u_centre - L);
+    vec3 bu = normalize(cross(ax, abs(ax.z) < 0.9 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0)));
+    vec3 bv = cross(ax, bu);
+    if (i == 0)
+        s_bad = 0;
+    barrier();
+    for (k = i; k < u_ns; k += 256) {
+        vec4 s = sp.s[k].p;
+        vec3 q = s.xyz - L;
+        float z = dot(q, ax);
+        if (z <= s.w * 1.01) {
+            s_bad = 1;
+            disc[k] = vec4(0.0);
+        } else
+            disc[k] = vec4(dot(q, bu) / z, dot(q, bv) / z, 1.02 * s.w / (z - s.w), 0.0);
+    }
+    barrier();
+    if (i == 0) {
+        vec2 lo = vec2(1e30), hi = vec2(-1e30);
+        for (k = 0; k < u_ns; k++) {
+            vec4 d = disc[k];
+            lo = min(lo, d.xy - d.z);
+            hi = max(hi, d.xy + d.z);
+        }
+        vec2 sz = max(hi - lo, vec2(1e-6));
+        s_box = vec4(lo, float(G) / sz);
+        gr.lamp = vec4(L, float(s_bad));
+        gr.ax = vec4(ax, 0.0);
+        gr.bu = vec4(bu, 0.0);
+        gr.bv = vec4(bv, 0.0);
+        gr.box = s_box;
+    }
+    barrier();
+    vec4 box = s_box;
+    for (int c = i; c < G * G; c += 256) {
+        // the cell's square, as a centre and half its diagonal
+        vec2 c0 = box.xy + vec2(float(c % G), float(c / G)) / box.zw, h = 0.5 / box.zw;
+        vec2 m = c0 + h;
+        float hr = length(h);
+        int n = 0;
+        for (k = 0; k < u_ns; k++) {
+            vec4 d = disc[k];
+            if (distance(d.xy, m) <= d.z + hr) {
+                if (n == CAP) {
+                    n = -1;
+                    break;
+                }
+                ce.s[c * CAP + n] = sp.s[k].p;
+                n++;
+            }
+        }
+        gr.cnt[c] = n;
+    }
+}

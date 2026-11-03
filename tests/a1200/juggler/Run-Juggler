@@ -1,0 +1,41 @@
+; Run-Juggler - Juggler RT, the ray-traced Juggler: how fast, each way.
+; See ReadMe.txt.
+;   CD to this directory, then:   Execute Run-Juggler
+;   Longer runs:                   Execute Run-Juggler FRAMES=600
+; Nothing is installed: libs/ is added to LIBS: for the run and removed at the
+; end. Output goes to results/.
+.key FRAMES/K
+.def FRAMES 150
+.bra {
+.ket }
+
+FailAt 21
+If NOT EXISTS bin/juggler-ogles3
+  Echo "Please CD into the ogles2-juggler directory first,"
+  Echo "then run:  Execute Run-Juggler"
+  Quit 20
+EndIf
+Assign JG: ""
+If NOT EXISTS JG:results
+  MakeDir JG:results
+EndIf
+Assign LIBS: JG:libs ADD
+Avail FLUSH >NIL:
+List LIBS:ogles#? LIBS:v3dglslc#? >JG:results/libs.txt
+CD JG:bin
+
+; The juggler: 1987 (320x200, HAM) and 2026 (640x480, then half that),
+; each the ES 3.1 way and the ES 2.0 way; then the other scenes in 1987.
+juggler-ogles3 FULLSCREEN WIDTH=640 HEIGHT=480 TIMING FRAMES={FRAMES} >JG:results/1987-es3.txt
+juggler-ogles3 FULLSCREEN WIDTH=640 HEIGHT=480 TIMING FRAMES={FRAMES} ES2 >JG:results/1987-es2.txt
+juggler-ogles3 FULLSCREEN WIDTH=640 HEIGHT=480 TIMING FRAMES={FRAMES} MODERN >JG:results/2026-es3.txt
+juggler-ogles3 FULLSCREEN WIDTH=640 HEIGHT=480 TIMING FRAMES={FRAMES} MODERN SCALE=50 >JG:results/2026-50-es3.txt
+juggler-ogles3 FULLSCREEN WIDTH=640 HEIGHT=480 TIMING FRAMES={FRAMES} MODERN SCALE=50 ES2 >JG:results/2026-50-es2.txt
+juggler-ogles3 FULLSCREEN WIDTH=640 HEIGHT=480 TIMING FRAMES={FRAMES} SCENE=scenes/ele.dat >JG:results/ele-1987.txt
+juggler-ogles3 FULLSCREEN WIDTH=640 HEIGHT=480 TIMING FRAMES={FRAMES} SCENE=scenes/dragon.dat >JG:results/dragon-1987.txt
+
+CD JG:
+Assign LIBS: JG:libs REMOVE
+Avail FLUSH >NIL:
+Assign JG:
+Echo "Done. Results are in results/."

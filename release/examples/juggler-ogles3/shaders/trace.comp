@@ -1,0 +1,274 @@
+#version 310 es
+// The ray tracer: Eric Graham's rt1.c (1987) for every pixel at once.
+// Spheres, a checkered ground (z = 0, 3-unit tiles), a sky blended from
+// horizon to zenith, one lamp; dull, bright (a hard highlight) and mirror
+// spheres; shadows; mirrors reflect up to u_bounces times.
+//
+// Each work group is a (TILE * SUB)^2 tile (16: on ogles3 a work group costs
+// much however small, so fewer and bigger ones are faster). It first tests every sphere against
+// the cone of its tile's rays (a pixel's margin round it for the jitter)
+// and keeps the ones inside in shared memory, so a primary ray looks only
+// at those (at most LIST, kept in shared memory themselves; more: all). Shadow and reflected rays go through
+// the objects' bounding spheres (Groups) to their spheres.
+//
+// u_levels: the picture as rt2.c's ham() takes it, 4-bit levels, into
+// u_lv (for ham.comp); otherwise the light itself into u_hdr, mixed with
+// u_prev's (u_blend: 1 a fresh picture, 1/n the n-th of still ones added up).
+precision highp float;
+precision highp int;
+#define TILE 16
+#define SUB 1 // each invocation SUB x SUB pixels, TILE apart: a work group (TILE * SUB)^2
+layout(local_size_x = TILE, local_size_y = TILE) in;
+struct Sphere { vec4 p; vec4 c; };
+struct Group { vec4 b; ivec4 r; };
+layout(std430, binding = 0) readonly buffer Spheres { Sphere s[]; } sp;
+layout(std430, binding = 1) readonly buffer Groups { Group g[]; } gr;
+#define G 16 // shadow.comp's grid
+#define CAP 48
+layout(std430, binding = 3) readonly buffer Grid { vec4 lamp, ax, bu, bv, box; int cnt[G * G]; } sg;
+layout(std430, binding = 4) readonly buffer Cells { vec4 s[]; } ce;
+layout(rgba16f, binding = 0) writeonly uniform highp image2D u_hdr;
+layout(rgba8, binding = 1) writeonly uniform highp image2D u_lv;
+uniform highp sampler2D u_prev;
+uniform vec3 u_eye, u_fwd, u_right, u_up; // rt1.c's pixline: fwd = view direction * focal length
+uniform ivec2 u_size;
+uniform int u_ns, u_ng, u_levels, u_bounces;
+uniform vec4 u_lamp;       // centre, radius
+uniform vec3 u_lampcol;    // times lampfac (rt2.c)
+uniform vec3 u_lampoff;    // a place on the lamp (soft shadows added up), else 0
+uniform vec3 u_g0, u_g1, u_illum, u_zen, u_hor;
+uniform vec2 u_jitter;     // within the pixel, -0.5..0.5
+uniform float u_blend;
+uniform int u_dbg;         // measuring: 1 no shadows, 4 no shading
+
+#define LIST 128
+#define SMALL 1.0e-3
+shared uint s_n;
+shared uint s_list[LIST];
+shared vec4 s_sph[LIST]; // the spheres themselves: one read a test, not two
+
+// rt1.c's intsplin for a unit direction: the nearer root, or the farther
+// if that is behind eps; -1 for none.
+float hit(vec3 o, vec3 d, vec4 s, float eps)
+{
+    vec3 oc = o - s.xyz;
+    float b = dot(oc, d), q = b * b - dot(oc, oc) + s.w * s.w;
+    if (q <= 0.0)
+        return -1.0;
+    q = sqrt(q);
+    float t = -b - q;
+    if (t < eps)
+        t = -b + q;
+    return t > eps ? t : -1.0;
+}
+
+// Does the ray reach the bounding sphere b (in front, nearer than tmax)?
+bool reach(vec3 o, vec3 d, vec4 b, float eps, float tmax)
+{
+    vec3 oc = o - b.xyz;
+    float bb = dot(oc, d), q = bb * bb - dot(oc, oc) + b.w * b.w;
+    if (q <= 0.0)
+        return false;
+    q = sqrt(q);
+    return -bb + q > eps && -bb - q < tmax;
+}
+
+void nearest_all(vec3 o, vec3 d, float eps, inout float tmin, inout int idx)
+{
+    for (int g = 0; g < u_ng; g++) {
+        if (!reach(o, d, gr.g[g].b, eps, tmin))
+            continue;
+        ivec2 r = gr.g[g].r.xy;
+        for (int i = r.x; i < r.x + r.y; i++) {
+            float t = hit(o, d, sp.s[i].p, eps);
+            if (t > 0.0 && t < tmin) {
+                tmin = t;
+                idx = i;
+            }
+        }
+    }
+}
+
+// Is anything but sphere skip in the way (rt1.c: anything along the line)?
+bool blocked_all(vec3 o, vec3 d, float eps, vec4 skip)
+{
+    for (int g = 0; g < u_ng; g++) {
+        if (!reach(o, d, gr.g[g].b, eps, 1e10))
+            continue;
+        ivec2 r = gr.g[g].r.xy;
+        for (int i = r.x; i < r.x + r.y; i++)
+            if (sp.s[i].p != skip && hit(o, d, sp.s[i].p, eps) > 0.0)
+                return true;
+    }
+    return false;
+}
+
+// The same for a ray from p to the lamp, d its direction: only the spheres
+// of p's cell in shadow.comp's grid.
+bool blocked(vec3 p, vec3 d, float eps, vec4 skip)
+{
+    if ((u_dbg & 1) != 0)
+        return false;
+    vec3 q = p - sg.lamp.xyz;
+    float z = dot(q, sg.ax.xyz);
+    if (sg.lamp.w != 0.0 || z <= 0.0)
+        return blocked_all(p, d, eps, skip);
+    vec4 box = sg.box;
+    ivec2 c = ivec2(floor((vec2(dot(q, sg.bu.xyz), dot(q, sg.bv.xyz)) / z - box.xy) * box.zw));
+    if (any(lessThan(c, ivec2(0))) || any(greaterThanEqual(c, ivec2(G))))
+        return false;
+    int cell = c.y * G + c.x, n = sg.cnt[cell];
+    if (n < 0)
+        return blocked_all(p, d, eps, skip);
+    for (int k = 0; k < n; k++) {
+        vec4 s = ce.s[cell * CAP + k];
+        if (s != skip && hit(p, d, s, eps) > 0.0)
+            return true;
+    }
+    return false;
+}
+
+// rt1.c's pixbrite: light from above and round about, and the lamp's
+// (cos i / r^2) where nothing is in its way.
+vec3 pixbrite(vec3 p, vec3 n, vec3 col, vec4 skip)
+{
+    vec3 c = (dot(n, vec3(0.0, 0.0, 1.0)) + 1.5) * 0.4 * u_illum * col;
+    vec3 lp = u_lamp.xyz + u_lampoff - p;
+    float cosi = dot(lp, n);
+    if (cosi > 0.0) {
+        float r = length(lp);
+        if (!blocked(p, lp / r, SMALL * r, skip))
+            c += cosi / (r * r * r) * col * u_lampcol;
+    }
+    return c;
+}
+
+// rt1.c's glint: the lamp seen in the surface, within 0.95 (cos^2).
+bool glint(vec3 p, vec3 n, vec3 d, vec4 skip)
+{
+    vec3 lp = u_lamp.xyz + u_lampoff - p;
+    if (dot(lp, n) <= 0.0)
+        return false;
+    float r = length(lp);
+    if (blocked(p, lp / r, SMALL * r, skip))
+        return false;
+    vec3 rv = reflect(d, n);
+    float t = dot(lp, rv);
+    return t * t / (dot(lp, lp) * dot(rv, rv)) > 0.95;
+}
+
+// rt1.c's gingham: which tile, 3 units wide.
+vec3 ground(vec3 p)
+{
+    int kx = int(abs(p.x)) + (p.x < 0.0 ? 1 : 0), ky = int(abs(p.y)) + (p.y < 0.0 ? 1 : 0);
+    return ((kx / 3 + ky / 3) & 1) == 0 ? u_g0 : u_g1;
+}
+
+vec3 dir_at(vec2 px)
+{
+    vec2 f = px / vec2(u_size) - 0.5;
+    return u_fwd + u_right * f.x + u_up * f.y;
+}
+
+// One pixel's ray and what it meets; n the tile's list's length.
+void trace(ivec2 pix, uint n)
+{
+    vec3 d = dir_at(vec2(pix) + 0.5 + u_jitter), o = u_eye, thr = vec3(1.0), col = vec3(0.0);
+    float eps = SMALL * length(d); // rt1.c's SMALL is along its rays, which are as long as these
+    d = normalize(d);
+    for (int b = 0; b <= u_bounces; b++) {
+        float tmin = 1e10;
+        int idx = -1;
+        if (b == 0 && n <= uint(LIST)) {
+            int kmin = -1;
+            for (int k = 0; k < int(n); k++) {
+                float t = hit(o, d, s_sph[k], eps);
+                if (t > 0.0 && t < tmin) {
+                    tmin = t;
+                    kmin = k;
+                }
+            }
+            if (kmin >= 0)
+                idx = int(s_list[kmin]);
+        } else
+            nearest_all(o, d, eps, tmin, idx);
+        float tl = hit(o, d, u_lamp, eps);
+        if (tl > 0.0 && tl < tmin) { // the lamp itself
+            col = thr * u_lampcol / (u_lamp.w * u_lamp.w);
+            break;
+        }
+        if (d.z != 0.0) {
+            float tg = -o.z / d.z;
+            if (tg > eps && tg < tmin) {
+                vec3 p = o + d * tg;
+                col = thr * pixbrite(p, vec3(0.0, 0.0, 1.0), ground(p), vec4(0.0, 0.0, 0.0, -1.0));
+                break;
+            }
+        }
+        if (idx >= 0) {
+            Sphere s = sp.s[idx];
+            vec3 p = o + d * tmin, nr = (p - s.p.xyz) / s.p.w;
+            int type = int(s.c.w);
+            if ((u_dbg & 4) != 0) {
+                col = thr * s.c.rgb;
+                break;
+            }
+            if (type == 2) { // a mirror: on with the reflected ray
+                if (dot(nr, d) >= 0.0)
+                    break; // inside a sphere: dark
+                thr *= s.c.rgb;
+                d = reflect(d, nr);
+                o = p;
+                continue;
+            }
+            if (type == 1 && glint(p, nr, d, s.p)) {
+                col = thr;
+                break;
+            }
+            col = thr * pixbrite(p, nr, s.c.rgb, s.p);
+            break;
+        }
+        float s2 = d.z * d.z; // rt1.c's skybrite
+        col = thr * ((1.0 - s2) * u_hor + s2 * u_zen);
+        break;
+    }
+    if (u_levels != 0)
+        imageStore(u_lv, pix, vec4(clamp(floor(col * 16.0 + 0.5), 0.0, 15.0) / 15.0, 1.0));
+    else
+        imageStore(u_hdr, pix, vec4(mix(texelFetch(u_prev, pix, 0).rgb, col, u_blend), 1.0));
+}
+
+void main()
+{
+    uint lid = gl_LocalInvocationIndex;
+
+    // the tile's cone: its axis, and the widest angle to a corner
+    vec2 c0 = vec2(gl_WorkGroupID.xy * uint(TILE * SUB)) - 1.0, c1 = c0 + float(TILE * SUB + 2);
+    vec3 axis = normalize(dir_at(0.5 * (c0 + c1)));
+    float co = min(min(dot(axis, normalize(dir_at(c0))), dot(axis, normalize(dir_at(c1)))),
+                   min(dot(axis, normalize(dir_at(vec2(c0.x, c1.y)))), dot(axis, normalize(dir_at(vec2(c1.x, c0.y))))));
+    float si = sqrt(max(1.0 - co * co, 0.0));
+    if (lid == 0u)
+        s_n = 0u;
+    barrier();
+    for (int i = int(lid); i < u_ns; i += TILE * TILE) {
+        vec4 s = sp.s[i].p;
+        vec3 v = s.xyz - u_eye;
+        float d = dot(v, axis), l2 = dot(v, v);
+        float perp = sqrt(max(l2 - d * d, 0.0));
+        if (l2 <= s.w * s.w || (d > -s.w && co * perp - si * d <= s.w)) {
+            uint k = atomicAdd(s_n, 1u);
+            if (k < uint(LIST))
+                s_list[k] = uint(i), s_sph[k] = s;
+        }
+    }
+    barrier();
+    uint n = s_n;
+    ivec2 base = ivec2(gl_WorkGroupID.xy) * (TILE * SUB) + ivec2(gl_LocalInvocationID.xy);
+    for (int sy = 0; sy < SUB; sy++)
+        for (int sx = 0; sx < SUB; sx++) {
+            ivec2 pix = base + ivec2(sx, sy) * TILE;
+            if (pix.x < u_size.x && pix.y < u_size.y)
+                trace(pix, n);
+        }
+}

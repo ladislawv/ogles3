@@ -737,6 +737,109 @@ and capture mode, 7 release). Success: 8192 boids at 30 fps or better, the
 - (Step 1's "next", done below otherwise: 16384 boids stayed the default,
   the grid made cheaper by a smaller grid instead of a wider scan.)
 
+**Plan: Juggler RT (2026-11-03, the developer's request).** Eric Graham's
+1987 Juggler ray traced live in compute shaders; the design is the
+developer's `JUGGLER_RT_PLAN.md` (outside the repository), from his ray
+tracer's sources (github.com/AlphaPixel/Eric-Graham-1987-Juggler-Raytracer-1.0:
+`rt1.c` the tracer, `rt2.c` the exposure, `rt3.c` HAM; "anyone can do what
+they want with the code, so long as I get a mention"). Done without the
+A1200 (the developer's ask: as much as can be): steps 1-6 of its build
+order written, checked on a PC; nothing measured on the Amiga yet.
+- **The program:** `release/examples/juggler-ogles3/` (`juggler-ogles3.c`
+  the Amiga side; `juggler_gl.h` the renderer and `juggler_scene.h` the
+  scenes, both portable C shared with the PC check; `shaders/`, `scenes/`
+  the three original `.dat` files, also built in; `Makefile`, `ReadMe.txt`).
+  A frame: `animate.comp` (one group: robot.dat's 22 control points at the
+  time into shared memory, the 79 spheres between them and each object's
+  bounding sphere into storage buffers; the juggler only), `trace.comp`
+  (rt1.c: 8 x 8 tiles, each first gathering the spheres inside its rays'
+  cone into a shared list with `atomicAdd`, at most 96, more: all; shadow
+  and mirror rays through the 13 objects' bounding spheres; up to 4
+  reflections; `imageStore` to RGBA8 levels or RGBA16F light),
+  `ham.comp` (1987: one invocation a row decodes rt3.c's HAM6 with the 16
+  registers its allocation gave over the scene's first picture, read back
+  once), a full-screen triangle. 1987: 320x200 4-bit levels shown 4:3; 2026:
+  the window's size (`SCALE`, keys + -), and still pictures (Space, or a
+  still scene) added up with Halton jitter and points on the lamp's disc:
+  edges and soft shadows, 64 pictures, then shown without tracing. The ES
+  2.0 way (key E): `es2trace.frag`, GLSL ES 1.00, every ray against every
+  sphere from uniform arrays (320 at most) the 68k fills, the 68k doing the
+  juggling (`j_juggle`, the shader's twin). Keys N (scenes), O, R, mouse
+  drag (the camera round the scene's middle).
+- **The juggling** (not in the original release: `movie.data` is only the
+  24 rendered frames; robot.dat is one pose): a three-ball cascade, a throw
+  every 0.4 s, each hand round a circle (caught outside, thrown inside),
+  elbows and knees by two-bone IK towards their rest bends, the body
+  bobbing at each throw. Its constants were searched for balls 0.2 clear of
+  each other and 0.3 of the head at every moment (the throws from the right
+  bowed towards the camera, from the left away); `pccheck` measures it.
+- **Checked on a PC** (`tools/pccheck.sh`: Mesa's llvmpipe through EGL
+  without a surface, the same renderer and shaders): robot.dat's 1987
+  picture against the original program's own (`robot.rgb`, ssg's dump:
+  its light x128 + 4) **99.71% of pixels the same level, 0.27% more than one
+  level apart** (edges); that needed rt1.c's ray through the pixel's corner
+  (x = i, y = the row from the top), 82.6% at the centre. `ham.comp`
+  against the C HAM: identical; `animate.comp` against `j_juggle`: 1.6e-6;
+  the ES 2.0 way against ES 3.1: within a level (1.9% of pixels, the
+  half-float's rounding). ele.dat (120 spheres) and dragon.dat (288) as
+  the originals'. The offline compiler takes all five programs (`make
+  shaders`): trace.comp 1642 instructions, 2 threads, no spills; ham.comp
+  4 threads; es2trace.frag 825, 2 threads.
+- **The package:** `tests/a1200/juggler` (`Run-Juggler`: 1987 and 2026 at
+  640x480 full screen, each way, 150 frames; ele.dat and dragon.dat in
+  1987), built (`build_package.sh juggler`).
+- **On the A1200 (2026-11-03, `results/ogles2-juggler-20261103-155853`):**
+  it draws (the juggler in 2026, ele.dat in 1987 on the screenshots), no
+  variant needed. 150 frames, ms a frame for trace / ham:
+  1987 ES 3.1 25.4 fps (27.9 / 9.9), ES 2.0 16.5 fps (59.6);
+  2026 640x480 ES 3.1 9.0 fps (109.1); SCALE=50 ES 3.1 29.6 fps (32.0),
+  ES 2.0 13.9 fps (70.9); ele.dat 1987 26.9 fps (24.3 / 11.7), dragon.dat
+  12.3 fps (68.5 / 12.1). The tiles' sphere lists halve the ES 2.0 way's
+  time; the trace is ~4x the 5-8 ms budget. The throws bowed towards the
+  camera do leave the frame's top (seen in 2026).
+- **Optimised to 60 fps (2026-11-03, the developer's request):** 1987
+  from 25.4 to **61.4 fps** (ES 3.1, 150 frames; ele.dat 73.3, dragon.dat
+  60.5; 2026 SCALE=50 65.9, full 640x480 27.4). Measured with the
+  environment variable `JUGGLER_DBG` (1 no shadows, 2 no reflections, 4
+  no shading): the shadow rays were 16.5 of the trace's 30 ms, the
+  primary rays 11.6. What each step gave:
+  1. **On ogles3 a work group costs much however small:** fewer, bigger
+     ones are faster. ham.comp from 16 rows a group (13 groups) to one
+     group of 256: 6.4 -> 1.5 ms (with 4 a group it was 21.7); trace.comp
+     tiles 8x8 -> 16x16 (1000 -> 250 groups): 30.2 -> 14.9 ms. 32x32 (each
+     invocation 2x2 pixels) gave nothing more.
+  2. ham.comp's nearest register looked up (`jgl_near`: 4096 colours, a
+     64x64 RGBA8 texture made with the palette) instead of searched.
+  3. **The shadows' grid** (`shadow.comp`, one group a frame): the lamp
+     is a point, so a shadow ray seen from it is a point; 16x16 cells
+     over the spheres' discs seen from the lamp, each listing up to 48
+     spheres (more: -1, the objects' way). Shadows 9 -> ~2 ms, the pass
+     1.2 ms (32x32 cells cost 1.6 ms and traced slower).
+  4. The tile list holds the spheres themselves (one read a test).
+  The PC check unchanged: 99.71% against the original, HAM identical.
+  Also (the developer's report): the left knee bent backwards, its rest
+  pose all but straight; the knees now bend forwards (pole -x).
+- **The camera and the text (2026-11-03, the developer's request):** the
+  camera swings slowly left and right in every scene (30 degrees each way,
+  24 s; key O: swinging, round, still; R back and swinging); the keys'
+  text as Boing Swarm's (its 5x7 font, `text.vert`/`text.frag`, each line
+  with a dark shadow to read over the checks; key H): the title, the
+  scene, the way and size, fps, the camera, the keys. 1987: 63.1 fps with
+  the text (300 frames).
+- **In the release (2026-11-03, the developer's request):** the title
+  line says what it is ("JUGGLER - REALTIME RAYTRACING OF ERIC GRAHAM'S
+  1987 DEMO", the font got an apostrophe). `build_release.sh` ships it as
+  Boing Swarm is (`SDK/examples/juggler-ogles3` with its scenes and PC
+  check, `Examples/juggler-ogles3` with its .txt and 23 shader files); the
+  1.0-beta1 archives rebuilt (`sdl dist`). `ogles3-1.0-beta1-demos.zip`
+  remade by hand with it (four demos, 181 files; the library and the
+  others byte for byte as before). Checked from the unzipped demos with an
+  empty `OGLES3Cache:` (a RAM: drawer for the run): every program from its
+  `shaders/`, nothing compiled, 62.7 fps; no draw-time variant to ship.
+- **Next:** the full-size 2026 picture (27 fps: the reflected rays still
+  go through the objects; a grid for them, or fewer bounces); lower the
+  front throws; a video.
+
 **Plan: Boing Ocean for ogles3 (2026-10-30, the developer's request).** A
 copy, `release/examples/boingocean-ogles3.c` (with
 `boingocean-ogles3_shaders.h`), becomes the OpenGL ES 3 version of example 3:

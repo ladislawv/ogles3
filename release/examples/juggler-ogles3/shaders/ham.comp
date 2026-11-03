@@ -1,0 +1,49 @@
+#version 310 es
+// The 1987 look: rt3.c's ham2 for each row of the 4-bit picture (one
+// invocation a row, left to right, as the Amiga's HAM6 display decodes it).
+// A pixel either takes the nearest of the 16 colour registers (made once
+// by rt3.c's allocation over the scene's first picture) or holds the
+// colour on its left and changes one channel, the one most wrong: the
+// fringes of HAM.
+//
+// The nearest register of each of the 4096 colours is looked up in u_near
+// (64 x 64, made on the CPU with the registers: rgb the register, a its
+// distance), not searched: a uniform array indexed in a loop is a memory
+// read a time on V3D. Sixteen rows a work group, one a lane.
+precision highp float;
+precision highp int;
+layout(local_size_x = 256) in;
+layout(rgba8, binding = 2) writeonly uniform highp image2D u_ham;
+uniform highp sampler2D u_lvtex;
+uniform highp sampler2D u_near;
+uniform ivec2 u_size;
+
+ivec3 level(int x, int y)
+{
+    return ivec3(texelFetch(u_lvtex, ivec2(x, y), 0).rgb * 15.0 + 0.5);
+}
+
+void main()
+{
+    int y = int(gl_GlobalInvocationID.x);
+    if (y >= u_size.y)
+        return;
+    ivec3 prev = ivec3(0), next = level(0, y);
+    for (int x = 0; x < u_size.x; x++) {
+        ivec3 p = next;
+        next = level(min(x + 1, u_size.x - 1), y); // the next one on its way meanwhile
+        int i = p.r * 256 + p.g * 16 + p.b;
+        vec4 nr = texelFetch(u_near, ivec2(i & 63, i >> 6), 0);
+        ivec3 e = abs(p - prev);
+        int dif = e.r + e.g + e.b - max(e.r, max(e.g, e.b)); // rt3.c's coldist
+        if (x == 0 || (dif != 0 && int(nr.a * 255.0 + 0.5) < dif))
+            prev = ivec3(nr.rgb * 15.0 + 0.5);
+        else if (e.r >= e.g && e.r >= e.b && e.r > 0) // hold and modify the worst channel (the first of equals)
+            prev.r = p.r;
+        else if (e.g >= e.b && e.g > 0)
+            prev.g = p.g;
+        else
+            prev.b = p.b;
+        imageStore(u_ham, ivec2(x, y), vec4(vec3(prev) / 15.0, 1.0));
+    }
+}

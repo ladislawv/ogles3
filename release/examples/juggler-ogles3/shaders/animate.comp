@@ -1,0 +1,127 @@
+#version 310 es
+// The juggling, one work group: robot.dat's 22 control points at u_time
+// (juggler_scene.h's j_juggle, the same sums) into shared memory, then each
+// sphere of the figure between its two points, and each object's bounding
+// sphere round its points (which holds every sphere between them).
+precision highp float;
+precision highp int;
+layout(local_size_x = 128) in;
+struct Sphere { vec4 p; vec4 c; };
+struct Group { vec4 b; ivec4 r; };
+layout(std430, binding = 0) writeonly buffer Spheres { Sphere s[]; } sp;
+layout(std430, binding = 1) buffer Groups { Group g[]; } gr;
+layout(std430, binding = 2) readonly buffer Chains { vec4 a[]; } ch;
+uniform vec4 u_rest[22]; // the points at rest (centre, radius)
+uniform float u_time;
+uniform int u_ns, u_ng;
+shared vec4 pts[22];
+
+#define PI 3.14159265
+#define H 0.4
+#define D (0.75 * H)
+#define F (3.0 * H - D)
+#define RISE 1.8
+#define HX -1.4
+#define CY 1.9
+#define RY 0.3
+#define XF 1.8
+#define XB 0.3
+
+vec3 hand_at(int h, float a)
+{
+    float s = h == 1 ? 1.0 : -1.0;
+    return vec3(HX - 0.12 * sin(a), s * (CY + RY * cos(a)), 4.5 - 0.3 * sin(a));
+}
+
+vec3 hand(int h, float t)
+{
+    float u = mod(t - float(h) * H + D, 2.0 * H);
+    return hand_at(h, u < D ? PI * u / D : PI + PI * (u - D) / (2.0 * H - D));
+}
+
+vec3 ball(int i, float t)
+{
+    float tau = mod(t - float(i) * H, 6.0 * H), g = 8.0 * RISE / (F * F);
+    int h = i & 1;
+    vec3 p;
+    if (tau >= 3.0 * H) {
+        tau -= 3.0 * H;
+        h = 1 - h;
+    }
+    if (tau < F) {
+        float f = tau / F;
+        p = mix(hand_at(h, PI), hand_at(1 - h, 0.0), f);
+        p.x += (h == 1 ? XB : -XF) * sin(PI * f);
+        p.z += 0.5 * g * tau * (F - tau);
+    } else
+        p = hand(1 - h, t);
+    return p + vec3(0.0, 0.0, 0.7);
+}
+
+vec3 ik(vec3 r, vec3 e, float la, float lb, vec3 pole)
+{
+    vec3 d = e - r;
+    float l = length(d);
+    vec3 n = d / l;
+    l = clamp(l, abs(la - lb) + 1e-3, la + lb - 1e-3);
+    float x = (la * la - lb * lb + l * l) / (2.0 * l);
+    float h = sqrt(max(la * la - x * x, 0.0));
+    vec3 pv = pole - n * dot(pole, n);
+    return r + n * x + pv / (length(pv) + 1e-6) * h;
+}
+
+// The body point k (not a ball, knee, foot, elbow or hand) at time t.
+vec3 body(int k, float t)
+{
+    float bob = 0.12 * (0.5 - 0.5 * cos(2.0 * PI * t / H));
+    float sway = 0.05 * sin(PI * t / H);
+    vec3 p = u_rest[k].xyz;
+    p.y += k >= 10 && k <= 15 ? 0.3 * sway : sway;
+    p.z -= bob;
+    return p;
+}
+
+vec3 point(int k, float t)
+{
+    if (k < 3)
+        return ball(k, t);
+    if (k == 12 || k == 15)
+        return u_rest[k].xyz; // the feet stay
+    if (k == 11 || k == 14) { // knees, bent forwards
+        vec3 hip = u_rest[k - 1].xyz, kn = u_rest[k].xyz, ft = u_rest[k + 1].xyz;
+        return ik(body(k - 1, t), ft, distance(hip, kn), distance(kn, ft), vec3(-1.0, 0.0, 0.0)); // forwards
+    }
+    if (k == 18 || k == 21)
+        return hand(k == 21 ? 1 : 0, t);
+    if (k == 17 || k == 20) { // elbows
+        vec3 sh = u_rest[k - 1].xyz, el = u_rest[k].xyz, hd = u_rest[k + 1].xyz;
+        return ik(body(k - 1, t), hand(k == 20 ? 1 : 0, t), distance(sh, el), distance(el, hd), el - 0.5 * (sh + hd));
+    }
+    return body(k, t);
+}
+
+void main()
+{
+    int i = int(gl_LocalInvocationID.x), k;
+    if (i < 22)
+        pts[i] = vec4(point(i, u_time), u_rest[i].w);
+    barrier();
+    for (k = i; k < u_ns; k += 128) {
+        vec4 a = ch.a[2 * k], c = ch.a[2 * k + 1];
+        sp.s[k].p = mix(pts[int(a.x)], pts[int(a.y)], a.z);
+        sp.s[k].c = vec4(c.rgb, a.w);
+    }
+    if (i < u_ng) {
+        ivec4 r = gr.g[i].r;
+        vec3 lo = vec3(1e30), hi = vec3(-1e30), c;
+        float rad = 0.0;
+        for (k = r.z; k < r.z + r.w; k++) {
+            lo = min(lo, pts[k].xyz - pts[k].w);
+            hi = max(hi, pts[k].xyz + pts[k].w);
+        }
+        c = 0.5 * (lo + hi);
+        for (k = r.z; k < r.z + r.w; k++)
+            rad = max(rad, distance(pts[k].xyz, c) + pts[k].w);
+        gr.g[i].b = vec4(c, rad);
+    }
+}
