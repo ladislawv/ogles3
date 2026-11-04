@@ -1,5 +1,39 @@
 # OpenGL ES 3.0 and 3.1 on ogles2.library
 
+**Release 1.0-beta2 (2026-11-04, the developer's call), for the compiler
+port below.** `OGLES3_RELEASE` 1.0-beta2; the library stays version 1.0,
+dated 04.11.2026 (its `$VER` and `v3dglslc3`'s). `Install-ogles3`: an
+installed `LIBS:v3dglslc3` is replaced whatever its version (beta1's is
+1.0 too and would have been kept), and the library and the compiler are
+deleted before each copy, so a failed copy is not hidden by beta1's 1.0
+answering `Version`. README.md and the ReadMe say what is new; the release
+name in GettingStarted, `ogles3.doc`, ReadMe-SDL, `docs/SDL.md`. Archives:
+`sdl dist` (beta1's left `release/dist/`), the user archive checked
+unpacked (both binaries 04.11.2026, the new port name, the installer);
+`ogles3-1.0-beta2-demos.zip` made from beta1's with its ReadMe.txt's
+release name and `libs/ogles3.library` replaced, the other 179 files byte
+for byte; `SHA256SUMS` checks. The installer's new steps are **not run on
+the A1200 yet** either: over a beta1 install, `Execute Install-ogles3 ALL`
+and `Version LIBS:ogles3.library FULL` / `LIBS:v3dglslc3 FULL` (04.11.2026).
+
+**Own compiler port (2026-11-04, a user's report; in 1.0-beta2).**
+ogles3 and ogles2 1.x served their compilers on the same public port,
+`v3dglsl compiler` (and with the same request version, 1): the library
+that came second sent its programs to the other's compiler (ES 3 shaders
+failed in ogles2's GLES2 context, ES 3-only requests were refused, ES 2
+programs went into `OGLES3Cache:` from ogles2's compiler, and the other
+way round), and either library's expunge stopped the other's compiler
+(its QUIT goes to the port by name). `v3dp/v3dglsl_port.h`'s
+`V3DGLSL_PORT_NAME` is now `v3dglsl3 compiler`, and the server process
+takes that name too (`compiler.c`, `v3dglslc-remote`); ogles2 1.x is left
+as it is. A `v3dglslc3` from before the fix with the new library never answers:
+the library gives up after 60 s and its log says so (one older than the
+library?); `Install-ogles3` installs the two together. Built (the library,
+`v3dglslc3` m68k, `v3dglslc-remote`: each holds the new name, none the
+old); released as 1.0-beta2 (above). **Not tested on the A1200 yet** (busy): run
+an ogles2 program that compiles, then an ogles3 one, then `Avail FLUSH`,
+and in the other order.
+
 **The 1.0-beta1 archives rebuilt (2026-11-01, the developer's call: the
 same release name and library version 1.0, dated 01.11.2026).** The
 ReadMe, `ogles3.doc` (the new extensions, CONFORMANCE) and README.md have
@@ -387,7 +421,7 @@ dEQP-GLES31 is left for the next day (the developer's call).
   `OES_draw_elements_base_vertex`: dEQP-GLES31 looks for
   `EXT_draw_elements_base_vertex` (or ES 3.2); to look at with the
   extensions.
-- **Next:** the 1.0-beta2.
+- **Next:** the 1.0-beta2 (made 2026-11-04 for the compiler port, at the top; the two freezes still open).
 
 **Plan: Boing Swarm (2026-11-02, the developer's request).** A new ES 3.1
 demo: thousands of boids that flock into a spinning Boing ball, burst apart
@@ -1635,7 +1669,8 @@ Mesa's driver, so they could follow later as an extension
     a program with its variants (`tools/v3dglslc/test/shaders`, one
     process), and the two write the same files byte for byte
     (`compare_v3dp.sh`). The library needs no change: it sends every
-    request to the public port `v3dglsl compiler` and starts its own
+    request to the public port `v3dglsl3 compiler` (`v3dglsl compiler`
+    until 2026-11-04, see "Own compiler port") and starts its own
     server only when the port is missing (`compiler.c`'s `send`). Three
     parts:
     - `v3dglslc-remote` on the A1200 (GCC 6 + libnix and Roadshow's

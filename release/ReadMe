@@ -1,4 +1,4 @@
-ogles3.library 1.0 (release 1.0-beta1) for AmigaOS 3.x on PiStorm
+ogles3.library 1.0 (release 1.0-beta2) for AmigaOS 3.x on PiStorm
 ==================================================================
 
 OpenGL ES 3.1 for 68k AmigaOS, drawn by the Raspberry Pi 4's GPU (Broadcom
@@ -13,6 +13,13 @@ This is a beta. The complete Khronos conformance runs of OpenGL ES 2.0,
 3.0 and 3.1 have been made on an A1200 (see "Conformance"); a few rare
 problems seen there are still being looked at. Please report what goes
 wrong.
+
+New in 1.0-beta2: the shader compiler has its own message port. In
+1.0-beta1 it shared ogles2's, so when programs of both libraries ran in a
+session, one library's shaders went to the other's compiler (ES 3 shaders
+failed to compile), and flushing one library stopped the other's
+compiler. Install ogles3.library and v3dglslc3 together: Install-ogles3
+replaces both.
 
 ogles3 and ogles2
 -----------------
@@ -39,7 +46,7 @@ What is in this archive
   Examples/           small programs with their compiled shaders
   SDK/                headers, import libraries, documentation and the
                       examples' sources, for programmers (only in
-                      ogles3-1.0-beta1-sdk.lha; see "For programmers")
+                      ogles3-1.0-beta2-sdk.lha; see "For programmers")
   LICENSE, licences/  licences and notices
 
 Installing
@@ -49,8 +56,9 @@ From a Shell, in this drawer:
     Execute Install-ogles3
 
 It asks before each step:
-- copies ogles3.library to LIBS: (an older LIBS:v3dglslc3 is replaced
-  without asking, since the library uses that one first);
+- copies ogles3.library to LIBS: (a LIBS:v3dglslc3 already installed is
+  replaced with this release's without asking: the library uses that one
+  first, and the two must be of the same release);
 - copies the shader compiler v3dglslc3 to LIBS: (optional, see "Shaders");
 - makes the drawer SYS:OGLES3Cache and adds "Assign OGLES3Cache:
   SYS:OGLES3Cache" to S:User-Startup, so compiled shaders are kept across
@@ -143,8 +151,8 @@ usually says why there.
 
 For programmers
 ---------------
-The SDK comes in two forms: ogles3-1.0-beta1-sdk.lha (this archive with
-SDK/ added) and ogles3-1.0-beta1-sdk.zip (the SDK alone, for building on a
+The SDK comes in two forms: ogles3-1.0-beta2-sdk.lha (this archive with
+SDK/ added) and ogles3-1.0-beta2-sdk.zip (the SDK alone, for building on a
 PC with a cross compiler). It holds:
 
 SDK/include    <proto/ogles3.h> (every OpenGL ES 3.1 function and agl*),

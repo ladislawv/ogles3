@@ -341,7 +341,7 @@ static void fall_back(struct V3DGLSLRequest *r)
     out = Open((STRPTR) "NIL:", MODE_NEWFILE);
     if (in && out &&
         SystemTags((STRPTR)cmd, SYS_Input, in, SYS_Output, out, SYS_Asynch, TRUE, NP_StackSize, COMPILER_STACK,
-                   NP_Name, (ULONG) "v3dglsl compiler", TAG_DONE) != -1) {
+                   NP_Name, (ULONG)V3DGLSL_PORT_NAME, TAG_DONE) != -1) {
         for (t = 0; t < 30 * 50 && !local; t += 5) { /* 30 s */
             Forbid();
             local = FindPort((STRPTR)V3DGLSL_PORT_NAME);

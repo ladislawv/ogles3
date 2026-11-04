@@ -12,7 +12,7 @@ and SDL3. With it, SDL programs draw through the PiStorm's VideoCore GPU
 | Licence | zlib (as SDL) | zlib (as SDL) |
 
 Both are static link libraries built with clib2; there is no `SDL2.library`.
-They ship as a separate archive, `ogles3-1.0-beta1-sdl.lha` (or `.zip` for a PC), which unpacks
+They ship as a separate archive, `ogles3-1.0-beta2-sdl.lha` (or `.zip` for a PC), which unpacks
 over the ogles3 SDK archive: `SDK/SDL2/`, `SDK/SDL3/`, `SDK/MiniGL/` (PiStorm3D's MiniGL SDK,
 which SDL links for its desktop-GL path), this guide as `SDK/doc/SDL.md`, and two examples
 (`SDK/examples-sdl/`: `sdl2_sprites`, the 2D renderer; `sdl3_gles2`, a program's own GLES2

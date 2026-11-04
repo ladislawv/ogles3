@@ -25,7 +25,12 @@
 #include <exec/ports.h>
 #endif
 
-#define V3DGLSL_PORT_NAME "v3dglsl compiler"
+/* ogles3's own (2026-11-04): ogles2.library 1.x and its v3dglslc serve
+ * "v3dglsl compiler"; sharing it, the library that came second sent its
+ * programs to the other's compiler (ES 3 shaders failed, programs went to
+ * the cache from the wrong compiler), and either library's expunge stopped
+ * the other's compiler (QUIT). */
+#define V3DGLSL_PORT_NAME "v3dglsl3 compiler"
 #define V3DGLSL_VERSION   1
 
 #define V3DGLSL_LINK    1 /* compile vs and fs, link, write the .v3dp to out_path */

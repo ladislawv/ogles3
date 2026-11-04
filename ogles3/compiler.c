@@ -194,7 +194,7 @@ static BOOL start_server(void)
     tags[1].ti_Tag = SYS_Output;   tags[1].ti_Data = (ULONG)out;
     tags[2].ti_Tag = SYS_Asynch;   tags[2].ti_Data = TRUE;
     tags[3].ti_Tag = NP_StackSize; tags[3].ti_Data = COMPILER_STACK;
-    tags[4].ti_Tag = NP_Name;      tags[4].ti_Data = (ULONG) "v3dglsl compiler";
+    tags[4].ti_Tag = NP_Name;      tags[4].ti_Data = (ULONG)V3DGLSL_PORT_NAME;
     tags[5].ti_Tag = TAG_DONE;
     rc = SystemTagList((STRPTR)cmd, tags);
     if (rc == -1) { /* not started: the handles are still ours */
@@ -210,7 +210,9 @@ static BOOL start_server(void)
         }
         Delay(5);
     }
-    ogles2_log("compiler: %s did not answer within %ld s", (ULONG)compiler_path, (LONG)START_TICKS / 50);
+    /* A v3dglslc3 built before 2026-11-04 serves the port ogles2 uses, never ours. */
+    ogles2_log("compiler: %s did not answer within %ld s (one older than the library?)", (ULONG)compiler_path,
+               (LONG)START_TICKS / 50);
     return FALSE;
 }
 

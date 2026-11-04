@@ -4,7 +4,7 @@ ogles3 SDL archive: SDL2 and SDL3 for AmigaOS 3 with OpenGL ES 3.1
 SDL2 (2.33.0) and SDL3 (3.4.14) for 68k AmigaOS 3, built from Steffen
 Haeuser's SDL2_68k and SDL3_68k with the ogles3 project's OpenGL ES
 backend: SDL programs draw through the PiStorm's GPU (ogles3.library 1.0,
-release 1.0-beta1).
+release 1.0-beta2).
 
   - SDL's 2D API (SDL_Renderer, textures, rotation, blending) is drawn by
     the GPU through SDL's GLES2 renderer ("opengles2"), with no GL code in

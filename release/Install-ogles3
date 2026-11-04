@@ -1,4 +1,4 @@
-; Install-ogles3 - installs ogles3.library 1.0 (release 1.0-beta1). See ReadMe.
+; Install-ogles3 - installs ogles3.library 1.0 (release 1.0-beta2). See ReadMe.
 ; From a Shell, in this drawer:   Execute Install-ogles3
 ; It asks before each step; with ALL it does every step without asking:
 ;                                 Execute Install-ogles3 ALL
@@ -13,7 +13,7 @@ If NOT EXISTS Libs/ogles3.library
   Quit 20
 EndIf
 
-Echo "ogles3.library 1.0 (release 1.0-beta1): OpenGL ES 3.1 for PiStorm (Raspberry Pi 4)"
+Echo "ogles3.library 1.0 (release 1.0-beta2): OpenGL ES 3.1 for PiStorm (Raspberry Pi 4)"
 Echo "It goes beside ogles2.library 1.x, which stays as it is."
 Echo ""
 
@@ -27,7 +27,9 @@ EndIf
 ; Copy answers 0 even when it copied nothing (a full disk, a protected
 ; file), so each copy is checked with Version, which answers 5 for an older
 ; version and 20 for none. The numbers are this library's (build_release.sh
-; checks them).
+; checks them). An installed one is deleted first: 1.0-beta1's is version
+; 1.0 too, and Version would take it for this one if the copy failed.
+Delete >NIL: LIBS:ogles3.library FORCE QUIET
 Copy Libs/ogles3.library LIBS: CLONE
 Version >NIL: LIBS:ogles3.library 1 0 FILE
 If WARN
@@ -37,21 +39,21 @@ EndIf
 ; an older version still in memory is replaced at its next opening
 Avail FLUSH >NIL:
 Echo "  LIBS:ogles3.library installed."
-; An installed compiler older than this library is replaced with it: the
-; library uses LIBS:v3dglslc3 first (ogles2.library 1.x's LIBS:v3dglslc is
-; another program, left as it is).
+; An installed compiler is replaced with this release's, whatever its
+; version: the library and the compiler are a pair (1.0-beta1's v3dglslc3,
+; also version 1.0, served another port and never answers this library).
+; The library uses LIBS:v3dglslc3 first (ogles2.library 1.x's LIBS:v3dglslc
+; is another program, left as it is).
 If EXISTS LIBS:v3dglslc3
+  Delete >NIL: LIBS:v3dglslc3 FORCE QUIET
+  Copy Libs/v3dglslc3 LIBS: CLONE
   Version >NIL: LIBS:v3dglslc3 1 0 FILE
   If WARN
-    Copy Libs/v3dglslc3 LIBS: CLONE
-    Version >NIL: LIBS:v3dglslc3 1 0 FILE
-    If WARN
-      Echo "Could not replace the older LIBS:v3dglslc3 (19 MB free? write-protected?)."
-      Quit 20
-    EndIf
-    Echo "  LIBS:v3dglslc3 replaced: the one installed was older."
-    Skip cache
+    Echo "Could not replace LIBS:v3dglslc3 (19 MB free? write-protected?)."
+    Quit 20
   EndIf
+  Echo "  LIBS:v3dglslc3 replaced with this release's."
+  Skip cache
 EndIf
 
 ; ---- the shader compiler
