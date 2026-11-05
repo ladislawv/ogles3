@@ -147,7 +147,10 @@ Logging
 The library logs to T:ogles3.log, or to the file named in the environment
 variable OGLES3/LogFile (SetEnv OGLES3/LogFile RAM:ogles3.log). OGLES3Log
 writes the buffered log while a program still runs. A program that fails
-usually says why there.
+usually says why there. Each context adds a few lines when it is destroyed,
+so T:ogles3.log (in RAM, as a rule) is kept to 256 KB: at that size it
+becomes T:ogles3.log.old and a new one starts. OGLES3/LogMax sets the cap
+in KB (0: none); a file named in OGLES3/LogFile has none unless it is set.
 
 For programmers
 ---------------

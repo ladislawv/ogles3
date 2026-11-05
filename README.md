@@ -145,7 +145,9 @@ next to it (`PROGDIR:`). Without a compiler, the library writes the sources it i
 `v3dp/split_shaders.py`, `v3dp/v3dp_hashname.py`).
 
 **Logging.** The library logs to `T:ogles3.log`, or to the file named in `ENV:OGLES3/LogFile`;
-`OGLES3Log` writes the buffered log while a program is still running. With `KHR_debug` a program
+`OGLES3Log` writes the buffered log while a program is still running. `T:ogles3.log` is kept to
+256 KB (then it becomes `T:ogles3.log.old` and a new one starts); `ENV:OGLES3/LogMax` sets the cap in
+KB, 0 for none, and a file named in `OGLES3/LogFile` has none unless it is set. With `KHR_debug` a program
 gets every GL error as a message, in a log or through its own callback.
 
 The full reference, with every call, tag, extension, limit and the deviations, is

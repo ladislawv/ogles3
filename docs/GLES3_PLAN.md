@@ -1,20 +1,43 @@
 # OpenGL ES 3.0 and 3.1 on ogles2.library
 
+**The log file capped (2026-11-05, a user's report).** A JUCE porter
+measured Fast RAM lost when contexts are made and destroyed: 1,040 bytes
+every cycle or two, more with clears and swaps, none with one context
+kept. Their samples (physical A500 + PiStorm, beta1) put every loss inside
+`aglDestroyContext`, where the library appends the context's lines (about
+500 bytes; the timing lines after drawing and swapping) to `T:ogles3.log`,
+which is on the RAM disk; each context's 18.48 MB came back whole. Not a
+leak, but the file grew without end. `log.c`: `T:ogles3.log` is capped at
+256 KB; a flush that would pass the cap renames the file to
+`<file>.old` (replacing the one before) and starts a new one with a line
+that says so, so the two stay within about 512 KB; where the rename fails
+the file starts over. `ENV:OGLES3/LogMax` sets the cap in KB (0: none); a
+file named in `OGLES3/LogFile` (the test packages' results) has none
+unless it is set. ReadMe, `ogles3.doc` (ENVIRONMENT), README.md. Checked
+on the PC: `log_cap` and `log_open` copied unchanged into a harness with
+POSIX stand-ins for DOS (2,000 flushes of 700 bytes: five rotations, the
+file never above 256 KB, the two at most 523,774 bytes; a named file
+uncapped; LogMax 0, 1, 64, junk, empty); the library builds. **Not run on
+the A1200 yet.** In the 1.0-beta2 archives, rebuilt (the developer's call): the
+library and `v3dglslc3` dated 05.11.2026, `sdl dist`, the user archive
+checked unpacked (the date, the port, `OGLES3/LogMax` in the library), the
+demos zip with only `libs/ogles3.library` replaced; `SHA256SUMS` checks.
+
 **Release 1.0-beta2 (2026-11-04, the developer's call), for the compiler
 port below.** `OGLES3_RELEASE` 1.0-beta2; the library stays version 1.0,
-dated 04.11.2026 (its `$VER` and `v3dglslc3`'s). `Install-ogles3`: an
+dated 05.11.2026 since the log cap above (04.11.2026 first; its `$VER` and `v3dglslc3`'s). `Install-ogles3`: an
 installed `LIBS:v3dglslc3` is replaced whatever its version (beta1's is
 1.0 too and would have been kept), and the library and the compiler are
 deleted before each copy, so a failed copy is not hidden by beta1's 1.0
 answering `Version`. README.md and the ReadMe say what is new; the release
 name in GettingStarted, `ogles3.doc`, ReadMe-SDL, `docs/SDL.md`. Archives:
 `sdl dist` (beta1's left `release/dist/`), the user archive checked
-unpacked (both binaries 04.11.2026, the new port name, the installer);
+unpacked (both binaries 04.11.2026, the new port name, the installer; 05.11.2026 after the log cap);
 `ogles3-1.0-beta2-demos.zip` made from beta1's with its ReadMe.txt's
 release name and `libs/ogles3.library` replaced, the other 179 files byte
 for byte; `SHA256SUMS` checks. The installer's new steps are **not run on
 the A1200 yet** either: over a beta1 install, `Execute Install-ogles3 ALL`
-and `Version LIBS:ogles3.library FULL` / `LIBS:v3dglslc3 FULL` (04.11.2026).
+and `Version LIBS:ogles3.library FULL` / `LIBS:v3dglslc3 FULL` (05.11.2026).
 
 **Own compiler port (2026-11-04, a user's report; in 1.0-beta2).**
 ogles3 and ogles2 1.x served their compilers on the same public port,

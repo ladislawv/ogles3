@@ -25,7 +25,7 @@
  * ogles2.library 1.x. */
 #define OGLES3_LIB_VERSION  1
 #define OGLES3_LIB_REVISION 0
-#define OGLES3_LIB_DATE     "04.11.2026"
+#define OGLES3_LIB_DATE     "05.11.2026"
 /* the release's name (its archives, release/build_release.sh): a release may
    rebuild a library without a new version.revision */
 #define OGLES3_RELEASE      "1.0-beta2"
@@ -1464,7 +1464,8 @@ BOOL ogles2_device_context_resize(struct V3DContext *v, UWORD w, UWORD h);
 /* ---- log (log.c; plan section 10) ----
  * Lines go to a RAM ring buffer, appended to the log file (T:ogles3.log, or
  * the path in ENV:OGLES3/LogFile) when a context is destroyed, when the
- * library is closed and when the OGLES3Log command asks. Builds with
+ * library is closed and when the OGLES3Log command asks; T:'s file is kept
+ * to 256 KB, then rotated to <file>.old (ENV:OGLES3/LogMax). Builds with
  * OGLES3_LOG_SYNC write every line at once, so a hang loses nothing.
  * Formats are exec RawDoFmt's: %ld/%lu/%lx for 32-bit values, %s, %c. */
 BOOL ogles2_log_init(void);

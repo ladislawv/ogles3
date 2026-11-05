@@ -17,6 +17,7 @@
 #define LOG_SIZE 32768 /* bytes of buffered lines */
 #define LINE_MAX 240
 #define DEFAULT_PATH "T:ogles3.log"
+#define DEFAULT_CAP  (256UL * 1024) /* the default file's: T: is RAM: as a rule */
 
 static char ring[LOG_SIZE];
 static ULONG head, used; /* write position, bytes held */
@@ -168,11 +169,74 @@ void ogles2_log(const char *fmt, ...)
 #endif
 }
 
+/* The log file's cap in bytes, 0 for none: ENV:OGLES3/LogMax in KB (0:
+ * none), else DEFAULT_CAP for the default file and none for one named in
+ * OGLES3/LogFile (the test packages' results, a disk: they want it all).
+ * Each context appends its lines at aglDestroyContext, so a program that
+ * makes many grew T:'s file, Fast RAM on the RAM disk, without end
+ * (2026-11-05, a user's report: 1,040 bytes every cycle or two). */
+static ULONG log_cap(BOOL named)
+{
+    char var[16];
+    const char *p;
+    ULONG kb = 0;
+    if (GetVar((STRPTR) "OGLES3/LogMax", (STRPTR)var, sizeof(var), GVF_GLOBAL_ONLY) <= 0 ||
+        var[0] < '0' || var[0] > '9')
+        return named ? 0 : DEFAULT_CAP;
+    for (p = var; *p >= '0' && *p <= '9' && kb < 0x3FFFFF; p++)
+        kb = kb * 10 + (ULONG)(*p - '0');
+    return (kb < 0x3FFFFF ? kb : 0x3FFFFF) * 1024; /* within 32 bits */
+}
+
+/* Opens the log file to append `n` bytes. One the cap would pass becomes
+ * <path>.old (replacing the one before) and a new file starts with a line
+ * that says so: the two together stay within about twice the cap. Where the
+ * file cannot be renamed it starts over. */
+static BPTR log_open(const char *path, ULONG n, ULONG cap)
+{
+    char old[256 + 4];
+    struct line l;
+    ULONG k, kb;
+    LONG size;
+    BOOL renamed;
+    BPTR fh = Open((STRPTR)path, MODE_READWRITE);
+    if (!fh)
+        return 0;
+    Seek(fh, 0, OFFSET_END);
+    size = Seek(fh, 0, OFFSET_CURRENT);
+    if (!cap || size <= 0 || (ULONG)size + n <= cap)
+        return fh;
+    Close(fh);
+    for (k = 0; path[k] && k < 256; k++)
+        old[k] = path[k];
+    CopyMem(".old", old + k, 5);
+    DeleteFile((STRPTR)old);
+    renamed = Rename((STRPTR)path, (STRPTR)old) != 0;
+    if (!(fh = Open((STRPTR)path, MODE_NEWFILE)))
+        return 0;
+    kb = cap / 1024;
+    l.len = 0;
+    if (renamed) {
+        ULONG args[2];
+        args[0] = kb;
+        args[1] = (ULONG)old;
+        RawDoFmt((STRPTR) "(the log reached its %lu KB, OGLES3/LogMax: the lines before are in %s)\n",
+                 args, (void (*)())put_char, &l);
+    } else
+        RawDoFmt((STRPTR) "(the log reached its %lu KB, OGLES3/LogMax, and starts again)\n", &kb,
+                 (void (*)())put_char, &l);
+    if (l.len && l.text[l.len - 1] != '\n') /* cut at LINE_MAX */
+        l.text[l.len++] = '\n';
+    Write(fh, l.text, l.len);
+    return fh;
+}
+
 BOOL ogles2_log_flush(void)
 {
     char path[256];
     char *copy;
     ULONG n, tail, missed;
+    BOOL named;
     BPTR fh;
 
     if (!caller_is_process())
@@ -201,11 +265,11 @@ BOOL ogles2_log_flush(void)
     }
 
     if (n) {
-        if (GetVar((STRPTR) "OGLES3/LogFile", (STRPTR)path, sizeof(path), GVF_GLOBAL_ONLY) <= 0)
+        named = GetVar((STRPTR) "OGLES3/LogFile", (STRPTR)path, sizeof(path), GVF_GLOBAL_ONLY) > 0;
+        if (!named)
             CopyMem(DEFAULT_PATH, path, sizeof(DEFAULT_PATH));
-        fh = Open((STRPTR)path, MODE_READWRITE);
+        fh = log_open(path, n, log_cap(named));
         if (fh) {
-            Seek(fh, 0, OFFSET_END);
             Write(fh, copy, n);
             Close(fh);
         }

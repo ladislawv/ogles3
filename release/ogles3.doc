@@ -162,6 +162,10 @@ ogles3.library/--background--                   ogles3.library/--background--
    ENVIRONMENT
        OGLES3/LogFile  the log's file (default T:ogles3.log). OGLES3Log
                        (C/) writes the buffered log while a program runs.
+       OGLES3/LogMax   the log file's cap in KB (0: none). Default 256 for
+                       T:ogles3.log, none for a file named in OGLES3/LogFile.
+                       A log that reaches it becomes <file>.old (replacing
+                       the one before) and a new one starts.
        OGLES3/MSAA     4 or 0: 4x multisampling for contexts created
                        without OGLES3_CCT_PISTORM_MSAA.
 
