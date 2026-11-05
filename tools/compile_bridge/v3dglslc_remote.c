@@ -2,7 +2,7 @@
  * v3dglslc-remote: ogles3.library's shader compiler on the PC
  * (docs/GLES3_PLAN.md, "Compiling on the PC"). It owns the compiler's public
  * port (v3dp/v3dglsl_port.h), so the library sends its requests here instead
- * of starting "v3dglslc SERVER"; tools/amictl/compile_bridge.py connects on
+ * of starting "v3dglslc SERVER"; tools/compile_bridge/compile_bridge.py connects on
  * TCP with amictld's token and compiles them with the host v3dglslc, which
  * writes the same files byte for byte. The files come back and are written
  * where the request says, then the request is replied.

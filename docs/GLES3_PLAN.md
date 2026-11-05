@@ -1,5 +1,21 @@
 # OpenGL ES 3.0 and 3.1 on ogles2.library
 
+**amictl from its own repository (2026-11-05, the developer's call).** The
+test station (`tools/amictl`: amictld, the client, `deqp_watch.py`,
+`amikvm.ps1`, the host test) is now the
+[amictl](https://github.com/ladislawv/amictl) repository (amictl 1.4, public, shared by
+ogles2, ogles2pi3 and ogles3) as a git submodule at the same path, so
+every command and script keeps its path; improvements to it are made there.
+Its copy differed from ours only in generic paths and comments,
+`AMICTL_RESULTS` and `AMICTL_STATION` (runpkg's results still go to
+`tests/a1200/results/`). ogles3's own part moved to
+`tools/compile_bridge/` (`compile_bridge.py`, which imports
+`tools/amictl/amictl.py`, and `v3dglslc_remote.c`; the Makefile, the dEQP
+scripts and the comments follow); `station.local` stays in the
+submodule's directory, in its `.gitignore`. CI checks out the submodule.
+CONTRIBUTING.md ("Setting up a build machine", "The remote test station"),
+README.md, CLAUDE.md, DEVELOPMENT_PLAN.md §10.1.
+
 **The log file capped (2026-11-05, a user's report).** A JUCE porter
 measured Fast RAM lost when contexts are made and destroyed: 1,040 bytes
 every cycle or two, more with clears and swaps, none with one context
@@ -1715,13 +1731,13 @@ Mesa's driver, so they could follow later as an extension
       first. With no bridge connected, or the link lost, it removes its
       port, starts the local `v3dglslc SERVER` (`COMPILER`), hands it the
       request and the queued ones and ends: a run goes on, slowly.
-      `tools/amictl/server/v3dglslc_remote.c`, 20 KB
+      `tools/compile_bridge/v3dglslc_remote.c` (then `tools/amictl/server/`), 20 KB
       (`$(B)/amictl/v3dglslc-remote`).
     - `v3dglslc` on the host: `SERVE` reads the requests as frames on
       stdin and answers on stdout (`serve_stdio`); both servers call one
       `handle()`, and `v3dglsl_port.h`'s `V3DGLSL_OPS_ONLY` gives the host
       the op codes without Exec.
-    - `tools/amictl/compile_bridge.py`: connects to the A1200's 6802
+    - `tools/compile_bridge/compile_bridge.py` (then `tools/amictl/`): connects to the A1200's 6802
       with the station's token, runs the host `v3dglslc SERVE`, each
       request in a directory of its own (the `.v3dx` sent along placed
       there first), and sends back the files written or changed.
@@ -1735,7 +1751,7 @@ Mesa's driver, so they could follow later as an extension
     The same 56 `texture_functions.texture` cases into fresh caches, once
     with the A1200's compiler and once through the PC: 95 files, all
     identical (`ogles2-m8-2-20261027-123827`, `-123926`). How: start
-    `python3 tools/amictl/compile_bridge.py` on the PC (after
+    `python3 tools/compile_bridge/compile_bridge.py` on the PC (after
     `. ./local.env`: the host compiler) and run cases with `bash
     ports/deqp/run_pc.sh PATTERN NAME`, which does the rest; by hand: put
     `$B/amictl/v3dglslc-remote` into the package's `bin/` and `amictl start
@@ -1818,7 +1834,7 @@ Mesa's driver, so they could follow later as an extension
       item 1); the library's cache in one drawer (in 16 subdrawers since
       2026-10-30, "Plan: the remaining gaps" item 6).
     - **Tools:** `ports/deqp/run_pc.sh` (cases with PC compiles),
-      `tools/amictl/compile_bridge.py`, `ports/deqp/summary.py`,
+      `tools/compile_bridge/compile_bridge.py`, `ports/deqp/summary.py`,
       `failed_list.py`, `qpa_images.py` (`ports/deqp/README.md`);
       `tools/v3dglslc/test/compare_v3dp.sh` after any compiler change
       (host and m68k byte for byte); `bash tests/vamos.sh m8_es3 NOGPU

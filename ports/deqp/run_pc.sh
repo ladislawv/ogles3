@@ -9,7 +9,7 @@
 #     --sources keep the shaders' sources in the log (Run-M1 SOURCES=1)
 #     --build  build the package first (tests/a1200/build_package.sh)
 # Needs, after `. ./local.env` in WSL: the station (tools/amictl, station.local),
-# `python3 tools/amictl/compile_bridge.py` running in another shell (it runs
+# `python3 tools/compile_bridge/compile_bridge.py` running in another shell (it runs
 # the host v3dglslc), and the package run once before (its drawer on the
 # A1200). Without a bridge a compile fails (v3dglslc-remote's NOFALLBACK):
 # nothing is compiled on the A1200, where one program held a run for 20
@@ -45,7 +45,7 @@ $X put $ES3/amictl/v3dglslc-remote $P/bin/v3dglslc-remote > /dev/null ||
 # minutes): without the bridge a compile fails (NOFALLBACK), and a run
 # without a bridge process does not start.
 pgrep -f compile_bridge.py > /dev/null ||
-    { echo "no compile_bridge.py running: start python3 tools/amictl/compile_bridge.py first"; exit 1; }
+    { echo "no compile_bridge.py running: start python3 tools/compile_bridge/compile_bridge.py first"; exit 1; }
 job=$($X start -d $P bin/v3dglslc-remote WAIT NOFALLBACK COMPILER=$P/libs/v3dglslc)
 # Watched (tools/amictl/deqp_watch.py): a line every 15 s with the cases
 # done, the last one finished, the one running and the library's new log

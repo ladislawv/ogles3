@@ -26,7 +26,9 @@ repositories: git in WSL needs credentials (CONTRIBUTING.md, "Access").
 - Commit only when asked; the commit message ends with the agent attribution line.
 - Never commit `tools/amictl/station.local` (the test station's token) or screenshots.
 - Tests on the A1200 run through `tools/amictl` (`runpkg` a package from
-  `tests/a1200/<name>`); visible tests show each state about a second; benchmarks run short.
+  `tests/a1200/<name>`); it is the `ladislawv/amictl` repository as a git submodule:
+  improvements to amictl are made there (its own clone or the submodule's checkout),
+  committed and pushed there, then the submodule moved here; visible tests show each state about a second; benchmarks run short.
 - Before rebooting the Amiga or changing its system files, ask the user.
 - Do not modify sources outside this repository (the Quake III trees are clones made by
   `ports/ioq3/sources.sh`; changes to them are patches in `ports/ioq3*/patches/`).

@@ -202,7 +202,8 @@ Real programs are checked against Mesa's reference images (`tests/corpus`).
 | `gen/` | `gen_ogles2.py`: dispatch table, client wrappers, `aglGetProcAddress` thunks, stubs and ABI test, from Khronos `gl.xml` and the append-only `abi_order.txt` |
 | `v3dp/` | The `.v3dp` program-binary format (`FORMAT.md`), writer, reader, helpers |
 | `tools/v3dglslc/` | The GLSL compiler: Mesa's GL front end and V3D driver on a fake DRM device, built for the PC (offline) and for 68k (on the Amiga), with its Mesa patches |
-| `tools/amictl/` | The remote test station: `amictld` (Amiga server), `amictl` (PC client), the dEQP watcher and the compile bridge |
+| `tools/amictl/` | The remote test station: `amictld` (Amiga server), `amictl` (PC client), the dEQP watcher; the [amictl](https://github.com/ladislawv/amictl) repository as a git submodule (`git submodule update --init`) |
+| `tools/compile_bridge/` | The shader compile bridge: dEQP's shaders compiled on the PC for the Amiga |
 | `ports/` | SDL2, SDL3, dEQP (GLES2, GLES3, GLES31); gl4es, Quake III and glmark2 (still on ogles2's names) |
 | `tests/` | Unit and hardware tests, `a1200/` test packages and results, `corpus/` (real programs against reference images) |
 | `cmd/` | `OGLES3Log` |

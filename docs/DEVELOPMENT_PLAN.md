@@ -846,7 +846,7 @@ Sizes, as effort for one experienced developer and with ±50% uncertainty: **S**
 
 **The network (from the developer, 2026-10-10):** the A1200 is `192.168.1.128` on the local network, with Roadshow on the Pi 4's Ethernet (Emu68's `genet.device`); it answers ping from this PC in about 1 ms, and no other server runs on it. The server may start at boot and stay running.
 
-**Components** (repository `tools/amictl/`, MIT, our own code):
+**Components** (repository `tools/amictl/`, MIT, our own code; since 2026-11-05 the [amictl](https://github.com/ladislawv/amictl) repository, a git submodule there, shared by ogles2, ogles2pi3 and ogles3, and developed there):
 - **`amictld`**, the Amiga server: C, GCC 6 + libnix, `bsdsocket.library` (Roadshow's; nothing Roadshow-specific is used, so AmiTCP and Miami would work too). One small program, started from `S:User-Startup`.
 - **`amictl`**, the PC client: Python 3, standard library only. Used by hand and by scripts.
 - **A host build of the server** (the same protocol code over POSIX sockets, with stubs for the Amiga-only commands) so the protocol and the client are tested on this PC before anything reaches the A1200.

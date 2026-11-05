@@ -20,7 +20,7 @@
 #define V3DGLSL_PORT_H
 
 /* V3DGLSL_OPS_ONLY: the op codes and key flags alone, for code without
- * Exec (the host compiler's SERVE, tools/amictl/compile_bridge.py's peer). */
+ * Exec (the host compiler's SERVE, tools/compile_bridge/compile_bridge.py's peer). */
 #ifndef V3DGLSL_OPS_ONLY
 #include <exec/ports.h>
 #endif

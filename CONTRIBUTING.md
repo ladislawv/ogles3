@@ -24,7 +24,9 @@ station's large-reply stall, postponed) is in §13's "Next" list.
 ## Setting up a build machine
 
 Ubuntu 24.04, natively or in WSL on Windows. The repository can live anywhere (also on a
-Windows drive, `/mnt/c/...`); the build output goes to `~/ogles2-build`.
+Windows drive, `/mnt/c/...`); the build output goes to `~/ogles2-build`. `tools/amictl` is a
+git submodule (the test station, below): clone with `--recurse-submodules`, or run
+`git submodule update --init` in a clone made without it.
 
 1. The packages listed in [`dev/host-setup/README.md`](dev/host-setup/README.md).
 2. `bash dev/host-setup/build_tools.sh`: lha and vamos (minutes).
@@ -129,7 +131,12 @@ run.
 ### The remote test station
 
 `tools/amictl` lets the PC upload a package, run it, fetch its results and take screenshots,
-so nobody has to copy files by hand.
+so nobody has to copy files by hand. It is the [amictl](https://github.com/ladislawv/amictl)
+repository, shared with ogles2 and ogles2pi3, as a git submodule: its README describes it, and
+changes to it are made there, then the submodule here is moved to the new commit
+(`git -C tools/amictl pull`, then commit `tools/amictl`). ogles3's own tools that talk to the
+Amiga stay here: the shader compile bridge (`tools/compile_bridge/`: `compile_bridge.py` on
+the PC, `v3dglslc_remote.c` on the Amiga).
 
 1. Make `tools/amictl/station.local` from `station.local.example`: the Amiga's address, a
    token (`python3 tools/amictl/amictl.py gentoken /dev/stdout`) and the PC's address for the

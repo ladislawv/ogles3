@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true # tools/amictl (github.com/ladislawv/amictl, public)
 
       - name: Python files compile
         run: python3 -m py_compile $(git ls-files '*.py')

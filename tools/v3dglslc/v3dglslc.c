@@ -1173,7 +1173,7 @@ static int handle(uint32_t op, const char *vs, const char *fs, const char *out_p
 
 #ifndef __amigaos__
 /* SERVE on the host, the PC's side of the A1200's v3dglslc-remote
- * (tools/amictl/compile_bridge.py runs it): the Amiga server's requests as
+ * (tools/compile_bridge/compile_bridge.py runs it): the Amiga server's requests as
  * frames on stdin, each answered on stdout, until stdin ends. Big-endian
  * u32s; a string is its length (0xffffffff: NULL) and its bytes.
  *   request: "V3Q1", op, layout_crc, vs, fs, bindings, keys, out_path

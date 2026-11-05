@@ -32,7 +32,7 @@ keeps its own. The licence decision is D6 in docs/DEVELOPMENT_PLAN.md
      ogles3_internal.h, runtime.c, share.c, start.s, state.c, v3dp.c,
      clear_mrt_v3dp.h;
    - cmd/, tests/, v3dp/, gen/ (except gen/khronos/), dev/, docs/, release/;
-   - tools/v3dglslc/, tools/amictl/, tools/v3dp_tests/, tools/blake3_test/,
+   - tools/v3dglslc/, tools/compile_bridge/, tools/v3dp_tests/, tools/blake3_test/,
      tools/etc1_test/, tools/clear_mrt/, tools/check_fpconv.py;
    - in ports/, the build scripts and the files the ports add, except where
      section 4 says otherwise.

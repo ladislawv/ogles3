@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""The PC's side of v3dglslc-remote (tools/amictl/server/v3dglslc_remote.c,
+"""The PC's side of v3dglslc-remote (tools/compile_bridge/v3dglslc_remote.c,
 docs/GLES3_PLAN.md "Compiling on the PC"): connects to it on the A1200,
 compiles each request ogles3.library sends there with the host v3dglslc
 (SERVE: the same requests as frames on its stdin, the same files byte for
 byte) and sends the written files back.
 
-    python3 tools/amictl/compile_bridge.py [--port 6802] [--compiler PATH]
-    python3 tools/amictl/compile_bridge.py --check
+    python3 tools/compile_bridge/compile_bridge.py [--port 6802] [--compiler PATH]
+    python3 tools/compile_bridge/compile_bridge.py --check
 
 The station's address and token are amictl's (station.local). It runs until
 stopped (Ctrl-C), connecting again whenever the link ends. --check needs no
@@ -23,7 +23,7 @@ import tempfile
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, HERE)
+sys.path.insert(0, os.path.join(os.path.dirname(HERE), "amictl"))  # the submodule
 import amictl  # noqa: E402  (its config: the station's address and token)
 
 V3DGLSL_LINK, V3DGLSL_QUIT = 1, 2  # v3dp/v3dglsl_port.h

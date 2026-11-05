@@ -2,7 +2,7 @@
 # The full dEQP runs (docs/GLES3_PLAN.md): every case list of a package
 # (caselists/, the CTS's must-pass lists by group), one package run a list,
 # watched (tools/amictl/deqp_watch.py), the shaders compiled on the PC
-# (tools/amictl/compile_bridge.py, started here when it is not running; the
+# (tools/compile_bridge/compile_bridge.py, started here when it is not running; the
 # A1200's v3dglslc-remote with NOFALLBACK: never a compile on the A1200).
 #   bash ports/deqp/run_full.sh PACKAGE [LIST...]     (in WSL, after . ./local.env)
 #     PACKAGE  m7-1 (dEQP-GLES2), m8-2 (dEQP-GLES3), m8-3 (dEQP-GLES31)
@@ -35,7 +35,7 @@ if [ $# -gt 0 ]; then lists="$*"; else lists=$(ls $OUTPKG/caselists | grep -v --
 
 bridge() {
     pgrep -f compile_bridge.py > /dev/null && return
-    nohup python3 tools/amictl/compile_bridge.py >> "$LOGDIR/bridge.log" 2>&1 &
+    nohup python3 tools/compile_bridge/compile_bridge.py >> "$LOGDIR/bridge.log" 2>&1 &
     sleep 3
     echo "$(date +%T) compile bridge started" | tee -a "$LOG"
 }

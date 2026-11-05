@@ -331,17 +331,17 @@ $(VB)/tests/abi_probe: tests/abi_probe/abi_probe.c $(VB)/ogles3.lib
 	@mkdir -p $(dir $@)
 	$(VC) $(VCFLAGS) $< $(VB)/ogles3.lib -lamiga -lm881 -o $@
 
-# ---- remote test station (tools/amictl, plan section 10.1)
+# ---- remote test station (tools/amictl: the amictl repository, a git submodule)
 AMICTL_SRC := tools/amictl/server/amictld.c tools/amictl/server/amictl_proto.h tools/amictl/server/os.h
 $(B)/amictl/amictld: $(AMICTL_SRC) tools/amictl/server/os_amiga.c Makefile
 	@mkdir -p $(dir $@)
 	$(CC) -std=gnu99 -O2 -Wall -Wno-pointer-sign -mcpu=68020 -mcrt=nix20 -fbbb=abcfhilmnprsz0 \
 	    -o $@ tools/amictl/server/amictld.c tools/amictl/server/os_amiga.c
-# The shader compiler on the PC (tools/amictl/compile_bridge.py's peer).
-$(B)/amictl/v3dglslc-remote: tools/amictl/server/v3dglslc_remote.c v3dp/v3dglsl_port.h Makefile
+# The shader compiler on the PC (tools/compile_bridge/compile_bridge.py's peer).
+$(B)/amictl/v3dglslc-remote: tools/compile_bridge/v3dglslc_remote.c v3dp/v3dglsl_port.h Makefile
 	@mkdir -p $(dir $@)
 	$(CC) -std=gnu99 -O2 -Wall -Wno-pointer-sign -mcpu=68020 -mcrt=nix20 -fbbb=abcfhilmnprsz0 -Iv3dp \
-	    -o $@ tools/amictl/server/v3dglslc_remote.c
+	    -o $@ tools/compile_bridge/v3dglslc_remote.c
 $(B)/amictl/amictld_host: $(AMICTL_SRC) tools/amictl/server/os_posix.c Makefile
 	@mkdir -p $(dir $@)
 	gcc -std=c99 -O2 -Wall -Wextra -o $@ tools/amictl/server/amictld.c tools/amictl/server/os_posix.c
