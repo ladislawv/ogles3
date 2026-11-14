@@ -1,5 +1,5 @@
-ogles3.library 1.0 (release 1.0-beta2) for AmigaOS 3.x on PiStorm
-==================================================================
+ogles3.library 1.0 (release 1.0) for AmigaOS 3.x on PiStorm
+============================================================
 
 OpenGL ES 3.1 for 68k AmigaOS, drawn by the Raspberry Pi 4's GPU (Broadcom
 V3D 4.2) through PiStorm and Emu68. Programs get OpenGL ES 3.1 contexts,
@@ -9,17 +9,17 @@ multisampled framebuffers, GLSL ES 3.10 and 3.00, and everything of
 OpenGL ES 2.0. The agl* context calls are those of AmigaOS 4's
 ogles2.library.
 
-This is a beta. The complete Khronos conformance runs of OpenGL ES 2.0,
-3.0 and 3.1 have been made on an A1200 (see "Conformance"); a few rare
-problems seen there are still being looked at. Please report what goes
-wrong.
+The complete Khronos conformance runs of OpenGL ES 2.0, 3.0 and 3.1
+have been made on an A1200 (see "Conformance"); a rare problem seen there
+is still being looked at. Please report what goes wrong.
 
-New in 1.0-beta2: the shader compiler has its own message port. In
-1.0-beta1 it shared ogles2's, so when programs of both libraries ran in a
-session, one library's shaders went to the other's compiler (ES 3 shaders
-failed to compile), and flushing one library stopped the other's
-compiler. Install ogles3.library and v3dglslc3 together: Install-ogles3
-replaces both.
+Upgrading from 1.0-beta1: the shader compiler now has its own message
+port. In 1.0-beta1 it shared ogles2's, so when programs of both libraries
+ran in a session, one library's shaders went to the other's compiler (ES
+3 shaders failed to compile), and flushing one library stopped the
+other's compiler. Install ogles3.library and v3dglslc3 together:
+Install-ogles3 replaces both. 1.0 is 1.0-beta2's library and compiler,
+unchanged.
 
 ogles3 and ogles2
 -----------------
@@ -46,7 +46,7 @@ What is in this archive
   Examples/           small programs with their compiled shaders
   SDK/                headers, import libraries, documentation and the
                       examples' sources, for programmers (only in
-                      ogles3-1.0-beta2-sdk.lha; see "For programmers")
+                      ogles3-1.0-sdk.lha; see "For programmers")
   LICENSE, licences/  licences and notices
 
 Installing
@@ -154,8 +154,8 @@ in KB (0: none); a file named in OGLES3/LogFile has none unless it is set.
 
 For programmers
 ---------------
-The SDK comes in two forms: ogles3-1.0-beta2-sdk.lha (this archive with
-SDK/ added) and ogles3-1.0-beta2-sdk.zip (the SDK alone, for building on a
+The SDK comes in two forms: ogles3-1.0-sdk.lha (this archive with
+SDK/ added) and ogles3-1.0-sdk.zip (the SDK alone, for building on a
 PC with a cross compiler). It holds:
 
 SDK/include    <proto/ogles3.h> (every OpenGL ES 3.1 function and agl*),

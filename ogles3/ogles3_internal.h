@@ -28,7 +28,7 @@
 #define OGLES3_LIB_DATE     "05.11.2026"
 /* the release's name (its archives, release/build_release.sh): a release may
    rebuild a library without a new version.revision */
-#define OGLES3_RELEASE      "1.0-beta2"
+#define OGLES3_RELEASE      "1.0"
 
 struct OGLES3Library
 {

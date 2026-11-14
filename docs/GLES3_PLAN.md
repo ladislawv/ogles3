@@ -1,5 +1,21 @@
 # OpenGL ES 3.0 and 3.1 on ogles2.library
 
+**Release 1.0 (2026-11-14, the developer's call): 1.0-beta2 made the full
+release, on GitHub as `v1.0`.** `OGLES3_RELEASE` 1.0; the library and
+`v3dglslc3` are beta2's, unchanged (version 1.0, dated 05.11.2026: only
+comments changed in their sources since). The beta wording left README.md,
+the ReadMe (its "New in 1.0-beta2" is now "Upgrading from 1.0-beta1"),
+`ogles3.doc` (VERSION, CONFORMANCE), GettingStarted, `Install-ogles3`,
+ReadMe-SDL and `docs/SDL.md`; the two freezes seen in the dEQP runs are
+named as the known issue. Archives: `build_release.sh sdl dist` (beta2's
+left `release/dist/` first: the script's `ogles3-$RELEASE*` glob would
+take them into `SHA256SUMS`); unpacked and compared with beta2's, only
+the ReadMe, ReadMe-SDL, `SDL.md`, GettingStarted, `ogles3.doc`, the
+installer and LICENSE (the amictl submodule's path) differ, every binary
+byte for byte the same. `ogles3-1.0-demos.zip` made from beta2's with its
+ReadMe.txt's release name replaced, the other 180 files unchanged;
+`SHA256SUMS` checks.
+
 **amictl from its own repository (2026-11-05, the developer's call).** The
 test station (`tools/amictl`: amictld, the client, `deqp_watch.py`,
 `amikvm.ps1`, the host test) is now the

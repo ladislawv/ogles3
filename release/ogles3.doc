@@ -22,7 +22,7 @@ ogles3.library/--background--                   ogles3.library/--background--
        their standard names, and the agl* context calls described here.
 
    VERSION
-       ogles3.library 1.0, release 1.0-beta2 (a beta: see CONFORMANCE).
+       ogles3.library 1.0, release 1.0 (known issue: see CONFORMANCE).
        It is a library of its own, beside ogles2.library 1.x (OpenGL ES
        2.0), which it does not replace: programs built for ogles2 keep
        using that. Their files do not meet either: ogles3's compiler is
@@ -176,7 +176,7 @@ ogles3.library/--background--                   ogles3.library/--background--
        passed, 2 failed once and passed in every rerun; dEQP-GLES2 17,091
        passed, the cube map cases of --deviations-- fail. Twice the whole
        Amiga stopped hours into a run on a case that passes again: that is
-       why it is still a beta. See --deviations--.
+       still being looked at. See --deviations--.
 
    AUTHORS
        Developed by R-Typer and Ladislawv, with Claude Opus 5.5
