@@ -29,6 +29,10 @@ Its copy differed from ours only in generic paths and comments,
 `tools/amictl/amictl.py`, and `v3dglslc_remote.c`; the Makefile, the dEQP
 scripts and the comments follow); `station.local` stays in the
 submodule's directory, in its `.gitignore`. CI checks out the submodule.
+Moved to amictl's `9374802` (2026-11-14): a stalled client gives up after
+15 s ("STATION DOWN", exit 4) instead of holding the station, and runpkg
+leaves out files the station already has (`uploads.local`); `make
+amictl-test` 43 of 43, `compile_bridge.py` imports it unchanged.
 CONTRIBUTING.md ("Setting up a build machine", "The remote test station"),
 README.md, CLAUDE.md, DEVELOPMENT_PLAN.md §10.1.
 
