@@ -1006,6 +1006,23 @@ BOOL ogles2_texture_image(const struct OGLES3Texture *t, int k, int l, UWORD *w,
 /* Colour-renderable (plan 7.7; ES 3.0's formats, stage B item 10), and the
  * image's format as a render target. */
 BOOL ogles2_texture_renderable(struct OGLES3Texture *t, int k, int l);
+/* glCopyImageSubData's GPU images (depth, stencil and multisample ones:
+ * texture.c's copy_gpu): an image's layer 0 and the bytes to the next, its
+ * tiling, row stride and padded rows, its texels' bytes, its size in pixels
+ * (each pixel scale x scale texels: 2 with 4x MSAA), its layers, its
+ * internal format and whether it is a depth or stencil one. */
+struct OGLES3CopyImg
+{
+    ULONG base, layer_bytes, stride, padded_h;
+    UWORD w, h, layers;
+    UBYTE tiling, cpp, scale, zs;
+    GLenum ifmt;
+    struct OGLES3Texture *tex; /* a texture's (its levels marked rendered after a copy into it), else 0 */
+    UBYTE level;
+};
+BOOL ogles2_texture_copy_img(struct OGLES3Context *ctx, struct OGLES3Texture *t, int l, struct OGLES3CopyImg *img,
+                             int *n);
+int ogles2_fbo_rb_copy(struct OGLES3Context *ctx, GLuint name, struct OGLES3CopyImg *img, int *n);
 int ogles2_texture_layers(const struct OGLES3Texture *t, int l, ULONG *stride);
 BOOL ogles2_texture_rt(struct OGLES3Texture *t, int k, int l, struct OGLES3RtFormat *rf);
 UWORD ogles2_float_to_half(GLfloat f); /* IEEE half precision, by the bits (texture.c) */

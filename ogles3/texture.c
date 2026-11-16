@@ -6155,6 +6155,199 @@ static struct OGLES3Texture *copy_object(struct OGLES3Context *ctx, GLuint name,
     return t;
 }
 
+/* ---- glCopyImageSubData on the GPU: depth, stencil and multisample
+ * images, which have no RAM copy to copy through (renderbuffers) or whose
+ * RAM copy is not their texels (4x textures: every sample), copied tile-
+ * wise: each layer's box untiled from the source's image and tiled into
+ * the destination's (v3d_load_tiled_image, v3d_store_tiled_image; raster
+ * rows as they are), the jobs of every context of the share group
+ * rendered first, a destination texture's levels marked rendered (their
+ * RAM copy read back when the CPU needs it). The same bytes a texel: a
+ * depth or stencil format to itself only, a colour one by its view class;
+ * the same samples. ---- */
+
+/* Level l of t's image for a copy, and a DEPTH32F_STENCIL8's or a stencil
+ * texture's S8 image (*n 2: depth then S8; a stencil texture: the S8 only). */
+BOOL ogles2_texture_copy_img(struct OGLES3Context *ctx, struct OGLES3Texture *t, int l, struct OGLES3CopyImg *img,
+                             int *n)
+{
+    const struct OGLES3Face *f = &t->f[0];
+    const V3DTexture *g;
+    BOOL ms = t->target == GL_TEXTURE_2D_MULTISAMPLE || t->target == GL_TEXTURE_2D_MULTISAMPLE_ARRAY_OES;
+    BOOL s8only = f->format[l] == GL_STENCIL_INDEX, d32s8 = f->type[l] == GL_FLOAT_32_UNSIGNED_INT_24_8_REV;
+    int c = level_class(f, l), k;
+    if (l < 0 || l >= MAX_LEVELS || !(f->defined & (1UL << l)) || ((!t->gpu || l >= t->gpu->num_levels) && !upload_all(t)) ||
+        !(g = t->gpu) || l >= g->num_levels)
+        return FALSE;
+    memset(img, 0, sizeof(*img) * 2);
+    img[0].base = V3D_ALIGN_UP((v3d_uintptr)g->texture_mem.hostptr, 256) + g->levels[l].offset;
+    img[0].layer_bytes = t->target == GL_TEXTURE_3D ? (ULONG)g->levels[l].padded_h * g->levels[l].stride : t->face_stride;
+    img[0].stride = g->levels[l].stride;
+    img[0].padded_h = g->levels[l].padded_h;
+    img[0].tiling = g->levels[l].tiling_format;
+    img[0].cpp = t->cpp;
+    img[0].zs = c == CLASS_DEPTH16 || c == CLASS_DEPTH24 || s8only;
+    *n = 1;
+    if (s8only || d32s8) { /* the S8 image: what the samplers and jobs read */
+        struct OGLES3Surface s;
+        k = s8only ? 0 : 1;
+        if (!ogles2_texture_s8_surface(ctx, t, 0, l, &s))
+            return FALSE;
+        img[k].base = s.addr;
+        img[k].layer_bytes = s.bytes;
+        img[k].padded_h = s.ub * 2 * v3d_utile_height(1);
+        img[k].stride = img[k].padded_h ? s.bytes / img[k].padded_h : 0;
+        img[k].tiling = V3D_MEMORY_FORMAT_UIF_NO_XOR;
+        img[k].cpp = 1;
+        img[k].zs = TRUE;
+        *n = k + 1;
+    }
+    for (k = 0; k < *n; k++) {
+        img[k].scale = ms ? 2 : 1;
+        img[k].w = (UWORD)(f->w[l] / img[k].scale);
+        img[k].h = (UWORD)(f->h[l] / img[k].scale);
+        img[k].layers = (UWORD)faces_at(t, l);
+        img[k].ifmt = level_sized(f, l);
+        img[k].tex = t;
+        img[k].level = (UBYTE)l;
+    }
+    return TRUE;
+}
+
+/* One layer's box of one image into another (both the same texels). */
+static BOOL move_box(const struct OGLES3CopyImg *s, ULONG sbase, int sx, int sy, const struct OGLES3CopyImg *d,
+                     ULONG dbase, int dx, int dy, int w, int h)
+{
+    ULONG row = (ULONG)w * s->cpp, len;
+    UBYTE *buf = AllocVec(row * (ULONG)h + 4, MEMF_ANY);
+    v3d_texture_box b;
+    int j;
+    if (!buf)
+        return FALSE;
+    len = s->layer_bytes ? s->layer_bytes : s->stride * s->padded_h;
+    CachePostDMA((APTR)sbase, &len, 0); /* the GPU's bytes, not a cache line's */
+    b.z = 0;
+    b.depth = 1;
+    b.width = w;
+    b.height = h;
+    b.x = sx;
+    b.y = sy;
+    if (s->tiling == V3D_MEMORY_FORMAT_RASTER)
+        for (j = 0; j < h; j++)
+            CopyMem((APTR)(sbase + (ULONG)(sy + j) * s->stride + (ULONG)sx * s->cpp), buf + (ULONG)j * row, row);
+    else
+        v3d_load_tiled_image(buf, row, (void *)sbase, s->stride, (enum v3d_memory_format)s->tiling, s->cpp,
+                             s->padded_h, &b);
+    b.x = dx;
+    b.y = dy;
+    if (d->tiling == V3D_MEMORY_FORMAT_RASTER)
+        for (j = 0; j < h; j++)
+            CopyMem(buf + (ULONG)j * row, (APTR)(dbase + (ULONG)(dy + j) * d->stride + (ULONG)dx * d->cpp), row);
+    else
+        v3d_store_tiled_image((void *)dbase, d->stride, buf, row, (enum v3d_memory_format)d->tiling, d->cpp,
+                              d->padded_h, &b);
+    FreeVec(buf);
+    return TRUE;
+}
+
+static BOOL copy_compatible(GLenum a, GLenum b);
+
+/* A copy object's GPU image(s): a renderbuffer's, a texture's level's. */
+static BOOL copy_img_of(struct OGLES3Context *ctx, GLuint name, GLenum target, GLint level, struct OGLES3CopyImg *img,
+                        int *n)
+{
+    struct OGLES3Texture *t;
+    if (target == GL_RENDERBUFFER) {
+        if (level) {
+            ogles2_error(ctx, GL_INVALID_VALUE);
+            return FALSE;
+        }
+        if (ogles2_fbo_rb_copy(ctx, name, 0, n) == 1) { /* a colour one of one sample: its hidden texture */
+            if (!(t = ogles2_fbo_rb_color(ctx, name)) || !ogles2_texture_copy_img(ctx, t, 0, img, n)) {
+                ogles2_error(ctx, GL_INVALID_OPERATION);
+                return FALSE;
+            }
+            return TRUE;
+        }
+        if (ogles2_fbo_rb_copy(ctx, name, img, n) != 2) {
+            ogles2_error(ctx, ogles2_glIsRenderbuffer(ctx, name) ? GL_INVALID_OPERATION : GL_INVALID_VALUE);
+            return FALSE;
+        }
+        return TRUE;
+    }
+    if (!(t = ogles2_texture_get(ctx, name)) || !t->target) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return FALSE;
+    }
+    if (t->target != target) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return FALSE;
+    }
+    if (level < 0 || level >= MAX_LEVELS || !(t->f[0].defined & (1UL << level))) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return FALSE;
+    }
+    if (!ogles2_texture_copy_img(ctx, t, level, img, n)) {
+        ogles2_error(ctx, GL_OUT_OF_MEMORY);
+        return FALSE;
+    }
+    return TRUE;
+}
+
+/* A side the RAM copies cannot copy: a renderbuffer but a colour one of one
+ * sample, or a multisample texture. */
+static BOOL copy_needs_gpu(struct OGLES3Context *ctx, GLuint name, GLenum target)
+{
+    if (target == GL_RENDERBUFFER)
+        return ogles2_fbo_rb_copy(ctx, name, 0, 0) == 2;
+    return target == GL_TEXTURE_2D_MULTISAMPLE || target == GL_TEXTURE_2D_MULTISAMPLE_ARRAY_OES;
+}
+
+static void copy_gpu(struct OGLES3Context *ctx, GLuint srcName, GLenum srcTarget, GLint srcLevel, GLint srcX,
+                     GLint srcY, GLint srcZ, GLuint dstName, GLenum dstTarget, GLint dstLevel, GLint dstX, GLint dstY,
+                     GLint dstZ, GLsizei w, GLsizei h, GLsizei depth)
+{
+    struct OGLES3CopyImg s[2], d[2];
+    struct OGLES3Context *m;
+    int ns, nd, z, k;
+    if (!ctx->v3d) /* a state-only context: no GPU images */
+        return;
+    if (!copy_img_of(ctx, srcName, srcTarget, srcLevel, s, &ns) || !copy_img_of(ctx, dstName, dstTarget, dstLevel, d, &nd))
+        return;
+    /* Mesa's check_region_bounds, in pixels (a renderbuffer one layer) */
+    if (w < 0 || h < 0 || depth < 0 || srcX < 0 || srcY < 0 || srcZ < 0 || dstX < 0 || dstY < 0 || dstZ < 0 ||
+        srcX + w > s[0].w || srcY + h > s[0].h || srcZ + depth > s[0].layers || dstX + w > d[0].w ||
+        dstY + h > d[0].h || dstZ + depth > d[0].layers) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    /* the same samples; a depth or stencil format to itself, a colour one by
+     * its view class (the same bytes a texel) */
+    if (s[0].scale != d[0].scale || ns != nd || s[0].cpp != d[0].cpp ||
+        (s[0].zs || d[0].zs ? s[0].ifmt != d[0].ifmt : !copy_compatible(s[0].ifmt, d[0].ifmt))) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
+    if (!w || !h || !depth)
+        return;
+    for (m = ctx->share->first; m; m = m->share_next) /* every job that draws or reads them rendered */
+        if (m->v3d) {
+            ogles2_job_flush(m, FALSE);
+            ogles2_job_finish(m);
+        }
+    for (z = 0; z < depth; z++)
+        for (k = 0; k < ns; k++) {
+            int sc = s[k].scale;
+            if (!move_box(&s[k], s[k].base + (ULONG)(srcZ + z) * s[k].layer_bytes, srcX * sc, srcY * sc, &d[k],
+                          d[k].base + (ULONG)(dstZ + z) * d[k].layer_bytes, dstX * sc, dstY * sc, w * sc, h * sc)) {
+                ogles2_error(ctx, GL_OUT_OF_MEMORY);
+                return;
+            }
+            if (d[k].tex && !k) /* the RAM copy read back when the CPU needs it */
+                ogles2_texture_rendered(d[k].tex, dstZ + z, d[k].level);
+        }
+}
+
 /* Mesa's check_region_bounds: the box within the level (a cube's six faces,
  * an array's layers, a 3D texture's slices its depth). */
 static BOOL copy_bounds(struct OGLES3Context *ctx, const struct OGLES3Texture *t, GLint level, GLint x, GLint y,
@@ -6264,6 +6457,12 @@ void ogles2_glCopyImageSubDataEXT(struct OGLES3Context *ctx, GLuint srcName, GLe
     int z;
     if (!ogles2_es3_entry(ctx) || !(ts = ts_get(ctx)))
         return;
+    /* depth, stencil and multisample images: on the GPU */
+    if (copy_needs_gpu(ctx, srcName, srcTarget) || copy_needs_gpu(ctx, dstName, dstTarget)) {
+        copy_gpu(ctx, srcName, srcTarget, srcLevel, srcX, srcY, srcZ, dstName, dstTarget, dstLevel, dstX, dstY, dstZ,
+                 srcWidth, srcHeight, srcDepth);
+        return;
+    }
     if (!(st = copy_object(ctx, srcName, srcTarget, srcLevel, srcZ, srcDepth)) ||
         !(dt = copy_object(ctx, dstName, dstTarget, dstLevel, dstZ, srcDepth)))
         return;

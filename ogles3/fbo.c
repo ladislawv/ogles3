@@ -717,6 +717,49 @@ struct OGLES3Texture *ogles2_fbo_rb_color(struct OGLES3Context *ctx, GLuint name
     return rb->color;
 }
 
+/* glCopyImageSubData of a renderbuffer on the GPU (texture.c's copy_gpu):
+ * its image (a colour one's hidden texture's), and DEPTH32F_STENCIL8's S8
+ * image second (*n 2). 0: not one (no such name); 1: a colour renderbuffer
+ * of one sample (texture.c copies it through its RAM copy); 2: given. */
+int ogles2_fbo_rb_copy(struct OGLES3Context *ctx, GLuint name, struct OGLES3CopyImg *img, int *n)
+{
+    struct OGLES3Renderbuffer *rb;
+    int k;
+    if (!ctx->fbo || !(rb = rb_by_name(ctx->fbo, name)) || !rb->bound_once)
+        return 0;
+    if (rb->color && !rb->samples)
+        return 1;
+    if (!img)
+        return 2;
+    if (rb->color) { /* 4x colour: the hidden texture's image, the pixels its quarter */
+        if (!ogles2_texture_copy_img(ctx, rb->color, 0, img, n))
+            return 0;
+    } else {
+        if (!rb->base)
+            return 0;
+        *n = rb->format == GL_DEPTH32F_STENCIL8 ? 2 : 1;
+        for (k = 0; k < *n; k++) {
+            ULONG cpp = k ? 1 : rb->cpp, ub = k ? rb->sub : rb->ub;
+            memset(&img[k], 0, sizeof(img[k]));
+            img[k].base = k ? rb->sbase : rb->base;
+            img[k].padded_h = ub * 2 * v3d_utile_height((int)cpp);
+            img[k].stride = img[k].padded_h ? (k ? rb->sbytes : rb->bytes) / img[k].padded_h : 0;
+            img[k].tiling = V3D_MEMORY_FORMAT_UIF_NO_XOR;
+            img[k].cpp = (UBYTE)cpp;
+            img[k].zs = TRUE;
+            img[k].layers = 1;
+        }
+    }
+    for (k = 0; k < *n; k++) {
+        img[k].w = rb->w;
+        img[k].h = rb->h;
+        img[k].scale = rb->samples ? 2 : 1;
+        img[k].ifmt = rb->format;
+        img[k].tex = 0;
+    }
+    return 2;
+}
+
 GLboolean ogles2_glIsRenderbuffer(struct OGLES3Context *ctx, GLuint renderbuffer)
 {
     struct OGLES3Renderbuffer *rb;

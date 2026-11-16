@@ -1,18 +1,36 @@
 ogles2: v3dglslc compiles a geometry program's draw-time variants too
-(docs/GLES3_PLAN.md item 9): patch 0015's v3d_compile_variant() hands the
-geometry shader the last draw bound (its key's is_coord picks the binning
-or the render variant) to v3d_get_compiled_shader() with that key. Unused,
-nothing changes.
+(docs/GLES3_PLAN.md item 9): v3d_compile_variant_gs() hands the geometry
+shader the last draw bound (its key's is_coord picks the binning or the
+render variant) to v3d_get_compiled_shader() with that key, as patch
+0015's v3d_compile_variant() does the vertex and fragment shaders. A
+function of its own, before v3d_program_fini, so that no line of 0015
+changes (apply_mesa_patches.sh tells a patch present by applying it in
+reverse). Unused, nothing changes.
 
 --- a/src/gallium/drivers/v3d/v3d_program.c
 +++ b/src/gallium/drivers/v3d/v3d_program.c
-@@ -1284,7 +1284,8 @@
-         struct v3d_context *v3d = v3d_context(pctx);
-         struct v3d_uncompiled_shader *so =
-                 stage == MESA_SHADER_VERTEX ? v3d->prog.bind_vs :
--                stage == MESA_SHADER_FRAGMENT ? v3d->prog.bind_fs : NULL;
-+                stage == MESA_SHADER_FRAGMENT ? v3d->prog.bind_fs :
-+                stage == MESA_SHADER_GEOMETRY ? v3d->prog.bind_gs : NULL;
+@@ -1247,6 +1247,24 @@
+                 _mesa_hash_table_create(pctx, cs_cache_hash, cs_cache_compare);
+ }
 
-         if (!so)
-                 return false;
++/* ogles2 (v3dglslc): as v3d_compile_variant (patch 0015), the geometry
++ * shader the last draw bound with exactly `key` (its is_coord: the binning
++ * or the render variant). */
++bool v3d_compile_variant_gs(struct pipe_context *pctx, struct v3d_key *key,
++                            size_t key_size);
++
++bool
++v3d_compile_variant_gs(struct pipe_context *pctx, struct v3d_key *key,
++                       size_t key_size)
++{
++        struct v3d_context *v3d = v3d_context(pctx);
++
++        if (!v3d->prog.bind_gs)
++                return false;
++        return v3d_get_compiled_shader(v3d, key, key_size,
++                                       v3d->prog.bind_gs) != NULL;
++}
++
+ void
+ v3d_program_fini(struct pipe_context *pctx)
+ {

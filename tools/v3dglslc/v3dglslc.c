@@ -142,6 +142,8 @@ extern bool v3d_force_alpha_to_coverage; /* Mesa patch 0014 */
 /* Mesa patch 0015: one variant for exactly `key` (the draw-time variants). */
 extern bool v3d_compile_variant(struct pipe_context *pctx, mesa_shader_stage stage, struct v3d_key *key,
                                 size_t key_size);
+/* Mesa patch 0019: the same for the geometry shader */
+extern bool v3d_compile_variant_gs(struct pipe_context *pctx, struct v3d_key *key, size_t key_size);
 static struct pipe_context *the_pipe;
 /* -x: the keys of the variants to compile (a .v3dx instead of the .v3dp):
  * each a u32 VARIANT stage and the key's bytes (v3dp_key_parse). */
@@ -1017,7 +1019,7 @@ static int write_files(struct gl_shader_program *prog, GLuint p, const char *pat
                     break;
             }
             ok = vstage == 4                  ? v3d_compile_variant(the_pipe, MESA_SHADER_FRAGMENT, &fk.base, sizeof(fk))
-               : vstage == 2 || vstage == 3   ? v3d_compile_variant(the_pipe, MESA_SHADER_GEOMETRY, &gk.base, sizeof(gk))
+               : vstage == 2 || vstage == 3   ? v3d_compile_variant_gs(the_pipe, &gk.base, sizeof(gk))
                                               : v3d_compile_variant(the_pipe, MESA_SHADER_VERTEX, &vk.base, sizeof(vk));
             if (!ok)
                 fprintf(stderr, "v3dglslc: the variant at byte %u did not compile\n", (unsigned)at);

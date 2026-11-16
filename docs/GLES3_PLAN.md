@@ -234,11 +234,8 @@ written, by size:
   the geometry program's uniforms, blocks and samplers as stage 2
   (`ogles2_v3dp_compose`); refused now (`GL_INVALID_OPERATION`, logged).
   dEQP's `separate_shader` groups have no geometry stage.
-- `glCopyImageSubData` of depth, stencil and multisample renderbuffers
-  and multisample textures (`GL_INVALID_OPERATION`, logged): GPU images
-  without a RAM copy, to be copied tile-wise (`v3d_load_tiled_image` and
-  `v3d_store_tiled_image`, as the S8 images are filled); dEQP's
-  `copy_image` groups copy colour formats only.
+- (Done since: `glCopyImageSubData` of depth, stencil and multisample
+  images, below.)
 - (Done since: a buffer's words and texels kept in step, below.)
 - Not possible on this GPU and its Mesa driver: RGB32 buffer textures,
   `EXT_gpu_shader5`, tessellation (so no ES 3.2 context), ASTC HDR and 3D.
@@ -330,6 +327,27 @@ A1200).**
   them where they are (`ogles2_buffer_texels`, no copy back while a draw
   builds). m8_draw `test_image_buffer_small` (es32ib: RGBA8UI and
   RGBA16UI stores, both buffers mapped).
+- **`glCopyImageSubData` of depth, stencil and multisample images**
+  (`texture.c`, "on the GPU"): a renderbuffer other than a colour one of
+  one sample, or a multisample texture, on either side makes the copy go
+  image to image (`copy_gpu`): each layer's box untiled from the source's
+  GPU image and tiled into the destination's (`move_box`:
+  `v3d_load_tiled_image`/`v3d_store_tiled_image`, raster rows as they
+  are; 4x images a pixel's 2x2 samples), DEPTH32F_STENCIL8's S8 image too
+  and a stencil texture's S8 image as its texels
+  (`ogles2_texture_copy_img`, `ogles2_fbo_rb_copy`); every share member's
+  job rendered first, a destination texture's levels marked rendered.
+  Rules: the same samples, a depth or stencil format to itself, a colour
+  one by its view class (`GL_INVALID_OPERATION`), the box within both
+  (`GL_INVALID_VALUE`). m8_draw `test_copy_gpu` (a depth renderbuffer's
+  half copied and drawn against, a 4x one's half copied and resolved, two
+  refusals).
+- **Mesa patch 0019 rewritten**: it changed a line patch 0015 added, so
+  `apply_mesa_patches.sh` (a patch is present when it applies in reverse)
+  stopped at 0015 on a tree with both. Now a function of its own,
+  `v3d_compile_variant_gs`, before `v3d_program_fini`, which v3dglslc
+  calls for geometry keys; the tree's old 0019 reverted, the new applied,
+  every patch present on a second run; Mesa and both compilers rebuilt.
 - **A buffer's words and texels kept in step** (`buffer.c`,
   `ogles2_buffers_settle`): once a buffer texture of 8- or 16-bit texels
   exists or such a store happened (`ogles2_mixed_writes_seen`), each draw

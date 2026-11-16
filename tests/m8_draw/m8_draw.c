@@ -3830,6 +3830,87 @@ static void test_image_buffer_small(void)
     glDeleteProgram(p);
 }
 
+/* glCopyImageSubData of GPU-only images (docs/GLES3_PLAN.md item 5): a
+ * depth renderbuffer cleared to 0.25 copied over the left half of one
+ * cleared to 1.0, then es3flat drawn at depth 0.5 with GL_LESS into the
+ * second: the left half fails the test (black), the right passes (green);
+ * the left half of a 4x renderbuffer cleared red copied into one cleared
+ * blue, resolved by a blit: left red, right blue. */
+static void test_copy_gpu(void)
+{
+    GLuint p = program("es3flat"), rb[4], tex[2], fb[4];
+    GLint lc, ok = 1;
+    if (!p) {
+        check(0, "copy image (GPU): es3flat links");
+        return;
+    }
+    glGenRenderbuffers(4, rb);
+    glGenTextures(2, tex);
+    glGenFramebuffers(4, fb);
+    glBindRenderbuffer(GL_RENDERBUFFER, rb[0]);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 64, 64);
+    glBindRenderbuffer(GL_RENDERBUFFER, rb[1]);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 64, 64);
+    glBindTexture(GL_TEXTURE_2D, tex[0]);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, 64, 64);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb[0]);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex[0], 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rb[0]);
+    glClearDepthf(0.25f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rb[1]);
+    glClearDepthf(1.0f);
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glCopyImageSubDataEXT(rb[0], GL_RENDERBUFFER, 0, 0, 0, 0, rb[1], GL_RENDERBUFFER, 0, 0, 0, 0, 32, 64, 1);
+    ok &= glGetError() == GL_NO_ERROR;
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    lc = glGetAttribLocation(p, "col");
+    glVertexAttrib4f((GLuint)lc, 0, 1, 0, 1);
+    draw_cover(p);
+    glDisable(GL_DEPTH_TEST);
+    check(ok && pixel_is(8, 32, 0, 0, 0, 255, 0) && pixel_is(56, 32, 0, 255, 0, 255, 0),
+          "copy image (GPU): a depth renderbuffer's left half copied into another");
+
+    glBindRenderbuffer(GL_RENDERBUFFER, rb[2]);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGBA8, 64, 64);
+    glBindRenderbuffer(GL_RENDERBUFFER, rb[3]);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGBA8, 64, 64);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb[1]);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, rb[2]);
+    glClearColor(1, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb[2]);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, rb[3]);
+    glClearColor(0, 0, 1, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glCopyImageSubDataEXT(rb[2], GL_RENDERBUFFER, 0, 0, 0, 0, rb[3], GL_RENDERBUFFER, 0, 0, 0, 0, 32, 64, 1);
+    ok = glGetError() == GL_NO_ERROR;
+    glBindTexture(GL_TEXTURE_2D, tex[1]);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, 64, 64);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb[3]);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex[1], 0);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fb[2]);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb[3]);
+    glBlitFramebuffer(0, 0, 64, 64, 0, 0, 64, 64, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb[3]);
+    check(ok && glGetError() == GL_NO_ERROR && pixel_is(8, 32, 255, 0, 0, 255, 0) && pixel_is(56, 32, 0, 0, 255, 255, 0),
+          "copy image (GPU): a 4x renderbuffer's left half copied into another, resolved");
+    glCopyImageSubDataEXT(rb[2], GL_RENDERBUFFER, 0, 0, 0, 0, tex[1], GL_TEXTURE_2D, 0, 0, 0, 0, 8, 8, 1);
+    check(glGetError() == GL_INVALID_OPERATION, "copy image (GPU): 4x into one sample: GL_INVALID_OPERATION");
+    glCopyImageSubDataEXT(rb[0], GL_RENDERBUFFER, 0, 0, 0, 0, rb[2], GL_RENDERBUFFER, 0, 0, 0, 0, 8, 8, 1);
+    check(glGetError() == GL_INVALID_OPERATION, "copy image (GPU): depth into colour: GL_INVALID_OPERATION");
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDeleteFramebuffers(4, fb);
+    glDeleteTextures(2, tex);
+    glDeleteRenderbuffers(4, rb);
+    glClearColor(0, 0, 0, 0);
+    glUseProgram(0);
+    glDeleteProgram(p);
+}
+
 static int skipped(const char *name)
 {
     const char *list = getenv("M8_SKIP");
@@ -3947,6 +4028,8 @@ int main(void)
                 test_advanced_blend();
             if (!skipped("copy_exact"))
                 test_copy_exact();
+            if (!skipped("copy_gpu"))
+                test_copy_gpu();
             if (!skipped("image_buffer_small"))
                 test_image_buffer_small();
         }
