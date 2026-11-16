@@ -1,0 +1,82 @@
+Writing test log into M8R3:results/cimixed.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles3.library: 4 functions of the ES 3.0 table not implemented yet: glTexStorage1DEXT glTextureStorage1DEXT glTextureStorage2DEXT glTextureStorage3DEXT
+
+Test case 'dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba32f_rgba8_etc2_eac.texture2d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba32f_rgba8_etc2_eac.texture2d_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba32f_rgba8_etc2_eac.texture3d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba32f_rgba8_etc2_eac.texture3d_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba32f_rgba8_etc2_eac.cubemap_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba32f_rgba8_etc2_eac.cubemap_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba32f_rgba8_etc2_eac.texture2d_array_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba32f_rgba8_etc2_eac.texture2d_array_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba8_etc2_eac_rgba32f.texture2d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba8_etc2_eac_rgba32f.texture2d_to_texture3d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba8_etc2_eac_rgba32f.texture2d_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba8_etc2_eac_rgba32f.texture2d_to_texture2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba8_etc2_eac_rgba32f.cubemap_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba8_etc2_eac_rgba32f.cubemap_to_texture3d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba8_etc2_eac_rgba32f.cubemap_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba8_etc2_eac_rgba32f.cubemap_to_texture2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba32f_srgb8_alpha8_etc2_eac.texture2d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba32f_srgb8_alpha8_etc2_eac.texture2d_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba32f_srgb8_alpha8_etc2_eac.texture3d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba32f_srgb8_alpha8_etc2_eac.texture3d_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba32f_srgb8_alpha8_etc2_eac.cubemap_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba32f_srgb8_alpha8_etc2_eac.cubemap_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba32f_srgb8_alpha8_etc2_eac.texture2d_array_to_texture2d'..
+
+ABORTED!
+
+Test run totals:
+  Passed:        22/22 (100.0%)
+  Failed:        0/22 (0.0%)
+  Not supported: 0/22 (0.0%)
+  Warnings:      0/22 (0.0%)
+  Waived:        0/22 (0.0%)
+Test run was ABORTED!

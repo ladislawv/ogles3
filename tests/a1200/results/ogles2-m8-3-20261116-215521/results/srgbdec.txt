@@ -1,0 +1,76 @@
+Writing test log into M8R3:results/srgbdec.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles3.library: 4 functions of the ES 3.0 table not implemented yet: glTexStorage1DEXT glTextureStorage1DEXT glTextureStorage2DEXT glTextureStorage3DEXT
+
+Test case 'dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srgba8.skipped'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srgba8.enabled'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srgba8.texel_fetch'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srgba8.conversion_gpu'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srgba8.toggled'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srgba8.multiple_textures'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srgba8.using_sampler'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srg8.skipped'..
+  NotSupported (Test requires GL_EXT_texture_sRGB_RG8 extension)
+
+Test case 'dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srg8.enabled'..
+  NotSupported (Test requires GL_EXT_texture_sRGB_RG8 extension)
+
+Test case 'dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srg8.texel_fetch'..
+  NotSupported (Test requires GL_EXT_texture_sRGB_RG8 extension)
+
+Test case 'dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srg8.conversion_gpu'..
+  NotSupported (Test requires GL_EXT_texture_sRGB_RG8 extension)
+
+Test case 'dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srg8.toggled'..
+  NotSupported (Test requires GL_EXT_texture_sRGB_RG8 extension)
+
+Test case 'dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srg8.multiple_textures'..
+  NotSupported (Test requires GL_EXT_texture_sRGB_RG8 extension)
+
+Test case 'dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srg8.using_sampler'..
+  NotSupported (Test requires GL_EXT_texture_sRGB_RG8 extension)
+
+Test case 'dEQP-GLES31.functional.srgb_texture_decode.skip_decode.sr8.skipped'..
+  NotSupported (Test requires GL_EXT_texture_sRGB_R8 extension)
+
+Test case 'dEQP-GLES31.functional.srgb_texture_decode.skip_decode.sr8.enabled'..
+  NotSupported (Test requires GL_EXT_texture_sRGB_R8 extension)
+
+Test case 'dEQP-GLES31.functional.srgb_texture_decode.skip_decode.sr8.texel_fetch'..
+  NotSupported (Test requires GL_EXT_texture_sRGB_R8 extension)
+
+Test case 'dEQP-GLES31.functional.srgb_texture_decode.skip_decode.sr8.conversion_gpu'..
+  NotSupported (Test requires GL_EXT_texture_sRGB_R8 extension)
+
+Test case 'dEQP-GLES31.functional.srgb_texture_decode.skip_decode.sr8.toggled'..
+  NotSupported (Test requires GL_EXT_texture_sRGB_R8 extension)
+
+Test case 'dEQP-GLES31.functional.srgb_texture_decode.skip_decode.sr8.multiple_textures'..
+  NotSupported (Test requires GL_EXT_texture_sRGB_R8 extension)
+
+Test case 'dEQP-GLES31.functional.srgb_texture_decode.skip_decode.sr8.using_sampler'..
+  NotSupported (Test requires GL_EXT_texture_sRGB_R8 extension)
+
+DONE!
+
+Test run totals:
+  Passed:        7/21 (33.3%)
+  Failed:        0/21 (0.0%)
+  Not supported: 14/21 (66.7%)
+  Warnings:      0/21 (0.0%)
+  Waived:        0/21 (0.0%)

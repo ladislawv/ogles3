@@ -1,0 +1,484 @@
+Writing test log into M8R3:results/texms.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles3.library: 4 functions of the ES 3.0 table not implemented yet: glTexStorage1DEXT glTextureStorage1DEXT glTextureStorage2DEXT glTextureStorage3DEXT
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_1.sample_position'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_1.sample_mask_only'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_1.sample_mask_and_alpha_to_coverage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_1.sample_mask_and_sample_coverage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_1.sample_mask_and_sample_coverage_and_alpha_to_coverage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_1.sample_mask_non_effective_bits'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_1.use_texture_color_2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_1.use_texture_color_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_1.use_texture_int_2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_1.use_texture_int_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_1.use_texture_uint_2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_1.use_texture_uint_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_1.use_texture_depth_2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_1.use_texture_depth_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_2.sample_position'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_2.sample_mask_only'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_2.sample_mask_and_alpha_to_coverage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_2.sample_mask_and_sample_coverage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_2.sample_mask_and_sample_coverage_and_alpha_to_coverage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_2.sample_mask_non_effective_bits'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_2.use_texture_color_2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_2.use_texture_color_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_2.use_texture_int_2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_2.use_texture_int_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_2.use_texture_uint_2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_2.use_texture_uint_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_2.use_texture_depth_2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_2.use_texture_depth_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_3.sample_position'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_3.sample_mask_only'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_3.sample_mask_and_alpha_to_coverage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_3.sample_mask_and_sample_coverage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_3.sample_mask_and_sample_coverage_and_alpha_to_coverage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_3.sample_mask_non_effective_bits'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_3.use_texture_color_2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_3.use_texture_color_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_3.use_texture_int_2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_3.use_texture_int_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_3.use_texture_uint_2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_3.use_texture_uint_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_3.use_texture_depth_2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_3.use_texture_depth_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_4.sample_position'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_4.sample_mask_only'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_4.sample_mask_and_alpha_to_coverage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_4.sample_mask_and_sample_coverage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_4.sample_mask_and_sample_coverage_and_alpha_to_coverage'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_4.sample_mask_non_effective_bits'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_4.use_texture_color_2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_4.use_texture_color_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_4.use_texture_int_2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_4.use_texture_int_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_4.use_texture_uint_2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_4.use_texture_uint_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_4.use_texture_depth_2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_4.use_texture_depth_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_8.sample_position'..
+  NotSupported (Requested sample count is greater than GL_MAX_COLOR_TEXTURE_SAMPLES)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_8.sample_mask_only'..
+  NotSupported (Requested sample count is greater than glGetInternalformativ(GL_SAMPLES) for this target/format)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_8.sample_mask_and_alpha_to_coverage'..
+  NotSupported (Requested sample count is greater than glGetInternalformativ(GL_SAMPLES) for this target/format)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_8.sample_mask_and_sample_coverage'..
+  NotSupported (Requested sample count is greater than glGetInternalformativ(GL_SAMPLES) for this target/format)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_8.sample_mask_and_sample_coverage_and_alpha_to_coverage'..
+  NotSupported (Requested sample count is greater than glGetInternalformativ(GL_SAMPLES) for this target/format)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_8.sample_mask_non_effective_bits'..
+  NotSupported (Requested sample count is greater than glGetInternalformativ(GL_SAMPLES) for this target/format)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_8.use_texture_color_2d'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_8.use_texture_color_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_8.use_texture_int_2d'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_8.use_texture_int_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_8.use_texture_uint_2d'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_8.use_texture_uint_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_8.use_texture_depth_2d'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_8.use_texture_depth_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_10.sample_position'..
+  NotSupported (Requested sample count is greater than GL_MAX_COLOR_TEXTURE_SAMPLES)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_10.sample_mask_only'..
+  NotSupported (Requested sample count is greater than glGetInternalformativ(GL_SAMPLES) for this target/format)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_10.sample_mask_and_alpha_to_coverage'..
+  NotSupported (Requested sample count is greater than glGetInternalformativ(GL_SAMPLES) for this target/format)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_10.sample_mask_and_sample_coverage'..
+  NotSupported (Requested sample count is greater than glGetInternalformativ(GL_SAMPLES) for this target/format)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_10.sample_mask_and_sample_coverage_and_alpha_to_coverage'..
+  NotSupported (Requested sample count is greater than glGetInternalformativ(GL_SAMPLES) for this target/format)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_10.sample_mask_non_effective_bits'..
+  NotSupported (Requested sample count is greater than glGetInternalformativ(GL_SAMPLES) for this target/format)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_10.use_texture_color_2d'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_10.use_texture_color_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_10.use_texture_int_2d'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_10.use_texture_int_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_10.use_texture_uint_2d'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_10.use_texture_uint_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_10.use_texture_depth_2d'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_10.use_texture_depth_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_12.sample_position'..
+  NotSupported (Requested sample count is greater than GL_MAX_COLOR_TEXTURE_SAMPLES)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_12.sample_mask_only'..
+  NotSupported (Requested sample count is greater than glGetInternalformativ(GL_SAMPLES) for this target/format)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_12.sample_mask_and_alpha_to_coverage'..
+  NotSupported (Requested sample count is greater than glGetInternalformativ(GL_SAMPLES) for this target/format)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_12.sample_mask_and_sample_coverage'..
+  NotSupported (Requested sample count is greater than glGetInternalformativ(GL_SAMPLES) for this target/format)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_12.sample_mask_and_sample_coverage_and_alpha_to_coverage'..
+  NotSupported (Requested sample count is greater than glGetInternalformativ(GL_SAMPLES) for this target/format)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_12.sample_mask_non_effective_bits'..
+  NotSupported (Requested sample count is greater than glGetInternalformativ(GL_SAMPLES) for this target/format)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_12.use_texture_color_2d'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_12.use_texture_color_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_12.use_texture_int_2d'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_12.use_texture_int_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_12.use_texture_uint_2d'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_12.use_texture_uint_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_12.use_texture_depth_2d'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_12.use_texture_depth_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_13.sample_position'..
+  NotSupported (Requested sample count is greater than GL_MAX_COLOR_TEXTURE_SAMPLES)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_13.sample_mask_only'..
+  NotSupported (Requested sample count is greater than glGetInternalformativ(GL_SAMPLES) for this target/format)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_13.sample_mask_and_alpha_to_coverage'..
+  NotSupported (Requested sample count is greater than glGetInternalformativ(GL_SAMPLES) for this target/format)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_13.sample_mask_and_sample_coverage'..
+  NotSupported (Requested sample count is greater than glGetInternalformativ(GL_SAMPLES) for this target/format)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_13.sample_mask_and_sample_coverage_and_alpha_to_coverage'..
+  NotSupported (Requested sample count is greater than glGetInternalformativ(GL_SAMPLES) for this target/format)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_13.sample_mask_non_effective_bits'..
+  NotSupported (Requested sample count is greater than glGetInternalformativ(GL_SAMPLES) for this target/format)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_13.use_texture_color_2d'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_13.use_texture_color_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_13.use_texture_int_2d'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_13.use_texture_int_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_13.use_texture_uint_2d'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_13.use_texture_uint_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_13.use_texture_depth_2d'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_13.use_texture_depth_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_16.sample_position'..
+  NotSupported (Requested sample count is greater than GL_MAX_COLOR_TEXTURE_SAMPLES)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_16.sample_mask_only'..
+  NotSupported (Requested sample count is greater than glGetInternalformativ(GL_SAMPLES) for this target/format)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_16.sample_mask_and_alpha_to_coverage'..
+  NotSupported (Requested sample count is greater than glGetInternalformativ(GL_SAMPLES) for this target/format)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_16.sample_mask_and_sample_coverage'..
+  NotSupported (Requested sample count is greater than glGetInternalformativ(GL_SAMPLES) for this target/format)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_16.sample_mask_and_sample_coverage_and_alpha_to_coverage'..
+  NotSupported (Requested sample count is greater than glGetInternalformativ(GL_SAMPLES) for this target/format)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_16.sample_mask_non_effective_bits'..
+  NotSupported (Requested sample count is greater than glGetInternalformativ(GL_SAMPLES) for this target/format)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_16.use_texture_color_2d'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_16.use_texture_color_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_16.use_texture_int_2d'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_16.use_texture_int_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_16.use_texture_uint_2d'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_16.use_texture_uint_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_16.use_texture_depth_2d'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_16.use_texture_depth_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_64.sample_position'..
+  NotSupported (Requested sample count is greater than GL_MAX_COLOR_TEXTURE_SAMPLES)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_64.sample_mask_only'..
+  NotSupported (Test requires larger GL_MAX_SAMPLE_MASK_WORDS)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_64.sample_mask_and_alpha_to_coverage'..
+  NotSupported (Test requires larger GL_MAX_SAMPLE_MASK_WORDS)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_64.sample_mask_and_sample_coverage'..
+  NotSupported (Test requires larger GL_MAX_SAMPLE_MASK_WORDS)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_64.sample_mask_and_sample_coverage_and_alpha_to_coverage'..
+  NotSupported (Test requires larger GL_MAX_SAMPLE_MASK_WORDS)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_64.sample_mask_non_effective_bits'..
+  NotSupported (Test requires larger GL_MAX_SAMPLE_MASK_WORDS)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_64.use_texture_color_2d'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_64.use_texture_color_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_64.use_texture_int_2d'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_64.use_texture_int_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_64.use_texture_uint_2d'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_64.use_texture_uint_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_64.use_texture_depth_2d'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.samples_64.use_texture_depth_2d_array'..
+  NotSupported (Requested sample count is greater than supported)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.negative.fbo_attach_different_sample_count_tex_tex'..
+  NotSupported (Test requires multiple supported sample counts)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.negative.fbo_attach_different_sample_count_tex_rbo'..
+  NotSupported (Test requires multiple supported sample counts)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.negative.fbo_attach_different_fixed_state_tex_tex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.negative.fbo_attach_different_fixed_state_tex_rbo'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.negative.fbo_attach_non_zero_level'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.negative.texture_min_filter'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.negative.texture_mag_filter'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.negative.texture_wrap_s'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.negative.texture_wrap_t'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.negative.texture_wrap_r'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.negative.texture_min_lod'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.negative.texture_max_lod'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.negative.texture_compare_mode'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.negative.texture_compare_func'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.negative.texture_base_level'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.negative.texture_high_sample_count'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.multisample.negative.texture_zero_sample_count'..
+  Pass (Pass)
+
+DONE!
+
+Test run totals:
+  Passed:        55/157 (35.0%)
+  Failed:        0/157 (0.0%)
+  Not supported: 102/157 (65.0%)
+  Warnings:      0/157 (0.0%)
+  Waived:        0/157 (0.0%)

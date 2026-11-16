@@ -1,0 +1,649 @@
+Writing test log into M8R3:results/cafilt.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles3.library: 4 functions of the ES 3.0 table not implemented yet: glTexStorage1DEXT glTextureStorage1DEXT glTextureStorage2DEXT glTextureStorage3DEXT
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgba16f_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgba16f_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgba16f_nearest_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgba16f_linear_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgba16f_nearest_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgba16f_linear_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.r11f_g11f_b10f_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.r11f_g11f_b10f_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.r11f_g11f_b10f_nearest_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.r11f_g11f_b10f_linear_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.r11f_g11f_b10f_nearest_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.r11f_g11f_b10f_linear_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgb9_e5_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgb9_e5_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgb9_e5_nearest_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgb9_e5_linear_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgb9_e5_nearest_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgb9_e5_linear_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgba8_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgba8_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgba8_nearest_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgba8_linear_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgba8_nearest_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgba8_linear_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgba8_snorm_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgba8_snorm_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgba8_snorm_nearest_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgba8_snorm_linear_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgba8_snorm_nearest_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgba8_snorm_linear_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgb565_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgb565_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgb565_nearest_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgb565_linear_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgb565_nearest_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgb565_linear_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgba4_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgba4_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgba4_nearest_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgba4_linear_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgba4_nearest_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgba4_linear_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgb5_a1_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgb5_a1_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgb5_a1_nearest_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgb5_a1_linear_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgb5_a1_nearest_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgb5_a1_linear_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.sr8_nearest'..
+  NotSupported (GL_EXT_texture_sRGB_R8 not supported at es31fTextureFilteringTests.cpp:195)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.sr8_linear'..
+  NotSupported (GL_EXT_texture_sRGB_R8 not supported at es31fTextureFilteringTests.cpp:195)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.sr8_nearest_mipmap_nearest'..
+  NotSupported (GL_EXT_texture_sRGB_R8 not supported at es31fTextureFilteringTests.cpp:195)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.sr8_linear_mipmap_nearest'..
+  NotSupported (GL_EXT_texture_sRGB_R8 not supported at es31fTextureFilteringTests.cpp:195)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.sr8_nearest_mipmap_linear'..
+  NotSupported (GL_EXT_texture_sRGB_R8 not supported at es31fTextureFilteringTests.cpp:195)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.sr8_linear_mipmap_linear'..
+  NotSupported (GL_EXT_texture_sRGB_R8 not supported at es31fTextureFilteringTests.cpp:195)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.srg8_nearest'..
+  NotSupported (GL_EXT_texture_sRGB_RG8 not supported at es31fTextureFilteringTests.cpp:199)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.srg8_linear'..
+  NotSupported (GL_EXT_texture_sRGB_RG8 not supported at es31fTextureFilteringTests.cpp:199)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.srg8_nearest_mipmap_nearest'..
+  NotSupported (GL_EXT_texture_sRGB_RG8 not supported at es31fTextureFilteringTests.cpp:199)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.srg8_linear_mipmap_nearest'..
+  NotSupported (GL_EXT_texture_sRGB_RG8 not supported at es31fTextureFilteringTests.cpp:199)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.srg8_nearest_mipmap_linear'..
+  NotSupported (GL_EXT_texture_sRGB_RG8 not supported at es31fTextureFilteringTests.cpp:199)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.srg8_linear_mipmap_linear'..
+  NotSupported (GL_EXT_texture_sRGB_RG8 not supported at es31fTextureFilteringTests.cpp:199)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.srgb8_alpha8_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.srgb8_alpha8_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.srgb8_alpha8_nearest_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.srgb8_alpha8_linear_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.srgb8_alpha8_nearest_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.srgb8_alpha8_linear_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgb10_a2_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgb10_a2_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgb10_a2_nearest_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgb10_a2_linear_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgb10_a2_nearest_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.formats.rgb10_a2_linear_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.8x8x6_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.8x8x6_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.8x8x6_nearest_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.8x8x6_linear_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.8x8x6_nearest_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.8x8x6_linear_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.64x64x12_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.64x64x12_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.64x64x12_nearest_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.64x64x12_linear_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.64x64x12_nearest_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.64x64x12_linear_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.128x128x12_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.128x128x12_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.128x128x12_nearest_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.128x128x12_linear_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.128x128x12_nearest_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.128x128x12_linear_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.7x7x12_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.7x7x12_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.7x7x12_nearest_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.7x7x12_linear_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.7x7x12_nearest_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.7x7x12_linear_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.63x63x18_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.63x63x18_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.63x63x18_nearest_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.63x63x18_linear_mipmap_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.63x63x18_nearest_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.sizes.63x63x18_linear_mipmap_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_nearest_clamp_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_nearest_clamp_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_nearest_clamp_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_nearest_repeat_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_nearest_repeat_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_nearest_repeat_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_nearest_mirror_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_nearest_mirror_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_nearest_mirror_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_linear_clamp_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_linear_clamp_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_linear_clamp_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_linear_repeat_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_linear_repeat_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_linear_repeat_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_linear_mirror_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_linear_mirror_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_linear_mirror_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_nearest_clamp_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_nearest_clamp_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_nearest_clamp_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_nearest_repeat_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_nearest_repeat_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_nearest_repeat_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_nearest_mirror_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_nearest_mirror_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_nearest_mirror_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_linear_clamp_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_linear_clamp_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_linear_clamp_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_linear_repeat_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_linear_repeat_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_linear_repeat_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_linear_mirror_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_linear_mirror_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_linear_mirror_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_nearest_nearest_clamp_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_nearest_nearest_clamp_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_nearest_nearest_clamp_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_nearest_nearest_repeat_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_nearest_nearest_repeat_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_nearest_nearest_repeat_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_nearest_nearest_mirror_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_nearest_nearest_mirror_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_nearest_nearest_mirror_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_nearest_linear_clamp_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_nearest_linear_clamp_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_nearest_linear_clamp_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_nearest_linear_repeat_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_nearest_linear_repeat_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_nearest_linear_repeat_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_nearest_linear_mirror_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_nearest_linear_mirror_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_nearest_linear_mirror_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_nearest_nearest_clamp_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_nearest_nearest_clamp_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_nearest_nearest_clamp_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_nearest_nearest_repeat_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_nearest_nearest_repeat_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_nearest_nearest_repeat_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_nearest_nearest_mirror_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_nearest_nearest_mirror_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_nearest_nearest_mirror_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_nearest_linear_clamp_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_nearest_linear_clamp_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_nearest_linear_clamp_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_nearest_linear_repeat_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_nearest_linear_repeat_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_nearest_linear_repeat_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_nearest_linear_mirror_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_nearest_linear_mirror_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_nearest_linear_mirror_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_linear_nearest_clamp_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_linear_nearest_clamp_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_linear_nearest_clamp_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_linear_nearest_repeat_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_linear_nearest_repeat_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_linear_nearest_repeat_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_linear_nearest_mirror_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_linear_nearest_mirror_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_linear_nearest_mirror_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_linear_linear_clamp_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_linear_linear_clamp_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_linear_linear_clamp_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_linear_linear_repeat_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_linear_linear_repeat_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_linear_linear_repeat_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_linear_linear_mirror_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_linear_linear_mirror_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.nearest_mipmap_linear_linear_mirror_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_linear_nearest_clamp_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_linear_nearest_clamp_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_linear_nearest_clamp_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_linear_nearest_repeat_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_linear_nearest_repeat_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_linear_nearest_repeat_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_linear_nearest_mirror_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_linear_nearest_mirror_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_linear_nearest_mirror_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_linear_linear_clamp_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_linear_linear_clamp_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_linear_linear_clamp_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_linear_linear_repeat_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_linear_linear_repeat_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_linear_linear_repeat_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_linear_linear_mirror_clamp'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_linear_linear_mirror_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.combinations.linear_mipmap_linear_linear_mirror_mirror'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.no_edges_visible.nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.filtering.cube_array.no_edges_visible.linear'..
+  Pass (Pass)
+
+DONE!
+
+Test run totals:
+  Passed:        200/212 (94.3%)
+  Failed:        0/212 (0.0%)
+  Not supported: 12/212 (5.7%)
+  Warnings:      0/212 (0.0%)
+  Waived:        0/212 (0.0%)

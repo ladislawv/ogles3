@@ -1,0 +1,1572 @@
+#sessionInfo releaseName unknown
+#sessionInfo releaseId 0xcafebabe
+#sessionInfo targetName "AmigaOS3"
+#sessionInfo logFormatVersion "0.3.4"
+#sessionInfo vendor "ogles3.library"
+#sessionInfo renderer "V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM"
+#sessionInfo commandLineParameters "--deqp-case dEQP-GLES31.functional.sample_shading.* --deqp-archive-dir=M8R3:bin --deqp-log-filename=M8R3:results/sampsh.qpa --deqp-log-images=disable --deqp-log-shader-sources=disable --deqp-surface-width=256 --deqp-surface-height=256 --deqp-gl-config-name=rgba8888d24s8ms4"
+
+#beginSession
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.state_query.sample_shading_is_enabled
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.state_query.sample_shading_is_enabled" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying initial value</Text>
+ <Text>glIsEnabled(GL_SAMPLE_SHADING);</Text>
+ <Text>// GL_FALSE returned</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>Verifying random values</Text>
+ <Text>glEnable(GL_SAMPLE_SHADING);</Text>
+ <Text>glIsEnabled(GL_SAMPLE_SHADING);</Text>
+ <Text>// GL_TRUE returned</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glDisable(GL_SAMPLE_SHADING);</Text>
+ <Text>glIsEnabled(GL_SAMPLE_SHADING);</Text>
+ <Text>// GL_FALSE returned</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">10149</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.state_query.sample_shading_get_boolean
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.state_query.sample_shading_get_boolean" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying initial value</Text>
+ <Text>glGetBooleanv(GL_SAMPLE_SHADING, 0x0a96e57d);</Text>
+ <Text>// data = { GL_FALSE }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>Verifying random values</Text>
+ <Text>glEnable(GL_SAMPLE_SHADING);</Text>
+ <Text>glGetBooleanv(GL_SAMPLE_SHADING, 0x0a96e57d);</Text>
+ <Text>// data = { GL_TRUE }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glDisable(GL_SAMPLE_SHADING);</Text>
+ <Text>glGetBooleanv(GL_SAMPLE_SHADING, 0x0a96e57d);</Text>
+ <Text>// data = { GL_FALSE }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">7589</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.state_query.sample_shading_get_integer
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.state_query.sample_shading_get_integer" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying initial value</Text>
+ <Text>glGetIntegerv(GL_SAMPLE_SHADING, 0x0a96e580);</Text>
+ <Text>// data = { 0 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>Verifying random values</Text>
+ <Text>glEnable(GL_SAMPLE_SHADING);</Text>
+ <Text>glGetIntegerv(GL_SAMPLE_SHADING, 0x0a96e580);</Text>
+ <Text>// data = { 1 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glDisable(GL_SAMPLE_SHADING);</Text>
+ <Text>glGetIntegerv(GL_SAMPLE_SHADING, 0x0a96e580);</Text>
+ <Text>// data = { 0 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">6569</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.state_query.sample_shading_get_float
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.state_query.sample_shading_get_float" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying initial value</Text>
+ <Text>glGetFloatv(GL_SAMPLE_SHADING, 0x0a96e580);</Text>
+ <Text>// data = { 0 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>Verifying random values</Text>
+ <Text>glEnable(GL_SAMPLE_SHADING);</Text>
+ <Text>glGetFloatv(GL_SAMPLE_SHADING, 0x0a96e580);</Text>
+ <Text>// data = { 1 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glDisable(GL_SAMPLE_SHADING);</Text>
+ <Text>glGetFloatv(GL_SAMPLE_SHADING, 0x0a96e580);</Text>
+ <Text>// data = { 0 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">6734</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.state_query.sample_shading_get_integer64
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.state_query.sample_shading_get_integer64" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying initial value</Text>
+ <Text>glGetInteger64v(GL_SAMPLE_SHADING, 0x0a96e584);</Text>
+ <Text>// data = { 0 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>Verifying random values</Text>
+ <Text>glEnable(GL_SAMPLE_SHADING);</Text>
+ <Text>glGetInteger64v(GL_SAMPLE_SHADING, 0x0a96e584);</Text>
+ <Text>// data = { 1 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glDisable(GL_SAMPLE_SHADING);</Text>
+ <Text>glGetInteger64v(GL_SAMPLE_SHADING, 0x0a96e584);</Text>
+ <Text>// data = { 0 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">6630</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.state_query.min_sample_shading_value_get_boolean
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.state_query.min_sample_shading_value_get_boolean" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying initial value</Text>
+ <Text>glGetBooleanv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e571);</Text>
+ <Text>// data = { GL_FALSE }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>Verifying special values</Text>
+ <Text>glMinSampleShading(0);</Text>
+ <Text>glGetBooleanv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e571);</Text>
+ <Text>// data = { GL_FALSE }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(1);</Text>
+ <Text>glGetBooleanv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e571);</Text>
+ <Text>// data = { GL_TRUE }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.5);</Text>
+ <Text>glGetBooleanv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e571);</Text>
+ <Text>// data = { GL_TRUE }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>Verifying random values</Text>
+ <Text>glMinSampleShading(0.228453);</Text>
+ <Text>glGetBooleanv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e571);</Text>
+ <Text>// data = { GL_TRUE }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.85814);</Text>
+ <Text>glGetBooleanv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e571);</Text>
+ <Text>// data = { GL_TRUE }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.196633);</Text>
+ <Text>glGetBooleanv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e571);</Text>
+ <Text>// data = { GL_TRUE }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.431608);</Text>
+ <Text>glGetBooleanv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e571);</Text>
+ <Text>// data = { GL_TRUE }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.513814);</Text>
+ <Text>glGetBooleanv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e571);</Text>
+ <Text>// data = { GL_TRUE }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.147687);</Text>
+ <Text>glGetBooleanv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e571);</Text>
+ <Text>// data = { GL_TRUE }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.630763);</Text>
+ <Text>glGetBooleanv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e571);</Text>
+ <Text>// data = { GL_TRUE }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.130462);</Text>
+ <Text>glGetBooleanv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e571);</Text>
+ <Text>// data = { GL_TRUE }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.934804);</Text>
+ <Text>glGetBooleanv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e571);</Text>
+ <Text>// data = { GL_TRUE }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.735744);</Text>
+ <Text>glGetBooleanv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e571);</Text>
+ <Text>// data = { GL_TRUE }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">14944</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.state_query.min_sample_shading_value_get_integer
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.state_query.min_sample_shading_value_get_integer" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying initial value</Text>
+ <Text>glGetIntegerv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 0 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>Verifying special values</Text>
+ <Text>glMinSampleShading(0);</Text>
+ <Text>glGetIntegerv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 0 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(1);</Text>
+ <Text>glGetIntegerv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 1 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.5);</Text>
+ <Text>glGetIntegerv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 1 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>Verifying random values</Text>
+ <Text>glMinSampleShading(0.228453);</Text>
+ <Text>glGetIntegerv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 0 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.85814);</Text>
+ <Text>glGetIntegerv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 1 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.196633);</Text>
+ <Text>glGetIntegerv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 0 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.431608);</Text>
+ <Text>glGetIntegerv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 0 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.513814);</Text>
+ <Text>glGetIntegerv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 1 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.147687);</Text>
+ <Text>glGetIntegerv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 0 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.630763);</Text>
+ <Text>glGetIntegerv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 1 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.130462);</Text>
+ <Text>glGetIntegerv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 0 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.934804);</Text>
+ <Text>glGetIntegerv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 1 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.735744);</Text>
+ <Text>glGetIntegerv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 1 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">16335</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.state_query.min_sample_shading_value_get_float
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.state_query.min_sample_shading_value_get_float" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying initial value</Text>
+ <Text>glGetFloatv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 0 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>Verifying special values</Text>
+ <Text>glMinSampleShading(0);</Text>
+ <Text>glGetFloatv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 0 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(1);</Text>
+ <Text>glGetFloatv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 1 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.5);</Text>
+ <Text>glGetFloatv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 0.5 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>Verifying random values</Text>
+ <Text>glMinSampleShading(0.228453);</Text>
+ <Text>glGetFloatv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 0.228453 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.85814);</Text>
+ <Text>glGetFloatv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 0.85814 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.196633);</Text>
+ <Text>glGetFloatv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 0.196633 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.431608);</Text>
+ <Text>glGetFloatv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 0.431608 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.513814);</Text>
+ <Text>glGetFloatv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 0.513814 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.147687);</Text>
+ <Text>glGetFloatv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 0.147687 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.630763);</Text>
+ <Text>glGetFloatv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 0.630763 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.130462);</Text>
+ <Text>glGetFloatv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 0.130462 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.934804);</Text>
+ <Text>glGetFloatv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 0.934804 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.735744);</Text>
+ <Text>glGetFloatv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e574);</Text>
+ <Text>// data = { 0.735744 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">14207</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.state_query.min_sample_shading_value_get_integer64
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.state_query.min_sample_shading_value_get_integer64" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying initial value</Text>
+ <Text>glGetInteger64v(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e578);</Text>
+ <Text>// data = { 0 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>Verifying special values</Text>
+ <Text>glMinSampleShading(0);</Text>
+ <Text>glGetInteger64v(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e578);</Text>
+ <Text>// data = { 0 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(1);</Text>
+ <Text>glGetInteger64v(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e578);</Text>
+ <Text>// data = { 1 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.5);</Text>
+ <Text>glGetInteger64v(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e578);</Text>
+ <Text>// data = { 1 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>Verifying random values</Text>
+ <Text>glMinSampleShading(0.228453);</Text>
+ <Text>glGetInteger64v(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e578);</Text>
+ <Text>// data = { 0 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.85814);</Text>
+ <Text>glGetInteger64v(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e578);</Text>
+ <Text>// data = { 1 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.196633);</Text>
+ <Text>glGetInteger64v(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e578);</Text>
+ <Text>// data = { 0 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.431608);</Text>
+ <Text>glGetInteger64v(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e578);</Text>
+ <Text>// data = { 0 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.513814);</Text>
+ <Text>glGetInteger64v(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e578);</Text>
+ <Text>// data = { 1 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.147687);</Text>
+ <Text>glGetInteger64v(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e578);</Text>
+ <Text>// data = { 0 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.630763);</Text>
+ <Text>glGetInteger64v(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e578);</Text>
+ <Text>// data = { 1 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.130462);</Text>
+ <Text>glGetInteger64v(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e578);</Text>
+ <Text>// data = { 0 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.934804);</Text>
+ <Text>glGetInteger64v(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e578);</Text>
+ <Text>// data = { 1 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(0.735744);</Text>
+ <Text>glGetInteger64v(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e578);</Text>
+ <Text>// data = { 1 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">16405</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.state_query.min_sample_shading_value_clamping
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.state_query.min_sample_shading_value_clamping" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying clamped values. Value is clamped when specified.</Text>
+ <Text>glMinSampleShading(-0.5);</Text>
+ <Text>glGetFloatv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e590);</Text>
+ <Text>// data = { 0 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(-1);</Text>
+ <Text>glGetFloatv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e590);</Text>
+ <Text>// data = { 0 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(-1.5);</Text>
+ <Text>glGetFloatv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e590);</Text>
+ <Text>// data = { 0 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(1.5);</Text>
+ <Text>glGetFloatv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e590);</Text>
+ <Text>// data = { 1 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(2);</Text>
+ <Text>glGetFloatv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e590);</Text>
+ <Text>// data = { 1 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Text>glMinSampleShading(2.5);</Text>
+ <Text>glGetFloatv(GL_MIN_SAMPLE_SHADING_VALUE, 0x0a96e590);</Text>
+ <Text>// data = { 1 }</Text>
+ <Text>glGetError();</Text>
+ <Text>// GL_NO_ERROR returned</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">10154</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.min_sample_shading.default_framebuffer_color
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.min_sample_shading.default_framebuffer_color" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying that a varying is given at least N different values for different samples within a single pixel.
+    Render high-frequency function, map result to black/white. Modify N with glMinSampleShading().
+ =&gt; Resulting image should contain N+1 shades of gray.
+</Text>
+ <Section Name="RenderShader" Description="Render shader">
+  <ShaderProgram LinkStatus="OK">
+   <InfoLog></InfoLog>
+   <VertexShader CompileStatus="OK">
+    <ShaderSource></ShaderSource>
+    <InfoLog></InfoLog>
+</VertexShader>
+   <FragmentShader CompileStatus="OK">
+    <ShaderSource></ShaderSource>
+    <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+  <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">91.038002</Number>
+  <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">39.956001</Number>
+  <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">44.738998</Number>
+</Section>
+ <Section Name="Iteration0" Description="Iteration 1/5: Disabled SAMPLE_SHADING">
+  <Text>Rendering quad with render shader to default framebuffer.</Text>
+  <Text>Reading pixels from default framebuffer.</Text>
+  <Text>Verifying image has (at least) 2 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 2 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 2
+</Text>
+</Section>
+ <Section Name="Iteration1" Description="Iteration 2/5: Samples per pixel: 1">
+  <Text>Rendering quad with render shader to default framebuffer.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.1875
+Requested sample count: shadingValue * numSamples = 0.1875 * 4 = 0.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(0.75) = 1</Text>
+  <Text>Reading pixels from default framebuffer.</Text>
+  <Text>Verifying image has (at least) 2 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 2 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 2
+</Text>
+</Section>
+ <Section Name="Iteration2" Description="Iteration 3/5: Samples per pixel: 2">
+  <Text>Rendering quad with render shader to default framebuffer.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.4375
+Requested sample count: shadingValue * numSamples = 0.4375 * 4 = 1.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(1.75) = 2</Text>
+  <Text>Reading pixels from default framebuffer.</Text>
+  <Text>Verifying image has (at least) 3 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Section Name="Iteration3" Description="Iteration 4/5: Samples per pixel: 3">
+  <Text>Rendering quad with render shader to default framebuffer.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.6875
+Requested sample count: shadingValue * numSamples = 0.6875 * 4 = 2.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(2.75) = 3</Text>
+  <Text>Reading pixels from default framebuffer.</Text>
+  <Text>Verifying image has (at least) 4 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Section Name="Iteration4" Description="Iteration 5/5: Samples per pixel: 4">
+  <Text>Rendering quad with render shader to default framebuffer.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.9375
+Requested sample count: shadingValue * numSamples = 0.9375 * 4 = 3.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(3.75) = 4</Text>
+  <Text>Reading pixels from default framebuffer.</Text>
+  <Text>Verifying image has (at least) 5 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">259784</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.min_sample_shading.default_framebuffer_discard
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.min_sample_shading.default_framebuffer_discard" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying that a varying is given at least N different values for different samples within a single pixel.
+    Render high-frequency function, map result to black/white. Modify N with glMinSampleShading().
+ =&gt; Resulting image should contain N+1 shades of gray.
+</Text>
+ <Section Name="RenderShader" Description="Render shader">
+  <ShaderProgram LinkStatus="OK">
+   <InfoLog></InfoLog>
+   <VertexShader CompileStatus="OK">
+    <ShaderSource></ShaderSource>
+    <InfoLog></InfoLog>
+</VertexShader>
+   <FragmentShader CompileStatus="OK">
+    <ShaderSource></ShaderSource>
+    <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+  <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.846000</Number>
+  <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">28.910000</Number>
+  <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">48.185001</Number>
+</Section>
+ <Section Name="Iteration0" Description="Iteration 1/5: Disabled SAMPLE_SHADING">
+  <Text>Rendering quad with render shader to default framebuffer.</Text>
+  <Text>Reading pixels from default framebuffer.</Text>
+  <Text>Verifying image has (at least) 2 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 2 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 2
+</Text>
+</Section>
+ <Section Name="Iteration1" Description="Iteration 2/5: Samples per pixel: 1">
+  <Text>Rendering quad with render shader to default framebuffer.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.1875
+Requested sample count: shadingValue * numSamples = 0.1875 * 4 = 0.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(0.75) = 1</Text>
+  <Text>Reading pixels from default framebuffer.</Text>
+  <Text>Verifying image has (at least) 2 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 2 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 2
+</Text>
+</Section>
+ <Section Name="Iteration2" Description="Iteration 3/5: Samples per pixel: 2">
+  <Text>Rendering quad with render shader to default framebuffer.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.4375
+Requested sample count: shadingValue * numSamples = 0.4375 * 4 = 1.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(1.75) = 2</Text>
+  <Text>Reading pixels from default framebuffer.</Text>
+  <Text>Verifying image has (at least) 3 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Section Name="Iteration3" Description="Iteration 4/5: Samples per pixel: 3">
+  <Text>Rendering quad with render shader to default framebuffer.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.6875
+Requested sample count: shadingValue * numSamples = 0.6875 * 4 = 2.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(2.75) = 3</Text>
+  <Text>Reading pixels from default framebuffer.</Text>
+  <Text>Verifying image has (at least) 4 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Section Name="Iteration4" Description="Iteration 5/5: Samples per pixel: 4">
+  <Text>Rendering quad with render shader to default framebuffer.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.9375
+Requested sample count: shadingValue * numSamples = 0.9375 * 4 = 3.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(3.75) = 4</Text>
+  <Text>Reading pixels from default framebuffer.</Text>
+  <Text>Verifying image has (at least) 5 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">157076</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_texture_samples_2_color
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_texture_samples_2_color" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying that a varying is given at least N different values for different samples within a single pixel.
+    Render high-frequency function, map result to black/white. Modify N with glMinSampleShading().
+ =&gt; Resulting image should contain N+1 shades of gray.
+</Text>
+ <Text>Asked for 2 samples, got 4 samples.</Text>
+ <Section Name="RenderShader" Description="Render shader">
+  <ShaderProgram LinkStatus="OK">
+   <InfoLog></InfoLog>
+   <VertexShader CompileStatus="OK">
+    <ShaderSource></ShaderSource>
+    <InfoLog></InfoLog>
+</VertexShader>
+   <FragmentShader CompileStatus="OK">
+    <ShaderSource></ShaderSource>
+    <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+  <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.822000</Number>
+  <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.678000</Number>
+  <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.084000</Number>
+</Section>
+ <Section Name="Iteration0" Description="Iteration 1/5: Disabled SAMPLE_SHADING">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Using sampler shader to sample the multisample texture to single sample framebuffer.</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 2 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 2 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 2
+</Text>
+</Section>
+ <Section Name="Iteration1" Description="Iteration 2/5: Samples per pixel: 1">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.1875
+Requested sample count: shadingValue * numSamples = 0.1875 * 4 = 0.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(0.75) = 1</Text>
+  <Text>Using sampler shader to sample the multisample texture to single sample framebuffer.</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 2 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 2 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 2
+</Text>
+</Section>
+ <Section Name="Iteration2" Description="Iteration 3/5: Samples per pixel: 2">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.4375
+Requested sample count: shadingValue * numSamples = 0.4375 * 4 = 1.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(1.75) = 2</Text>
+  <Text>Using sampler shader to sample the multisample texture to single sample framebuffer.</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 3 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Section Name="Iteration3" Description="Iteration 4/5: Samples per pixel: 3">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.6875
+Requested sample count: shadingValue * numSamples = 0.6875 * 4 = 2.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(2.75) = 3</Text>
+  <Text>Using sampler shader to sample the multisample texture to single sample framebuffer.</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 4 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Section Name="Iteration4" Description="Iteration 5/5: Samples per pixel: 4">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.9375
+Requested sample count: shadingValue * numSamples = 0.9375 * 4 = 3.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(3.75) = 4</Text>
+  <Text>Using sampler shader to sample the multisample texture to single sample framebuffer.</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 5 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">132586</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_texture_samples_2_discard
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_texture_samples_2_discard" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying that a varying is given at least N different values for different samples within a single pixel.
+    Render high-frequency function, map result to black/white. Modify N with glMinSampleShading().
+ =&gt; Resulting image should contain N+1 shades of gray.
+</Text>
+ <Text>Asked for 2 samples, got 4 samples.</Text>
+ <Section Name="RenderShader" Description="Render shader">
+  <ShaderProgram LinkStatus="OK">
+   <InfoLog></InfoLog>
+   <VertexShader CompileStatus="OK">
+    <ShaderSource></ShaderSource>
+    <InfoLog></InfoLog>
+</VertexShader>
+   <FragmentShader CompileStatus="OK">
+    <ShaderSource></ShaderSource>
+    <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+  <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.797000</Number>
+  <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.683000</Number>
+  <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.070000</Number>
+</Section>
+ <Section Name="Iteration0" Description="Iteration 1/5: Disabled SAMPLE_SHADING">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Using sampler shader to sample the multisample texture to single sample framebuffer.</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 2 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 2 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 2
+</Text>
+</Section>
+ <Section Name="Iteration1" Description="Iteration 2/5: Samples per pixel: 1">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.1875
+Requested sample count: shadingValue * numSamples = 0.1875 * 4 = 0.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(0.75) = 1</Text>
+  <Text>Using sampler shader to sample the multisample texture to single sample framebuffer.</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 2 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 2 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 2
+</Text>
+</Section>
+ <Section Name="Iteration2" Description="Iteration 3/5: Samples per pixel: 2">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.4375
+Requested sample count: shadingValue * numSamples = 0.4375 * 4 = 1.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(1.75) = 2</Text>
+  <Text>Using sampler shader to sample the multisample texture to single sample framebuffer.</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 3 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Section Name="Iteration3" Description="Iteration 4/5: Samples per pixel: 3">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.6875
+Requested sample count: shadingValue * numSamples = 0.6875 * 4 = 2.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(2.75) = 3</Text>
+  <Text>Using sampler shader to sample the multisample texture to single sample framebuffer.</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 4 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Section Name="Iteration4" Description="Iteration 5/5: Samples per pixel: 4">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.9375
+Requested sample count: shadingValue * numSamples = 0.9375 * 4 = 3.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(3.75) = 4</Text>
+  <Text>Using sampler shader to sample the multisample texture to single sample framebuffer.</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 5 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">62359</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_texture_samples_4_color
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_texture_samples_4_color" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying that a varying is given at least N different values for different samples within a single pixel.
+    Render high-frequency function, map result to black/white. Modify N with glMinSampleShading().
+ =&gt; Resulting image should contain N+1 shades of gray.
+</Text>
+ <Text>Asked for 4 samples, got 4 samples.</Text>
+ <Section Name="RenderShader" Description="Render shader">
+  <ShaderProgram LinkStatus="OK">
+   <InfoLog></InfoLog>
+   <VertexShader CompileStatus="OK">
+    <ShaderSource></ShaderSource>
+    <InfoLog></InfoLog>
+</VertexShader>
+   <FragmentShader CompileStatus="OK">
+    <ShaderSource></ShaderSource>
+    <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+  <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.796000</Number>
+  <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.385000</Number>
+  <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.075000</Number>
+</Section>
+ <Section Name="Iteration0" Description="Iteration 1/5: Disabled SAMPLE_SHADING">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Using sampler shader to sample the multisample texture to single sample framebuffer.</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 2 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 2 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 2
+</Text>
+</Section>
+ <Section Name="Iteration1" Description="Iteration 2/5: Samples per pixel: 1">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.1875
+Requested sample count: shadingValue * numSamples = 0.1875 * 4 = 0.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(0.75) = 1</Text>
+  <Text>Using sampler shader to sample the multisample texture to single sample framebuffer.</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 2 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 2 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 2
+</Text>
+</Section>
+ <Section Name="Iteration2" Description="Iteration 3/5: Samples per pixel: 2">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.4375
+Requested sample count: shadingValue * numSamples = 0.4375 * 4 = 1.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(1.75) = 2</Text>
+  <Text>Using sampler shader to sample the multisample texture to single sample framebuffer.</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 3 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Section Name="Iteration3" Description="Iteration 4/5: Samples per pixel: 3">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.6875
+Requested sample count: shadingValue * numSamples = 0.6875 * 4 = 2.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(2.75) = 3</Text>
+  <Text>Using sampler shader to sample the multisample texture to single sample framebuffer.</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 4 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Section Name="Iteration4" Description="Iteration 5/5: Samples per pixel: 4">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.9375
+Requested sample count: shadingValue * numSamples = 0.9375 * 4 = 3.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(3.75) = 4</Text>
+  <Text>Using sampler shader to sample the multisample texture to single sample framebuffer.</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 5 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">61529</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_texture_samples_4_discard
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_texture_samples_4_discard" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying that a varying is given at least N different values for different samples within a single pixel.
+    Render high-frequency function, map result to black/white. Modify N with glMinSampleShading().
+ =&gt; Resulting image should contain N+1 shades of gray.
+</Text>
+ <Text>Asked for 4 samples, got 4 samples.</Text>
+ <Section Name="RenderShader" Description="Render shader">
+  <ShaderProgram LinkStatus="OK">
+   <InfoLog></InfoLog>
+   <VertexShader CompileStatus="OK">
+    <ShaderSource></ShaderSource>
+    <InfoLog></InfoLog>
+</VertexShader>
+   <FragmentShader CompileStatus="OK">
+    <ShaderSource></ShaderSource>
+    <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+  <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.663000</Number>
+  <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.964000</Number>
+  <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.104000</Number>
+</Section>
+ <Section Name="Iteration0" Description="Iteration 1/5: Disabled SAMPLE_SHADING">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Using sampler shader to sample the multisample texture to single sample framebuffer.</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 2 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 2 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 2
+</Text>
+</Section>
+ <Section Name="Iteration1" Description="Iteration 2/5: Samples per pixel: 1">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.1875
+Requested sample count: shadingValue * numSamples = 0.1875 * 4 = 0.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(0.75) = 1</Text>
+  <Text>Using sampler shader to sample the multisample texture to single sample framebuffer.</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 2 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 2 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 2
+</Text>
+</Section>
+ <Section Name="Iteration2" Description="Iteration 3/5: Samples per pixel: 2">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.4375
+Requested sample count: shadingValue * numSamples = 0.4375 * 4 = 1.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(1.75) = 2</Text>
+  <Text>Using sampler shader to sample the multisample texture to single sample framebuffer.</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 3 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Section Name="Iteration3" Description="Iteration 4/5: Samples per pixel: 3">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.6875
+Requested sample count: shadingValue * numSamples = 0.6875 * 4 = 2.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(2.75) = 3</Text>
+  <Text>Using sampler shader to sample the multisample texture to single sample framebuffer.</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 4 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Section Name="Iteration4" Description="Iteration 5/5: Samples per pixel: 4">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.9375
+Requested sample count: shadingValue * numSamples = 0.9375 * 4 = 3.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(3.75) = 4</Text>
+  <Text>Using sampler shader to sample the multisample texture to single sample framebuffer.</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 5 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">68193</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_texture_samples_8_color
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_texture_samples_8_color" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying that a varying is given at least N different values for different samples within a single pixel.
+    Render high-frequency function, map result to black/white. Modify N with glMinSampleShading().
+ =&gt; Resulting image should contain N+1 shades of gray.
+</Text>
+ <Text>Sample count not supported</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">7230</Number>
+ <Result StatusCode="NotSupported">Sample count not supported</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_texture_samples_8_discard
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_texture_samples_8_discard" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying that a varying is given at least N different values for different samples within a single pixel.
+    Render high-frequency function, map result to black/white. Modify N with glMinSampleShading().
+ =&gt; Resulting image should contain N+1 shades of gray.
+</Text>
+ <Text>Sample count not supported</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">5202</Number>
+ <Result StatusCode="NotSupported">Sample count not supported</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_texture_samples_16_color
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_texture_samples_16_color" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying that a varying is given at least N different values for different samples within a single pixel.
+    Render high-frequency function, map result to black/white. Modify N with glMinSampleShading().
+ =&gt; Resulting image should contain N+1 shades of gray.
+</Text>
+ <Text>Sample count not supported</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">5285</Number>
+ <Result StatusCode="NotSupported">Sample count not supported</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_texture_samples_16_discard
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_texture_samples_16_discard" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying that a varying is given at least N different values for different samples within a single pixel.
+    Render high-frequency function, map result to black/white. Modify N with glMinSampleShading().
+ =&gt; Resulting image should contain N+1 shades of gray.
+</Text>
+ <Text>Sample count not supported</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">5185</Number>
+ <Result StatusCode="NotSupported">Sample count not supported</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_renderbuffer_samples_2_color
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_renderbuffer_samples_2_color" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying that a varying is given at least N different values for different samples within a single pixel.
+    Render high-frequency function, map result to black/white. Modify N with glMinSampleShading().
+ =&gt; Resulting image should contain N+1 shades of gray.
+</Text>
+ <Text>Asked for 2 samples, got 4 samples.</Text>
+ <Section Name="RenderShader" Description="Render shader">
+  <ShaderProgram LinkStatus="OK">
+   <InfoLog></InfoLog>
+   <VertexShader CompileStatus="OK">
+    <ShaderSource></ShaderSource>
+    <InfoLog></InfoLog>
+</VertexShader>
+   <FragmentShader CompileStatus="OK">
+    <ShaderSource></ShaderSource>
+    <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+  <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.294000</Number>
+  <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.715000</Number>
+  <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.089000</Number>
+</Section>
+ <Section Name="Iteration0" Description="Iteration 1/5: Disabled SAMPLE_SHADING">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Blitting result from fbo to single sample fbo. (Resolve multisample)</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 2 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 2 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 2
+</Text>
+</Section>
+ <Section Name="Iteration1" Description="Iteration 2/5: Samples per pixel: 1">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.1875
+Requested sample count: shadingValue * numSamples = 0.1875 * 4 = 0.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(0.75) = 1</Text>
+  <Text>Blitting result from fbo to single sample fbo. (Resolve multisample)</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 2 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 2 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 2
+</Text>
+</Section>
+ <Section Name="Iteration2" Description="Iteration 3/5: Samples per pixel: 2">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.4375
+Requested sample count: shadingValue * numSamples = 0.4375 * 4 = 1.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(1.75) = 2</Text>
+  <Text>Blitting result from fbo to single sample fbo. (Resolve multisample)</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 3 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Section Name="Iteration3" Description="Iteration 4/5: Samples per pixel: 3">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.6875
+Requested sample count: shadingValue * numSamples = 0.6875 * 4 = 2.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(2.75) = 3</Text>
+  <Text>Blitting result from fbo to single sample fbo. (Resolve multisample)</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 4 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Section Name="Iteration4" Description="Iteration 5/5: Samples per pixel: 4">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.9375
+Requested sample count: shadingValue * numSamples = 0.9375 * 4 = 3.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(3.75) = 4</Text>
+  <Text>Blitting result from fbo to single sample fbo. (Resolve multisample)</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 5 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">177052</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_renderbuffer_samples_2_discard
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_renderbuffer_samples_2_discard" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying that a varying is given at least N different values for different samples within a single pixel.
+    Render high-frequency function, map result to black/white. Modify N with glMinSampleShading().
+ =&gt; Resulting image should contain N+1 shades of gray.
+</Text>
+ <Text>Asked for 2 samples, got 4 samples.</Text>
+ <Section Name="RenderShader" Description="Render shader">
+  <ShaderProgram LinkStatus="OK">
+   <InfoLog></InfoLog>
+   <VertexShader CompileStatus="OK">
+    <ShaderSource></ShaderSource>
+    <InfoLog></InfoLog>
+</VertexShader>
+   <FragmentShader CompileStatus="OK">
+    <ShaderSource></ShaderSource>
+    <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+  <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.882000</Number>
+  <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.689000</Number>
+  <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.085000</Number>
+</Section>
+ <Section Name="Iteration0" Description="Iteration 1/5: Disabled SAMPLE_SHADING">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Blitting result from fbo to single sample fbo. (Resolve multisample)</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 2 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 2 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 2
+</Text>
+</Section>
+ <Section Name="Iteration1" Description="Iteration 2/5: Samples per pixel: 1">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.1875
+Requested sample count: shadingValue * numSamples = 0.1875 * 4 = 0.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(0.75) = 1</Text>
+  <Text>Blitting result from fbo to single sample fbo. (Resolve multisample)</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 2 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 2 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 2
+</Text>
+</Section>
+ <Section Name="Iteration2" Description="Iteration 3/5: Samples per pixel: 2">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.4375
+Requested sample count: shadingValue * numSamples = 0.4375 * 4 = 1.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(1.75) = 2</Text>
+  <Text>Blitting result from fbo to single sample fbo. (Resolve multisample)</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 3 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Section Name="Iteration3" Description="Iteration 4/5: Samples per pixel: 3">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.6875
+Requested sample count: shadingValue * numSamples = 0.6875 * 4 = 2.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(2.75) = 3</Text>
+  <Text>Blitting result from fbo to single sample fbo. (Resolve multisample)</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 4 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Section Name="Iteration4" Description="Iteration 5/5: Samples per pixel: 4">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.9375
+Requested sample count: shadingValue * numSamples = 0.9375 * 4 = 3.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(3.75) = 4</Text>
+  <Text>Blitting result from fbo to single sample fbo. (Resolve multisample)</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 5 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">159058</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_renderbuffer_samples_4_color
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_renderbuffer_samples_4_color" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying that a varying is given at least N different values for different samples within a single pixel.
+    Render high-frequency function, map result to black/white. Modify N with glMinSampleShading().
+ =&gt; Resulting image should contain N+1 shades of gray.
+</Text>
+ <Text>Asked for 4 samples, got 4 samples.</Text>
+ <Section Name="RenderShader" Description="Render shader">
+  <ShaderProgram LinkStatus="OK">
+   <InfoLog></InfoLog>
+   <VertexShader CompileStatus="OK">
+    <ShaderSource></ShaderSource>
+    <InfoLog></InfoLog>
+</VertexShader>
+   <FragmentShader CompileStatus="OK">
+    <ShaderSource></ShaderSource>
+    <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+  <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.891000</Number>
+  <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.686000</Number>
+  <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.085000</Number>
+</Section>
+ <Section Name="Iteration0" Description="Iteration 1/5: Disabled SAMPLE_SHADING">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Blitting result from fbo to single sample fbo. (Resolve multisample)</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 2 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 2 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 2
+</Text>
+</Section>
+ <Section Name="Iteration1" Description="Iteration 2/5: Samples per pixel: 1">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.1875
+Requested sample count: shadingValue * numSamples = 0.1875 * 4 = 0.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(0.75) = 1</Text>
+  <Text>Blitting result from fbo to single sample fbo. (Resolve multisample)</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 2 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 2 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 2
+</Text>
+</Section>
+ <Section Name="Iteration2" Description="Iteration 3/5: Samples per pixel: 2">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.4375
+Requested sample count: shadingValue * numSamples = 0.4375 * 4 = 1.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(1.75) = 2</Text>
+  <Text>Blitting result from fbo to single sample fbo. (Resolve multisample)</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 3 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Section Name="Iteration3" Description="Iteration 4/5: Samples per pixel: 3">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.6875
+Requested sample count: shadingValue * numSamples = 0.6875 * 4 = 2.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(2.75) = 3</Text>
+  <Text>Blitting result from fbo to single sample fbo. (Resolve multisample)</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 4 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Section Name="Iteration4" Description="Iteration 5/5: Samples per pixel: 4">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.9375
+Requested sample count: shadingValue * numSamples = 0.9375 * 4 = 3.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(3.75) = 4</Text>
+  <Text>Blitting result from fbo to single sample fbo. (Resolve multisample)</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 5 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">163219</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_renderbuffer_samples_4_discard
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_renderbuffer_samples_4_discard" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying that a varying is given at least N different values for different samples within a single pixel.
+    Render high-frequency function, map result to black/white. Modify N with glMinSampleShading().
+ =&gt; Resulting image should contain N+1 shades of gray.
+</Text>
+ <Text>Asked for 4 samples, got 4 samples.</Text>
+ <Section Name="RenderShader" Description="Render shader">
+  <ShaderProgram LinkStatus="OK">
+   <InfoLog></InfoLog>
+   <VertexShader CompileStatus="OK">
+    <ShaderSource></ShaderSource>
+    <InfoLog></InfoLog>
+</VertexShader>
+   <FragmentShader CompileStatus="OK">
+    <ShaderSource></ShaderSource>
+    <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+  <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.876000</Number>
+  <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.083000</Number>
+  <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.085000</Number>
+</Section>
+ <Section Name="Iteration0" Description="Iteration 1/5: Disabled SAMPLE_SHADING">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Blitting result from fbo to single sample fbo. (Resolve multisample)</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 2 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 2 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 2
+</Text>
+</Section>
+ <Section Name="Iteration1" Description="Iteration 2/5: Samples per pixel: 1">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.1875
+Requested sample count: shadingValue * numSamples = 0.1875 * 4 = 0.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(0.75) = 1</Text>
+  <Text>Blitting result from fbo to single sample fbo. (Resolve multisample)</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 2 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 2 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 2
+</Text>
+</Section>
+ <Section Name="Iteration2" Description="Iteration 3/5: Samples per pixel: 2">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.4375
+Requested sample count: shadingValue * numSamples = 0.4375 * 4 = 1.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(1.75) = 2</Text>
+  <Text>Blitting result from fbo to single sample fbo. (Resolve multisample)</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 3 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Section Name="Iteration3" Description="Iteration 4/5: Samples per pixel: 3">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.6875
+Requested sample count: shadingValue * numSamples = 0.6875 * 4 = 2.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(2.75) = 3</Text>
+  <Text>Blitting result from fbo to single sample fbo. (Resolve multisample)</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 4 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Section Name="Iteration4" Description="Iteration 5/5: Samples per pixel: 4">
+  <Text>Rendering quad with render shader to fbo.</Text>
+  <Text>Setting MIN_SAMPLE_SHADING_VALUE = 0.9375
+Requested sample count: shadingValue * numSamples = 0.9375 * 4 = 3.75
+Minimum sample count: ceil(shadingValue * numSamples) = ceil(3.75) = 4</Text>
+  <Text>Blitting result from fbo to single sample fbo. (Resolve multisample)</Text>
+  <Text>Reading pixels from single sample framebuffer.</Text>
+  <Text>Verifying image has (at least) 5 different shades.
+Excluding pixels with no full coverage (pixels on the shared edge of the triangle pair).</Text>
+  <Text>Found 5 different shades.
+	Rare (less than 100 pixels): 0
+	Common: 5
+</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">175303</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_renderbuffer_samples_8_color
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_renderbuffer_samples_8_color" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying that a varying is given at least N different values for different samples within a single pixel.
+    Render high-frequency function, map result to black/white. Modify N with glMinSampleShading().
+ =&gt; Resulting image should contain N+1 shades of gray.
+</Text>
+ <Text>Sample count not supported</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">6331</Number>
+ <Result StatusCode="NotSupported">Sample count not supported</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_renderbuffer_samples_8_discard
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_renderbuffer_samples_8_discard" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying that a varying is given at least N different values for different samples within a single pixel.
+    Render high-frequency function, map result to black/white. Modify N with glMinSampleShading().
+ =&gt; Resulting image should contain N+1 shades of gray.
+</Text>
+ <Text>Sample count not supported</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">5265</Number>
+ <Result StatusCode="NotSupported">Sample count not supported</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_renderbuffer_samples_16_color
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_renderbuffer_samples_16_color" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying that a varying is given at least N different values for different samples within a single pixel.
+    Render high-frequency function, map result to black/white. Modify N with glMinSampleShading().
+ =&gt; Resulting image should contain N+1 shades of gray.
+</Text>
+ <Text>Sample count not supported</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">5244</Number>
+ <Result StatusCode="NotSupported">Sample count not supported</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_renderbuffer_samples_16_discard
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_renderbuffer_samples_16_discard" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Verifying that a varying is given at least N different values for different samples within a single pixel.
+    Render high-frequency function, map result to black/white. Modify N with glMinSampleShading().
+ =&gt; Resulting image should contain N+1 shades of gray.
+</Text>
+ <Text>Sample count not supported</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">5298</Number>
+ <Result StatusCode="NotSupported">Sample count not supported</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+Run took 1.83 seconds
+
+#endSession

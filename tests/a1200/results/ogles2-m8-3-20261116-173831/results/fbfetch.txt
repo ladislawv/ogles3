@@ -1,0 +1,145 @@
+Writing test log into M8R3:results/fbfetch.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles3.library: 4 functions of the ES 3.0 table not implemented yet: glTexStorage1DEXT glTextureStorage1DEXT glTextureStorage2DEXT glTextureStorage3DEXT
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.basic.texel_fetch'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.basic.last_frag_data'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.basic.fragment_discard'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.basic.multiple_assignment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.basic.multiple_render_targets'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.basic.multiple_render_targets_overdraw'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.basic.framebuffer_texture_level'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.basic.framebuffer_texture_layer'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba32i'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba32ui'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba16i'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba16ui'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba8'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba8i'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba8ui'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.srgb8_alpha8'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgb10_a2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgb10_a2ui'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgb5_a1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgb8'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgb565'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg32i'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg32ui'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg16i'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg16ui'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg8'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg8i'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg8ui'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r32i'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r32ui'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r16i'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r16ui'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r8'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r8i'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r8ui'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba32f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba16f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r11f_g11f_b10f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg32f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg16f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r32f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r16f'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgb16f'..
+  Pass (Pass)
+
+DONE!
+
+Test run totals:
+  Passed:        44/44 (100.0%)
+  Failed:        0/44 (0.0%)
+  Not supported: 0/44 (0.0%)
+  Warnings:      0/44 (0.0%)
+  Waived:        0/44 (0.0%)

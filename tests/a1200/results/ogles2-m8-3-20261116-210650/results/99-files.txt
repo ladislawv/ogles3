@@ -1,0 +1,8 @@
+Directory "M8R3:results" on Monday 16-Nov-26
+00-progress.txt                 121 ----rwed Today     21:08:09
+cafilt.txt                    27493 ----rwed Today     21:08:09
+cafilt.qpa                  1907370 ----rwed Today     21:08:09
+ogles2.log                     2097 ----rwed Today     21:08:09
+notes.txt                       228 ----rwed Today     21:08:09
+99-files.txt                    196 ----rwed Today     21:08:09
+6 files - 1892K bytes - 3794 blocks used

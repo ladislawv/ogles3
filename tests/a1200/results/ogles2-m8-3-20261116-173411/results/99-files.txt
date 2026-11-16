@@ -1,0 +1,8 @@
+Directory "M8R3:results" on Monday 16-Nov-26
+00-progress.txt                 113 ----rwed Today     17:35:31
+bclamp.txt                    81996 ----rwed Today     17:35:31
+bclamp.qpa                  1060041 ----rwed Today     17:35:31
+ogles2.log                     5592 ----rwed Today     17:35:31
+notes.txt                       228 ----rwed Today     17:35:31
+99-files.txt                    196 ----rwed Today     17:35:31
+6 files - 1121K bytes - 2252 blocks used

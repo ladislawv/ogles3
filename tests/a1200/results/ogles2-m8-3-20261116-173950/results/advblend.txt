@@ -1,0 +1,319 @@
+Writing test log into M8R3:results/advblend.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles3.library: 4 functions of the ES 3.0 table not implemented yet: glTexStorage1DEXT glTextureStorage1DEXT glTextureStorage2DEXT glTextureStorage3DEXT
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_advanced_coherent_getboolean'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_advanced_coherent_isenabled'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_advanced_coherent_getinteger'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_advanced_coherent_getinteger64'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_advanced_coherent_getfloat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_equation_getboolean'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_equation_getinteger'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_equation_getinteger64'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_equation_getfloat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_equation_getbooleani_v'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_equation_getintegeri_v'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_equation_getinteger64i_v'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.basic.multiply'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.basic.screen'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.basic.overlay'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.basic.darken'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.basic.lighten'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.basic.colordodge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.basic.colorburn'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.basic.hardlight'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.basic.softlight'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.basic.difference'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.basic.exclusion'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.basic.hsl_hue'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.basic.hsl_saturation'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.basic.hsl_color'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.basic.hsl_luminosity'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.srgb.multiply'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.srgb.screen'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.srgb.overlay'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.srgb.darken'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.srgb.lighten'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.srgb.colordodge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.srgb.colorburn'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.srgb.hardlight'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.srgb.softlight'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.srgb.difference'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.srgb.exclusion'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.srgb.hsl_hue'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.srgb.hsl_saturation'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.srgb.hsl_color'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.srgb.hsl_luminosity'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.msaa.multiply'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.msaa.screen'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.msaa.overlay'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.msaa.darken'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.msaa.lighten'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.msaa.colordodge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.msaa.colorburn'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.msaa.hardlight'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.msaa.softlight'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.msaa.difference'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.msaa.exclusion'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.msaa.hsl_hue'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.msaa.hsl_saturation'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.msaa.hsl_color'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.msaa.hsl_luminosity'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.barrier.multiply'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.barrier.screen'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.barrier.overlay'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.barrier.darken'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.barrier.lighten'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.barrier.colordodge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.barrier.colorburn'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.barrier.hardlight'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.barrier.softlight'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.barrier.difference'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.barrier.exclusion'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.barrier.hsl_hue'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.barrier.hsl_saturation'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.barrier.hsl_color'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.barrier.hsl_luminosity'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent.multiply'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent.screen'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent.overlay'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent.darken'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent.lighten'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent.colordodge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent.colorburn'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent.hardlight'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent.softlight'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent.difference'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent.exclusion'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent.hsl_hue'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent.hsl_saturation'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent.hsl_color'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent.hsl_luminosity'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.multiply'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.screen'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.overlay'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.darken'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.lighten'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.colordodge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.colorburn'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.hardlight'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.softlight'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.difference'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.exclusion'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.hsl_hue'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.hsl_saturation'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.hsl_color'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.hsl_luminosity'..
+  Pass (Pass)
+
+DONE!
+
+Test run totals:
+  Passed:        102/102 (100.0%)
+  Failed:        0/102 (0.0%)
+  Not supported: 0/102 (0.0%)
+  Warnings:      0/102 (0.0%)
+  Waived:        0/102 (0.0%)

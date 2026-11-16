@@ -1,0 +1,97 @@
+Writing test log into M8R3:results/sampsh.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles3.library: 4 functions of the ES 3.0 table not implemented yet: glTexStorage1DEXT glTextureStorage1DEXT glTextureStorage2DEXT glTextureStorage3DEXT
+
+Test case 'dEQP-GLES31.functional.sample_shading.state_query.sample_shading_is_enabled'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.sample_shading.state_query.sample_shading_get_boolean'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.sample_shading.state_query.sample_shading_get_integer'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.sample_shading.state_query.sample_shading_get_float'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.sample_shading.state_query.sample_shading_get_integer64'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.sample_shading.state_query.min_sample_shading_value_get_boolean'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.sample_shading.state_query.min_sample_shading_value_get_integer'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.sample_shading.state_query.min_sample_shading_value_get_float'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.sample_shading.state_query.min_sample_shading_value_get_integer64'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.sample_shading.state_query.min_sample_shading_value_clamping'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.sample_shading.min_sample_shading.default_framebuffer_color'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.sample_shading.min_sample_shading.default_framebuffer_discard'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_texture_samples_2_color'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_texture_samples_2_discard'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_texture_samples_4_color'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_texture_samples_4_discard'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_texture_samples_8_color'..
+  NotSupported (Sample count not supported)
+
+Test case 'dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_texture_samples_8_discard'..
+  NotSupported (Sample count not supported)
+
+Test case 'dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_texture_samples_16_color'..
+  NotSupported (Sample count not supported)
+
+Test case 'dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_texture_samples_16_discard'..
+  NotSupported (Sample count not supported)
+
+Test case 'dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_renderbuffer_samples_2_color'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_renderbuffer_samples_2_discard'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_renderbuffer_samples_4_color'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_renderbuffer_samples_4_discard'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_renderbuffer_samples_8_color'..
+  NotSupported (Sample count not supported)
+
+Test case 'dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_renderbuffer_samples_8_discard'..
+  NotSupported (Sample count not supported)
+
+Test case 'dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_renderbuffer_samples_16_color'..
+  NotSupported (Sample count not supported)
+
+Test case 'dEQP-GLES31.functional.sample_shading.min_sample_shading.multisample_renderbuffer_samples_16_discard'..
+  NotSupported (Sample count not supported)
+
+DONE!
+
+Test run totals:
+  Passed:        20/28 (71.4%)
+  Failed:        0/28 (0.0%)
+  Not supported: 8/28 (28.6%)
+  Warnings:      0/28 (0.0%)
+  Waived:        0/28 (0.0%)

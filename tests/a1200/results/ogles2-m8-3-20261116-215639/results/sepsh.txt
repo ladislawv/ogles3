@@ -1,0 +1,802 @@
+Writing test log into M8R3:results/sepsh.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles3.library: 4 functions of the ES 3.0 table not implemented yet: glTexStorage1DEXT glTextureStorage1DEXT glTextureStorage2DEXT glTextureStorage3DEXT
+
+Test case 'dEQP-GLES31.functional.separate_shader.pipeline.different_constant_separate_programs'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.pipeline.different_constant_separate_programs_add_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.pipeline.different_constant_separate_programs_add_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.pipeline.different_constant_separate_programs_add_both'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.pipeline.different_constant_single_program'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.pipeline.different_constant_single_program_add_both'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.pipeline.different_uniform_separate_programs'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.pipeline.different_uniform_separate_programs_add_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.pipeline.different_uniform_separate_programs_add_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.pipeline.different_uniform_separate_programs_add_both'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.pipeline.different_uniform_single_program'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.pipeline.different_uniform_single_program_add_both'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.pipeline.same_constant_separate_programs'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.pipeline.same_constant_separate_programs_add_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.pipeline.same_constant_separate_programs_add_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.pipeline.same_constant_separate_programs_add_both'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.pipeline.same_uniform_separate_programs'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.pipeline.same_uniform_separate_programs_add_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.pipeline.same_uniform_separate_programs_add_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.pipeline.same_uniform_separate_programs_add_both'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.program_uniform.separate_programs'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.program_uniform.separate_programs_add_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.program_uniform.separate_programs_add_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.program_uniform.separate_programs_add_both'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.program_uniform.single_program'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.program_uniform.single_program_add_both'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.create_shader_program.separate_programs'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.create_shader_program.separate_programs_add_fragment'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.create_shader_program.separate_programs_add_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.create_shader_program.separate_programs_add_both'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.create_shader_program.single_program_add_both'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.interface.same_name_vertex_smooth_fragment_smooth'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.interface.same_name_vertex_smooth_fragment_centroid'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.interface.same_name_vertex_smooth'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.interface.same_name_vertex_flat_fragment_flat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.interface.same_name_vertex_centroid_fragment_smooth'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.interface.same_name_vertex_centroid_fragment_centroid'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.interface.same_name_vertex_centroid'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.interface.same_name_fragment_smooth'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.interface.same_name_fragment_centroid'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.interface.same_name'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.interface.same_location_vertex_smooth_fragment_smooth'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.interface.same_location_vertex_smooth_fragment_centroid'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.interface.same_location_vertex_smooth'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.interface.same_location_vertex_flat_fragment_flat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.interface.same_location_vertex_centroid_fragment_smooth'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.interface.same_location_vertex_centroid_fragment_centroid'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.interface.same_location_vertex_centroid'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.interface.same_location_fragment_smooth'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.interface.same_location_fragment_centroid'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.interface.same_location'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.0'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.5'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.6'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.7'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.8'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.9'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.10'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.11'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.12'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.13'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.14'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.15'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.16'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.17'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.18'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.19'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.20'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.21'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.22'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.23'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.24'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.25'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.26'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.27'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.28'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.29'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.30'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.31'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.32'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.33'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.34'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.35'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.36'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.37'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.38'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.39'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.40'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.41'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.42'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.43'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.44'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.45'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.46'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.47'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.48'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.49'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.50'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.51'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.52'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.53'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.54'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.55'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.56'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.57'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.58'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.59'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.60'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.61'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.62'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.63'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.64'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.65'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.66'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.67'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.68'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.69'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.70'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.71'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.72'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.73'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.74'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.75'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.76'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.77'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.78'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.79'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.80'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.81'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.82'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.83'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.84'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.85'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.86'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.87'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.88'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.89'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.90'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.91'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.92'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.93'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.94'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.95'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.96'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.97'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.98'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.99'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.100'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.101'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.102'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.103'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.104'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.105'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.106'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.107'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.108'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.109'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.110'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.111'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.112'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.113'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.114'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.115'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.116'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.117'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.118'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.119'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.120'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.121'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.122'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.123'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.124'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.125'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.126'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.random.127'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.api.current_program_priority'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.api.active_program_uniform'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.api.pipeline_programs'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.api.pipeline_active'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.varying.missing_input'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.varying.missing_output'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.varying.mismatch_type'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.varying.mismatch_precision'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.varying.mismatch_explicit_location_type'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.varying.mismatch_explicit_location_precision'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.varying.mismatch_explicit_location'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.varying.mismatch_implicit_explicit_location_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.varying.mismatch_implicit_explicit_location_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.varying.mismatch_implicit_explicit_location_3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.varying.mismatch_different_struct_names'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.varying.mismatch_struct_member_name'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.varying.mismatch_struct_member_type'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.varying.mismatch_struct_member_precision'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.varying.mismatch_struct_member_order'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.varying.mismatch_array_element_type'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.varying.mismatch_array_length'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.varying.mismatch_array_precision'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.varying.mismatch_qualifier_vertex_flat_fragment_none'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.varying.mismatch_qualifier_vertex_flat_fragment_smooth'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.varying.mismatch_qualifier_vertex_flat_fragment_centroid'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.varying.mismatch_qualifier_vertex_smooth_fragment_flat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.varying.mismatch_qualifier_vertex_centroid_fragment_flat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.io_blocks.missing_input'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.io_blocks.missing_output'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.io_blocks.mismatch_number_of_declarations'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.io_blocks.mismatch_member_order'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.io_blocks.mismatch_member_type'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.io_blocks.mismatch_member_name'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.io_blocks.mismatch_member_precision'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.io_blocks.mismatch_different_member_interpolation'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.io_blocks.mismatch_member_array_size'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.io_blocks.mismatch_different_member_struct_names'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.io_blocks.mismatch_member_struct_member_name'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.io_blocks.mismatch_member_struct_member_type'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.io_blocks.mismatch_member_struct_member_precision'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.io_blocks.mismatch_member_struct_member_order'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.io_blocks.mismatch_array_size'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.io_blocks.mismatch_variable_and_block_member_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es31.io_blocks.mismatch_variable_and_block_member_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.varying.missing_input'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.varying.missing_output'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.varying.mismatch_type'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.varying.mismatch_precision'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.varying.mismatch_explicit_location_type'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.varying.mismatch_explicit_location_precision'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.varying.mismatch_explicit_location'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.varying.mismatch_implicit_explicit_location_1'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.varying.mismatch_implicit_explicit_location_2'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.varying.mismatch_implicit_explicit_location_3'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.varying.match_different_struct_names'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.varying.mismatch_struct_member_name'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.varying.mismatch_struct_member_type'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.varying.mismatch_struct_member_precision'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.varying.mismatch_struct_member_order'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.varying.mismatch_array_element_type'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.varying.mismatch_array_length'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.varying.mismatch_array_precision'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.varying.mismatch_qualifier_vertex_flat_fragment_none'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.varying.mismatch_qualifier_vertex_flat_fragment_smooth'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.varying.mismatch_qualifier_vertex_flat_fragment_centroid'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.varying.mismatch_qualifier_vertex_smooth_fragment_flat'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.varying.mismatch_qualifier_vertex_centroid_fragment_flat'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.io_blocks.missing_input'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.io_blocks.missing_output'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.io_blocks.mismatch_number_of_declarations'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.io_blocks.mismatch_member_order'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.io_blocks.mismatch_member_type'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.io_blocks.mismatch_member_name'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.io_blocks.mismatch_member_precision'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.io_blocks.mismatch_different_member_interpolation'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.io_blocks.mismatch_member_array_size'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.io_blocks.match_different_member_struct_names'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.io_blocks.mismatch_member_struct_member_name'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.io_blocks.mismatch_member_struct_member_type'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.io_blocks.mismatch_member_struct_member_precision'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.io_blocks.mismatch_member_struct_member_order'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.io_blocks.mismatch_array_size'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.io_blocks.mismatch_variable_and_block_member_1'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+Test case 'dEQP-GLES31.functional.separate_shader.validation.es32.io_blocks.mismatch_variable_and_block_member_2'..
+  NotSupported (GLSL ES 3.2 is not supported at glsShaderLibraryCase.cpp:774)
+
+DONE!
+
+Test run totals:
+  Passed:        223/263 (84.8%)
+  Failed:        0/263 (0.0%)
+  Not supported: 40/263 (15.2%)
+  Warnings:      0/263 (0.0%)
+  Waived:        0/263 (0.0%)

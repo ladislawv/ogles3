@@ -1,0 +1,10 @@
+Directory "M8R5:results" on Monday 16-Nov-26
+00-progress.txt                  98 ----rwed Today     21:54:09
+00-libs.txt                     349 ----rwed Today     21:54:03
+1-m8_es31.txt                  5671 ----rwed Today     21:54:03
+ogles2.log                    14969 ----rwed Today     21:54:09
+2-limits.txt                   2138 ----rwed Today     21:54:03
+3-m8_draw.txt                 15340 ----rwed Today     21:54:09
+notes.txt                       228 ----rwed Today     21:54:09
+99-files.txt                    392 ----rwed Today     21:54:09
+8 files - 38K bytes - 89 blocks used

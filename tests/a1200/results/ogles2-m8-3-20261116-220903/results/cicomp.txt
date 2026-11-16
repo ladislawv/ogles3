@@ -1,0 +1,685 @@
+Writing test log into M8R3:results/cicomp.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles3.library: 4 functions of the ES 3.0 table not implemented yet: glTexStorage1DEXT glTextureStorage1DEXT glTextureStorage2DEXT glTextureStorage3DEXT
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_r11.r11_eac_r11_eac.texture2d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_r11.r11_eac_r11_eac.texture2d_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_r11.r11_eac_r11_eac.cubemap_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_r11.r11_eac_r11_eac.cubemap_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_r11.r11_eac_signed_r11_eac.texture2d_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_r11.r11_eac_signed_r11_eac.texture2d_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_r11.r11_eac_signed_r11_eac.cubemap_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_r11.r11_eac_signed_r11_eac.cubemap_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_r11.signed_r11_eac_r11_eac.texture2d_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_r11.signed_r11_eac_r11_eac.texture2d_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_r11.signed_r11_eac_r11_eac.cubemap_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_r11.signed_r11_eac_r11_eac.cubemap_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_r11.signed_r11_eac_signed_r11_eac.texture2d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_r11.signed_r11_eac_signed_r11_eac.texture2d_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_r11.signed_r11_eac_signed_r11_eac.cubemap_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_r11.signed_r11_eac_signed_r11_eac.cubemap_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_rg11.rg11_eac_rg11_eac.texture2d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_rg11.rg11_eac_rg11_eac.texture2d_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_rg11.rg11_eac_rg11_eac.cubemap_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_rg11.rg11_eac_rg11_eac.cubemap_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_rg11.rg11_eac_signed_rg11_eac.texture2d_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_rg11.rg11_eac_signed_rg11_eac.texture2d_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_rg11.rg11_eac_signed_rg11_eac.cubemap_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_rg11.rg11_eac_signed_rg11_eac.cubemap_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_rg11.signed_rg11_eac_rg11_eac.texture2d_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_rg11.signed_rg11_eac_rg11_eac.texture2d_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_rg11.signed_rg11_eac_rg11_eac.cubemap_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_rg11.signed_rg11_eac_rg11_eac.cubemap_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_rg11.signed_rg11_eac_signed_rg11_eac.texture2d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_rg11.signed_rg11_eac_signed_rg11_eac.texture2d_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_rg11.signed_rg11_eac_signed_rg11_eac.cubemap_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_rg11.signed_rg11_eac_signed_rg11_eac.cubemap_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgb.rgb8_etc2_rgb8_etc2.texture2d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgb.rgb8_etc2_rgb8_etc2.texture2d_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgb.rgb8_etc2_rgb8_etc2.cubemap_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgb.rgb8_etc2_rgb8_etc2.cubemap_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgb.rgb8_etc2_srgb8_etc2.texture2d_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgb.rgb8_etc2_srgb8_etc2.texture2d_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgb.rgb8_etc2_srgb8_etc2.cubemap_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgb.rgb8_etc2_srgb8_etc2.cubemap_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgb.srgb8_etc2_rgb8_etc2.texture2d_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgb.srgb8_etc2_rgb8_etc2.texture2d_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgb.srgb8_etc2_rgb8_etc2.cubemap_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgb.srgb8_etc2_rgb8_etc2.cubemap_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgb.srgb8_etc2_srgb8_etc2.texture2d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgb.srgb8_etc2_srgb8_etc2.texture2d_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgb.srgb8_etc2_srgb8_etc2.cubemap_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgb.srgb8_etc2_srgb8_etc2.cubemap_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgba.rgb8_punchthrough_alpha1_etc2_rgb8_punchthrough_alpha1_etc2.texture2d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgba.rgb8_punchthrough_alpha1_etc2_rgb8_punchthrough_alpha1_etc2.texture2d_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgba.rgb8_punchthrough_alpha1_etc2_rgb8_punchthrough_alpha1_etc2.cubemap_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgba.rgb8_punchthrough_alpha1_etc2_rgb8_punchthrough_alpha1_etc2.cubemap_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgba.rgb8_punchthrough_alpha1_etc2_srgb8_punchthrough_alpha1_etc2.texture2d_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgba.rgb8_punchthrough_alpha1_etc2_srgb8_punchthrough_alpha1_etc2.texture2d_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgba.rgb8_punchthrough_alpha1_etc2_srgb8_punchthrough_alpha1_etc2.cubemap_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgba.rgb8_punchthrough_alpha1_etc2_srgb8_punchthrough_alpha1_etc2.cubemap_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgba.srgb8_punchthrough_alpha1_etc2_rgb8_punchthrough_alpha1_etc2.texture2d_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgba.srgb8_punchthrough_alpha1_etc2_rgb8_punchthrough_alpha1_etc2.texture2d_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgba.srgb8_punchthrough_alpha1_etc2_rgb8_punchthrough_alpha1_etc2.cubemap_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgba.srgb8_punchthrough_alpha1_etc2_rgb8_punchthrough_alpha1_etc2.cubemap_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgba.srgb8_punchthrough_alpha1_etc2_srgb8_punchthrough_alpha1_etc2.texture2d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgba.srgb8_punchthrough_alpha1_etc2_srgb8_punchthrough_alpha1_etc2.texture2d_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgba.srgb8_punchthrough_alpha1_etc2_srgb8_punchthrough_alpha1_etc2.cubemap_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_rgba.srgb8_punchthrough_alpha1_etc2_srgb8_punchthrough_alpha1_etc2.cubemap_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_eac_rgba.rgba8_etc2_eac_rgba8_etc2_eac.texture2d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_eac_rgba.rgba8_etc2_eac_rgba8_etc2_eac.texture2d_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_eac_rgba.rgba8_etc2_eac_rgba8_etc2_eac.cubemap_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_eac_rgba.rgba8_etc2_eac_rgba8_etc2_eac.cubemap_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_eac_rgba.rgba8_etc2_eac_srgb8_alpha8_etc2_eac.texture2d_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_eac_rgba.rgba8_etc2_eac_srgb8_alpha8_etc2_eac.texture2d_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_eac_rgba.rgba8_etc2_eac_srgb8_alpha8_etc2_eac.cubemap_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_eac_rgba.rgba8_etc2_eac_srgb8_alpha8_etc2_eac.cubemap_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_eac_rgba.srgb8_alpha8_etc2_eac_rgba8_etc2_eac.texture2d_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_eac_rgba.srgb8_alpha8_etc2_eac_rgba8_etc2_eac.texture2d_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_eac_rgba.srgb8_alpha8_etc2_eac_rgba8_etc2_eac.cubemap_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_eac_rgba.srgb8_alpha8_etc2_eac_rgba8_etc2_eac.cubemap_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_eac_rgba.srgb8_alpha8_etc2_eac_srgb8_alpha8_etc2_eac.texture2d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_eac_rgba.srgb8_alpha8_etc2_eac_srgb8_alpha8_etc2_eac.texture2d_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_eac_rgba.srgb8_alpha8_etc2_eac_srgb8_alpha8_etc2_eac.cubemap_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_etc2_eac_rgba.srgb8_alpha8_etc2_eac_srgb8_alpha8_etc2_eac.cubemap_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_rgba_astc_4x4_khr.texture2d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_rgba_astc_4x4_khr.texture2d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_rgba_astc_4x4_khr.texture2d_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_rgba_astc_4x4_khr.texture2d_to_texture2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_rgba_astc_4x4_khr.texture3d_to_texture2d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_rgba_astc_4x4_khr.texture3d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_rgba_astc_4x4_khr.texture3d_to_cubemap'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_rgba_astc_4x4_khr.texture3d_to_texture2d_array'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_rgba_astc_4x4_khr.cubemap_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_rgba_astc_4x4_khr.cubemap_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_rgba_astc_4x4_khr.cubemap_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_rgba_astc_4x4_khr.cubemap_to_texture2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_rgba_astc_4x4_khr.texture2d_array_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_rgba_astc_4x4_khr.texture2d_array_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_rgba_astc_4x4_khr.texture2d_array_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_rgba_astc_4x4_khr.texture2d_array_to_texture2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.texture2d_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.texture2d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.texture2d_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.texture2d_to_texture2d_array'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.texture3d_to_texture2d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.texture3d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.texture3d_to_cubemap'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.texture3d_to_texture2d_array'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.cubemap_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.cubemap_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.cubemap_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.cubemap_to_texture2d_array'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.texture2d_array_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.texture2d_array_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.texture2d_array_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.rgba_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.texture2d_array_to_texture2d_array'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_rgba_astc_4x4_khr.texture2d_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_rgba_astc_4x4_khr.texture2d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_rgba_astc_4x4_khr.texture2d_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_rgba_astc_4x4_khr.texture2d_to_texture2d_array'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_rgba_astc_4x4_khr.texture3d_to_texture2d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_rgba_astc_4x4_khr.texture3d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_rgba_astc_4x4_khr.texture3d_to_cubemap'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_rgba_astc_4x4_khr.texture3d_to_texture2d_array'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_rgba_astc_4x4_khr.cubemap_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_rgba_astc_4x4_khr.cubemap_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_rgba_astc_4x4_khr.cubemap_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_rgba_astc_4x4_khr.cubemap_to_texture2d_array'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_rgba_astc_4x4_khr.texture2d_array_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_rgba_astc_4x4_khr.texture2d_array_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_rgba_astc_4x4_khr.texture2d_array_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_rgba_astc_4x4_khr.texture2d_array_to_texture2d_array'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.texture2d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.texture2d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.texture2d_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.texture2d_to_texture2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.texture3d_to_texture2d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.texture3d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.texture3d_to_cubemap'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.texture3d_to_texture2d_array'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.cubemap_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.cubemap_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.cubemap_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.cubemap_to_texture2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.texture2d_array_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.texture2d_array_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.texture2d_array_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_4x4_rgba.srgb8_alpha8_astc_4x4_khr_srgb8_alpha8_astc_4x4_khr.texture2d_array_to_texture2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_to_texture2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture3d_to_texture2d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture3d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture3d_to_cubemap'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture3d_to_texture2d_array'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.cubemap_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.cubemap_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.cubemap_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.cubemap_to_texture2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_array_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_array_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_array_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_array_to_texture2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_to_texture2d_array'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture3d_to_texture2d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture3d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture3d_to_cubemap'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture3d_to_texture2d_array'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.cubemap_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.cubemap_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.cubemap_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.cubemap_to_texture2d_array'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_array_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_array_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_array_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_array_to_texture2d_array'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_to_texture2d_array'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.texture3d_to_texture2d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.texture3d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.texture3d_to_cubemap'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.texture3d_to_texture2d_array'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.cubemap_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.cubemap_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.cubemap_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.cubemap_to_texture2d_array'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_array_to_texture2d'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_array_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_array_to_cubemap'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_array_to_texture2d_array'..
+  Fail (glCopyImageSubData failed.: glGetError() returned GL_INVALID_OPERATION at es31fCopyImageTests.cpp:1214)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_to_texture2d'..
+  Fail (Image comparison of level 2 failed.)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_to_cubemap'..
+  Fail (Image comparison of level 2 failed.)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_to_texture2d_array'..
+  Fail (Image comparison of level 2 failed.)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture3d_to_texture2d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture3d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture3d_to_cubemap'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture3d_to_texture2d_array'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.cubemap_to_texture2d'..
+  Fail (Image comparison of level 2 and Face 0 failed.)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.cubemap_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.cubemap_to_cubemap'..
+  Fail (Image comparison of level 2 and Face 0 failed.)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.cubemap_to_texture2d_array'..
+  Fail (Image comparison of level 2 and Face 0 failed.)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_array_to_texture2d'..
+  Fail (Image comparison of level 2 and Layer 0 failed.)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_array_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_array_to_cubemap'..
+  Fail (Image comparison of level 2 and Layer 0 failed.)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_array_to_texture2d_array'..
+  Fail (Image comparison of level 2 and Layer 0 failed.)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x5_rgba.rgba_astc_5x5_khr_rgba_astc_5x5_khr.texture2d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x5_rgba.rgba_astc_5x5_khr_rgba_astc_5x5_khr.texture2d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x5_rgba.rgba_astc_5x5_khr_rgba_astc_5x5_khr.texture2d_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x5_rgba.rgba_astc_5x5_khr_rgba_astc_5x5_khr.texture2d_to_texture2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x5_rgba.rgba_astc_5x5_khr_rgba_astc_5x5_khr.texture3d_to_texture2d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x5_rgba.rgba_astc_5x5_khr_rgba_astc_5x5_khr.texture3d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x5_rgba.rgba_astc_5x5_khr_rgba_astc_5x5_khr.texture3d_to_cubemap'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x5_rgba.rgba_astc_5x5_khr_rgba_astc_5x5_khr.texture3d_to_texture2d_array'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x5_rgba.rgba_astc_5x5_khr_rgba_astc_5x5_khr.cubemap_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x5_rgba.rgba_astc_5x5_khr_rgba_astc_5x5_khr.cubemap_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x5_rgba.rgba_astc_5x5_khr_rgba_astc_5x5_khr.cubemap_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x5_rgba.rgba_astc_5x5_khr_rgba_astc_5x5_khr.cubemap_to_texture2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x5_rgba.rgba_astc_5x5_khr_rgba_astc_5x5_khr.texture2d_array_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x5_rgba.rgba_astc_5x5_khr_rgba_astc_5x5_khr.texture2d_array_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x5_rgba.rgba_astc_5x5_khr_rgba_astc_5x5_khr.texture2d_array_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x5_rgba.rgba_astc_5x5_khr_rgba_astc_5x5_khr.texture2d_array_to_texture2d_array'..
+
+ABORTED!
+
+Test run totals:
+  Passed:        75/223 (33.6%)
+  Failed:        85/223 (38.1%)
+  Not supported: 63/223 (28.3%)
+  Warnings:      0/223 (0.0%)
+  Waived:        0/223 (0.0%)
+Test run was ABORTED!

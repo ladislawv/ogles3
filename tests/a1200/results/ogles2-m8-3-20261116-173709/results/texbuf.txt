@@ -1,0 +1,1066 @@
+Writing test log into M8R3:results/texbuf.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles3.library: 4 functions of the ES 3.0 table not implemented yet: glTexStorage1DEXT glTextureStorage1DEXT glTextureStorage2DEXT glTextureStorage3DEXT
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.state_query.max_texture_buffer_size_getboolean'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.state_query.max_texture_buffer_size_getinteger'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.state_query.max_texture_buffer_size_getinteger64'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.state_query.max_texture_buffer_size_getfloat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.state_query.texture_buffer_offset_alignment_getboolean'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.state_query.texture_buffer_offset_alignment_getinteger'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.state_query.texture_buffer_offset_alignment_getinteger64'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.state_query.texture_buffer_offset_alignment_getfloat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.state_query.texture_buffer_binding_getboolean'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.state_query.texture_buffer_binding_getinteger'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.state_query.texture_buffer_binding_getinteger64'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.state_query.texture_buffer_binding_getfloat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.state_query.texture_binding_buffer_getboolean'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.state_query.texture_binding_buffer_getinteger'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.state_query.texture_binding_buffer_getinteger64'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.state_query.texture_binding_buffer_getfloat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.state_query.texture_buffer_data_store_binding_integer'..
+  Fail (glGetTexLevelParameteriv: glGetError() returned GL_INVALID_ENUM)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.state_query.texture_buffer_data_store_binding_float'..
+  Fail (glGetTexLevelParameterfv: glGetError() returned GL_INVALID_ENUM)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.state_query.texture_buffer_offset_integer'..
+  Fail (glGetTexLevelParameteriv: glGetError() returned GL_INVALID_ENUM)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.state_query.texture_buffer_offset_float'..
+  Fail (glGetTexLevelParameterfv: glGetError() returned GL_INVALID_ENUM)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.state_query.texture_buffer_size_integer'..
+  Fail (glGetTexLevelParameteriv: glGetError() returned GL_INVALID_ENUM)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.state_query.texture_buffer_size_float'..
+  Fail (glGetTexLevelParameterfv: glGetError() returned GL_INVALID_ENUM)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array.buffer_size_512'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array.buffer_size_513'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array.buffer_size_65536'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array.buffer_size_65537'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array.buffer_size_131071'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array.range_size_512'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array.range_size_513'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array.range_size_65537'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array.range_size_98304'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array.offset_1_alignments'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array.offset_7_alignments'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array.buffer_size_512'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array.buffer_size_513'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array.buffer_size_65536'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array.buffer_size_65537'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array.buffer_size_131071'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array.range_size_512'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array.range_size_513'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array.range_size_65537'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array.range_size_98304'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array.offset_1_alignments'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array.offset_7_alignments'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array.buffer_size_512'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array.buffer_size_513'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array.buffer_size_65536'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array.buffer_size_65537'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array.buffer_size_131071'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array.range_size_512'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array.range_size_513'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array.range_size_65537'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array.range_size_98304'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array.offset_1_alignments'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array.offset_7_alignments'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_texture.buffer_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_texture.buffer_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_texture.buffer_size_65536'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_texture.buffer_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_texture.buffer_size_131071'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_texture.range_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_texture.range_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_texture.range_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_texture.range_size_98304'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_texture.offset_1_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_texture.offset_7_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_vertex_texture.buffer_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_vertex_texture.buffer_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_vertex_texture.buffer_size_65536'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_vertex_texture.buffer_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_vertex_texture.buffer_size_131071'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_vertex_texture.range_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_vertex_texture.range_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_vertex_texture.range_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_vertex_texture.range_size_98304'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_vertex_texture.offset_1_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_vertex_texture.offset_7_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_vertex_texture.buffer_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_vertex_texture.buffer_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_vertex_texture.buffer_size_65536'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_vertex_texture.buffer_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_vertex_texture.buffer_size_131071'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_vertex_texture.range_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_vertex_texture.range_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_vertex_texture.range_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_vertex_texture.range_size_98304'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_vertex_texture.offset_1_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_vertex_texture.offset_7_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_vertex_texture.buffer_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_vertex_texture.buffer_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_vertex_texture.buffer_size_65536'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_vertex_texture.buffer_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_vertex_texture.buffer_size_131071'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_vertex_texture.range_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_vertex_texture.range_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_vertex_texture.range_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_vertex_texture.range_size_98304'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_vertex_texture.offset_1_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_vertex_texture.offset_7_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_fragment_texture.buffer_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_fragment_texture.buffer_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_fragment_texture.buffer_size_65536'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_fragment_texture.buffer_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_fragment_texture.buffer_size_131071'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_fragment_texture.range_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_fragment_texture.range_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_fragment_texture.range_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_fragment_texture.range_size_98304'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_fragment_texture.offset_1_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_fragment_texture.offset_7_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_fragment_texture.buffer_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_fragment_texture.buffer_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_fragment_texture.buffer_size_65536'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_fragment_texture.buffer_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_fragment_texture.buffer_size_131071'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_fragment_texture.range_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_fragment_texture.range_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_fragment_texture.range_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_fragment_texture.range_size_98304'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_fragment_texture.offset_1_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_fragment_texture.offset_7_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_fragment_texture.buffer_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_fragment_texture.buffer_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_fragment_texture.buffer_size_65536'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_fragment_texture.buffer_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_fragment_texture.buffer_size_131071'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_fragment_texture.range_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_fragment_texture.range_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_fragment_texture.range_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_fragment_texture.range_size_98304'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_fragment_texture.offset_1_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_fragment_texture.offset_7_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_fragment_texture.buffer_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_fragment_texture.buffer_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_fragment_texture.buffer_size_65536'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_fragment_texture.buffer_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_fragment_texture.buffer_size_131071'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_fragment_texture.range_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_fragment_texture.range_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_fragment_texture.range_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_fragment_texture.range_size_98304'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_fragment_texture.offset_1_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_fragment_texture.offset_7_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_texture_as_fragment_texture.buffer_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_texture_as_fragment_texture.buffer_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_texture_as_fragment_texture.buffer_size_65536'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_texture_as_fragment_texture.buffer_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_texture_as_fragment_texture.buffer_size_131071'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_texture_as_fragment_texture.range_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_texture_as_fragment_texture.range_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_texture_as_fragment_texture.range_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_texture_as_fragment_texture.range_size_98304'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_texture_as_fragment_texture.offset_1_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_texture_as_fragment_texture.offset_7_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_vertex_texture_as_fragment_texture.buffer_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_vertex_texture_as_fragment_texture.buffer_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_vertex_texture_as_fragment_texture.buffer_size_65536'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_vertex_texture_as_fragment_texture.buffer_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_vertex_texture_as_fragment_texture.buffer_size_131071'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_vertex_texture_as_fragment_texture.range_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_vertex_texture_as_fragment_texture.range_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_vertex_texture_as_fragment_texture.range_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_vertex_texture_as_fragment_texture.range_size_98304'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_vertex_texture_as_fragment_texture.offset_1_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_vertex_texture_as_fragment_texture.offset_7_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_vertex_texture_as_fragment_texture.buffer_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_vertex_texture_as_fragment_texture.buffer_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_vertex_texture_as_fragment_texture.buffer_size_65536'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_vertex_texture_as_fragment_texture.buffer_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_vertex_texture_as_fragment_texture.buffer_size_131071'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_vertex_texture_as_fragment_texture.range_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_vertex_texture_as_fragment_texture.range_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_vertex_texture_as_fragment_texture.range_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_vertex_texture_as_fragment_texture.range_size_98304'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_vertex_texture_as_fragment_texture.offset_1_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_index_array_as_vertex_texture_as_fragment_texture.offset_7_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_vertex_texture_as_fragment_texture.buffer_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_vertex_texture_as_fragment_texture.buffer_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_vertex_texture_as_fragment_texture.buffer_size_65536'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_vertex_texture_as_fragment_texture.buffer_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_vertex_texture_as_fragment_texture.buffer_size_131071'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_vertex_texture_as_fragment_texture.range_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_vertex_texture_as_fragment_texture.range_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_vertex_texture_as_fragment_texture.range_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_vertex_texture_as_fragment_texture.range_size_98304'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_vertex_texture_as_fragment_texture.offset_1_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render.as_vertex_array_as_index_array_as_vertex_texture_as_fragment_texture.offset_7_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.bufferdata.buffer_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.bufferdata.buffer_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.bufferdata.buffer_size_65536'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.bufferdata.buffer_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.bufferdata.buffer_size_131071'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.bufferdata.range_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.bufferdata.range_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.bufferdata.range_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.bufferdata.range_size_98304'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.bufferdata.offset_1_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.bufferdata.offset_7_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.buffersubdata.buffer_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.buffersubdata.buffer_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.buffersubdata.buffer_size_65536'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.buffersubdata.buffer_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.buffersubdata.buffer_size_131071'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.buffersubdata.range_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.buffersubdata.range_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.buffersubdata.range_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.buffersubdata.range_size_98304'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.buffersubdata.offset_1_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.buffersubdata.offset_7_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.mapbuffer_write.buffer_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.mapbuffer_write.buffer_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.mapbuffer_write.buffer_size_65536'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.mapbuffer_write.buffer_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.mapbuffer_write.buffer_size_131071'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.mapbuffer_write.range_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.mapbuffer_write.range_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.mapbuffer_write.range_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.mapbuffer_write.range_size_98304'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.mapbuffer_write.offset_1_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.mapbuffer_write.offset_7_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.mapbuffer_readwrite.buffer_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.mapbuffer_readwrite.buffer_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.mapbuffer_readwrite.buffer_size_65536'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.mapbuffer_readwrite.buffer_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.mapbuffer_readwrite.buffer_size_131071'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.mapbuffer_readwrite.range_size_512'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.mapbuffer_readwrite.range_size_513'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.mapbuffer_readwrite.range_size_65537'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.mapbuffer_readwrite.range_size_98304'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.mapbuffer_readwrite.offset_1_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify.mapbuffer_readwrite.offset_7_alignments'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.bufferdata.as_vertex_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.bufferdata.as_index_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.bufferdata.as_vertex_array_as_index_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.bufferdata.as_vertex_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.bufferdata.as_vertex_array_as_vertex_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.bufferdata.as_index_array_as_vertex_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.bufferdata.as_vertex_array_as_index_array_as_vertex_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.bufferdata.as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.bufferdata.as_vertex_array_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.bufferdata.as_index_array_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.bufferdata.as_vertex_array_as_index_array_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.bufferdata.as_vertex_texture_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.bufferdata.as_vertex_array_as_vertex_texture_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.bufferdata.as_index_array_as_vertex_texture_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.bufferdata.as_vertex_array_as_index_array_as_vertex_texture_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.buffersubdata.as_vertex_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.buffersubdata.as_index_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.buffersubdata.as_vertex_array_as_index_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.buffersubdata.as_vertex_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.buffersubdata.as_vertex_array_as_vertex_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.buffersubdata.as_index_array_as_vertex_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.buffersubdata.as_vertex_array_as_index_array_as_vertex_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.buffersubdata.as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.buffersubdata.as_vertex_array_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.buffersubdata.as_index_array_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.buffersubdata.as_vertex_array_as_index_array_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.buffersubdata.as_vertex_texture_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.buffersubdata.as_vertex_array_as_vertex_texture_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.buffersubdata.as_index_array_as_vertex_texture_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.buffersubdata.as_vertex_array_as_index_array_as_vertex_texture_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_write.as_vertex_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_write.as_index_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_write.as_vertex_array_as_index_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_write.as_vertex_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_write.as_vertex_array_as_vertex_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_write.as_index_array_as_vertex_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_write.as_vertex_array_as_index_array_as_vertex_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_write.as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_write.as_vertex_array_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_write.as_index_array_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_write.as_vertex_array_as_index_array_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_write.as_vertex_texture_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_write.as_vertex_array_as_vertex_texture_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_write.as_index_array_as_vertex_texture_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_write.as_vertex_array_as_index_array_as_vertex_texture_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_readwrite.as_vertex_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_readwrite.as_index_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_readwrite.as_vertex_array_as_index_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_readwrite.as_vertex_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_readwrite.as_vertex_array_as_vertex_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_readwrite.as_index_array_as_vertex_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_readwrite.as_vertex_array_as_index_array_as_vertex_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_readwrite.as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_readwrite.as_vertex_array_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_readwrite.as_index_array_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_readwrite.as_vertex_array_as_index_array_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_readwrite.as_vertex_texture_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_readwrite.as_vertex_array_as_vertex_texture_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_readwrite.as_index_array_as_vertex_texture_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.modify_render.mapbuffer_readwrite.as_vertex_array_as_index_array_as_vertex_texture_as_fragment_texture'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array.bufferdata'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array.buffersubdata'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array.mapbuffer_write'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array.mapbuffer_readwrite'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_index_array.bufferdata'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_index_array.buffersubdata'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_index_array.mapbuffer_write'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_index_array.mapbuffer_readwrite'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_index_array.bufferdata'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_index_array.buffersubdata'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_index_array.mapbuffer_write'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_index_array.mapbuffer_readwrite'..
+  Fail (Runtime check failed: 'm_postRenderProgram->isOk()' at glsTextureBufferCase.cpp:969)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_texture.bufferdata'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_texture.buffersubdata'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_texture.mapbuffer_write'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_texture.mapbuffer_readwrite'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_vertex_texture.bufferdata'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_vertex_texture.buffersubdata'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_vertex_texture.mapbuffer_write'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_vertex_texture.mapbuffer_readwrite'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_index_array_as_vertex_texture.bufferdata'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_index_array_as_vertex_texture.buffersubdata'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_index_array_as_vertex_texture.mapbuffer_write'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_index_array_as_vertex_texture.mapbuffer_readwrite'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_index_array_as_vertex_texture.bufferdata'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_index_array_as_vertex_texture.buffersubdata'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_index_array_as_vertex_texture.mapbuffer_write'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_index_array_as_vertex_texture.mapbuffer_readwrite'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_fragment_texture.bufferdata'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_fragment_texture.buffersubdata'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_fragment_texture.mapbuffer_write'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_fragment_texture.mapbuffer_readwrite'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_fragment_texture.bufferdata'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_fragment_texture.buffersubdata'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_fragment_texture.mapbuffer_write'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_fragment_texture.mapbuffer_readwrite'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_index_array_as_fragment_texture.bufferdata'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_index_array_as_fragment_texture.buffersubdata'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_index_array_as_fragment_texture.mapbuffer_write'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_index_array_as_fragment_texture.mapbuffer_readwrite'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_index_array_as_fragment_texture.bufferdata'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_index_array_as_fragment_texture.buffersubdata'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_index_array_as_fragment_texture.mapbuffer_write'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_index_array_as_fragment_texture.mapbuffer_readwrite'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_texture_as_fragment_texture.bufferdata'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_texture_as_fragment_texture.buffersubdata'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_texture_as_fragment_texture.mapbuffer_write'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_texture_as_fragment_texture.mapbuffer_readwrite'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_vertex_texture_as_fragment_texture.bufferdata'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_vertex_texture_as_fragment_texture.buffersubdata'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_vertex_texture_as_fragment_texture.mapbuffer_write'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_vertex_texture_as_fragment_texture.mapbuffer_readwrite'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_index_array_as_vertex_texture_as_fragment_texture.bufferdata'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_index_array_as_vertex_texture_as_fragment_texture.buffersubdata'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_index_array_as_vertex_texture_as_fragment_texture.mapbuffer_write'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_index_array_as_vertex_texture_as_fragment_texture.mapbuffer_readwrite'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_index_array_as_vertex_texture_as_fragment_texture.bufferdata'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_index_array_as_vertex_texture_as_fragment_texture.buffersubdata'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_index_array_as_vertex_texture_as_fragment_texture.mapbuffer_write'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+Test case 'dEQP-GLES31.functional.texture.texture_buffer.render_modify.as_vertex_array_as_index_array_as_vertex_texture_as_fragment_texture.mapbuffer_readwrite'..
+  Fail (Runtime check failed: 'm_preRenderProgram->isOk()' at glsTextureBufferCase.cpp:950)
+
+DONE!
+
+Test run totals:
+  Passed:        61/351 (17.4%)
+  Failed:        290/351 (82.6%)
+  Not supported: 0/351 (0.0%)
+  Warnings:      0/351 (0.0%)
+  Waived:        0/351 (0.0%)

@@ -1,0 +1,7 @@
+ogles2 M8 run 5, starting at step 1
+Monday 16-Nov-26 21:54:03
+step 1 done
+step 2 done
+step 3 done
+finished
+Monday 16-Nov-26 21:54:09

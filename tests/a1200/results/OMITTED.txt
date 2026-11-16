@@ -43,3 +43,17 @@ dEQP-GLES2 logs (.qpa) over 1 MB of the final run (2026-10-14), left out as abov
    9055523  ogles2-m7-1-20261014-184232/results/fragment_ops.qpa
    2768312  ogles2-m7-1-20261014-192743/results/shaders-random.qpa
    3515706  ogles2-m7-1-20261014-operator/results/shaders-operator.qpa
+
+dEQP-GLES31 logs (.qpa) over 1 MB, left out (2026-11-16, the es32 runs through amigent; each
+case's result is also in the run's <name>.txt):
+
+     1060041  ogles2-m8-3-20261116-173411/results/bclamp.qpa
+     7615463  ogles2-m8-3-20261116-175105/results/squery.qpa
+    39526325  ogles2-m8-3-20261116-175227/results/negcov.qpa
+   105026971  ogles2-m8-3-20261116-181122/results/copyimg.qpa
+     7633433  ogles2-m8-3-20261116-205022/results/squery.qpa
+    39525036  ogles2-m8-3-20261116-205145/results/negcov.qpa
+     1907370  ogles2-m8-3-20261116-210650/results/cafilt.qpa
+     2495500  ogles2-m8-3-20261116-211106/results/gather.qpa
+     3541384  ogles2-m8-3-20261116-211339/results/cicomp.qpa
+     1832413  ogles2-m8-3-20261116-220903/results/cicomp.qpa

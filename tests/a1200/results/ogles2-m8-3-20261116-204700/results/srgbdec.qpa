@@ -1,0 +1,854 @@
+#sessionInfo releaseName unknown
+#sessionInfo releaseId 0xcafebabe
+#sessionInfo targetName "AmigaOS3"
+#sessionInfo logFormatVersion "0.3.4"
+#sessionInfo vendor "ogles3.library"
+#sessionInfo renderer "V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM"
+#sessionInfo commandLineParameters "--deqp-case dEQP-GLES31.functional.srgb_texture_decode.* --deqp-archive-dir=M8R3:bin --deqp-log-filename=M8R3:results/srgbdec.qpa --deqp-log-images=disable --deqp-log-shader-sources=disable --deqp-surface-width=256 --deqp-surface-height=256 --deqp-gl-config-name=rgba8888d24s8ms0"
+
+#beginSession
+
+#beginTestCaseResult dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srgba8.skipped
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srgba8.skipped" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">38.578999</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.257000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">32.987000</Number>
+ <Text>Result color: 0 = (0.486275, 0.584314, 0.666667, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0.484535, 0.583837, 0.665189, 1)</Text>
+ <Text>sRGB as expected</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.255000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">25.584000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">6.011000</Number>
+ <Text>Result color: 0 = (0.486275, 0.584314, 0.666667, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0.484535, 0.583837, 0.665189, 1)</Text>
+ <Text>sRGB as expected</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.280000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.497000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">30.485001</Number>
+ <Text>Result color: 0 = (0.486275, 0.584314, 0.666667, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0.484535, 0.583837, 0.665189, 1)</Text>
+ <Text>sRGB as expected</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.292000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">31.549999</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">5.649000</Number>
+ <Text>Result color: 0 = (0.486275, 0.584314, 0.666667, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0.484535, 0.583837, 0.665189, 1)</Text>
+ <Text>sRGB as expected</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.218000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.714000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">37.115002</Number>
+ <Text>Result color: 0 = (0.486275, 0.584314, 0.666667, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0.484535, 0.583837, 0.665189, 1)</Text>
+ <Text>sRGB as expected</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">308376</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srgba8.enabled
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srgba8.enabled" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.218000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.992000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.090000</Number>
+ <Text>Result color: 0 = (0.2, 0.301961, 0.4, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0.2, 0.3, 0.4, 1)</Text>
+ <Text>linear as expected</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.241000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.961000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.091000</Number>
+ <Text>Result color: 0 = (0.2, 0.301961, 0.4, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0.2, 0.3, 0.4, 1)</Text>
+ <Text>linear as expected</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.845000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.052000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.085000</Number>
+ <Text>Result color: 0 = (0.2, 0.301961, 0.4, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0.2, 0.3, 0.4, 1)</Text>
+ <Text>linear as expected</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.509000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.022000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.086000</Number>
+ <Text>Result color: 0 = (0.2, 0.301961, 0.4, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0.2, 0.3, 0.4, 1)</Text>
+ <Text>linear as expected</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.233000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.967000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.088000</Number>
+ <Text>Result color: 0 = (0.2, 0.301961, 0.4, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0.2, 0.3, 0.4, 1)</Text>
+ <Text>linear as expected</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">78897</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srgba8.texel_fetch
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srgba8.texel_fetch" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.228000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.744000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">29.266001</Number>
+ <Text>Result color: 0 = (0.486275, 0.584314, 0.666667, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0.2, 0.3, 0.4, 1)</Text>
+ <Text>not linear as expected</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">56877</Number>
+ <Result StatusCode="Fail">Result verification failed</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srgba8.conversion_gpu
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srgba8.conversion_gpu" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.141000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.871000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">8.393000</Number>
+ <Text>Result color: 0 = (0, 1, 0, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0, 1, 0, 1)</Text>
+ <Text>returned pass color from GPU</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.278000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.783000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">36.528000</Number>
+ <Text>Result color: 0 = (0, 1, 0, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0, 1, 0, 1)</Text>
+ <Text>returned pass color from GPU</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.279000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.374000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">32.494999</Number>
+ <Text>Result color: 0 = (0, 1, 0, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0, 1, 0, 1)</Text>
+ <Text>returned pass color from GPU</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.248000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">26.683001</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">6.042000</Number>
+ <Text>Result color: 0 = (0, 1, 0, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0, 1, 0, 1)</Text>
+ <Text>returned pass color from GPU</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.258000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">27.370001</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">33.047001</Number>
+ <Text>Result color: 0 = (0, 1, 0, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0, 1, 0, 1)</Text>
+ <Text>returned pass color from GPU</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">255997</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srgba8.toggled
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srgba8.toggled" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.273000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.310000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.112000</Number>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.181000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.529000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">30.719999</Number>
+ <Text>Result color: 0 = (0, 1, 0, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0, 1, 0, 1)</Text>
+ <Text>returned pass color from GPU</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.261000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">26.691000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.116000</Number>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.189000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">24.584000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">31.622000</Number>
+ <Text>Result color: 0 = (0, 1, 0, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0, 1, 0, 1)</Text>
+ <Text>returned pass color from GPU</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.303000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.007000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.108000</Number>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.647000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">25.618999</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">5.771000</Number>
+ <Text>Result color: 0 = (0, 1, 0, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0, 1, 0, 1)</Text>
+ <Text>returned pass color from GPU</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.253000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.995000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.105000</Number>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.159000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.705000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">5.718000</Number>
+ <Text>Result color: 0 = (0, 1, 0, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0, 1, 0, 1)</Text>
+ <Text>returned pass color from GPU</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.280000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">26.025999</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.121000</Number>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.214000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">25.768000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">33.400002</Number>
+ <Text>Result color: 0 = (0, 1, 0, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0, 1, 0, 1)</Text>
+ <Text>returned pass color from GPU</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">350936</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srgba8.multiple_textures
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srgba8.multiple_textures" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.674000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.501000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">31.025999</Number>
+ <Text>Result color: 0 = (0.486275, 0.584314, 0.666667, 1)</Text>
+ <Text>Result color: 1 = (0.2, 0.301961, 0.4, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0.484535, 0.583837, 0.665189, 1)</Text>
+ <Text>Expected color: 1 = (0.2, 0.3, 0.4, 1)</Text>
+ <Text>texel values are different</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.273000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">25.750000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">5.962000</Number>
+ <Text>Result color: 0 = (0.486275, 0.584314, 0.666667, 1)</Text>
+ <Text>Result color: 1 = (0.2, 0.301961, 0.4, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0.484535, 0.583837, 0.665189, 1)</Text>
+ <Text>Expected color: 1 = (0.2, 0.3, 0.4, 1)</Text>
+ <Text>texel values are different</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.250000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">26.896000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">32.327999</Number>
+ <Text>Result color: 0 = (0.486275, 0.584314, 0.666667, 1)</Text>
+ <Text>Result color: 1 = (0.2, 0.301961, 0.4, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0.484535, 0.583837, 0.665189, 1)</Text>
+ <Text>Expected color: 1 = (0.2, 0.3, 0.4, 1)</Text>
+ <Text>texel values are different</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.701000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">3.082000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">30.465000</Number>
+ <Text>Result color: 0 = (0.486275, 0.584314, 0.666667, 1)</Text>
+ <Text>Result color: 1 = (0.2, 0.301961, 0.4, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0.484535, 0.583837, 0.665189, 1)</Text>
+ <Text>Expected color: 1 = (0.2, 0.3, 0.4, 1)</Text>
+ <Text>texel values are different</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.251000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">26.495001</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">9.979000</Number>
+ <Text>Result color: 0 = (0.486275, 0.584314, 0.666667, 1)</Text>
+ <Text>Result color: 1 = (0.2, 0.301961, 0.4, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0.484535, 0.583837, 0.665189, 1)</Text>
+ <Text>Expected color: 1 = (0.2, 0.3, 0.4, 1)</Text>
+ <Text>texel values are different</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">314958</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srgba8.using_sampler
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srgba8.using_sampler" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.269000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.946000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.099000</Number>
+ <Text>Result color: 0 = (0.2, 0.301961, 0.4, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0.2, 0.3, 0.4, 1)</Text>
+ <Text>linear as expected</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.251000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">23.128000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.107000</Number>
+ <Text>Result color: 0 = (0.2, 0.301961, 0.4, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0.2, 0.3, 0.4, 1)</Text>
+ <Text>linear as expected</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.272000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.171000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.096000</Number>
+ <Text>Result color: 0 = (0.2, 0.301961, 0.4, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0.2, 0.3, 0.4, 1)</Text>
+ <Text>linear as expected</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.532000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.773000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.098000</Number>
+ <Text>Result color: 0 = (0.2, 0.301961, 0.4, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0.2, 0.3, 0.4, 1)</Text>
+ <Text>linear as expected</Text>
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.237000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.412000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.093000</Number>
+ <Text>Result color: 0 = (0.2, 0.301961, 0.4, 1)</Text>
+ <Text>Epsilon error: (0.005, 0.005, 0.005, 0.005)</Text>
+ <Text>Expected color: 0 = (0.2, 0.3, 0.4, 1)</Text>
+ <Text>linear as expected</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">106829</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srg8.skipped
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srg8.skipped" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Test requires GL_EXT_texture_sRGB_RG8 extension</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">6653</Number>
+ <Result StatusCode="NotSupported">Test requires GL_EXT_texture_sRGB_RG8 extension</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srg8.enabled
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srg8.enabled" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Test requires GL_EXT_texture_sRGB_RG8 extension</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">6139</Number>
+ <Result StatusCode="NotSupported">Test requires GL_EXT_texture_sRGB_RG8 extension</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srg8.texel_fetch
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srg8.texel_fetch" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Test requires GL_EXT_texture_sRGB_RG8 extension</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">5935</Number>
+ <Result StatusCode="NotSupported">Test requires GL_EXT_texture_sRGB_RG8 extension</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srg8.conversion_gpu
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srg8.conversion_gpu" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Test requires GL_EXT_texture_sRGB_RG8 extension</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">5946</Number>
+ <Result StatusCode="NotSupported">Test requires GL_EXT_texture_sRGB_RG8 extension</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srg8.toggled
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srg8.toggled" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Test requires GL_EXT_texture_sRGB_RG8 extension</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">6043</Number>
+ <Result StatusCode="NotSupported">Test requires GL_EXT_texture_sRGB_RG8 extension</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srg8.multiple_textures
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srg8.multiple_textures" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Test requires GL_EXT_texture_sRGB_RG8 extension</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">6565</Number>
+ <Result StatusCode="NotSupported">Test requires GL_EXT_texture_sRGB_RG8 extension</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srg8.using_sampler
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.srgb_texture_decode.skip_decode.srg8.using_sampler" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Test requires GL_EXT_texture_sRGB_RG8 extension</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">6220</Number>
+ <Result StatusCode="NotSupported">Test requires GL_EXT_texture_sRGB_RG8 extension</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.srgb_texture_decode.skip_decode.sr8.skipped
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.srgb_texture_decode.skip_decode.sr8.skipped" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Test requires GL_EXT_texture_sRGB_R8 extension</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">6314</Number>
+ <Result StatusCode="NotSupported">Test requires GL_EXT_texture_sRGB_R8 extension</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.srgb_texture_decode.skip_decode.sr8.enabled
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.srgb_texture_decode.skip_decode.sr8.enabled" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Test requires GL_EXT_texture_sRGB_R8 extension</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">6081</Number>
+ <Result StatusCode="NotSupported">Test requires GL_EXT_texture_sRGB_R8 extension</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.srgb_texture_decode.skip_decode.sr8.texel_fetch
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.srgb_texture_decode.skip_decode.sr8.texel_fetch" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Test requires GL_EXT_texture_sRGB_R8 extension</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">6366</Number>
+ <Result StatusCode="NotSupported">Test requires GL_EXT_texture_sRGB_R8 extension</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.srgb_texture_decode.skip_decode.sr8.conversion_gpu
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.srgb_texture_decode.skip_decode.sr8.conversion_gpu" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Test requires GL_EXT_texture_sRGB_R8 extension</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">6368</Number>
+ <Result StatusCode="NotSupported">Test requires GL_EXT_texture_sRGB_R8 extension</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.srgb_texture_decode.skip_decode.sr8.toggled
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.srgb_texture_decode.skip_decode.sr8.toggled" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Test requires GL_EXT_texture_sRGB_R8 extension</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">6398</Number>
+ <Result StatusCode="NotSupported">Test requires GL_EXT_texture_sRGB_R8 extension</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.srgb_texture_decode.skip_decode.sr8.multiple_textures
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.srgb_texture_decode.skip_decode.sr8.multiple_textures" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Test requires GL_EXT_texture_sRGB_R8 extension</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">5950</Number>
+ <Result StatusCode="NotSupported">Test requires GL_EXT_texture_sRGB_R8 extension</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.srgb_texture_decode.skip_decode.sr8.using_sampler
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.srgb_texture_decode.skip_decode.sr8.using_sampler" Version="0.3.4" CaseType="SelfValidate">
+ <Text>Test requires GL_EXT_texture_sRGB_R8 extension</Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">6275</Number>
+ <Result StatusCode="NotSupported">Test requires GL_EXT_texture_sRGB_R8 extension</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+Run took 1.78 seconds
+
+#endSession

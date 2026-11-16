@@ -1,0 +1,597 @@
+     1 ogles3.library 1.0 init
+     2 open (count 1)
+     3 GPU submission lock "V3D 4.2 submit" at 0x08367AB0
+     4 device: V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM, clipper granularity 256
+     5 device: GPU-visible RAM (device tree memory): 0x01000000-0x3B9FFFFF
+     6 device: GPU-visible RAM (device tree memory): 0x40000000-0x79DFFFFF
+     7 device: memory region "expansion memory" 0x08000020-0x3B9FFFFF fast: the GPU reaches it
+     8 device: memory region "expansion memory" 0x01000020-0x07FFFFFF fast: the GPU reaches it
+     9 device: memory region "expansion memory" 0x41000020-0x79DFFFFF fast: the GPU reaches it
+    10 device: memory region "memory" 0x00C00020-0x00C7FFFF fast: OUTSIDE the GPU-visible RAM
+    11 device: memory region "chip memory" 0x00001020-0x001FFFFF chip: OUTSIDE the GPU-visible RAM
+    12 display: own window, 256x256, BGRA
+    13 device: context pools for 256x256, D32F, 17783168 bytes of GPU memory in use
+    14 aglCreateContext2: context 0x0904AFBC, OpenGL ES 3.1, 256x256
+    15 compiler: CaffeineOS:Libs/v3dglslc3, 19048396 bytes, id 11B095AA
+    16 compiler: shader compiled in 60 ms
+    17 compiler: shader compiled in 40 ms
+    18 compiler: program compiled in 200 ms, OGLES3Cache:c/cdb1aceba5981ae824f2d810.v3dp
+    19 glLinkProgram: OGLES3Cache:c/cdb1aceba5981ae824f2d810.v3dp (5 variants, 488 bytes of code)
+    20 job: depth and stencil kept across a mid-frame flush (logged once)
+    21 compiler: shader compiled in 20 ms
+    22 compiler: program failed in 20 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    23 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    24 compiler: program failed in 80 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    25 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    26 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    27 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    28 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    29 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    30 compiler: program failed in 80 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    31 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    32 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    33 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    34 compiler: program failed in 100 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    35 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    36 compiler: program failed in 80 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    37 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    38 compiler: program failed in 100 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    39 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    40 compiler: program failed in 100 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    41 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    42 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    43 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    44 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    45 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    46 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    47 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    48 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    49 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    50 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    51 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    52 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    53 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    54 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    55 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    56 compiler: program failed in 80 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    57 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    58 compiler: program failed in 80 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    59 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    60 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    61 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    62 compiler: program failed in 100 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    63 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    64 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    65 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    66 compiler: program failed in 100 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    67 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    68 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    69 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    70 compiler: program failed in 140 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    71 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    72 compiler: program failed in 80 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    73 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    74 compiler: program failed in 80 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    75 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    76 compiler: program failed in 80 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    77 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    78 compiler: program failed in 80 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    79 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    80 compiler: program failed in 120 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    81 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    82 compiler: program failed in 120 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    83 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    84 compiler: program failed in 120 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    85 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    86 compiler: program failed in 120 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    87 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    88 compiler: program failed in 320 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    89 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    90 compiler: program failed in 240 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    91 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    92 compiler: program failed in 160 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    93 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    94 compiler: program failed in 120 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    95 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    96 compiler: program failed in 120 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    97 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+    98 compiler: program failed in 80 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+    99 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   100 compiler: program failed in 120 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   101 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   102 compiler: program failed in 120 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   103 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   104 compiler: program failed in 120 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   105 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   106 compiler: program failed in 120 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   107 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   108 compiler: program failed in 80 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   109 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   110 compiler: shader compiled in 60 ms
+   111 compiler: program failed in 40 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   112 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   113 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   114 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   115 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   116 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   117 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   118 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   119 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   120 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   121 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   122 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   123 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   124 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   125 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   126 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   127 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   128 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   129 compiler: program failed in 120 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   130 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   131 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   132 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   133 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   134 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   135 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   136 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   137 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   138 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   139 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   140 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   141 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   142 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   143 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   144 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   145 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   146 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   147 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   148 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   149 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   150 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   151 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   152 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   153 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   154 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   155 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   156 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   157 compiler: program failed in 120 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   158 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   159 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   160 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   161 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   162 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   163 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   164 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   165 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   166 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   167 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   168 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   169 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   170 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   171 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   172 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   173 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   174 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   175 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   176 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   177 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   178 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   179 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   180 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   181 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   182 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   183 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   184 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   185 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   186 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   187 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   188 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   189 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   190 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   191 compiler: program failed in 120 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   192 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   193 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   194 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   195 compiler: program failed in 120 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   196 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   197 compiler: program failed in 240 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   198 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   199 compiler: program failed in 200 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   200 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   201 compiler: program failed in 120 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   202 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   203 compiler: program failed in 120 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   204 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   205 compiler: program failed in 120 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   206 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   207 compiler: program failed in 120 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   208 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   209 compiler: program failed in 120 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   210 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   211 compiler: program failed in 160 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   212 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   213 compiler: program failed in 120 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   214 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   215 compiler: program failed in 120 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   216 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   217 compiler: program failed in 120 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   218 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   219 compiler: program failed in 160 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   220 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   221 compiler: program failed in 120 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   222 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   223 compiler: program failed in 80 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   224 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   225 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   226 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   227 compiler: program failed in 80 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   228 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   229 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   230 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   231 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   232 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   233 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   234 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   235 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   236 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   237 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   238 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   239 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   240 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   241 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   242 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   243 compiler: program failed in 140 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   244 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   245 compiler: program failed in 80 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   246 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   247 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   248 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   249 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   250 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   251 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   252 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   253 compiler: program failed in 80 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   254 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   255 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   256 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   257 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   258 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   259 compiler: program failed in 100 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   260 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   261 compiler: program failed in 100 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   262 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   263 compiler: program failed in 100 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   264 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   265 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   266 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   267 compiler: program failed in 80 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   268 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   269 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   270 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   271 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   272 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   273 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   274 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   275 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   276 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   277 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   278 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   279 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   280 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   281 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   282 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   283 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   284 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   285 compiler: program failed in 100 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   286 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   287 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   288 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   289 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   290 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   291 compiler: program failed in 120 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   292 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   293 compiler: program failed in 120 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   294 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   295 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   296 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   297 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   298 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   299 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   300 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   301 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   302 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   303 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   304 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   305 compiler: program failed in 120 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   306 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   307 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   308 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   309 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   310 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   311 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   312 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   313 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   314 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   315 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   316 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   317 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   318 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   319 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   320 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   321 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   322 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   323 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   324 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   325 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   326 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   327 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   328 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   329 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   330 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   331 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   332 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   333 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   334 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   335 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   336 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   337 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   338 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   339 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   340 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   341 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   342 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   343 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   344 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   345 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   346 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   347 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   348 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   349 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   350 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   351 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   352 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   353 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   354 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   355 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   356 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   357 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   358 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   359 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   360 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   361 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   362 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   363 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   364 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   365 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   366 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   367 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   368 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   369 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   370 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   371 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   372 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   373 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   374 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   375 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   376 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   377 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   378 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   379 compiler: program failed in 100 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   380 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   381 compiler: program failed in 100 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   382 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   383 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   384 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   385 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   386 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   387 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   388 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   389 compiler: program failed in 140 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   390 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   391 compiler: program failed in 80 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   392 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   393 compiler: program failed in 80 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   394 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   395 compiler: program failed in 100 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   396 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   397 compiler: program failed in 80 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   398 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   399 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   400 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   401 compiler: program failed in 80 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   402 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   403 compiler: program failed in 80 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   404 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   405 compiler: program failed in 80 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   406 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   407 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   408 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   409 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   410 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   411 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   412 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   413 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   414 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   415 compiler: program failed in 80 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   416 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   417 compiler: program failed in 100 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   418 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   419 compiler: program failed in 140 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   420 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   421 compiler: program failed in 80 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   422 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   423 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   424 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   425 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   426 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   427 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   428 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   429 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   430 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   431 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   432 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   433 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   434 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   435 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   436 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   437 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   438 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   439 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   440 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   441 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   442 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   443 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   444 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   445 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   446 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   447 compiler: program failed in 120 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   448 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   449 compiler: program failed in 80 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   450 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   451 compiler: program failed in 80 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   452 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   453 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   454 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   455 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   456 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   457 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   458 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   459 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   460 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   461 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   462 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   463 compiler: program failed in 80 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   464 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   465 compiler: program failed in 80 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   466 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   467 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   468 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   469 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   470 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   471 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   472 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   473 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   474 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   475 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   476 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   477 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   478 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   479 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   480 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   481 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   482 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   483 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   484 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   485 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   486 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   487 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   488 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   489 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   490 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   491 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   492 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   493 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   494 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   495 compiler: program failed in 80 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   496 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   497 compiler: program failed in 80 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   498 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   499 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   500 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   501 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   502 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   503 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   504 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   505 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   506 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   507 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   508 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   509 compiler: program failed in 80 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   510 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   511 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   512 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   513 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   514 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   515 compiler: program failed in 80 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   516 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   517 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   518 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   519 compiler: program failed in 80 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   520 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   521 compiler: program failed in 60 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   522 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   523 compiler: program failed in 80 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   524 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   525 compiler: program failed in 100 ms, OGLES3Cache:d/db55fa67b5888c84eb5cab72.v3dp
+   526 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   527 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   528 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   529 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   530 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   531 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   532 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   533 compiler: program failed in 140 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   534 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   535 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   536 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   537 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   538 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   539 compiler: program failed in 80 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   540 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   541 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   542 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   543 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   544 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   545 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   546 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   547 compiler: program failed in 60 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   548 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   549 compiler: program failed in 100 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   550 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   551 compiler: program failed in 160 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   552 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   553 compiler: program failed in 120 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   554 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   555 compiler: program failed in 200 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   556 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   557 compiler: program failed in 160 ms, OGLES3Cache:9/90bd2c3148b07c408ef04d41.v3dp
+   558 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   559 compiler: program failed in 120 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   560 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   561 compiler: program failed in 160 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   562 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   563 compiler: program failed in 160 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   564 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   565 compiler: program failed in 120 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   566 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   567 compiler: program failed in 120 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   568 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   569 compiler: program failed in 80 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   570 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   571 compiler: program failed in 100 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   572 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   573 compiler: program failed in 120 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   574 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   575 compiler: program failed in 80 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   576 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   577 compiler: program failed in 140 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   578 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   579 compiler: program failed in 80 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   580 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   581 compiler: program failed in 80 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   582 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   583 compiler: program failed in 80 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   584 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   585 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   586 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   587 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   588 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   589 compiler: program failed in 60 ms, OGLES3Cache:1/1fecc515c90557b7ad26550e.v3dp
+   590 glLinkProgram: the compiler failed: compile_bridge: the host compiler ended
+   591 aglDestroyContext: context 0x0904AFBC: freeing
+   592 device: context freed, 0 bytes of GPU memory still in use
+   593 aglDestroyContext: context 0x0904AFBC (45 frames, 0 dropped, 0 binning blocks added)
+   594 timing: 45 jobs, each on average: 137281 us of CPU work before its flush, 7 us waiting for binning, 162 us for the render
+   595 timing: and in each flush 78 us building the render list, 94 us for the CPU cache before the GPU, 173 us after
+   596 timing: 67 swaps, 633866 us from one to the next on average, 393 us of it presenting
+   597 timing: per frame 0 draws, 2524 us in them; in all 7 ms in glBuffer(Sub)Data, 277 ms in glTex(Sub)Image2D

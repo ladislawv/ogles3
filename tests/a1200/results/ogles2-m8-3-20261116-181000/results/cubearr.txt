@@ -1,0 +1,13 @@
+Writing test log into M8R3:results/cubearr.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles3.library: 4 functions of the ES 3.0 table not implemented yet: glTexStorage1DEXT glTextureStorage1DEXT glTextureStorage2DEXT glTextureStorage3DEXT
+
+DONE!
+
+Test run totals:
+  Passed:        0/0 (0.0%)
+  Failed:        0/0 (0.0%)
+  Not supported: 0/0 (0.0%)
+  Warnings:      0/0 (0.0%)
+  Waived:        0/0 (0.0%)

@@ -1,0 +1,93 @@
+     1 ogles3.library 1.0 init
+     2 open (count 1)
+     3 GPU submission lock "V3D 4.2 submit" at 0x08367AB0
+     4 device: V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM, clipper granularity 256
+     5 device: GPU-visible RAM (device tree memory): 0x01000000-0x3B9FFFFF
+     6 device: GPU-visible RAM (device tree memory): 0x40000000-0x79DFFFFF
+     7 device: memory region "expansion memory" 0x08000020-0x3B9FFFFF fast: the GPU reaches it
+     8 device: memory region "expansion memory" 0x01000020-0x07FFFFFF fast: the GPU reaches it
+     9 device: memory region "expansion memory" 0x41000020-0x79DFFFFF fast: the GPU reaches it
+    10 device: memory region "memory" 0x00C00020-0x00C7FFFF fast: OUTSIDE the GPU-visible RAM
+    11 device: memory region "chip memory" 0x00001020-0x001FFFFF chip: OUTSIDE the GPU-visible RAM
+    12 display: own window, 256x256, BGRA
+    13 device: context pools for 256x256, D32F, 17783168 bytes of GPU memory in use
+    14 aglCreateContext2: context 0x0904AFBC, OpenGL ES 3.1, 256x256
+    15 compiler: CaffeineOS:Libs/v3dglslc3, 19048396 bytes, id 11B095AA
+    16 compiler: shader compiled in 120 ms
+    17 compiler: shader compiled in 40 ms
+    18 compiler: program compiled in 240 ms, OGLES3Cache:5/50c454e447688e6afcd74b86.v3dp
+    19 glLinkProgram: OGLES3Cache:5/50c454e447688e6afcd74b86.v3dp (5 variants, 640 bytes of code)
+    20 framebuffer 1: tile pools of its own for 256x256
+    21 compiler: shader compiled in 20 ms
+    22 compiler: program compiled in 40 ms, OGLES3Cache:a/a4638313ef57787e230e69ec.v3dp
+    23 glLinkProgram: OGLES3Cache:a/a4638313ef57787e230e69ec.v3dp (5 variants, 664 bytes of code)
+    24 compiler: shader compiled in 20 ms
+    25 compiler: program compiled in 40 ms, OGLES3Cache:6/6784d1831ea8b3a91d9bccec.v3dp
+    26 glLinkProgram: OGLES3Cache:6/6784d1831ea8b3a91d9bccec.v3dp (5 variants, 664 bytes of code)
+    27 compiler: shader compiled in 40 ms
+    28 compiler: program compiled in 80 ms, OGLES3Cache:3/38118b00c41ab5170c312ae6.v3dp
+    29 glLinkProgram: OGLES3Cache:3/38118b00c41ab5170c312ae6.v3dp (5 variants, 640 bytes of code)
+    30 compiler: shader compiled in 20 ms
+    31 compiler: program compiled in 40 ms, OGLES3Cache:2/2413de63fb60c785b0d01219.v3dp
+    32 glLinkProgram: OGLES3Cache:2/2413de63fb60c785b0d01219.v3dp (5 variants, 640 bytes of code)
+    33 framebuffer 1: tile pools of its own for 256x256
+    34 compiler: shader compiled in 20 ms
+    35 compiler: program compiled in 40 ms, OGLES3Cache:7/7b9daf71a0b5b7e53df88c1f.v3dp
+    36 glLinkProgram: OGLES3Cache:7/7b9daf71a0b5b7e53df88c1f.v3dp (5 variants, 688 bytes of code)
+    37 framebuffer 1: tile pools of its own for 256x256
+    38 compiler: shader compiled in 40 ms
+    39 compiler: program compiled in 40 ms, OGLES3Cache:a/a7daad506977ee9bc1fa6d23.v3dp
+    40 glLinkProgram: OGLES3Cache:a/a7daad506977ee9bc1fa6d23.v3dp (5 variants, 1504 bytes of code)
+    41 framebuffer 1: tile pools of its own for 256x256
+    42 compiler: shader compiled in 40 ms
+    43 compiler: program compiled in 120 ms, OGLES3Cache:6/6952611f29992cce1f9c6d7e.v3dp
+    44 glLinkProgram: OGLES3Cache:6/6952611f29992cce1f9c6d7e.v3dp (5 variants, 1576 bytes of code)
+    45 compiler: shader compiled in 80 ms
+    46 compiler: program compiled in 160 ms, OGLES3Cache:c/c1beb79c07c07b9a88b66c2e.v3dp
+    47 glLinkProgram: OGLES3Cache:c/c1beb79c07c07b9a88b66c2e.v3dp (5 variants, 1576 bytes of code)
+    48 compiler: shader compiled in 60 ms
+    49 compiler: program compiled in 120 ms, OGLES3Cache:d/dd0b3688fb0df0eab5edaf48.v3dp
+    50 glLinkProgram: OGLES3Cache:d/dd0b3688fb0df0eab5edaf48.v3dp (5 variants, 1504 bytes of code)
+    51 compiler: shader compiled in 100 ms
+    52 compiler: program compiled in 120 ms, OGLES3Cache:8/8baefa416ecd2026ba331807.v3dp
+    53 glLinkProgram: OGLES3Cache:8/8baefa416ecd2026ba331807.v3dp (5 variants, 1504 bytes of code)
+    54 compiler: shader compiled in 80 ms
+    55 compiler: program compiled in 160 ms, OGLES3Cache:6/645243da1ccb6f9a02f41015.v3dp
+    56 glLinkProgram: OGLES3Cache:6/645243da1ccb6f9a02f41015.v3dp (5 variants, 1168 bytes of code)
+    57 framebuffer 1: tile pools of its own for 256x256
+    58 compiler: shader compiled in 60 ms
+    59 compiler: program compiled in 160 ms, OGLES3Cache:d/d7b9360e8496306b2f48412b.v3dp
+    60 glLinkProgram: OGLES3Cache:d/d7b9360e8496306b2f48412b.v3dp (5 variants, 1240 bytes of code)
+    61 compiler: shader compiled in 80 ms
+    62 compiler: program compiled in 120 ms, OGLES3Cache:d/db8e70ca7fa47975d4d78b6f.v3dp
+    63 glLinkProgram: OGLES3Cache:d/db8e70ca7fa47975d4d78b6f.v3dp (5 variants, 1240 bytes of code)
+    64 compiler: shader compiled in 60 ms
+    65 compiler: program compiled in 100 ms, OGLES3Cache:e/eb46e3efc51902fce7ad9961.v3dp
+    66 glLinkProgram: OGLES3Cache:e/eb46e3efc51902fce7ad9961.v3dp (5 variants, 1168 bytes of code)
+    67 compiler: shader compiled in 60 ms
+    68 compiler: program compiled in 120 ms, OGLES3Cache:1/1cefba369591d35c7728c6c4.v3dp
+    69 glLinkProgram: OGLES3Cache:1/1cefba369591d35c7728c6c4.v3dp (5 variants, 1168 bytes of code)
+    70 compiler: shader compiled in 60 ms
+    71 compiler: program compiled in 60 ms, OGLES3Cache:f/f1b6045e928acf95a4080886.v3dp
+    72 glLinkProgram: OGLES3Cache:f/f1b6045e928acf95a4080886.v3dp (5 variants, 784 bytes of code)
+    73 framebuffer 1: tile pools of its own for 256x256
+    74 compiler: shader compiled in 20 ms
+    75 compiler: program compiled in 60 ms, OGLES3Cache:1/1fbfaa5bbeb55748ff1896ae.v3dp
+    76 glLinkProgram: OGLES3Cache:1/1fbfaa5bbeb55748ff1896ae.v3dp (5 variants, 856 bytes of code)
+    77 compiler: shader compiled in 20 ms
+    78 compiler: program compiled in 60 ms, OGLES3Cache:8/864576dc6e7a24220adb193e.v3dp
+    79 glLinkProgram: OGLES3Cache:8/864576dc6e7a24220adb193e.v3dp (5 variants, 856 bytes of code)
+    80 compiler: shader compiled in 60 ms
+    81 compiler: program compiled in 100 ms, OGLES3Cache:9/98a25ef93cfc0e6d7782088b.v3dp
+    82 glLinkProgram: OGLES3Cache:9/98a25ef93cfc0e6d7782088b.v3dp (5 variants, 784 bytes of code)
+    83 compiler: shader compiled in 40 ms
+    84 compiler: program compiled in 60 ms, OGLES3Cache:d/d79af7079e111ef3585ebaac.v3dp
+    85 glLinkProgram: OGLES3Cache:d/d79af7079e111ef3585ebaac.v3dp (5 variants, 784 bytes of code)
+    86 framebuffer 1: tile pools of its own for 256x256
+    87 aglDestroyContext: context 0x0904AFBC: freeing
+    88 device: context freed, 0 bytes of GPU memory still in use
+    89 aglDestroyContext: context 0x0904AFBC (31 frames, 0 dropped, 0 binning blocks added)
+    90 timing: 31 jobs, each on average: 756 us of CPU work before its flush, 8 us waiting for binning, 300 us for the render
+    91 timing: and in each flush 121 us building the render list, 112 us for the CPU cache before the GPU, 0 us after
+    92 timing: 7 swaps, 550255 us from one to the next on average, 461 us of it presenting
+    93 timing: per frame 5 draws, 5760 us in them; in all 0 ms in glBuffer(Sub)Data, 24 ms in glTex(Sub)Image2D

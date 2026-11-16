@@ -1,0 +1,5 @@
+ogles2 M8 run 3: --deqp-case dEQP-GLES31.functional.state_query.*
+Monday 16-Nov-26 20:50:22
+squery done
+finished
+Monday 16-Nov-26 20:51:06

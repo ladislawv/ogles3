@@ -1,0 +1,8 @@
+Directory "LIBS:" on Monday 16-Nov-26
+ogles3.library.beta1         434988 ----rwed 28-Oct-26 20:47:28
+ogles3.library               771976 ----rwed Today     21:52:23
+2 files - 1178K bytes - 2360 blocks used
+
+Directory "LIBS:" on Monday 16-Nov-26
+v3dglslc3                  19049072 ----rwed Today     21:53:11
+1 file - 18M bytes - 37207 blocks used

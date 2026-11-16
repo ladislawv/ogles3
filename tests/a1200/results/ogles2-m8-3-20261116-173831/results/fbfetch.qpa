@@ -1,0 +1,1096 @@
+#sessionInfo releaseName unknown
+#sessionInfo releaseId 0xcafebabe
+#sessionInfo targetName "AmigaOS3"
+#sessionInfo logFormatVersion "0.3.4"
+#sessionInfo vendor "ogles3.library"
+#sessionInfo renderer "V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM"
+#sessionInfo commandLineParameters "--deqp-case dEQP-GLES31.functional.shaders.framebuffer_fetch.* --deqp-archive-dir=M8R3:bin --deqp-log-filename=M8R3:results/fbfetch.qpa --deqp-log-images=disable --deqp-log-shader-sources=disable --deqp-surface-width=256 --deqp-surface-height=256 --deqp-gl-config-name=rgba8888d24s8ms0"
+
+#beginSession
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.basic.texel_fetch
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.basic.texel_fetch" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">159.274994</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">41.122002</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">82.557999</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (fixed point)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">306472</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.basic.last_frag_data
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.basic.last_frag_data" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">70.219002</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">79.531998</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">85.710999</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (fixed point)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">250960</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.basic.fragment_discard
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.basic.fragment_discard" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.834000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">39.535999</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">80.851997</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (fixed point)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">137635</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.basic.multiple_assignment
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.basic.multiple_assignment" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">36.915001</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">40.006001</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">44.455002</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (fixed point)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">136284</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.basic.multiple_render_targets
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.basic.multiple_render_targets" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.824000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">37.807999</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">43.563999</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (fixed point)" />
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (fixed point)" />
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (fixed point)" />
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (fixed point)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">114033</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.basic.multiple_render_targets_overdraw
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.basic.multiple_render_targets_overdraw" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.828000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">41.323002</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">44.023998</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (fixed point)" />
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (fixed point)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">111227</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.basic.framebuffer_texture_level
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.basic.framebuffer_texture_level" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.262000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">26.160999</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">42.978001</Number>
+ <Section Name="Level 0" Description="Mipmap level 0">
+  <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (fixed point)" />
+</Section>
+ <Section Name="Level 1" Description="Mipmap level 1">
+  <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (fixed point)" />
+</Section>
+ <Section Name="Level 2" Description="Mipmap level 2">
+  <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (fixed point)" />
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">93470</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.basic.framebuffer_texture_layer
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.basic.framebuffer_texture_layer" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.847000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.685000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.083000</Number>
+ <Section Name="Layer 0" Description="Layer 0">
+  <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (fixed point)" />
+</Section>
+ <Section Name="Layer 1" Description="Layer 1">
+  <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (fixed point)" />
+</Section>
+ <Section Name="Layer 2" Description="Layer 2">
+  <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (fixed point)" />
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">29635</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba32i
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba32i" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.866000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">36.005001</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">44.415001</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (integer)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">137584</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba32ui
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba32ui" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog>0:8(62): warning: signed literal value `4294967040&apos; is interpreted as -256
+0:8(74): warning: signed literal value `4294967040&apos; is interpreted as -256
+0:8(86): warning: signed literal value `4294967040&apos; is interpreted as -256
+0:8(98): warning: signed literal value `4294967040&apos; is interpreted as -256
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.855000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">34.518002</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">123.804001</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (integer)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">255164</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba16i
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba16i" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.841000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">77.848000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">125.316002</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (integer)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">296243</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba16ui
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba16ui" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.824000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">38.383999</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">169.539993</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (integer)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">437549</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba8
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba8" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.868000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.913000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.084000</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (fixed point)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">18296</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba8i
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba8i" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.837000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">37.386002</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">83.759003</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (integer)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">140825</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba8ui
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba8ui" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.818000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">34.789001</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">82.907997</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (integer)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">136679</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.srgb8_alpha8
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.srgb8_alpha8" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.834000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.689000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.087000</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (fixed point)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">17096</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgb10_a2
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgb10_a2" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.828000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.695000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.084000</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (fixed point)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">20421</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgb10_a2ui
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgb10_a2ui" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.852000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">73.018997</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">41.062000</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (integer)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">207990</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba4
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba4" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.647000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.435000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.086000</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (fixed point)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">21142</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgb5_a1
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgb5_a1" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.835000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">34.006001</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">43.168999</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (fixed point)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">96905</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgb8
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgb8" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.538000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">33.986000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">43.251999</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (fixed point)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">95129</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgb565
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgb565" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.831000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">0.693000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.082000</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (fixed point)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">16577</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg32i
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg32i" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.661000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">33.710999</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">43.325001</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (integer)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">131397</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg32ui
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg32ui" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog>0:8(62): warning: signed literal value `4294967040&apos; is interpreted as -256
+0:8(74): warning: signed literal value `4294967040&apos; is interpreted as -256
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.847000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">38.886002</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">124.913002</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (integer)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">296361</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg16i
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg16i" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.837000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">38.778999</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">44.222000</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (integer)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">175789</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg16ui
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg16ui" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.508000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">36.876999</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">83.205002</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (integer)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">214271</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg8
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg8" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.228000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">37.466000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">44.013000</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (fixed point)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">99735</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg8i
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg8i" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.844000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">35.219002</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">44.640999</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (integer)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">132337</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg8ui
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg8ui" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.827000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">44.520000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">39.956001</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (integer)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">136622</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r32i
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r32i" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.831000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">41.179001</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">42.993999</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (integer)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">136784</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r32ui
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r32ui" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog>0:8(62): warning: signed literal value `4294967040&apos; is interpreted as -256
+</InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.839000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">41.865002</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">44.291000</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (integer)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">137876</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r16i
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r16i" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.834000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">40.444000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">88.807999</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (integer)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">216333</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r16ui
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r16ui" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.224000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">40.638000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">43.171001</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (integer)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">177588</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r8
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r8" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.850000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">38.529999</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">44.105000</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (fixed point)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">99359</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r8i
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r8i" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.852000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">35.778999</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">48.592999</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (integer)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">173127</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r8ui
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r8ui" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.849000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">40.547001</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">43.924999</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (integer)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">178602</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba32f
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba32f" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.878000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">39.963001</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">43.596001</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (floating_point)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">141715</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba16f
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgba16f" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.872000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">34.354000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">45.806999</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (floating_point)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">110225</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r11f_g11f_b10f
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r11f_g11f_b10f" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.494000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">39.313999</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">42.558998</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (floating_point)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">104280</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg32f
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg32f" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.860000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">30.683001</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">45.631001</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (floating_point)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">130734</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg16f
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rg16f" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.874000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">37.551998</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">43.530998</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (floating_point)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">101278</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r32f
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r32f" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.854000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">32.181000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">44.780998</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (floating_point)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">131152</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r16f
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.r16f" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.844000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">39.748001</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">44.433998</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (floating_point)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">105016</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgb16f
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.shaders.framebuffer_fetch.framebuffer_format.rgb16f" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.863000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">31.360001</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">44.487000</Number>
+ <ImageSet Name="Renderbuffer" Description="Compare renderbuffer (floating_point)" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">97677</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+Run took 6.60 seconds
+
+#endSession

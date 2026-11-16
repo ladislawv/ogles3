@@ -1,0 +1,634 @@
+Writing test log into M8R3:results/gs.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles3.library: 4 functions of the ES 3.0 table not implemented yet: glTexStorage1DEXT glTextureStorage1DEXT glTextureStorage2DEXT glTextureStorage3DEXT
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.max_geometry_input_components'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.max_geometry_output_components'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.max_geometry_image_uniforms'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.max_geometry_texture_image_units'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.max_geometry_output_vertices'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.max_geometry_total_output_components'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.max_geometry_uniform_components'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.max_geometry_atomic_counters'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.max_geometry_atomic_counter_buffers'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.geometry_linked_vertices_out'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.geometry_linked_input_type'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.geometry_linked_output_type'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.geometry_shader_invocations'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.max_geometry_shader_invocations'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.max_geometry_uniform_blocks'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.max_geometry_shader_storage_blocks'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.layer_provoking_vertex'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.primitives_generated_no_geometry'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.primitives_generated_no_amplification'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.primitives_generated_amplification'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.primitives_generated_partial_primitives'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.primitives_generated_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.primitives_generated'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.max_framebuffer_layers'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.framebuffer_default_layers'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.framebuffer_attachment_layered'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.framebuffer_incomplete_layer_targets'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.referenced_by_geometry_shader'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.query.max_combined_geometry_uniform_components'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.basic.output_10'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.basic.output_128'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.basic.output_256'..
+  NotSupported (2048 output components required.)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.basic.output_max'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.basic.output_10_and_100'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.basic.output_100_and_10'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.basic.output_0_and_128'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.basic.output_128_and_0'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.basic.output_vary_by_attribute'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.basic.output_vary_by_uniform'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.basic.output_vary_by_texture'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.basic.point_size'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.basic.primitive_id_in'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.basic.primitive_id_in_restarted'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.basic.primitive_id'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.input.basic_primitive.points'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.input.basic_primitive.lines'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.input.basic_primitive.line_loop'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.input.basic_primitive.line_strip'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.input.basic_primitive.triangles'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.input.basic_primitive.triangle_strip'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.input.basic_primitive.triangle_fan'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.input.basic_primitive.lines_adjacency'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.input.basic_primitive.line_strip_adjacency'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.input.basic_primitive.triangles_adjacency'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.input.triangle_strip_adjacency.vertex_count_0'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.input.triangle_strip_adjacency.vertex_count_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.input.triangle_strip_adjacency.vertex_count_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.input.triangle_strip_adjacency.vertex_count_3'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.input.triangle_strip_adjacency.vertex_count_4'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.input.triangle_strip_adjacency.vertex_count_5'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.input.triangle_strip_adjacency.vertex_count_6'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.input.triangle_strip_adjacency.vertex_count_7'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.input.triangle_strip_adjacency.vertex_count_8'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.input.triangle_strip_adjacency.vertex_count_9'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.input.triangle_strip_adjacency.vertex_count_10'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.input.triangle_strip_adjacency.vertex_count_11'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.input.triangle_strip_adjacency.vertex_count_12'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.conversion.triangles_to_points'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.conversion.lines_to_points'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.conversion.points_to_lines'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.conversion.triangles_to_lines'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.conversion.points_to_triangles'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.conversion.lines_to_triangles'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.emit.points_emit_0_end_0'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.emit.points_emit_0_end_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.emit.points_emit_1_end_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.emit.points_emit_0_end_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.emit.points_emit_1_end_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.emit.line_strip_emit_0_end_0'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.emit.line_strip_emit_0_end_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.emit.line_strip_emit_1_end_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.emit.line_strip_emit_2_end_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.emit.line_strip_emit_0_end_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.emit.line_strip_emit_1_end_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.emit.line_strip_emit_2_end_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.emit.line_strip_emit_2_end_2_emit_2_end_0'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.emit.triangle_strip_emit_0_end_0'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.emit.triangle_strip_emit_0_end_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.emit.triangle_strip_emit_1_end_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.emit.triangle_strip_emit_2_end_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.emit.triangle_strip_emit_3_end_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.emit.triangle_strip_emit_0_end_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.emit.triangle_strip_emit_1_end_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.emit.triangle_strip_emit_2_end_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.emit.triangle_strip_emit_3_end_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.emit.triangle_strip_emit_3_end_2_emit_3_end_0'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.varying.vertex_no_op_geometry_out_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.varying.vertex_out_0_geometry_out_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.varying.vertex_out_0_geometry_out_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.varying.vertex_out_1_geometry_out_0'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.varying.vertex_out_1_geometry_out_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.layered.render_with_default_layer_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.layered.render_with_default_layer_3d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.layered.render_with_default_layer_2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.layered.render_with_default_layer_2d_multisample_array'..
+  NotSupported (Test requires OES_texture_storage_multisample_2d_array extension or higher context version. at es31fGeometryShaderTests.cpp:3034)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.layered.render_to_one_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.layered.render_to_one_3d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.layered.render_to_one_2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.layered.render_to_one_2d_multisample_array'..
+  NotSupported (Test requires OES_texture_storage_multisample_2d_array extension or higher context version. at es31fGeometryShaderTests.cpp:3034)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.layered.render_to_all_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.layered.render_to_all_3d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.layered.render_to_all_2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.layered.render_to_all_2d_multisample_array'..
+  NotSupported (Test requires OES_texture_storage_multisample_2d_array extension or higher context version. at es31fGeometryShaderTests.cpp:3034)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.layered.render_different_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.layered.render_different_to_3d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.layered.render_different_to_2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.layered.render_different_to_2d_multisample_array'..
+  NotSupported (Test requires OES_texture_storage_multisample_2d_array extension or higher context version. at es31fGeometryShaderTests.cpp:3034)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.layered.fragment_layer_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.layered.fragment_layer_3d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.layered.fragment_layer_2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.layered.fragment_layer_2d_multisample_array'..
+  NotSupported (Test requires OES_texture_storage_multisample_2d_array extension or higher context version. at es31fGeometryShaderTests.cpp:3034)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.layered.layer_provoking_vertex_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.layered.layer_provoking_vertex_3d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.layered.layer_provoking_vertex_2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.layered.layer_provoking_vertex_2d_multisample_array'..
+  NotSupported (Test requires OES_texture_storage_multisample_2d_array extension or higher context version. at es31fGeometryShaderTests.cpp:3034)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.geometry_1_invocations'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.geometry_2_invocations'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.geometry_8_invocations'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.geometry_32_invocations'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.geometry_max_invocations'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.geometry_output_different_2_invocations'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.geometry_output_different_8_invocations'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.geometry_output_different_32_invocations'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.geometry_output_different_max_invocations'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.invocation_per_layer_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.invocation_per_layer_3d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.invocation_per_layer_2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.invocation_per_layer_2d_multisample_array'..
+  NotSupported (Test requires OES_texture_storage_multisample_2d_array extension or higher context version. at es31fGeometryShaderTests.cpp:3034)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.multiple_layers_per_invocation_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.multiple_layers_per_invocation_3d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.multiple_layers_per_invocation_2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.multiple_layers_per_invocation_2d_multisample_array'..
+  NotSupported (Test requires OES_texture_storage_multisample_2d_array extension or higher context version. at es31fGeometryShaderTests.cpp:3034)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.invocation_output_vary_by_attribute'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.invocation_output_vary_by_uniform'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.invocation_output_vary_by_texture'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.draw_2_instances_geometry_2_invocations'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.draw_2_instances_geometry_8_invocations'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.draw_4_instances_geometry_2_invocations'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.draw_4_instances_geometry_8_invocations'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.draw_8_instances_geometry_2_invocations'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.instanced.draw_8_instances_geometry_8_invocations'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_points_primitive_lines'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_points_primitive_line_loop'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_points_primitive_line_strip'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_points_primitive_lines_adjacency'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_points_primitive_line_strip_adjacency'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_points_primitive_triangles'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_points_primitive_triangle_strip'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_points_primitive_triangle_fan'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_points_primitive_triangles_adjacency'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_points_primitive_triangle_strip_adjacency'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_lines_primitive_points'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_lines_primitive_lines_adjacency'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_lines_primitive_line_strip_adjacency'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_lines_primitive_triangles'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_lines_primitive_triangle_strip'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_lines_primitive_triangle_fan'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_lines_primitive_triangles_adjacency'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_lines_primitive_triangle_strip_adjacency'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_lines_adjacency_primitive_points'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_lines_adjacency_primitive_lines'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_lines_adjacency_primitive_line_loop'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_lines_adjacency_primitive_line_strip'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_lines_adjacency_primitive_triangles'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_lines_adjacency_primitive_triangle_strip'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_lines_adjacency_primitive_triangle_fan'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_lines_adjacency_primitive_triangles_adjacency'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_lines_adjacency_primitive_triangle_strip_adjacency'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_triangles_primitive_points'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_triangles_primitive_lines'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_triangles_primitive_line_loop'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_triangles_primitive_line_strip'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_triangles_primitive_lines_adjacency'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_triangles_primitive_line_strip_adjacency'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_triangles_primitive_triangles_adjacency'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_triangles_primitive_triangle_strip_adjacency'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_triangles_adjacency_primitive_points'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_triangles_adjacency_primitive_lines'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_triangles_adjacency_primitive_line_loop'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_triangles_adjacency_primitive_line_strip'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_triangles_adjacency_primitive_lines_adjacency'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_triangles_adjacency_primitive_line_strip_adjacency'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_triangles_adjacency_primitive_triangles'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_triangles_adjacency_primitive_triangle_strip'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.negative.type_triangles_adjacency_primitive_triangle_fan'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.vertex_transform_feedback.capture_vertex_line_loop'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.vertex_transform_feedback.capture_vertex_line_strip'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.vertex_transform_feedback.capture_vertex_triangle_strip'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.vertex_transform_feedback.capture_vertex_triangle_fan'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.vertex_transform_feedback.capture_vertex_draw_arrays'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.vertex_transform_feedback.capture_vertex_draw_arrays_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.vertex_transform_feedback.capture_vertex_draw_arrays_indirect'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.vertex_transform_feedback.capture_vertex_draw_elements'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.vertex_transform_feedback.capture_vertex_draw_elements_instanced'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.vertex_transform_feedback.capture_vertex_draw_elements_indirect'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.vertex_transform_feedback.capture_vertex_draw_arrays_overflow_single_buffer'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.geometry_shading.vertex_transform_feedback.capture_vertex_draw_elements_overflow_single_buffer'..
+  Pass (Pass)
+
+DONE!
+
+Test run totals:
+  Passed:        198/207 (95.7%)
+  Failed:        0/207 (0.0%)
+  Not supported: 9/207 (4.3%)
+  Warnings:      0/207 (0.0%)
+  Waived:        0/207 (0.0%)

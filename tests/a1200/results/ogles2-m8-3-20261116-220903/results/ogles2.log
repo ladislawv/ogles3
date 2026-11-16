@@ -1,0 +1,24 @@
+  9372 close (count 1)
+  9373 open (count 2)
+  9374 display: own window, 256x256, BGRA
+  9375 device: context pools for 256x256, D32F, 38225632 bytes of GPU memory in use
+  9376 aglCreateContext2: context 0x0923237C, OpenGL ES 3.1, 256x256
+  9377 compiler: shader compiled in 40 ms
+  9378 compiler: shader compiled in 40 ms
+  9379 compiler: program compiled in 240 ms, OGLES3Cache:7/7d6e8bdbe1e83fc0936b22fa.v3dp
+  9380 glLinkProgram: OGLES3Cache:7/7d6e8bdbe1e83fc0936b22fa.v3dp (5 variants, 856 bytes of code)
+  9381 job: depth and stencil kept across a mid-frame flush (logged once)
+  9382 compiler: shader compiled in 40 ms
+  9383 compiler: shader compiled in 40 ms
+  9384 compiler: program compiled in 160 ms, OGLES3Cache:f/f5e7ade4a6b6a3195ca9a9c1.v3dp
+  9385 glLinkProgram: OGLES3Cache:f/f5e7ade4a6b6a3195ca9a9c1.v3dp (5 variants, 1064 bytes of code)
+  9386 compiler: shader compiled in 40 ms
+  9387 compiler: program compiled in 160 ms, OGLES3Cache:0/09b784f3a92896a34a5d8860.v3dp
+  9388 glLinkProgram: OGLES3Cache:0/09b784f3a92896a34a5d8860.v3dp (5 variants, 896 bytes of code)
+  9389 aglDestroyContext: context 0x0923237C: freeing
+  9390 device: context freed, 21295904 bytes of GPU memory still in use
+  9391 aglDestroyContext: context 0x0923237C (3094 frames, 0 dropped, 0 binning blocks added)
+  9392 timing: 3094 jobs, each on average: 294774 us of CPU work before its flush, 10 us waiting for binning, 260 us for the render
+  9393 timing: and in each flush 67 us building the render list, 66 us for the CPU cache before the GPU, 94 us after
+  9394 timing: 658 swaps, 1585371 us from one to the next on average, 369 us of it presenting
+  9395 timing: per frame 41 draws, 8479 us in them; in all 279 ms in glBuffer(Sub)Data, 238 ms in glTex(Sub)Image2D

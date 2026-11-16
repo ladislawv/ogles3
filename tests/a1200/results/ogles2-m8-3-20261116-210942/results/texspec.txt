@@ -1,0 +1,721 @@
+Writing test log into M8R3:results/texspec.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles3.library: 4 functions of the ES 3.0 table not implemented yet: glTexStorage1DEXT glTextureStorage1DEXT glTextureStorage2DEXT glTextureStorage3DEXT
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgba32f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgba32i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgba32ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgba16f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgba16i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgba16ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgba8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgba8i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgba8ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.srgb8_alpha8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgb10_a2_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgb10_a2ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgba4_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgb5_a1_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgba8_snorm_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgb8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgb565_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.r11f_g11f_b10f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgb32f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgb32i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgb32ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgb16f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgb16i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgb16ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgb8_snorm_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgb8i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgb8ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.srgb8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rgb9_e5_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rg32f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rg32i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rg32ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rg16f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rg16i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rg16ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rg8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rg8i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rg8ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.rg8_snorm_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.r32f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.r32i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.r32ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.r16f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.r16i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.r16ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.r8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.r8i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.r8ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.basic_teximage3d.r8_snorm_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgba32f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgba32i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgba32ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgba16f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgba16i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgba16ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgba8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgba8i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgba8ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.srgb8_alpha8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgb10_a2_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgb10_a2ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgba4_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgb5_a1_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgba8_snorm_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgb8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgb565_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.r11f_g11f_b10f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgb32f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgb32i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgb32ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgb16f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgb16i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgb16ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgb8_snorm_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgb8i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgb8ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.srgb8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgb9_e5_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rg32f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rg32i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rg32ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rg16f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rg16i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rg16ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rg8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rg8i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rg8ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rg8_snorm_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.r32f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.r32i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.r32ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.r16f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.r16i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.r16ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.r8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.r8i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.r8ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.r8_snorm_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgb8_offset_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgb8_alignment_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgb8_image_height_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgb8_row_length_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgb8_skip_images_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgb8_skip_rows_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_pbo.rgb8_skip_pixels_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_depth.depth_component32f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_depth.depth_component24_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_depth.depth_component16_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_depth.depth32f_stencil8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_depth.depth24_stencil8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_depth_pbo.depth_component32f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_depth_pbo.depth_component24_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_depth_pbo.depth_component16_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_depth_pbo.depth32f_stencil8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.teximage3d_depth_pbo.depth24_stencil8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgba32f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgba32i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgba32ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgba16f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgba16i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgba16ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgba8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgba8i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgba8ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.srgb8_alpha8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgb10_a2_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgb10_a2ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgba4_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgb5_a1_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgba8_snorm_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgb8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgb565_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.r11f_g11f_b10f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgb32f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgb32i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgb32ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgb16f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgb16i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgb16ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgb8_snorm_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgb8i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgb8ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.srgb8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgb9_e5_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rg32f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rg32i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rg32ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rg16f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rg16i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rg16ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rg8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rg8i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rg8ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rg8_snorm_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.r32f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.r32i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.r32ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.r16f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.r16i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.r16ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.r8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.r8i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.r8ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.r8_snorm_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgb8_offset_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgb8_image_height_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgb8_row_length_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgb8_skip_images_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgb8_skip_rows_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_pbo.rgb8_skip_pixels_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_depth.depth_component32f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_depth.depth_component24_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_depth.depth_component16_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_depth.depth32f_stencil8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texsubimage3d_depth.depth24_stencil8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgba32f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgba32i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgba32ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgba16f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgba16i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgba16ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgba8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgba8i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgba8ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.srgb8_alpha8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgb10_a2_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgb10_a2ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgba4_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgb5_a1_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgba8_snorm_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgb8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgb565_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.r11f_g11f_b10f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgb32f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgb32i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgb32ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgb16f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgb16i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgb16ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgb8_snorm_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgb8i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgb8ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.srgb8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rgb9_e5_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rg32f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rg32i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rg32ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rg16f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rg16i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rg16ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rg8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rg8i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rg8ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.rg8_snorm_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.r32f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.r32i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.r32ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.r16f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.r16i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.r16ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.r8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.r8i_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.r8ui_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.r8_snorm_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.depth_component32f_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.depth_component24_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.depth_component16_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.depth32f_stencil8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.format.depth24_stencil8_cube_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.size.cube_array_1x1x6_1_levels'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.size.cube_array_2x2x6_2_levels'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.size.cube_array_32x32x6_3_levels'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.size.cube_array_64x64x6_4_levels'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.size.cube_array_57x57x12_1_levels'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.size.cube_array_57x57x12_2_levels'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.specification.texstorage3d.size.cube_array_57x57x12_6_levels'..
+  Pass (Pass)
+
+DONE!
+
+Test run totals:
+  Passed:        236/236 (100.0%)
+  Failed:        0/236 (0.0%)
+  Not supported: 0/236 (0.0%)
+  Warnings:      0/236 (0.0%)
+  Waived:        0/236 (0.0%)

@@ -1,0 +1,2506 @@
+Writing test log into M8R3:results/gather.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles3.library: 4 functions of the ES 3.0 table not implemented yet: glTexStorage1DEXT glTextureStorage1DEXT glTextureStorage2DEXT glTextureStorage3DEXT
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8.size_pot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8.size_pot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8.size_pot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8.size_npot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8.size_npot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8.size_npot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8.texture_swizzle.red_green_blue_alpha'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8.texture_swizzle.green_blue_alpha_zero'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8.texture_swizzle.blue_alpha_zero_one'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8.texture_swizzle.alpha_zero_one_red'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8.texture_swizzle.zero_one_red_green'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8.texture_swizzle.one_red_green_blue'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8.filter_mode.min_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8.filter_mode.min_nearest_mipmap_nearest_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8.filter_mode.min_nearest_mipmap_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8.filter_mode.min_linear_mipmap_nearest_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8.filter_mode.min_linear_mipmap_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8.base_level.level_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8.base_level.level_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8.incomplete.mipmap_incomplete'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8ui.size_pot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8ui.size_pot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8ui.size_pot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8ui.size_npot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8ui.size_npot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8ui.size_npot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8ui.texture_swizzle.red_green_blue_alpha'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8ui.texture_swizzle.green_blue_alpha_zero'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8ui.texture_swizzle.blue_alpha_zero_one'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8ui.texture_swizzle.alpha_zero_one_red'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8ui.texture_swizzle.zero_one_red_green'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8ui.texture_swizzle.one_red_green_blue'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8ui.filter_mode.min_nearest_mipmap_nearest_mag_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8ui.base_level.level_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8ui.base_level.level_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8i.size_pot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8i.size_pot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8i.size_pot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8i.size_npot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8i.size_npot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8i.size_npot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8i.texture_swizzle.red_green_blue_alpha'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8i.texture_swizzle.green_blue_alpha_zero'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8i.texture_swizzle.blue_alpha_zero_one'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8i.texture_swizzle.alpha_zero_one_red'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8i.texture_swizzle.zero_one_red_green'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8i.texture_swizzle.one_red_green_blue'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8i.filter_mode.min_nearest_mipmap_nearest_mag_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8i.base_level.level_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.rgba8i.base_level.level_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.depth32f.size_pot.compare_less.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.depth32f.size_pot.compare_less.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.depth32f.size_pot.compare_less.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.depth32f.size_pot.compare_greater.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.depth32f.size_pot.compare_greater.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.depth32f.size_pot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.depth32f.size_npot.compare_less.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.depth32f.size_npot.compare_less.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.depth32f.size_npot.compare_less.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.depth32f.size_npot.compare_greater.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.depth32f.size_npot.compare_greater.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.depth32f.size_npot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.depth32f.filter_mode.min_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.depth32f.filter_mode.min_nearest_mipmap_nearest_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.depth32f.filter_mode.min_nearest_mipmap_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.depth32f.filter_mode.min_linear_mipmap_nearest_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.depth32f.filter_mode.min_linear_mipmap_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.depth32f.base_level.level_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d.depth32f.base_level.level_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8.size_pot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8.size_pot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8.size_pot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8.size_npot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8.size_npot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8.size_npot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8.texture_swizzle.red_green_blue_alpha'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8.texture_swizzle.green_blue_alpha_zero'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8.texture_swizzle.blue_alpha_zero_one'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8.texture_swizzle.alpha_zero_one_red'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8.texture_swizzle.zero_one_red_green'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8.texture_swizzle.one_red_green_blue'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8.filter_mode.min_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8.filter_mode.min_nearest_mipmap_nearest_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8.filter_mode.min_nearest_mipmap_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8.filter_mode.min_linear_mipmap_nearest_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8.filter_mode.min_linear_mipmap_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8.base_level.level_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8.base_level.level_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8.incomplete.mipmap_incomplete'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8ui.size_pot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8ui.size_pot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8ui.size_pot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8ui.size_npot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8ui.size_npot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8ui.size_npot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8ui.texture_swizzle.red_green_blue_alpha'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8ui.texture_swizzle.green_blue_alpha_zero'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8ui.texture_swizzle.blue_alpha_zero_one'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8ui.texture_swizzle.alpha_zero_one_red'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8ui.texture_swizzle.zero_one_red_green'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8ui.texture_swizzle.one_red_green_blue'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8ui.filter_mode.min_nearest_mipmap_nearest_mag_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8ui.base_level.level_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8ui.base_level.level_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8i.size_pot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8i.size_pot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8i.size_pot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8i.size_npot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8i.size_npot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8i.size_npot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8i.texture_swizzle.red_green_blue_alpha'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8i.texture_swizzle.green_blue_alpha_zero'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8i.texture_swizzle.blue_alpha_zero_one'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8i.texture_swizzle.alpha_zero_one_red'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8i.texture_swizzle.zero_one_red_green'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8i.texture_swizzle.one_red_green_blue'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8i.filter_mode.min_nearest_mipmap_nearest_mag_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8i.base_level.level_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.rgba8i.base_level.level_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.depth32f.size_pot.compare_less.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.depth32f.size_pot.compare_less.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.depth32f.size_pot.compare_less.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.depth32f.size_pot.compare_greater.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.depth32f.size_pot.compare_greater.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.depth32f.size_pot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.depth32f.size_npot.compare_less.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.depth32f.size_npot.compare_less.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.depth32f.size_npot.compare_less.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.depth32f.size_npot.compare_greater.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.depth32f.size_npot.compare_greater.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.depth32f.size_npot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.depth32f.filter_mode.min_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.depth32f.filter_mode.min_nearest_mipmap_nearest_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.depth32f.filter_mode.min_nearest_mipmap_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.depth32f.filter_mode.min_linear_mipmap_nearest_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.depth32f.filter_mode.min_linear_mipmap_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.depth32f.base_level.level_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.2d_array.depth32f.base_level.level_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.size_pot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.size_pot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.size_pot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.size_npot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.size_npot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.size_npot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.no_corners.size_pot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.no_corners.size_pot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.no_corners.size_pot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.no_corners.size_npot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.no_corners.size_npot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.no_corners.size_npot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.texture_swizzle.red_green_blue_alpha'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.texture_swizzle.green_blue_alpha_zero'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.texture_swizzle.blue_alpha_zero_one'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.texture_swizzle.alpha_zero_one_red'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.texture_swizzle.zero_one_red_green'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.texture_swizzle.one_red_green_blue'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.filter_mode.min_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.filter_mode.min_nearest_mipmap_nearest_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.filter_mode.min_nearest_mipmap_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.filter_mode.min_linear_mipmap_nearest_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.filter_mode.min_linear_mipmap_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.base_level.level_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.base_level.level_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8.incomplete.mipmap_incomplete'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8ui.size_pot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8ui.size_pot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8ui.size_pot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8ui.size_npot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8ui.size_npot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8ui.size_npot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8ui.no_corners.size_pot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8ui.no_corners.size_pot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8ui.no_corners.size_pot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8ui.no_corners.size_npot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8ui.no_corners.size_npot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8ui.no_corners.size_npot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8ui.texture_swizzle.red_green_blue_alpha'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8ui.texture_swizzle.green_blue_alpha_zero'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8ui.texture_swizzle.blue_alpha_zero_one'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8ui.texture_swizzle.alpha_zero_one_red'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8ui.texture_swizzle.zero_one_red_green'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8ui.texture_swizzle.one_red_green_blue'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8ui.filter_mode.min_nearest_mipmap_nearest_mag_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8ui.base_level.level_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8ui.base_level.level_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8i.size_pot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8i.size_pot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8i.size_pot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8i.size_npot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8i.size_npot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8i.size_npot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8i.no_corners.size_pot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8i.no_corners.size_pot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8i.no_corners.size_pot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8i.no_corners.size_npot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8i.no_corners.size_npot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8i.no_corners.size_npot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8i.texture_swizzle.red_green_blue_alpha'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8i.texture_swizzle.green_blue_alpha_zero'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8i.texture_swizzle.blue_alpha_zero_one'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8i.texture_swizzle.alpha_zero_one_red'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8i.texture_swizzle.zero_one_red_green'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8i.texture_swizzle.one_red_green_blue'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8i.filter_mode.min_nearest_mipmap_nearest_mag_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8i.base_level.level_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.rgba8i.base_level.level_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.size_pot.compare_less.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.size_pot.compare_less.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.size_pot.compare_less.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.size_pot.compare_greater.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.size_pot.compare_greater.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.size_pot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.size_npot.compare_less.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.size_npot.compare_less.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.size_npot.compare_less.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.size_npot.compare_greater.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.size_npot.compare_greater.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.size_npot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.no_corners.size_pot.compare_less.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.no_corners.size_pot.compare_less.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.no_corners.size_pot.compare_less.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.no_corners.size_pot.compare_greater.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.no_corners.size_pot.compare_greater.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.no_corners.size_pot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.no_corners.size_npot.compare_less.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.no_corners.size_npot.compare_less.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.no_corners.size_npot.compare_less.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.no_corners.size_npot.compare_greater.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.no_corners.size_npot.compare_greater.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.no_corners.size_npot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.filter_mode.min_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.filter_mode.min_nearest_mipmap_nearest_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.filter_mode.min_nearest_mipmap_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.filter_mode.min_linear_mipmap_nearest_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.filter_mode.min_linear_mipmap_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.base_level.level_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.basic.cube.depth32f.base_level.level_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.rgba8.size_pot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.rgba8.size_pot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.rgba8.size_pot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.rgba8.size_npot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.rgba8.size_npot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.rgba8.size_npot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.rgba8ui.size_pot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.rgba8ui.size_pot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.rgba8ui.size_pot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.rgba8ui.size_npot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.rgba8ui.size_npot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.rgba8ui.size_npot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.rgba8i.size_pot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.rgba8i.size_pot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.rgba8i.size_pot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.rgba8i.size_npot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.rgba8i.size_npot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.rgba8i.size_npot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.depth32f.size_pot.compare_less.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.depth32f.size_pot.compare_less.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.depth32f.size_pot.compare_less.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.depth32f.size_pot.compare_greater.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.depth32f.size_pot.compare_greater.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.depth32f.size_pot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.depth32f.size_npot.compare_less.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.depth32f.size_npot.compare_less.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.depth32f.size_npot.compare_less.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.depth32f.size_npot.compare_greater.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.depth32f.size_npot.compare_greater.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d.depth32f.size_npot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.rgba8.size_pot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.rgba8.size_pot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.rgba8.size_pot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.rgba8.size_npot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.rgba8.size_npot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.rgba8.size_npot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.rgba8ui.size_pot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.rgba8ui.size_pot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.rgba8ui.size_pot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.rgba8ui.size_npot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.rgba8ui.size_npot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.rgba8ui.size_npot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.rgba8i.size_pot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.rgba8i.size_pot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.rgba8i.size_pot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.rgba8i.size_npot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.rgba8i.size_npot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.rgba8i.size_npot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.depth32f.size_pot.compare_less.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.depth32f.size_pot.compare_less.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.depth32f.size_pot.compare_less.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.depth32f.size_pot.compare_greater.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.depth32f.size_pot.compare_greater.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.depth32f.size_pot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.depth32f.size_npot.compare_less.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.depth32f.size_npot.compare_less.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.depth32f.size_npot.compare_less.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.depth32f.size_npot.compare_greater.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.depth32f.size_npot.compare_greater.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.min_required_offset.2d_array.depth32f.size_npot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8.size_pot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8.size_pot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8.size_pot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8.size_npot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8.size_npot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8.size_npot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8.texture_swizzle.red_green_blue_alpha'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8.texture_swizzle.green_blue_alpha_zero'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8.texture_swizzle.blue_alpha_zero_one'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8.texture_swizzle.alpha_zero_one_red'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8.texture_swizzle.zero_one_red_green'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8.texture_swizzle.one_red_green_blue'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8.filter_mode.min_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8.filter_mode.min_nearest_mipmap_nearest_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8.filter_mode.min_nearest_mipmap_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8.filter_mode.min_linear_mipmap_nearest_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8.filter_mode.min_linear_mipmap_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8.base_level.level_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8.base_level.level_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8.incomplete.mipmap_incomplete'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8ui.size_pot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8ui.size_pot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8ui.size_pot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8ui.size_npot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8ui.size_npot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8ui.size_npot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8ui.texture_swizzle.red_green_blue_alpha'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8ui.texture_swizzle.green_blue_alpha_zero'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8ui.texture_swizzle.blue_alpha_zero_one'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8ui.texture_swizzle.alpha_zero_one_red'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8ui.texture_swizzle.zero_one_red_green'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8ui.texture_swizzle.one_red_green_blue'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8ui.filter_mode.min_nearest_mipmap_nearest_mag_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8ui.base_level.level_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8ui.base_level.level_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8i.size_pot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8i.size_pot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8i.size_pot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8i.size_npot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8i.size_npot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8i.size_npot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8i.texture_swizzle.red_green_blue_alpha'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8i.texture_swizzle.green_blue_alpha_zero'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8i.texture_swizzle.blue_alpha_zero_one'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8i.texture_swizzle.alpha_zero_one_red'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8i.texture_swizzle.zero_one_red_green'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8i.texture_swizzle.one_red_green_blue'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8i.filter_mode.min_nearest_mipmap_nearest_mag_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8i.base_level.level_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8i.base_level.level_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.depth32f.size_pot.compare_less.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.depth32f.size_pot.compare_less.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.depth32f.size_pot.compare_less.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.depth32f.size_pot.compare_greater.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.depth32f.size_pot.compare_greater.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.depth32f.size_pot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.depth32f.size_npot.compare_less.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.depth32f.size_npot.compare_less.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.depth32f.size_npot.compare_less.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.depth32f.size_npot.compare_greater.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.depth32f.size_npot.compare_greater.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.depth32f.size_npot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.depth32f.filter_mode.min_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.depth32f.filter_mode.min_nearest_mipmap_nearest_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.depth32f.filter_mode.min_nearest_mipmap_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.depth32f.filter_mode.min_linear_mipmap_nearest_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.depth32f.filter_mode.min_linear_mipmap_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.depth32f.base_level.level_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.depth32f.base_level.level_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8.size_pot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8.size_pot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8.size_pot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8.size_npot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8.size_npot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8.size_npot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8.texture_swizzle.red_green_blue_alpha'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8.texture_swizzle.green_blue_alpha_zero'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8.texture_swizzle.blue_alpha_zero_one'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8.texture_swizzle.alpha_zero_one_red'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8.texture_swizzle.zero_one_red_green'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8.texture_swizzle.one_red_green_blue'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8.filter_mode.min_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8.filter_mode.min_nearest_mipmap_nearest_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8.filter_mode.min_nearest_mipmap_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8.filter_mode.min_linear_mipmap_nearest_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8.filter_mode.min_linear_mipmap_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8.base_level.level_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8.base_level.level_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8.incomplete.mipmap_incomplete'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8ui.size_pot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8ui.size_pot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8ui.size_pot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8ui.size_npot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8ui.size_npot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8ui.size_npot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8ui.texture_swizzle.red_green_blue_alpha'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8ui.texture_swizzle.green_blue_alpha_zero'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8ui.texture_swizzle.blue_alpha_zero_one'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8ui.texture_swizzle.alpha_zero_one_red'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8ui.texture_swizzle.zero_one_red_green'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8ui.texture_swizzle.one_red_green_blue'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8ui.filter_mode.min_nearest_mipmap_nearest_mag_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8ui.base_level.level_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8ui.base_level.level_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8i.size_pot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8i.size_pot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8i.size_pot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8i.size_npot.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8i.size_npot.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8i.size_npot.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8i.texture_swizzle.red_green_blue_alpha'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8i.texture_swizzle.green_blue_alpha_zero'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8i.texture_swizzle.blue_alpha_zero_one'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8i.texture_swizzle.alpha_zero_one_red'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8i.texture_swizzle.zero_one_red_green'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8i.texture_swizzle.one_red_green_blue'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8i.filter_mode.min_nearest_mipmap_nearest_mag_nearest'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8i.base_level.level_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8i.base_level.level_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.depth32f.size_pot.compare_less.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.depth32f.size_pot.compare_less.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.depth32f.size_pot.compare_less.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.depth32f.size_pot.compare_greater.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.depth32f.size_pot.compare_greater.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.depth32f.size_pot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.depth32f.size_npot.compare_less.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.depth32f.size_npot.compare_less.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.depth32f.size_npot.compare_less.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.depth32f.size_npot.compare_greater.clamp_to_edge_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.depth32f.size_npot.compare_greater.repeat_mirrored_repeat'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.depth32f.size_npot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.depth32f.filter_mode.min_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.depth32f.filter_mode.min_nearest_mipmap_nearest_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.depth32f.filter_mode.min_nearest_mipmap_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.depth32f.filter_mode.min_linear_mipmap_nearest_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.depth32f.filter_mode.min_linear_mipmap_linear_mag_linear'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.depth32f.base_level.level_1'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.depth32f.base_level.level_2'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.rgba8.size_pot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.rgba8.size_pot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.rgba8.size_pot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.rgba8.size_npot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.rgba8.size_npot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.rgba8.size_npot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.rgba8ui.size_pot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.rgba8ui.size_pot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.rgba8ui.size_pot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.rgba8ui.size_npot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.rgba8ui.size_npot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.rgba8ui.size_npot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.rgba8i.size_pot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.rgba8i.size_pot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.rgba8i.size_pot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.rgba8i.size_npot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.rgba8i.size_npot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.rgba8i.size_npot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.depth32f.size_pot.compare_less.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.depth32f.size_pot.compare_less.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.depth32f.size_pot.compare_less.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.depth32f.size_pot.compare_greater.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.depth32f.size_pot.compare_greater.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.depth32f.size_pot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.depth32f.size_npot.compare_less.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.depth32f.size_npot.compare_less.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.depth32f.size_npot.compare_less.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.depth32f.size_npot.compare_greater.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.depth32f.size_npot.compare_greater.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.depth32f.size_npot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.rgba8.size_pot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.rgba8.size_pot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.rgba8.size_pot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.rgba8.size_npot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.rgba8.size_npot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.rgba8.size_npot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.rgba8ui.size_pot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.rgba8ui.size_pot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.rgba8ui.size_pot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.rgba8ui.size_npot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.rgba8ui.size_npot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.rgba8ui.size_npot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.rgba8i.size_pot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.rgba8i.size_pot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.rgba8i.size_pot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.rgba8i.size_npot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.rgba8i.size_npot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.rgba8i.size_npot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.depth32f.size_pot.compare_less.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.depth32f.size_pot.compare_less.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.depth32f.size_pot.compare_less.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.depth32f.size_pot.compare_greater.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.depth32f.size_pot.compare_greater.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.depth32f.size_pot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.depth32f.size_npot.compare_less.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.depth32f.size_npot.compare_less.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.depth32f.size_npot.compare_less.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.depth32f.size_npot.compare_greater.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.depth32f.size_npot.compare_greater.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d_array.depth32f.size_npot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8.size_pot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8.size_pot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8.size_pot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8.size_npot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8.size_npot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8.size_npot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8.texture_swizzle.red_green_blue_alpha'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8.texture_swizzle.green_blue_alpha_zero'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8.texture_swizzle.blue_alpha_zero_one'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8.texture_swizzle.alpha_zero_one_red'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8.texture_swizzle.zero_one_red_green'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8.texture_swizzle.one_red_green_blue'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8.filter_mode.min_linear_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8.filter_mode.min_nearest_mipmap_nearest_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8.filter_mode.min_nearest_mipmap_linear_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8.filter_mode.min_linear_mipmap_nearest_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8.filter_mode.min_linear_mipmap_linear_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8.base_level.level_1'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8.base_level.level_2'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8.incomplete.mipmap_incomplete'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8ui.size_pot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8ui.size_pot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8ui.size_pot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8ui.size_npot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8ui.size_npot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8ui.size_npot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8ui.texture_swizzle.red_green_blue_alpha'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8ui.texture_swizzle.green_blue_alpha_zero'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8ui.texture_swizzle.blue_alpha_zero_one'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8ui.texture_swizzle.alpha_zero_one_red'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8ui.texture_swizzle.zero_one_red_green'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8ui.texture_swizzle.one_red_green_blue'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8ui.filter_mode.min_nearest_mipmap_nearest_mag_nearest'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8ui.base_level.level_1'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8ui.base_level.level_2'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8i.size_pot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8i.size_pot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8i.size_pot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8i.size_npot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8i.size_npot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8i.size_npot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8i.texture_swizzle.red_green_blue_alpha'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8i.texture_swizzle.green_blue_alpha_zero'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8i.texture_swizzle.blue_alpha_zero_one'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8i.texture_swizzle.alpha_zero_one_red'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8i.texture_swizzle.zero_one_red_green'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8i.texture_swizzle.one_red_green_blue'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8i.filter_mode.min_nearest_mipmap_nearest_mag_nearest'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8i.base_level.level_1'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8i.base_level.level_2'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.depth32f.size_pot.compare_less.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.depth32f.size_pot.compare_less.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.depth32f.size_pot.compare_less.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.depth32f.size_pot.compare_greater.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.depth32f.size_pot.compare_greater.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.depth32f.size_pot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.depth32f.size_npot.compare_less.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.depth32f.size_npot.compare_less.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.depth32f.size_npot.compare_less.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.depth32f.size_npot.compare_greater.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.depth32f.size_npot.compare_greater.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.depth32f.size_npot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.depth32f.filter_mode.min_linear_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.depth32f.filter_mode.min_nearest_mipmap_nearest_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.depth32f.filter_mode.min_nearest_mipmap_linear_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.depth32f.filter_mode.min_linear_mipmap_nearest_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.depth32f.filter_mode.min_linear_mipmap_linear_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.depth32f.base_level.level_1'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.depth32f.base_level.level_2'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8.size_pot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8.size_pot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8.size_pot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8.size_npot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8.size_npot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8.size_npot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8.texture_swizzle.red_green_blue_alpha'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8.texture_swizzle.green_blue_alpha_zero'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8.texture_swizzle.blue_alpha_zero_one'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8.texture_swizzle.alpha_zero_one_red'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8.texture_swizzle.zero_one_red_green'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8.texture_swizzle.one_red_green_blue'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8.filter_mode.min_linear_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8.filter_mode.min_nearest_mipmap_nearest_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8.filter_mode.min_nearest_mipmap_linear_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8.filter_mode.min_linear_mipmap_nearest_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8.filter_mode.min_linear_mipmap_linear_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8.base_level.level_1'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8.base_level.level_2'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8.incomplete.mipmap_incomplete'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8ui.size_pot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8ui.size_pot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8ui.size_pot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8ui.size_npot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8ui.size_npot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8ui.size_npot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8ui.texture_swizzle.red_green_blue_alpha'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8ui.texture_swizzle.green_blue_alpha_zero'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8ui.texture_swizzle.blue_alpha_zero_one'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8ui.texture_swizzle.alpha_zero_one_red'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8ui.texture_swizzle.zero_one_red_green'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8ui.texture_swizzle.one_red_green_blue'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8ui.filter_mode.min_nearest_mipmap_nearest_mag_nearest'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8ui.base_level.level_1'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8ui.base_level.level_2'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8i.size_pot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8i.size_pot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8i.size_pot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8i.size_npot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8i.size_npot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8i.size_npot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8i.texture_swizzle.red_green_blue_alpha'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8i.texture_swizzle.green_blue_alpha_zero'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8i.texture_swizzle.blue_alpha_zero_one'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8i.texture_swizzle.alpha_zero_one_red'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8i.texture_swizzle.zero_one_red_green'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8i.texture_swizzle.one_red_green_blue'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8i.filter_mode.min_nearest_mipmap_nearest_mag_nearest'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8i.base_level.level_1'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.rgba8i.base_level.level_2'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.depth32f.size_pot.compare_less.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.depth32f.size_pot.compare_less.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.depth32f.size_pot.compare_less.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.depth32f.size_pot.compare_greater.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.depth32f.size_pot.compare_greater.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.depth32f.size_pot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.depth32f.size_npot.compare_less.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.depth32f.size_npot.compare_less.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.depth32f.size_npot.compare_less.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.depth32f.size_npot.compare_greater.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.depth32f.size_npot.compare_greater.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.depth32f.size_npot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.depth32f.filter_mode.min_linear_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.depth32f.filter_mode.min_nearest_mipmap_nearest_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.depth32f.filter_mode.min_nearest_mipmap_linear_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.depth32f.filter_mode.min_linear_mipmap_nearest_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.depth32f.filter_mode.min_linear_mipmap_linear_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.depth32f.base_level.level_1'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d_array.depth32f.base_level.level_2'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.rgba8.size_pot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.rgba8.size_pot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.rgba8.size_pot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.rgba8.size_npot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.rgba8.size_npot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.rgba8.size_npot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.rgba8ui.size_pot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.rgba8ui.size_pot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.rgba8ui.size_pot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.rgba8ui.size_npot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.rgba8ui.size_npot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.rgba8ui.size_npot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.rgba8i.size_pot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.rgba8i.size_pot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.rgba8i.size_pot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.rgba8i.size_npot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.rgba8i.size_npot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.rgba8i.size_npot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.depth32f.size_pot.compare_less.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.depth32f.size_pot.compare_less.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.depth32f.size_pot.compare_less.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.depth32f.size_pot.compare_greater.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.depth32f.size_pot.compare_greater.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.depth32f.size_pot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.depth32f.size_npot.compare_less.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.depth32f.size_npot.compare_less.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.depth32f.size_npot.compare_less.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.depth32f.size_npot.compare_greater.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.depth32f.size_npot.compare_greater.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d.depth32f.size_npot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.rgba8.size_pot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.rgba8.size_pot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.rgba8.size_pot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.rgba8.size_npot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.rgba8.size_npot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.rgba8.size_npot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.rgba8ui.size_pot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.rgba8ui.size_pot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.rgba8ui.size_pot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.rgba8ui.size_npot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.rgba8ui.size_npot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.rgba8ui.size_npot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.rgba8i.size_pot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.rgba8i.size_pot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.rgba8i.size_pot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.rgba8i.size_npot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.rgba8i.size_npot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.rgba8i.size_npot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.depth32f.size_pot.compare_less.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.depth32f.size_pot.compare_less.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.depth32f.size_pot.compare_less.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.depth32f.size_pot.compare_greater.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.depth32f.size_pot.compare_greater.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.depth32f.size_pot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.depth32f.size_npot.compare_less.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.depth32f.size_npot.compare_less.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.depth32f.size_npot.compare_less.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.depth32f.size_npot.compare_greater.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.depth32f.size_npot.compare_greater.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.min_required_offset.2d_array.depth32f.size_npot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8.size_pot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8.size_pot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8.size_pot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8.size_npot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8.size_npot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8.size_npot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8.texture_swizzle.red_green_blue_alpha'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8.texture_swizzle.green_blue_alpha_zero'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8.texture_swizzle.blue_alpha_zero_one'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8.texture_swizzle.alpha_zero_one_red'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8.texture_swizzle.zero_one_red_green'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8.texture_swizzle.one_red_green_blue'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8.filter_mode.min_linear_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8.filter_mode.min_nearest_mipmap_nearest_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8.filter_mode.min_nearest_mipmap_linear_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8.filter_mode.min_linear_mipmap_nearest_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8.filter_mode.min_linear_mipmap_linear_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8.base_level.level_1'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8.base_level.level_2'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8.incomplete.mipmap_incomplete'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8ui.size_pot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8ui.size_pot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8ui.size_pot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8ui.size_npot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8ui.size_npot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8ui.size_npot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8ui.texture_swizzle.red_green_blue_alpha'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8ui.texture_swizzle.green_blue_alpha_zero'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8ui.texture_swizzle.blue_alpha_zero_one'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8ui.texture_swizzle.alpha_zero_one_red'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8ui.texture_swizzle.zero_one_red_green'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8ui.texture_swizzle.one_red_green_blue'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8ui.filter_mode.min_nearest_mipmap_nearest_mag_nearest'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8ui.base_level.level_1'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8ui.base_level.level_2'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8i.size_pot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8i.size_pot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8i.size_pot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8i.size_npot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8i.size_npot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8i.size_npot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8i.texture_swizzle.red_green_blue_alpha'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8i.texture_swizzle.green_blue_alpha_zero'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8i.texture_swizzle.blue_alpha_zero_one'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8i.texture_swizzle.alpha_zero_one_red'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8i.texture_swizzle.zero_one_red_green'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8i.texture_swizzle.one_red_green_blue'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8i.filter_mode.min_nearest_mipmap_nearest_mag_nearest'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8i.base_level.level_1'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.rgba8i.base_level.level_2'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.depth32f.size_pot.compare_less.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.depth32f.size_pot.compare_less.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.depth32f.size_pot.compare_less.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.depth32f.size_pot.compare_greater.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.depth32f.size_pot.compare_greater.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.depth32f.size_pot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.depth32f.size_npot.compare_less.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.depth32f.size_npot.compare_less.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.depth32f.size_npot.compare_less.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.depth32f.size_npot.compare_greater.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.depth32f.size_npot.compare_greater.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.depth32f.size_npot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.depth32f.filter_mode.min_linear_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.depth32f.filter_mode.min_nearest_mipmap_nearest_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.depth32f.filter_mode.min_nearest_mipmap_linear_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.depth32f.filter_mode.min_linear_mipmap_nearest_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.depth32f.filter_mode.min_linear_mipmap_linear_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.depth32f.base_level.level_1'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d.depth32f.base_level.level_2'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8.size_pot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8.size_pot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8.size_pot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8.size_npot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8.size_npot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8.size_npot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8.texture_swizzle.red_green_blue_alpha'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8.texture_swizzle.green_blue_alpha_zero'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8.texture_swizzle.blue_alpha_zero_one'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8.texture_swizzle.alpha_zero_one_red'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8.texture_swizzle.zero_one_red_green'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8.texture_swizzle.one_red_green_blue'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8.filter_mode.min_linear_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8.filter_mode.min_nearest_mipmap_nearest_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8.filter_mode.min_nearest_mipmap_linear_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8.filter_mode.min_linear_mipmap_nearest_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8.filter_mode.min_linear_mipmap_linear_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8.base_level.level_1'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8.base_level.level_2'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8.incomplete.mipmap_incomplete'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8ui.size_pot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8ui.size_pot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8ui.size_pot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8ui.size_npot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8ui.size_npot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8ui.size_npot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8ui.texture_swizzle.red_green_blue_alpha'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8ui.texture_swizzle.green_blue_alpha_zero'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8ui.texture_swizzle.blue_alpha_zero_one'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8ui.texture_swizzle.alpha_zero_one_red'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8ui.texture_swizzle.zero_one_red_green'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8ui.texture_swizzle.one_red_green_blue'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8ui.filter_mode.min_nearest_mipmap_nearest_mag_nearest'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8ui.base_level.level_1'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8ui.base_level.level_2'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8i.size_pot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8i.size_pot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8i.size_pot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8i.size_npot.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8i.size_npot.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8i.size_npot.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8i.texture_swizzle.red_green_blue_alpha'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8i.texture_swizzle.green_blue_alpha_zero'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8i.texture_swizzle.blue_alpha_zero_one'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8i.texture_swizzle.alpha_zero_one_red'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8i.texture_swizzle.zero_one_red_green'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8i.texture_swizzle.one_red_green_blue'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8i.filter_mode.min_nearest_mipmap_nearest_mag_nearest'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8i.base_level.level_1'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.rgba8i.base_level.level_2'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.depth32f.size_pot.compare_less.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.depth32f.size_pot.compare_less.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.depth32f.size_pot.compare_less.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.depth32f.size_pot.compare_greater.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.depth32f.size_pot.compare_greater.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.depth32f.size_pot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.depth32f.size_npot.compare_less.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.depth32f.size_npot.compare_less.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.depth32f.size_npot.compare_less.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.depth32f.size_npot.compare_greater.clamp_to_edge_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.depth32f.size_npot.compare_greater.repeat_mirrored_repeat'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.depth32f.size_npot.compare_greater.mirrored_repeat_clamp_to_edge'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.depth32f.filter_mode.min_linear_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.depth32f.filter_mode.min_nearest_mipmap_nearest_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.depth32f.filter_mode.min_nearest_mipmap_linear_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.depth32f.filter_mode.min_linear_mipmap_nearest_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.depth32f.filter_mode.min_linear_mipmap_linear_mag_linear'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.depth32f.base_level.level_1'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+Test case 'dEQP-GLES31.functional.texture.gather.offsets.implementation_offset.2d_array.depth32f.base_level.level_2'..
+  NotSupported (GL_EXT_gpu_shader5 required)
+
+DONE!
+
+Test run totals:
+  Passed:        435/831 (52.3%)
+  Failed:        0/831 (0.0%)
+  Not supported: 396/831 (47.7%)
+  Warnings:      0/831 (0.0%)
+  Waived:        0/831 (0.0%)

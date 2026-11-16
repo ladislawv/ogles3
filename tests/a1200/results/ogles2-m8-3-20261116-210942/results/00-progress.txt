@@ -1,0 +1,5 @@
+ogles2 M8 run 3: --deqp-case dEQP-GLES31.functional.texture.specification.*
+Monday 16-Nov-26 21:09:42
+texspec done
+finished
+Monday 16-Nov-26 21:10:46

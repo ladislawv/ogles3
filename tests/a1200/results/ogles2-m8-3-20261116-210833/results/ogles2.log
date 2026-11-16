@@ -1,0 +1,52 @@
+     1 ogles3.library 1.0 init
+     2 open (count 1)
+     3 GPU submission lock "V3D 4.2 submit" at 0x08367AB0
+     4 device: V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM, clipper granularity 256
+     5 device: GPU-visible RAM (device tree memory): 0x01000000-0x3B9FFFFF
+     6 device: GPU-visible RAM (device tree memory): 0x40000000-0x79DFFFFF
+     7 device: memory region "expansion memory" 0x08000020-0x3B9FFFFF fast: the GPU reaches it
+     8 device: memory region "expansion memory" 0x01000020-0x07FFFFFF fast: the GPU reaches it
+     9 device: memory region "expansion memory" 0x41000020-0x79DFFFFF fast: the GPU reaches it
+    10 device: memory region "memory" 0x00C00020-0x00C7FFFF fast: OUTSIDE the GPU-visible RAM
+    11 device: memory region "chip memory" 0x00001020-0x001FFFFF chip: OUTSIDE the GPU-visible RAM
+    12 display: own window, 256x256, BGRA
+    13 device: context pools for 256x256, D32F, 17783168 bytes of GPU memory in use
+    14 aglCreateContext2: context 0x0904AFBC, OpenGL ES 3.1, 256x256
+    15 compiler: CaffeineOS:Libs/v3dglslc3, 19049072 bytes, id 145EE868
+    16 glLinkProgram: OGLES3Cache:e/e765a8393c45b5d51a310b00.v3dp (5 variants, 1104 bytes of code)
+    17 job: depth and stencil kept across a mid-frame flush (logged once)
+    18 compiler: variants compiled in 220 ms, OGLES3Cache:e/e765a8393c45b5d51a310b00.v3dp
+    19 draw: OGLES3Cache:e/e765a8393c45b5d51a310b00.v3dx (2 variants)
+    20 compiler: shader compiled in 40 ms
+    21 compiler: program compiled in 20 ms, OGLES3Cache:d/d6565b9d13948db5f71b1f3b.v3dp
+    22 glLinkProgram: OGLES3Cache:d/d6565b9d13948db5f71b1f3b.v3dp (5 variants, 1296 bytes of code)
+    23 compiler: variants compiled in 20 ms, OGLES3Cache:d/d6565b9d13948db5f71b1f3b.v3dp
+    24 draw: OGLES3Cache:d/d6565b9d13948db5f71b1f3b.v3dx (2 variants)
+    25 compiler: shader compiled in 20 ms
+    26 compiler: program compiled in 20 ms, OGLES3Cache:f/f50511080ce3fe0c5f1c09f0.v3dp
+    27 glLinkProgram: OGLES3Cache:f/f50511080ce3fe0c5f1c09f0.v3dp (5 variants, 1248 bytes of code)
+    28 compiler: variants compiled in 20 ms, OGLES3Cache:f/f50511080ce3fe0c5f1c09f0.v3dp
+    29 draw: OGLES3Cache:f/f50511080ce3fe0c5f1c09f0.v3dx (2 variants)
+    30 compiler: shader compiled in 40 ms
+    31 compiler: shader compiled in 20 ms
+    32 compiler: program compiled in 20 ms, OGLES3Cache:9/930ee501da523c169d8ee5ab.v3dp
+    33 glLinkProgram: OGLES3Cache:9/930ee501da523c169d8ee5ab.v3dp (5 variants, 816 bytes of code)
+    34 compiler: variants compiled in 20 ms, OGLES3Cache:9/930ee501da523c169d8ee5ab.v3dp
+    35 draw: OGLES3Cache:9/930ee501da523c169d8ee5ab.v3dx (2 variants)
+    36 compiler: shader compiled in 20 ms
+    37 compiler: program compiled in 20 ms, OGLES3Cache:4/46881eccf3addcab95bdbd71.v3dp
+    38 glLinkProgram: OGLES3Cache:4/46881eccf3addcab95bdbd71.v3dp (5 variants, 1008 bytes of code)
+    39 compiler: variants compiled in 20 ms, OGLES3Cache:4/46881eccf3addcab95bdbd71.v3dp
+    40 draw: OGLES3Cache:4/46881eccf3addcab95bdbd71.v3dx (2 variants)
+    41 compiler: shader compiled in 20 ms
+    42 compiler: program compiled in 20 ms, OGLES3Cache:c/c35f358b78492603e3dc1c68.v3dp
+    43 glLinkProgram: OGLES3Cache:c/c35f358b78492603e3dc1c68.v3dp (5 variants, 960 bytes of code)
+    44 compiler: variants compiled in 20 ms, OGLES3Cache:c/c35f358b78492603e3dc1c68.v3dp
+    45 draw: OGLES3Cache:c/c35f358b78492603e3dc1c68.v3dx (2 variants)
+    46 aglDestroyContext: context 0x0904AFBC: freeing
+    47 device: context freed, 0 bytes of GPU memory still in use
+    48 aglDestroyContext: context 0x0904AFBC (1542 frames, 0 dropped, 0 binning blocks added)
+    49 timing: 1542 jobs, each on average: 9888 us of CPU work before its flush, 7 us waiting for binning, 140 us for the render
+    50 timing: and in each flush 73 us building the render list, 159 us for the CPU cache before the GPU, 102 us after
+    51 timing: 1546 swaps, 30797 us from one to the next on average, 357 us of it presenting
+    52 timing: per frame 0 draws, 4602 us in them; in all 29 ms in glBuffer(Sub)Data, 189 ms in glTex(Sub)Image2D

@@ -1,0 +1,593 @@
+     1 ogles3.library 1.0 init
+     2 open (count 1)
+     3 GPU submission lock "V3D 4.2 submit" at 0x08367AB0
+     4 device: V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM, clipper granularity 256
+     5 device: GPU-visible RAM (device tree memory): 0x01000000-0x3B9FFFFF
+     6 device: GPU-visible RAM (device tree memory): 0x40000000-0x79DFFFFF
+     7 device: memory region "expansion memory" 0x08000020-0x3B9FFFFF fast: the GPU reaches it
+     8 device: memory region "expansion memory" 0x01000020-0x07FFFFFF fast: the GPU reaches it
+     9 device: memory region "expansion memory" 0x41000020-0x79DFFFFF fast: the GPU reaches it
+    10 device: memory region "memory" 0x00C00020-0x00C7FFFF fast: OUTSIDE the GPU-visible RAM
+    11 device: memory region "chip memory" 0x00001020-0x001FFFFF chip: OUTSIDE the GPU-visible RAM
+    12 display: own window, 256x256, BGRA
+    13 device: context pools for 256x256, D32F, 17783168 bytes of GPU memory in use
+    14 aglCreateContext2: context 0x0904AFBC, OpenGL ES 3.1, 256x256
+    15 compiler: CaffeineOS:Libs/v3dglslc3, 19048396 bytes, id 11B095AA
+    16 compiler: shader compiled in 80 ms
+    17 compiler: shader compiled in 40 ms
+    18 compiler: program compiled in 40 ms
+    19 compiler: program compiled in 40 ms, OGLES3Cache:6/6a3c8aa2720c990b61c1820c.v3dp
+    20 glLinkProgram: OGLES3Cache:6/6a3c8aa2720c990b61c1820c.v3dp (5 variants, 368 bytes of code)
+    21 compiler: program compiled in 60 ms
+    22 compiler: program compiled in 80 ms, OGLES3Cache:d/d32de599e520635528e88c4c.v3dp
+    23 glLinkProgram: OGLES3Cache:d/d32de599e520635528e88c4c.v3dp (5 variants, 368 bytes of code)
+    24 compiler: program compiled in 80 ms
+    25 compiler: program compiled in 80 ms, OGLES3Cache:3/31e45ab277729bd138b11d33.v3dp
+    26 glLinkProgram: OGLES3Cache:3/31e45ab277729bd138b11d33.v3dp (5 variants, 368 bytes of code)
+    27 compiler: program compiled in 40 ms
+    28 compiler: program compiled in 120 ms, OGLES3Cache:e/e9f4760fe5a1a060b39ebcb9.v3dp
+    29 glLinkProgram: OGLES3Cache:e/e9f4760fe5a1a060b39ebcb9.v3dp (5 variants, 368 bytes of code)
+    30 compiler: program compiled in 60 ms
+    31 compiler: program compiled in 160 ms, OGLES3Cache:6/6e147716e741810f7210bd1a.v3dp
+    32 glLinkProgram: OGLES3Cache:6/6e147716e741810f7210bd1a.v3dp (5 variants, 368 bytes of code)
+    33 compiler: program compiled in 60 ms
+    34 compiler: program compiled in 80 ms, OGLES3Cache:b/bd81d804f131dcde57fdeba0.v3dp
+    35 glLinkProgram: OGLES3Cache:b/bd81d804f131dcde57fdeba0.v3dp (5 variants, 368 bytes of code)
+    36 compiler: program compiled in 40 ms
+    37 compiler: program compiled in 120 ms, OGLES3Cache:b/badd95efd6647139b059e760.v3dp
+    38 glLinkProgram: OGLES3Cache:b/badd95efd6647139b059e760.v3dp (5 variants, 368 bytes of code)
+    39 compiler: program compiled in 120 ms
+    40 compiler: program compiled in 60 ms, OGLES3Cache:7/760b3301c1dfc58bc4b269af.v3dp
+    41 glLinkProgram: OGLES3Cache:7/760b3301c1dfc58bc4b269af.v3dp (5 variants, 368 bytes of code)
+    42 compiler: program compiled in 80 ms
+    43 compiler: program compiled in 120 ms, OGLES3Cache:3/3cdf9140d6e6cae3b2d9b781.v3dp
+    44 glLinkProgram: OGLES3Cache:3/3cdf9140d6e6cae3b2d9b781.v3dp (5 variants, 368 bytes of code)
+    45 compiler: program compiled in 80 ms
+    46 compiler: program compiled in 80 ms, OGLES3Cache:3/3286fbc3b59734dfc6ac3056.v3dp
+    47 glLinkProgram: OGLES3Cache:3/3286fbc3b59734dfc6ac3056.v3dp (5 variants, 368 bytes of code)
+    48 compiler: program compiled in 80 ms, OGLES3Cache:0/084d2454510945da55f57b7f.v3dp
+    49 glLinkProgram: OGLES3Cache:0/084d2454510945da55f57b7f.v3dp (5 variants, 384 bytes of code)
+    50 compiler: program compiled in 60 ms
+    51 compiler: program compiled in 100 ms, OGLES3Cache:9/99e60053793adba9a0b51dd6.v3dp
+    52 glLinkProgram: OGLES3Cache:9/99e60053793adba9a0b51dd6.v3dp (5 variants, 368 bytes of code)
+    53 compiler: program compiled in 100 ms
+    54 compiler: program compiled in 80 ms, OGLES3Cache:5/5b553a0869df911900c40216.v3dp
+    55 glLinkProgram: OGLES3Cache:5/5b553a0869df911900c40216.v3dp (5 variants, 368 bytes of code)
+    56 compiler: program compiled in 60 ms
+    57 compiler: program compiled in 80 ms, OGLES3Cache:a/aad96b94828340479bee3c99.v3dp
+    58 glLinkProgram: OGLES3Cache:a/aad96b94828340479bee3c99.v3dp (5 variants, 368 bytes of code)
+    59 compiler: program compiled in 60 ms
+    60 compiler: program compiled in 80 ms, OGLES3Cache:e/e2b3ffa4aee27b8ad912cc8f.v3dp
+    61 glLinkProgram: OGLES3Cache:e/e2b3ffa4aee27b8ad912cc8f.v3dp (5 variants, 368 bytes of code)
+    62 compiler: program compiled in 60 ms
+    63 compiler: program compiled in 80 ms, OGLES3Cache:9/9b66ef687cc11f5da5d547ec.v3dp
+    64 glLinkProgram: OGLES3Cache:9/9b66ef687cc11f5da5d547ec.v3dp (5 variants, 368 bytes of code)
+    65 compiler: program compiled in 60 ms
+    66 compiler: program compiled in 40 ms, OGLES3Cache:9/9ee9e9a76d8dfdc3a8aebb07.v3dp
+    67 glLinkProgram: OGLES3Cache:9/9ee9e9a76d8dfdc3a8aebb07.v3dp (5 variants, 368 bytes of code)
+    68 compiler: shader compiled in 60 ms
+    69 compiler: shader compiled in 40 ms
+    70 compiler: program compiled in 100 ms, OGLES3Cache:4/4c4e9c350b8a6e738a093861.v3dp
+    71 glLinkProgram: OGLES3Cache:4/4c4e9c350b8a6e738a093861.v3dp (5 variants, 520 bytes of code)
+    72 compiler: program compiled in 20 ms
+    73 compiler: program compiled in 60 ms, OGLES3Cache:7/7748afb9f9d6d8e23c19f4c9.v3dp
+    74 glLinkProgram: OGLES3Cache:7/7748afb9f9d6d8e23c19f4c9.v3dp (5 variants, 1352 bytes of code)
+    75 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+    76 compiler: variants compiled in 60 ms, OGLES3Cache:7/7748afb9f9d6d8e23c19f4c9.v3dp
+    77 draw: OGLES3Cache:7/7748afb9f9d6d8e23c19f4c9.v3dx (2 variants)
+    78 job: depth and stencil kept across a mid-frame flush (logged once)
+    79 compiler: program compiled in 40 ms
+    80 compiler: program compiled in 60 ms, OGLES3Cache:6/69804398660a2e319e455541.v3dp
+    81 glLinkProgram: OGLES3Cache:6/69804398660a2e319e455541.v3dp (5 variants, 2424 bytes of code)
+    82 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+    83 compiler: variants compiled in 60 ms, OGLES3Cache:6/69804398660a2e319e455541.v3dp
+    84 draw: OGLES3Cache:6/69804398660a2e319e455541.v3dx (2 variants)
+    85 compiler: program compiled in 20 ms
+    86 compiler: program compiled in 60 ms, OGLES3Cache:1/1d01561820186f4c5388dc6c.v3dp
+    87 glLinkProgram: OGLES3Cache:1/1d01561820186f4c5388dc6c.v3dp (5 variants, 2688 bytes of code)
+    88 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+    89 compiler: variants compiled in 60 ms, OGLES3Cache:1/1d01561820186f4c5388dc6c.v3dp
+    90 draw: OGLES3Cache:1/1d01561820186f4c5388dc6c.v3dx (2 variants)
+    91 compiler: program compiled in 20 ms
+    92 compiler: program compiled in 20 ms, OGLES3Cache:7/77d5dc1760c358c9e30b3638.v3dp
+    93 glLinkProgram: OGLES3Cache:7/77d5dc1760c358c9e30b3638.v3dp (5 variants, 2304 bytes of code)
+    94 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+    95 compiler: variants compiled in 20 ms, OGLES3Cache:7/77d5dc1760c358c9e30b3638.v3dp
+    96 draw: OGLES3Cache:7/77d5dc1760c358c9e30b3638.v3dx (2 variants)
+    97 compiler: shader compiled in 40 ms
+    98 compiler: program compiled in 20 ms
+    99 compiler: program compiled in 20 ms, OGLES3Cache:2/2fd9eaf57e7704168c28444b.v3dp
+   100 glLinkProgram: OGLES3Cache:2/2fd9eaf57e7704168c28444b.v3dp (5 variants, 576 bytes of code)
+   101 compiler: shader compiled in 20 ms
+   102 compiler: shader compiled in 20 ms
+   103 compiler: program compiled in 20 ms
+   104 compiler: program compiled in 20 ms, OGLES3Cache:8/8f5b1756638c3a93c809ef9f.v3dp
+   105 glLinkProgram: OGLES3Cache:8/8f5b1756638c3a93c809ef9f.v3dp (5 variants, 2200 bytes of code)
+   106 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   107 compiler: variants compiled in 60 ms, OGLES3Cache:8/8f5b1756638c3a93c809ef9f.v3dp
+   108 draw: OGLES3Cache:8/8f5b1756638c3a93c809ef9f.v3dx (2 variants)
+   109 compiler: program compiled in 40 ms
+   110 compiler: program compiled in 20 ms, OGLES3Cache:1/13ba723fc47b77fbec253f11.v3dp
+   111 glLinkProgram: OGLES3Cache:1/13ba723fc47b77fbec253f11.v3dp (5 variants, 1544 bytes of code)
+   112 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   113 compiler: variants compiled in 60 ms, OGLES3Cache:1/13ba723fc47b77fbec253f11.v3dp
+   114 draw: OGLES3Cache:1/13ba723fc47b77fbec253f11.v3dx (2 variants)
+   115 compiler: program compiled in 40 ms
+   116 compiler: program compiled in 40 ms, OGLES3Cache:7/7a29398e73e59c2685bcd6d1.v3dp
+   117 glLinkProgram: OGLES3Cache:7/7a29398e73e59c2685bcd6d1.v3dp (5 variants, 1856 bytes of code)
+   118 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   119 compiler: variants compiled in 80 ms, OGLES3Cache:7/7a29398e73e59c2685bcd6d1.v3dp
+   120 draw: OGLES3Cache:7/7a29398e73e59c2685bcd6d1.v3dx (2 variants)
+   121 compiler: program compiled in 40 ms
+   122 compiler: program compiled in 40 ms, OGLES3Cache:3/3d3cc4948415a12d78a0bc1f.v3dp
+   123 glLinkProgram: OGLES3Cache:3/3d3cc4948415a12d78a0bc1f.v3dp (5 variants, 1880 bytes of code)
+   124 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   125 compiler: variants compiled in 80 ms, OGLES3Cache:3/3d3cc4948415a12d78a0bc1f.v3dp
+   126 draw: OGLES3Cache:3/3d3cc4948415a12d78a0bc1f.v3dx (2 variants)
+   127 compiler: program compiled in 40 ms
+   128 compiler: program compiled in 40 ms, OGLES3Cache:c/c2ee893aefec17792d553916.v3dp
+   129 glLinkProgram: OGLES3Cache:c/c2ee893aefec17792d553916.v3dp (5 variants, 1872 bytes of code)
+   130 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   131 compiler: variants compiled in 40 ms, OGLES3Cache:c/c2ee893aefec17792d553916.v3dp
+   132 draw: OGLES3Cache:c/c2ee893aefec17792d553916.v3dx (2 variants)
+   133 compiler: program compiled in 20 ms
+   134 compiler: program compiled in 40 ms, OGLES3Cache:f/f2ed0cc4e7ca2ef6555a8d3d.v3dp
+   135 glLinkProgram: OGLES3Cache:f/f2ed0cc4e7ca2ef6555a8d3d.v3dp (5 variants, 1880 bytes of code)
+   136 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   137 compiler: variants compiled in 60 ms, OGLES3Cache:f/f2ed0cc4e7ca2ef6555a8d3d.v3dp
+   138 draw: OGLES3Cache:f/f2ed0cc4e7ca2ef6555a8d3d.v3dx (2 variants)
+   139 compiler: shader compiled in 40 ms
+   140 compiler: program compiled in 40 ms
+   141 compiler: program compiled in 40 ms, OGLES3Cache:e/efb173b1ea5f8833ede6d5af.v3dp
+   142 glLinkProgram: OGLES3Cache:e/efb173b1ea5f8833ede6d5af.v3dp (5 variants, 2088 bytes of code)
+   143 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   144 compiler: variants compiled in 20 ms, OGLES3Cache:e/efb173b1ea5f8833ede6d5af.v3dp
+   145 draw: OGLES3Cache:e/efb173b1ea5f8833ede6d5af.v3dx (2 variants)
+   146 compiler: shader compiled in 40 ms
+   147 compiler: program compiled in 40 ms
+   148 compiler: program compiled in 40 ms, OGLES3Cache:3/3041bffab543c9f6a69c334e.v3dp
+   149 glLinkProgram: OGLES3Cache:3/3041bffab543c9f6a69c334e.v3dp (5 variants, 2296 bytes of code)
+   150 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   151 compiler: variants compiled in 60 ms, OGLES3Cache:3/3041bffab543c9f6a69c334e.v3dp
+   152 draw: OGLES3Cache:3/3041bffab543c9f6a69c334e.v3dx (2 variants)
+   153 compiler: program compiled in 40 ms
+   154 compiler: program compiled in 40 ms, OGLES3Cache:1/1048523513c86ec13d3ea3a7.v3dp
+   155 glLinkProgram: OGLES3Cache:1/1048523513c86ec13d3ea3a7.v3dp (5 variants, 2320 bytes of code)
+   156 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   157 compiler: variants compiled in 40 ms, OGLES3Cache:1/1048523513c86ec13d3ea3a7.v3dp
+   158 draw: OGLES3Cache:1/1048523513c86ec13d3ea3a7.v3dx (2 variants)
+   159 compiler: shader compiled in 40 ms
+   160 compiler: program compiled in 40 ms
+   161 compiler: program compiled in 40 ms, OGLES3Cache:2/2c0a1a9d053b933b18b26d18.v3dp
+   162 glLinkProgram: OGLES3Cache:2/2c0a1a9d053b933b18b26d18.v3dp (5 variants, 752 bytes of code)
+   163 compiler: shader compiled in 40 ms
+   164 compiler: program compiled in 40 ms
+   165 compiler: program compiled in 40 ms, OGLES3Cache:3/33e5cf4fbd6e6637d8beb6b9.v3dp
+   166 glLinkProgram: OGLES3Cache:3/33e5cf4fbd6e6637d8beb6b9.v3dp (5 variants, 1128 bytes of code)
+   167 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   168 compiler: variants compiled in 40 ms, OGLES3Cache:3/33e5cf4fbd6e6637d8beb6b9.v3dp
+   169 draw: OGLES3Cache:3/33e5cf4fbd6e6637d8beb6b9.v3dx (2 variants)
+   170 compiler: shader compiled in 100 ms
+   171 compiler: shader compiled in 80 ms
+   172 compiler: program compiled in 80 ms
+   173 compiler: program compiled in 120 ms, OGLES3Cache:0/0d0f7f2e9f9d25a77530d482.v3dp
+   174 glLinkProgram: OGLES3Cache:0/0d0f7f2e9f9d25a77530d482.v3dp (5 variants, 1120 bytes of code)
+   175 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   176 compiler: variants compiled in 100 ms, OGLES3Cache:0/0d0f7f2e9f9d25a77530d482.v3dp
+   177 draw: OGLES3Cache:0/0d0f7f2e9f9d25a77530d482.v3dx (2 variants)
+   178 compiler: program compiled in 20 ms
+   179 compiler: program compiled in 40 ms, OGLES3Cache:7/7d5dde4ddf7746ccb317a87d.v3dp
+   180 glLinkProgram: OGLES3Cache:7/7d5dde4ddf7746ccb317a87d.v3dp (5 variants, 1400 bytes of code)
+   181 compiler: program compiled in 20 ms
+   182 compiler: program compiled in 40 ms, OGLES3Cache:0/0ef3ae455c8ce52e716e01d0.v3dp
+   183 glLinkProgram: OGLES3Cache:0/0ef3ae455c8ce52e716e01d0.v3dp (5 variants, 2312 bytes of code)
+   184 compiler: program compiled in 120 ms
+   185 compiler: program compiled in 160 ms, OGLES3Cache:b/b80914bf2b81abcbe5687827.v3dp
+   186 glLinkProgram: OGLES3Cache:b/b80914bf2b81abcbe5687827.v3dp (5 variants, 3320 bytes of code)
+   187 compiler: program compiled in 80 ms
+   188 compiler: program compiled in 160 ms, OGLES3Cache:6/600490c58f6f1a6122792849.v3dp
+   189 glLinkProgram: OGLES3Cache:6/600490c58f6f1a6122792849.v3dp (5 variants, 4512 bytes of code)
+   190 glDrawArrays: no fragment shader variant for primitive 10; using the closest
+   191 compiler: variants compiled in 180 ms, OGLES3Cache:6/600490c58f6f1a6122792849.v3dp
+   192 draw: OGLES3Cache:6/600490c58f6f1a6122792849.v3dx (2 variants)
+   193 compiler: program compiled in 60 ms
+   194 compiler: program compiled in 240 ms, OGLES3Cache:c/c124471549c600fb4fcc331d.v3dp
+   195 glLinkProgram: OGLES3Cache:c/c124471549c600fb4fcc331d.v3dp (5 variants, 6128 bytes of code)
+   196 device: GPU reset after a binning job it did not finish: the core answers
+   197 job: binning stopped: CT0CA 0x00000000 CT0EA 0x00000000 CT0CS 0x00000000; list 0x3B538800..0x3B538875 (last block 0x3B538800), 0 spill blocks
+   198 job: frame dropped: binning timed out
+   199 device: GPU reset after a binning job it did not finish: the core answers
+   200 job: binning stopped: CT0CA 0x00000000 CT0EA 0x00000000 CT0CS 0x00000000; list 0x3B1387C0..0x3B138835 (last block 0x3B1387C0), 0 spill blocks
+   201 job: frame dropped: binning timed out
+   202 device: GPU reset after a binning job it did not finish: the core answers
+   203 job: binning stopped: CT0CA 0x00000000 CT0EA 0x00000000 CT0CS 0x00000000; list 0x3B538800..0x3B538875 (last block 0x3B538800), 0 spill blocks
+   204 job: frame dropped: binning timed out
+   205 device: GPU reset after a binning job it did not finish: the core answers
+   206 job: binning stopped: CT0CA 0x00000000 CT0EA 0x00000000 CT0CS 0x00000000; list 0x3B1387C0..0x3B138835 (last block 0x3B1387C0), 0 spill blocks
+   207 job: frame dropped: binning timed out
+   208 device: GPU reset after a binning job it did not finish: the core answers
+   209 job: binning stopped: CT0CA 0x00000000 CT0EA 0x00000000 CT0CS 0x00000000; list 0x3B538800..0x3B538875 (last block 0x3B538800), 0 spill blocks
+   210 job: frame dropped: binning timed out
+   211 device: GPU reset after a binning job it did not finish: the core answers
+   212 job: binning stopped: CT0CA 0x00000000 CT0EA 0x00000000 CT0CS 0x00000000; list 0x3B1387C0..0x3B138835 (last block 0x3B1387C0), 0 spill blocks
+   213 job: frame dropped: binning timed out
+   214 device: GPU reset after a binning job it did not finish: the core answers
+   215 job: binning stopped: CT0CA 0x00000000 CT0EA 0x00000000 CT0CS 0x00000000; list 0x3B538800..0x3B538875 (last block 0x3B538800), 0 spill blocks
+   216 job: frame dropped: binning timed out
+   217 device: GPU reset after a binning job it did not finish: the core answers
+   218 job: binning stopped: CT0CA 0x00000000 CT0EA 0x00000000 CT0CS 0x00000000; list 0x3B1387C0..0x3B138835 (last block 0x3B1387C0), 0 spill blocks
+   219 job: frame dropped: binning timed out
+   220 device: GPU reset after a binning job it did not finish: the core answers
+   221 job: binning stopped: CT0CA 0x00000000 CT0EA 0x00000000 CT0CS 0x00000000; list 0x3B538800..0x3B538875 (last block 0x3B538800), 0 spill blocks
+   222 job: frame dropped: binning timed out
+   223 device: GPU reset after a binning job it did not finish: the core answers
+   224 job: binning stopped: CT0CA 0x00000000 CT0EA 0x00000000 CT0CS 0x00000000; list 0x3B1387C0..0x3B138835 (last block 0x3B1387C0), 0 spill blocks
+   225 job: frame dropped: binning timed out
+   226 compiler: program compiled in 20 ms
+   227 compiler: program compiled in 140 ms, OGLES3Cache:9/9a5c9900e405117727913bde.v3dp
+   228 glLinkProgram: OGLES3Cache:9/9a5c9900e405117727913bde.v3dp (5 variants, 3320 bytes of code)
+   229 glDrawArrays: no fragment shader variant for primitive 4; using the closest
+   230 compiler: variants compiled in 100 ms, OGLES3Cache:9/9a5c9900e405117727913bde.v3dp
+   231 draw: OGLES3Cache:9/9a5c9900e405117727913bde.v3dx (2 variants)
+   232 compiler: program compiled in 20 ms
+   233 compiler: program compiled in 240 ms, OGLES3Cache:d/d9f6b94eca2e195e6ab0a601.v3dp
+   234 glLinkProgram: OGLES3Cache:d/d9f6b94eca2e195e6ab0a601.v3dp (5 variants, 2312 bytes of code)
+   235 glDrawArrays: no fragment shader variant for primitive 1; using the closest
+   236 compiler: variants compiled in 200 ms, OGLES3Cache:d/d9f6b94eca2e195e6ab0a601.v3dp
+   237 draw: OGLES3Cache:d/d9f6b94eca2e195e6ab0a601.v3dx (2 variants)
+   238 compiler: program compiled in 80 ms
+   239 compiler: program compiled in 80 ms, OGLES3Cache:4/4ca7ad2fdbcec6002ffa1edb.v3dp
+   240 glLinkProgram: OGLES3Cache:4/4ca7ad2fdbcec6002ffa1edb.v3dp (5 variants, 1400 bytes of code)
+   241 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   242 compiler: variants compiled in 60 ms, OGLES3Cache:4/4ca7ad2fdbcec6002ffa1edb.v3dp
+   243 draw: OGLES3Cache:4/4ca7ad2fdbcec6002ffa1edb.v3dx (2 variants)
+   244 compiler: program compiled in 40 ms
+   245 compiler: program compiled in 80 ms, OGLES3Cache:9/9f14a2d9705f1621e2ea600d.v3dp
+   246 glLinkProgram: OGLES3Cache:9/9f14a2d9705f1621e2ea600d.v3dp (5 variants, 3320 bytes of code)
+   247 glDrawArrays: no fragment shader variant for primitive 4; using the closest
+   248 compiler: variants compiled in 120 ms, OGLES3Cache:9/9f14a2d9705f1621e2ea600d.v3dp
+   249 draw: OGLES3Cache:9/9f14a2d9705f1621e2ea600d.v3dx (2 variants)
+   250 compiler: program compiled in 80 ms
+   251 compiler: program compiled in 120 ms, OGLES3Cache:1/1566ab5a9f5050d400147bf0.v3dp
+   252 glLinkProgram: OGLES3Cache:1/1566ab5a9f5050d400147bf0.v3dp (5 variants, 1400 bytes of code)
+   253 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   254 compiler: variants compiled in 80 ms, OGLES3Cache:1/1566ab5a9f5050d400147bf0.v3dp
+   255 draw: OGLES3Cache:1/1566ab5a9f5050d400147bf0.v3dx (2 variants)
+   256 compiler: program compiled in 60 ms
+   257 compiler: program compiled in 160 ms, OGLES3Cache:4/414d632c624d925695d5c827.v3dp
+   258 glLinkProgram: OGLES3Cache:4/414d632c624d925695d5c827.v3dp (5 variants, 2312 bytes of code)
+   259 glDrawArrays: no fragment shader variant for primitive 1; using the closest
+   260 compiler: variants compiled in 160 ms, OGLES3Cache:4/414d632c624d925695d5c827.v3dp
+   261 draw: OGLES3Cache:4/414d632c624d925695d5c827.v3dx (2 variants)
+   262 compiler: program compiled in 40 ms
+   263 compiler: program compiled in 40 ms, OGLES3Cache:a/adad5de3aae5bc115731591c.v3dp
+   264 glLinkProgram: OGLES3Cache:a/adad5de3aae5bc115731591c.v3dp (5 variants, 224 bytes of code)
+   265 compiler: program compiled in 40 ms
+   266 compiler: program compiled in 40 ms, OGLES3Cache:9/9dc9dd91677be19a7895d14d.v3dp
+   267 glLinkProgram: OGLES3Cache:9/9dc9dd91677be19a7895d14d.v3dp (5 variants, 224 bytes of code)
+   268 compiler: program compiled in 40 ms
+   269 compiler: program compiled in 40 ms, OGLES3Cache:9/9fe5bf1712982c1f2b157621.v3dp
+   270 glLinkProgram: OGLES3Cache:9/9fe5bf1712982c1f2b157621.v3dp (5 variants, 840 bytes of code)
+   271 compiler: program compiled in 40 ms
+   272 compiler: program compiled in 40 ms, OGLES3Cache:a/a26619d8722e4eb32836fba1.v3dp
+   273 glLinkProgram: OGLES3Cache:a/a26619d8722e4eb32836fba1.v3dp (5 variants, 224 bytes of code)
+   274 compiler: program compiled in 20 ms
+   275 compiler: program compiled in 40 ms, OGLES3Cache:4/4b7fefcb17d58630f347fc3a.v3dp
+   276 glLinkProgram: OGLES3Cache:4/4b7fefcb17d58630f347fc3a.v3dp (5 variants, 840 bytes of code)
+   277 compiler: program compiled in 40 ms
+   278 compiler: program compiled in 40 ms, OGLES3Cache:a/a15e28c5ed4ecf039b8413b2.v3dp
+   279 glLinkProgram: OGLES3Cache:a/a15e28c5ed4ecf039b8413b2.v3dp (5 variants, 224 bytes of code)
+   280 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   281 compiler: variants compiled in 40 ms, OGLES3Cache:a/a15e28c5ed4ecf039b8413b2.v3dp
+   282 draw: OGLES3Cache:a/a15e28c5ed4ecf039b8413b2.v3dx (2 variants)
+   283 compiler: program compiled in 40 ms
+   284 compiler: program compiled in 40 ms, OGLES3Cache:e/edd72cd4961e6133cd834e00.v3dp
+   285 glLinkProgram: OGLES3Cache:e/edd72cd4961e6133cd834e00.v3dp (5 variants, 224 bytes of code)
+   286 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   287 compiler: variants compiled in 20 ms, OGLES3Cache:e/edd72cd4961e6133cd834e00.v3dp
+   288 draw: OGLES3Cache:e/edd72cd4961e6133cd834e00.v3dx (2 variants)
+   289 compiler: program compiled in 20 ms
+   290 compiler: program compiled in 40 ms, OGLES3Cache:4/4d32fff862c3dadc3ea173db.v3dp
+   291 glLinkProgram: OGLES3Cache:4/4d32fff862c3dadc3ea173db.v3dp (5 variants, 840 bytes of code)
+   292 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   293 compiler: variants compiled in 20 ms, OGLES3Cache:4/4d32fff862c3dadc3ea173db.v3dp
+   294 draw: OGLES3Cache:4/4d32fff862c3dadc3ea173db.v3dx (2 variants)
+   295 compiler: program compiled in 40 ms
+   296 compiler: program compiled in 40 ms, OGLES3Cache:3/3907062c6176496c60d43b39.v3dp
+   297 glLinkProgram: OGLES3Cache:3/3907062c6176496c60d43b39.v3dp (5 variants, 1048 bytes of code)
+   298 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   299 compiler: variants compiled in 40 ms, OGLES3Cache:3/3907062c6176496c60d43b39.v3dp
+   300 draw: OGLES3Cache:3/3907062c6176496c60d43b39.v3dx (2 variants)
+   301 compiler: program compiled in 40 ms
+   302 compiler: program compiled in 40 ms, OGLES3Cache:5/5f6908a64f2952738f4c1a0d.v3dp
+   303 glLinkProgram: OGLES3Cache:5/5f6908a64f2952738f4c1a0d.v3dp (5 variants, 224 bytes of code)
+   304 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   305 compiler: variants compiled in 20 ms, OGLES3Cache:5/5f6908a64f2952738f4c1a0d.v3dp
+   306 draw: OGLES3Cache:5/5f6908a64f2952738f4c1a0d.v3dx (2 variants)
+   307 compiler: program compiled in 40 ms
+   308 compiler: program compiled in 40 ms, OGLES3Cache:1/1c855ba3c4a11451b83b7e62.v3dp
+   309 glLinkProgram: OGLES3Cache:1/1c855ba3c4a11451b83b7e62.v3dp (5 variants, 840 bytes of code)
+   310 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   311 compiler: variants compiled in 20 ms, OGLES3Cache:1/1c855ba3c4a11451b83b7e62.v3dp
+   312 draw: OGLES3Cache:1/1c855ba3c4a11451b83b7e62.v3dx (2 variants)
+   313 compiler: program compiled in 40 ms
+   314 compiler: program compiled in 40 ms, OGLES3Cache:9/9ec19916680ce880ca9e68e2.v3dp
+   315 glLinkProgram: OGLES3Cache:9/9ec19916680ce880ca9e68e2.v3dp (5 variants, 1048 bytes of code)
+   316 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   317 compiler: variants compiled in 20 ms, OGLES3Cache:9/9ec19916680ce880ca9e68e2.v3dp
+   318 draw: OGLES3Cache:9/9ec19916680ce880ca9e68e2.v3dx (2 variants)
+   319 compiler: program compiled in 20 ms
+   320 compiler: program compiled in 40 ms, OGLES3Cache:1/1852c21ce7107a65694cdd09.v3dp
+   321 glLinkProgram: OGLES3Cache:1/1852c21ce7107a65694cdd09.v3dp (5 variants, 1440 bytes of code)
+   322 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   323 compiler: variants compiled in 20 ms, OGLES3Cache:1/1852c21ce7107a65694cdd09.v3dp
+   324 draw: OGLES3Cache:1/1852c21ce7107a65694cdd09.v3dx (2 variants)
+   325 compiler: program compiled in 20 ms
+   326 compiler: program compiled in 40 ms, OGLES3Cache:1/1c6af4da3c9076a9219805bf.v3dp
+   327 glLinkProgram: OGLES3Cache:1/1c6af4da3c9076a9219805bf.v3dp (5 variants, 224 bytes of code)
+   328 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   329 compiler: variants compiled in 40 ms, OGLES3Cache:1/1c6af4da3c9076a9219805bf.v3dp
+   330 draw: OGLES3Cache:1/1c6af4da3c9076a9219805bf.v3dx (2 variants)
+   331 compiler: program compiled in 40 ms
+   332 compiler: program compiled in 40 ms, OGLES3Cache:1/188be408c95d6308db4f660a.v3dp
+   333 glLinkProgram: OGLES3Cache:1/188be408c95d6308db4f660a.v3dp (5 variants, 224 bytes of code)
+   334 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   335 compiler: variants compiled in 20 ms, OGLES3Cache:1/188be408c95d6308db4f660a.v3dp
+   336 draw: OGLES3Cache:1/188be408c95d6308db4f660a.v3dx (2 variants)
+   337 compiler: program compiled in 20 ms
+   338 compiler: program compiled in 40 ms, OGLES3Cache:b/bda67f0017e8a4c14367dbc9.v3dp
+   339 glLinkProgram: OGLES3Cache:b/bda67f0017e8a4c14367dbc9.v3dp (5 variants, 840 bytes of code)
+   340 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   341 compiler: variants compiled in 20 ms, OGLES3Cache:b/bda67f0017e8a4c14367dbc9.v3dp
+   342 draw: OGLES3Cache:b/bda67f0017e8a4c14367dbc9.v3dx (2 variants)
+   343 compiler: program compiled in 40 ms
+   344 compiler: program compiled in 120 ms, OGLES3Cache:a/a5587898426f1c88b87443d2.v3dp
+   345 glLinkProgram: OGLES3Cache:a/a5587898426f1c88b87443d2.v3dp (5 variants, 1048 bytes of code)
+   346 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   347 compiler: variants compiled in 120 ms, OGLES3Cache:a/a5587898426f1c88b87443d2.v3dp
+   348 draw: OGLES3Cache:a/a5587898426f1c88b87443d2.v3dx (2 variants)
+   349 compiler: program compiled in 60 ms
+   350 compiler: program compiled in 40 ms, OGLES3Cache:2/2cf2345606ddbf41a6ddb491.v3dp
+   351 glLinkProgram: OGLES3Cache:2/2cf2345606ddbf41a6ddb491.v3dp (5 variants, 1224 bytes of code)
+   352 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   353 compiler: variants compiled in 60 ms, OGLES3Cache:2/2cf2345606ddbf41a6ddb491.v3dp
+   354 draw: OGLES3Cache:2/2cf2345606ddbf41a6ddb491.v3dx (2 variants)
+   355 compiler: program compiled in 20 ms
+   356 compiler: program compiled in 40 ms, OGLES3Cache:6/6222414571a138d9260fa2fd.v3dp
+   357 glLinkProgram: OGLES3Cache:6/6222414571a138d9260fa2fd.v3dp (5 variants, 224 bytes of code)
+   358 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   359 compiler: variants compiled in 20 ms, OGLES3Cache:6/6222414571a138d9260fa2fd.v3dp
+   360 draw: OGLES3Cache:6/6222414571a138d9260fa2fd.v3dx (2 variants)
+   361 compiler: program compiled in 20 ms
+   362 compiler: program compiled in 40 ms, OGLES3Cache:5/5b84df4b612f15c6a3430e97.v3dp
+   363 glLinkProgram: OGLES3Cache:5/5b84df4b612f15c6a3430e97.v3dp (5 variants, 840 bytes of code)
+   364 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   365 compiler: variants compiled in 60 ms, OGLES3Cache:5/5b84df4b612f15c6a3430e97.v3dp
+   366 draw: OGLES3Cache:5/5b84df4b612f15c6a3430e97.v3dx (2 variants)
+   367 compiler: program compiled in 20 ms
+   368 compiler: program compiled in 120 ms, OGLES3Cache:a/a68773f00238e466529a16c8.v3dp
+   369 glLinkProgram: OGLES3Cache:a/a68773f00238e466529a16c8.v3dp (5 variants, 1048 bytes of code)
+   370 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   371 compiler: variants compiled in 100 ms, OGLES3Cache:a/a68773f00238e466529a16c8.v3dp
+   372 draw: OGLES3Cache:a/a68773f00238e466529a16c8.v3dx (2 variants)
+   373 compiler: program compiled in 120 ms
+   374 compiler: program compiled in 120 ms, OGLES3Cache:e/e83a0b0585af5dcd66637d60.v3dp
+   375 glLinkProgram: OGLES3Cache:e/e83a0b0585af5dcd66637d60.v3dp (5 variants, 1224 bytes of code)
+   376 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   377 compiler: variants compiled in 120 ms, OGLES3Cache:e/e83a0b0585af5dcd66637d60.v3dp
+   378 draw: OGLES3Cache:e/e83a0b0585af5dcd66637d60.v3dx (2 variants)
+   379 compiler: program compiled in 60 ms
+   380 compiler: program compiled in 60 ms, OGLES3Cache:5/5ea6d97d8fb99ee1efdf57f0.v3dp
+   381 glLinkProgram: OGLES3Cache:5/5ea6d97d8fb99ee1efdf57f0.v3dp (5 variants, 1960 bytes of code)
+   382 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   383 compiler: variants compiled in 100 ms, OGLES3Cache:5/5ea6d97d8fb99ee1efdf57f0.v3dp
+   384 draw: OGLES3Cache:5/5ea6d97d8fb99ee1efdf57f0.v3dx (2 variants)
+   385 compiler: shader compiled in 20 ms
+   386 compiler: shader compiled in 20 ms
+   387 compiler: program compiled in 20 ms
+   388 compiler: program compiled in 20 ms, OGLES3Cache:d/db7b6317b368af97e5266f84.v3dp
+   389 glLinkProgram: OGLES3Cache:d/db7b6317b368af97e5266f84.v3dp (5 variants, 744 bytes of code)
+   390 compiler: shader compiled in 60 ms
+   391 compiler: program compiled in 20 ms
+   392 compiler: program compiled in 20 ms, OGLES3Cache:d/d38e07559c5119c0ba17c2b5.v3dp
+   393 glLinkProgram: OGLES3Cache:d/d38e07559c5119c0ba17c2b5.v3dp (5 variants, 1224 bytes of code)
+   394 compiler: shader compiled in 20 ms
+   395 compiler: program compiled in 20 ms
+   396 compiler: program compiled in 20 ms, OGLES3Cache:3/3baf96a4a41a74565b6131c8.v3dp
+   397 glLinkProgram: OGLES3Cache:3/3baf96a4a41a74565b6131c8.v3dp (5 variants, 1224 bytes of code)
+   398 compiler: shader compiled in 20 ms
+   399 compiler: shader compiled in 20 ms
+   400 compiler: program compiled in 20 ms
+   401 compiler: program compiled in 20 ms, OGLES3Cache:d/d516ce6129b15e9045405bd5.v3dp
+   402 glLinkProgram: OGLES3Cache:d/d516ce6129b15e9045405bd5.v3dp (5 variants, 1224 bytes of code)
+   403 compiler: program compiled in 60 ms
+   404 compiler: program compiled in 60 ms, OGLES3Cache:b/b29b16b95c178761bffe0127.v3dp
+   405 glLinkProgram: OGLES3Cache:b/b29b16b95c178761bffe0127.v3dp (5 variants, 1576 bytes of code)
+   406 compiler: shader compiled in 40 ms
+   407 compiler: program compiled in 80 ms
+   408 compiler: program compiled in 160 ms, OGLES3Cache:9/9f814adf98256e148621b310.v3dp
+   409 glLinkProgram: OGLES3Cache:9/9f814adf98256e148621b310.v3dp (5 variants, 736 bytes of code)
+   410 compiler: shader compiled in 80 ms
+   411 compiler: shader compiled in 40 ms
+   412 compiler: program compiled in 120 ms, OGLES3Cache:e/e9813e3af835f795d34c1bf9.v3dp
+   413 glLinkProgram: OGLES3Cache:e/e9813e3af835f795d34c1bf9.v3dp (5 variants, 3760 bytes of code)
+   414 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   415 compiler: variants compiled in 80 ms, OGLES3Cache:9/9f814adf98256e148621b310.v3dp
+   416 draw: OGLES3Cache:9/9f814adf98256e148621b310.v3dx (2 variants)
+   417 compiler: shader compiled in 80 ms
+   418 compiler: program compiled in 80 ms, OGLES3Cache:0/0ba9e352bf78c65ddee4f6e3.v3dp
+   419 glLinkProgram: OGLES3Cache:0/0ba9e352bf78c65ddee4f6e3.v3dp (5 variants, 688 bytes of code)
+   420 compiler: shader compiled in 80 ms
+   421 compiler: program compiled in 120 ms, OGLES3Cache:c/cb191f64ac833043eedafdb2.v3dp
+   422 glLinkProgram: OGLES3Cache:c/cb191f64ac833043eedafdb2.v3dp (5 variants, 688 bytes of code)
+   423 compiler: program compiled in 40 ms
+   424 compiler: program compiled in 120 ms, OGLES3Cache:d/deb72a129e0a05abf448df0e.v3dp
+   425 glLinkProgram: OGLES3Cache:d/deb72a129e0a05abf448df0e.v3dp (5 variants, 808 bytes of code)
+   426 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   427 compiler: variants compiled in 120 ms, OGLES3Cache:d/deb72a129e0a05abf448df0e.v3dp
+   428 draw: OGLES3Cache:d/deb72a129e0a05abf448df0e.v3dx (2 variants)
+   429 compiler: program compiled in 80 ms
+   430 compiler: program compiled in 120 ms, OGLES3Cache:e/e437bb081d466ea842a10efe.v3dp
+   431 glLinkProgram: OGLES3Cache:e/e437bb081d466ea842a10efe.v3dp (5 variants, 808 bytes of code)
+   432 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   433 compiler: variants compiled in 120 ms, OGLES3Cache:e/e437bb081d466ea842a10efe.v3dp
+   434 draw: OGLES3Cache:e/e437bb081d466ea842a10efe.v3dx (2 variants)
+   435 compiler: program compiled in 60 ms
+   436 compiler: program compiled in 160 ms, OGLES3Cache:f/f93928feead90c57e742433c.v3dp
+   437 glLinkProgram: OGLES3Cache:f/f93928feead90c57e742433c.v3dp (5 variants, 3456 bytes of code)
+   438 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   439 compiler: variants compiled in 120 ms, OGLES3Cache:f/f93928feead90c57e742433c.v3dp
+   440 draw: OGLES3Cache:f/f93928feead90c57e742433c.v3dx (2 variants)
+   441 compiler: program compiled in 40 ms
+   442 compiler: program compiled in 80 ms, OGLES3Cache:a/a002c0eb8aee392a724b78e8.v3dp
+   443 glLinkProgram: OGLES3Cache:a/a002c0eb8aee392a724b78e8.v3dp (5 variants, 2440 bytes of code)
+   444 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   445 compiler: variants compiled in 100 ms, OGLES3Cache:a/a002c0eb8aee392a724b78e8.v3dp
+   446 draw: OGLES3Cache:a/a002c0eb8aee392a724b78e8.v3dx (2 variants)
+   447 compiler: program compiled in 80 ms
+   448 compiler: program compiled in 120 ms, OGLES3Cache:a/ae54b5721196a09247f9f703.v3dp
+   449 glLinkProgram: OGLES3Cache:a/ae54b5721196a09247f9f703.v3dp (5 variants, 1344 bytes of code)
+   450 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   451 compiler: variants compiled in 80 ms, OGLES3Cache:a/ae54b5721196a09247f9f703.v3dp
+   452 draw: OGLES3Cache:a/ae54b5721196a09247f9f703.v3dx (2 variants)
+   453 compiler: program compiled in 40 ms
+   454 compiler: program compiled in 120 ms, OGLES3Cache:b/bd0ff80e22156dd804fdac5f.v3dp
+   455 glLinkProgram: OGLES3Cache:b/bd0ff80e22156dd804fdac5f.v3dp (5 variants, 1344 bytes of code)
+   456 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   457 compiler: variants compiled in 120 ms, OGLES3Cache:b/bd0ff80e22156dd804fdac5f.v3dp
+   458 draw: OGLES3Cache:b/bd0ff80e22156dd804fdac5f.v3dx (2 variants)
+   459 compiler: shader compiled in 80 ms
+   460 compiler: program compiled in 160 ms, OGLES3Cache:4/4aa2389a5fc68e156a714f98.v3dp
+   461 glLinkProgram: OGLES3Cache:4/4aa2389a5fc68e156a714f98.v3dp (5 variants, 3216 bytes of code)
+   462 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   463 compiler: variants compiled in 80 ms, OGLES3Cache:4/4aa2389a5fc68e156a714f98.v3dp
+   464 draw: OGLES3Cache:4/4aa2389a5fc68e156a714f98.v3dx (2 variants)
+   465 compiler: program compiled in 120 ms, OGLES3Cache:1/18db42b5a0a9b236f70df7a7.v3dp
+   466 glLinkProgram: OGLES3Cache:1/18db42b5a0a9b236f70df7a7.v3dp (5 variants, 2304 bytes of code)
+   467 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   468 compiler: variants compiled in 100 ms, OGLES3Cache:1/18db42b5a0a9b236f70df7a7.v3dp
+   469 draw: OGLES3Cache:1/18db42b5a0a9b236f70df7a7.v3dx (2 variants)
+   470 compiler: program compiled in 60 ms
+   471 compiler: program compiled in 80 ms, OGLES3Cache:3/39c02d6892f4db27c88cc7ee.v3dp
+   472 glLinkProgram: OGLES3Cache:3/39c02d6892f4db27c88cc7ee.v3dp (5 variants, 976 bytes of code)
+   473 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   474 compiler: variants compiled in 80 ms, OGLES3Cache:3/39c02d6892f4db27c88cc7ee.v3dp
+   475 draw: OGLES3Cache:3/39c02d6892f4db27c88cc7ee.v3dx (2 variants)
+   476 compiler: program compiled in 40 ms
+   477 compiler: program compiled in 40 ms, OGLES3Cache:b/b1613f6a468cd0e2d51b6ae7.v3dp
+   478 glLinkProgram: OGLES3Cache:b/b1613f6a468cd0e2d51b6ae7.v3dp (5 variants, 1928 bytes of code)
+   479 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   480 compiler: variants compiled in 60 ms, OGLES3Cache:b/b1613f6a468cd0e2d51b6ae7.v3dp
+   481 draw: OGLES3Cache:b/b1613f6a468cd0e2d51b6ae7.v3dx (2 variants)
+   482 compiler: program compiled in 80 ms
+   483 compiler: program compiled in 80 ms, OGLES3Cache:b/ba2513c7532803ff251998ea.v3dp
+   484 glLinkProgram: OGLES3Cache:b/ba2513c7532803ff251998ea.v3dp (5 variants, 1928 bytes of code)
+   485 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   486 compiler: variants compiled in 80 ms, OGLES3Cache:b/ba2513c7532803ff251998ea.v3dp
+   487 draw: OGLES3Cache:b/ba2513c7532803ff251998ea.v3dx (2 variants)
+   488 compiler: program compiled in 80 ms
+   489 compiler: program compiled in 80 ms, OGLES3Cache:d/dacd53ad9119aba2d2d21dd5.v3dp
+   490 glLinkProgram: OGLES3Cache:d/dacd53ad9119aba2d2d21dd5.v3dp (5 variants, 1928 bytes of code)
+   491 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   492 compiler: variants compiled in 80 ms, OGLES3Cache:d/dacd53ad9119aba2d2d21dd5.v3dp
+   493 draw: OGLES3Cache:d/dacd53ad9119aba2d2d21dd5.v3dx (2 variants)
+   494 compiler: program compiled in 60 ms
+   495 compiler: program compiled in 80 ms, OGLES3Cache:c/cac062999d5ccaec0b8393d8.v3dp
+   496 glLinkProgram: OGLES3Cache:c/cac062999d5ccaec0b8393d8.v3dp (5 variants, 1928 bytes of code)
+   497 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   498 compiler: variants compiled in 80 ms, OGLES3Cache:c/cac062999d5ccaec0b8393d8.v3dp
+   499 draw: OGLES3Cache:c/cac062999d5ccaec0b8393d8.v3dx (2 variants)
+   500 compiler: program compiled in 20 ms
+   501 compiler: program compiled in 40 ms, OGLES3Cache:5/54d6146f9846ac1c28d83ed1.v3dp
+   502 glLinkProgram: OGLES3Cache:5/54d6146f9846ac1c28d83ed1.v3dp (5 variants, 2928 bytes of code)
+   503 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   504 compiler: variants compiled in 60 ms, OGLES3Cache:5/54d6146f9846ac1c28d83ed1.v3dp
+   505 draw: OGLES3Cache:5/54d6146f9846ac1c28d83ed1.v3dx (2 variants)
+   506 compiler: program compiled in 20 ms
+   507 compiler: program compiled in 40 ms, OGLES3Cache:a/a480d2f309b0db95978eeb85.v3dp
+   508 glLinkProgram: OGLES3Cache:a/a480d2f309b0db95978eeb85.v3dp (5 variants, 2928 bytes of code)
+   509 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   510 compiler: variants compiled in 40 ms, OGLES3Cache:a/a480d2f309b0db95978eeb85.v3dp
+   511 draw: OGLES3Cache:a/a480d2f309b0db95978eeb85.v3dx (2 variants)
+   512 compiler: program compiled in 40 ms
+   513 compiler: program compiled in 40 ms, OGLES3Cache:0/07159e6e4a6d1307d24a98d5.v3dp
+   514 glLinkProgram: OGLES3Cache:0/07159e6e4a6d1307d24a98d5.v3dp (5 variants, 2936 bytes of code)
+   515 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   516 compiler: variants compiled in 60 ms, OGLES3Cache:0/07159e6e4a6d1307d24a98d5.v3dp
+   517 draw: OGLES3Cache:0/07159e6e4a6d1307d24a98d5.v3dx (2 variants)
+   518 compiler: program compiled in 20 ms
+   519 compiler: program compiled in 40 ms, OGLES3Cache:e/e4f78084a5eff488d90a3704.v3dp
+   520 glLinkProgram: OGLES3Cache:e/e4f78084a5eff488d90a3704.v3dp (5 variants, 1080 bytes of code)
+   521 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   522 compiler: variants compiled in 40 ms, OGLES3Cache:e/e4f78084a5eff488d90a3704.v3dp
+   523 draw: OGLES3Cache:e/e4f78084a5eff488d90a3704.v3dx (2 variants)
+   524 compiler: program compiled in 20 ms
+   525 compiler: program compiled in 40 ms, OGLES3Cache:a/a09ffda06ef20a3cc8960e6e.v3dp
+   526 glLinkProgram: OGLES3Cache:a/a09ffda06ef20a3cc8960e6e.v3dp (5 variants, 1080 bytes of code)
+   527 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   528 compiler: variants compiled in 40 ms, OGLES3Cache:a/a09ffda06ef20a3cc8960e6e.v3dp
+   529 draw: OGLES3Cache:a/a09ffda06ef20a3cc8960e6e.v3dx (2 variants)
+   530 compiler: program compiled in 20 ms
+   531 compiler: program compiled in 40 ms, OGLES3Cache:7/744b80221d5ae79684c5d11f.v3dp
+   532 glLinkProgram: OGLES3Cache:7/744b80221d5ae79684c5d11f.v3dp (5 variants, 1472 bytes of code)
+   533 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   534 compiler: variants compiled in 40 ms, OGLES3Cache:7/744b80221d5ae79684c5d11f.v3dp
+   535 draw: OGLES3Cache:7/744b80221d5ae79684c5d11f.v3dx (2 variants)
+   536 compiler: program compiled in 40 ms
+   537 compiler: program compiled in 40 ms, OGLES3Cache:8/8ff0897c5755fcc48093c44e.v3dp
+   538 glLinkProgram: OGLES3Cache:8/8ff0897c5755fcc48093c44e.v3dp (5 variants, 1328 bytes of code)
+   539 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   540 compiler: variants compiled in 40 ms, OGLES3Cache:8/8ff0897c5755fcc48093c44e.v3dp
+   541 draw: OGLES3Cache:8/8ff0897c5755fcc48093c44e.v3dx (2 variants)
+   542 compiler: program compiled in 20 ms
+   543 compiler: program compiled in 40 ms, OGLES3Cache:e/eded0aa0f31ba0720fd6d25b.v3dp
+   544 glLinkProgram: OGLES3Cache:e/eded0aa0f31ba0720fd6d25b.v3dp (5 variants, 2488 bytes of code)
+   545 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   546 compiler: variants compiled in 60 ms, OGLES3Cache:e/eded0aa0f31ba0720fd6d25b.v3dp
+   547 draw: OGLES3Cache:e/eded0aa0f31ba0720fd6d25b.v3dx (2 variants)
+   548 compiler: program compiled in 40 ms
+   549 compiler: program compiled in 40 ms, OGLES3Cache:b/ba32f5df62454f1e4a96ea2b.v3dp
+   550 glLinkProgram: OGLES3Cache:b/ba32f5df62454f1e4a96ea2b.v3dp (5 variants, 2416 bytes of code)
+   551 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   552 compiler: variants compiled in 60 ms, OGLES3Cache:b/ba32f5df62454f1e4a96ea2b.v3dp
+   553 draw: OGLES3Cache:b/ba32f5df62454f1e4a96ea2b.v3dx (2 variants)
+   554 compiler: program compiled in 20 ms
+   555 compiler: program compiled in 40 ms, OGLES3Cache:4/4b7d15a6853bf8ed17fde908.v3dp
+   556 glLinkProgram: OGLES3Cache:4/4b7d15a6853bf8ed17fde908.v3dp (5 variants, 2512 bytes of code)
+   557 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   558 compiler: variants compiled in 40 ms, OGLES3Cache:4/4b7d15a6853bf8ed17fde908.v3dp
+   559 draw: OGLES3Cache:4/4b7d15a6853bf8ed17fde908.v3dx (2 variants)
+   560 compiler: shader compiled in 20 ms
+   561 compiler: program compiled in 20 ms
+   562 compiler: program compiled in 40 ms, OGLES3Cache:c/c6b8907e50cbd81c48385600.v3dp
+   563 glLinkProgram: OGLES3Cache:c/c6b8907e50cbd81c48385600.v3dp (5 variants, 1376 bytes of code)
+   564 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   565 compiler: variants compiled in 60 ms, OGLES3Cache:c/c6b8907e50cbd81c48385600.v3dp
+   566 draw: OGLES3Cache:c/c6b8907e50cbd81c48385600.v3dx (2 variants)
+   567 compiler: program compiled in 40 ms
+   568 compiler: program compiled in 40 ms, OGLES3Cache:c/ccb711e2d3bae4457bec1ba7.v3dp
+   569 glLinkProgram: OGLES3Cache:c/ccb711e2d3bae4457bec1ba7.v3dp (5 variants, 1376 bytes of code)
+   570 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   571 compiler: variants compiled in 20 ms, OGLES3Cache:c/ccb711e2d3bae4457bec1ba7.v3dp
+   572 draw: OGLES3Cache:c/ccb711e2d3bae4457bec1ba7.v3dx (2 variants)
+   573 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   574 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   575 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   576 glDrawArrays: no fragment shader variant for primitive 0; using the closest
+   577 compiler: program compiled in 100 ms
+   578 compiler: program compiled in 180 ms, OGLES3Cache:4/44aaba18671c1e3afe8e3d81.v3dp
+   579 glLinkProgram: OGLES3Cache:4/44aaba18671c1e3afe8e3d81.v3dp (5 variants, 4512 bytes of code)
+   580 compiler: program compiled in 100 ms
+   581 compiler: program compiled in 280 ms, OGLES3Cache:4/474d74601e91abbbe9ec0719.v3dp
+   582 glLinkProgram: OGLES3Cache:4/474d74601e91abbbe9ec0719.v3dp (5 variants, 6128 bytes of code)
+   583 compiler: shader compiled in 120 ms
+   584 compiler: shader compiled in 120 ms
+   585 compiler: program compiled in 240 ms, OGLES3Cache:3/35a4c1fd5b018f5925edd16e.v3dp
+   586 glLinkProgram: OGLES3Cache:3/35a4c1fd5b018f5925edd16e.v3dp (5 variants, 600 bytes of code)
+   587 aglDestroyContext: context 0x0904AFBC: freeing
+   588 device: context freed, 0 bytes of GPU memory still in use
+   589 aglDestroyContext: context 0x0904AFBC (274 frames, 10 dropped, 0 binning blocks added)
+   590 timing: 274 jobs, each on average: 18840 us of CPU work before its flush, 1236 us waiting for binning, 103 us for the render
+   591 timing: and in each flush 97 us building the render list, 67 us for the CPU cache before the GPU, 102 us after
+   592 timing: 465 swaps, 93958 us from one to the next on average, 383 us of it presenting
+   593 timing: per frame 0 draws, 10803 us in them; in all 4 ms in glBuffer(Sub)Data, 160 ms in glTex(Sub)Image2D

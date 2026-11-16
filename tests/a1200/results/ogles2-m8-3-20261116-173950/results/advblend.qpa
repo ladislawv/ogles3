@@ -1,0 +1,3741 @@
+#sessionInfo releaseName unknown
+#sessionInfo releaseId 0xcafebabe
+#sessionInfo targetName "AmigaOS3"
+#sessionInfo logFormatVersion "0.3.4"
+#sessionInfo vendor "ogles3.library"
+#sessionInfo renderer "V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM"
+#sessionInfo commandLineParameters "--deqp-case dEQP-GLES31.functional.blend_equation_advanced.* --deqp-archive-dir=M8R3:bin --deqp-log-filename=M8R3:results/advblend.qpa --deqp-log-images=disable --deqp-log-shader-sources=disable --deqp-surface-width=256 --deqp-surface-height=256 --deqp-gl-config-name=rgba8888d24s8ms0"
+
+#beginSession
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_advanced_coherent_getboolean
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_advanced_coherent_getboolean" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Initial" Description="Initial">
+  <Text>glGetBooleanv(GL_BLEND_ADVANCED_COHERENT_KHR, 0x0a96e5ed);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Toggle" Description="Toggle">
+  <Text>glDisable(GL_BLEND_ADVANCED_COHERENT_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleanv(GL_BLEND_ADVANCED_COHERENT_KHR, 0x0a96e5ed);</Text>
+  <Text>// data = { GL_FALSE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glEnable(GL_BLEND_ADVANCED_COHERENT_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleanv(GL_BLEND_ADVANCED_COHERENT_KHR, 0x0a96e5ed);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">11977</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_advanced_coherent_isenabled
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_advanced_coherent_isenabled" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Initial" Description="Initial">
+  <Text>glIsEnabled(GL_BLEND_ADVANCED_COHERENT_KHR);</Text>
+  <Text>// GL_TRUE returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Toggle" Description="Toggle">
+  <Text>glDisable(GL_BLEND_ADVANCED_COHERENT_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glIsEnabled(GL_BLEND_ADVANCED_COHERENT_KHR);</Text>
+  <Text>// GL_FALSE returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glEnable(GL_BLEND_ADVANCED_COHERENT_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glIsEnabled(GL_BLEND_ADVANCED_COHERENT_KHR);</Text>
+  <Text>// GL_TRUE returned</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">7939</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_advanced_coherent_getinteger
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_advanced_coherent_getinteger" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Initial" Description="Initial">
+  <Text>glGetIntegerv(GL_BLEND_ADVANCED_COHERENT_KHR, 0x0a96e5f0);</Text>
+  <Text>// data = { 1 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Toggle" Description="Toggle">
+  <Text>glDisable(GL_BLEND_ADVANCED_COHERENT_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegerv(GL_BLEND_ADVANCED_COHERENT_KHR, 0x0a96e5f0);</Text>
+  <Text>// data = { 0 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glEnable(GL_BLEND_ADVANCED_COHERENT_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegerv(GL_BLEND_ADVANCED_COHERENT_KHR, 0x0a96e5f0);</Text>
+  <Text>// data = { 1 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">7384</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_advanced_coherent_getinteger64
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_advanced_coherent_getinteger64" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Initial" Description="Initial">
+  <Text>glGetInteger64v(GL_BLEND_ADVANCED_COHERENT_KHR, 0x0a96e5f4);</Text>
+  <Text>// data = { 1 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Toggle" Description="Toggle">
+  <Text>glDisable(GL_BLEND_ADVANCED_COHERENT_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64v(GL_BLEND_ADVANCED_COHERENT_KHR, 0x0a96e5f4);</Text>
+  <Text>// data = { 0 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glEnable(GL_BLEND_ADVANCED_COHERENT_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64v(GL_BLEND_ADVANCED_COHERENT_KHR, 0x0a96e5f4);</Text>
+  <Text>// data = { 1 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">8693</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_advanced_coherent_getfloat
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_advanced_coherent_getfloat" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Initial" Description="Initial">
+  <Text>glGetFloatv(GL_BLEND_ADVANCED_COHERENT_KHR, 0x0a96e5f0);</Text>
+  <Text>// data = { 1 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Toggle" Description="Toggle">
+  <Text>glDisable(GL_BLEND_ADVANCED_COHERENT_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetFloatv(GL_BLEND_ADVANCED_COHERENT_KHR, 0x0a96e5f0);</Text>
+  <Text>// data = { 0 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glEnable(GL_BLEND_ADVANCED_COHERENT_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetFloatv(GL_BLEND_ADVANCED_COHERENT_KHR, 0x0a96e5f0);</Text>
+  <Text>// data = { 1 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">8362</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_equation_getboolean
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_equation_getboolean" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Type" Description="Test GL_MULTIPLY_KHR">
+  <Text>glBlendEquation(GL_MULTIPLY_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleanv(GL_BLEND_EQUATION_RGB, 0x0a96e521);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_SCREEN_KHR">
+  <Text>glBlendEquation(GL_SCREEN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleanv(GL_BLEND_EQUATION_RGB, 0x0a96e521);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_OVERLAY_KHR">
+  <Text>glBlendEquation(GL_OVERLAY_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleanv(GL_BLEND_EQUATION_RGB, 0x0a96e521);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_DARKEN_KHR">
+  <Text>glBlendEquation(GL_DARKEN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleanv(GL_BLEND_EQUATION_RGB, 0x0a96e521);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_LIGHTEN_KHR">
+  <Text>glBlendEquation(GL_LIGHTEN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleanv(GL_BLEND_EQUATION_RGB, 0x0a96e521);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_COLORDODGE_KHR">
+  <Text>glBlendEquation(GL_COLORDODGE_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleanv(GL_BLEND_EQUATION_RGB, 0x0a96e521);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_COLORBURN_KHR">
+  <Text>glBlendEquation(GL_COLORBURN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleanv(GL_BLEND_EQUATION_RGB, 0x0a96e521);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HARDLIGHT_KHR">
+  <Text>glBlendEquation(GL_HARDLIGHT_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleanv(GL_BLEND_EQUATION_RGB, 0x0a96e521);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_SOFTLIGHT_KHR">
+  <Text>glBlendEquation(GL_SOFTLIGHT_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleanv(GL_BLEND_EQUATION_RGB, 0x0a96e521);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_DIFFERENCE_KHR">
+  <Text>glBlendEquation(GL_DIFFERENCE_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleanv(GL_BLEND_EQUATION_RGB, 0x0a96e521);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_EXCLUSION_KHR">
+  <Text>glBlendEquation(GL_EXCLUSION_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleanv(GL_BLEND_EQUATION_RGB, 0x0a96e521);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_HUE_KHR">
+  <Text>glBlendEquation(GL_HSL_HUE_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleanv(GL_BLEND_EQUATION_RGB, 0x0a96e521);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_SATURATION_KHR">
+  <Text>glBlendEquation(GL_HSL_SATURATION_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleanv(GL_BLEND_EQUATION_RGB, 0x0a96e521);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_COLOR_KHR">
+  <Text>glBlendEquation(GL_HSL_COLOR_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleanv(GL_BLEND_EQUATION_RGB, 0x0a96e521);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_LUMINOSITY_KHR">
+  <Text>glBlendEquation(GL_HSL_LUMINOSITY_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleanv(GL_BLEND_EQUATION_RGB, 0x0a96e521);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">22430</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_equation_getinteger
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_equation_getinteger" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Type" Description="Test GL_MULTIPLY_KHR">
+  <Text>glBlendEquation(GL_MULTIPLY_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegerv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37524 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_SCREEN_KHR">
+  <Text>glBlendEquation(GL_SCREEN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegerv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37525 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_OVERLAY_KHR">
+  <Text>glBlendEquation(GL_OVERLAY_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegerv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37526 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_DARKEN_KHR">
+  <Text>glBlendEquation(GL_DARKEN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegerv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37527 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_LIGHTEN_KHR">
+  <Text>glBlendEquation(GL_LIGHTEN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegerv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37528 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_COLORDODGE_KHR">
+  <Text>glBlendEquation(GL_COLORDODGE_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegerv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37529 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_COLORBURN_KHR">
+  <Text>glBlendEquation(GL_COLORBURN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegerv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37530 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HARDLIGHT_KHR">
+  <Text>glBlendEquation(GL_HARDLIGHT_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegerv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37531 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_SOFTLIGHT_KHR">
+  <Text>glBlendEquation(GL_SOFTLIGHT_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegerv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37532 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_DIFFERENCE_KHR">
+  <Text>glBlendEquation(GL_DIFFERENCE_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegerv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37534 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_EXCLUSION_KHR">
+  <Text>glBlendEquation(GL_EXCLUSION_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegerv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37536 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_HUE_KHR">
+  <Text>glBlendEquation(GL_HSL_HUE_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegerv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37549 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_SATURATION_KHR">
+  <Text>glBlendEquation(GL_HSL_SATURATION_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegerv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37550 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_COLOR_KHR">
+  <Text>glBlendEquation(GL_HSL_COLOR_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegerv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37551 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_LUMINOSITY_KHR">
+  <Text>glBlendEquation(GL_HSL_LUMINOSITY_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegerv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37552 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">23127</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_equation_getinteger64
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_equation_getinteger64" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Type" Description="Test GL_MULTIPLY_KHR">
+  <Text>glBlendEquation(GL_MULTIPLY_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64v(GL_BLEND_EQUATION_RGB, 0x0a96e528);</Text>
+  <Text>// data = { 37524 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_SCREEN_KHR">
+  <Text>glBlendEquation(GL_SCREEN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64v(GL_BLEND_EQUATION_RGB, 0x0a96e528);</Text>
+  <Text>// data = { 37525 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_OVERLAY_KHR">
+  <Text>glBlendEquation(GL_OVERLAY_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64v(GL_BLEND_EQUATION_RGB, 0x0a96e528);</Text>
+  <Text>// data = { 37526 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_DARKEN_KHR">
+  <Text>glBlendEquation(GL_DARKEN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64v(GL_BLEND_EQUATION_RGB, 0x0a96e528);</Text>
+  <Text>// data = { 37527 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_LIGHTEN_KHR">
+  <Text>glBlendEquation(GL_LIGHTEN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64v(GL_BLEND_EQUATION_RGB, 0x0a96e528);</Text>
+  <Text>// data = { 37528 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_COLORDODGE_KHR">
+  <Text>glBlendEquation(GL_COLORDODGE_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64v(GL_BLEND_EQUATION_RGB, 0x0a96e528);</Text>
+  <Text>// data = { 37529 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_COLORBURN_KHR">
+  <Text>glBlendEquation(GL_COLORBURN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64v(GL_BLEND_EQUATION_RGB, 0x0a96e528);</Text>
+  <Text>// data = { 37530 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HARDLIGHT_KHR">
+  <Text>glBlendEquation(GL_HARDLIGHT_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64v(GL_BLEND_EQUATION_RGB, 0x0a96e528);</Text>
+  <Text>// data = { 37531 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_SOFTLIGHT_KHR">
+  <Text>glBlendEquation(GL_SOFTLIGHT_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64v(GL_BLEND_EQUATION_RGB, 0x0a96e528);</Text>
+  <Text>// data = { 37532 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_DIFFERENCE_KHR">
+  <Text>glBlendEquation(GL_DIFFERENCE_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64v(GL_BLEND_EQUATION_RGB, 0x0a96e528);</Text>
+  <Text>// data = { 37534 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_EXCLUSION_KHR">
+  <Text>glBlendEquation(GL_EXCLUSION_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64v(GL_BLEND_EQUATION_RGB, 0x0a96e528);</Text>
+  <Text>// data = { 37536 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_HUE_KHR">
+  <Text>glBlendEquation(GL_HSL_HUE_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64v(GL_BLEND_EQUATION_RGB, 0x0a96e528);</Text>
+  <Text>// data = { 37549 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_SATURATION_KHR">
+  <Text>glBlendEquation(GL_HSL_SATURATION_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64v(GL_BLEND_EQUATION_RGB, 0x0a96e528);</Text>
+  <Text>// data = { 37550 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_COLOR_KHR">
+  <Text>glBlendEquation(GL_HSL_COLOR_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64v(GL_BLEND_EQUATION_RGB, 0x0a96e528);</Text>
+  <Text>// data = { 37551 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_LUMINOSITY_KHR">
+  <Text>glBlendEquation(GL_HSL_LUMINOSITY_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64v(GL_BLEND_EQUATION_RGB, 0x0a96e528);</Text>
+  <Text>// data = { 37552 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">23029</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_equation_getfloat
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_equation_getfloat" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Type" Description="Test GL_MULTIPLY_KHR">
+  <Text>glBlendEquation(GL_MULTIPLY_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetFloatv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37524 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_SCREEN_KHR">
+  <Text>glBlendEquation(GL_SCREEN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetFloatv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37525 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_OVERLAY_KHR">
+  <Text>glBlendEquation(GL_OVERLAY_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetFloatv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37526 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_DARKEN_KHR">
+  <Text>glBlendEquation(GL_DARKEN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetFloatv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37527 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_LIGHTEN_KHR">
+  <Text>glBlendEquation(GL_LIGHTEN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetFloatv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37528 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_COLORDODGE_KHR">
+  <Text>glBlendEquation(GL_COLORDODGE_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetFloatv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37529 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_COLORBURN_KHR">
+  <Text>glBlendEquation(GL_COLORBURN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetFloatv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37530 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HARDLIGHT_KHR">
+  <Text>glBlendEquation(GL_HARDLIGHT_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetFloatv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37531 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_SOFTLIGHT_KHR">
+  <Text>glBlendEquation(GL_SOFTLIGHT_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetFloatv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37532 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_DIFFERENCE_KHR">
+  <Text>glBlendEquation(GL_DIFFERENCE_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetFloatv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37534 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_EXCLUSION_KHR">
+  <Text>glBlendEquation(GL_EXCLUSION_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetFloatv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37536 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_HUE_KHR">
+  <Text>glBlendEquation(GL_HSL_HUE_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetFloatv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37549 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_SATURATION_KHR">
+  <Text>glBlendEquation(GL_HSL_SATURATION_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetFloatv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37550 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_COLOR_KHR">
+  <Text>glBlendEquation(GL_HSL_COLOR_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetFloatv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37551 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_LUMINOSITY_KHR">
+  <Text>glBlendEquation(GL_HSL_LUMINOSITY_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetFloatv(GL_BLEND_EQUATION_RGB, 0x0a96e524);</Text>
+  <Text>// data = { 37552 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">22348</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_equation_getbooleani_v
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_equation_getbooleani_v" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Type" Description="Test GL_MULTIPLY_KHR">
+  <Text>glBlendEquationi(2, GL_MULTIPLY_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleani_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e467);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_SCREEN_KHR">
+  <Text>glBlendEquationi(2, GL_SCREEN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleani_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e467);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_OVERLAY_KHR">
+  <Text>glBlendEquationi(2, GL_OVERLAY_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleani_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e467);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_DARKEN_KHR">
+  <Text>glBlendEquationi(2, GL_DARKEN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleani_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e467);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_LIGHTEN_KHR">
+  <Text>glBlendEquationi(2, GL_LIGHTEN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleani_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e467);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_COLORDODGE_KHR">
+  <Text>glBlendEquationi(2, GL_COLORDODGE_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleani_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e467);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_COLORBURN_KHR">
+  <Text>glBlendEquationi(2, GL_COLORBURN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleani_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e467);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HARDLIGHT_KHR">
+  <Text>glBlendEquationi(2, GL_HARDLIGHT_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleani_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e467);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_SOFTLIGHT_KHR">
+  <Text>glBlendEquationi(2, GL_SOFTLIGHT_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleani_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e467);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_DIFFERENCE_KHR">
+  <Text>glBlendEquationi(2, GL_DIFFERENCE_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleani_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e467);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_EXCLUSION_KHR">
+  <Text>glBlendEquationi(2, GL_EXCLUSION_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleani_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e467);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_HUE_KHR">
+  <Text>glBlendEquationi(2, GL_HSL_HUE_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleani_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e467);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_SATURATION_KHR">
+  <Text>glBlendEquationi(2, GL_HSL_SATURATION_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleani_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e467);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_COLOR_KHR">
+  <Text>glBlendEquationi(2, GL_HSL_COLOR_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleani_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e467);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_LUMINOSITY_KHR">
+  <Text>glBlendEquationi(2, GL_HSL_LUMINOSITY_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetBooleani_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e467);</Text>
+  <Text>// data = { GL_TRUE }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">27937</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_equation_getintegeri_v
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_equation_getintegeri_v" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Type" Description="Test GL_MULTIPLY_KHR">
+  <Text>glBlendEquationi(2, GL_MULTIPLY_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegeri_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46a);</Text>
+  <Text>// data = { 37524 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_SCREEN_KHR">
+  <Text>glBlendEquationi(2, GL_SCREEN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegeri_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46a);</Text>
+  <Text>// data = { 37525 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_OVERLAY_KHR">
+  <Text>glBlendEquationi(2, GL_OVERLAY_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegeri_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46a);</Text>
+  <Text>// data = { 37526 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_DARKEN_KHR">
+  <Text>glBlendEquationi(2, GL_DARKEN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegeri_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46a);</Text>
+  <Text>// data = { 37527 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_LIGHTEN_KHR">
+  <Text>glBlendEquationi(2, GL_LIGHTEN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegeri_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46a);</Text>
+  <Text>// data = { 37528 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_COLORDODGE_KHR">
+  <Text>glBlendEquationi(2, GL_COLORDODGE_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegeri_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46a);</Text>
+  <Text>// data = { 37529 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_COLORBURN_KHR">
+  <Text>glBlendEquationi(2, GL_COLORBURN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegeri_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46a);</Text>
+  <Text>// data = { 37530 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HARDLIGHT_KHR">
+  <Text>glBlendEquationi(2, GL_HARDLIGHT_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegeri_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46a);</Text>
+  <Text>// data = { 37531 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_SOFTLIGHT_KHR">
+  <Text>glBlendEquationi(2, GL_SOFTLIGHT_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegeri_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46a);</Text>
+  <Text>// data = { 37532 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_DIFFERENCE_KHR">
+  <Text>glBlendEquationi(2, GL_DIFFERENCE_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegeri_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46a);</Text>
+  <Text>// data = { 37534 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_EXCLUSION_KHR">
+  <Text>glBlendEquationi(2, GL_EXCLUSION_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegeri_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46a);</Text>
+  <Text>// data = { 37536 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_HUE_KHR">
+  <Text>glBlendEquationi(2, GL_HSL_HUE_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegeri_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46a);</Text>
+  <Text>// data = { 37549 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_SATURATION_KHR">
+  <Text>glBlendEquationi(2, GL_HSL_SATURATION_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegeri_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46a);</Text>
+  <Text>// data = { 37550 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_COLOR_KHR">
+  <Text>glBlendEquationi(2, GL_HSL_COLOR_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegeri_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46a);</Text>
+  <Text>// data = { 37551 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_LUMINOSITY_KHR">
+  <Text>glBlendEquationi(2, GL_HSL_LUMINOSITY_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetIntegeri_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46a);</Text>
+  <Text>// data = { 37552 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">23206</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_equation_getinteger64i_v
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.state_query.blend_equation_getinteger64i_v" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="Type" Description="Test GL_MULTIPLY_KHR">
+  <Text>glBlendEquationi(2, GL_MULTIPLY_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64i_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46e);</Text>
+  <Text>// data = { 37524 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_SCREEN_KHR">
+  <Text>glBlendEquationi(2, GL_SCREEN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64i_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46e);</Text>
+  <Text>// data = { 37525 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_OVERLAY_KHR">
+  <Text>glBlendEquationi(2, GL_OVERLAY_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64i_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46e);</Text>
+  <Text>// data = { 37526 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_DARKEN_KHR">
+  <Text>glBlendEquationi(2, GL_DARKEN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64i_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46e);</Text>
+  <Text>// data = { 37527 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_LIGHTEN_KHR">
+  <Text>glBlendEquationi(2, GL_LIGHTEN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64i_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46e);</Text>
+  <Text>// data = { 37528 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_COLORDODGE_KHR">
+  <Text>glBlendEquationi(2, GL_COLORDODGE_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64i_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46e);</Text>
+  <Text>// data = { 37529 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_COLORBURN_KHR">
+  <Text>glBlendEquationi(2, GL_COLORBURN_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64i_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46e);</Text>
+  <Text>// data = { 37530 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HARDLIGHT_KHR">
+  <Text>glBlendEquationi(2, GL_HARDLIGHT_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64i_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46e);</Text>
+  <Text>// data = { 37531 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_SOFTLIGHT_KHR">
+  <Text>glBlendEquationi(2, GL_SOFTLIGHT_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64i_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46e);</Text>
+  <Text>// data = { 37532 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_DIFFERENCE_KHR">
+  <Text>glBlendEquationi(2, GL_DIFFERENCE_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64i_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46e);</Text>
+  <Text>// data = { 37534 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_EXCLUSION_KHR">
+  <Text>glBlendEquationi(2, GL_EXCLUSION_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64i_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46e);</Text>
+  <Text>// data = { 37536 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_HUE_KHR">
+  <Text>glBlendEquationi(2, GL_HSL_HUE_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64i_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46e);</Text>
+  <Text>// data = { 37549 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_SATURATION_KHR">
+  <Text>glBlendEquationi(2, GL_HSL_SATURATION_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64i_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46e);</Text>
+  <Text>// data = { 37550 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_COLOR_KHR">
+  <Text>glBlendEquationi(2, GL_HSL_COLOR_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64i_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46e);</Text>
+  <Text>// data = { 37551 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Section Name="Type" Description="Test GL_HSL_LUMINOSITY_KHR">
+  <Text>glBlendEquationi(2, GL_HSL_LUMINOSITY_KHR);</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+  <Text>glGetInteger64i_v(GL_BLEND_EQUATION_RGB, 2, 0x0a96e46e);</Text>
+  <Text>// data = { 37552 }</Text>
+  <Text>glGetError();</Text>
+  <Text>// GL_NO_ERROR returned</Text>
+</Section>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">22672</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.basic.multiply
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.basic.multiply" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">84.230003</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">40.443001</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">244.438004</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">660016</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.basic.screen
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.basic.screen" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.830000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">46.609001</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">41.025002</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">376939</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.basic.overlay
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.basic.overlay" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.598000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">33.577000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">44.230999</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">375798</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.basic.darken
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.basic.darken" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.509000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">31.302000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">45.195999</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">371323</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.basic.lighten
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.basic.lighten" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.672000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">34.221001</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">44.221001</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">369515</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.basic.colordodge
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.basic.colordodge" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.821000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">40.601002</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">44.402000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">380847</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.basic.colorburn
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.basic.colorburn" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">5.810000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">30.594000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">49.622002</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">382509</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.basic.hardlight
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.basic.hardlight" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.828000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">24.687000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">43.207001</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">362586</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.basic.softlight
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.basic.softlight" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.643000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">32.770000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">44.755001</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">375630</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.basic.difference
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.basic.difference" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.688000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">31.495001</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">44.425999</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">362313</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.basic.exclusion
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.basic.exclusion" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.831000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">25.910000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">44.139000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">361037</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.basic.hsl_hue
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.basic.hsl_hue" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.497000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">43.111000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">40.465000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">717843</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.basic.hsl_saturation
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.basic.hsl_saturation" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.509000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">32.259998</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">44.344002</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">724562</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.basic.hsl_color
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.basic.hsl_color" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.787000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">43.619999</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">40.759998</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">697317</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.basic.hsl_luminosity
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.basic.hsl_luminosity" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.537000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">39.612000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">44.570000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">693102</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.srgb.multiply
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.srgb.multiply" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.847000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.882000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.091000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_SRGB8_ALPHA8 and 0 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">502320</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.srgb.screen
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.srgb.screen" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.856000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">5.771000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.102000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_SRGB8_ALPHA8 and 0 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">505159</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.srgb.overlay
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.srgb.overlay" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.188000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.101000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.095000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_SRGB8_ALPHA8 and 0 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">509333</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.srgb.darken
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.srgb.darken" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.688000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">5.633000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.099000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_SRGB8_ALPHA8 and 0 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">504877</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.srgb.lighten
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.srgb.lighten" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.481000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">3.056000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.099000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_SRGB8_ALPHA8 and 0 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">508735</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.srgb.colordodge
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.srgb.colordodge" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.665000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.307000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.100000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_SRGB8_ALPHA8 and 0 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">505606</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.srgb.colorburn
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.srgb.colorburn" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.536000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.677000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.093000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_SRGB8_ALPHA8 and 0 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">508403</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.srgb.hardlight
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.srgb.hardlight" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.662000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.552000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.094000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_SRGB8_ALPHA8 and 0 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">507428</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.srgb.softlight
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.srgb.softlight" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.652000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.957000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.097000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_SRGB8_ALPHA8 and 0 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">514456</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.srgb.difference
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.srgb.difference" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.170000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.882000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.098000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_SRGB8_ALPHA8 and 0 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">507738</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.srgb.exclusion
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.srgb.exclusion" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.558000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.858000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.095000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_SRGB8_ALPHA8 and 0 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">507147</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.srgb.hsl_hue
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.srgb.hsl_hue" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.051000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.800000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.093000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_SRGB8_ALPHA8 and 0 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">840750</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.srgb.hsl_saturation
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.srgb.hsl_saturation" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.680000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">5.166000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.110000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_SRGB8_ALPHA8 and 0 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">845731</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.srgb.hsl_color
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.srgb.hsl_color" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">4.022000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.472000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.100000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_SRGB8_ALPHA8 and 0 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">828110</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.srgb.hsl_luminosity
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.srgb.hsl_luminosity" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.133000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.811000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.094000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_SRGB8_ALPHA8 and 0 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">819757</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.msaa.multiply
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.msaa.multiply" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.521000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">4.688000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.098000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">762502</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.msaa.screen
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.msaa.screen" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.968000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.979000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.096000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">745505</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.msaa.overlay
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.msaa.overlay" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.665000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">6.476000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.331000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">751676</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.msaa.darken
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.msaa.darken" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.631000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">3.833000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.117000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">761247</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.msaa.lighten
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.msaa.lighten" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.246000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.487000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.093000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">755703</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.msaa.colordodge
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.msaa.colordodge" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.962000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.093000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.093000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">761393</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.msaa.colorburn
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.msaa.colorburn" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.659000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">5.564000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.100000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">755610</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.msaa.hardlight
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.msaa.hardlight" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">3.959000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">5.010000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.103000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">757970</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.msaa.softlight
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.msaa.softlight" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.754000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.786000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.093000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">756381</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.msaa.difference
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.msaa.difference" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.846000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.101000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.090000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">752423</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.msaa.exclusion
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.msaa.exclusion" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.935000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">6.298000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.094000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">755645</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.msaa.hsl_hue
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.msaa.hsl_hue" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">3.922000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">4.894000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.097000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1090199</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.msaa.hsl_saturation
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.msaa.hsl_saturation" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">5.244000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.789000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.096000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1101070</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.msaa.hsl_color
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.msaa.hsl_color" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.665000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">5.236000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.107000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1062498</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.msaa.hsl_luminosity
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.msaa.hsl_luminosity" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.775000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.476000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.106000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1062793</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.barrier.multiply
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.barrier.multiply" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.413000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.624000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.093000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">749323</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.barrier.screen
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.barrier.screen" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.768000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.236000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.100000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">749010</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.barrier.overlay
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.barrier.overlay" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.516000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">6.274000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.115000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">769855</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.barrier.darken
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.barrier.darken" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.520000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.757000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.096000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">769002</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.barrier.lighten
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.barrier.lighten" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.298000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.250000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.093000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">765760</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.barrier.colordodge
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.barrier.colordodge" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.438000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.762000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.098000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">771179</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.barrier.colorburn
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.barrier.colorburn" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">3.272000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">4.409000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.120000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">785483</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.barrier.hardlight
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.barrier.hardlight" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.381000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">5.462000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.098000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">769900</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.barrier.softlight
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.barrier.softlight" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.857000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.084000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.089000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">778602</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.barrier.difference
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.barrier.difference" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">3.694000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.449000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.094000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">766714</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.barrier.exclusion
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.barrier.exclusion" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.382000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">3.764000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.100000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">755496</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.barrier.hsl_hue
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.barrier.hsl_hue" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.511000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">3.689000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.113000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1228908</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.barrier.hsl_saturation
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.barrier.hsl_saturation" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.692000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.179000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.096000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1232842</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.barrier.hsl_color
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.barrier.hsl_color" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.371000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.371000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.092000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1129128</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.barrier.hsl_luminosity
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.barrier.hsl_luminosity" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.107000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.786000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.090000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1124872</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent.multiply
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent.multiply" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.520000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">5.333000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.102000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">751800</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent.screen
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent.screen" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.954000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.612000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.093000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">752465</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent.overlay
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent.overlay" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.665000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">4.880000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.097000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">764427</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent.darken
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent.darken" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.293000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">8.357000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.112000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">772344</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent.lighten
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent.lighten" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.510000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">4.676000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.096000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">765020</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent.colordodge
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent.colordodge" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">0.840000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.085000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.091000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">780444</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent.colorburn
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent.colorburn" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">3.365000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">3.075000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.097000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">782142</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent.hardlight
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent.hardlight" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.161000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.228000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.099000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">768354</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent.softlight
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent.softlight" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.545000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">7.383000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.114000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">780353</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent.difference
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent.difference" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.332000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">5.462000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.100000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">767864</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent.exclusion
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent.exclusion" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.952000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.703000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.096000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">758924</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent.hsl_hue
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent.hsl_hue" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.680000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">3.305000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.098000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1228233</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent.hsl_saturation
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent.hsl_saturation" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.985000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.918000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.091000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1224902</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent.hsl_color
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent.hsl_color" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.528000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">4.688000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.089000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1132843</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent.hsl_luminosity
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent.hsl_luminosity" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.731000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.374000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.099000</Number>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1128831</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.multiply
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.multiply" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.511000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">4.686000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.098000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1208668</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.screen
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.screen" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">3.013000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">3.090000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.103000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1220679</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.overlay
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.overlay" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.727000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">5.264000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.108000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1214492</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.darken
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.darken" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.331000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.519000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.101000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1215216</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.lighten
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.lighten" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.508000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">4.685000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.097000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1221866</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.colordodge
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.colordodge" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">5.103000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.571000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.103000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1229977</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.colorburn
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.colorburn" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.877000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">3.138000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.096000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1251652</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.hardlight
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.hardlight" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">5.089000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.276000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.114000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1231508</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.softlight
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.softlight" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.537000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.612000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.093000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1247176</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.difference
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.difference" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">4.759000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.506000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.103000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1246297</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.exclusion
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.exclusion" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">2.856000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">5.626000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.118000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1228234</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.hsl_hue
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.hsl_hue" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.627000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">1.435000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.094000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1670534</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.hsl_saturation
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.hsl_saturation" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.664000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">5.849000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.103000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1709846</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.hsl_color
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.hsl_color" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.518000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">3.527000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.097000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1571576</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.hsl_luminosity
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.blend_equation_advanced.coherent_msaa.hsl_luminosity" Version="0.3.4" CaseType="SelfValidate">
+ <ShaderProgram LinkStatus="OK">
+  <InfoLog></InfoLog>
+  <VertexShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</VertexShader>
+  <FragmentShader CompileStatus="OK">
+   <ShaderSource></ShaderSource>
+   <InfoLog></InfoLog>
+</FragmentShader>
+</ShaderProgram>
+ <Number Name="VertexCompileTime" Description="Vertex shader compile time" Tag="Time" Unit="ms">1.949000</Number>
+ <Number Name="FragmentCompileTime" Description="Fragment shader compile time" Tag="Time" Unit="ms">2.602000</Number>
+ <Number Name="LinkTime" Description="Link time" Tag="Time" Unit="ms">0.090000</Number>
+ <Text>Using FBO of size (256, 256) with format GL_RGBA8 and 4 samples</Text>
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <ImageSet Name="CompareResult" Description="Image Comparison Result" />
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1592958</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+Run took 76.28 seconds
+
+#endSession
