@@ -643,6 +643,32 @@ static int dispatch_key_state(GLuint p, int wide)
 static int draw_key_states(GLuint p, int wide);
 
 /* The default key states: a compute program's dispatch, any other's draws. */
+/* V3DGLSL_KEY_PER_SAMPLE: the key-state draw a 4x target's, with
+ * GL_SAMPLE_SHADING at 1.0, so the state tracker binds its per-sample
+ * variant of the fragment shader (st_atom_shader.c's persample_shading);
+ * one primitive class (the variant's key comes from the request). */
+static int per_sample_draw;
+static GLuint ms_fbo;
+
+static int make_ms_target(void)
+{
+    GLuint rb[2];
+    _mesa_GenRenderbuffers(2, rb);
+    _mesa_BindRenderbuffer(GL_RENDERBUFFER, rb[0]);
+    _mesa_RenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGBA8, 64, 64);
+    _mesa_BindRenderbuffer(GL_RENDERBUFFER, rb[1]);
+    _mesa_RenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH_COMPONENT16, 64, 64);
+    _mesa_GenFramebuffers(1, &ms_fbo);
+    _mesa_BindFramebuffer(GL_FRAMEBUFFER, ms_fbo);
+    _mesa_FramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, rb[0]);
+    _mesa_FramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rb[1]);
+    if (_mesa_CheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        fprintf(stderr, "v3dglslc: the 4x draw target is incomplete\n");
+        return 0;
+    }
+    return 1;
+}
+
 static int key_states(GLuint p, int wide)
 {
     GET_CURRENT_CONTEXT(ctx);
@@ -759,18 +785,30 @@ static int draw_key_states(GLuint p, int wide)
             count = gs_mode == GL_POINTS ? 1 : gs_mode == GL_LINES ? 2 : gs_mode == GL_LINES_ADJACENCY ? 4
                   : gs_mode == GL_TRIANGLES_ADJACENCY ? 6 : 3;
         }
-        if (typed)
+        if (per_sample_draw) { /* V3DGLSL_KEY_PER_SAMPLE: the state tracker's per-sample variant bound */
+            if (!ms_fbo && !make_ms_target())
+                return 0;
+            _mesa_BindFramebuffer(GL_FRAMEBUFFER, ms_fbo);
+            _mesa_Enable(GL_SAMPLE_SHADING);
+            _mesa_MinSampleShading(1.0f);
+            _mesa_DrawArrays(modes[0], 0, count);
+            _mesa_Disable(GL_SAMPLE_SHADING);
+            _mesa_BindFramebuffer(GL_FRAMEBUFFER, draw_fbo);
+            nmodes = 0; /* no other draws */
+        }
+        if (typed && nmodes)
             _mesa_BindFramebuffer(GL_FRAMEBUFFER, typed);
         for (m = 0; m < nmodes; m++)
             _mesa_DrawArrays(modes[m], 0, count);
-        if (typed)
+        if (typed && nmodes)
             _mesa_BindFramebuffer(GL_FRAMEBUFFER, draw_fbo);
         /* EXT_draw_buffers (GLSL ES 1.00): a fragment shader that writes
          * gl_FragData[1] or up is also drawn into 2, 3 and 4 targets.
          * gl_FragColor would be broadcast to them too, but every program
          * would then compile nine more fragment shaders: ogles2 draws such a
          * program into the first target only. */
-        if (sp && sp->GLSL_Version < 300 && fsh && fsh->Program && (fsh->Program->info.outputs_written & more)) {
+        if (nmodes && sp && sp->GLSL_Version < 300 && fsh && fsh->Program &&
+            (fsh->Program->info.outputs_written & more)) {
             int n;
             for (n = 0; n < 3; n++) {
                 _mesa_BindFramebuffer(GL_FRAMEBUFFER, mrt_fbo[n]);
@@ -910,7 +948,7 @@ static int write_files(struct gl_shader_program *prog, GLuint p, const char *pat
     if (variant_keys) {
         char xpath[512];
         size_t n = strlen(path), at = 0, used;
-        int ok = 1;
+        int ok = 1, bound_per_sample = 0;
         if (n <= 5 || n >= sizeof(xpath) || !key_states(p, 0))
             return 0;
         snprintf(xpath, sizeof(xpath), "%.*s.v3dx", (int)(n - 5), path);
@@ -920,6 +958,7 @@ static int write_files(struct gl_shader_program *prog, GLuint p, const char *pat
             struct v3d_fs_key fk;
             struct v3d_gs_key gk;
             unsigned vstage;
+            int per_sample;
             /* A vertex key (or a geometry one: EXT_geometry_shader, whose
              * render variant's outputs are the fragment shader's inputs)
              * whose outputs follow the fragment variant before it
@@ -927,15 +966,16 @@ static int write_files(struct gl_shader_program *prog, GLuint p, const char *pat
             uint8_t one[4 + 512];
             const uint8_t *key = variant_keys + at;
             int from_fs = variant_keys_len - at >= 4 && (key[1] & (V3DGLSL_KEY_OUTPUTS_FROM_FS >> 8));
-            if (from_fs) {
+            per_sample = variant_keys_len - at >= 4 && (key[1] & (V3DGLSL_KEY_PER_SAMPLE >> 8));
+            if (from_fs || per_sample) {
                 size_t n = variant_keys_len - at < sizeof(one) ? variant_keys_len - at : sizeof(one);
                 memcpy(one, key, n);
-                one[1] &= ~(V3DGLSL_KEY_OUTPUTS_FROM_FS >> 8);
+                one[1] &= ~((V3DGLSL_KEY_OUTPUTS_FROM_FS | V3DGLSL_KEY_PER_SAMPLE) >> 8);
                 used = v3dp_key_parse(one, n, &vstage, &vk, &fk, &gk);
             } else {
                 used = v3dp_key_parse(key, variant_keys_len - at, &vstage, &vk, &fk, &gk);
             }
-            if (!used || (from_fs && vstage == 4)) {
+            if (!used || (from_fs && vstage == 4) || (per_sample && vstage != 4)) {
                 fprintf(stderr, "v3dglslc: unreadable variant key at byte %u\n", (unsigned)at);
                 ok = 0;
                 break;
@@ -961,6 +1001,17 @@ static int write_files(struct gl_shader_program *prog, GLuint p, const char *pat
                     else
                         vk.used_outputs[i].slot_and_component = s;
                 }
+            }
+            /* the fragment shader the state tracker bound: its per-sample
+             * variant for such a key, else the plain one (a draw each time
+             * it changes) */
+            if (vstage == 4 && per_sample != bound_per_sample) {
+                per_sample_draw = per_sample;
+                ok = key_states(p, 0);
+                per_sample_draw = 0;
+                bound_per_sample = per_sample;
+                if (!ok)
+                    break;
             }
             ok = vstage == 4                  ? v3d_compile_variant(the_pipe, MESA_SHADER_FRAGMENT, &fk.base, sizeof(fk))
                : vstage == 2 || vstage == 3   ? v3d_compile_variant(the_pipe, MESA_SHADER_GEOMETRY, &gk.base, sizeof(gk))

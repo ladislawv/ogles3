@@ -2827,20 +2827,32 @@ static BOOL same_targets(const struct OGLES3VkTargets *a, const struct OGLES3VkT
     return TRUE;
 }
 
-/* A variant of `stage` fitting `want` in one image, or 0. */
-static const struct OGLES3Variant *find_in(const struct OGLES3Image *im, UBYTE stage, const UBYTE *want)
+/* A variant of `stage` fitting `want` in one image, or 0. A fragment
+ * variant for `ps` (OES_sample_shading: the per-sample one, which the key
+ * does not tell apart: its prog data's force_per_sample_msaa) must be one;
+ * without, a plain one comes before (a program reading the sample has only
+ * such). */
+static const struct OGLES3Variant *find_in(const struct OGLES3Image *im, UBYTE stage, const UBYTE *want, BOOL ps)
 {
+    const struct OGLES3Variant *any = 0;
     UWORD i;
     for (i = 0; im && i < im->nvariants; i++) {
         const struct OGLES3Variant *v = &im->variants[i];
         if (v->stage == stage &&
             (stage == OGLES3_VARIANT_FS ? ogles2_vk_fs_fits(v->key, want)
              : stage == OGLES3_VARIANT_GS || stage == OGLES3_VARIANT_GS_BIN ? ogles2_vk_gs_fits(v->key, want)
-                                                                             : ogles2_vk_vs_fits(v->key, want)))
-            return v;
+                                                                             : ogles2_vk_vs_fits(v->key, want))) {
+            if (stage != OGLES3_VARIANT_FS || (ps ? v->force_per_sample_msaa : !v->force_per_sample_msaa))
+                return v;
+            if (!ps && !any)
+                any = v;
+        }
     }
-    return 0;
+    return any;
 }
+
+static const struct OGLES3Variant *find_xs(struct OGLES3Image *im, UBYTE stage, const UBYTE *want,
+                                           const struct OGLES3Image **owner, BOOL ps);
 
 /* In the program's file, then (fragment variants) its shipped or cached
  * .v3dw and .v3da where the key has 32-bit samplers or alpha to coverage,
@@ -2849,28 +2861,34 @@ static const struct OGLES3Variant *find_in(const struct OGLES3Image *im, UBYTE s
 static const struct OGLES3Variant *find_x(struct OGLES3Image *im, UBYTE stage, const UBYTE *want,
                                           const struct OGLES3Image **owner)
 {
+    return find_xs(im, stage, want, owner, FALSE);
+}
+
+static const struct OGLES3Variant *find_xs(struct OGLES3Image *im, UBYTE stage, const UBYTE *want,
+                                           const struct OGLES3Image **owner, BOOL ps)
+{
     const struct OGLES3Variant *v;
     const struct OGLES3Image *x;
-    if ((v = find_in(im, stage, want))) {
+    if ((v = find_in(im, stage, want, ps))) {
         *owner = im;
         return v;
     }
     if (stage == OGLES3_VARIANT_FS && ogles2_vk_bits(want) && (x = ogles2_image_wide_file(im)) &&
-        (v = find_in(x, stage, want))) {
+        (v = find_in(x, stage, want, ps))) {
         *owner = x;
         return v;
     }
     if (stage == OGLES3_VARIANT_FS && want[OGLES3_VK_FS_A2C] && (x = ogles2_image_a2c_file(im)) &&
-        (v = find_in(x, stage, want))) {
+        (v = find_in(x, stage, want, ps))) {
         *owner = x;
         return v;
     }
-    if ((x = ogles2_image_x(im, FALSE)) && (v = find_in(x, stage, want))) {
+    if ((x = ogles2_image_x(im, FALSE)) && (v = find_in(x, stage, want, ps))) {
         *owner = x;
         return v;
     }
     for (x = ogles2_image_x(im, TRUE); x; x = x->xc)
-        if ((v = find_in(x, stage, want))) {
+        if ((v = find_in(x, stage, want, ps))) {
             *owner = x;
             return v;
         }
@@ -2914,7 +2932,7 @@ struct gs_pick
 static BOOL es3_variants(struct OGLES3Context *ctx, struct OGLES3Program *p, GLenum fsmode, UBYTE cbufs,
                          const ULONG *bits, BOOL a2c, const struct OGLES3VkTargets *tg, const struct OGLES3Variant **vs,
                          const struct OGLES3Variant **fs, const struct OGLES3Image **vown,
-                         const struct OGLES3Image **fown, struct gs_pick *gp)
+                         const struct OGLES3Image **fown, struct gs_pick *gp, BOOL ps)
 {
     struct OGLES3Image *im = (struct OGLES3Image *)p->image;
     UBYTE want[OGLES3_FS_KEY_BYTES], vwant[OGLES3_VS_KEY_BYTES], gwant[OGLES3_GS_KEY_BYTES],
@@ -2929,9 +2947,10 @@ static BOOL es3_variants(struct OGLES3Context *ctx, struct OGLES3Program *p, GLe
                                                                                    : OGLES3_VK_TRIANGLES;
     ogles2_vk_fs_want(want, (*fs)->key, prim, cbufs, bits[1], a2c);
     ogles2_vk_fs_targets(want, tg);
-    f = find_x(im, OGLES3_VARIANT_FS, want, fown);
+    f = find_xs(im, OGLES3_VARIANT_FS, want, fown, ps);
     if (!f) {
-        ULONG n = key_entry(req, OGLES3_VARIANT_FS, 0, want);
+        /* OES_sample_shading: the state tracker's per-sample variant */
+        ULONG n = key_entry(req, OGLES3_VARIANT_FS, ps ? V3DGLSL_KEY_PER_SAMPLE >> 8 : 0, want);
         if (gp) {
             ogles2_vk_gs_want(gwant, gp->gs->key, 0, 0, bits[2]);
             n += key_entry(req + n, OGLES3_VARIANT_GS, V3DGLSL_KEY_OUTPUTS_FROM_FS >> 8, gwant);
@@ -2940,7 +2959,7 @@ static BOOL es3_variants(struct OGLES3Context *ctx, struct OGLES3Program *p, GLe
             n += key_entry(req + n, OGLES3_VARIANT_VS, V3DGLSL_KEY_OUTPUTS_FROM_FS >> 8, vwant);
         }
         if (ogles2_image_compile_variants(ctx, im, req, n))
-            f = find_x(im, OGLES3_VARIANT_FS, want, fown);
+            f = find_xs(im, OGLES3_VARIANT_FS, want, fown, ps);
     }
     if (f && gp) {
         const struct OGLES3Variant *gg, *gb;
@@ -3246,6 +3265,7 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
     struct tex_states tst;
     BOOL vid;        /* a shader reads gl_VertexID: the real vertex numbers (below) */
     BOOL a2c;        /* alpha to coverage in an ES3 program's key */
+    BOOL ps;         /* OES_sample_shading: an ES3 program's per-sample fragment variant */
     ULONG bits[3];   /* an ES3 program's 32-bit samplers, vertex, fragment and geometry */
     struct OGLES3VkTargets tg; /* and its render targets' key fields */
     BOOL tg_made = FALSE;      /* tg holds them (vk_targets) */
@@ -3321,6 +3341,10 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
      * the fragment shader). */
     a2c = (ctx->state.caps & OGLES3_CAP_SAMPLE_ALPHA_TO_COVERAGE) != 0 &&
           (ctx->draw_fb ? ogles2_fbo_samples(ctx->draw_fb) != 0 : ctx->msaa);
+    /* GL_SAMPLE_SHADING above one of the 4 samples (Mesa's st_atom_shader.c:
+     * MinSampleShadingValue * samples > 1): the shader's inputs a sample's */
+    ps = (ctx->state.caps & OGLES3_CAP_SAMPLE_SHADING) && ctx->state.min_sample_shading > 0.25f &&
+         im->format2 && (ctx->draw_fb ? ogles2_fbo_samples(ctx->draw_fb) != 0 : ctx->msaa);
     fim = im;
     bits[0] = bits[1] = bits[2] = 0;
     if (im->format2) {
@@ -3359,6 +3383,7 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
     if (p->var_ok && p->var_mode == mode && p->var_fsmode == fsmode && p->var_fim == fim &&
         p->var_nrt == ctx->fb_nrt && p->var_cbufs == (ctx->draw_fb ? ctx->fb_draw_mask : 1) &&
         p->var_bits[0] == bits[0] && p->var_bits[1] == bits[1] && p->var_bits[2] == bits[2] && p->var_a2c == a2c &&
+        p->var_ps == ps &&
         (!im->format2 || (tg_made ? same_targets(&p->var_tg, &tg)
                                   : !p->var_tg.soft && p->var_tg.f32 == ctx->fb_wide))) { /* an ES3 program's */
         cs = p->var[0];
@@ -3416,7 +3441,7 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
             }
             if (im->format2)
                 es3_variants(ctx, p, fsmode, ctx->draw_fb ? ctx->fb_draw_mask : 1, bits, a2c, &tg, &vs, &fs,
-                             &vown, &fown, im->geometry ? &gp : 0);
+                             &vown, &fown, im->geometry ? &gp : 0, ps);
             code[0] = code_address(d, im, cs);
             code[1] = code_address(d, vown, vs);
             code[2] = code_address(d, fown, fs);
@@ -3453,6 +3478,7 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
         p->var_bits[1] = bits[1];
         p->var_bits[2] = bits[2];
         p->var_a2c = a2c;
+        p->var_ps = ps;
         if (im->format2)
             p->var_tg = tg;
         p->var_f32 = fs->key ? ogles2_vk_fs_f32(fs->key) : 0;

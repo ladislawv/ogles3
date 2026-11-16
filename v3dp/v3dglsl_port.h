@@ -91,6 +91,12 @@
                                            * before it in the same request (Mesa's
                                            * v3d_update_compiled_vs), whatever its bytes say:
                                            * both variants in one request */
+#define V3DGLSL_KEY_PER_SAMPLE 0x200 /* in a fragment key's stage word: the state tracker's
+                                      * per-sample variant of the shader (GL_SAMPLE_SHADING with
+                                      * more than one sample: its inputs a sample's,
+                                      * nir_lower_sample_shading), the variant's prog data
+                                      * saying so (force_per_sample_msaa). A compiler older
+                                      * than this refuses the key (unreadable). */
 
 #ifndef V3DGLSL_OPS_ONLY
 struct V3DGLSLRequest

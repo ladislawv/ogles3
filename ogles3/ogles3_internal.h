@@ -655,6 +655,7 @@ struct OGLES3Program
     /* An OpenGL ES 3 program's last choice also by these (draw.c's
      * es3_variants): each stage's 32-bit samplers, alpha to coverage. */
     ULONG var_bits[3];              /* vertex, fragment, geometry */
+    BOOL var_ps;                    /* the per-sample fragment variant (OES_sample_shading) */
     BOOL var_a2c;
     struct OGLES3VkTargets var_tg;  /* and the render targets' key fields (variant_key.h) */
     UBYTE var_f32;                  /* the fragment variant's f32_color_rb (draw: ctx->fb_wide) */

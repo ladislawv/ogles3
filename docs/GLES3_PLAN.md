@@ -261,6 +261,22 @@ A1200).**
   read back as given). Not checkable under vamos: a state-only context
   reads no pixels, and `glTexImage2D` times itself on the system timer,
   which vamos has not got (as `glBufferData`).
+- **`GL_SAMPLE_SHADING`'s per-sample inputs** (item 6's open point): on
+  v3d Mesa's state tracker makes a per-sample variant of the fragment shader
+  for it (`force_persample_in_shader`: `nir_lower_sample_shading`, its inputs
+  a sample's), the driver key the same, the prog data's
+  `force_per_sample_msaa` set. A draw with `GL_SAMPLE_SHADING` above one of
+  the 4 samples (`ps`, Mesa's `MinSampleShadingValue * samples > 1`) of an
+  ES3 program now takes such a fragment variant (`find_in`/`find_xs`: one
+  with the flag; without `ps` a plain one first), or asks for it: a key
+  entry with `V3DGLSL_KEY_PER_SAMPLE` (0x200, `v3dglsl_port.h`) makes the
+  compiler draw once into a 4x target with `GL_SAMPLE_SHADING` at 1.0
+  (`per_sample_draw`, `make_ms_target`) so that variant is bound, then
+  compile the key (and draw normally again before a plain key). The
+  program's choice remembers it (`var_ps`). Checked on the PC: es3flat's
+  key through `-x` plain and per-sample: two fragment variants, the second
+  `force_per_sample_msaa=1`. To run: dEQP-GLES31 `sample_shading` with
+  `MSAA=1`.
 - **imageBuffer's 8- and 16-bit stores reach the buffer's data**
   (`buffer.c`): a store through such a format marks the buffer's texels
   GPU-written (`tex_job` for a draw's job, `tex_cs_written` after a
@@ -395,11 +411,8 @@ linked. The library reads the file's `force_per_sample_msaa` (written all
 along, skipped until now: v3dp.c) and sets the shader record's
 `enable_sample_rate_shading` in a 4x job for it (Mesa's `v3dx_draw.c`), and
 for `GL_SAMPLE_SHADING` with `glMinSampleShadingOES` above 0.25 (more than
-one of the 4 samples). **Unsure:** the latter runs a program a sample at a
-time without the state tracker's per-sample lowering of its inputs (Mesa
-compiles a variant with `persample_shading` for it; the offline variants
-have no such key), so the samples may still read the pixel's centre
-values. `GL_MIN_SAMPLE_SHADING_VALUE`, the interpolation offset limits
+one of the 4 samples). The latter's per-sample inputs: since "Remaining
+items, the first batch" (the state tracker's per-sample variants). `GL_MIN_SAMPLE_SHADING_VALUE`, the interpolation offset limits
 (-0.5, 0.4375, 4 bits, Mesa's). Both compilers rebuilt.
 
 **`KHR_texture_compression_astc_ldr` (2026-11-16, built, not run; ES3
