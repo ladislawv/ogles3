@@ -412,6 +412,8 @@ static const struct { const char *name; UBYTE in; } extensions[] = {
      * the draws give (8-bit and 16F targets read as halves, 32-bit ones by
      * f32_color_rb) */
     {"GL_EXT_shader_framebuffer_fetch", EXT_ES3},
+    /* item 2's last: stencil textures (texture.c's S8 images, fbo.c) */
+    {"GL_OES_texture_stencil8", EXT_ES31},
 };
 #define NUM_EXTENSIONS (sizeof(extensions) / sizeof(extensions[0]))
 

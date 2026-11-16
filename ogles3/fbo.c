@@ -1303,7 +1303,10 @@ static GLenum status_of(struct OGLES3Context *ctx, struct OGLES3Framebuffer *fb)
              * OES_packed_depth_stencil, a depth-stencil one for the stencil. */
             UBYTE bits;
             BOOL st;
-            if (at->face || !ogles2_texture_depth(at->tex, at->level, &bits, &st) || (a == ATT_STENCIL && !st))
+            /* OES_texture_stencil8: a stencil texture for the stencil */
+            if (a == ATT_STENCIL && !at->face && ogles2_texture_stencil8(at->tex, at->level))
+                ;
+            else if (at->face || !ogles2_texture_depth(at->tex, at->level, &bits, &st) || (a == ATT_STENCIL && !st))
                 return GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT;
         }
         /* ES 3.1 9.4.2: the same samples (a multisample texture's
@@ -1469,6 +1472,8 @@ void ogles2_fb_update(struct OGLES3Context *ctx)
             ctx->fb_stencil_bits = 8;
             ctx->fb_depth_format = bits == 32 ? OGLES3_DEPTH_32F : OGLES3_DEPTH_24;
         }
+        if (s->type == GL_TEXTURE && ogles2_texture_stencil8(s->tex, s->level))
+            ctx->fb_stencil_bits = 8; /* OES_texture_stencil8: the depth stays the depth attachment's */
     }
 }
 
@@ -1637,6 +1642,14 @@ BOOL ogles2_fbo_target(struct OGLES3Context *ctx, struct OGLES3Framebuffer *fb, 
             return FALSE;
         t->has_z = TRUE;
         t->packed_zs = same_image(d, s) && t->z.format == V3D_OUTPUT_IMAGE_FORMAT_D24S8;
+    }
+    /* OES_texture_stencil8: the stencil texture's S8 image, which its
+     * samplers read too (texture.c) */
+    if (s->type == GL_TEXTURE && ogles2_texture_stencil8(s->tex, s->level)) {
+        if (!ogles2_texture_s8_surface(ctx, s->tex, s->level, &t->s))
+            return FALSE;
+        t->has_s = TRUE;
+        return TRUE;
     }
     if (s->type == GL_TEXTURE && !t->packed_zs) {
         if (ogles2_texture_s8_surface(ctx, s->tex, s->level, &t->s)) {

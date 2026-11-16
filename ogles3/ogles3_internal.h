@@ -1023,6 +1023,7 @@ UBYTE ogles2_texture_samples(const struct OGLES3Texture *t, GLboolean *fixed);
 BOOL ogles2_fbo_renderable_format(struct OGLES3Context *ctx, GLenum f, BOOL *none);
 /* OES_depth_texture: level l is a depth image (bits 16 or 24; stencil: DEPTH_STENCIL_OES). */
 BOOL ogles2_texture_depth(const struct OGLES3Texture *t, int l, UBYTE *bits, BOOL *stencil);
+BOOL ogles2_texture_stencil8(const struct OGLES3Texture *t, int l);
 /* That image as a job's depth/stencil surface, its GPU storage made first; FALSE: none. */
 BOOL ogles2_texture_s8_surface(struct OGLES3Context *ctx, struct OGLES3Texture *t, int l,
                                struct OGLES3Surface *s);

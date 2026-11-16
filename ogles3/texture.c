@@ -2012,6 +2012,12 @@ static GLenum keep_sized(GLenum ifmt)
 static int pixel_size(GLenum format, GLenum type, GLenum *err)
 {
     *err = GL_NO_ERROR;
+    if (format == GL_STENCIL_INDEX) { /* OES_texture_stencil8: bytes */
+        if (type == GL_UNSIGNED_BYTE)
+            return 1;
+        *err = GL_INVALID_OPERATION;
+        return 0;
+    }
     if (int_components(format)) { /* ES 3.0's integer formats */
         int n = int_components(format);
         switch (type) {
@@ -2277,6 +2283,10 @@ static BOOL keep_stencil(struct OGLES3Texture *t, struct OGLES3Face *f, int l, c
         return FALSE;
     for (j = 0; j < h; j++, src += row) {
         UBYTE *d = f->stencil[l] + (ULONG)(y + j) * f->w[l] + x;
+        if (f->format[l] == GL_STENCIL_INDEX) { /* OES_texture_stencil8: the bytes */
+            CopyMem((APTR)src, d, (ULONG)w);
+            continue;
+        }
         for (i = 0; i < w; i++) {
             ULONG v;
             memcpy(&v, src + (ULONG)i * 8 + 4, 4);
@@ -2410,6 +2420,8 @@ static void convert(UBYTE *dst, ULONG dst_stride, const UBYTE *src, GLenum forma
                     int w, int h, ULONG src_stride)
 {
     int x, y;
+    if (format == GL_STENCIL_INDEX) /* OES_texture_stencil8: its bytes as red (the S8 image is what is read) */
+        format = GL_RED;
     if (int_components(format)) {
         convert_int(dst, dst_stride, src, format, type, w, h, src_stride);
         return;
@@ -2779,7 +2791,9 @@ static void storage_of(struct OGLES3Texture *t)
     sw[0] = R; sw[1] = G; sw[2] = B; sw[3] = A;
     if (f == GL_RGB)
         sw[3] = O; /* rendered into, the stored alpha is the shader's */
-    if (int_components(f)) { /* ES 3.0's integers: the TMU's integer types, RGB as RGBA (alpha 1) */
+    if (f == GL_STENCIL_INDEX) { /* OES_texture_stencil8: R8 (sampled and rendered: its S8 image) */
+        type = V3D_TEXTURE_DATA_FORMAT_R8; cpp = 1; sw[1] = sw[2] = Z; sw[3] = O;
+    } else if (int_components(f)) { /* ES 3.0's integers: the TMU's integer types, RGB as RGBA (alpha 1) */
         int n = int_components(f), bits = ty == GL_BYTE || ty == GL_UNSIGNED_BYTE ? 8
                                          : ty == GL_SHORT || ty == GL_UNSIGNED_SHORT ? 16 : 32;
         BOOL s = ty == GL_BYTE || ty == GL_SHORT || ty == GL_INT;
@@ -3895,8 +3909,9 @@ BOOL ogles2_texture_s8_surface(struct OGLES3Context *ctx, struct OGLES3Texture *
     const struct OGLES3Face *f = &t->f[0];
     struct OGLES3S8 *p;
     int n, k;
-    if (l < 0 || l >= MAX_LEVELS || !(f->defined & (1UL << l)) || f->format[l] != GL_DEPTH_STENCIL_OES ||
-        f->type[l] != GL_FLOAT_32_UNSIGNED_INT_24_8_REV)
+    if (l < 0 || l >= MAX_LEVELS || !(f->defined & (1UL << l)) ||
+        !((f->format[l] == GL_DEPTH_STENCIL_OES && f->type[l] == GL_FLOAT_32_UNSIGNED_INT_24_8_REV) ||
+          f->format[l] == GL_STENCIL_INDEX)) /* OES_texture_stencil8's: its texels */
         return FALSE;
     n = faces_at(t, l);
     if (!t->s8 && !(t->s8 = AllocVec(sizeof(*t->s8), MEMF_ANY | MEMF_CLEAR)))
@@ -3947,7 +3962,16 @@ BOOL ogles2_texture_s8_surface(struct OGLES3Context *ctx, struct OGLES3Texture *
  * as unsigned integers (s, 0, 0, 1), nearest. */
 static BOOL stencil_sampled(const struct OGLES3Texture *t)
 {
-    return t->ds_mode == GL_STENCIL_INDEX && t->f[0].format[0] == GL_DEPTH_STENCIL_OES;
+    return (t->ds_mode == GL_STENCIL_INDEX && t->f[0].format[0] == GL_DEPTH_STENCIL_OES) ||
+           t->f[0].format[0] == GL_STENCIL_INDEX; /* OES_texture_stencil8: always */
+}
+
+/* OES_texture_stencil8: level l of t is a stencil image (fbo.c: a
+ * stencil attachment of its own, its S8 image). */
+BOOL ogles2_texture_stencil8(const struct OGLES3Texture *t, int l)
+{
+    return t->target == GL_TEXTURE_2D && l >= 0 && l < MAX_LEVELS && (t->f[0].defined & (1UL << l)) &&
+           t->f[0].format[l] == GL_STENCIL_INDEX;
 }
 
 /* draw.c: unit `unit`'s texture of that kind returns 32 bits (by its level
@@ -4435,6 +4459,8 @@ static GLenum sized_base(GLenum ifmt, GLenum format, GLenum type)
         return format == GL_DEPTH_COMPONENT && type == GL_FLOAT ? format : NOT_FILLED;
     case GL_DEPTH32F_STENCIL8:
         return format == GL_DEPTH_STENCIL_OES && type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV ? format : NOT_FILLED;
+    case GL_STENCIL_INDEX8: /* OES_texture_stencil8 */
+        return format == GL_STENCIL_INDEX && type == GL_UNSIGNED_BYTE ? format : NOT_FILLED;
     case GL_RGBA16F:
     case GL_RGB16F:
         return format == (ifmt == GL_RGBA16F ? GL_RGBA : GL_RGB) && (type == GL_HALF_FLOAT_OES || type == GL_FLOAT)
@@ -4548,7 +4574,8 @@ static void tex_image(struct OGLES3Context *ctx, GLenum target, GLint level, GLi
         convert(img, (ULONG)width * cb, src, format, type, width, height, row);
     }
     set_level(ctx, t, k, level, img, width, height, format, type, pixels != 0, keep, sized, given);
-    if (src && type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV && !keep_stencil(t, &t->f[k], level, src, row, 0, 0, width, height))
+    if (src && (type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV || format == GL_STENCIL_INDEX) &&
+        !keep_stencil(t, &t->f[k], level, src, row, 0, 0, width, height))
         ogles2_error(ctx, GL_OUT_OF_MEMORY);
 }
 
@@ -4686,7 +4713,7 @@ static void tex_sub_image(struct OGLES3Context *ctx, GLenum target, GLint level,
         ULONG row, image;
         const UBYTE *src = unpack_image(ctx, pixels, format, type, width, height, &row, &image);
         convert(sub, (ULONG)width * cb, src, format, type, width, height, row);
-        if (type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV &&
+        if ((type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV || format == GL_STENCIL_INDEX) &&
             !keep_stencil(t, f, level, src, row, xoffset, yoffset, width, height))
             ogles2_error(ctx, GL_OUT_OF_MEMORY);
     }
@@ -4851,7 +4878,7 @@ void ogles2_glTexImage3D(struct OGLES3Context *ctx, GLenum target, GLint level, 
         if (img && pixels)
             convert(img, (ULONG)width * cb, src + (ULONG)k * in, format, type, width, height, row);
         put_level(&t->f[k], level, img, width, height, format, type, pixels != 0, keep, sized, given);
-        if (img && pixels && type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV &&
+        if (img && pixels && (type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV || format == GL_STENCIL_INDEX) &&
             !keep_stencil(t, &t->f[k], level, src + (ULONG)k * in, row, 0, 0, width, height))
             ogles2_error(ctx, GL_OUT_OF_MEMORY);
     }
@@ -4930,7 +4957,7 @@ void ogles2_glTexSubImage3D(struct OGLES3Context *ctx, GLenum target, GLint leve
             memcpy(fk->shadow[level] + ((ULONG)(yoffset + y) * fk->w[level] + xoffset) * cb,
                    sub + (ULONG)y * width * cb, (ULONG)width * cb);
         fk->blank &= ~(1UL << level);
-        if (type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV &&
+        if ((type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV || format == GL_STENCIL_INDEX) &&
             !keep_stencil(t, fk, level, src + (ULONG)(k - zoffset) * in, row, xoffset, yoffset, width, height))
             ogles2_error(ctx, GL_OUT_OF_MEMORY);
         if (stored)
@@ -4977,6 +5004,7 @@ static BOOL sized_storage(GLenum ifmt, GLenum *format, GLenum *type)
     case GL_RGB9_E5:           *format = GL_RGB; *type = GL_FLOAT; return TRUE;
     case GL_DEPTH_COMPONENT32F: *format = GL_DEPTH_COMPONENT; *type = GL_FLOAT; return TRUE;
     case GL_DEPTH32F_STENCIL8: *format = GL_DEPTH_STENCIL_OES; *type = GL_FLOAT_32_UNSIGNED_INT_24_8_REV; return TRUE;
+    case GL_STENCIL_INDEX8:    *format = GL_STENCIL_INDEX; *type = GL_UNSIGNED_BYTE; return TRUE; /* OES_texture_stencil8 */
     case GL_DEPTH_COMPONENT16: *format = GL_DEPTH_COMPONENT; *type = GL_UNSIGNED_SHORT; return TRUE;
     case GL_DEPTH_COMPONENT24: *format = GL_DEPTH_COMPONENT; *type = GL_UNSIGNED_INT; return TRUE;
     case GL_DEPTH24_STENCIL8:  *format = GL_DEPTH_STENCIL_OES; *type = GL_UNSIGNED_INT_24_8_OES; return TRUE;
@@ -4993,7 +5021,7 @@ static BOOL es3_sized(GLenum ifmt)
            ifmt == GL_R8_SNORM || ifmt == GL_RG8_SNORM || ifmt == GL_RGB8_SNORM || ifmt == GL_RGBA8_SNORM ||
            ifmt == GL_SRGB8 || ifmt == GL_SRGB8_ALPHA8 || ifmt == GL_RGB10_A2 || ifmt == GL_RGB10_A2UI ||
            ifmt == GL_R11F_G11F_B10F || ifmt == GL_RGB9_E5 || ifmt == GL_DEPTH_COMPONENT32F ||
-           ifmt == GL_DEPTH32F_STENCIL8;
+           ifmt == GL_DEPTH32F_STENCIL8 || ifmt == GL_STENCIL_INDEX8;
 }
 
 static void tex_storage(struct OGLES3Context *ctx, GLenum target, GLsizei levels, GLenum ifmt, GLsizei width,
@@ -7107,7 +7135,7 @@ static BOOL texture_state_build(struct OGLES3Context *ctx, int unit, int kind, U
     tsr->array_stride_64_byte_aligned = faces(t) > 1 ? t->face_stride / 64 : 0;
     tsr->texture_type = t->hw_type;
     stencil = stencil_sampled(t);
-    if (stencil && t->f[0].type[0] != GL_FLOAT_32_UNSIGNED_INT_24_8_REV) {
+    if (stencil && t->f[0].type[0] != GL_FLOAT_32_UNSIGNED_INT_24_8_REV && t->f[0].format[0] != GL_STENCIL_INDEX) {
         /* D24S8's word as RGBA8UI: its low byte the stencil (Mesa's
          * S8X24_UINT view) */
         tsr->texture_type = V3D_TEXTURE_DATA_FORMAT_RGBA8UI;

@@ -1,5 +1,17 @@
 # OpenGL ES 3.0 and 3.1 on ogles2.library
 
+**`OES_texture_stencil8` (2026-11-16, built, not run; ES 3.1 contexts).**
+STENCIL_INDEX8 textures (`glTexImage2D`/`3D` with `GL_STENCIL_INDEX` and
+bytes, `glTexStorage*`) as DEPTH32F_STENCIL8's stencil is: the texels kept
+as the faces' stencil bytes (`keep_stencil`), the level's S8 image
+(`ogles2_texture_s8_surface`) both what the samplers read (R8UI, nearest,
+(s, 0, 0, 1): `stencil_sampled`) and what a job renders into as a stencil
+attachment of its own (`fbo.c`: complete as the stencil, the stencil bits 8,
+the depth the depth attachment's). The texture's own GPU copy (R8 of the
+RAM copy's red) is never read. As DEPTH32F_STENCIL8's: an upload after a
+render refills the whole S8 level from the RAM bytes (what was drawn
+outside the box is lost); 2D textures only as attachments.
+
 **More of items 4 and 7, written without the A1200 (2026-11-16, after
 the entry below; built, not run).**
 - **`EXT_`/`OES_texture_buffer`** (ES 3.1 contexts): the compiler's
