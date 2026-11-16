@@ -1,0 +1,16 @@
+    42 close (count 0)
+    43 open (count 1)
+    44 display: mode 0x50031200 has pixel format 9, needs 32-bit BGRA or RGBA
+    45 aglCreateContext2: failed, error 4
+    46 display: mode 0x50031201 has pixel format 10, needs 32-bit BGRA or RGBA
+    47 aglCreateContext2: failed, error 4
+    48 display: fullscreen, 640x480, BGRA
+    49 device: context pools for 640x480, D16, 18196864 bytes of GPU memory in use
+    50 aglCreateContext2: context 0x0904DDDC, OpenGL ES 3.1, 640x480
+    51 aglDestroyContext: context 0x0904DDDC: freeing
+    52 device: context freed, 0 bytes of GPU memory still in use
+    53 aglDestroyContext: context 0x0904DDDC (3001 frames, 0 dropped, 0 binning blocks added)
+    54 timing: 3001 jobs, each on average: 11414 us of CPU work before its flush, 17 us waiting for binning, 1 us for the render
+    55 timing: and in each flush 52 us building the render list, 51 us for the CPU cache before the GPU, 2 us after
+    56 timing: 3001 swaps, 16777 us from one to the next on average, 2 us of it presenting
+    57 timing: per frame 0 draws, 0 us in them; in all 0 ms in glBuffer(Sub)Data, 0 ms in glTex(Sub)Image2D

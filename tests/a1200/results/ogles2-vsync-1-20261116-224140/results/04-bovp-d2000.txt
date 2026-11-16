@@ -1,0 +1,29 @@
+WaitBOVP, priority 0, work 5000 us, a task at 15 spinning 2000 us every 97 ms (213 spins): 1200 waits in 20883 ms
+  idle counter: 2536828 rounds a second
+  frames the counter moved during a wait: 0: 1147, 1: 0, 2: 0, 3+: 53
+  line at the return: 1080-1080; ms between returns: 17:1146 33:53
+  wait 11: 28334 us, line 292 -> 1080, counter +4
+  wait 74: 28333 us, line 292 -> 1080, counter +4, a spin of the disturber inside it
+  wait 79: 28333 us, line 292 -> 1080, counter +4, a spin of the disturber inside it
+  wait 84: 28334 us, line 292 -> 1080, counter +4, a spin of the disturber inside it
+  wait 120: 28333 us, line 292 -> 1080, counter +4
+  wait 131: 28333 us, line 292 -> 1080, counter +4
+  wait 182: 28334 us, line 292 -> 1080, counter +4, a spin of the disturber inside it
+  wait 187: 28334 us, line 292 -> 1080, counter +4, a spin of the disturber inside it
+  wait 192: 28334 us, line 292 -> 1080, counter +4, a spin of the disturber inside it
+  wait 252: 28333 us, line 292 -> 1080, counter +4
+  wait 257: 28333 us, line 292 -> 1080, counter +4
+  wait 296: 28333 us, line 292 -> 1080, counter +4, a spin of the disturber inside it
+  wait 301: 28255 us, line 297 -> 1080, counter +4, a spin of the disturber inside it
+  wait 311: 28333 us, line 292 -> 1080, counter +4, a spin of the disturber inside it
+  wait 366: 28333 us, line 292 -> 1080, counter +4
+  wait 371: 28333 us, line 292 -> 1080, counter +4
+  wait 376: 28333 us, line 292 -> 1080, counter +4
+  wait 391: 28333 us, line 292 -> 1080, counter +4, a spin of the disturber inside it
+  wait 396: 28333 us, line 292 -> 1080, counter +4, a spin of the disturber inside it
+  wait 401: 28334 us, line 292 -> 1080, counter +4, a spin of the disturber inside it
+  wait 406: 28336 us, line 292 -> 1080, counter +4, a spin of the disturber inside it
+  wait 411: 28333 us, line 292 -> 1080, counter +4, a spin of the disturber inside it
+  wait 459: 28334 us, line 292 -> 1080, counter +4
+  wait 488: 28333 us, line 292 -> 1080, counter +4
+  spins inside a wait: 150, of them in a wait that slept through a refresh: 31

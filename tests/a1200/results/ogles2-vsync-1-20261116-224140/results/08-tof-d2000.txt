@@ -1,0 +1,29 @@
+WaitTOF, priority 0, work 5000 us, a task at 15 spinning 2000 us every 97 ms (245 spins): 1200 waits in 24058 ms
+  idle counter: 3534740 rounds a second
+  frames the counter moved during a wait: 0: 110, 1: 0, 2: 0, 3+: 1090
+  line at the return: 5-1080; ms between returns: 18:14 19:13 20:1143 21:14 22:14 39:1
+  wait 0: 15103 us, line 523 -> 417, counter +4
+  wait 1: 14947 us, line 755 -> 639, counter +4
+  wait 2: 14961 us, line 976 -> 861, counter +4
+  wait 4: 15109 us, line 300 -> 195, counter +4
+  wait 5: 14969 us, line 532 -> 418, counter +4
+  wait 6: 15246 us, line 755 -> 659, counter +4
+  wait 7: 14804 us, line 997 -> 871, counter +4
+  wait 8: 15044 us, line 83 -> 7, counter +4, a spin of the disturber inside it
+  wait 9: 15033 us, line 311 -> 201, counter +4
+  wait 10: 15031 us, line 539 -> 428, counter +4
+  wait 11: 15030 us, line 766 -> 655, counter +4
+  wait 12: 15160 us, line 993 -> 891, counter +4
+  wait 13: 14905 us, line 104 -> 7, counter +4, a spin of the disturber inside it
+  wait 14: 15048 us, line 322 -> 213, counter +4
+  wait 15: 15014 us, line 550 -> 439, counter +4
+  wait 16: 15064 us, line 776 -> 668, counter +4
+  wait 17: 15000 us, line 1006 -> 893, counter +4
+  wait 18: 15166 us, line 106 -> 7, counter +4, a spin of the disturber inside it
+  wait 19: 14920 us, line 342 -> 224, counter +4
+  wait 20: 15022 us, line 562 -> 451, counter +4
+  wait 21: 14999 us, line 788 -> 676, counter +4
+  wait 22: 15064 us, line 1013 -> 905, counter +4
+  wait 23: 15000 us, line 118 -> 7, counter +4, a spin of the disturber inside it
+  wait 24: 15265 us, line 343 -> 248, counter +4
+  spins inside a wait: 182, of them in a wait that slept through a refresh: 95

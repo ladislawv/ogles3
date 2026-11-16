@@ -1,0 +1,3 @@
+30 s, work 0 ms, busy task, priority 0: 1730 frames over 1739 refreshes
+  skipped refreshes 10, doubled frames 0, late 113 (past an eighth 5, at most line 1057 of 1080), judder 30 (most 17629 us)
+  skips at frames: 183 337 342 710 756 791 1289 1402 1592 1716

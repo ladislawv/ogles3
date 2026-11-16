@@ -1,0 +1,7 @@
+ogles2 M6: presentation with GL (watch the white bar)
+screen mode 0x50031303
+5 ogles2, vsync off: 13053 frames in 6 s, 2175 fps
+6 ogles2, vsync switched on: 359 frames in 6 s, 59 fps
+7 ogles2, vsync switched off again: 12782 frames in 6 s, 2130 fps
+8 ogles2, a context with vsync from the start: 361 frames in 6 s, 60 fps
+done

@@ -1,0 +1,15 @@
+ogles3.library 1.0 (05.11.2026.)
+PiStorm V3D 4.2
+Directory "LIBS:" on Monday 16-Nov-26
+ogles3.library.beta1         434988 ----rwed 28-Oct-26 20:47:28
+ogles3.library               771976 ----rwed Today     21:54:24
+ogles3.library.vsync-backup     771976 ----rwed Today     21:54:24
+3 files - 1932K bytes - 3869 blocks used
+ogles3.library 1.0 (05.11.2026.)
+PiStorm V3D 4.2
+ogles3.library 1.0 (05.11.2026.)
+PiStorm V3D 4.2
+Directory "LIBS:" on Monday 16-Nov-26
+ogles3.library.beta1         434988 ----rwed 28-Oct-26 20:47:28
+ogles3.library               771976 ----rwed Today     21:54:24
+2 files - 1178K bytes - 2360 blocks used

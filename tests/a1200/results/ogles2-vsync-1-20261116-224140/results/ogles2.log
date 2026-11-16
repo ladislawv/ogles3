@@ -1,0 +1,32 @@
+  9396 close (count 1)
+  9397 open (count 2)
+  9398 display: mode 0x50031200 has pixel format 9, needs 32-bit BGRA or RGBA
+  9399 aglCreateContext2: failed, error 4
+  9400 display: mode 0x50031201 has pixel format 10, needs 32-bit BGRA or RGBA
+  9401 aglCreateContext2: failed, error 4
+  9402 display: fullscreen, 640x480, BGRA
+  9403 device: context pools for 640x480, D16, 39495264 bytes of GPU memory in use
+  9404 aglCreateContext2: context 0x0922FE9C, OpenGL ES 3.1, 640x480
+  9405 aglDestroyContext: context 0x0922FE9C: freeing
+  9406 device: context freed, 21295904 bytes of GPU memory still in use
+  9407 aglDestroyContext: context 0x0922FE9C (3001 frames, 0 dropped, 0 binning blocks added)
+  9408 timing: 3001 jobs, each on average: 11410 us of CPU work before its flush, 16 us waiting for binning, 1 us for the render
+  9409 timing: and in each flush 52 us building the render list, 49 us for the CPU cache before the GPU, 1 us after
+  9410 timing: 3001 swaps, 16744 us from one to the next on average, 1 us of it presenting
+  9411 timing: per frame 0 draws, 0 us in them; in all 0 ms in glBuffer(Sub)Data, 0 ms in glTex(Sub)Image2D
+  9412 close (count 1)
+  9413 open (count 2)
+  9414 display: mode 0x50031200 has pixel format 9, needs 32-bit BGRA or RGBA
+  9415 aglCreateContext2: failed, error 4
+  9416 display: mode 0x50031201 has pixel format 10, needs 32-bit BGRA or RGBA
+  9417 aglCreateContext2: failed, error 4
+  9418 display: fullscreen, 640x480, BGRA
+  9419 device: context pools for 640x480, D16, 39495264 bytes of GPU memory in use
+  9420 aglCreateContext2: context 0x0922FE9C, OpenGL ES 3.1, 640x480
+  9421 aglDestroyContext: context 0x0922FE9C: freeing
+  9422 device: context freed, 21295904 bytes of GPU memory still in use
+  9423 aglDestroyContext: context 0x0922FE9C (601 frames, 0 dropped, 0 binning blocks added)
+  9424 timing: 601 jobs, each on average: 16286 us of CPU work before its flush, 15 us waiting for binning, 1 us for the render
+  9425 timing: and in each flush 50 us building the render list, 47 us for the CPU cache before the GPU, 1 us after
+  9426 timing: 601 swaps, 16722 us from one to the next on average, 1 us of it presenting
+  9427 timing: per frame 0 draws, 0 us in them; in all 0 ms in glBuffer(Sub)Data, 0 ms in glTex(Sub)Image2D

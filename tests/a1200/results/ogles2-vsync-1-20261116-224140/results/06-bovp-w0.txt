@@ -1,0 +1,7 @@
+WaitBOVP, priority 0, work 0 us: 600 waits in 81 ms
+  idle counter: 672855791 rounds a second
+  frames the counter moved during a wait: 0: 597, 1: 0, 2: 0, 3+: 3
+  line at the return: 0-1080; ms between returns: 0:595 17:4
+  wait 136: 1 us, line 1080 -> 0, counter +4
+  wait 275: 16550 us, line 1080 -> 1080, counter +4
+  wait 552: 16551 us, line 1080 -> 1080, counter +4

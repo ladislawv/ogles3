@@ -1,0 +1,2 @@
+ogles3: 1140 swaps, priority 0, work 15 ms; time between two swaps, ms: frames  15: 1  16: 19  17: 1093  19: 1  33: 25  50: 1
+long ones at frames: 71 104 110 148 265 280 327 348 366 373 380 410 429 433 514 852 877 907 913 996 1078 1082 1111 1118 1119 1184

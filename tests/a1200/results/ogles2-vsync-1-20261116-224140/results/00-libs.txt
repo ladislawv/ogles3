@@ -1,0 +1,22 @@
+Directory "LIBS:" on Monday 16-Nov-26
+ogles3.library.beta1         434988 ----rwed 28-Oct-26 20:47:28
+ogles3.library               771976 ----rwed Today     21:54:24
+2 files - 1178K bytes - 2360 blocks used
+ogles3.library 1.0 (05.11.2026.)
+PiStorm V3D 4.2
+VideoCore 1.5 (03.02.2026.)
+git:db8770a,dirty
+rtg.library 43.787 (06.06.2026.)
+©1991-99 A.Kneer T.Abt, ©2017-2023 icomp
+Process  1: Loaded as command: Status
+Process  2: Loaded as command: TitleShadow
+Process  3: Loaded as command: OpenDevicePatch
+Process  4: Loaded as command: VisualPrefs
+Process  5: Loaded as command: TCP/IP Superserver
+Process  6: Loaded as command: XpkMasterPrefs
+Process  7: Loaded as command: Stuff:amictld/amictld
+Process  8: Loaded as command: Stuff:amigent/amigentd
+Process  9: Loaded as command: DO_LAUNCHER
+Process 10: Loaded as command: Stuff:amictld/amictld
+Process 11: Loaded as command: C:ScreenText
+Process 13: Loaded as command: CaffeineOS:Libs/v3dglslc3

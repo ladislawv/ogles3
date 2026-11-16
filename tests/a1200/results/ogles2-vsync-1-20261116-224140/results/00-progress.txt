@@ -1,0 +1,8 @@
+ogles2 vsync run 1
+Monday 16-Nov-26 22:41:40
+step 1 done
+step 2 done
+step 3 done
+step 4 done
+finished
+Monday 16-Nov-26 22:44:54
