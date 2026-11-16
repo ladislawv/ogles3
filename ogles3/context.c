@@ -414,6 +414,8 @@ static const struct { const char *name; UBYTE in; } extensions[] = {
     {"GL_EXT_shader_framebuffer_fetch", EXT_ES3},
     /* item 2's last: stencil textures (texture.c's S8 images, fbo.c) */
     {"GL_OES_texture_stencil8", EXT_ES31},
+    /* item 4: ASTC LDR, blocks the TMU decodes (texture.c, v3dcore's block_h) */
+    {"GL_KHR_texture_compression_astc_ldr", EXT_ES3},
 };
 #define NUM_EXTENSIONS (sizeof(extensions) / sizeof(extensions[0]))
 

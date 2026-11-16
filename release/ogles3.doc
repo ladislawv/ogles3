@@ -126,7 +126,8 @@ ogles3.library/--background--                   ogles3.library/--background--
        EXT_ and OES_draw_buffers_indexed (blending and colour masks by
        draw buffer) and EXT_ and OES_copy_image (glCopyImageSubData
        between textures; renderbuffers and multisample textures are not
-       copied: GL_INVALID_OPERATION) and EXT_shader_framebuffer_fetch;
+       copied: GL_INVALID_OPERATION), EXT_shader_framebuffer_fetch and
+       KHR_texture_compression_astc_ldr (2D, arrays and cube maps);
        3.1 contexts EXT_ and OES_texture_cube_map_array, EXT_ and
        OES_texture_buffer (not the RGB32 formats: GL_INVALID_ENUM; no
        imageBuffer), OES_texture_storage_multisample_2d_array and

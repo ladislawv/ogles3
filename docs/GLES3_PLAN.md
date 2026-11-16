@@ -1,5 +1,17 @@
 # OpenGL ES 3.0 and 3.1 on ogles2.library
 
+**`KHR_texture_compression_astc_ldr` (2026-11-16, built, not run; ES3
+contexts).** The 28 2D formats (14 block sizes, linear and sRGB) kept as
+their 16-byte blocks and given to the TMU as they are (Mesa's table:
+`ASTC_4X4` on, 16-bit returns, filtered); the sRGB ones by the texture
+state's bit. Each compressed format's block is its own now (`blk_w`,
+`blk_h`: 4x4 but ASTC's) in every compressed path (`glCompressedTex*`,
+`store_box`, `copy_image`), and v3dcore lays a level out by blocks of
+`block` x `block_h` texels (`v3d_texture_alloc_blocks_wh`, PROVENANCE.md).
+`GL_COMPRESSED_TEXTURE_FORMATS` lists them (43 in ES3 contexts; the
+query's values hold 48). No 3D textures (`astc_sliced_3d`, HDR: not
+offered).
+
 **`OES_texture_stencil8` (2026-11-16, built, not run; ES 3.1 contexts).**
 STENCIL_INDEX8 textures (`glTexImage2D`/`3D` with `GL_STENCIL_INDEX` and
 bytes, `glTexStorage*`) as DEPTH32F_STENCIL8's stencil is: the texels kept

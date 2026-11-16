@@ -206,6 +206,12 @@ static v3d_u32 v3d_blocks(v3d_u32 texels, v3d_u32 block)
 int v3d_texture_alloc_blocks(V3DDevice* device, V3DTexture* tex, v3d_u16 width, v3d_u16 height,
                              v3d_u8 cpp, v3d_u8 block)
 {
+    return v3d_texture_alloc_blocks_wh(device, tex, width, height, cpp, block, block);
+}
+
+int v3d_texture_alloc_blocks_wh(V3DDevice* device, V3DTexture* tex, v3d_u16 width, v3d_u16 height,
+                                v3d_u8 cpp, v3d_u8 block, v3d_u8 block_h)
+{
     v3d_u32 numComponents = cpp;
     v3d_u32 utile_w, utile_h, mb_width, mb_height;
     v3d_u32 padded_width, padded_height;
@@ -242,7 +248,7 @@ int v3d_texture_alloc_blocks(V3DDevice* device, V3DTexture* tex, v3d_u16 width, 
         /* The decision lives in v3d_texture_level_layout so the mip chain
          * runs the identical code rather than a second copy of it. */
         v3d_u32 ub_pad = 0;
-        v3d_texture_level_layout(v3d_blocks((v3d_u32)width, block), v3d_blocks((v3d_u32)height, block),
+        v3d_texture_level_layout(v3d_blocks((v3d_u32)width, block), v3d_blocks((v3d_u32)height, block_h),
                                  utile_w, utile_h, &format, &padded_width, &padded_height, &ub_pad);
         tex->ub_pad = (v3d_u8)ub_pad;
     }
@@ -256,6 +262,7 @@ int v3d_texture_alloc_blocks(V3DDevice* device, V3DTexture* tex, v3d_u16 width, 
     tex->height = height;
     tex->cpp = cpp;
     tex->block = block;
+    tex->block_h = block_h != block ? block_h : 0;
     tex->format = V3D_SRCFMT_RGBA8;
     tex->min_filter = V3D_TEXFILTER_NEAREST;
     tex->mag_filter = V3D_TEXFILTER_NEAREST;
@@ -339,7 +346,7 @@ int v3d_texture_alloc_mipchain(V3DDevice* device, V3DTexture* tex, v3d_u8 want_l
 
         /* ogles2: a block-compressed level is laid out as its blocks */
         lw = v3d_blocks(lw, tex->block);
-        lh = v3d_blocks(lh, tex->block);
+        lh = v3d_blocks(lh, tex->block_h ? tex->block_h : tex->block);
         v3d_texture_level_layout(lw, lh, utile_w, utile_h, &fmt, &pw, &ph, &ubp);
 
         sz = ph * pw * numComponents;

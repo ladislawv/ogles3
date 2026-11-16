@@ -1826,8 +1826,44 @@ BOOL ogles2_texture_query(struct OGLES3Context *ctx, GLenum pname, GLint *v)
 #ifndef GL_ETC1_RGB8_OES
 #define GL_ETC1_RGB8_OES 0x8D64
 #endif
+/* KHR_texture_compression_astc_ldr (ES 3.2 plan item 4): the 2D formats,
+ * linear and sRGB, in V3D's order (V3D_TEXTURE_DATA_FORMAT_ASTC4X4 on);
+ * 16-byte blocks the TMU decodes, kept and stored as they are. */
+static BOOL astc_format(GLenum format)
+{
+    return (format >= GL_COMPRESSED_RGBA_ASTC_4x4_KHR && format <= GL_COMPRESSED_RGBA_ASTC_12x12_KHR) ||
+           (format >= GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR && format <= GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR);
+}
+
+static int astc_index(GLenum format)
+{
+    return (int)(format >= GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR ? format - GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR
+                                                                  : format - GL_COMPRESSED_RGBA_ASTC_4x4_KHR);
+}
+
+/* A compressed format's block in texels: 4x4, ASTC's its own. */
+static ULONG blk_w(GLenum format)
+{
+    static const UBYTE w[14] = {4, 5, 5, 6, 6, 8, 8, 8, 10, 10, 10, 10, 12, 12};
+    return astc_format(format) ? w[astc_index(format)] : 4;
+}
+
+static ULONG blk_h(GLenum format)
+{
+    static const UBYTE h[14] = {4, 4, 5, 5, 6, 5, 6, 8, 5, 6, 8, 10, 10, 12};
+    return astc_format(format) ? h[astc_index(format)] : 4;
+}
+
+/* Texels in blocks of b, rounded up. */
+static ULONG bdiv(ULONG texels, ULONG b)
+{
+    return (texels + b - 1) / b;
+}
+
 static ULONG dxt_block_bytes(GLenum format)
 {
+    if (astc_format(format))
+        return 16;
     switch (format) {
     case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
     case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
@@ -1860,14 +1896,10 @@ static BOOL etc2_format(GLenum format)
 static BOOL srgb_etc2(GLenum format)
 {
     return format == GL_COMPRESSED_SRGB8_ETC2 || format == GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2 ||
-           format == GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC;
+           format == GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC ||
+           (format >= GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR && format <= GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR);
 }
 
-/* Texels in blocks of 4, rounded up (a level smaller than 4x4 is one block). */
-static ULONG blocks4(ULONG texels)
-{
-    return (texels + 3) / 4;
-}
 
 static int class_of(GLenum format, GLenum type)
 {
@@ -2862,7 +2894,9 @@ static void storage_of(struct OGLES3Texture *t)
         case GL_COMPRESSED_SIGNED_R11_EAC:     type = V3D_TEXTURE_DATA_FORMAT_SIGNEDR11EAC; break;
         case GL_COMPRESSED_RG11_EAC:           type = V3D_TEXTURE_DATA_FORMAT_RG11EAC; break;
         case GL_COMPRESSED_SIGNED_RG11_EAC:    type = V3D_TEXTURE_DATA_FORMAT_SIGNEDRG11EAC; break;
-        default:                               type = V3D_TEXTURE_DATA_FORMAT_BC1; break;
+        default: /* BC1, or KHR_texture_compression_astc_ldr's */
+            type = astc_format(f) ? (UBYTE)(V3D_TEXTURE_DATA_FORMAT_ASTC4X4 + astc_index(f)) : V3D_TEXTURE_DATA_FORMAT_BC1;
+            break;
         }
         if (f == GL_COMPRESSED_R11_EAC || f == GL_COMPRESSED_SIGNED_R11_EAC) {
             sw[1] = sw[2] = Z; sw[3] = O;
@@ -3449,8 +3483,9 @@ static void store_box(struct OGLES3Texture *t, int k, int l, const UBYTE *src, i
     BOOL whole = x == 0 && y == 0 && w == t->f[k].w[l] && h == t->f[k].h[l];
     int j;
     if (class_of(t->f[0].format[0], t->f[0].type[0]) == CLASS_BLOCKS) {
-        v3d_texture_store(ogles2_device(), face_gpu(t, k, l, &tmp), (v3d_u8)l, src, blocks4((ULONG)w) * t->cpp,
-                          x / 4, y / 4, (int)blocks4((ULONG)w), (int)blocks4((ULONG)h));
+        ULONG kw = blk_w(t->f[0].format[0]), kh = blk_h(t->f[0].format[0]);
+        v3d_texture_store(ogles2_device(), face_gpu(t, k, l, &tmp), (v3d_u8)l, src, bdiv((ULONG)w, kw) * t->cpp,
+                          x / (int)kw, y / (int)kh, (int)bdiv((ULONG)w, kw), (int)bdiv((ULONG)h, kh));
         return;
     }
     in = (ULONG)w * copy_bytes(class_of(t->f[0].format[0], t->f[0].type[0]));
@@ -3550,8 +3585,9 @@ static BOOL upload_all(struct OGLES3Texture *t)
     if (!(t->gpu = AllocVec(sizeof(*t->gpu), MEMF_ANY | MEMF_CLEAR)))
         return FALSE;
     storage_of(t);
-    if (v3d_texture_alloc_blocks(dev, t->gpu, f0->w[0], f0->h[0], t->cpp,
-                                 level_class(f0, 0) == CLASS_BLOCKS ? 4 : 1) < 0 ||
+    if (v3d_texture_alloc_blocks_wh(dev, t->gpu, f0->w[0], f0->h[0], t->cpp,
+                                    level_class(f0, 0) == CLASS_BLOCKS ? (v3d_u8)blk_w(f0->format[0]) : 1,
+                                    level_class(f0, 0) == CLASS_BLOCKS ? (v3d_u8)blk_h(f0->format[0]) : 1) < 0 ||
         (n > 1 && v3d_texture_alloc_mipchain(dev, t->gpu, (v3d_u8)n) < 0)) {
         free_gpu(t);
         return FALSE;
@@ -5248,7 +5284,7 @@ void ogles2_glCompressedTexImage3D(struct OGLES3Context *ctx, GLenum target, GLi
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
-    layer = blocks4((ULONG)width) * blocks4((ULONG)height) * bs;
+    layer = bdiv((ULONG)width, blk_w(internalformat)) * bdiv((ULONG)height, blk_h(internalformat)) * bs;
     if (width < 0 || height < 0 || depth < 0 || border || level < 0 || level >= MAX_LEVELS ||
         width > (MAX_SIZE >> level) || height > (MAX_SIZE >> level) || depth > MAX_LAYERS ||
         imageSize != (GLsizei)(layer * (ULONG)depth)) {
@@ -5293,7 +5329,7 @@ void ogles2_glCompressedTexSubImage3D(struct OGLES3Context *ctx, GLenum target, 
     struct OGLES3TexState *ts;
     struct OGLES3Texture *t;
     struct OGLES3Face *f;
-    ULONG bs, bw, bh, row, j, layer;
+    ULONG bs, bw, bh, row, j, layer, kw, kh;
     int k;
     BOOL stored;
     if (!tex3d_entry(ctx, target) || !(ts = ts_get(ctx)) || !(t = image_texture_3d(ctx, ts, target)))
@@ -5316,16 +5352,18 @@ void ogles2_glCompressedTexSubImage3D(struct OGLES3Context *ctx, GLenum target, 
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
-    bw = blocks4((ULONG)width);
-    bh = blocks4((ULONG)height);
+    kw = blk_w(format);
+    kh = blk_h(format);
+    bw = bdiv((ULONG)width, kw);
+    bh = bdiv((ULONG)height, kh);
     layer = bw * bh * bs;
     if (xoffset + width > f->w[level] || yoffset + height > f->h[level] || zoffset + depth > t->d[level] ||
         imageSize != (GLsizei)(layer * (ULONG)depth)) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
-    if (format != f->format[level] || ((xoffset | yoffset) & 3) ||
-        ((width & 3) && xoffset + width != f->w[level]) || ((height & 3) && yoffset + height != f->h[level])) {
+    if (format != f->format[level] || (ULONG)xoffset % kw || (ULONG)yoffset % kh ||
+        ((ULONG)width % kw && xoffset + width != f->w[level]) || ((ULONG)height % kh && yoffset + height != f->h[level])) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
@@ -5334,14 +5372,14 @@ void ogles2_glCompressedTexSubImage3D(struct OGLES3Context *ctx, GLenum target, 
     if (!width || !height || !depth || !data)
         return;
     before_change(ctx, ts, t);
-    row = blocks4(f->w[level]) * bs;
+    row = bdiv(f->w[level], kw) * bs;
     stored = t->gpu && level < t->gpu->num_levels && consistent(f, level) && depth_ok(t, level);
     for (k = zoffset; k < zoffset + depth; k++) {
         struct OGLES3Face *fk = &t->f[k];
         const UBYTE *src = (const UBYTE *)data + (ULONG)(k - zoffset) * layer;
         for (j = 0; j < bh; j++)
             CopyMem((APTR)(src + j * bw * bs),
-                    fk->shadow[level] + ((ULONG)yoffset / 4 + j) * row + (ULONG)xoffset / 4 * bs, bw * bs);
+                    fk->shadow[level] + ((ULONG)yoffset / kh + j) * row + (ULONG)xoffset / kw * bs, bw * bs);
         fk->blank &= ~(1UL << level);
         if (stored)
             store_box(t, k, level, src, xoffset, yoffset, width, height);
@@ -5627,12 +5665,12 @@ void ogles2_glCompressedTexImage2D(struct OGLES3Context *ctx, GLenum target, GLi
         return;
     }
     bs = dxt_block_bytes(internalformat);
-    if (!bs || (etc2_format(internalformat) && !ogles2_es3(ctx))) {
+    if (!bs || ((etc2_format(internalformat) || astc_format(internalformat)) && !ogles2_es3(ctx))) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
-    bw = blocks4((ULONG)width);
-    bh = blocks4((ULONG)height);
+    bw = bdiv((ULONG)width, blk_w(internalformat));
+    bh = bdiv((ULONG)height, blk_h(internalformat));
     if (width < 0 || height < 0 || border != 0 || level < 0 || level >= MAX_LEVELS ||
         imageSize != (GLsizei)(bw * bh * bs)) {
         ogles2_error(ctx, GL_INVALID_VALUE);
@@ -5651,12 +5689,13 @@ void ogles2_glCompressedTexSubImage2D(struct OGLES3Context *ctx, GLenum target, 
     struct OGLES3TexState *ts;
     struct OGLES3Texture *t;
     struct OGLES3Face *f;
-    ULONG bs, bw, bh, row, j;
+    ULONG bs, bw, bh, row, j, kw, kh;
     int k;
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
         return;
     bs = dxt_block_bytes(format);
-    if ((target != GL_TEXTURE_2D && !face_target(target)) || !bs || (etc2_format(format) && !ogles2_es3(ctx))) {
+    if ((target != GL_TEXTURE_2D && !face_target(target)) || !bs ||
+        ((etc2_format(format) || astc_format(format)) && !ogles2_es3(ctx))) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
@@ -5674,8 +5713,10 @@ void ogles2_glCompressedTexSubImage2D(struct OGLES3Context *ctx, GLenum target, 
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
-    bw = blocks4((ULONG)width);
-    bh = blocks4((ULONG)height);
+    kw = blk_w(format);
+    kh = blk_h(format);
+    bw = bdiv((ULONG)width, kw);
+    bh = bdiv((ULONG)height, kh);
     if (xoffset + width > f->w[level] || yoffset + height > f->h[level] ||
         imageSize != (GLsizei)(bw * bh * (bs ? bs : 8))) {
         ogles2_error(ctx, GL_INVALID_VALUE);
@@ -5684,8 +5725,8 @@ void ogles2_glCompressedTexSubImage2D(struct OGLES3Context *ctx, GLenum target, 
     /* OES_compressed_ETC1_RGB8_texture: ETC1 images cannot be updated; S3TC
      * (EXT_texture_compression_s3tc) and ETC2/EAC (ES 3.0): the level's own
      * format, whole blocks (a box may end at the level's edge). */
-    if (format == GL_ETC1_RGB8_OES || format != f->format[level] || ((xoffset | yoffset) & 3) ||
-        ((width & 3) && xoffset + width != f->w[level]) || ((height & 3) && yoffset + height != f->h[level])) {
+    if (format == GL_ETC1_RGB8_OES || format != f->format[level] || (ULONG)xoffset % kw || (ULONG)yoffset % kh ||
+        ((ULONG)width % kw && xoffset + width != f->w[level]) || ((ULONG)height % kh && yoffset + height != f->h[level])) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
@@ -5694,9 +5735,9 @@ void ogles2_glCompressedTexSubImage2D(struct OGLES3Context *ctx, GLenum target, 
     if (!width || !height || !data)
         return;
     before_change(ctx, ts, t);
-    row = blocks4(f->w[level]) * bs;
+    row = bdiv(f->w[level], kw) * bs;
     for (j = 0; j < bh; j++)
-        CopyMem((UBYTE *)data + j * bw * bs, f->shadow[level] + ((ULONG)yoffset / 4 + j) * row + (ULONG)xoffset / 4 * bs,
+        CopyMem((UBYTE *)data + j * bw * bs, f->shadow[level] + ((ULONG)yoffset / kh + j) * row + (ULONG)xoffset / kw * bs,
                 bw * bs);
     f->blank &= ~(1UL << level);
     if (t->gpu && level < t->gpu->num_levels && consistent(f, level))
@@ -5940,11 +5981,11 @@ static void copy_write(struct OGLES3Context *ctx, struct OGLES3Texture *t, int k
                        int y, int w, int h)
 {
     struct OGLES3Face *f = &t->f[k];
-    ULONG bs = dxt_block_bytes(f->format[l]), j;
+    ULONG bs = dxt_block_bytes(f->format[l]), j, kw = blk_w(f->format[l]), kh = blk_h(f->format[l]);
     if (bs) {
-        ULONG row = blocks4(f->w[l]) * bs, bw = blocks4((ULONG)w);
-        for (j = 0; j < blocks4((ULONG)h); j++)
-            CopyMem((APTR)(box + j * bw * bs), f->shadow[l] + ((ULONG)y / 4 + j) * row + (ULONG)x / 4 * bs, bw * bs);
+        ULONG row = bdiv(f->w[l], kw) * bs, bw = bdiv((ULONG)w, kw);
+        for (j = 0; j < bdiv((ULONG)h, kh); j++)
+            CopyMem((APTR)(box + j * bw * bs), f->shadow[l] + ((ULONG)y / kh + j) * row + (ULONG)x / kw * bs, bw * bs);
     } else {
         ULONG cb = copy_bytes(level_class(f, l));
         for (j = 0; j < (ULONG)h; j++)
@@ -5969,6 +6010,7 @@ void ogles2_glCopyImageSubDataEXT(struct OGLES3Context *ctx, GLuint srcName, GLe
     GLenum sfmt, dfmt;
     const struct copy_fmt *scf, *dcf;
     ULONG sbs, dbs, sw, sh, unit, cb;
+    GLint skw, skh, dkw, dkh;
     GLsizei dw, dh;
     UBYTE *buf, *box;
     int z;
@@ -5983,20 +6025,25 @@ void ogles2_glCopyImageSubDataEXT(struct OGLES3Context *ctx, GLuint srcName, GLe
     dfmt = level_sized(df, dstLevel);
     sbs = dxt_block_bytes(sf->format[srcLevel]);
     dbs = dxt_block_bytes(df->format[dstLevel]);
+    skw = sbs ? (GLint)blk_w(sf->format[srcLevel]) : 1;
+    skh = sbs ? (GLint)blk_h(sf->format[srcLevel]) : 1;
+    dkw = dbs ? (GLint)blk_w(df->format[dstLevel]) : 1;
+    dkh = dbs ? (GLint)blk_h(df->format[dstLevel]) : 1;
     /* Whole blocks (a box may end at the level's edge) */
-    if (sbs && ((srcX | srcY) & 3 || ((srcWidth & 3) && srcX + srcWidth != sf->w[srcLevel]) ||
-                ((srcHeight & 3) && srcY + srcHeight != sf->h[srcLevel]))) {
+    if (sbs && (srcX % skw || srcY % skh || (srcWidth % skw && srcX + srcWidth != sf->w[srcLevel]) ||
+                (srcHeight % skh && srcY + srcHeight != sf->h[srcLevel]))) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
-    if (dbs && ((dstX | dstY) & 3)) {
+    if (dbs && (dstX % dkw || dstY % dkh)) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
     /* The destination's box: a compressed source's blocks are texels, a
-     * compressed destination's texels blocks. */
-    dw = sbs && !dbs ? (GLsizei)blocks4((ULONG)srcWidth) : !sbs && dbs ? srcWidth * 4 : srcWidth;
-    dh = sbs && !dbs ? (GLsizei)blocks4((ULONG)srcHeight) : !sbs && dbs ? srcHeight * 4 : srcHeight;
+     * compressed destination's texels blocks (same-sized blocks between
+     * two compressed formats: the same format, copy_compatible). */
+    dw = sbs && !dbs ? (GLsizei)bdiv((ULONG)srcWidth, (ULONG)skw) : !sbs && dbs ? srcWidth * dkw : srcWidth;
+    dh = sbs && !dbs ? (GLsizei)bdiv((ULONG)srcHeight, (ULONG)skh) : !sbs && dbs ? srcHeight * dkh : srcHeight;
     if (srcWidth < 0 || srcHeight < 0)
         dw = srcWidth, dh = srcHeight;
     if (!copy_bounds(ctx, st, srcLevel, srcX, srcY, srcZ, srcWidth, srcHeight, srcDepth) ||
@@ -6012,12 +6059,13 @@ void ogles2_glCopyImageSubDataEXT(struct OGLES3Context *ctx, GLuint srcName, GLe
     scf = copy_fmt_of(sfmt);
     dcf = copy_fmt_of(dfmt);
     /* Units of the copy: blocks or texels of the source (sw x sh of them). */
-    sw = sbs ? blocks4((ULONG)srcWidth) : (ULONG)srcWidth;
-    sh = sbs ? blocks4((ULONG)srcHeight) : (ULONG)srcHeight;
+    sw = sbs ? bdiv((ULONG)srcWidth, (ULONG)skw) : (ULONG)srcWidth;
+    sh = sbs ? bdiv((ULONG)srcHeight, (ULONG)skh) : (ULONG)srcHeight;
     unit = sfmt == dfmt ? (sbs ? sbs : copy_bytes(level_class(sf, srcLevel))) : sbs ? sbs : (ULONG)scf->nc * scf->cs;
     cb = dbs ? dbs : copy_bytes(level_class(df, dstLevel));
     if (!(buf = AllocVec(sw * sh * unit + 4, MEMF_ANY)) ||
-        !(box = AllocVec((ULONG)(dbs ? blocks4((ULONG)dw) * blocks4((ULONG)dh) : (ULONG)dw * dh) * cb + 4, MEMF_ANY))) {
+        !(box = AllocVec((ULONG)(dbs ? bdiv((ULONG)dw, (ULONG)dkw) * bdiv((ULONG)dh, (ULONG)dkh) : (ULONG)dw * dh) * cb + 4,
+                         MEMF_ANY))) {
         FreeVec(buf);
         ogles2_error(ctx, GL_OUT_OF_MEMORY);
         return;
@@ -6038,9 +6086,9 @@ void ogles2_glCopyImageSubDataEXT(struct OGLES3Context *ctx, GLuint srcName, GLe
         }
         /* the source's units */
         if (sbs) {
-            ULONG row = blocks4(s->w[srcLevel]) * sbs;
+            ULONG row = bdiv(s->w[srcLevel], (ULONG)skw) * sbs;
             for (j = 0; j < sh; j++)
-                CopyMem(s->shadow[srcLevel] + ((ULONG)srcY / 4 + j) * row + (ULONG)srcX / 4 * sbs, buf + j * sw * sbs,
+                CopyMem(s->shadow[srcLevel] + ((ULONG)srcY / skh + j) * row + (ULONG)srcX / skw * sbs, buf + j * sw * sbs,
                         sw * sbs);
         } else if (sfmt == dfmt) {
             for (j = 0; j < sh; j++)

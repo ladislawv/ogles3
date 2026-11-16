@@ -993,7 +993,7 @@ void ogles2_glClearStencil(struct OGLES3Context *ctx, GLint s)
  * round to the nearest integer. */
 
 enum kind { K_BOOL, K_INT, K_UINT, K_FLOAT, K_NFLOAT }; /* K_UINT: a mask, unsigned as a float */
-struct value { enum kind kind; int n; GLint i[16]; GLfloat f[16]; };
+struct value { enum kind kind; int n; GLint i[48]; GLfloat f[16]; }; /* i: GL_COMPRESSED_TEXTURE_FORMATS' 43 */
 
 /* ES 3.0's limits that GLES2 contexts lack, answered in ES3 contexts only
  * (docs/GLES3_PLAN.md stage A item 1). The values are those `v3dglslc -L`
@@ -1253,11 +1253,11 @@ static int lookup(struct OGLES3Context *ctx, GLenum pname, struct value *v)
         v->kind = K_INT; v->n = 1; v->i[0] = (GLint)s->clip_depth;
         return 1;
     case GL_NUM_COMPRESSED_TEXTURE_FORMATS: /* OES_compressed_ETC1_RGB8_texture, S3TC (M7); ES 3.0's ETC2/EAC */
-        v->kind = K_INT; v->n = 1; v->i[0] = ogles2_es3(ctx) ? 15 : 5;
+        v->kind = K_INT; v->n = 1; v->i[0] = ogles2_es3(ctx) ? 15 + 28 : 5;
         return 1;
     case GL_COMPRESSED_TEXTURE_FORMATS:
         /* ETC1 first: dEQP's negative cases take the first format listed. */
-        v->kind = K_INT; v->n = ogles2_es3(ctx) ? 15 : 5;
+        v->kind = K_INT; v->n = ogles2_es3(ctx) ? 15 + 28 : 5;
         v->i[0] = 0x8D64; /* GL_ETC1_RGB8_OES */
         v->i[1] = 0x83F0; /* GL_COMPRESSED_RGB_S3TC_DXT1_EXT */
         v->i[2] = 0x83F1; /* GL_COMPRESSED_RGBA_S3TC_DXT1_EXT */
@@ -1267,6 +1267,11 @@ static int lookup(struct OGLES3Context *ctx, GLenum pname, struct value *v)
             int k;
             for (k = 0; k < 10; k++)
                 v->i[5 + k] = 0x9270 + k;
+            /* KHR_texture_compression_astc_ldr's 14 sizes, linear and sRGB */
+            for (k = 0; k < 14; k++) {
+                v->i[15 + k] = GL_COMPRESSED_RGBA_ASTC_4x4_KHR + k;
+                v->i[29 + k] = GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR + k;
+            }
         }
         return 1;
     case GL_SHADER_COMPILER: /* TRUE with offline binaries too (plan 7.8) */
