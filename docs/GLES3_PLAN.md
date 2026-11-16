@@ -225,25 +225,24 @@ extension offered.**
   renderbuffer beside a layered attachment stays `_LAYER_TARGETS`, as the
   extension says.)
 
-**What is left on `es32` (2026-11-16, after the batch below).** Not
-written, by size:
-- (Done since: program pipelines with a geometry stage, below.) One
-  program of the vertex and fragment stages around a geometry program of
-  its own is an invalid pipeline by ES 3.2 7.4.1 (as Mesa says, "Program is
-  active for multiple shader stages with an intervening stage provided by
-  another program"): `pipe_validate` says so too, a draw
-  `GL_INVALID_OPERATION`. v3dglslc prints a pipeline's validation message
-  when Mesa refuses a key-state draw through it.
-- (Done since: `glCopyImageSubData` of depth, stencil and multisample
-  images, below.)
-- (Done since: a buffer's words and texels kept in step, below.)
-- Not possible on this GPU and its Mesa driver: RGB32 buffer textures,
-  `EXT_gpu_shader5`, tessellation (so no ES 3.2 context), ASTC HDR and 3D.
+**What is left on `es32` (2026-11-16): nothing this GPU and its Mesa
+driver can do.** The last three gaps are written (below: program
+pipelines with a geometry stage; `glCopyImageSubData` of depth, stencil
+and multisample images; a buffer's words and texels kept in step). One
+program of the vertex and fragment stages around a geometry program of its
+own is an invalid pipeline by ES 3.2 7.4.1 (as Mesa says, "Program is
+active for multiple shader stages with an intervening stage provided by
+another program"): `pipe_validate` says so too, a draw
+`GL_INVALID_OPERATION`; v3dglslc prints a pipeline's validation message
+when Mesa refuses a key-state draw through it. Not possible on this GPU
+and its Mesa driver: RGB32 buffer textures, `EXT_gpu_shader5`,
+tessellation (so no ES 3.2 context), ASTC HDR and 3D.
 Everything written on `es32` waits for the A1200 (amigent): `m8_draw`'s
 new tests (`test_geometry`, `test_advanced_blend`, `test_copy_exact`,
-`test_image_buffer_small`), then dEQP-GLES31 (the plan's "To run" lists),
-with `v3dglslc3` rebuilt (`~/ogles3-build/v3dglslc/v3dglslc.stripped`, 39
-of 39 identical with the host compiler).
+`test_image_buffer_small`, `test_copy_gpu`, `test_pipeline_geometry`),
+then dEQP-GLES31 (the plan's "To run" lists), with `v3dglslc3` rebuilt
+(`~/ogles3-build/v3dglslc/v3dglslc.stripped`, 39 of 39 identical with the
+host compiler) and the tree's Mesa patches 0015 to 0019 all present.
 
 **Remaining items, the first batch (2026-11-16, built; not run on the
 A1200).**
