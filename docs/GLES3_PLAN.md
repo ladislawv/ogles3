@@ -243,6 +243,24 @@ A1200).**
   0xfffe), `OGLES3Image.blend_modes`, a pipeline's its fragment
   program's. m8_draw `test_advanced_blend` (es32adv: multiply declared and
   drawn, screen refused, es3flat refused).
+- **`glCopyImageSubData`'s exact bits** (`texture.c`, "exact texels"):
+  the formats whose float RAM copy cannot give every encoding back
+  (R8/RG8/RGB8/RGBA8_SNORM, R16F to RGBA16F, R11F_G11F_B10F, RGB9_E5) keep
+  a level's texels as the GPU stores them (`raw[]`, in `raw_hw[]`'s stored
+  format) when an upload gives them in that format's own type (`raw_fmt`:
+  `GL_BYTE`, `GL_HALF_FLOAT`, the packed words; `raw_texels` puts them in
+  the GPU's byte order). The GPU copy (`store_box`, the TFU's whole level
+  too) and the copy (`copy_read`; a destination's from the application's
+  texels the copy read, `copy_write`) use them; every other change to the
+  level keeps them current from the RAM copy (`raw_pack_box`: sub-images
+  in another type, `fill_bytes`, `ogles2_texture_write`/`_fill`), a new
+  level or a render into it drops them (the GPU copy is the texels then).
+  A base-level view shares them as it shares the RAM copy. m8_draw
+  `test_copy_exact` (R8_SNORM's 0x80, a half NaN's payload 0x7E01 and the
+  non-canonical RGB9_E5 word 0x08000002 copied into R8UI, R16UI, R32UI and
+  read back as given). Not checkable under vamos: a state-only context
+  reads no pixels, and `glTexImage2D` times itself on the system timer,
+  which vamos has not got (as `glBufferData`).
 
 **Layered depth and stencil; depth and stencil by face or layer
 (2026-11-16, built; not run on the A1200).** Depth textures attached as 2D
@@ -495,7 +513,7 @@ OpenGL ES 3.2's features"):
   floats: SNORM's 0x80 (read as -1.0, stored 0x81 already at the upload),
   RGB9_E5's non-canonical encodings, half and small floats' NaN payloads;
   dEQP's copies of random bits from those into integer formats will show
-  it (a fix: those formats' RAM copies keeping the bits given).
+  it. (Fixed in "Remaining items, the first batch": the exact texels.)
   Renderbuffers and multisample textures: not copied
   (`GL_INVALID_OPERATION`, logged once). An independent review of the
   diff found that and the four fixed: the completeness rule,

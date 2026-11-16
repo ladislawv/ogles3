@@ -3698,6 +3698,50 @@ static void test_advanced_blend(void)
     glDeleteProgram(q);
 }
 
+/* glCopyImageSubData's exact bits (docs/GLES3_PLAN.md item 5): a texel
+ * given in a format the RAM copy keeps as floats, copied into an integer
+ * format of its size, read back through a framebuffer: R8_SNORM's 0x80
+ * (not 0x81), a half NaN's payload, a non-canonical RGB9_E5 word, as given. */
+static GLuint copied_bits(GLenum sfmt, GLenum format, GLenum type, const void *texel, GLenum ufmt)
+{
+    GLuint t[2], fb, px[4] = { 0xdead, 0xdead, 0xdead, 0xdead };
+    glGenTextures(2, t);
+    glBindTexture(GL_TEXTURE_2D, t[0]);
+    glTexImage2D(GL_TEXTURE_2D, 0, (GLint)sfmt, 1, 1, 0, format, type, texel);
+    glBindTexture(GL_TEXTURE_2D, t[1]);
+    glTexStorage2D(GL_TEXTURE_2D, 1, ufmt, 1, 1);
+    glCopyImageSubDataEXT(t[0], GL_TEXTURE_2D, 0, 0, 0, 0, t[1], GL_TEXTURE_2D, 0, 0, 0, 0, 1, 1, 1);
+    glGenFramebuffers(1, &fb);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, t[1], 0);
+    glReadPixels(0, 0, 1, 1, GL_RGBA_INTEGER, GL_UNSIGNED_INT, px);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDeleteFramebuffers(1, &fb);
+    glDeleteTextures(2, t);
+    return px[0];
+}
+
+static void test_copy_exact(void)
+{
+    static const GLbyte snorm = -128;
+    static const GLushort nan_half = 0x7E01;
+    static const GLuint e5 = 0x08000002;
+    GLuint v;
+    v = copied_bits(GL_R8_SNORM, GL_RED, GL_BYTE, &snorm, GL_R8UI);
+    check(v == 0x80 && glGetError() == GL_NO_ERROR, "copy image: R8_SNORM's 0x80 into R8UI as it is");
+    if (v != 0x80)
+        printf("     read 0x%lx\n", (unsigned long)v);
+    v = copied_bits(GL_R16F, GL_RED, GL_HALF_FLOAT, &nan_half, GL_R16UI);
+    check(v == 0x7E01 && glGetError() == GL_NO_ERROR, "copy image: a half NaN's payload into R16UI as it is");
+    if (v != 0x7E01)
+        printf("     read 0x%lx\n", (unsigned long)v);
+    v = copied_bits(GL_RGB9_E5, GL_RGB, GL_UNSIGNED_INT_5_9_9_9_REV, &e5, GL_R32UI);
+    check(v == 0x08000002 && glGetError() == GL_NO_ERROR,
+          "copy image: a non-canonical RGB9_E5 word into R32UI as it is");
+    if (v != 0x08000002)
+        printf("     read 0x%lx\n", (unsigned long)v);
+}
+
 static int skipped(const char *name)
 {
     const char *list = getenv("M8_SKIP");
@@ -3813,6 +3857,8 @@ int main(void)
                 test_geometry();
             if (!skipped("advanced_blend"))
                 test_advanced_blend();
+            if (!skipped("copy_exact"))
+                test_copy_exact();
         }
     }
     check(glGetError() == GL_NO_ERROR, "no GL error left over");
