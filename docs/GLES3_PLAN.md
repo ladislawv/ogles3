@@ -272,7 +272,12 @@ name). Fixed on the way:
   KHR_blend_equation_advanced's errors for empty draws too.
 - **Compressed copies within a view class** (ES 3.2 table 8.27: R11 and
   signed R11, ETC2 and its sRGB, each ASTC size and its sRGB):
-  `compressed_class` (not yet rerun).
+  `compressed_class`. **Still refused on the A1200** (22:09 run,
+  `ogles2-m8-3-20261116-220903`, about 400 of 976 cases before the pause:
+  76 view-class pairs `GL_INVALID_OPERATION`, every class): either the
+  installed library lacked it or another check refuses; next, check
+  `LIBS:ogles3.library` is the new build, then step through
+  `ogles2_glCopyImageSubDataEXT` with an R11 to signed R11 copy.
 - **`glTexStorage2D`/`3D` of compressed formats** (ES 3.0 8.18; none was
   accepted): zeroed blocks, as `glCompressedTexImage2D` keeps them; found by
   `m8_draw`'s new ASTC levels test (not yet rerun).
