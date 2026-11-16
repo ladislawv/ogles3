@@ -125,8 +125,8 @@ ogles3.library/--background--                   ogles3.library/--background--
        for). OpenGL ES 3.x contexts also list EXT_texture_sRGB_decode,
        EXT_ and OES_draw_buffers_indexed (blending and colour masks by
        draw buffer) and EXT_ and OES_copy_image (glCopyImageSubData
-       between textures; renderbuffers and multisample textures are not
-       copied: GL_INVALID_OPERATION), EXT_shader_framebuffer_fetch and
+       between textures and colour renderbuffers; depth, stencil and
+       multisample images are not copied: GL_INVALID_OPERATION), EXT_shader_framebuffer_fetch and
        KHR_texture_compression_astc_ldr (2D, arrays and cube maps),
        OES_sample_shading, OES_sample_variables and
        OES_shader_multisample_interpolation;

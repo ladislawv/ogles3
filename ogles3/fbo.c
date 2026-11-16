@@ -701,6 +701,17 @@ GLboolean ogles2_glIsFramebuffer(struct OGLES3Context *ctx, GLuint framebuffer)
     return fb && fb->bound_once ? GL_TRUE : GL_FALSE;
 }
 
+/* EXT_copy_image (texture.c): a colour renderbuffer's storage, the hidden
+ * texture it renders into; 0 for another (depth, stencil, multisample, no
+ * storage yet). */
+struct OGLES3Texture *ogles2_fbo_rb_color(struct OGLES3Context *ctx, GLuint name)
+{
+    struct OGLES3Renderbuffer *rb;
+    if (!ctx->fbo || !(rb = rb_by_name(ctx->fbo, name)) || rb->samples)
+        return 0;
+    return rb->color;
+}
+
 GLboolean ogles2_glIsRenderbuffer(struct OGLES3Context *ctx, GLuint renderbuffer)
 {
     struct OGLES3Renderbuffer *rb;

@@ -4306,10 +4306,14 @@ struct OGLES3Texture *ogles2_texture_hidden(struct OGLES3Context *ctx, UWORD w, 
  * it is colour-renderable), stored as glTexStorage2D stores it. */
 struct OGLES3Texture *ogles2_texture_hidden_sized(struct OGLES3Context *ctx, UWORD w, UWORD h, GLenum ifmt)
 {
+    struct OGLES3Texture *t;
     GLenum format, type;
     if (!sized_storage(ifmt, &format, &type))
         return 0;
-    return hidden(ctx, w, h, format, type, keep_sized(ifmt), TRUE);
+    t = hidden(ctx, w, h, format, type, keep_sized(ifmt), TRUE);
+    if (t)
+        t->f[0].ifmt[0] = ifmt; /* the renderbuffer's format (copy_image's compatibility) */
+    return t;
 }
 
 void ogles2_texture_hidden_free(struct OGLES3Context *ctx, struct OGLES3Texture *t)
@@ -5861,16 +5865,29 @@ static struct OGLES3Texture *copy_object(struct OGLES3Context *ctx, GLuint name,
         ogles2_error(ctx, GL_INVALID_ENUM);
         return 0;
     }
+    /* A colour renderbuffer: its hidden texture's one level (fbo.c) */
+    if (target == GL_RENDERBUFFER) {
+        if (!ogles2_glIsRenderbuffer(ctx, name)) {
+            ogles2_error(ctx, GL_INVALID_VALUE);
+            return 0;
+        }
+        if (level != 0) {
+            ogles2_error(ctx, GL_INVALID_VALUE);
+            return 0;
+        }
+        if ((t = ogles2_fbo_rb_color(ctx, name)) && (t->gpu || upload_all(t)) && (t->f[0].defined & 1))
+            return t;
+    }
     if (target == GL_RENDERBUFFER || target == GL_TEXTURE_2D_MULTISAMPLE ||
         target == GL_TEXTURE_2D_MULTISAMPLE_ARRAY_OES) {
-        if (target == GL_RENDERBUFFER ? !ogles2_glIsRenderbuffer(ctx, name) : !ogles2_texture_get(ctx, name)) {
+        if (target != GL_RENDERBUFFER && !ogles2_texture_get(ctx, name)) {
             ogles2_error(ctx, GL_INVALID_VALUE);
             return 0;
         }
         if (!warned) {
             warned = TRUE;
-            ogles2_log("glCopyImageSubData: renderbuffers and multisample textures are not copied "
-                       "(GL_INVALID_OPERATION; logged once)");
+            ogles2_log("glCopyImageSubData: depth, stencil and multisample renderbuffers and multisample "
+                       "textures are not copied (GL_INVALID_OPERATION; logged once)");
         }
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return 0;

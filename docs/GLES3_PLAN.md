@@ -1,5 +1,13 @@
 # OpenGL ES 3.0 and 3.1 on ogles2.library
 
+**`glCopyImageSubData` of colour renderbuffers (2026-11-16, built, not
+run).** A colour renderbuffer is its hidden texture's one level
+(`ogles2_fbo_rb_color`; Mesa's checks: level 0, else `GL_INVALID_VALUE`; no
+completeness rule), its internal format now recorded on it
+(`ogles2_texture_hidden_sized`) for the compatibility; a job rendering into
+it is rendered first, as for a texture. Depth, stencil and multisample
+renderbuffers and multisample textures: still `GL_INVALID_OPERATION`.
+
 **Item 6, sample shading (2026-11-16, built, not run; ES3 contexts).**
 `OES_sample_variables`, `OES_sample_shading` and
 `OES_shader_multisample_interpolation`. The compiler's context turns
