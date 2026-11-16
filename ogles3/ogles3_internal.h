@@ -138,6 +138,7 @@ struct OGLES3PixelStore
 #define OGLES3_CAP_RASTERIZER_DISCARD      (1UL << 10) /* GL_RASTERIZER_DISCARD (ES 3.0) */
 #define OGLES3_CAP_SAMPLE_MASK             (1UL << 11) /* GL_SAMPLE_MASK (ES 3.1) */
 #define OGLES3_CAP_SAMPLE_SHADING          (1UL << 12) /* OES_sample_shading's GL_SAMPLE_SHADING (draw.c) */
+#define OGLES3_CAP_BLEND_ADV_COHERENT      (1UL << 13) /* KHR_blend_equation_advanced_coherent's (on) */
 
 /* EXT_draw_buffers (M7 step 5): colour attachments 0..3, each a render
  * target of the tile buffer. */
@@ -275,6 +276,7 @@ struct OGLES3Array
 #define OGLES3_STATE_DEPTH_RANGE        39
 #define OGLES3_STATE_FB_WPOS_Y_TRANSFORM 63
 #define OGLES3_STATE_FB_PNTC_Y_TRANSFORM 64
+#define OGLES3_STATE_ADVANCED_BLENDING_MODE 67 /* KHR_blend_equation_advanced: one int, the mode */
 
 #define OGLES3_VARIANT_VS 0 /* .v3dp VARIANT stages */
 #define OGLES3_VARIANT_CS 1 /* binning (coordinate) shader */
@@ -1134,6 +1136,9 @@ BOOL ogles2_fbo_read_ready(struct OGLES3Context *ctx);  /* and, read from, not m
  * image units' (texture.c): -1 no such query, 0 an error set, 1 *v. */
 int ogles2_indexed_query(struct OGLES3Context *ctx, GLenum pname, GLuint index, GLint64 *v);
 int ogles2_indexed_mask(struct OGLES3Context *ctx, GLenum pname, GLuint index, GLint64 *v);
+/* KHR_blend_equation_advanced: the advanced mode the draws blend with
+ * (Mesa's enum pipe_advanced_blend_mode, 1 to 15), 0 for none (state.c). */
+ULONG ogles2_advanced_blend(const struct OGLES3Context *ctx);
 int ogles2_image_query(struct OGLES3Context *ctx, GLenum pname, GLuint index, GLint64 *v);
 int ogles2_vab_query(struct OGLES3Context *ctx, GLenum pname, GLuint index, GLint64 *v); /* draw.c's bindings */
 struct OGLES3Buffer *ogles2_buffer_get(struct OGLES3Context *ctx, GLuint name); /* NULL: no such buffer */

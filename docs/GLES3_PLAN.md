@@ -1,5 +1,21 @@
 # OpenGL ES 3.0 and 3.1 on ogles2.library
 
+**`KHR_blend_equation_advanced` and `_coherent`, item 7's second half
+(2026-11-16, built, not run; ES3 contexts).** The compiler had them: Mesa's
+state tracker offers them with framebuffer fetch, and its linker lowers a
+program that declares `layout(blend_support_*) out` to blend in the shader
+(`gl_nir_lower_blend_equation_advanced`) on a hidden state uniform,
+`gl_AdvancedBlendModeMESA` (`STATE_ADVANCED_BLENDING_MODE`, 67 at the
+pinned commit: one int; a program with `blend_support_all_equations`
+compiled to 15 KB). The library: `glBlendEquation(i)` takes the 15
+equations (not `glBlendEquationSeparate`: `GL_INVALID_ENUM`); while draw
+buffer 0 blends with one, the state variable holds its mode (Mesa's
+`_mesa_get_advanced_blend_sh_constant`, 1 to 15) and the tile buffer does
+not blend (`be`, software blending's key). `glBlendBarrierKHR` does nothing
+(the reads are coherent); `GL_BLEND_ADVANCED_COHERENT_KHR` is a capability,
+on. Not checked at the draw: a program that does not declare the mode, or
+more than one draw buffer (both `GL_INVALID_OPERATION` in the extension).
+
 **`glCopyImageSubData` of colour renderbuffers (2026-11-16, built, not
 run).** A colour renderbuffer is its hidden texture's one level
 (`ogles2_fbo_rb_color`; Mesa's checks: level 0, else `GL_INVALID_VALUE`; no

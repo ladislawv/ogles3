@@ -32,6 +32,8 @@ static ULONG cap_bit(const struct OGLES3Context *ctx, GLenum cap)
     case GL_SAMPLE_MASK: return ogles2_es31(ctx) ? OGLES3_CAP_SAMPLE_MASK : 0;
     /* OES_sample_shading (ES3 contexts): a sample at a time (draw.c) */
     case GL_SAMPLE_SHADING_OES: return ogles2_es3(ctx) ? OGLES3_CAP_SAMPLE_SHADING : 0;
+    /* KHR_blend_equation_advanced_coherent's: on by default, nothing changes */
+    case GL_BLEND_ADVANCED_COHERENT_KHR: return ogles2_es3(ctx) ? OGLES3_CAP_BLEND_ADV_COHERENT : 0;
     default:                          return 0;
     }
 }
@@ -46,7 +48,7 @@ void ogles2_state_init(struct OGLES3Context *ctx)
     struct OGLES3State *s = &ctx->state;
     int i;
 
-    s->caps = OGLES3_CAP_DITHER; /* the only capability enabled initially */
+    s->caps = OGLES3_CAP_DITHER | OGLES3_CAP_BLEND_ADV_COHERENT; /* enabled initially */
     s->depth_mask = GL_TRUE;
     for (i = 0; i < 4; i++)
         s->clear_color[i] = 0.0f;
@@ -797,10 +799,41 @@ static int blend_eq_ok(GLenum e)
            e == GL_MIN_EXT || e == GL_MAX_EXT; /* EXT_blend_minmax */
 }
 
+/* KHR_blend_equation_advanced's equations (ES3 contexts, glBlendEquation
+ * and glBlendEquationi only) as Mesa's enum pipe_advanced_blend_mode; 0:
+ * none of them. */
+static ULONG advanced_mode(GLenum e)
+{
+    static const GLenum modes[15] = {
+        GL_MULTIPLY_KHR, GL_SCREEN_KHR, GL_OVERLAY_KHR, GL_DARKEN_KHR, GL_LIGHTEN_KHR, GL_COLORDODGE_KHR,
+        GL_COLORBURN_KHR, GL_HARDLIGHT_KHR, GL_SOFTLIGHT_KHR, GL_DIFFERENCE_KHR, GL_EXCLUSION_KHR,
+        GL_HSL_HUE_KHR, GL_HSL_SATURATION_KHR, GL_HSL_COLOR_KHR, GL_HSL_LUMINOSITY_KHR,
+    };
+    ULONG k;
+    for (k = 0; k < 15; k++)
+        if (modes[k] == e)
+            return k + 1;
+    return 0;
+}
+
+/* Draw buffer 0's advanced equation while it blends (Mesa's
+ * _mesa_get_advanced_blend_sh_constant): the shader blends then, the tile
+ * buffer not (draw.c). */
+ULONG ogles2_advanced_blend(const struct OGLES3Context *ctx)
+{
+    const struct OGLES3State *s = &ctx->state;
+    if (!(s->caps & OGLES3_CAP_BLEND) || !(s->blend_rts & 1))
+        return 0;
+    return advanced_mode(s->blend_eq_rgb[0]);
+}
+
 static void blend_equation(struct OGLES3Context *ctx, UBYTE rts, GLenum modeRGB, GLenum modeAlpha)
 {
     int k;
-    if (!blend_eq_ok(modeRGB) || !blend_eq_ok(modeAlpha)) {
+    /* an advanced one by itself (glBlendEquation's, glBlendEquationi's) */
+    if (modeRGB == modeAlpha && advanced_mode(modeRGB) && ogles2_es3(ctx))
+        ;
+    else if (!blend_eq_ok(modeRGB) || !blend_eq_ok(modeAlpha)) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
@@ -814,25 +847,44 @@ static void blend_equation(struct OGLES3Context *ctx, UBYTE rts, GLenum modeRGB,
 
 void ogles2_glBlendEquationSeparate(struct OGLES3Context *ctx, GLenum modeRGB, GLenum modeAlpha)
 {
-    if (ogles2_context_valid(ctx))
-        blend_equation(ctx, ALL_RTS, modeRGB, modeAlpha);
+    if (!ogles2_context_valid(ctx))
+        return;
+    if (advanced_mode(modeRGB) || advanced_mode(modeAlpha)) { /* not separately (KHR_blend_equation_advanced) */
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    blend_equation(ctx, ALL_RTS, modeRGB, modeAlpha);
 }
 
 void ogles2_glBlendEquation(struct OGLES3Context *ctx, GLenum mode)
 {
-    ogles2_glBlendEquationSeparate(ctx, mode, mode);
+    if (ogles2_context_valid(ctx))
+        blend_equation(ctx, ALL_RTS, mode, mode);
+}
+
+/* KHR_blend_equation_advanced: the tile buffer's reads are coherent (the
+ * _coherent extension's), so nothing to wait for. */
+void ogles2_glBlendBarrierKHR(struct OGLES3Context *ctx)
+{
+    (void)ctx;
 }
 
 /* EXT_/OES_draw_buffers_indexed: one draw buffer's equations and factors. */
 void ogles2_glBlendEquationSeparateiEXT(struct OGLES3Context *ctx, GLuint buf, GLenum modeRGB, GLenum modeAlpha)
 {
-    if (ogles2_es3_entry(ctx) && draw_buffer_ok(ctx, buf))
-        blend_equation(ctx, (UBYTE)(1 << buf), modeRGB, modeAlpha);
+    if (!ogles2_es3_entry(ctx) || !draw_buffer_ok(ctx, buf))
+        return;
+    if (advanced_mode(modeRGB) || advanced_mode(modeAlpha)) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    blend_equation(ctx, (UBYTE)(1 << buf), modeRGB, modeAlpha);
 }
 
 void ogles2_glBlendEquationiEXT(struct OGLES3Context *ctx, GLuint buf, GLenum mode)
 {
-    ogles2_glBlendEquationSeparateiEXT(ctx, buf, mode, mode);
+    if (ogles2_es3_entry(ctx) && draw_buffer_ok(ctx, buf))
+        blend_equation(ctx, (UBYTE)(1 << buf), mode, mode);
 }
 
 void ogles2_glBlendFuncSeparateiEXT(struct OGLES3Context *ctx, GLuint buf, GLenum srcRGB, GLenum dstRGB,
@@ -854,7 +906,7 @@ void ogles2_glBlendEquationSeparateiOES(struct OGLES3Context *ctx, GLuint buf, G
 
 void ogles2_glBlendEquationiOES(struct OGLES3Context *ctx, GLuint buf, GLenum mode)
 {
-    ogles2_glBlendEquationSeparateiEXT(ctx, buf, mode, mode);
+    ogles2_glBlendEquationiEXT(ctx, buf, mode);
 }
 
 void ogles2_glBlendFuncSeparateiOES(struct OGLES3Context *ctx, GLuint buf, GLenum srcRGB, GLenum dstRGB,

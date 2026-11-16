@@ -200,3 +200,5 @@ command glTexBufferRangeOES
 command glTexStorage3DMultisampleOES
 # OES_sample_shading (ES3 contexts; state.c, draw.c)
 command glMinSampleShadingOES
+# KHR_blend_equation_advanced (ES3 contexts; state.c)
+command glBlendBarrierKHR

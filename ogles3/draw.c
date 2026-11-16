@@ -802,6 +802,15 @@ static void update_state_vars(struct OGLES3Context *ctx, struct OGLES3Program *p
             v[2] = ctx->fb_flip ? 1.0f : -1.0f;
             v[3] = ctx->fb_flip ? 0.0f : (GLfloat)ctx->fb_h;
             break;
+        case OGLES3_STATE_ADVANCED_BLENDING_MODE: {
+            /* KHR_blend_equation_advanced, Mesa's lowering to framebuffer
+             * fetch (gl_nir_lower_blend_equation_advanced): its one int,
+             * the mode while draw buffer 0 blends, else 0 */
+            ULONG m = ogles2_advanced_blend(ctx);
+            if (p->cbuf[sv->stage][sv->offset] != m)
+                ogles2_cbuf_set(p, sv->stage, sv->offset, m);
+            continue;
+        }
         case OGLES3_STATE_FB_PNTC_Y_TRANSFORM:
             /* upper-left sprite origin: inverted on a flipped buffer only */
             v[0] = ctx->fb_flip ? -1.0f : 1.0f;
@@ -2192,7 +2201,8 @@ static void emit_state_all(struct OGLES3Context *ctx, struct dedup *dd, int prim
     edo = (s->caps & OGLES3_CAP_POLYGON_OFFSET_FILL) ? TRUE : FALSE;
     /* be: Mesa's v3dx_emit.c, the tile buffer does not blend while the
      * shader does (a 32-bit float or integer target in the framebuffer) */
-    be = (s->caps & OGLES3_CAP_BLEND) && s->blend_rts && !ctx->fb_soft_blend ? TRUE : FALSE;
+    be = (s->caps & OGLES3_CAP_BLEND) && s->blend_rts && !ctx->fb_soft_blend && !ogles2_advanced_blend(ctx)
+             ? TRUE : FALSE; /* an advanced mode: the shader blends (KHR_blend_equation_advanced) */
     /* 4x MSAA (the job's, job.c): the rasterizer samples four
      * points a pixel (Mesa v3dx_emit.c), and glSampleCoverage's mask, as
      * Mesa's state tracker makes one: round(value x 4) samples, inverted on
@@ -2659,7 +2669,7 @@ static void vk_targets(struct OGLES3Context *ctx, struct OGLES3VkTargets *t)
         t->cbufs |= (UBYTE)(1 << i);
         t->fmt[i] = rf->pipe;
         memcpy(t->swz[i], rf->swz, 4);
-        if ((s->caps & OGLES3_CAP_BLEND) && (s->blend_rts & (1 << i)) && !integer) {
+        if ((s->caps & OGLES3_CAP_BLEND) && (s->blend_rts & (1 << i)) && !integer && !ogles2_advanced_blend(ctx)) {
             t->blend[i][0] = pipe_func(s->blend_eq_rgb[i]);
             t->blend[i][1] = pipe_factor(s->blend_src_rgb[i], s->blend_eq_rgb[i]);
             t->blend[i][2] = pipe_factor(s->blend_dst_rgb[i], s->blend_eq_rgb[i]);

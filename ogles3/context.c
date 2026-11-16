@@ -420,6 +420,9 @@ static const struct { const char *name; UBYTE in; } extensions[] = {
      * sample-rate shading) */
     {"GL_OES_sample_shading", EXT_ES3}, {"GL_OES_sample_variables", EXT_ES3},
     {"GL_OES_shader_multisample_interpolation", EXT_ES3},
+    /* item 7's second half: the advanced equations, blended in the shader
+     * by Mesa's lowering to framebuffer fetch (state.c, draw.c) */
+    {"GL_KHR_blend_equation_advanced", EXT_ES3}, {"GL_KHR_blend_equation_advanced_coherent", EXT_ES3},
 };
 #define NUM_EXTENSIONS (sizeof(extensions) / sizeof(extensions[0]))
 
