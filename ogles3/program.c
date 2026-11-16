@@ -2641,9 +2641,17 @@ static BOOL pipe_validate(struct OGLES3Pipeline *pp)
         }
     if (!pp->stage[0] && !pp->stage[1] && !pp->stage[2] && !pp->stage[3])
         return FALSE; /* empty */
-    if (pp->stage[0] && pp->stage[1] && pp->stage[0] != pp->stage[1] &&
-        !interfaces_match(pp->stage[0]->image, pp->stage[1]->image))
-        return FALSE;
+    /* each program's outputs the next one's inputs: vertex to fragment, or
+     * through a geometry program of its own (EXT_geometry_shader) */
+    {
+        struct OGLES3Program *v = pp->stage[0], *g = pp->stage[3], *f = pp->stage[1];
+        if (g && g != v && g != f) {
+            if ((v && !interfaces_match(v->image, g->image)) || (f && !interfaces_match(g->image, f->image)))
+                return FALSE;
+        } else if (v && f && v != f && !interfaces_match(v->image, f->image)) {
+            return FALSE;
+        }
+    }
     pp->validated = GL_TRUE;
     return TRUE;
 }
@@ -2694,29 +2702,39 @@ static void pair_free(struct OGLES3Context *ctx, struct OGLES3Pipeline *pp)
  * shipped, cached, else compiled through a Mesa pipeline of the two
  * (V3DGLSL_LINK_PIPELINE). NULL: no memory, no variants (logged). */
 static struct OGLES3Image *pair_image(struct OGLES3Context *ctx, const struct OGLES3Image *a,
-                                      const struct OGLES3Image *b)
+                                      const struct OGLES3Image *g, const struct OGLES3Image *b)
 {
     static const char digits[] = "0123456789abcdef";
-    char line[140], hex[FILE_HASH_DIGITS + 1], path[96];
+    char line[210], hex[FILE_HASH_DIGITS + 1], path[96];
     UBYTE hash[32];
     struct blake3 h;
     struct OGLES3Image *im;
     const struct OGLES3Image *x;
-    int k, s;
-    /* "PIPE <a's hash> <b's hash>\n", the hex the pseudo-stages hash */
-    memcpy(line, "PIPE ", 5);
-    for (s = 0; s < 2; s++)
+    int k, s, n = g ? 3 : 2;
+    /* "PIPE <a's hash> <b's hash>\n", the hex the pseudo-stages hash; with a
+     * geometry stage (EXT_geometry_shader, V3DGLSL_PIP3_MARK) "PIP3 <a's>
+     * <g's> <b's> <V|F|G>\n" (its shader in a, in b, or a program of its
+     * own), hashed as PIPV, PIPG, PIPF */
+    memcpy(line, g ? "PIP3 " : "PIPE ", 5);
+    for (s = 0; s < n; s++) {
+        const UBYTE *hh = s == 0 ? a->hash : s == n - 1 ? b->hash : g->hash;
         for (k = 0; k < 32; k++) {
-            const UBYTE *hh = s ? b->hash : a->hash;
             line[5 + 65 * s + 2 * k] = digits[hh[k] >> 4];
             line[5 + 65 * s + 2 * k + 1] = digits[hh[k] & 15];
         }
-    line[69] = ' ';
-    line[134] = '\n';
-    line[135] = 0;
+        line[69 + 65 * s] = ' ';
+    }
+    if (g) {
+        line[200] = g == a ? 'V' : g == b ? 'F' : 'G';
+        line[201] = '\n';
+        line[202] = 0;
+    } else {
+        line[134] = '\n';
+        line[135] = 0;
+    }
     blake3_init(&h);
-    for (s = 0; s < 2; s++) {
-        ULONG stage = s ? 0x50495046UL : 0x50495056UL; /* "PIPF", "PIPV" */
+    for (s = 0; s < n; s++) {
+        ULONG stage = s == 0 ? 0x50495056UL : s == n - 1 ? 0x50495046UL : 0x50495047UL; /* "PIPV", "PIPF", "PIPG" */
         UBYTE w[8];
         for (k = 0; k < 4; k++) {
             w[k] = (UBYTE)(stage >> (8 * k));
@@ -2729,7 +2747,7 @@ static struct OGLES3Image *pair_image(struct OGLES3Context *ctx, const struct OG
     for (im = ctx->share->images; im && memcmp(im->hash, hash, 32); im = im->next)
         ;
     if (!im) {
-        if (!(im = ogles2_v3dp_compose(a, b, hash, line)))
+        if (!(im = ogles2_v3dp_compose(a, g, b, hash, line)))
             return 0;
         im->next = ctx->share->images;
         ctx->share->images = im;
@@ -2777,12 +2795,12 @@ static UWORD stage_uniform(const struct OGLES3Program *s, const char *name)
  * stage programs' units and bindings by. */
 static BOOL pair_link(struct OGLES3Context *ctx, struct OGLES3Pipeline *pp)
 {
-    struct OGLES3Program *a = pp->stage[0], *b = pp->stage[1], *q;
+    struct OGLES3Program *a = pp->stage[0], *b = pp->stage[1], *g = pp->stage[3], *q;
     struct OGLES3Image *im;
     UWORD k, n;
-    if (!a->image->vs_src || !b->image->fs_src)
+    if (!a->image->vs_src || !b->image->fs_src || (g && !g->image->gs_src))
         return FALSE;
-    if (!(im = pair_image(ctx, a->image, b->image)))
+    if (!(im = pair_image(ctx, a->image, g ? g->image : 0, b->image)))
         return FALSE;
     if (!(q = AllocVec(sizeof(*q), MEMF_ANY | MEMF_CLEAR)))
         return FALSE;
@@ -2814,20 +2832,23 @@ static BOOL pair_link(struct OGLES3Context *ctx, struct OGLES3Pipeline *pp)
         u = &q->image->uniforms[q->loc_uniform[k]];
         if (!(u->flags & (OGLES3_UNIFORM_SAMPLER | OGLES3_UNIFORM_IMAGE)))
             continue;
-        st = u->sampler[1] != ~0UL ? 1 : 0;
+        /* the pipeline stage whose program has it: 1 fragment, 3 geometry, 0 vertex */
+        st = u->sampler[1] != ~0UL ? 1 : u->sampler[2] != ~0UL && g ? 3 : 0;
         s = pp->stage[st];
         if ((su = stage_uniform(s, u->name)) != 0xFFFF && s->uniform_loc[su] != 0xFFFF)
             pp->pair_loc[k] = ((ULONG)st << 16) | (ULONG)(s->uniform_loc[su] + q->loc_element[k]);
     }
-    /* each uniform block's binding from its stage's program */
+    /* each uniform block's binding from its stage's program (the pipeline
+     * stage in the top two bits: 0 vertex, 1 fragment, 3 geometry) */
     for (k = 0; k < q->image->nublocks; k++) {
         const struct OGLES3ImageBlock *bl = &q->image->ublocks[k];
-        const struct OGLES3Program *s = pp->stage[(bl->stages & 1) ? 0 : 1];
+        int st = (bl->stages & 1) ? 0 : (bl->stages & 0x10) ? 1 : g && (bl->stages & 0x08) ? 3 : 1;
+        const struct OGLES3Program *s = pp->stage[st];
         UWORD j;
         pp->pair_blk[k] = 0xFFFF;
-        for (j = 0; j < s->image->nublocks; j++)
+        for (j = 0; j < s->image->nublocks && j < 0x3FFF; j++)
             if (str_eq(s->image->ublocks[j].name, bl->name))
-                pp->pair_blk[k] = (UWORD)(((bl->stages & 1) ? 0 : 0x8000) | j);
+                pp->pair_blk[k] = (UWORD)(((UWORD)st << 14) | j);
     }
     return TRUE;
 }
@@ -2840,9 +2861,11 @@ static void pair_sync(struct OGLES3Pipeline *pp)
     struct OGLES3Program *q = pp->pair;
     UWORD k;
     int st;
-    for (st = 0; st < 2; st++) {
-        struct OGLES3Program *s = pp->stage[st];
+    for (st = 0; st < 3; st++) { /* constant buffers: vertex, fragment, geometry */
+        struct OGLES3Program *s = pp->stage[st == 2 ? 3 : st];
         ULONG n = q->image->cbuf_words[st];
+        if (!s)
+            continue;
         if (pp->pair_src[st] == s && pp->pair_ver[st] == s->cbuf_ver[st])
             continue;
         if (s->image->cbuf_words[st] < n)
@@ -2862,7 +2885,7 @@ static void pair_sync(struct OGLES3Pipeline *pp)
         }
     for (k = 0; k < q->image->nublocks; k++)
         if (pp->pair_blk[k] != 0xFFFF)
-            q->block_binding[k] = pp->stage[pp->pair_blk[k] >> 15]->block_binding[pp->pair_blk[k] & 0x7FFF];
+            q->block_binding[k] = pp->stage[pp->pair_blk[k] >> 14]->block_binding[pp->pair_blk[k] & 0x3FFF];
 }
 
 struct OGLES3Program *ogles2_pipeline_program(struct OGLES3Context *ctx, BOOL compute)
@@ -2872,26 +2895,31 @@ struct OGLES3Program *ogles2_pipeline_program(struct OGLES3Context *ctx, BOOL co
         return 0;
     if (compute)
         return pp->stage[2];
-    /* a geometry stage only as one program of all three (the pair program's
-     * link has no geometry stage: GL_INVALID_OPERATION, logged once) */
-    if (pp->stage[3] && !(pp->stage[3] == pp->stage[0] && pp->stage[0] == pp->stage[1])) {
+    /* one program of all its stages: that program */
+    if (pp->stage[0] == pp->stage[1] && (!pp->stage[3] || pp->stage[3] == pp->stage[0]))
+        return pp->stage[0];
+    /* EXT_geometry_shader: one program of the vertex and fragment stages
+     * beside a geometry program would need the pair linked otherwise than
+     * that program's file was (GL_INVALID_OPERATION, logged once) */
+    if (pp->stage[0] == pp->stage[1]) {
         static BOOL logged;
         if (!logged) {
             logged = TRUE;
-            ogles2_log("draw: a program pipeline with a geometry program of its own is not drawn (logged once)");
+            ogles2_log("draw: a pipeline of one vertex and fragment program and a geometry program is not drawn "
+                       "(logged once)");
         }
         return 0;
     }
-    if (pp->stage[0] == pp->stage[1]) /* one program of both stages */
-        return pp->stage[0];
-    if (!pp->pair || pp->pair_img[0] != pp->stage[0]->image || pp->pair_img[1] != pp->stage[1]->image) {
+    if (!pp->pair || pp->pair_img[0] != pp->stage[0]->image || pp->pair_img[1] != pp->stage[1]->image ||
+        pp->pair_img[2] != (pp->stage[3] ? pp->stage[3]->image : 0)) {
         pair_free(ctx, pp);
         pp->pair_img[0] = pp->stage[0]->image;
         pp->pair_img[1] = pp->stage[1]->image;
-        pp->pair_src[0] = pp->pair_src[1] = 0;
+        pp->pair_img[2] = pp->stage[3] ? pp->stage[3]->image : 0;
+        pp->pair_src[0] = pp->pair_src[1] = pp->pair_src[2] = 0;
         if (!pair_link(ctx, pp)) {
             pair_free(ctx, pp);
-            pp->pair_img[0] = pp->pair_img[1] = 0;
+            pp->pair_img[0] = pp->pair_img[1] = pp->pair_img[2] = 0;
             return 0;
         }
     }

@@ -1160,6 +1160,8 @@ static unsigned old_variants(const char *path, const uint8_t *hash, uint32_t lay
 /* Writes the program's file (v3dx 0) or its draw-time variants file (v3dx
  * 1: the captured variants added to those of the existing file, which a
  * temporary file and a rename replace). */
+int v3dp_pipeline_geometry;
+
 static int write_file(const char *path, struct gl_shader_program *prog, unsigned num_sources,
                       const unsigned *stages, const char *const *sources, int v3dx, uint32_t expect_crc)
 {
@@ -1171,7 +1173,7 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
     char commit[12];
     unsigned i, num_sections = 0, stage_mask = 0, nold = 0;
     int rc = -1, format2 = prog->GLSL_Version >= 300 || v3dx == 2, separable = 0;
-    size_t layout_end = 0;
+    size_t layout_start = 0, layout_end = 0;
     struct buf *old = NULL;
     char tmp[600];
     FILE *f;
@@ -1214,8 +1216,9 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
     for (i = 0; i < NUM_FILE_STAGES; i++)
         if (prog->_LinkedShaders[stages_in_file[i]])
             stage_mask |= 1u << stages_in_file[i];
-    if (v3dx == 2) /* a pipeline's: its vertex program's and its fragment program's */
-        stage_mask = (1u << MESA_SHADER_VERTEX) | (1u << MESA_SHADER_FRAGMENT);
+    if (v3dx == 2) /* a pipeline's: its vertex program's and its fragment program's (and geometry) */
+        stage_mask = (1u << MESA_SHADER_VERTEX) | (1u << MESA_SHADER_FRAGMENT) |
+                     (v3dp_pipeline_geometry ? 1u << MESA_SHADER_GEOMETRY : 0);
     put_bytes(&sec, hash, sizeof(hash));
     put_u32(&sec, stage_mask);
     if (format2) /* features (FORMAT.md, format 2) */
@@ -1224,7 +1227,8 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
                                ? V3DP_FEATURE_STORAGE : 0) |
                           (prog->data->NumAtomicBuffers ? V3DP_FEATURE_ATOMIC : 0) |
                           (prog->_LinkedShaders[MESA_SHADER_COMPUTE] ? V3DP_FEATURE_COMPUTE : 0) |
-                          (prog->_LinkedShaders[MESA_SHADER_GEOMETRY] ? V3DP_FEATURE_GEOMETRY : 0) |
+                          (prog->_LinkedShaders[MESA_SHADER_GEOMETRY] || (v3dx == 2 && v3dp_pipeline_geometry)
+                               ? V3DP_FEATURE_GEOMETRY : 0) |
                           (separable ? V3DP_FEATURE_SEPARABLE : 0));
     put_section(&program, SEC_PROGRAM, &sec);
     num_sections++;
@@ -1243,7 +1247,10 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
         buf_free(&sec);
     }
 
-    /* STAGE_PARAMS */
+    /* STAGE_PARAMS: the layout CRC from here (a geometry program's GEOMETRY
+     * section before it is not in it: the library's loader takes STAGE_PARAMS
+     * to ATTRIBUTES, FORMAT.md's VARIANT_OF) */
+    layout_start = body.len;
     for (i = 0; i < NUM_FILE_STAGES; i++) {
         const struct gl_linked_shader *sh = prog->_LinkedShaders[stages_in_file[i]];
         if (!sh)
@@ -1331,7 +1338,7 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
         /* A .v3dx: PROGRAM, an empty STRINGS, VARIANT_OF, the variants of
          * the existing file (oldest dropped past the limit), then the new
          * ones that are not among them. */
-        uint32_t crc = v3dx == 2 ? expect_crc : crc32_le(body.p, layout_end); /* a pipeline's: the library's */
+        uint32_t crc = v3dx == 2 ? expect_crc : crc32_le(body.p + layout_start, layout_end - layout_start); /* a pipeline's: the library's */
         unsigned keep, j;
         if (expect_crc && crc != expect_crc) {
             fprintf(stderr, "v3dp: the program's link lays it out otherwise (%08x, not %08x): another "

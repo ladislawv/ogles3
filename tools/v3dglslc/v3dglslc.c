@@ -736,6 +736,8 @@ static int draw_key_states(GLuint p, int wide)
         _mesa_GenProgramPipelines(1, &pipe);
         _mesa_UseProgramStages(pipe, GL_VERTEX_SHADER_BIT, p);
         _mesa_UseProgramStages(pipe, GL_FRAGMENT_SHADER_BIT, pipe_fs);
+        if (pipe_gs) /* EXT_geometry_shader: its program's geometry stage */
+            _mesa_UseProgramStages(pipe, GL_GEOMETRY_SHADER_BIT, pipe_gs);
         _mesa_BindProgramPipeline(pipe);
     } else {
         _mesa_UseProgram(p);
@@ -749,6 +751,12 @@ static int draw_key_states(GLuint p, int wide)
         bind_uniform_blocks(pipe_fs);
         bind_storage_blocks(pipe_fs);
         bind_images(pipe_fs);
+    }
+    if (pipe_gs && pipe_gs != p && pipe_gs != pipe_fs) {
+        bind_samplers(pipe_gs, 0, wide);
+        bind_uniform_blocks(pipe_gs);
+        bind_storage_blocks(pipe_gs);
+        bind_images(pipe_gs);
     }
     _mesa_GetProgramiv(p, GL_ACTIVE_ATTRIBUTES, &n);
     for (i = 0; i < n; i++) {
@@ -779,7 +787,8 @@ static int draw_key_states(GLuint p, int wide)
         /* EXT_geometry_shader: its input primitive only (Mesa's enum is
          * GL's), with its vertices; its output decides the fragment
          * shader's primitive class */
-        struct gl_linked_shader *gsh = sp ? sp->_LinkedShaders[MESA_SHADER_GEOMETRY] : NULL;
+        struct gl_shader_program *gsp = pipe_gs ? _mesa_lookup_shader_program(ctx, pipe_gs) : sp;
+        struct gl_linked_shader *gsh = gsp ? gsp->_LinkedShaders[MESA_SHADER_GEOMETRY] : NULL;
         if (gsh && gsh->Program) {
             gs_mode = (GLenum)gsh->Program->info.gs.input_primitive;
             modes = &gs_mode;
@@ -827,6 +836,8 @@ static int draw_key_states(GLuint p, int wide)
     for (i = 0; i < 16; i++)
         _mesa_DisableVertexAttribArray(i);
     bind_samplers(p, 1, 0);
+    if (pipe_gs && pipe_gs != p && pipe_gs != pipe_fs)
+        bind_samplers(pipe_gs, 1, 0);
     if (pipe_fs) {
         bind_samplers(pipe_fs, 1, 0);
         _mesa_BindProgramPipeline(0);
@@ -1235,17 +1246,33 @@ static int handle_one(uint32_t op, const char *vs, const char *fs, const char *o
     }
     /* ES 3.1: a program pipeline's variants, its default ones or the keys' */
     if (op == V3DGLSL_LINK_PIPELINE ||
-        (op == V3DGLSL_COMPILE_VARIANT && bindings && !strncmp(bindings, V3DGLSL_PIPE_MARK, sizeof(V3DGLSL_PIPE_MARK) - 1))) {
-        if (!vs || !fs || !out_path || !bindings || strlen(bindings) < 5 + 130 || bindings[69] != ' ' ||
-            bindings[134] != '\n' || (op == V3DGLSL_COMPILE_VARIANT && (!keys || !keys_len))) {
+        (op == V3DGLSL_COMPILE_VARIANT && bindings &&
+         (!strncmp(bindings, V3DGLSL_PIPE_MARK, sizeof(V3DGLSL_PIPE_MARK) - 1) ||
+          !strncmp(bindings, V3DGLSL_PIP3_MARK, sizeof(V3DGLSL_PIP3_MARK) - 1)))) {
+        /* PIP3 (EXT_geometry_shader): three hashes and the geometry
+         * shader's program, "<a> <g> <b> <V|F|G>\n" */
+        int three = bindings && !strncmp(bindings, V3DGLSL_PIP3_MARK, sizeof(V3DGLSL_PIP3_MARK) - 1);
+        size_t head = three ? 202 : 135;
+        if (!vs || !fs || !out_path || !bindings || strlen(bindings) < head || bindings[69] != ' ' ||
+            bindings[134] != (three ? ' ' : '\n') ||
+            (three && (bindings[199] != ' ' || bindings[201] != '\n' ||
+                       (bindings[200] != 'V' && bindings[200] != 'F' && bindings[200] != 'G'))) ||
+            (op == V3DGLSL_COMPILE_VARIANT && (!keys || !keys_len))) {
             log_add(log, log_size, "the compiler does not understand this request", NULL);
             return 3;
         }
         memcpy(pipe_hex[0], bindings + 5, 64);
-        memcpy(pipe_hex[1], bindings + 70, 64);
-        pipe_hex[0][64] = pipe_hex[1][64] = 0;
+        if (three) {
+            memcpy(pipe_hex[2], bindings + 70, 64);
+            memcpy(pipe_hex[1], bindings + 135, 64);
+            pipe_mode = bindings[200];
+        } else {
+            memcpy(pipe_hex[1], bindings + 70, 64);
+            pipe_mode = 0;
+        }
+        pipe_hex[0][64] = pipe_hex[1][64] = pipe_hex[2][64] = 0;
         write_mode = WRITE_PLAIN;
-        link_bindings = *(bindings + 135) ? bindings + 135 : NULL;
+        link_bindings = *(bindings + head) ? bindings + head : NULL;
         link_separable = 1;
         if (link_bindings && !strncmp(link_bindings, V3DGLSL_SEPA_MARK, sizeof(V3DGLSL_SEPA_MARK) - 1))
             link_bindings = *(link_bindings + sizeof(V3DGLSL_SEPA_MARK) - 1) ? link_bindings + sizeof(V3DGLSL_SEPA_MARK) - 1
@@ -1254,6 +1281,7 @@ static int handle_one(uint32_t op, const char *vs, const char *fs, const char *o
         variant_keys_len = op == V3DGLSL_COMPILE_VARIANT ? keys_len : 0;
         variant_layout_crc = layout_crc;
         result = link_pipeline(vs, fs, out_path, log, log_size) ? 0 : 1;
+        pipe_mode = 0;
         link_bindings = NULL;
         link_separable = 0;
         variant_keys = NULL;

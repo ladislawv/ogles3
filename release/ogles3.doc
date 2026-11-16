@@ -136,9 +136,9 @@ ogles3.library/--background--                   ogles3.library/--background--
        OES_texture_storage_multisample_2d_array,
        OES_texture_stencil8, and EXT_ and OES_geometry_shader with
        _geometry_point_size (layered colour attachments, up to 256 layers;
-       GL_PRIMITIVES_GENERATED; separable programs with a geometry stage
-       link, but a program pipeline draws with one only when a single
-       program holds the vertex, geometry and fragment stages).
+       GL_PRIMITIVES_GENERATED; separable programs with a geometry stage,
+       in program pipelines too, but for one program of the vertex and
+       fragment stages beside a geometry program).
 
        KHR_debug: debug messages with their filters and debug groups, the
        message log (64 messages of at most 256 characters) or the

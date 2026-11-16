@@ -33,6 +33,10 @@ int v3dp_last_fs_inputs(uint8_t *num_inputs, uint8_t *slots);
 #define V3DP_HASH_SEPA 0x53455041u
 #define V3DP_HASH_PIPV 0x50495056u /* a pipeline's: its vertex program's hash, 64 hex digits */
 #define V3DP_HASH_PIPF 0x50495046u /* and its fragment program's */
+#define V3DP_HASH_PIPG 0x50495047u /* and its geometry program's (EXT_geometry_shader), between them */
+/* A pipeline's .v3dx with a geometry stage: its PROGRAM's stage 3 and
+ * feature bit 5 (v3dglslc's link_pipeline sets it while writing). */
+extern int v3dp_pipeline_geometry;
 
 /* Format 2's must-understand feature bits (PROGRAM's features word). */
 #define V3DP_FEATURE_TF 0x1u /* transform feedback: a TRANSFORM_FEEDBACK section */

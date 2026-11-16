@@ -603,6 +603,52 @@ static void geometry(void)
         glDeleteProgram(sp[1]);
     }
 
+    /* a program pipeline of three separable programs, its geometry stage a
+     * program of its own (es32gsp; the pipeline's .v3dx made by make
+     * test-v3dp): a draw asks for the pipeline's program, composed and
+     * found by its hash (a state-only context then draws nothing) */
+    {
+        static const char *const names[3] = { "es32gsp.vert", "es32gsp.geom", "es32gsp.frag" };
+        static const GLenum types[3] = { GL_VERTEX_SHADER, GL_GEOMETRY_SHADER_EXT, GL_FRAGMENT_SHADER };
+        static const GLbitfield bits[3] = { GL_VERTEX_SHADER_BIT, GL_GEOMETRY_SHADER_BIT_EXT, GL_FRAGMENT_SHADER_BIT };
+        GLuint sp[3], pipe;
+        GLint ok = 1, lk, v = -1;
+        glGenProgramPipelines(1, &pipe);
+        for (i = 0; i < 3; i++) {
+            char *src = read_text(names[i]);
+            GLuint s;
+            sp[i] = glCreateProgram();
+            glProgramParameteri(sp[i], GL_PROGRAM_SEPARABLE, GL_TRUE);
+            if (src) {
+                s = glCreateShader(types[i]);
+                glShaderSource(s, 1, (const GLchar *const *)&src, 0);
+                glCompileShader(s);
+                glAttachShader(sp[i], s);
+                glDeleteShader(s);
+                free(src);
+            }
+            glLinkProgram(sp[i]);
+            glGetProgramiv(sp[i], GL_LINK_STATUS, &lk);
+            ok &= lk;
+            glUseProgramStages(pipe, bits[i], sp[i]);
+        }
+        check(ok, "pipeline: three separable programs, a vertex, a geometry and a fragment one, link");
+        glValidateProgramPipeline(pipe);
+        glGetProgramPipelineiv(pipe, GL_VALIDATE_STATUS, &v);
+        check(v == GL_TRUE && glGetError() == GL_NO_ERROR, "pipeline: valid with its geometry program");
+        if (ok) {
+            glUseProgram(0);
+            glBindProgramPipeline(pipe);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+            check(glGetError() == GL_NO_ERROR,
+                  "pipeline: a draw finds its program (the three composed, the .v3dx by its hash)");
+            glBindProgramPipeline(0);
+        }
+        glDeleteProgramPipelines(1, &pipe);
+        for (i = 0; i < 3; i++)
+            glDeleteProgram(sp[i]);
+    }
+
     /* GL_PRIMITIVES_GENERATED (no draws here: a state-only context) */
     {
         GLuint q = 0, r = 99;

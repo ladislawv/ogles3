@@ -3911,6 +3911,66 @@ static void test_copy_gpu(void)
     glDeleteProgram(p);
 }
 
+/* A program pipeline of three separable programs (EXT_geometry_shader):
+ * es32gsp's vertex, geometry and fragment shaders each a program; the
+ * geometry program's uniform gtint set green by glProgramUniform4f: the
+ * whole-screen triangle moved right, green on the right, the left clear. */
+static void test_pipeline_geometry(void)
+{
+    static const char *const names[3] = { "es32gsp.vert", "es32gsp.geom", "es32gsp.frag" };
+    static const GLenum types[3] = { GL_VERTEX_SHADER, GL_GEOMETRY_SHADER_EXT, GL_FRAGMENT_SHADER };
+    static const GLbitfield bits[3] = { GL_VERTEX_SHADER_BIT, GL_GEOMETRY_SHADER_BIT_EXT, GL_FRAGMENT_SHADER_BIT };
+    GLuint sp[3], pipe, vao, b;
+    GLint ok = 1, lk, i, lp;
+    glGenProgramPipelines(1, &pipe);
+    for (i = 0; i < 3; i++) {
+        char *src = read_text(names[i]);
+        GLuint s;
+        sp[i] = glCreateProgram();
+        glProgramParameteri(sp[i], GL_PROGRAM_SEPARABLE, GL_TRUE);
+        if (src) {
+            s = glCreateShader(types[i]);
+            glShaderSource(s, 1, (const GLchar *const *)&src, 0);
+            glCompileShader(s);
+            glAttachShader(sp[i], s);
+            glDeleteShader(s);
+            free(src);
+        }
+        glLinkProgram(sp[i]);
+        glGetProgramiv(sp[i], GL_LINK_STATUS, &lk);
+        ok &= lk;
+        glUseProgramStages(pipe, bits[i], sp[i]);
+    }
+    if (!ok) {
+        check(0, "pipeline with a geometry program: es32gsp's three programs link");
+    } else {
+        glProgramUniform4f(sp[1], glGetUniformLocation(sp[1], "gtint"), 0, 1, 0, 1);
+        glUseProgram(0);
+        glBindProgramPipeline(pipe);
+        glGenVertexArrays(1, &vao);
+        glBindVertexArray(vao);
+        glGenBuffers(1, &b);
+        glBindBuffer(GL_ARRAY_BUFFER, b);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(cover), cover, GL_STATIC_DRAW);
+        lp = glGetAttribLocation(sp[0], "pos");
+        glVertexAttribPointer((GLuint)lp, 2, GL_FLOAT, GL_FALSE, 0, 0);
+        glEnableVertexAttribArray((GLuint)lp);
+        glClearColor(0, 0, 0, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        check(glGetError() == GL_NO_ERROR && pixel_is(48, 32, 0, 255, 0, 255, 0) && pixel_is(8, 32, 0, 0, 0, 0, 0),
+              "pipeline with a geometry program: drawn, its uniform's colour");
+        glBindVertexArray(0);
+        glDeleteVertexArrays(1, &vao);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glDeleteBuffers(1, &b);
+        glBindProgramPipeline(0);
+    }
+    glDeleteProgramPipelines(1, &pipe);
+    for (i = 0; i < 3; i++)
+        glDeleteProgram(sp[i]);
+}
+
 static int skipped(const char *name)
 {
     const char *list = getenv("M8_SKIP");
@@ -4030,6 +4090,8 @@ int main(void)
                 test_copy_exact();
             if (!skipped("copy_gpu"))
                 test_copy_gpu();
+            if (!skipped("pipeline_geometry"))
+                test_pipeline_geometry();
             if (!skipped("image_buffer_small"))
                 test_image_buffer_small();
         }

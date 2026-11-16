@@ -227,13 +227,9 @@ extension offered.**
 
 **What is left on `es32` (2026-11-16, after the batch below).** Not
 written, by size:
-- A program pipeline drawing with a geometry program of its own (beside
-  separate vertex and fragment programs): the pair program's link would
-  need a three-program link (`link_pipeline` with the geometry shader, a
-  Mesa pipeline of three in the key-state draws) and the composed image
-  the geometry program's uniforms, blocks and samplers as stage 2
-  (`ogles2_v3dp_compose`); refused now (`GL_INVALID_OPERATION`, logged).
-  dEQP's `separate_shader` groups have no geometry stage.
+- (Done since: program pipelines with a geometry stage, below.) Still
+  refused: one program of the vertex and fragment stages beside a
+  geometry program of its own (`GL_INVALID_OPERATION`, logged).
 - (Done since: `glCopyImageSubData` of depth, stencil and multisample
   images, below.)
 - (Done since: a buffer's words and texels kept in step, below.)
@@ -348,6 +344,42 @@ A1200).**
   `v3d_compile_variant_gs`, before `v3d_program_fini`, which v3dglslc
   calls for geometry keys; the tree's old 0019 reverted, the new applied,
   every patch present on a second run; Mesa and both compilers rebuilt.
+- **Program pipelines with a geometry stage** (EXT_geometry_shader): the
+  pair program of a pipeline now takes its geometry stage's program, in
+  the vertex program (V), in the fragment program (F) or a program of its
+  own (G). The library: `pair_image` hashes `PIPV`, `PIPG`, `PIPF` and
+  sends "PIP3 <a> <g> <b> <V|F|G>\n" (`V3DGLSL_PIP3_MARK`), the geometry
+  shader in front; `ogles2_v3dp_compose(a, g, b)` composes three images
+  (uniforms, blocks, storage blocks, atomic buffers, state variables,
+  interface, units: a's, g's own, b's; each stage's constant buffer and
+  block maps its program's; the geometry layout g's; the layout CRC with
+  g's); `pair_link`/`pair_sync` map units, block bindings and the third
+  constant buffer from the geometry stage's program; the pipeline's
+  validation matches vertex to geometry to fragment. The compiler:
+  `link_pipeline` links the geometry shader with the program it is in (as
+  the library's files were, so each stage's layout is its program's),
+  draws the key states through a Mesa pipeline with its geometry stage
+  (`pipe_gs`), and writes the .v3dx's PROGRAM with stage 3 and feature bit
+  5 (`v3dp_pipeline_geometry`). (ES 3.1 pipelines want the varyings
+  between programs by location and of one precision; Mesa refuses the
+  draw otherwise.)
+- **Found on the way:** the writer's layout CRC began at a geometry
+  program's GEOMETRY section, the loader's at STAGE_PARAMS: the compiler
+  would have refused every draw-time variant of a geometry program
+  ("another compiler made its .v3dp"); the writer's starts at
+  STAGE_PARAMS now (other programs' CRCs unchanged). And
+  `ogles2_clock_us` read the Pi's system timer whatever the context: a
+  state-only context (or vamos, with no Pi peripherals) crashed at the
+  first `glDrawArrays` or `glTexImage2D`; it reads 0 until the GPU device
+  is open.
+- **Tests:** `make test-v3dp` makes es32gsp's three separable programs and
+  their pipeline's .v3dx (`separable_gs.py`: the CRC composed as the
+  library does, the file named by the hash the compiler wrote); vamos.sh
+  copies .v3dx files; m8_es31 links the three, validates the pipeline and
+  draws (88 of 88 under vamos: the library found the .v3dx by its hash,
+  so hash, CRC and loader agree); m8_draw `test_pipeline_geometry` draws it
+  on the A1200 (the geometry program's uniform by
+  `glProgramUniform4f`).
 - **A buffer's words and texels kept in step** (`buffer.c`,
   `ogles2_buffers_settle`): once a buffer texture of 8- or 16-bit texels
   exists or such a store happened (`ogles2_mixed_writes_seen`), each draw

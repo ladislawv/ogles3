@@ -37,7 +37,9 @@ static int link_separable;
  * program (0: none, a program's own draws) and the two programs' hashes,
  * the hash's pseudo-stages "PIPV" and "PIPF" (FORMAT.md). */
 static GLuint pipe_fs;
-static char pipe_hex[2][65];
+static char pipe_hex[3][65];   /* the vertex, fragment and (PIP3) geometry programs' hashes */
+static char pipe_mode;         /* PIP3's: 'V', 'F' or 'G' (the geometry shader's program); 0: PIPE */
+static GLuint pipe_gs;         /* a pipeline's geometry stage's program (draw_key_states) */
 
 #define XFBV_MARK "XFBV\n"
 
@@ -278,45 +280,86 @@ static int link_pair(const char *vs_label, const char *fs_label, const char *vs_
  * (draw_key_states with pipe_fs), written as its .v3dx. */
 static int link_pipeline(const char *vs_src, const char *fs_src, const char *target, char *log, size_t log_size)
 {
-    GLuint pa, pb, vs, fs;
-    GLint la = 0, lb = 0;
-    int vs_ok, fs_ok, ok = 0;
-    unsigned stages[2] = { V3DP_HASH_PIPV, V3DP_HASH_PIPF };
-    const char *sources[2];
+    GLuint pa, pb, pg = 0, vs, fs, gs = 0;
+    GLint la = 0, lb = 0, lg = 1;
+    int vs_ok, fs_ok, gs_ok = 1, ok = 0;
+    /* EXT_geometry_shader (PIP3): the geometry shader linked with the
+     * program it is in, as the library's images were (each stage's
+     * constant buffer laid out as its program's), its hash between */
+    unsigned stages[3] = { V3DP_HASH_PIPV, V3DP_HASH_PIPF, 0 };
+    const char *sources[3];
     GET_CURRENT_CONTEXT(ctx);
 
-    fprintf(stderr, "v3dglslc: ==== pipeline %.12s + %.12s\n", pipe_hex[0], pipe_hex[1]);
+    fprintf(stderr, "v3dglslc: ==== pipeline %.12s + %.12s%s\n", pipe_hex[0], pipe_hex[1],
+            pipe_mode ? " with a geometry stage" : "");
     vs = compile_src(GL_VERTEX_SHADER, "vertex shader", vs_src, &vs_ok, log, log_size);
     fs = compile_src(GL_FRAGMENT_SHADER, "fragment shader", fs_src, &fs_ok, log, log_size);
+    if (pipe_mode) {
+        if (!link_gs_src) {
+            log_add(log, log_size, "a pipeline's geometry stage without its geometry shader", NULL);
+            gs_ok = 0;
+        } else {
+            gs = compile_src(GL_GEOMETRY_SHADER, "geometry shader", link_gs_src, &gs_ok, log, log_size);
+        }
+    }
     pa = glCreateProgram();
     pb = glCreateProgram();
-    if (vs_ok && fs_ok) {
+    if (pipe_mode == 'G')
+        pg = glCreateProgram();
+    if (vs_ok && fs_ok && gs_ok) {
         glProgramParameteri(pa, GL_PROGRAM_SEPARABLE, GL_TRUE);
         glAttachShader(pa, vs);
+        if (pipe_mode == 'V')
+            glAttachShader(pa, gs);
         apply_bindings(pa, link_bindings);
         apply_xfb(pa, link_bindings);
         glLinkProgram(pa);
         glGetProgramiv(pa, GL_LINK_STATUS, &la);
         glProgramParameteri(pb, GL_PROGRAM_SEPARABLE, GL_TRUE);
         glAttachShader(pb, fs);
+        if (pipe_mode == 'F')
+            glAttachShader(pb, gs);
         glLinkProgram(pb);
         glGetProgramiv(pb, GL_LINK_STATUS, &lb);
-        if (!la || !lb)
+        if (pg) {
+            glProgramParameteri(pg, GL_PROGRAM_SEPARABLE, GL_TRUE);
+            glAttachShader(pg, gs);
+            glLinkProgram(pg);
+            glGetProgramiv(pg, GL_LINK_STATUS, &lg);
+        }
+        if (!la || !lb || !lg)
             log_add(log, log_size, "a pipeline's program did not link", NULL);
     }
-    if (la && lb) {
+    if (la && lb && lg && vs_ok && fs_ok && gs_ok) {
+        unsigned n = 2;
         sources[0] = pipe_hex[0];
-        sources[1] = pipe_hex[1];
+        if (pipe_mode) { /* PIPV, PIPG, PIPF */
+            stages[1] = V3DP_HASH_PIPG;
+            sources[1] = pipe_hex[2];
+            stages[2] = V3DP_HASH_PIPF;
+            sources[2] = pipe_hex[1];
+            n = 3;
+        } else {
+            sources[1] = pipe_hex[1];
+        }
         pipe_fs = pb;
-        ok = write_files(_mesa_lookup_shader_program(ctx, pa), pa, target, 2, stages, sources);
+        pipe_gs = pipe_mode == 'V' ? pa : pipe_mode == 'F' ? pb : pg;
+        v3dp_pipeline_geometry = pipe_mode != 0;
+        ok = write_files(_mesa_lookup_shader_program(ctx, pa), pa, target, n, stages, sources);
+        v3dp_pipeline_geometry = 0;
         pipe_fs = 0;
+        pipe_gs = 0;
         if (!ok)
             log_add(log, log_size, "the pipeline's variants could not be written: ", target);
     }
     glDeleteProgram(pa);
     glDeleteProgram(pb);
+    if (pg)
+        glDeleteProgram(pg);
     glDeleteShader(vs);
     glDeleteShader(fs);
+    if (gs)
+        glDeleteShader(gs);
     return ok;
 }
 

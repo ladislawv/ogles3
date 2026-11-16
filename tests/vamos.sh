@@ -23,10 +23,10 @@ cp "$B/tests/$T" "$W/"
 # The test shaders and their files (make test-v3dp), for tests that link.
 cp "$REPO"/tools/v3dglslc/test/shaders/* "$W/shaders/"
 sed -i 's/\r$//' "$W"/shaders/*
-cp "$B"/v3dp/*.v3dp "$B"/v3dp/*.v3dw "$W/" 2>/dev/null || true
+cp "$B"/v3dp/*.v3dp "$B"/v3dp/*.v3dw "$B"/v3dp/*.v3dx "$W/" 2>/dev/null || true
 # Under vamos the library finds them in neither PROGDIR: nor OGLES3Cache:
 # (vamos lists no assigns in the DOS list, so the cache is T:): in T:.
-cp "$B"/v3dp/*.v3dp "$B"/v3dp/*.v3dw "$W/t/" 2>/dev/null || true
+cp "$B"/v3dp/*.v3dp "$B"/v3dp/*.v3dw "$B"/v3dp/*.v3dx "$W/t/" 2>/dev/null || true
 cd "$W"
 timeout 300 "$VAMOS" -C 68040 -H disable -m 65536 -s 256 -V "w:$W" \
     -a LIBS:w:libs -a T:w:t -a ENV:w:t -a OGLES3Cache:w:cache -- "$T" "$@" 2> "$W/vamos.err"

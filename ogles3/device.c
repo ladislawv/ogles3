@@ -27,9 +27,13 @@
  * across the PiStorm bus, which cost about 25 microseconds a call. */
 #define SYSTIMER_CLO (*(volatile ULONG *)(0xF2000000 + 0x3004))
 
+static LONG state; /* the device: 0 not tried, 1 ready, < 0 v3d_init's error */
+
+/* 0 while the GPU device is not open: the window may not be there (a
+ * state-only context's program, or vamos, which has no Pi peripherals) */
 ULONG ogles2_clock_us(void)
 {
-    return LE32(SYSTIMER_CLO);
+    return state == 1 ? LE32(SYSTIMER_CLO) : 0;
 }
 
 static V3DDevice device;
@@ -39,7 +43,6 @@ ULONG ogles2_device_bytes(void)
     return (ULONG)device.BytesAllocated;
 }
 static struct SignalSemaphore *gpu_lock; /* public, shared with other GPU clients */
-static LONG state;          /* 0 not tried, 1 ready, < 0 v3d_init's error */
 static char renderer[96];
 
 struct fmt { char *p; ULONG left; };

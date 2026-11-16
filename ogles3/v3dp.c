@@ -13,6 +13,7 @@
 #include <proto/exec.h>
 #include <string.h>
 #include "ogles3_internal.h"
+#include "../v3dp/v3dglsl_port.h" /* V3DGLSL_GEOM_MARK */
 #include "v3d_device.h"
 #include "v3d_context.h"
 #include "v3d_frame.h"
@@ -1169,8 +1170,32 @@ static char *dup_str(struct OGLES3Image *im, const char *a, const char *b)
     return t;
 }
 
-struct OGLES3Image *ogles2_v3dp_compose(const struct OGLES3Image *a, const struct OGLES3Image *b,
-                                        const UBYTE hash[32], const char *pipe_line)
+/* A link state with a geometry shader in front (V3DGLSL_GEOM_MARK): its
+ * part after it (a vertex program's link state, when that program has the
+ * geometry stage too). */
+static const char *after_geom(const char *s)
+{
+    ULONG n = 0;
+    if (!s || strncmp(s, V3DGLSL_GEOM_MARK, sizeof(V3DGLSL_GEOM_MARK) - 1))
+        return s;
+    s += sizeof(V3DGLSL_GEOM_MARK) - 1;
+    while (*s >= '0' && *s <= '9')
+        n = n * 10 + (ULONG)(*s++ - '0');
+    if (*s == '\n')
+        s++;
+    while (n-- && *s)
+        s++;
+    return s;
+}
+
+/* The image of a program pipeline: vertex program a's, fragment program
+ * b's and (EXT_geometry_shader) the geometry stage's program g's (0: none;
+ * a or b when one of them has it, else its own), each stage as its program
+ * has it: uniforms a's, g's (its own), then b's, blocks so too, each
+ * stage's constant buffer, state variables, block maps and units its
+ * program's. Its variants come from its .v3dx (program.c's pair_image). */
+struct OGLES3Image *ogles2_v3dp_compose(const struct OGLES3Image *a, const struct OGLES3Image *g,
+                                        const struct OGLES3Image *b, const UBYTE hash[32], const char *pipe_line)
 {
     struct OGLES3Image *im = AllocVec(sizeof(*im), MEMF_ANY | MEMF_CLEAR);
     struct OGLES3ImageUniform *u;
@@ -1178,29 +1203,44 @@ struct OGLES3Image *ogles2_v3dp_compose(const struct OGLES3Image *a, const struc
     struct OGLES3ImageAtomic *ab;
     struct OGLES3StateVar *sv;
     struct OGLES3ImageVar *iv;
-    ULONG k, na, nb;
+    const struct OGLES3Image *gs = g && g != a && g != b ? g : 0; /* a geometry program of its own */
+    /* where g's and b's uniforms, uniform blocks, storage blocks and atomic
+     * counter buffers start */
+    ULONG bu = a->nuniforms + (gs ? gs->nuniforms : 0), bub = a->nublocks + (gs ? gs->nublocks : 0);
+    ULONG bsb = a->nsblocks + (gs ? gs->nsblocks : 0), bab = a->nabuffers + (gs ? gs->nabuffers : 0);
+    ULONG gub = g == a ? 0 : g == b ? bub : a->nublocks;
+    ULONG gsb = g == a ? 0 : g == b ? bsb : a->nsblocks;
+    ULONG k, na, ng, nb;
     if (!im)
         return 0;
     im->name = "program pipeline";
     CopyMem((APTR)hash, im->hash, 32);
     im->format2 = TRUE;
     im->separable = TRUE;
-    im->stages = 0x11;
+    im->stages = g ? 0x19 : 0x11;
     im->code_borrowed = TRUE;
     im->blend_modes = b->blend_modes; /* the fragment program's blend_support (KHR_blend_equation_advanced) */
-    /* uniforms: a's, then b's (their blocks moved past a's) */
-    im->nuniforms = (UWORD)(a->nuniforms + b->nuniforms);
+    /* uniforms: a's, g's, then b's (their blocks moved past those before) */
+    im->nuniforms = (UWORD)(bu + b->nuniforms);
     if (!(u = alloc(im, (im->nuniforms + 1UL) * sizeof(*u))))
         goto fail;
     for (k = 0; k < a->nuniforms; k++)
         u[k] = a->uniforms[k];
-    for (k = 0; k < b->nuniforms; k++) {
+    for (k = 0; gs && k < gs->nuniforms; k++) {
         struct OGLES3ImageUniform *v = &u[a->nuniforms + k];
-        *v = b->uniforms[k];
+        *v = gs->uniforms[k];
         if (v->block >= 0)
             v->block = (WORD)(v->block + ((v->flags & OGLES3_UNIFORM_BUFFER)   ? a->nsblocks
                                           : (v->flags & OGLES3_UNIFORM_ATOMIC) ? a->nabuffers
                                                                                : a->nublocks));
+    }
+    for (k = 0; k < b->nuniforms; k++) {
+        struct OGLES3ImageUniform *v = &u[bu + k];
+        *v = b->uniforms[k];
+        if (v->block >= 0)
+            v->block = (WORD)(v->block + ((v->flags & OGLES3_UNIFORM_BUFFER)   ? bsb
+                                          : (v->flags & OGLES3_UNIFORM_ATOMIC) ? bab
+                                                                               : bub));
     }
     im->uniforms = u;
     /* each stage's constant buffer and state variables, its program's */
@@ -1208,13 +1248,19 @@ struct OGLES3Image *ogles2_v3dp_compose(const struct OGLES3Image *a, const struc
     im->cbuf_template[0] = a->cbuf_template[0];
     im->cbuf_words[1] = b->cbuf_words[1];
     im->cbuf_template[1] = b->cbuf_template[1];
-    im->nstatevars = (UWORD)(a->nstatevars + b->nstatevars);
+    if (g) {
+        im->cbuf_words[2] = g->cbuf_words[2];
+        im->cbuf_template[2] = g->cbuf_template[2];
+    }
+    im->nstatevars = (UWORD)(a->nstatevars + (gs ? gs->nstatevars : 0) + b->nstatevars);
     if (!(sv = alloc(im, (im->nstatevars + 1UL) * sizeof(*sv))))
         goto fail;
-    for (k = 0; k < a->nstatevars; k++)
-        sv[k] = a->statevars[k];
+    for (na = 0, k = 0; k < a->nstatevars; k++)
+        sv[na++] = a->statevars[k];
+    for (k = 0; gs && k < gs->nstatevars; k++)
+        sv[na++] = gs->statevars[k];
     for (k = 0; k < b->nstatevars; k++)
-        sv[a->nstatevars + k] = b->statevars[k];
+        sv[na++] = b->statevars[k];
     im->statevars = sv;
     /* the vertex program's attributes, transform feedback, clip control */
     im->nattribs = a->nattribs;
@@ -1222,95 +1268,151 @@ struct OGLES3Image *ogles2_v3dp_compose(const struct OGLES3Image *a, const struc
     im->xfb = a->xfb;
     im->clip_z_coeff = a->clip_z_coeff;
     /* uniform blocks and the stages' maps */
-    im->nublocks = (UWORD)(a->nublocks + b->nublocks);
+    im->nublocks = (UWORD)(bub + b->nublocks);
     if (!(ub = alloc(im, (im->nublocks + 1UL) * sizeof(*ub))) ||
         !blocks_moved(im, ub, a->ublocks, a->nublocks, 0) ||
-        !blocks_moved(im, ub + a->nublocks, b->ublocks, b->nublocks, a->nuniforms))
+        (gs && !blocks_moved(im, ub + a->nublocks, gs->ublocks, gs->nublocks, a->nuniforms)) ||
+        !blocks_moved(im, ub + bub, b->ublocks, b->nublocks, bu))
         goto fail;
     im->ublocks = ub;
     im->stage_nblocks[0] = a->stage_nblocks[0];
     im->stage_block[0] = a->stage_block[0];
     im->stage_nblocks[1] = b->stage_nblocks[1];
-    if (b->stage_nblocks[1] && !(im->stage_block[1] = moved(im, b->stage_block[1], b->stage_nblocks[1],
-                                                            a->nublocks, FALSE)))
+    if (b->stage_nblocks[1] && !(im->stage_block[1] = moved(im, b->stage_block[1], b->stage_nblocks[1], bub, FALSE)))
+        goto fail;
+    if (g && (im->stage_nblocks[2] = g->stage_nblocks[2]) != 0 &&
+        !(im->stage_block[2] = moved(im, g->stage_block[2], g->stage_nblocks[2], gub, FALSE)))
         goto fail;
     /* storage blocks (atomic counter buffers' entries kept: by binding) */
-    im->nsblocks = (UWORD)(a->nsblocks + b->nsblocks);
+    im->nsblocks = (UWORD)(bsb + b->nsblocks);
     if (!(sb = alloc(im, (im->nsblocks + 1UL) * sizeof(*sb))) ||
         !blocks_moved(im, sb, a->sblocks, a->nsblocks, 0) ||
-        !blocks_moved(im, sb + a->nsblocks, b->sblocks, b->nsblocks, a->nuniforms))
+        (gs && !blocks_moved(im, sb + a->nsblocks, gs->sblocks, gs->nsblocks, a->nuniforms)) ||
+        !blocks_moved(im, sb + bsb, b->sblocks, b->nsblocks, bu))
         goto fail;
-    for (k = 0; k < b->nsblocks; k++) /* the top-level arrays' sizes and strides: per member, b's own */
-        sb[a->nsblocks + k].top_level = b->sblocks[k].top_level;
+    for (k = 0; gs && k < gs->nsblocks; k++) /* the top-level arrays' sizes and strides: per member, its own */
+        sb[a->nsblocks + k].top_level = gs->sblocks[k].top_level;
+    for (k = 0; k < b->nsblocks; k++)
+        sb[bsb + k].top_level = b->sblocks[k].top_level;
     im->sblocks = sb;
     im->stage_nsblocks[0] = a->stage_nsblocks[0];
     im->stage_sblock[0] = a->stage_sblock[0];
     im->stage_nsblocks[1] = b->stage_nsblocks[1];
-    if (b->stage_nsblocks[1] && !(im->stage_sblock[1] = moved(im, b->stage_sblock[1], b->stage_nsblocks[1],
-                                                              a->nsblocks, TRUE)))
+    if (b->stage_nsblocks[1] && !(im->stage_sblock[1] = moved(im, b->stage_sblock[1], b->stage_nsblocks[1], bsb, TRUE)))
+        goto fail;
+    if (g && (im->stage_nsblocks[2] = g->stage_nsblocks[2]) != 0 &&
+        !(im->stage_sblock[2] = moved(im, g->stage_sblock[2], g->stage_nsblocks[2], gsb, TRUE)))
         goto fail;
     /* atomic counter buffers */
-    im->nabuffers = (UWORD)(a->nabuffers + b->nabuffers);
+    im->nabuffers = (UWORD)(bab + b->nabuffers);
     if (!(ab = alloc(im, (im->nabuffers + 1UL) * sizeof(*ab))))
         goto fail;
     for (k = 0; k < a->nabuffers; k++)
         ab[k] = a->abuffers[k];
-    for (k = 0; k < b->nabuffers; k++) {
-        ab[a->nabuffers + k] = b->abuffers[k];
-        if (b->abuffers[k].ncounters &&
-            !(ab[a->nabuffers + k].counters = moved(im, b->abuffers[k].counters, b->abuffers[k].ncounters,
+    for (k = 0; gs && k < gs->nabuffers; k++) {
+        ab[a->nabuffers + k] = gs->abuffers[k];
+        if (gs->abuffers[k].ncounters &&
+            !(ab[a->nabuffers + k].counters = moved(im, gs->abuffers[k].counters, gs->abuffers[k].ncounters,
                                                     a->nuniforms, FALSE)))
+            goto fail;
+    }
+    for (k = 0; k < b->nabuffers; k++) {
+        ab[bab + k] = b->abuffers[k];
+        if (b->abuffers[k].ncounters &&
+            !(ab[bab + k].counters = moved(im, b->abuffers[k].counters, b->abuffers[k].ncounters, bu, FALSE)))
             goto fail;
     }
     im->abuffers = ab;
     /* inputs and outputs */
-    im->ninterface = (UWORD)(a->ninterface + b->ninterface);
+    im->ninterface = (UWORD)(a->ninterface + (gs ? gs->ninterface : 0) + b->ninterface);
     if (!(iv = alloc(im, (im->ninterface + 1UL) * sizeof(*iv))))
         goto fail;
-    for (k = 0; k < a->ninterface; k++)
-        iv[k] = a->interface[k];
+    for (na = 0, k = 0; k < a->ninterface; k++)
+        iv[na++] = a->interface[k];
+    for (k = 0; gs && k < gs->ninterface; k++)
+        iv[na++] = gs->interface[k];
     for (k = 0; k < b->ninterface; k++)
-        iv[a->ninterface + k] = b->interface[k];
+        iv[na++] = b->interface[k];
     im->interface = iv;
-    if (a->interface_types && b->interface_types) {
+    if (a->interface_types && b->interface_types && (!gs || gs->interface_types)) {
         ULONG *t = alloc(im, (im->ninterface + 1UL) * 4);
         if (!t)
             goto fail;
-        for (k = 0; k < a->ninterface; k++)
-            t[k] = a->interface_types[k];
+        for (na = 0, k = 0; k < a->ninterface; k++)
+            t[na++] = a->interface_types[k];
+        for (k = 0; gs && k < gs->ninterface; k++)
+            t[na++] = gs->interface_types[k];
         for (k = 0; k < b->ninterface; k++)
-            t[a->ninterface + k] = b->interface_types[k];
+            t[na++] = b->interface_types[k];
         im->interface_types = t;
     }
     /* the units samplers and images start with: each entry the uniform, its
      * elements, then their units */
     for (na = 0, k = 0; k < a->nopaque; k++)
         na += 2 + a->opaque_units[na + 1];
+    for (ng = 0, k = 0; gs && k < gs->nopaque; k++)
+        ng += 2 + gs->opaque_units[ng + 1];
     for (nb = 0, k = 0; k < b->nopaque; k++)
         nb += 2 + b->opaque_units[nb + 1];
-    if (na + nb) {
-        UWORD *o = alloc(im, (na + nb) * 2 + 2);
-        ULONG at;
+    if (na + ng + nb) {
+        UWORD *o = alloc(im, (na + ng + nb) * 2 + 2);
+        ULONG at, base;
+        int part;
         if (!o)
             goto fail;
         for (k = 0; k < na; k++)
             o[k] = a->opaque_units[k];
-        for (at = 0, k = 0; k < b->nopaque; k++) {
-            ULONG n = b->opaque_units[at + 1], j;
-            o[na + at] = (UWORD)(b->opaque_units[at] + a->nuniforms);
-            for (j = 1; j < 2 + n; j++)
-                o[na + at + j] = b->opaque_units[at + j];
-            at += 2 + n;
+        for (part = 0; part < 2; part++) {
+            const struct OGLES3Image *x = part ? b : gs;
+            ULONG by = part ? bu : a->nuniforms;
+            base = part ? na + ng : na;
+            for (at = 0, k = 0; x && k < x->nopaque; k++) {
+                ULONG n = x->opaque_units[at + 1], j;
+                o[base + at] = (UWORD)(x->opaque_units[at] + by);
+                for (j = 1; j < 2 + n; j++)
+                    o[base + at + j] = x->opaque_units[at + j];
+                at += 2 + n;
+            }
         }
         im->opaque_units = o;
-        im->nopaque = (UWORD)(a->nopaque + b->nopaque);
+        im->nopaque = (UWORD)(a->nopaque + (gs ? gs->nopaque : 0) + b->nopaque);
+    }
+    /* EXT_geometry_shader: the geometry stage's layout */
+    if (g) {
+        im->geometry = TRUE;
+        im->gs_in = g->gs_in;
+        im->gs_out = g->gs_out;
+        im->gs_vertices = g->gs_vertices;
+        im->gs_invocations = g->gs_invocations;
+        im->gs_layout = g->gs_layout;
     }
     /* the pair's .v3dx: its own layout CRC, the compiles' sources and their
-     * link state ("PIPE <a's hash> <b's hash>", then a's) */
+     * link state ("PIPE <a's hash> <b's hash>" or "PIP3 ...", then a's; a
+     * geometry shader in front) */
     im->layout_crc = a->layout_crc ^ ((b->layout_crc << 7) | (b->layout_crc >> 25)) ^ 0x50495045UL;
+    if (g)
+        im->layout_crc ^= ((g->layout_crc << 13) | (g->layout_crc >> 19)) ^ 0x50495047UL;
     im->vs_src = dup_str(im, a->vs_src, 0);
     im->fs_src = dup_str(im, b->fs_src, 0);
-    im->bind_src = dup_str(im, pipe_line, a->bind_src);
+    if (g) {
+        char head[24];
+        ULONG ng2 = 0;
+        char *t1, *t2;
+        while (g->gs_src && g->gs_src[ng2])
+            ng2++;
+        if (!g->gs_src || !(im->gs_src = dup_str(im, g->gs_src, 0)))
+            goto fail;
+        ogles2_format(head, sizeof(head), V3DGLSL_GEOM_MARK "%lu\n", ng2);
+        t1 = dup_str(im, head, g->gs_src);
+        t2 = t1 ? dup_str(im, t1, pipe_line) : 0;
+        im->bind_src = t2 ? dup_str(im, t2, after_geom(a->bind_src)) : 0;
+        if (t1)
+            FreeVec(t1);
+        if (t2)
+            FreeVec(t2);
+    } else {
+        im->bind_src = dup_str(im, pipe_line, a->bind_src);
+    }
     if (!im->vs_src || !im->fs_src || !im->bind_src)
         goto fail;
     return im;

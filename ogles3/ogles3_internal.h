@@ -591,11 +591,11 @@ struct OGLES3Pipeline
      * uniform block of it the stage program's block (0xFFFF none), and the
      * stage programs' constant buffer versions last copied. */
     struct OGLES3Program *pair;
-    const struct OGLES3Image *pair_img[2];
-    struct OGLES3Program *pair_src[2];
+    const struct OGLES3Image *pair_img[3];  /* the vertex, fragment and geometry programs' */
+    struct OGLES3Program *pair_src[3];      /* by constant buffer: vertex, fragment, geometry */
     ULONG *pair_loc;
     UWORD *pair_blk;
-    ULONG pair_ver[2];
+    ULONG pair_ver[3];
 };
 
 struct OGLES3Program
@@ -688,8 +688,8 @@ void ogles2_program_builtin_free(struct OGLES3Program *p);
 struct OGLES3Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, ULONG whylen);
 /* ES 3.1: a program pipeline's image, a's vertex stage and b's fragment
  * stage, its hash and its compiles' link state line (v3dp.c). */
-struct OGLES3Image *ogles2_v3dp_compose(const struct OGLES3Image *a, const struct OGLES3Image *b,
-                                        const UBYTE hash[32], const char *pipe_line);
+struct OGLES3Image *ogles2_v3dp_compose(const struct OGLES3Image *a, const struct OGLES3Image *g,
+                                        const struct OGLES3Image *b, const UBYTE hash[32], const char *pipe_line);
 void ogles2_image_free(struct OGLES3Image *im, struct OGLES3Context *ctx);
 /* The image's variant for `stage` and a draw of primitive `mode` (GL_POINTS ...). */
 const struct OGLES3Variant *ogles2_image_variant(const struct OGLES3Image *im, UBYTE stage, UBYTE cbufs,

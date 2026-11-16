@@ -78,6 +78,14 @@
                                   * (docs/GLES3_PLAN.md stage D item 5). A compiler older than this
                                   * answers 3. */
 #define V3DGLSL_PIPE_MARK "PIPE "
+/* EXT_geometry_shader: a pipeline with a geometry stage (LINK_PIPELINE, a
+ * COMPILE_VARIANT of its): "PIP3 <vertex program's hash> <geometry
+ * program's> <fragment program's> <V, F or G>\n" (the geometry shader in
+ * the vertex program, in the fragment program, or a program of its own; its
+ * source in front, V3DGLSL_GEOM_MARK), then the vertex program's link state.
+ * Its .v3dx's hash: the pseudo-stages PIPV, PIPG and PIPF. A compiler older
+ * than this does not understand it (3). */
+#define V3DGLSL_PIP3_MARK "PIP3 "
 /* EXT_geometry_shader (docs/GLES3_PLAN.md, the ES 3.2 plan's item 9): a
  * program's geometry shader rides in front of its link state, in any link
  * op's `bindings`: "GEOM <decimal length>
