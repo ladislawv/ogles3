@@ -136,7 +136,7 @@ ogles3.library/--background--                   ogles3.library/--background--
        imageBuffer stores of 8- and 16-bit formats are not read back), OES_texture_storage_multisample_2d_array,
        OES_texture_stencil8, and EXT_ and OES_geometry_shader with
        _geometry_point_size (layered colour attachments, up to 256 layers;
-       not with transform feedback, indirect draws or separable programs).
+       not in separable programs).
 
        KHR_debug: debug messages with their filters and debug groups, the
        message log (64 messages of at most 256 characters) or the
@@ -280,9 +280,9 @@ ogles3.library/--deviations--                   ogles3.library/--deviations--
    - No OpenGL ES 3.2 contexts and no tessellation shaders; ES 3.2's
      other features come as the extensions above.
    - A geometry shader draws only with the program's precompiled
-     variants; with transform feedback, or an indirect draw, it draws
-     nothing (logged). Layered framebuffers have no layered depth or
-     stencil.
+     variants. Each of its draws that feeds back (transform feedback)
+     waits for the GPU, which counts what it wrote: slow, but right.
+     Layered framebuffers have no layered depth or stencil.
    - Stencil a draw wrote into a DEPTH32F_STENCIL8 texture is replaced by
      the uploaded stencil when part of that texture is uploaded again
      (glTexSubImage*).

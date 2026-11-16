@@ -19,7 +19,11 @@
  * writes: the next draw's offsets and the primitives-written query count
  * it, without reading the GPU's counts back. The buffers' GPU copies are
  * their 32-bit words (buffer.c), which the CPU waits for and takes back at
- * its next access (ogles2_buffer_cpu).
+ * its next access (ogles2_buffer_cpu). A geometry shader's draw
+ * (EXT_geometry_shader) writes what the CPU cannot know: its job is its
+ * own and is flushed after it, and the binner's counts read back
+ * (ogles2_xfb_after_gs_draw, as Mesa's
+ * v3d_read_and_accumulate_primitive_counters).
  */
 #include <exec/memory.h>
 #include <proto/exec.h>
@@ -47,7 +51,8 @@ struct OGLES3XfbState
     GLuint ntab;
     struct OGLES3Xfb zero;            /* object 0, the default */
     struct OGLES3Xfb *bound;          /* never NULL once made: &zero or a named one */
-    v3d_mem counts;                   /* PRIMITIVE_COUNTS_FEEDBACK's words (never read) */
+    v3d_mem counts;                   /* PRIMITIVE_COUNTS_FEEDBACK's words (read after a geometry
+                                       * shader's draw only) */
     BOOL specs_on;                    /* the open job's last specs packet enabled feedback */
 };
 
@@ -411,6 +416,17 @@ BOOL ogles2_xfb_draw_ok(struct OGLES3Context *ctx, GLenum mode, GLsizei count, G
         return TRUE;
     o = ctx->xfb->bound;
     x = o->program && o->program->image ? o->program->image->xfb : 0;
+    /* EXT_geometry_shader: the geometry shader's output the mode begun
+     * with; no room checked (what it writes is not known: the binner
+     * stops at each buffer's end, ES 3.2 12.1.2) */
+    if (x && o->program->image->geometry) {
+        GLenum go = o->program->image->gs_out;
+        if ((go == GL_POINTS ? GL_POINTS : go == GL_LINE_STRIP ? GL_LINES : GL_TRIANGLES) != o->mode) {
+            ogles2_error(ctx, GL_INVALID_OPERATION);
+            return FALSE;
+        }
+        return TRUE;
+    }
     /* ES 3.0 2.15.2: the mode begun with, and room for every vertex */
     if (mode != o->mode || !x) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
@@ -496,13 +512,27 @@ void ogles2_xfb_after_draw(struct OGLES3Context *ctx, GLenum mode, GLsizei count
     ogles2_query_xfb_add(ctx, n / (mode == GL_TRIANGLES ? 3 : mode == GL_LINES ? 2 : 1));
 }
 
+/* PRIMITIVE_COUNTS_FEEDBACK's seven words, at a 32-byte boundary (0-3 the
+ * words written into each buffer, 4 the primitives generated, 5 those
+ * written, 6 those that did not fit); NULL: no memory. */
+static volatile ULONG *counts_words(struct OGLES3XfbState *xs)
+{
+    if (!xs->counts.hostptr && v3d_mem_alloc(ogles2_device(), &xs->counts, 96) < 0) {
+        memset(&xs->counts, 0, sizeof(xs->counts));
+        return 0;
+    }
+    return (volatile ULONG *)(((ULONG)xs->counts.hostptr + 31) & ~31UL);
+}
+
 /* The end of the open job's binning list, before its FLUSH (job.c): after
- * feedback, the primitive counts stored (where nothing reads them) and the
- * specs off, so the feedback block finishes before the next job begins
- * (Mesa's v3dx_job.c, SWVC5-718). */
+ * feedback, the primitive counts stored (and zeroed: each job's its own;
+ * read after a geometry shader's draw) and the specs off, so the feedback
+ * block finishes before the next job begins (Mesa's v3dx_job.c,
+ * SWVC5-718). */
 void ogles2_xfb_job_end(struct OGLES3Context *ctx)
 {
     struct OGLES3XfbState *xs = ctx->xfb;
+    volatile ULONG *w;
     UBYTE *p;
     if (!ctx->job_xfb)
         return;
@@ -510,11 +540,43 @@ void ogles2_xfb_job_end(struct OGLES3Context *ctx)
     if (!xs)
         return;
     xs->specs_on = FALSE;
-    if (!xs->counts.hostptr && v3d_mem_alloc(ogles2_device(), &xs->counts, 96) < 0)
-        memset(&xs->counts, 0, sizeof(xs->counts));
-    if (xs->counts.hostptr && (p = v3d_buffer_claim_memory(ctx->v3d->current_buf, 5))) {
-        p[0] = v3d_OP_PRIMITIVE_COUNTS_FEEDBACK; /* seven words, at a 32-byte boundary */
-        put32(p + 1, (((ULONG)xs->counts.hostptr + 31) & ~31UL) | v3d_STORE_PRIMITIVE_COUNTS);
+    if ((w = counts_words(xs)) != 0 && (p = v3d_buffer_claim_memory(ctx->v3d->current_buf, 5))) {
+        p[0] = v3d_OP_PRIMITIVE_COUNTS_FEEDBACK;
+        put32(p + 1, (ULONG)w | v3d_STORE_PRIMITIVE_COUNTS_AND_ZERO);
     }
     TransformFeedbackSpecs(ctx->v3d, FALSE, 0);
+}
+
+/* EXT_geometry_shader: after the primitives of a draw whose geometry
+ * shader fed back (its job its own: draw.c flushed one that fed back
+ * before it). What it wrote is the binner's to know: the job is flushed
+ * (its binning waited for), and the primitives written it stored
+ * (ogles2_xfb_job_end) count the buffers' vertices, a primitive the
+ * begun mode's, and the query's primitives. A job that did not bin
+ * leaves the word as set here: none written. */
+void ogles2_xfb_after_gs_draw(struct OGLES3Context *ctx)
+{
+    struct OGLES3XfbState *xs = ctx->xfb;
+    struct OGLES3Xfb *o = xs->bound;
+    const struct OGLES3ImageXfb *x = o->program->image->xfb;
+    volatile ULONG *w;
+    ULONG prims = 0, n, len = 32;
+    int k;
+    DoCommand(ctx->v3d, v3d_OP_TRANSFORM_FEEDBACK_FLUSH_AND_COUNT);
+    ctx->xfb_draws++;
+    w = counts_words(xs);
+    if (w)
+        w[5] = 0xFFFFFFFFUL; /* cleaned with the whole cache at the submission (job.c) */
+    ogles2_job_flush(ctx, FALSE);
+    if (w) {
+        CachePostDMA((APTR)w, &len, 0);
+        n = LE32(w[5]);
+        if (n != 0xFFFFFFFFUL)
+            prims = n;
+    }
+    n = prims * (o->mode == GL_TRIANGLES ? 3 : o->mode == GL_LINES ? 2 : 1);
+    for (k = 0; k < OGLES3_MAX_XFB_BUFFERS; k++)
+        if (x->stride[k])
+            o->written[k] += n;
+    ogles2_query_xfb_add(ctx, prims);
 }

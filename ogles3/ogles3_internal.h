@@ -1279,6 +1279,7 @@ BOOL ogles2_xfb_draw_ok(struct OGLES3Context *ctx, GLenum mode, GLsizei count, G
 BOOL ogles2_xfb_before_draw(struct OGLES3Context *ctx, GLenum mode, BOOL psiz);
 void ogles2_xfb_after_draw(struct OGLES3Context *ctx, GLenum mode, GLsizei count, GLsizei instances);
 void ogles2_xfb_job_end(struct OGLES3Context *ctx);
+void ogles2_xfb_after_gs_draw(struct OGLES3Context *ctx);
 void ogles2_xfbs_free(struct OGLES3Context *ctx);
 GLuint ogles2_xfb_bound_name(const struct OGLES3Context *ctx); /* GL_TRANSFORM_FEEDBACK_BINDING */
 BOOL ogles2_xfb_paused(const struct OGLES3Context *ctx);

@@ -26,6 +26,7 @@
 #include <proto/graphics.h>
 #include <proto/ogles3.h>
 #include <GLES3/gl31.h> /* ES 3.0 and, in ES 3.1 contexts, 3.1 */
+#include <GLES2/gl2ext.h> /* EXT_geometry_shader's enums */
 
 #ifndef GL_ETC1_RGB8_OES
 #define GL_ETC1_RGB8_OES 0x8D64 /* OES_compressed_ETC1_RGB8_texture */
@@ -69,15 +70,26 @@ static char *read_text(const char *name)
 static const char *const *xfb_names;
 static GLsizei xfb_count;
 
-/* shaders/<name>.vert and .frag, linked; 0 if not (the log printed). */
+/* shaders/<name>.vert and .frag, and .geom if there is one, linked; 0 if
+ * not (the log printed). */
 static GLuint program(const char *name)
 {
-    char vn[32], fn[32], log[256];
+    char vn[32], fn[32], gn[32], log[256];
     char *src[2];
     GLuint p = glCreateProgram(), s;
     GLint ok = 0, k;
     snprintf(vn, sizeof(vn), "%s.vert", name);
     snprintf(fn, sizeof(fn), "%s.frag", name);
+    snprintf(gn, sizeof(gn), "%s.geom", name);
+    src[0] = read_text(gn);
+    if (src[0]) { /* EXT_geometry_shader (an ES 3.1 context) */
+        s = glCreateShader(GL_GEOMETRY_SHADER_EXT);
+        glShaderSource(s, 1, (const GLchar *const *)&src[0], 0);
+        glCompileShader(s);
+        glAttachShader(p, s);
+        glDeleteShader(s);
+        free(src[0]);
+    }
     src[0] = read_text(vn);
     src[1] = read_text(fn);
     for (k = 0; k < 2; k++) {
@@ -3315,6 +3327,203 @@ static void test_wide_a2c(void)
 
 /* ENV:M8_SKIP names tests to leave out (words of their names after
  * "test_", e.g. "indirect fragment_storage"): bisecting a fault on the A1200. */
+/* EXT_geometry_shader (docs/GLES3_PLAN.md item 9), ES 3.1 contexts:
+ * es32gsd's geometry shader moves the whole-screen triangle right by half
+ * the screen (green on the right, the left clear), drawn directly, through
+ * glDrawArraysIndirect, and from vertices and a command es31gpu's compute
+ * shader wrote (read by the GPU); es32gsx turns each point into a quad and
+ * feeds back its two triangles (g_val, g_pos): 3 points then 1 more,
+ * appended where the binner's counts say the first draw ended, and the
+ * primitives-written query; a feedback begun in another mode than the
+ * geometry output's refuses the draw; es32gs's two invocations write
+ * layers 0 and 1 of a layered 2D array (blue), 2 and 3 keep their red. */
+static int gs_tri_is(const GLfloat *w, int base, GLfloat x, GLfloat y)
+{
+    GLfloat lo = w[0], sum = 0;
+    int k;
+    for (k = 0; k < 3; k++) {
+        if (w[3 * k] < lo)
+            lo = w[3 * k];
+        sum += w[3 * k];
+        if (w[3 * k + 1] != x || w[3 * k + 2] != y) {
+            printf("     vertex %d of a triangle at (%g %g), not (%g %g)\n", k, w[3 * k + 1], w[3 * k + 2], x, y);
+            return 0;
+        }
+    }
+    if (lo == (GLfloat)base && sum == (GLfloat)(3 * base + 3))
+        return 1;
+    printf("     a triangle's values %g %g %g, not %d to %d\n", w[0], w[3], w[6], base, base + 2);
+    return 0;
+}
+
+static void test_geometry(void)
+{
+    static const GLfloat pts[8] = { -0.5f, 0, 0, 0, 0.5f, 0, 0.25f, 0.5f };
+    static const GLuint cmd[4] = { 3, 1, 0, 0 };
+    static const char *const names[2] = { "g_val", "g_pos" };
+    static GLubyte zeros[512];
+    GLuint pd, px, pl, c, b[5], q, prims = 0, vao, tex, fb[2];
+    GLint lp, k, i, ok;
+    const GLfloat *w;
+
+    pd = program("es32gsd");
+    if (!pd) {
+        check(0, "geometry: es32gsd links");
+        return;
+    }
+    lp = glGetAttribLocation(pd, "pos");
+    glUseProgram(pd);
+    glVertexAttribPointer((GLuint)lp, 2, GL_FLOAT, GL_FALSE, 0, cover);
+    glEnableVertexAttribArray((GLuint)lp);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    check(glGetError() == GL_NO_ERROR && pixel_is(48, 32, 0, 255, 0, 255, 0) && pixel_is(8, 32, 0, 0, 0, 0, 0),
+          "geometry: the geometry shader's triangle drawn (moved right)");
+    glDrawArrays(GL_POINTS, 0, 3);
+    check(glGetError() == GL_INVALID_OPERATION, "geometry: points into a triangles shader: GL_INVALID_OPERATION");
+    glDisableVertexAttribArray((GLuint)lp);
+
+    /* indirect: a command the CPU reads, then one the GPU wrote */
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    glGenBuffers(5, b);
+    glBindBuffer(GL_ARRAY_BUFFER, b[0]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cover), cover, GL_STATIC_DRAW);
+    glVertexAttribPointer((GLuint)lp, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray((GLuint)lp);
+    glBindBuffer(GL_DRAW_INDIRECT_BUFFER, b[1]);
+    glBufferData(GL_DRAW_INDIRECT_BUFFER, sizeof(cmd), cmd, GL_STATIC_DRAW);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glDrawArraysIndirect(GL_TRIANGLES, 0);
+    check(glGetError() == GL_NO_ERROR && pixel_is(48, 32, 0, 255, 0, 255, 0) && pixel_is(8, 32, 0, 0, 0, 0, 0),
+          "geometry: glDrawArraysIndirect");
+    c = compute_program("es31gpu");
+    if (c) {
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, b[2]);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, 56, zeros, GL_DYNAMIC_COPY);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, b[2]);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, b[3]);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, 36, zeros, GL_DYNAMIC_COPY);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, b[3]);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, b[4]);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, 24, zeros, GL_DYNAMIC_COPY);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, b[4]); /* its indices: unused here */
+        glUseProgram(c);
+        glDispatchCompute(1, 1, 1);
+        glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT | GL_COMMAND_BARRIER_BIT);
+        for (i = 0; i < 3; i++)
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, (GLuint)i, 0);
+        glUseProgram(pd);
+        glBindBuffer(GL_ARRAY_BUFFER, b[2]);
+        glVertexAttribPointer((GLuint)lp, 2, GL_FLOAT, GL_FALSE, 0, 0);
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, b[3]);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glDrawArraysIndirect(GL_TRIANGLES, 0);
+        check(glGetError() == GL_NO_ERROR && pixel_is(48, 32, 0, 255, 0, 255, 0) && pixel_is(8, 32, 0, 0, 0, 0, 0),
+              "geometry: glDrawArraysIndirect of a command and vertices a compute shader wrote");
+        glDeleteProgram(c);
+    } else {
+        check(0, "geometry: es31gpu links");
+    }
+    glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(5, b);
+
+    /* transform feedback of the geometry shader's triangles */
+    xfb_names = names;
+    xfb_count = 2;
+    px = program("es32gsx");
+    xfb_names = 0;
+    xfb_count = 0;
+    if (px) {
+        lp = glGetAttribLocation(px, "pos");
+        glUseProgram(px);
+        glVertexAttribPointer((GLuint)lp, 2, GL_FLOAT, GL_FALSE, 0, pts);
+        glEnableVertexAttribArray((GLuint)lp);
+        glGenBuffers(1, &b[0]);
+        glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, b[0]);
+        glBufferData(GL_TRANSFORM_FEEDBACK_BUFFER, sizeof(zeros), zeros, GL_STREAM_READ);
+        glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, b[0]);
+        glGenQueries(1, &q);
+        glEnable(GL_RASTERIZER_DISCARD);
+        glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, q);
+        glBeginTransformFeedback(GL_TRIANGLES);
+        glDrawArrays(GL_POINTS, 0, 3);
+        glDrawArrays(GL_POINTS, 3, 1);
+        glEndTransformFeedback();
+        glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+        glGetQueryObjectuiv(q, GL_QUERY_RESULT, &prims);
+        check(glGetError() == GL_NO_ERROR && prims == 8,
+              "geometry feedback: 4 points, 8 triangles written (the query)");
+        if (prims != 8)
+            printf("     %lu primitives\n", (unsigned long)prims);
+        w = glMapBufferRange(GL_TRANSFORM_FEEDBACK_BUFFER, 0, 8 * 9 * 4, GL_MAP_READ_BIT);
+        ok = w != 0;
+        for (i = 0; ok && i < 3; i++) /* the first draw: points 0-2 */
+            for (k = 0; k < 2; k++)
+                ok &= gs_tri_is(w + 9 * (2 * i + k), 10 * i + k, pts[2 * i], pts[2 * i + 1]);
+        for (k = 0; ok && k < 2; k++) /* the second, appended: its point's primitive id 0 */
+            ok &= gs_tri_is(w + 9 * (6 + k), k, pts[6], pts[7]);
+        check(ok, "geometry feedback: each triangle's values, the second draw's after the first's");
+        if (w)
+            glUnmapBuffer(GL_TRANSFORM_FEEDBACK_BUFFER);
+        glBeginTransformFeedback(GL_POINTS);
+        glDrawArrays(GL_POINTS, 0, 1);
+        check(glGetError() == GL_INVALID_OPERATION,
+              "geometry feedback: begun with points, triangles out: GL_INVALID_OPERATION");
+        glEndTransformFeedback();
+        glDisable(GL_RASTERIZER_DISCARD);
+        glDisableVertexAttribArray((GLuint)lp);
+        glDeleteQueries(1, &q);
+        glDeleteBuffers(1, &b[0]);
+        glDeleteProgram(px);
+    } else {
+        check(0, "geometry feedback: es32gsx links with its varyings");
+    }
+
+    /* layered rendering */
+    pl = program("es32gs");
+    if (pl) {
+        GLint lpos = glGetAttribLocation(pl, "position");
+        glGenTextures(1, &tex);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, tex);
+        glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, 16, 16, 4);
+        glGenFramebuffers(2, fb);
+        glBindFramebuffer(GL_FRAMEBUFFER, fb[0]);
+        glFramebufferTextureEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex, 0);
+        ok = glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
+        glViewport(0, 0, 16, 16);
+        glClearColor(1, 0, 0, 1);
+        glClear(GL_COLOR_BUFFER_BIT); /* every layer */
+        glUseProgram(pl);
+        glUniform1f(glGetUniformLocation(pl, "gscale"), 1.0f);
+        glUniform4f(glGetUniformLocation(pl, "tint"), 0, 0, 1, 1);
+        glVertexAttribPointer((GLuint)lpos, 2, GL_FLOAT, GL_FALSE, 0, cover);
+        glEnableVertexAttribArray((GLuint)lpos);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDisableVertexAttribArray((GLuint)lpos);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, fb[1]);
+        for (i = 0; i < 4; i++) {
+            glFramebufferTextureLayer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex, 0, i);
+            ok &= i < 2 ? pixel_is(8, 8, 0, 0, 128, 255, 2) : pixel_is(8, 8, 255, 0, 0, 255, 0);
+        }
+        check(ok && glGetError() == GL_NO_ERROR, "layered: invocations 0 and 1 drew layers 0 and 1, 2 and 3 kept");
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glDeleteFramebuffers(2, fb);
+        glDeleteTextures(1, &tex);
+        glClearColor(0, 0, 0, 0);
+        glViewport(0, 0, 64, 64);
+        glDeleteProgram(pl);
+    } else {
+        check(0, "layered: es32gs links");
+    }
+    glUseProgram(0);
+    glDeleteProgram(pd);
+}
+
 static int skipped(const char *name)
 {
     const char *list = getenv("M8_SKIP");
@@ -3426,6 +3635,8 @@ int main(void)
                 test_ms_texture();
             if (!skipped("pipelines"))
                 test_pipelines();
+            if (!skipped("geometry"))
+                test_geometry();
         }
     }
     check(glGetError() == GL_NO_ERROR, "no GL error left over");

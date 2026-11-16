@@ -9,15 +9,16 @@ OUT=${OUT:-$HOME/ogles2-build/v3dglslc}
 T="$(dirname "$(readlink -f "$0")")"
 V="$(dirname "$(dirname "$(dirname "$T")")")/v3dp"
 W=$OUT/v3dpcmp && rm -rf $W && mkdir -p $W/host $W/m68k && cd $W
-cp "$T"/shaders/*.vert "$T"/shaders/*.frag "$T"/shaders/*.link "$T"/shaders/*.comp . || exit 1
+cp "$T"/shaders/*.vert "$T"/shaders/*.frag "$T"/shaders/*.link "$T"/shaders/*.comp "$T"/shaders/*.geom . || exit 1
 # The source hash covers the exact text: LF line ends, as in the repository
 # and the A1200 packages (a Windows checkout must not turn them into CRLF).
-sed -i 's/\r$//' *.vert *.frag *.link
+sed -i 's/\r$//' *.vert *.frag *.link *.geom
 PAIRS="tex.vert tex.frag light.vert light.frag skin.vert skin.frag tex.vert proc.frag state.vert state.frag mrt.vert mrt.frag
        es3.vert es3.frag es3tex.vert es3tex.frag es3uni.vert es3uni.frag es3flat.vert es3flat.frag
        es3block.vert es3block.frag es3size.vert es3size.frag es3vid.vert es3vid.frag
        es3out.vert es3out.frag es3wide.vert es3wide.frag
-       es31frag.vert es31frag.frag es31loc.vert es31loc.frag es31ms.vert es31ms.frag es31cs.comp es31oob.comp es31ac.comp es31img.comp es31tex32.comp es31xchg.comp es31aoa.comp" # compute programs (ES 3.1): one file each
+       es31frag.vert es31frag.frag es31loc.vert es31loc.frag es31ms.vert es31ms.frag es31cs.comp es31oob.comp es31ac.comp es31img.comp es31tex32.comp es31xchg.comp es31aoa.comp
+       es32gs.vert es32gs.geom es32gs.frag es32gsd.vert es32gsd.geom es32gsd.frag" # compute programs (ES 3.1): one file each; geometry ones (EXT_geometry_shader): a triple
 
 $OUT/host/v3dglslc -o host $PAIRS > host.txt 2>&1
 echo "host v3dglslc rc=$?"
@@ -25,6 +26,8 @@ echo "host v3dglslc rc=$?"
 # run of its own, as -b applies to every pair of a run.
 $OUT/host/v3dglslc -o host -b es3xfb.link es3xfb.vert es3xfb.frag >> host.txt 2>&1
 echo "host v3dglslc (es3xfb) rc=$?"
+$OUT/host/v3dglslc -o host -b es32gsx.link es32gsx.vert es32gsx.geom es32gsx.frag >> host.txt 2>&1
+echo "host v3dglslc (es32gsx) rc=$?"
 
 cp $OUT/v3dglslc.stripped v3dglslc
 start=$(date +%s)
@@ -34,6 +37,9 @@ echo "m68k v3dglslc rc=$? ($(( $(date +%s) - start )) s under vamos)"
 timeout 3000 ~/amitools-venv/bin/vamos -C 68040 -H disable -m 262144 -s 4096 -- \
     v3dglslc -o m68k -b es3xfb.link es3xfb.vert es3xfb.frag >> m68k.txt 2>> m68k.err
 echo "m68k v3dglslc (es3xfb) rc=$?"
+timeout 3000 ~/amitools-venv/bin/vamos -C 68040 -H disable -m 262144 -s 4096 -- \
+    v3dglslc -o m68k -b es32gsx.link es32gsx.vert es32gsx.geom es32gsx.frag >> m68k.txt 2>> m68k.err
+echo "m68k v3dglslc (es32gsx) rc=$?"
 grep -vE "WARNING|^\s*$" m68k.err | grep -E "ERROR|rror" | head -5
 
 # The programs' files and, for those with samplers, their 32-bit-sampler

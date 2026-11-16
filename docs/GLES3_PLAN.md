@@ -90,9 +90,51 @@ line's; the bridge's 31 programs as before. Both compilers rebuilt.
   fields, the primitive id flags (Mesa's), the point size by the geometry
   output; VCM_CACHE_SIZE's Vc and GL_SHADER_STATE_INCLUDING_GS (66) patched
   into draw_packets' bytes (`gs_packets`).
-- Not yet: transform feedback with a geometry shader, indirect and
-  GPU-read draws (logged, not drawn); the 32-bit-sampler, alpha-to-coverage
-  and draw-time variants of geometry programs.
+- Not yet: the 32-bit-sampler, alpha-to-coverage and draw-time variants
+  of geometry programs. (Transform feedback, indirect and GPU-read draws:
+  done 2026-11-16, below.)
+
+**Geometry shaders with transform feedback and indirect draws (2026-11-16,
+built; not run on the A1200).**
+- **The compiler** (`v3dglslc.c`, `capture_tf`): the feedback layout from
+  the geometry shader when the program has one (Mesa's `get_tf_shader`,
+  `v3dx_emit.c`), not the vertex shader's (which has none then: a
+  geometry program's file had no `TRANSFORM_FEEDBACK` section, so
+  `glBeginTransformFeedback` refused it). The geometry binning variant
+  outputs the fed-back varyings already (Mesa's key from `tf_outputs`).
+  Both compilers rebuilt.
+- **Counting** (`xfb.c`): what a geometry shader writes is not known on
+  the CPU. As Mesa (`v3d_read_and_accumulate_primitive_counters`), the
+  binner's counts are read back: a geometry draw that feeds back gets a
+  job of its own (draw.c flushes an open job that fed back first), the
+  job is flushed after it (`ogles2_xfb_after_gs_draw`), and
+  `PRIMITIVE_COUNTS_FEEDBACK`'s primitives written (word 5, stored and
+  zeroed at each job's end now: `STORE_PRIMITIVE_COUNTS_AND_ZERO`) advance
+  each buffer by that many primitives of the begun mode and count in the
+  primitives-written query; a sentinel the CPU puts there tells a job
+  that did not bin (none written). One wait for the binner per such draw.
+- **Rules** (`ogles2_xfb_draw_ok`): with a geometry shader, its output
+  (points, line strip, triangle strip) must be the begun mode
+  (`GL_INVALID_OPERATION`), and no room is checked (ES 3.2 12.1.2: the
+  binner stops at each buffer's end). The specs: the geometry binning
+  variant's points with or without their size (its key's
+  `per_vertex_point_size`).
+- **Indirect and GPU-read draws** (`draw.c`): `indirect_packets` patches
+  the geometry stage's VCM_CACHE_SIZE and `GL_SHADER_STATE_INCLUDING_GS`
+  as `draw_packets`' users do (`gs_packets`); the other GPU-read draws
+  (vertices or indices a shader wrote) use the common packets. Commands
+  the CPU reads were drawn already (`indirect_command` calls the common
+  draw).
+- **Tests:** m8_draw `test_geometry` (ES 3.1 contexts; `program()` attaches
+  `<name>.geom`): `es32gsd` (triangles moved right by the geometry
+  shader) drawn directly, by `glDrawArraysIndirect` and from es31gpu's
+  GPU-written vertices and command; `es32gsx` (points to quads, `g_val`
+  and `g_pos` fed back: 3 points then 1, the second draw appended after
+  the binner's count, 8 primitives in the query, a triangle's values in
+  any order); a mode mismatch refused; `es32gs` into a layered 2D array
+  (layers 0 and 1 drawn, 2 and 3 kept). `compare_v3dp.sh` compiles the
+  geometry programs too: host and m68k compilers 37 of 37 identical. vamos:
+  m8_es31 68 of 68, m8_es3 33 of 33. Not run on the A1200 yet.
 
 **Stage D, done (2026-11-16, built; not run): layered rendering, and the
 extension offered.**

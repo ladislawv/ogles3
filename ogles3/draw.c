@@ -3011,6 +3011,18 @@ static BOOL draw_mode_ok(const struct OGLES3Context *ctx, GLenum mode)
            (ogles2_es31(ctx) && mode >= GL_LINES_ADJACENCY_EXT && mode <= GL_TRIANGLE_STRIP_ADJACENCY_EXT);
 }
 
+/* After a draw's feedback: what it wrote counted, on the CPU, or (a
+ * geometry shader's) from the binner's counts. Out of line: draw_arrays'
+ * body as small as it was. */
+static __attribute__((noinline)) void xfb_after(struct OGLES3Context *ctx, BOOL gs, GLenum mode, GLsizei count,
+                                                GLsizei instances)
+{
+    if (gs)
+        ogles2_xfb_after_gs_draw(ctx);
+    else
+        ogles2_xfb_after_draw(ctx, mode, count, instances);
+}
+
 /* EXT_geometry_shader: draw_packets' VCM_CACHE_SIZE with the geometry
  * stage's VPM (Vc, bin and render) and GL_SHADER_STATE_INCLUDING_GS (66:
  * the record starts with the geometry stage's, shader_record). */
@@ -3042,13 +3054,16 @@ static BOOL gs_takes(GLenum in, GLenum mode)
 static __attribute__((noinline)) void indirect_packets(V3DContext *v, const struct OGLES3Variant *cs,
                                                        const struct OGLES3Variant *vs, ULONG rec, int nslots,
                                                        GLenum mode, const struct elements *el, GLenum itype_gl,
-                                                       ULONG idx_addr, ULONG idx_size, ULONG ind)
+                                                       ULONG idx_addr, ULONG idx_size, ULONG ind,
+                                                       const struct gs_draw *g)
 {
     UBYTE *b = v3d_buffer_claim_memory(v->current_buf, el ? 32 : 23);
     if (!b)
         return;
     draw_packets(b, cs->vcm_cache_size, vs->vcm_cache_size, rec, nslots ? nslots : 1, (UBYTE)mode, -1, 0, 0, 0, 0, 1,
                  0); /* bytes 0-11: point size, VCM cache, shader state */
+    if (g)
+        gs_packets(b, g); /* the geometry stage's VPM and shader state (EXT_geometry_shader) */
     if (el) {
         b[12] = v3d_OP_INDEX_BUFFER_SETUP;
         put_le32(b + 13, idx_addr);
@@ -3186,20 +3201,24 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
      * input primitive (GL_INVALID_OPERATION; the adjacency ones only with
      * one), the fragment shader's class its output's; precompiled variants
      * only (es3_variants keys the vertex shader's outputs on the fragment
-     * shader's inputs), no transform feedback or GPU-read draw yet. */
+     * shader's inputs). Feeding back, its job is its own (the open one, if
+     * it fed back, rendered first: ogles2_xfb_after_gs_draw reads what the
+     * job wrote). */
     if (im->geometry ? !gs_takes(im->gs_in, mode) : mode > GL_TRIANGLE_FAN) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
     if (im->geometry) {
-        if (ctx->xfb_begun || gd || !packets_ok(v)) {
+        if (!packets_ok(v)) { /* v3dcore's writers: no GL_SHADER_STATE_INCLUDING_GS */
             if (!d->gs_refused_logged) {
                 d->gs_refused_logged = TRUE;
-                ogles2_log("draw: a geometry shader with transform feedback or an indirect or GPU-read draw is "
-                           "not drawn yet (logged once)");
+                ogles2_log("draw: a geometry shader without the library's own draw packets is not drawn "
+                           "(logged once)");
             }
             return;
         }
+        if (ctx->job_xfb && ogles2_xfb_drawing(ctx))
+            ogles2_job_flush(ctx, FALSE);
         fsmode = im->gs_out == GL_POINTS ? GL_POINTS : im->gs_out == GL_LINE_STRIP ? GL_LINES : GL_TRIANGLES;
     }
     /* A 4x MSAA default framebuffer, or multisampled renderbuffers, with
@@ -3617,9 +3636,14 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
      * flush after them (xfb.c; never indexed: draw_elements refuses that). */
     if (__builtin_expect(ctx->job_xfb, 0) && ctx->xfb_draws != ctx->xfb_waited)
         xfb_wait(ctx, p);
-    xfb = ctx->xfb_begun && ogles2_xfb_before_draw(ctx, mode, cs->writes_psiz); /* never begun: never used */
+    /* never begun: never used; a geometry shader's: its binning variant's
+     * points, sized or not (its output's specs) */
+    xfb = ctx->xfb_begun &&
+          (g ? ogles2_xfb_before_draw(ctx, im->gs_out == GL_POINTS ? GL_POINTS : GL_TRIANGLES,
+                                      g->bin->per_vertex_point_size)
+             : ogles2_xfb_before_draw(ctx, mode, cs->writes_psiz));
     if (__builtin_expect(gd != 0, 0) && gd->ind_addr) {
-        indirect_packets(v, cs, vs, rec, nslots, mode, el, itype_gl, idx_addr, idx_size, gd->ind_addr);
+        indirect_packets(v, cs, vs, rec, nslots, mode, el, itype_gl, idx_addr, idx_size, gd->ind_addr, g);
         mark(ctx, 7);
         return;
     }
@@ -3637,7 +3661,7 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
                 gs_packets(b, g);
         }
         if (xfb)
-            ogles2_xfb_after_draw(ctx, mode, count, instances);
+            xfb_after(ctx, g != 0, mode, count, instances);
         mark(ctx, 7);
         return;
     }
@@ -3654,7 +3678,7 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
                 gs_packets(b, g);
         }
         if (xfb)
-            ogles2_xfb_after_draw(ctx, mode, count, instances);
+            xfb_after(ctx, g != 0, mode, count, instances);
         mark(ctx, 7);
         return;
     }

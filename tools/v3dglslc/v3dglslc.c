@@ -657,11 +657,14 @@ static int key_states(GLuint p, int wide)
  * target with depth on. The fake device runs nothing; the draws only make
  * the driver compute its keys and compile. */
 /* After a draw: the transform feedback layout the driver made for the
- * bound vertex shader (v3d_set_transform_feedback_outputs, at the shader's
- * creation), for v3dp_write; none if it has no varyings to feed back. */
+ * bound vertex shader, or the geometry shader with one (the last stage
+ * before the rasterizer: Mesa's get_tf_shader, v3dx_emit.c;
+ * v3d_set_transform_feedback_outputs, at the shader's creation), for
+ * v3dp_write; none if it has no varyings to feed back. */
 static void capture_tf(void)
 {
-    const struct v3d_uncompiled_shader *so = v3d_context(the_pipe)->prog.bind_vs;
+    const struct v3d_context *v3d = v3d_context(the_pipe);
+    const struct v3d_uncompiled_shader *so = v3d->prog.bind_gs ? v3d->prog.bind_gs : v3d->prog.bind_vs;
     struct v3dp_tf tf;
     unsigned i;
     if (!so || !so->num_tf_specs || so->num_tf_specs > ARRAY_SIZE(tf.specs) ||
