@@ -124,7 +124,7 @@ recipe types below.
 | `u8` | vector stride in **bytes** (between matrix columns) |
 | `u8` | format: 0 native, 1 integer stored as float (Mesa `gl_uniform_driver_format`) |
 | `u8` | pad |
-| `u32[2]` | sampler index for the vertex and the fragment stage (the texture index in that stage's `TMU_CONFIG` recipe data); 0xffffffff where not a sampler or unused there |
+| `u32[2]` | sampler index for the vertex and the fragment stage (the texture index in that stage's `TMU_CONFIG` recipe data); 0xffffffff where not a sampler or unused there. With a geometry stage (format 2, feature bit 5) `u32[3]`, the geometry stage's third |
 
 Samplers have no storage places: the texture unit a sampler reads (`glUniform1i`) is runtime
 state, not part of a constant buffer. Built-in uniforms (`gl_DepthRange.near`, ...) have none
@@ -155,7 +155,7 @@ must know of it, or it gives every active attribute a location of its own and fa
 
 | Type | Field |
 |---|---|
-| `u32` | stage: 0 vertex, 1 vertex binning (coordinate) shader, 4 fragment |
+| `u32` | stage: 0 vertex, 1 vertex binning (coordinate) shader, 4 fragment; format 2: 2 geometry, 3 geometry binning (feature bit 5), 5 compute |
 | key | the variant key, field by field (below) |
 | prog data | the shader's properties, field by field (below) |
 | `u32` | uniform recipe entries |
@@ -223,6 +223,16 @@ Prog data (`struct v3d_vs_prog_data`), after the common part: `u8` each: `uses_i
 `u8 vattr_sizes[16]`, `u32 vpm_input_size`, `u32 vpm_output_size`,
 `i32 driver_location_map[64]`.
 
+### Geometry and geometry binning shaders (format 2, feature bit 5)
+
+Key (`struct v3d_gs_key`), after the common key: `u8 num_used_outputs`, `u8 pad[3]`,
+`u8 used_outputs[64]` (`slot_and_component`), `u8` each: `is_coord`,
+`per_vertex_point_size`, `u8 pad[2]`.
+
+Prog data (`struct v3d_gs_prog_data`), after the common part: `u8` each: `uses_pid`,
+`num_inputs`, `simd_width`, `out_prim_type`, `num_invocations`, `writes_psiz`, `u8 pad[2]`,
+`u8 input_sizes[16]`, `u8 input_slots[64]` (`slot_and_component`), `u32 vpm_output_size`.
+
 ### Fragment shader
 
 Key (`struct v3d_fs_key`), after the common key: `u8` each: `is_points`, `is_lines`,
@@ -272,7 +282,12 @@ its `STORAGE_BLOCKS` section: Mesa makes them storage buffers). Bit 4 (0x10, 202
 3.1): a separable program (`GL_PROGRAM_SEPARABLE`; its hash ends with `"SEPA"`, below): its
 stages 0x11, or one stage alone, 0x01 or 0x10, and then no variants (it draws only with
 another program in a pipeline, whose draws link the two as one program of their own, so it
-has no `.v3dw` either). Images and explicit uniform locations need no bit: their sections and
+has no `.v3dw` either). Bit 5 (0x20, 2026-11-16, `EXT_geometry_shader`): a geometry stage,
+its stages bit 3 with 0 and 4 (Mesa's `MESA_SHADER_GEOMETRY`), its `STAGE_PARAMS` and uniform
+block list of stage 3 after the others, its variants of stages 2 (geometry) and 3 (geometry
+binning), and each uniform's sampler indexes three words (the geometry stage's third); its
+hash has the geometry shader's source after the vertex shader's, as stage 3. Images and
+explicit uniform locations need no bit: their sections and
 flags are format 2's.
 
 **The hash** covers the program's link state after the shaders and the bindings, each as a

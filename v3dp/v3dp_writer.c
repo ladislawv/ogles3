@@ -44,7 +44,7 @@ enum {
     SEC_INTERFACE_TYPES = 15,    /* format 2: INTERFACE's structures (ES 3.1's interface matching) */
 };
 
-enum { VARIANT_VS = 0, VARIANT_VS_BIN = 1, VARIANT_FS = 4, VARIANT_CS = 5 };
+enum { VARIANT_VS = 0, VARIANT_VS_BIN = 1, VARIANT_GS = 2, VARIANT_GS_BIN = 3, VARIANT_FS = 4, VARIANT_CS = 5 };
 
 /* The file numbers stages as Mesa does; the fixed-size arrays below are part
  * of the format, so a Mesa that changes them needs a new format version. */
@@ -172,6 +172,38 @@ static void put_prog_data_common(struct buf *b, const struct v3d_prog_data *d)
     put_u8(b, d->has_control_barrier);
     put_u8(b, d->has_global_address);
     put_u16(b, 0);
+}
+
+/* EXT_geometry_shader (FORMAT.md, format 2): a geometry variant's key and
+ * prog data, as the vertex shader's are put. */
+static_assert(V3D_MAX_GS_INPUTS == 64 && V3D_MAX_FS_INPUTS == 64, "the file's 64 slots");
+static void put_gs(struct buf *b, const struct v3d_gs_key *k, const struct v3d_gs_prog_data *d)
+{
+    unsigned i;
+
+    put_key_common(b, &k->base);
+    put_u8(b, k->num_used_outputs);
+    put_u8(b, 0);
+    put_u16(b, 0);
+    for (i = 0; i < 64; i++)
+        put_u8(b, k->used_outputs[i].slot_and_component);
+    put_u8(b, k->is_coord);
+    put_u8(b, k->per_vertex_point_size);
+    put_u16(b, 0);
+
+    put_prog_data_common(b, &d->base);
+    put_u8(b, d->uses_pid);
+    put_u8(b, d->num_inputs);
+    put_u8(b, d->simd_width);
+    put_u8(b, d->out_prim_type);
+    put_u8(b, d->num_invocations);
+    put_u8(b, d->writes_psiz);
+    put_u16(b, 0);
+    for (i = 0; i < 16; i++)
+        put_u8(b, d->input_sizes[i]);
+    for (i = 0; i < 64; i++)
+        put_u8(b, d->input_slots[i].slot_and_component);
+    put_u32(b, d->vpm_output_size);
 }
 
 static void put_vs(struct buf *b, const struct v3d_vs_key *k, const struct v3d_vs_prog_data *d)
@@ -432,6 +464,10 @@ static void variant_hook(mesa_shader_stage stage, const struct v3d_key *key, siz
     } else if (stage == MESA_SHADER_COMPUTE && key_size == sizeof(struct v3d_key)) {
         put_u32(b, VARIANT_CS);
         put_cs(b, key, (const struct v3d_compute_prog_data *)prog_data);
+    } else if (stage == MESA_SHADER_GEOMETRY && key_size == sizeof(struct v3d_gs_key)) {
+        const struct v3d_gs_key *k = (const struct v3d_gs_key *)key;
+        put_u32(b, k->is_coord ? VARIANT_GS_BIN : VARIANT_GS);
+        put_gs(b, k, (const struct v3d_gs_prog_data *)prog_data);
     } else {
         fprintf(stderr, "v3dp: unexpected variant (stage %d, key size %u)\n", (int)stage,
                 (unsigned)key_size);
@@ -527,10 +563,12 @@ static int stage_index(mesa_shader_stage stage)
     return stage == MESA_SHADER_VERTEX ? 0 : stage == MESA_SHADER_FRAGMENT ? 1 : -1;
 }
 
-/* A program's stages in file order: vertex and fragment, or (ES 3.1) compute. */
-#define NUM_FILE_STAGES 3
+/* A program's stages in file order: vertex and fragment, or (ES 3.1) compute;
+ * EXT_geometry_shader's geometry stage after them (files without one keep
+ * their layout). */
+#define NUM_FILE_STAGES 4
 static const mesa_shader_stage stages_in_file[NUM_FILE_STAGES] = { MESA_SHADER_VERTEX, MESA_SHADER_FRAGMENT,
-                                                                  MESA_SHADER_COMPUTE };
+                                                                  MESA_SHADER_COMPUTE, MESA_SHADER_GEOMETRY };
 
 static int put_stage_params(struct buf *b, struct buf *strings, mesa_shader_stage stage,
                             const struct gl_program_parameter_list *pl)
@@ -630,9 +668,9 @@ static int put_uniforms(struct buf *b, struct buf *strings, struct gl_shader_pro
         /* The vertex and fragment stages' sampler (or image) index; a
          * compute program's compute stage's in the first word (FORMAT.md,
          * format 2). */
-        for (s = 0; s < 2; s++) {
+        for (s = 0; s < (prog->_LinkedShaders[MESA_SHADER_GEOMETRY] ? 3u : 2u); s++) { /* the geometry stage's third */
             mesa_shader_stage st = prog->_LinkedShaders[MESA_SHADER_COMPUTE] ? (s ? MESA_SHADER_NONE : MESA_SHADER_COMPUTE)
-                                                                         : stages_in_file[s];
+                                 : s == 2 ? MESA_SHADER_GEOMETRY : stages_in_file[s];
             put_u32(b, (sampler || image) && st != MESA_SHADER_NONE && u->opaque[st].active ? u->opaque[st].index
                                                                                           : 0xffffffffu);
         }
@@ -1130,7 +1168,7 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
     /* ES 3.1's objects come with stage D (docs/GLES3_PLAN.md §7): storage
      * blocks, atomic counters, compute programs and images. */
     if (prog->data->NumShaderStorageBlocks || prog->data->NumAtomicBuffers ||
-        prog->_LinkedShaders[MESA_SHADER_COMPUTE])
+        prog->_LinkedShaders[MESA_SHADER_COMPUTE] || prog->_LinkedShaders[MESA_SHADER_GEOMETRY])
         format2 = 1;
     for (i = 0; i < NUM_FILE_STAGES; i++) {
         const struct gl_linked_shader *sh = prog->_LinkedShaders[stages_in_file[i]];
@@ -1165,6 +1203,7 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
                                ? V3DP_FEATURE_STORAGE : 0) |
                           (prog->data->NumAtomicBuffers ? V3DP_FEATURE_ATOMIC : 0) |
                           (prog->_LinkedShaders[MESA_SHADER_COMPUTE] ? V3DP_FEATURE_COMPUTE : 0) |
+                          (prog->_LinkedShaders[MESA_SHADER_GEOMETRY] ? V3DP_FEATURE_GEOMETRY : 0) |
                           (separable ? V3DP_FEATURE_SEPARABLE : 0));
     put_section(&program, SEC_PROGRAM, &sec);
     num_sections++;

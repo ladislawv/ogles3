@@ -7,8 +7,9 @@ this exits with status 1. Usage: v3dp_dump.py file.v3dp [--qpu]
 """
 import struct, sys, zlib
 
-STAGES = {0: "vertex", 4: "fragment", 5: "compute"}
-VARIANT_STAGES = {0: "vertex", 1: "vertex binning", 4: "fragment", 5: "compute"}
+STAGES = {0: "vertex", 3: "geometry", 4: "fragment", 5: "compute"}
+VARIANT_STAGES = {0: "vertex", 1: "vertex binning", 2: "geometry", 3: "geometry binning", 4: "fragment",
+                  5: "compute"}
 KINDS = {0: "uniform", 1: "constant", 2: "state"}
 SECTIONS = {1: "PROGRAM", 2: "STRINGS", 3: "STAGE_PARAMS", 4: "UNIFORMS", 5: "ATTRIBUTES",
             6: "VARIANT", 7: "UNIFORM_BLOCKS", 8: "INTERFACE", 9: "VARIANT_OF",
@@ -19,7 +20,8 @@ FEATURE_STORAGE = 0x2  # ES 3.1: shader storage blocks (a STORAGE_BLOCKS section
 FEATURE_COMPUTE = 0x4  # ES 3.1: a compute program
 FEATURE_ATOMIC = 0x8  # ES 3.1: atomic counter buffers (an ATOMIC_BUFFERS section)
 FEATURE_SEPARABLE = 0x10  # ES 3.1: a separable program (one stage, or both)
-FEATURES = FEATURE_TF | FEATURE_STORAGE | FEATURE_COMPUTE | FEATURE_ATOMIC | FEATURE_SEPARABLE
+FEATURE_GEOMETRY = 0x20  # EXT_geometry_shader: a geometry stage, three sampler indexes a uniform
+FEATURES = FEATURE_TF | FEATURE_STORAGE | FEATURE_COMPUTE | FEATURE_ATOMIC | FEATURE_SEPARABLE | FEATURE_GEOMETRY
 # Format 2 (ES3 programs) is written as major 0x8002 until release 2.1 (FORMAT.md).
 FORMAT2 = (2, 0x8002)
 PACKING = {0: "std140", 1: "shared", 2: "packed", 3: "std430"}
@@ -125,6 +127,24 @@ def vs_variant(r):
     return k, d
 
 
+def gs_variant(r):
+    k = key_common(r)
+    k["num_used_outputs"] = r.u8()
+    r.pad(3)
+    k["used_outputs"] = r.u8s(64)[:k["num_used_outputs"]]
+    for f in ("is_coord", "per_vertex_point_size"):
+        k[f] = r.u8()
+    r.pad(2)
+    d = prog_data_common(r)
+    for f in ("uses_pid", "num_inputs", "simd_width", "out_prim_type", "num_invocations", "writes_psiz"):
+        d[f] = r.u8()
+    r.pad(2)
+    d["input_sizes"] = r.u8s(16)
+    d["input_slots"] = r.u8s(64)[:d["num_inputs"]]
+    d["vpm_output_size"] = r.u32()
+    return k, d
+
+
 def fs_variant(r):
     k = key_common(r)
     for f in ("is_points", "is_lines", "line_smoothing", "point_coord_upper_left", "msaa",
@@ -225,6 +245,7 @@ def dump(path, show_qpu):
             h = r.take(32).hex()
             mask = r.u32()
             features = r.u32() if v2 else 0
+            geometry = bool(features & FEATURE_GEOMETRY)
             r.done()
             if features & ~FEATURES:
                 raise Bad("unknown feature bits %08x" % (features & ~FEATURES))
@@ -284,7 +305,7 @@ def dump(path, show_qpu):
                         raise Bad("driver format %d" % fmt)
                     places.append("%s@%d es=%d vs=%d%s" % (STAGES.get(stage, stage), off, es, vs,
                                                           " int-as-float" if fmt else ""))
-                samp = r.u32s(2)
+                samp = r.u32s(3 if geometry else 2)
                 block = ""
                 if v2:
                     bi, boff, astride, mstride, flags2 = r.i32(), r.i32(), r.i32(), r.i32(), r.u32()
@@ -302,7 +323,7 @@ def dump(path, show_qpu):
                       (string(strings, nm), gtype, "[%d]" % arr if arr else "", ",".join(fl),
                        " ".join(places),
                        " units %s" % " ".join("%s=%s" % (w, "-" if x == 0xffffffff else x)
-                                              for w, x in zip(("vs/cs", "fs"), samp))
+                                              for w, x in zip(("vs/cs", "fs", "gs"), samp))
                        if flags & 9 else "", block))
             r.done()
             nuniforms = n
@@ -322,6 +343,8 @@ def dump(path, show_qpu):
             stage = r.u32()
             if stage in (0, 1):
                 k, d = vs_variant(r)
+            elif stage in (2, 3):
+                k, d = gs_variant(r)
             elif stage == 4:
                 k, d = fs_variant(r)
             elif stage == 5:

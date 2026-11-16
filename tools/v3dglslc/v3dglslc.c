@@ -688,11 +688,14 @@ static void capture_tf(void)
 
 static int draw_key_states(GLuint p, int wide)
 {
-    static const GLenum modes[] = { GL_TRIANGLES, GL_LINES, GL_POINTS };
-    static const GLfloat zeros[4 * 4 * 3]; /* 3 vertices of a mat4 attribute */
+    static const GLenum all_modes[] = { GL_TRIANGLES, GL_LINES, GL_POINTS };
+    static const GLfloat zeros[4 * 4 * 6]; /* 6 vertices (an adjacency triangle) of a mat4 attribute */
     GLint n = 0, i, err;
     GLuint pipe = 0, fp = pipe_fs ? pipe_fs : p; /* the fragment shader's program */
-    unsigned m;
+    unsigned m, nmodes = ARRAY_SIZE(all_modes);
+    const GLenum *modes = all_modes;
+    GLenum gs_mode;
+    GLsizei count = 3;
 
     if (!draw_fbo && !make_target())
         return 0;
@@ -742,10 +745,21 @@ static int draw_key_states(GLuint p, int wide)
                               BITFIELD64_BIT(FRAG_RESULT_DATA3);
         /* GLSL ES 3.x: one target with the outputs' locations and types. */
         GLuint typed = sp && sp->GLSL_Version >= 300 ? typed_target(fp) : 0;
+        /* EXT_geometry_shader: its input primitive only (Mesa's enum is
+         * GL's), with its vertices; its output decides the fragment
+         * shader's primitive class */
+        struct gl_linked_shader *gsh = sp ? sp->_LinkedShaders[MESA_SHADER_GEOMETRY] : NULL;
+        if (gsh && gsh->Program) {
+            gs_mode = (GLenum)gsh->Program->info.gs.input_primitive;
+            modes = &gs_mode;
+            nmodes = 1;
+            count = gs_mode == GL_POINTS ? 1 : gs_mode == GL_LINES ? 2 : gs_mode == GL_LINES_ADJACENCY ? 4
+                  : gs_mode == GL_TRIANGLES_ADJACENCY ? 6 : 3;
+        }
         if (typed)
             _mesa_BindFramebuffer(GL_FRAMEBUFFER, typed);
-        for (m = 0; m < ARRAY_SIZE(modes); m++)
-            _mesa_DrawArrays(modes[m], 0, 3);
+        for (m = 0; m < nmodes; m++)
+            _mesa_DrawArrays(modes[m], 0, count);
         if (typed)
             _mesa_BindFramebuffer(GL_FRAMEBUFFER, draw_fbo);
         /* EXT_draw_buffers (GLSL ES 1.00): a fragment shader that writes
@@ -757,8 +771,8 @@ static int draw_key_states(GLuint p, int wide)
             int n;
             for (n = 0; n < 3; n++) {
                 _mesa_BindFramebuffer(GL_FRAMEBUFFER, mrt_fbo[n]);
-                for (m = 0; m < ARRAY_SIZE(modes); m++)
-                    _mesa_DrawArrays(modes[m], 0, 3);
+                for (m = 0; m < nmodes; m++)
+                    _mesa_DrawArrays(modes[m], 0, count);
             }
             _mesa_BindFramebuffer(GL_FRAMEBUFFER, draw_fbo);
         }
@@ -806,8 +820,8 @@ static int write_program(GLuint p, const char *path, const char *vs_src, const c
     /* The link state of a V3DGLSL_LINK_BOUND request is hashed after the
      * shaders (v3dp/FORMAT.md, PROGRAM): its bindings as the stage "BIND",
      * its transform feedback varyings as "XFBV" (format 2). */
-    unsigned stages[5];
-    const char *sources[5];
+    unsigned stages[6];
+    const char *sources[6];
     unsigned nsrc = 0;
     const char *xfbv = xfbv_part(link_bindings);
     char *bind = NULL;
@@ -825,6 +839,10 @@ static int write_program(GLuint p, const char *path, const char *vs_src, const c
     if (vs_src) {
         stages[nsrc] = MESA_SHADER_VERTEX;
         sources[nsrc++] = vs_src;
+    }
+    if (link_gs_src) { /* EXT_geometry_shader: hashed after the vertex shader */
+        stages[nsrc] = MESA_SHADER_GEOMETRY;
+        sources[nsrc++] = link_gs_src;
     }
     if (fs_src) {
         stages[nsrc] = MESA_SHADER_FRAGMENT;

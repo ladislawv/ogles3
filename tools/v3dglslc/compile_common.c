@@ -167,6 +167,11 @@ static GLuint compile_src(GLenum type, const char *label, const char *src, int *
     return s;
 }
 
+/* EXT_geometry_shader (docs/GLES3_PLAN.md, the ES 3.2 plan's item 9): the
+ * geometry shader the next link_pair links between its two, NULL for none
+ * (the command line's .geom; a request's geometry source). */
+static const char *link_gs_src;
+
 /* Compile and link one vertex+fragment pair from memory, delete the GL
  * objects again, and with V3DC_WRITER and a `target` write the program
  * there. With V3D_DEBUG=precompile the driver compiles its default variants
@@ -174,9 +179,9 @@ static GLuint compile_src(GLenum type, const char *label, const char *src, int *
 static int link_pair(const char *vs_label, const char *fs_label, const char *vs_src,
                      const char *fs_src, const char *target, char *log, size_t log_size)
 {
-    GLuint p, vs, fs;
+    GLuint p, vs, fs, gs = 0;
     GLint ok = 0;
-    int vs_ok, fs_ok;
+    int vs_ok, fs_ok, gs_ok = 1;
     char info[2048];
 
     fprintf(stderr, "v3dglslc: ==== program %s + %s%s\n", vs_src ? vs_label : "-", fs_src ? fs_label : "-",
@@ -187,11 +192,15 @@ static int link_pair(const char *vs_label, const char *fs_label, const char *vs_
         vs = compile_src(GL_VERTEX_SHADER, vs_label, vs_src, &vs_ok, log, log_size);
     if (fs_src)
         fs = compile_src(GL_FRAGMENT_SHADER, fs_label, fs_src, &fs_ok, log, log_size);
-    if (!vs_ok || !fs_ok || (!vs_src && !fs_src) || (!link_separable && (!vs_src || !fs_src))) {
+    if (link_gs_src)
+        gs = compile_src(GL_GEOMETRY_SHADER, "geometry shader", link_gs_src, &gs_ok, log, log_size);
+    if (!vs_ok || !fs_ok || !gs_ok || (!vs_src && !fs_src) || (!link_separable && (!vs_src || !fs_src))) {
         if (vs)
             glDeleteShader(vs);
         if (fs)
             glDeleteShader(fs);
+        if (gs)
+            glDeleteShader(gs);
         return 0;
     }
     p = glCreateProgram();
@@ -199,6 +208,8 @@ static int link_pair(const char *vs_label, const char *fs_label, const char *vs_
         glProgramParameteri(p, GL_PROGRAM_SEPARABLE, GL_TRUE);
     if (vs)
         glAttachShader(p, vs);
+    if (gs)
+        glAttachShader(p, gs);
     if (fs)
         glAttachShader(p, fs);
     apply_bindings(p, link_bindings);
@@ -228,6 +239,8 @@ static int link_pair(const char *vs_label, const char *fs_label, const char *vs_
         glDeleteShader(vs);
     if (fs)
         glDeleteShader(fs);
+    if (gs)
+        glDeleteShader(gs);
     return ok;
 }
 
@@ -334,10 +347,11 @@ static int compile_link_compute(const char *cs_path)
 }
 #endif
 
-/* One pair of shader files (the command line). */
-static int compile_link(const char *vs_path, const char *fs_path)
+/* One pair of shader files (the command line), with gs_path a geometry
+ * shader between them (NULL: none). */
+static int compile_link(const char *vs_path, const char *fs_path, const char *gs_path)
 {
-    char *vs_src = load_text(vs_path), *fs_src = load_text(fs_path);
+    char *vs_src = load_text(vs_path), *fs_src = load_text(fs_path), *gs_src = gs_path ? load_text(gs_path) : NULL;
     const char *target = NULL;
     int ok = 0;
 #ifdef V3DC_WRITER
@@ -347,18 +361,23 @@ static int compile_link(const char *vs_path, const char *fs_path)
         target = path;
     }
 #endif
-    if (!vs_src || !fs_src)
-        fprintf(stderr, "v3dglslc: cannot read %s\n", !vs_src ? vs_path : fs_path);
-    else
+    if (!vs_src || !fs_src || (gs_path && !gs_src)) {
+        fprintf(stderr, "v3dglslc: cannot read %s\n", !vs_src ? vs_path : !fs_src ? fs_path : gs_path);
+    } else {
+        link_gs_src = gs_src;
         ok = link_pair(vs_path, fs_path, vs_src, fs_src, target, NULL, 0);
+        link_gs_src = NULL;
+    }
     free(vs_src);
     free(fs_src);
+    free(gs_src);
     return ok;
 }
 
-/* The command line's programs: vertex and fragment shader files in pairs;
- * with V3DC_WRITER a file whose name ends in ".comp" is a compute program
- * of its own (ES 3.1). */
+/* The command line's programs: vertex and fragment shader files in pairs
+ * (a ".geom" between them: a geometry shader, EXT_geometry_shader); with
+ * V3DC_WRITER a file whose name ends in ".comp" is a compute program of its
+ * own (ES 3.1). */
 static int run_pairs(int argc, char **argv, int first)
 {
     int i, failed = 0;
@@ -376,7 +395,18 @@ static int run_pairs(int argc, char **argv, int first)
 #endif
         if (i + 1 >= argc)
             break;
-        if (!compile_link(argv[i], argv[i + 1]))
+        {
+            size_t m = strlen(argv[i + 1]);
+            if (m > 5 && !strcmp(argv[i + 1] + m - 5, ".geom")) {
+                if (i + 2 >= argc)
+                    break;
+                if (!compile_link(argv[i], argv[i + 2], argv[i + 1]))
+                    failed++;
+                i += 3;
+                continue;
+            }
+        }
+        if (!compile_link(argv[i], argv[i + 1], NULL))
             failed++;
         i += 2;
     }

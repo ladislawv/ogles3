@@ -40,6 +40,8 @@ int v3dp_last_fs_inputs(uint8_t *num_inputs, uint8_t *slots);
 #define V3DP_FEATURE_ATOMIC 0x8u  /* atomic counter buffers: an ATOMIC_BUFFERS section (ES 3.1) */
 #define V3DP_FEATURE_SEPARABLE 0x10u /* ES 3.1: a separable program; one stage (and no variants) or two */
 #define V3DP_FEATURE_COMPUTE 0x4u /* a compute program: its one stage compute, VARIANTs of stage 5 (ES 3.1) */
+#define V3DP_FEATURE_GEOMETRY 0x20u /* EXT_geometry_shader: a geometry stage (STAGE_PARAMS 3, VARIANTs of
+                                     * stages 2 and 3, a third sampler index a uniform) */
 
 /* Transform feedback as the V3D driver laid it out for the program's vertex
  * shader (its v3d_uncompiled_shader, read after a draw): written with a

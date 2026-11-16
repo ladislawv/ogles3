@@ -1,5 +1,28 @@
 # OpenGL ES 3.0 and 3.1 on ogles2.library
 
+**Item 9, geometry shaders: stage A, the compiler and the file
+(2026-11-16).** The plan for item 9, in four stages: (A) the compiler
+compiles a geometry stage and the file holds it; (B) the library reads it
+(`glCreateShader(GL_GEOMETRY_SHADER)`, the link request, the program
+queries); (C) the draw: Mesa's `v3dx_draw.c` with a geometry shader (the
+geometry shader state record and its `TESSELLATION_GEOMETRY_*` params, the
+VPM sizes with one, `v3d_compute_vpm_config`), the adjacency primitives;
+(D) layered rendering (`glFramebufferTexture`, `gl_Layer`). **A, done and
+checked on the PC:** `v3dglslc` takes a `.geom` between a pair
+(`vs.vert gs.geom fs.frag`; `link_gs_src` for a request), its key-state
+draws use the geometry shader's input primitive alone, with its vertices
+(the fragment shader's class comes from its output); the writer stores
+the driver's geometry and geometry binning variants (VARIANT stages 2 and
+3: `struct v3d_gs_key` and `v3d_gs_prog_data` field by field), the
+geometry stage's `STAGE_PARAMS` (stage 3, after the others: files without
+one keep their layout), a third sampler index per uniform, and feature bit
+5 (FORMAT.md); `v3dp_dump.py` reads them. A vertex + geometry (triangles
+in, a strip of 3 out, a uniform) + fragment program: its file holds
+vertex, vertex binning, geometry, geometry binning and fragment variants,
+the vertex key's used outputs the geometry stage's inputs. The library
+refuses such a file until stage B (an unknown feature bit). The request
+protocol (a geometry source in `V3DGLSL_LINK`) is stage B's.
+
 **`KHR_blend_equation_advanced` and `_coherent`, item 7's second half
 (2026-11-16, built, not run; ES3 contexts).** The compiler had them: Mesa's
 state tracker offers them with framebuffer fetch, and its linker lowers a
