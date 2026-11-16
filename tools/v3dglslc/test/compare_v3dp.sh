@@ -18,7 +18,8 @@ PAIRS="tex.vert tex.frag light.vert light.frag skin.vert skin.frag tex.vert proc
        es3block.vert es3block.frag es3size.vert es3size.frag es3vid.vert es3vid.frag
        es3out.vert es3out.frag es3wide.vert es3wide.frag
        es31frag.vert es31frag.frag es31loc.vert es31loc.frag es31ms.vert es31ms.frag es31cs.comp es31oob.comp es31ac.comp es31img.comp es31tex32.comp es31xchg.comp es31aoa.comp
-       es32gs.vert es32gs.geom es32gs.frag es32gsd.vert es32gsd.geom es32gsd.frag" # compute programs (ES 3.1): one file each; geometry ones (EXT_geometry_shader): a triple
+       es32gs.vert es32gs.geom es32gs.frag es32gsd.vert es32gsd.geom es32gsd.frag
+       es32gst.vert es32gst.geom es32gst.frag" # compute programs (ES 3.1): one file each; geometry ones (EXT_geometry_shader): a triple
 
 $OUT/host/v3dglslc -o host $PAIRS > host.txt 2>&1
 echo "host v3dglslc rc=$?"

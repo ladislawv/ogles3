@@ -85,12 +85,13 @@ int v3dp_write_pipeline_variants(const char *path, struct gl_shader_program *ver
                                  const char *const *sources, uint32_t layout_crc);
 
 /* A variant's key from its bytes as the files and ogles3.library have them:
- * a u32 VARIANT stage (0 vertex, 1 binning, 4 fragment), then the key
- * (FORMAT.md's fields). Fills *vs or *fs, zeroed first; the bytes used, or
- * 0 for keys it cannot read. */
+ * a u32 VARIANT stage (0 vertex, 1 binning, 2 geometry, 3 its binning, 4
+ * fragment), then the key (FORMAT.md's fields). Fills *vs, *fs or *gs,
+ * zeroed first; the bytes used, or 0 for keys it cannot read. */
 struct v3d_vs_key;
 struct v3d_fs_key;
+struct v3d_gs_key;
 size_t v3dp_key_parse(const uint8_t *b, size_t len, unsigned *variant_stage,
-                      struct v3d_vs_key *vs, struct v3d_fs_key *fs);
+                      struct v3d_vs_key *vs, struct v3d_fs_key *fs, struct v3d_gs_key *gs);
 
 #endif

@@ -918,9 +918,12 @@ static int write_files(struct gl_shader_program *prog, GLuint p, const char *pat
         while (ok && at < variant_keys_len) {
             struct v3d_vs_key vk;
             struct v3d_fs_key fk;
+            struct v3d_gs_key gk;
             unsigned vstage;
-            /* A vertex key whose outputs follow the fragment variant before
-             * it (V3DGLSL_KEY_OUTPUTS_FROM_FS): read without the flag. */
+            /* A vertex key (or a geometry one: EXT_geometry_shader, whose
+             * render variant's outputs are the fragment shader's inputs)
+             * whose outputs follow the fragment variant before it
+             * (V3DGLSL_KEY_OUTPUTS_FROM_FS): read without the flag. */
             uint8_t one[4 + 512];
             const uint8_t *key = variant_keys + at;
             int from_fs = variant_keys_len - at >= 4 && (key[1] & (V3DGLSL_KEY_OUTPUTS_FROM_FS >> 8));
@@ -928,9 +931,9 @@ static int write_files(struct gl_shader_program *prog, GLuint p, const char *pat
                 size_t n = variant_keys_len - at < sizeof(one) ? variant_keys_len - at : sizeof(one);
                 memcpy(one, key, n);
                 one[1] &= ~(V3DGLSL_KEY_OUTPUTS_FROM_FS >> 8);
-                used = v3dp_key_parse(one, n, &vstage, &vk, &fk);
+                used = v3dp_key_parse(one, n, &vstage, &vk, &fk, &gk);
             } else {
-                used = v3dp_key_parse(key, variant_keys_len - at, &vstage, &vk, &fk);
+                used = v3dp_key_parse(key, variant_keys_len - at, &vstage, &vk, &fk, &gk);
             }
             if (!used || (from_fs && vstage == 4)) {
                 fprintf(stderr, "v3dglslc: unreadable variant key at byte %u\n", (unsigned)at);
@@ -938,19 +941,30 @@ static int write_files(struct gl_shader_program *prog, GLuint p, const char *pat
                 break;
             }
             if (from_fs) {
-                uint8_t slots[64];
+                uint8_t slots[64], nin;
                 unsigned i;
-                if (!v3dp_last_fs_inputs(&vk.num_used_outputs, slots)) {
+                int gsk = vstage == 2 || vstage == 3;
+                if (!v3dp_last_fs_inputs(&nin, slots)) {
                     fprintf(stderr, "v3dglslc: the vertex key at byte %u follows no fragment variant\n",
                             (unsigned)at);
                     ok = 0;
                     break;
                 }
-                for (i = 0; i < 64; i++) /* as Mesa copies them: the rest zeroed */
-                    vk.used_outputs[i].slot_and_component = i < vk.num_used_outputs ? slots[i] : 0;
+                if (gsk)
+                    gk.num_used_outputs = nin;
+                else
+                    vk.num_used_outputs = nin;
+                for (i = 0; i < 64; i++) { /* as Mesa copies them: the rest zeroed */
+                    uint8_t s = i < nin ? slots[i] : 0;
+                    if (gsk)
+                        gk.used_outputs[i].slot_and_component = s;
+                    else
+                        vk.used_outputs[i].slot_and_component = s;
+                }
             }
-            ok = vstage == 4 ? v3d_compile_variant(the_pipe, MESA_SHADER_FRAGMENT, &fk.base, sizeof(fk))
-                             : v3d_compile_variant(the_pipe, MESA_SHADER_VERTEX, &vk.base, sizeof(vk));
+            ok = vstage == 4                  ? v3d_compile_variant(the_pipe, MESA_SHADER_FRAGMENT, &fk.base, sizeof(fk))
+               : vstage == 2 || vstage == 3   ? v3d_compile_variant(the_pipe, MESA_SHADER_GEOMETRY, &gk.base, sizeof(gk))
+                                              : v3d_compile_variant(the_pipe, MESA_SHADER_VERTEX, &vk.base, sizeof(vk));
             if (!ok)
                 fprintf(stderr, "v3dglslc: the variant at byte %u did not compile\n", (unsigned)at);
             at += used;

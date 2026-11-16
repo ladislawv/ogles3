@@ -22,6 +22,7 @@
 #define VK_NUM_OUTPUTS 12
 #define VK_OUTPUTS 16  /* used_outputs[64] */
 #define VK_PSIZE  85   /* per_vertex_point_size */
+#define GK_PSIZE  81   /* a geometry key's (its outputs where a vertex key's are) */
 
 ULONG ogles2_vk_bits(const UBYTE *k)
 {
@@ -104,6 +105,23 @@ void ogles2_vk_vs_want(UBYTE *want, const UBYTE *base, UBYTE num_inputs, const U
         want[VK_NUM_OUTPUTS] = num_inputs;
         memcpy(want + VK_OUTPUTS, slots, 64);
     }
+}
+
+void ogles2_vk_gs_want(UBYTE *want, const UBYTE *base, UBYTE num_inputs, const UBYTE *slots, ULONG bits)
+{
+    memcpy(want, base, OGLES3_VK_GS_BYTES);
+    set_bits(want, bits);
+    if (slots) {
+        want[VK_NUM_OUTPUTS] = num_inputs;
+        memcpy(want + VK_OUTPUTS, slots, 64);
+    }
+}
+
+BOOL ogles2_vk_gs_fits(const UBYTE *k, const UBYTE *want)
+{
+    ULONG w = ogles2_vk_bits(want);
+    return k && k[VK_NUM_OUTPUTS] == want[VK_NUM_OUTPUTS] && !memcmp(k + VK_OUTPUTS, want + VK_OUTPUTS, 64) &&
+           k[GK_PSIZE] == want[GK_PSIZE] && (ogles2_vk_bits(k) & w) == w;
 }
 
 BOOL ogles2_vk_vs_fits(const UBYTE *k, const UBYTE *want)

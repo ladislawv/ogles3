@@ -634,8 +634,9 @@ struct OGLES3Program
     GLenum var_mode, var_fsmode;      /* the draw's primitive, the fragment shader's (glPolygonMode) */
     const struct OGLES3Image *var_fim; /* the fragment shader's image: the program's, or its .v3dw */
     UBYTE var_nrt;                    /* the render targets drawn into (EXT_draw_buffers) */
-    const struct OGLES3Variant *var[3];
-    ULONG var_code[3];
+    const struct OGLES3Variant *var[5]; /* binning, vertex, fragment, and a geometry program's geometry
+                                         * binning and geometry variants */
+    ULONG var_code[5];
     UBYTE nsamplers;
     UWORD samplers[16];
     /* draw.c: the coordinate and vertex shaders' last uniform streams,
@@ -652,7 +653,7 @@ struct OGLES3Program
     BOOL var_logged;                  /* a draw-time variant miss logged (draw.c) */
     /* An OpenGL ES 3 program's last choice also by these (draw.c's
      * es3_variants): each stage's 32-bit samplers, alpha to coverage. */
-    ULONG var_bits[2];
+    ULONG var_bits[3];              /* vertex, fragment, geometry */
     BOOL var_a2c;
     struct OGLES3VkTargets var_tg;  /* and the render targets' key fields (variant_key.h) */
     UBYTE var_f32;                  /* the fragment variant's f32_color_rb (draw: ctx->fb_wide) */
@@ -874,6 +875,9 @@ struct OGLES3Context
     struct OGLES3Framebuffer *job_fb;  /* what the open job renders into */
     BOOL job_msaa;                  /* the open job is 4x MSAA (the default framebuffer's, or multisampled renderbuffers', job.c) */
     UWORD job_layers;               /* the open job's layers (EXT_geometry_shader's layered framebuffers, job.c) */
+    BOOL gen_active;                /* GL_PRIMITIVES_GENERATED's query is active (query.c; draw.c counts) */
+    BOOL query_paused;              /* the library's own draw: no query counts it (ogles2_query_pause) */
+    BOOL job_counts;                /* the open job's binning list ends storing the primitive counts (xfb.c) */
     UWORD fb_w, fb_h;
     BOOL fb_flip;                   /* the default framebuffer: drawn upside down (plan 7.11) */
     UBYTE fb_depth_bits, fb_stencil_bits, fb_depth_format;
@@ -1279,7 +1283,7 @@ BOOL ogles2_xfb_draw_ok(struct OGLES3Context *ctx, GLenum mode, GLsizei count, G
 BOOL ogles2_xfb_before_draw(struct OGLES3Context *ctx, GLenum mode, BOOL psiz);
 void ogles2_xfb_after_draw(struct OGLES3Context *ctx, GLenum mode, GLsizei count, GLsizei instances);
 void ogles2_xfb_job_end(struct OGLES3Context *ctx);
-void ogles2_xfb_after_gs_draw(struct OGLES3Context *ctx);
+
 void ogles2_xfbs_free(struct OGLES3Context *ctx);
 GLuint ogles2_xfb_bound_name(const struct OGLES3Context *ctx); /* GL_TRANSFORM_FEEDBACK_BINDING */
 BOOL ogles2_xfb_paused(const struct OGLES3Context *ctx);
@@ -1287,6 +1291,8 @@ BOOL ogles2_xfb_paused(const struct OGLES3Context *ctx);
 void ogles2_program_unref(struct OGLES3Context *ctx, struct OGLES3Program *p);
 /* query.c: primitives transform feedback wrote, for GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN */
 void ogles2_query_xfb_add(struct OGLES3Context *ctx, ULONG primitives);
+void ogles2_query_gen_add(struct OGLES3Context *ctx, ULONG primitives);
+void ogles2_xfb_gpu_counts(struct OGLES3Context *ctx, BOOL fed);
 /* vao.c: the bound vertex array object's name (0: object 0); whether an
  * object not bound uses b; freed with the context. */
 GLuint ogles2_vao_bound(const struct OGLES3Context *ctx);

@@ -492,6 +492,24 @@ static void geometry(void)
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glDeleteFramebuffers(1, &fb);
     glDeleteTextures(3, t);
+
+    /* GL_PRIMITIVES_GENERATED (no draws here: a state-only context) */
+    {
+        GLuint q = 0, r = 99;
+        GLint cur = -1;
+        glGenQueries(1, &q);
+        glBeginQuery(GL_PRIMITIVES_GENERATED_EXT, q);
+        glGetQueryiv(GL_PRIMITIVES_GENERATED_EXT, GL_CURRENT_QUERY, &cur);
+        check(cur == (GLint)q && glGetError() == GL_NO_ERROR, "primitives generated: a query begun, current");
+        glBeginQuery(GL_PRIMITIVES_GENERATED_EXT, q);
+        check(glGetError() == GL_INVALID_OPERATION, "primitives generated: begun twice: GL_INVALID_OPERATION");
+        glEndQuery(GL_PRIMITIVES_GENERATED_EXT);
+        glGetQueryObjectuiv(q, GL_QUERY_RESULT, &r);
+        check(r == 0 && glGetError() == GL_NO_ERROR, "primitives generated: ended, nothing drawn: 0");
+        glBeginQuery(GL_ANY_SAMPLES_PASSED, q);
+        check(glGetError() == GL_INVALID_OPERATION, "primitives generated: the query of another target");
+        glDeleteQueries(1, &q);
+    }
 }
 
 static GLenum cb_source, cb_type, cb_severity;

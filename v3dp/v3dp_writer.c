@@ -370,6 +370,20 @@ static void get_vs_key(struct rd *r, struct v3d_vs_key *k)
     r->p += 1;
 }
 
+/* The inverse of put_gs's key part (EXT_geometry_shader). */
+static void get_gs_key(struct rd *r, struct v3d_gs_key *k)
+{
+    unsigned i;
+    get_key_common(r, &k->base);
+    k->num_used_outputs = get_u8(r);
+    r->p += 3;
+    for (i = 0; i < 64; i++)
+        k->used_outputs[i].slot_and_component = get_u8(r);
+    k->is_coord = get_u8(r);
+    k->per_vertex_point_size = get_u8(r);
+    r->p += 2;
+}
+
 static void get_fs_key(struct rd *r, struct v3d_fs_key *k)
 {
     unsigned i, j;
@@ -410,7 +424,7 @@ static void get_fs_key(struct rd *r, struct v3d_fs_key *k)
 }
 
 size_t v3dp_key_parse(const uint8_t *b, size_t len, unsigned *variant_stage, struct v3d_vs_key *vs,
-                      struct v3d_fs_key *fs)
+                      struct v3d_fs_key *fs, struct v3d_gs_key *gs)
 {
     struct rd r;
     r.p = b;
@@ -425,6 +439,11 @@ size_t v3dp_key_parse(const uint8_t *b, size_t len, unsigned *variant_stage, str
     } else if (*variant_stage == VARIANT_FS) {
         memset(fs, 0, sizeof(*fs));
         get_fs_key(&r, fs);
+    } else if (*variant_stage == VARIANT_GS || *variant_stage == VARIANT_GS_BIN) {
+        memset(gs, 0, sizeof(*gs));
+        get_gs_key(&r, gs);
+        if (gs->is_coord != (*variant_stage == VARIANT_GS_BIN))
+            r.bad = 1;
     } else {
         r.bad = 1;
     }

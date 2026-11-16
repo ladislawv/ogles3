@@ -22,7 +22,7 @@
  * its next access (ogles2_buffer_cpu). A geometry shader's draw
  * (EXT_geometry_shader) writes what the CPU cannot know: its job is its
  * own and is flushed after it, and the binner's counts read back
- * (ogles2_xfb_after_gs_draw, as Mesa's
+ * (ogles2_xfb_gpu_counts, as Mesa's
  * v3d_read_and_accumulate_primitive_counters).
  */
 #include <exec/memory.h>
@@ -534,49 +534,63 @@ void ogles2_xfb_job_end(struct OGLES3Context *ctx)
     struct OGLES3XfbState *xs = ctx->xfb;
     volatile ULONG *w;
     UBYTE *p;
-    if (!ctx->job_xfb)
+    BOOL fed = ctx->job_xfb;
+    if (!fed && !ctx->job_counts) /* a draw counted by the GPU (ogles2_xfb_gpu_counts) stores them too */
         return;
     ctx->job_xfb = FALSE;
+    ctx->job_counts = FALSE;
     if (!xs)
         return;
-    xs->specs_on = FALSE;
     if ((w = counts_words(xs)) != 0 && (p = v3d_buffer_claim_memory(ctx->v3d->current_buf, 5))) {
         p[0] = v3d_OP_PRIMITIVE_COUNTS_FEEDBACK;
         put32(p + 1, (ULONG)w | v3d_STORE_PRIMITIVE_COUNTS_AND_ZERO);
     }
-    TransformFeedbackSpecs(ctx->v3d, FALSE, 0);
+    if (fed) {
+        xs->specs_on = FALSE;
+        TransformFeedbackSpecs(ctx->v3d, FALSE, 0);
+    }
 }
 
-/* EXT_geometry_shader: after the primitives of a draw whose geometry
- * shader fed back (its job its own: draw.c flushed one that fed back
- * before it). What it wrote is the binner's to know: the job is flushed
- * (its binning waited for), and the primitives written it stored
- * (ogles2_xfb_job_end) count the buffers' vertices, a primitive the
- * begun mode's, and the query's primitives. A job that did not bin
- * leaves the word as set here: none written. */
-void ogles2_xfb_after_gs_draw(struct OGLES3Context *ctx)
+/* After the primitives of a draw whose counts only the binner knows (its
+ * job its own: draw.c flushed the open one before it): a geometry shader's
+ * that fed back (`fed`), or one GL_PRIMITIVES_GENERATED counts (a
+ * geometry shader's, a restarted or GPU-read command's). The job is
+ * flushed (its binning waited for) and the counts it stored at its end
+ * (ogles2_xfb_job_end) read: the primitives generated (word 4) for that
+ * query; with `fed`, those written (word 5) advance each buffer by their
+ * vertices, a primitive the begun mode's, and count in its query (Mesa's
+ * v3d_read_and_accumulate_primitive_counters). A job that did not bin
+ * leaves the words as set here: none. */
+void ogles2_xfb_gpu_counts(struct OGLES3Context *ctx, BOOL fed)
 {
-    struct OGLES3XfbState *xs = ctx->xfb;
-    struct OGLES3Xfb *o = xs->bound;
-    const struct OGLES3ImageXfb *x = o->program->image->xfb;
-    volatile ULONG *w;
-    ULONG prims = 0, n, len = 32;
+    struct OGLES3XfbState *xs = xs_get(ctx);
+    volatile ULONG *w = xs ? counts_words(xs) : 0;
+    ULONG gen = 0, written = 0, n, len = 32;
     int k;
-    DoCommand(ctx->v3d, v3d_OP_TRANSFORM_FEEDBACK_FLUSH_AND_COUNT);
-    ctx->xfb_draws++;
-    w = counts_words(xs);
-    if (w)
-        w[5] = 0xFFFFFFFFUL; /* cleaned with the whole cache at the submission (job.c) */
+    if (fed) {
+        DoCommand(ctx->v3d, v3d_OP_TRANSFORM_FEEDBACK_FLUSH_AND_COUNT);
+        ctx->xfb_draws++;
+    }
+    if (w) {
+        w[4] = w[5] = 0xFFFFFFFFUL; /* cleaned with the whole cache at the submission (job.c) */
+        ctx->job_counts = TRUE;
+    }
     ogles2_job_flush(ctx, FALSE);
     if (w) {
         CachePostDMA((APTR)w, &len, 0);
-        n = LE32(w[5]);
-        if (n != 0xFFFFFFFFUL)
-            prims = n;
+        if ((n = LE32(w[4])) != 0xFFFFFFFFUL)
+            gen = n;
+        if ((n = LE32(w[5])) != 0xFFFFFFFFUL)
+            written = n;
     }
-    n = prims * (o->mode == GL_TRIANGLES ? 3 : o->mode == GL_LINES ? 2 : 1);
-    for (k = 0; k < OGLES3_MAX_XFB_BUFFERS; k++)
-        if (x->stride[k])
-            o->written[k] += n;
-    ogles2_query_xfb_add(ctx, prims);
+    ogles2_query_gen_add(ctx, gen);
+    if (fed) {
+        struct OGLES3Xfb *o = xs->bound;
+        const struct OGLES3ImageXfb *x = o->program->image->xfb;
+        n = written * (o->mode == GL_TRIANGLES ? 3 : o->mode == GL_LINES ? 2 : 1);
+        for (k = 0; k < OGLES3_MAX_XFB_BUFFERS; k++)
+            if (x->stride[k])
+                o->written[k] += n;
+        ogles2_query_xfb_add(ctx, written);
+    }
 }

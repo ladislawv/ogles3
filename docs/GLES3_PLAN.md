@@ -92,7 +92,8 @@ line's; the bridge's 31 programs as before. Both compilers rebuilt.
   into draw_packets' bytes (`gs_packets`).
 - Not yet: the 32-bit-sampler, alpha-to-coverage and draw-time variants
   of geometry programs. (Transform feedback, indirect and GPU-read draws:
-  done 2026-11-16, below.)
+  done 2026-11-16, below; the draw-time variants and
+  `GL_PRIMITIVES_GENERATED` too, below that.)
 
 **Geometry shaders with transform feedback and indirect draws (2026-11-16,
 built; not run on the A1200).**
@@ -135,6 +136,57 @@ built; not run on the A1200).**
   (layers 0 and 1 drawn, 2 and 3 kept). `compare_v3dp.sh` compiles the
   geometry programs too: host and m68k compilers 37 of 37 identical. vamos:
   m8_es31 68 of 68, m8_es3 33 of 33. Not run on the A1200 yet.
+
+**`GL_PRIMITIVES_GENERATED` and geometry programs' draw-time variants
+(2026-11-16, built; not run on the A1200).**
+- **The query** (`query.c`, ES 3.1 contexts): a third kind beside occlusion
+  and primitives written (`kind`, `slot`), `ctx->gen_active` while one is
+  active. Each draw counts its primitives (`draw.c`, as Mesa): on the CPU
+  from its mode and count times its instances (`prims_of`, Mesa's
+  `u_prims_for_vertices`), or, when only the binner knows them (a geometry
+  shader's draw; one with primitive restart; a command the GPU wrote), the
+  binner's: such a draw gets a job of its own and its counts are read back
+  (`ogles2_xfb_gpu_counts`, word 4 "written" of `PRIMITIVE_COUNTS_FEEDBACK`,
+  the counters' enum in v3d_packet.xml; `ogles2_xfb_job_end` stores the
+  counts at the end of a job that fed back or holds such a draw,
+  `ctx->job_counts`). With `GL_RASTERIZER_DISCARD` a draw is still made
+  while the query runs (it counts, CFG_BITS draws nothing). The library's
+  own draws count none (`ogles2_query_pause` sets `ctx->query_paused`; the
+  clears now pause for this query too).
+- **Draw-time variants of a geometry program** (`draw.c` `es3_variants`
+  with a `struct gs_pick`; `variant_key.c` `ogles2_vk_gs_want`/`_fits`, a
+  geometry key's outputs where a vertex key's are, its point size at 81):
+  the fragment variant keyed as before (the primitive class the geometry
+  output's), the geometry variant on the fragment variant's inputs (Mesa's
+  `v3d_update_compiled_gs`) and the geometry stage's 32-bit samplers
+  (`sampler_bits(..., 2)`, `bits[2]`), the geometry binning variant on
+  those samplers, the vertex variant on its own (its outputs the geometry
+  stage's inputs, as compiled). What is missing is asked for in one
+  `COMPILE_VARIANT` request (a fragment variant with the geometry variant
+  `KEY_OUTPUTS_FROM_FS`, then the others). The program's cached choice
+  holds five variants now (`var[5]`, `var_code[5]`, `var_bits[3]`); `try_x`
+  checks a geometry variant's uniform blocks against the geometry stage's.
+- **The compiler:** `v3dp_key_parse` reads geometry keys (`get_gs_key`), the
+  variant loop compiles them (`KEY_OUTPUTS_FROM_FS` for a geometry key
+  too), and Mesa patch **0019** lets `v3d_compile_variant` take the
+  geometry stage (`bind_gs`). Checked on the PC: es32gs's own keys with a
+  32-bit sampler bit set, through `-x`, made a `.v3dx` of a fragment,
+  geometry (outputs the fragment inputs), geometry binning and vertex
+  variant, stages 0x19 and feature bit 5 (the library's loader takes
+  that).
+- **This machine's Mesa tree** stopped `apply_mesa_patches.sh` at 0015
+  again: its copy said `ogles2.library` in a comment where the
+  repository's patch (since the rename) says `ogles3.library`. The tree's
+  comment made the repository's; every patch now reports present, 0019
+  applied; Mesa, both compilers (`replay.py` 908 of 908, `build_m68k.sh`)
+  rebuilt; `compare_v3dp.sh` (es32gst added) 39 of 39 identical.
+- **Tests:** m8_es31 the query's state (begun, current, twice, its result
+  0, another target's name): 72 of 72 under vamos; m8_draw
+  `test_geometry`: es32gst's geometry stage reads an RGBA32F texel (a
+  draw-time geometry variant with a 32-bit sampler), es32gsd into an
+  RGBA32F target (a draw-time fragment variant), and the query (es32gsx's
+  3 points: 6 triangles from the binner, es3flat's triangle: 1 from the
+  CPU, 7 in all). Not run on the A1200 yet.
 
 **Stage D, done (2026-11-16, built; not run): layered rendering, and the
 extension offered.**

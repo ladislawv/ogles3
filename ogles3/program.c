@@ -1353,7 +1353,8 @@ static struct OGLES3Image *try_x(const struct OGLES3Image *im, const char *path)
     }
     for (k = 0; k < x->nvariants; k++) {
         const struct OGLES3Variant *v = &x->variants[k];
-        ULONG si = v->stage == OGLES3_VARIANT_FS;
+        ULONG si = v->stage == OGLES3_VARIANT_FS ? 1
+                 : v->stage == OGLES3_VARIANT_GS || v->stage == OGLES3_VARIANT_GS_BIN ? 2 : 0;
         for (j = 0; j < v->nrecipe; j++)
             if ((v->rtype[j] == OGLES3_U_UBO_ADDR && (v->rdata[j] >> 24) > im->stage_nblocks[si]) ||
                 (v->rtype[j] == OGLES3_U_GET_UBO_SIZE && v->rdata[j] >= im->stage_nblocks[si])) {

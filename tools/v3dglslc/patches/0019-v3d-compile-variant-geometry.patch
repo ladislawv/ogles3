@@ -1,0 +1,18 @@
+ogles2: v3dglslc compiles a geometry program's draw-time variants too
+(docs/GLES3_PLAN.md item 9): patch 0015's v3d_compile_variant() hands the
+geometry shader the last draw bound (its key's is_coord picks the binning
+or the render variant) to v3d_get_compiled_shader() with that key. Unused,
+nothing changes.
+
+--- a/src/gallium/drivers/v3d/v3d_program.c
++++ b/src/gallium/drivers/v3d/v3d_program.c
+@@ -1284,7 +1284,8 @@
+         struct v3d_context *v3d = v3d_context(pctx);
+         struct v3d_uncompiled_shader *so =
+                 stage == MESA_SHADER_VERTEX ? v3d->prog.bind_vs :
+-                stage == MESA_SHADER_FRAGMENT ? v3d->prog.bind_fs : NULL;
++                stage == MESA_SHADER_FRAGMENT ? v3d->prog.bind_fs :
++                stage == MESA_SHADER_GEOMETRY ? v3d->prog.bind_gs : NULL;
+
+         if (!so)
+                 return false;

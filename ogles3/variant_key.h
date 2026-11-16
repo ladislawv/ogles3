@@ -15,6 +15,7 @@ typedef short BOOL;
 
 #define OGLES3_VK_FS_BYTES 296 /* OGLES3_FS_KEY_BYTES */
 #define OGLES3_VK_VS_BYTES 88  /* OGLES3_VS_KEY_BYTES */
+#define OGLES3_VK_GS_BYTES 84  /* OGLES3_GS_KEY_BYTES (EXT_geometry_shader) */
 
 /* The rasterizer's primitive class (Mesa's is_points, is_lines). */
 #define OGLES3_VK_TRIANGLES 0
@@ -63,4 +64,11 @@ BOOL ogles2_vk_fs_fits(const UBYTE *key, const UBYTE *want);
  * used outputs. */
 void ogles2_vk_vs_want(UBYTE *want, const UBYTE *base, UBYTE num_inputs, const UBYTE *slots, ULONG bits);
 BOOL ogles2_vk_vs_fits(const UBYTE *key, const UBYTE *want);
+
+/* A geometry key (EXT_geometry_shader; Mesa's v3d_update_compiled_gs):
+ * `base` with the geometry stage's 32-bit samplers and, unless `slots` is
+ * NULL, the fragment variant's inputs as its used outputs (the render
+ * variant's; the binning one's are the fed-back varyings, as compiled). */
+void ogles2_vk_gs_want(UBYTE *want, const UBYTE *base, UBYTE num_inputs, const UBYTE *slots, ULONG bits);
+BOOL ogles2_vk_gs_fits(const UBYTE *key, const UBYTE *want);
 #endif

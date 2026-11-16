@@ -2834,7 +2834,9 @@ static const struct OGLES3Variant *find_in(const struct OGLES3Image *im, UBYTE s
     for (i = 0; im && i < im->nvariants; i++) {
         const struct OGLES3Variant *v = &im->variants[i];
         if (v->stage == stage &&
-            (stage == OGLES3_VARIANT_FS ? ogles2_vk_fs_fits(v->key, want) : ogles2_vk_vs_fits(v->key, want)))
+            (stage == OGLES3_VARIANT_FS ? ogles2_vk_fs_fits(v->key, want)
+             : stage == OGLES3_VARIANT_GS || stage == OGLES3_VARIANT_GS_BIN ? ogles2_vk_gs_fits(v->key, want)
+                                                                             : ogles2_vk_vs_fits(v->key, want)))
             return v;
     }
     return 0;
@@ -2879,7 +2881,9 @@ static const struct OGLES3Variant *find_x(struct OGLES3Image *im, UBYTE stage, c
  * `flags` in its second byte) and the key; its length. */
 static ULONG key_entry(UBYTE *e, UBYTE stage, UBYTE flags, const UBYTE *key)
 {
-    ULONG n = stage == OGLES3_VARIANT_FS ? OGLES3_FS_KEY_BYTES : OGLES3_VS_KEY_BYTES;
+    ULONG n = stage == OGLES3_VARIANT_FS ? OGLES3_FS_KEY_BYTES
+            : stage == OGLES3_VARIANT_GS || stage == OGLES3_VARIANT_GS_BIN ? OGLES3_GS_KEY_BYTES
+                                                                            : OGLES3_VS_KEY_BYTES;
     e[0] = stage;
     e[1] = flags;
     e[2] = e[3] = 0;
@@ -2887,23 +2891,38 @@ static ULONG key_entry(UBYTE *e, UBYTE stage, UBYTE flags, const UBYTE *key)
     return 4 + n;
 }
 
+/* A geometry program's geometry variants for es3_variants (both, and their
+ * images): the closest in, this draw's out. */
+struct gs_pick
+{
+    const struct OGLES3Variant *bin, *gs;
+    const struct OGLES3Image *bown, *gown;
+};
+
 /* An ES3 program's variants for this draw (from 1.x's choice, *fs and *vs);
  * FALSE leaves them as they are (logged once). A fragment variant not found
  * is compiled with the vertex variant that goes with it, in one request: the
  * compiler gives the vertex key the fragment variant's inputs as its used
  * outputs (V3DGLSL_KEY_OUTPUTS_FROM_FS), as Mesa's v3d_update_compiled_vs
- * does. A vertex variant alone is asked for when only it is missing. */
+ * does. A vertex variant alone is asked for when only it is missing. A
+ * geometry program's (`gp`, EXT_geometry_shader): its geometry variant takes
+ * the fragment variant's inputs instead (Mesa's v3d_update_compiled_gs), its
+ * vertex variants keep the geometry stage's inputs as their outputs, and
+ * the geometry stage's 32-bit samplers (bits[2]) key both geometry
+ * variants; what is missing of them and the vertex variant is asked for in
+ * one request. */
 static BOOL es3_variants(struct OGLES3Context *ctx, struct OGLES3Program *p, GLenum fsmode, UBYTE cbufs,
                          const ULONG *bits, BOOL a2c, const struct OGLES3VkTargets *tg, const struct OGLES3Variant **vs,
                          const struct OGLES3Variant **fs, const struct OGLES3Image **vown,
-                         const struct OGLES3Image **fown)
+                         const struct OGLES3Image **fown, struct gs_pick *gp)
 {
     struct OGLES3Image *im = (struct OGLES3Image *)p->image;
-    UBYTE want[OGLES3_FS_KEY_BYTES], vwant[OGLES3_VS_KEY_BYTES];
-    UBYTE req[8 + OGLES3_FS_KEY_BYTES + OGLES3_VS_KEY_BYTES];
+    UBYTE want[OGLES3_FS_KEY_BYTES], vwant[OGLES3_VS_KEY_BYTES], gwant[OGLES3_GS_KEY_BYTES],
+        bwant[OGLES3_GS_KEY_BYTES];
+    UBYTE req[16 + OGLES3_FS_KEY_BYTES + OGLES3_VS_KEY_BYTES + 2 * OGLES3_GS_KEY_BYTES];
     const struct OGLES3Variant *f, *v = 0;
     int prim;
-    if (!(*fs)->key || !(*vs)->key)
+    if (!(*fs)->key || !(*vs)->key || (gp && (!gp->gs->key || !gp->bin->key)))
         return FALSE;
     prim = fsmode == GL_POINTS ? OGLES3_VK_POINTS
          : fsmode == GL_LINES || fsmode == GL_LINE_LOOP || fsmode == GL_LINE_STRIP ? OGLES3_VK_LINES
@@ -2913,12 +2932,50 @@ static BOOL es3_variants(struct OGLES3Context *ctx, struct OGLES3Program *p, GLe
     f = find_x(im, OGLES3_VARIANT_FS, want, fown);
     if (!f) {
         ULONG n = key_entry(req, OGLES3_VARIANT_FS, 0, want);
-        ogles2_vk_vs_want(vwant, (*vs)->key, 0, 0, bits[0]);
-        n += key_entry(req + n, OGLES3_VARIANT_VS, V3DGLSL_KEY_OUTPUTS_FROM_FS >> 8, vwant);
+        if (gp) {
+            ogles2_vk_gs_want(gwant, gp->gs->key, 0, 0, bits[2]);
+            n += key_entry(req + n, OGLES3_VARIANT_GS, V3DGLSL_KEY_OUTPUTS_FROM_FS >> 8, gwant);
+        } else {
+            ogles2_vk_vs_want(vwant, (*vs)->key, 0, 0, bits[0]);
+            n += key_entry(req + n, OGLES3_VARIANT_VS, V3DGLSL_KEY_OUTPUTS_FROM_FS >> 8, vwant);
+        }
         if (ogles2_image_compile_variants(ctx, im, req, n))
             f = find_x(im, OGLES3_VARIANT_FS, want, fown);
     }
-    if (f) {
+    if (f && gp) {
+        const struct OGLES3Variant *gg, *gb;
+        const struct OGLES3Image *gown = im, *bown = im;
+        ULONG n = 0;
+        ogles2_vk_gs_want(gwant, gp->gs->key, f->num_inputs, f->input_slots, bits[2]);
+        ogles2_vk_gs_want(bwant, gp->bin->key, 0, 0, bits[2]);
+        ogles2_vk_vs_want(vwant, (*vs)->key, 0, 0, bits[0]); /* its outputs the geometry stage's inputs */
+        gg = find_x(im, OGLES3_VARIANT_GS, gwant, &gown);
+        gb = find_x(im, OGLES3_VARIANT_GS_BIN, bwant, &bown);
+        v = find_x(im, OGLES3_VARIANT_VS, vwant, vown);
+        if (!gg)
+            n += key_entry(req + n, OGLES3_VARIANT_GS, 0, gwant);
+        if (!gb)
+            n += key_entry(req + n, OGLES3_VARIANT_GS_BIN, 0, bwant);
+        if (!v)
+            n += key_entry(req + n, OGLES3_VARIANT_VS, 0, vwant);
+        if (n && ogles2_image_compile_variants(ctx, im, req, n)) {
+            if (!gg)
+                gg = find_x(im, OGLES3_VARIANT_GS, gwant, &gown);
+            if (!gb)
+                gb = find_x(im, OGLES3_VARIANT_GS_BIN, bwant, &bown);
+            if (!v)
+                v = find_x(im, OGLES3_VARIANT_VS, vwant, vown);
+        }
+        if (gg && gb && v) {
+            *fs = f;
+            *vs = v;
+            gp->gs = gg;
+            gp->bin = gb;
+            gp->gown = gown;
+            gp->bown = bown;
+            return TRUE;
+        }
+    } else if (f) {
         ogles2_vk_vs_want(vwant, (*vs)->key, f->num_inputs, f->input_slots, bits[0]);
         v = find_x(im, OGLES3_VARIANT_VS, vwant, vown);
         if (!v && ogles2_image_compile_variants(ctx, im, req, key_entry(req, OGLES3_VARIANT_VS, 0, vwant)))
@@ -2944,6 +3001,8 @@ static BOOL es3_variants(struct OGLES3Context *ctx, struct OGLES3Program *p, GLe
     }
     *fown = im;
     *vown = im;
+    if (gp)
+        gp->gown = gp->bown = im;
     return FALSE;
 }
 
@@ -3011,16 +3070,32 @@ static BOOL draw_mode_ok(const struct OGLES3Context *ctx, GLenum mode)
            (ogles2_es31(ctx) && mode >= GL_LINES_ADJACENCY_EXT && mode <= GL_TRIANGLE_STRIP_ADJACENCY_EXT);
 }
 
-/* After a draw's feedback: what it wrote counted, on the CPU, or (a
- * geometry shader's) from the binner's counts. Out of line: draw_arrays'
- * body as small as it was. */
-static __attribute__((noinline)) void xfb_after(struct OGLES3Context *ctx, BOOL gs, GLenum mode, GLsizei count,
-                                                GLsizei instances)
+/* After a draw that fed back (`fed`) or whose counts only the binner
+ * knows (`gpu`): what it wrote counted on the CPU, or the binner's counts
+ * read back (a geometry shader's, GL_PRIMITIVES_GENERATED's). Out of line:
+ * draw_arrays' body as small as it was. */
+static __attribute__((noinline)) void xfb_after(struct OGLES3Context *ctx, BOOL gpu, BOOL fed, GLenum mode,
+                                                GLsizei count, GLsizei instances)
 {
-    if (gs)
-        ogles2_xfb_after_gs_draw(ctx);
-    else
+    if (gpu)
+        ogles2_xfb_gpu_counts(ctx, fed);
+    else if (fed)
         ogles2_xfb_after_draw(ctx, mode, count, instances);
+}
+
+/* The primitives `n` vertices make in `mode` (Mesa's u_prims_for_vertices;
+ * not the adjacency modes, which come with a geometry shader: counted by
+ * the binner). */
+static ULONG prims_of(GLenum mode, ULONG n)
+{
+    switch (mode) {
+    case GL_POINTS:         return n;
+    case GL_LINES:          return n / 2;
+    case GL_LINE_LOOP:      return n >= 2 ? n : 0;
+    case GL_LINE_STRIP:     return n >= 2 ? n - 1 : 0;
+    case GL_TRIANGLES:      return n / 3;
+    default:                return n >= 3 ? n - 2 : 0; /* strips and fans */
+    }
 }
 
 /* EXT_geometry_shader: draw_packets' VCM_CACHE_SIZE with the geometry
@@ -3171,7 +3246,7 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
     struct tex_states tst;
     BOOL vid;        /* a shader reads gl_VertexID: the real vertex numbers (below) */
     BOOL a2c;        /* alpha to coverage in an ES3 program's key */
-    ULONG bits[2];   /* an ES3 program's 32-bit samplers, vertex and fragment */
+    ULONG bits[3];   /* an ES3 program's 32-bit samplers, vertex, fragment and geometry */
     struct OGLES3VkTargets tg; /* and its render targets' key fields */
     BOOL tg_made = FALSE;      /* tg holds them (vk_targets) */
     GLenum itype_gl; /* the indices' type as the GPU gets them */
@@ -3179,11 +3254,15 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
     ULONG unif[3], code[3], defattr, rec, idx_addr = 0, idx_size = 0, ioffset;
     int a, nslots = 0, i;
     struct gs_draw gsd, *g = 0; /* EXT_geometry_shader: the draw's geometry stage, if it has one */
+    /* GL_PRIMITIVES_GENERATED counts it (not the library's own draws), and
+     * whether only the binner knows its counts (below) */
+    BOOL gen = ctx->gen_active && !ctx->query_paused, gpu_count;
 
     /* GL_RASTERIZER_DISCARD: no fragments, and without transform feedback a
      * draw then has no effect at all: nothing is drawn. With it, binning
-     * still feeds back (CFG_BITS discards every primitive, emit_state). */
-    if ((ctx->state.caps & OGLES3_CAP_RASTERIZER_DISCARD) && !ogles2_xfb_drawing(ctx))
+     * still feeds back (CFG_BITS discards every primitive, emit_state);
+     * and still counts the primitives generated. */
+    if ((ctx->state.caps & OGLES3_CAP_RASTERIZER_DISCARD) && !ogles2_xfb_drawing(ctx) && !gen)
         return;
     if (!(d = draw_state(ctx))) {
         ogles2_error(ctx, GL_OUT_OF_MEMORY);
@@ -3202,7 +3281,7 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
      * one), the fragment shader's class its output's; precompiled variants
      * only (es3_variants keys the vertex shader's outputs on the fragment
      * shader's inputs). Feeding back, its job is its own (the open one, if
-     * it fed back, rendered first: ogles2_xfb_after_gs_draw reads what the
+     * it fed back, rendered first: ogles2_xfb_gpu_counts reads what the
      * job wrote). */
     if (im->geometry ? !gs_takes(im->gs_in, mode) : mode > GL_TRIANGLE_FAN) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
@@ -3217,23 +3296,30 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
             }
             return;
         }
-        if (ctx->job_xfb && ogles2_xfb_drawing(ctx))
-            ogles2_job_flush(ctx, FALSE);
         fsmode = im->gs_out == GL_POINTS ? GL_POINTS : im->gs_out == GL_LINE_STRIP ? GL_LINES : GL_TRIANGLES;
     }
+    /* Counts only the binner knows: a geometry shader's output fed back or
+     * counted, or a draw counted whose primitives restart or whose command
+     * the GPU wrote. Its job is its own (the open one rendered first), read
+     * back after it (ogles2_xfb_gpu_counts). */
+    gpu_count = im->geometry ? gen || ogles2_xfb_drawing(ctx) : gen && ((el && el->restart) || (gd && gd->ind_addr));
+    if (__builtin_expect(gpu_count, 0) && v && v->frame_active)
+        ogles2_job_flush(ctx, FALSE);
     /* A 4x MSAA default framebuffer, or multisampled renderbuffers, with
      * GL_SAMPLE_ALPHA_TO_COVERAGE (Mesa turns alpha into the sample mask in
      * the fragment shader). */
     a2c = (ctx->state.caps & OGLES3_CAP_SAMPLE_ALPHA_TO_COVERAGE) != 0 &&
           (ctx->draw_fb ? ogles2_fbo_samples(ctx->draw_fb) != 0 : ctx->msaa);
     fim = im;
-    bits[0] = bits[1] = 0;
+    bits[0] = bits[1] = bits[2] = 0;
     if (im->format2) {
         /* An OpenGL ES 3 program: both in the variants' keys (es3_variants),
          * and the render targets'. */
         if (ogles2_wide_seen) { /* sampler_bits' own first test, without its calls */
             bits[0] = sampler_bits(ctx, p, 0);
             bits[1] = sampler_bits(ctx, p, 1);
+            if (im->geometry)
+                bits[2] = sampler_bits(ctx, p, 2);
         }
         /* The targets' key: with software blending all of vk_targets';
          * without, its 32-bit targets alone (fb_wide), compared as that
@@ -3261,7 +3347,7 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
     }
     if (p->var_ok && p->var_mode == mode && p->var_fsmode == fsmode && p->var_fim == fim &&
         p->var_nrt == ctx->fb_nrt && p->var_cbufs == (ctx->draw_fb ? ctx->fb_draw_mask : 1) &&
-        p->var_bits[0] == bits[0] && p->var_bits[1] == bits[1] && p->var_a2c == a2c &&
+        p->var_bits[0] == bits[0] && p->var_bits[1] == bits[1] && p->var_bits[2] == bits[2] && p->var_a2c == a2c &&
         (!im->format2 || (tg_made ? same_targets(&p->var_tg, &tg)
                                   : !p->var_tg.soft && p->var_tg.f32 == ctx->fb_wide))) { /* an ES3 program's */
         cs = p->var[0];
@@ -3270,6 +3356,13 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
         code[0] = p->var_code[0];
         code[1] = p->var_code[1];
         code[2] = p->var_code[2];
+        if (im->geometry) { /* EXT_geometry_shader: its geometry variants, chosen with them */
+            g = &gsd;
+            g->bin = p->var[3];
+            g->gs = p->var[4];
+            g->code[0] = p->var_code[3];
+            g->code[1] = p->var_code[4];
+        }
     } else {
         UBYTE cbufs = (UBYTE)((1 << ctx->fb_nrt) - 1);
         cs = ogles2_image_variant(im, OGLES3_VARIANT_CS, 0, im->geometry ? GL_TRIANGLES : mode);
@@ -3299,14 +3392,32 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
                 vk_targets(ctx, &tg);
                 tg_made = TRUE;
             }
-            if (im->format2 && !im->geometry)
+            struct gs_pick gp;
+            if (im->geometry) { /* EXT_geometry_shader: the closest geometry variants first */
+                GLenum gmode = im->gs_out == GL_POINTS ? GL_POINTS : GL_TRIANGLES;
+                gp.bin = ogles2_image_variant(im, OGLES3_VARIANT_GS_BIN, 0, gmode);
+                gp.gs = ogles2_image_variant(im, OGLES3_VARIANT_GS, 0, gmode);
+                gp.bown = gp.gown = im;
+                if (!gp.bin || !gp.gs) {
+                    ogles2_log("glDrawArrays: the program has no geometry shader variant; nothing drawn");
+                    return;
+                }
+            }
+            if (im->format2)
                 es3_variants(ctx, p, fsmode, ctx->draw_fb ? ctx->fb_draw_mask : 1, bits, a2c, &tg, &vs, &fs,
-                             &vown, &fown);
+                             &vown, &fown, im->geometry ? &gp : 0);
             code[0] = code_address(d, im, cs);
             code[1] = code_address(d, vown, vs);
             code[2] = code_address(d, fown, fs);
+            if (im->geometry) {
+                g = &gsd;
+                g->bin = gp.bin;
+                g->gs = gp.gs;
+                g->code[0] = code_address(d, gp.bown, gp.bin);
+                g->code[1] = code_address(d, gp.gown, gp.gs);
+            }
         }
-        if (!code[0] || !code[1] || !code[2]) {
+        if (!code[0] || !code[1] || !code[2] || (g && (!g->code[0] || !g->code[1]))) {
             ogles2_error(ctx, GL_OUT_OF_MEMORY);
             return;
         }
@@ -3316,6 +3427,12 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
         p->var_code[0] = code[0];
         p->var_code[1] = code[1];
         p->var_code[2] = code[2];
+        if (g) {
+            p->var[3] = g->bin;
+            p->var[4] = g->gs;
+            p->var_code[3] = g->code[0];
+            p->var_code[4] = g->code[1];
+        }
         p->var_mode = mode;
         p->var_fsmode = fsmode;
         p->var_fim = fim;
@@ -3323,6 +3440,7 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
         p->var_cbufs = (UBYTE)(ctx->draw_fb ? ctx->fb_draw_mask : 1);
         p->var_bits[0] = bits[0];
         p->var_bits[1] = bits[1];
+        p->var_bits[2] = bits[2];
         p->var_a2c = a2c;
         if (im->format2)
             p->var_tg = tg;
@@ -3349,21 +3467,7 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
             return;
         }
     }
-    if (im->geometry) {
-        GLenum gmode = im->gs_out == GL_POINTS ? GL_POINTS : GL_TRIANGLES;
-        g = &gsd;
-        g->bin = ogles2_image_variant(im, OGLES3_VARIANT_GS_BIN, 0, gmode);
-        g->gs = ogles2_image_variant(im, OGLES3_VARIANT_GS, 0, gmode);
-        if (!g->bin || !g->gs) {
-            ogles2_log("glDrawArrays: the program has no geometry shader variant; nothing drawn");
-            return;
-        }
-        g->code[0] = code_address(d, im, g->bin);
-        g->code[1] = code_address(d, im, g->gs);
-        if (!g->code[0] || !g->code[1]) {
-            ogles2_error(ctx, GL_OUT_OF_MEMORY);
-            return;
-        }
+    if (g) { /* the geometry variants chosen with the others (above) */
         if (!vpm_gs(cs, g->bin, &g->cfg[0]) || !vpm_gs(vs, g->gs, &g->cfg[1])) {
             if (!d->gs_refused_logged) {
                 d->gs_refused_logged = TRUE;
@@ -3642,8 +3746,13 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
           (g ? ogles2_xfb_before_draw(ctx, im->gs_out == GL_POINTS ? GL_POINTS : GL_TRIANGLES,
                                       g->bin->per_vertex_point_size)
              : ogles2_xfb_before_draw(ctx, mode, cs->writes_psiz));
+    if (__builtin_expect(gen && !gpu_count, 0)) /* GL_PRIMITIVES_GENERATED, on the CPU */
+        ogles2_query_gen_add(ctx, prims_of(mode, el ? (ULONG)el->count & 0x7FFFFFFFUL : (ULONG)count) *
+                                      (ULONG)instances);
     if (__builtin_expect(gd != 0, 0) && gd->ind_addr) {
         indirect_packets(v, cs, vs, rec, nslots, mode, el, itype_gl, idx_addr, idx_size, gd->ind_addr, g);
+        if (gpu_count)
+            ogles2_xfb_gpu_counts(ctx, FALSE);
         mark(ctx, 7);
         return;
     }
@@ -3660,8 +3769,8 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
             if (g)
                 gs_packets(b, g);
         }
-        if (xfb)
-            xfb_after(ctx, g != 0, mode, count, instances);
+        if (xfb || gpu_count)
+            xfb_after(ctx, gpu_count, xfb, mode, count, instances);
         mark(ctx, 7);
         return;
     }
@@ -3677,8 +3786,8 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
             if (g)
                 gs_packets(b, g);
         }
-        if (xfb)
-            xfb_after(ctx, g != 0, mode, count, instances);
+        if (xfb || gpu_count)
+            xfb_after(ctx, gpu_count, xfb, mode, count, instances);
         mark(ctx, 7);
         return;
     }
@@ -3698,8 +3807,8 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
          * gl_VertexID (the addresses moved back, above). */
         VertexArrayPrims(v, (UBYTE)mode, (ULONG)count, vid ? (ULONG)first : 0);
     }
-    if (xfb)
-        ogles2_xfb_after_draw(ctx, mode, count, instances);
+    if (xfb || gpu_count)
+        xfb_after(ctx, gpu_count, xfb, mode, count, instances);
     mark(ctx, 7);
     return;
 
@@ -4628,7 +4737,7 @@ void ogles2_draw_clear(struct OGLES3Context *ctx, GLbitfield mask, UBYTE rts, co
     ogles2_job_begin(ctx);
     OGLES3_STATE_CHANGED(ctx, OGLES3_SG_ALL); /* the override above */
     mark(ctx, -1); /* probe P: the time before is not the draw's */
-    if (ctx->oq_addr) /* its test, without the call */
+    if (ctx->oq_addr || ctx->gen_active) /* its test, without the call */
         ogles2_query_pause(ctx, TRUE); /* nor a clear */
     ctx->draw_rts = rts; /* glClearBuffer*: one draw buffer */
     draw_arrays(ctx, quad, GL_TRIANGLE_STRIP, 0, 4, 0, 1, 0);

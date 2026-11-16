@@ -3336,7 +3336,12 @@ static void test_wide_a2c(void)
  * appended where the binner's counts say the first draw ended, and the
  * primitives-written query; a feedback begun in another mode than the
  * geometry output's refuses the draw; es32gs's two invocations write
- * layers 0 and 1 of a layered 2D array (blue), 2 and 3 keep their red. */
+ * layers 0 and 1 of a layered 2D array (blue), 2 and 3 keep their red.
+ * Draw-time variants of a geometry program: es32gst's geometry stage reads
+ * an RGBA32F texel (32-bit samplers there), es32gsd draws into an RGBA32F
+ * target (its fragment variant's f32_color_rb). GL_PRIMITIVES_GENERATED:
+ * es32gsx's 3 points make 6 triangles (the binner's count), es3flat's
+ * triangle 1 (the CPU's), with the rasterizer off. */
 static int gs_tri_is(const GLfloat *w, int base, GLfloat x, GLfloat y)
 {
     GLfloat lo = w[0], sum = 0;
@@ -3520,6 +3525,92 @@ static void test_geometry(void)
     } else {
         check(0, "layered: es32gs links");
     }
+
+    /* draw-time variants: 32-bit samplers in the geometry stage */
+    pl = program("es32gst");
+    if (pl) {
+        static const GLfloat texel[4] = { 0.25f, 0.5f, 0.75f, 1.0f };
+        lp = glGetAttribLocation(pl, "pos");
+        glGenTextures(1, &tex);
+        glBindTexture(GL_TEXTURE_2D, tex);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 1, 1, 0, GL_RGBA, GL_FLOAT, texel);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glUseProgram(pl);
+        glUniform1i(glGetUniformLocation(pl, "tex"), 0);
+        glVertexAttribPointer((GLuint)lp, 2, GL_FLOAT, GL_FALSE, 0, cover);
+        glEnableVertexAttribArray((GLuint)lp);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDisableVertexAttribArray((GLuint)lp);
+        check(glGetError() == GL_NO_ERROR && pixel_is(48, 32, 64, 128, 191, 255, 1) && pixel_is(8, 32, 0, 0, 0, 0, 0),
+              "geometry variants: the geometry stage reads an RGBA32F texel (32-bit samplers)");
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glDeleteTextures(1, &tex);
+        glDeleteProgram(pl);
+    } else {
+        check(0, "geometry variants: es32gst links");
+    }
+    /* and a 32-bit float target */
+    {
+        GLfloat px[4] = { -1, -1, -1, -1 };
+        glGenTextures(1, &tex);
+        glBindTexture(GL_TEXTURE_2D, tex);
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, 64, 64);
+        glGenFramebuffers(1, fb);
+        glBindFramebuffer(GL_FRAMEBUFFER, fb[0]);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
+        lp = glGetAttribLocation(pd, "pos");
+        glUseProgram(pd);
+        glVertexAttribPointer((GLuint)lp, 2, GL_FLOAT, GL_FALSE, 0, cover);
+        glEnableVertexAttribArray((GLuint)lp);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDisableVertexAttribArray((GLuint)lp);
+        glReadPixels(48, 32, 1, 1, GL_RGBA, GL_FLOAT, px);
+        check(glGetError() == GL_NO_ERROR && px[0] == 0 && px[1] == 1 && px[2] == 0 && px[3] == 1,
+              "geometry variants: es32gsd into an RGBA32F target (32-bit colour writes)");
+        if (px[1] != 1)
+            printf("     read %g %g %g %g\n", px[0], px[1], px[2], px[3]);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glDeleteFramebuffers(1, fb);
+        glDeleteTextures(1, &tex);
+    }
+
+    /* GL_PRIMITIVES_GENERATED */
+    xfb_names = names; /* its file's link, varyings and all (no feedback begun) */
+    xfb_count = 2;
+    px = program("es32gsx");
+    xfb_names = 0;
+    xfb_count = 0;
+    pl = program("es3flat");
+    if (px && pl) {
+        glGenQueries(1, &q);
+        glEnable(GL_RASTERIZER_DISCARD);
+        glBeginQuery(GL_PRIMITIVES_GENERATED_EXT, q);
+        lp = glGetAttribLocation(px, "pos");
+        glUseProgram(px);
+        glVertexAttribPointer((GLuint)lp, 2, GL_FLOAT, GL_FALSE, 0, pts);
+        glEnableVertexAttribArray((GLuint)lp);
+        glDrawArrays(GL_POINTS, 0, 3);
+        glDisableVertexAttribArray((GLuint)lp);
+        draw_cover(pl);
+        glEndQuery(GL_PRIMITIVES_GENERATED_EXT);
+        glDisable(GL_RASTERIZER_DISCARD);
+        prims = 0;
+        glGetQueryObjectuiv(q, GL_QUERY_RESULT, &prims);
+        check(glGetError() == GL_NO_ERROR && prims == 7,
+              "primitives generated: 6 triangles from 3 points' geometry shader, 1 drawn without one");
+        if (prims != 7)
+            printf("     %lu primitives\n", (unsigned long)prims);
+        glDeleteQueries(1, &q);
+    } else {
+        check(0, "primitives generated: es32gsx (no varyings) and es3flat link");
+    }
+    if (px)
+        glDeleteProgram(px);
+    if (pl)
+        glDeleteProgram(pl);
     glUseProgram(0);
     glDeleteProgram(pd);
 }

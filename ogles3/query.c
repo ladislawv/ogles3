@@ -11,7 +11,12 @@
  * past a group's 64 bytes names, so each query's is a group's first word. A job begun while a query is
  * active points at it too (job.c, ctx->oq_addr), so a query spans jobs.
  * GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN counts on the CPU what each draw
- * feeds back (xfb.c: ES 3.0's draw rules make that exact).
+ * feeds back (xfb.c: ES 3.0's draw rules make that exact; a geometry
+ * shader's from the binner's counts). EXT_geometry_shader's
+ * GL_PRIMITIVES_GENERATED (ES 3.1 contexts) counts each draw's primitives,
+ * on the CPU from its mode and count, or (a geometry shader's, a restarted
+ * or GPU-read command's) from the binner's counts (draw.c, xfb.c), as
+ * Mesa does; the library's own draws (clears, copies) count none.
  *
  * Not shared: each context has its own (ES 3.0 appendix D).
  */
@@ -38,8 +43,24 @@ struct OGLES3QueryState
 {
     struct OGLES3Query **tab;   /* by name (glGenQueries'), slot 0 unused */
     GLuint ntab;
-    struct OGLES3Query *occlusion, *xfb; /* the active one of each kind */
+    struct OGLES3Query *occlusion, *xfb, *gen; /* the active one of each kind */
 };
+
+/* A query target's kind: 1 occlusion, 2 primitives written, 3 primitives
+ * generated (EXT_geometry_shader, ES 3.1 contexts); 0 none. */
+static int kind(const struct OGLES3Context *ctx, GLenum t)
+{
+    return t == GL_ANY_SAMPLES_PASSED || t == GL_ANY_SAMPLES_PASSED_CONSERVATIVE ? 1
+         : t == GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN                       ? 2
+         : t == GL_PRIMITIVES_GENERATED_EXT && ogles2_es31(ctx)                ? 3
+                                                                              : 0;
+}
+
+/* The active query of kind k's slot. */
+static struct OGLES3Query **slot(struct OGLES3QueryState *qs, int k)
+{
+    return k == 1 ? &qs->occlusion : k == 2 ? &qs->xfb : &qs->gen;
+}
 
 static struct OGLES3QueryState *qs_get(struct OGLES3Context *ctx)
 {
@@ -72,6 +93,7 @@ static void emit_counter(struct OGLES3Context *ctx, ULONG addr)
  * the counter off for them (`pause`), then back. */
 void ogles2_query_pause(struct OGLES3Context *ctx, BOOL pause)
 {
+    ctx->query_paused = pause; /* nor primitives generated (draw.c) */
     if (ctx->oq_addr)
         emit_counter(ctx, pause ? 0 : ctx->oq_addr);
 }
@@ -166,9 +188,10 @@ void ogles2_glBeginQuery(struct OGLES3Context *ctx, GLenum target, GLuint id)
 {
     struct OGLES3QueryState *qs;
     struct OGLES3Query *q;
+    int k;
     if (!ogles2_es3_entry(ctx))
         return;
-    if (!occlusion_target(target) && target != GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN) {
+    if (!(k = kind(ctx, target))) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
@@ -176,16 +199,17 @@ void ogles2_glBeginQuery(struct OGLES3Context *ctx, GLenum target, GLuint id)
     q = by_name(qs, id);
     /* a name glGenQueries gave, not active, of this target if begun before;
      * none of its kind active already */
-    if (!qs || !q || q->active || (q->target && q->target != target) ||
-        (occlusion_target(target) ? qs->occlusion != 0 : qs->xfb != 0)) {
+    if (!qs || !q || q->active || (q->target && q->target != target) || *slot(qs, k)) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
     q->target = target;
     q->active = TRUE;
-    if (!occlusion_target(target)) {
+    if (k != 1) {
         q->primitives = 0;
-        qs->xfb = q;
+        *slot(qs, k) = q;
+        if (k == 3)
+            ctx->gen_active = TRUE;
         return;
     }
     /* A counter a job not yet rendered still writes is left to it. */
@@ -214,6 +238,11 @@ static void end(struct OGLES3Context *ctx, struct OGLES3QueryState *qs, struct O
         qs->xfb = 0;
         return;
     }
+    if (q == qs->gen) {
+        qs->gen = 0;
+        ctx->gen_active = FALSE;
+        return;
+    }
     qs->occlusion = 0;
     ctx->oq_addr = 0;
     emit_counter(ctx, 0);
@@ -225,14 +254,15 @@ void ogles2_glEndQuery(struct OGLES3Context *ctx, GLenum target)
 {
     struct OGLES3QueryState *qs;
     struct OGLES3Query *q;
+    int k;
     if (!ogles2_es3_entry(ctx))
         return;
-    if (!occlusion_target(target) && target != GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN) {
+    if (!(k = kind(ctx, target))) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
     qs = ctx->query;
-    q = !qs ? 0 : occlusion_target(target) ? qs->occlusion : qs->xfb;
+    q = !qs ? 0 : *slot(qs, k);
     if (!q || q->target != target) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
@@ -244,15 +274,15 @@ void ogles2_glGetQueryiv(struct OGLES3Context *ctx, GLenum target, GLenum pname,
 {
     struct OGLES3QueryState *qs;
     struct OGLES3Query *q;
+    int k;
     if (!ogles2_es3_entry(ctx))
         return;
-    if ((!occlusion_target(target) && target != GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN) ||
-        pname != GL_CURRENT_QUERY) {
+    if (!(k = kind(ctx, target)) || pname != GL_CURRENT_QUERY) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
     qs = ctx->query;
-    q = !qs ? 0 : occlusion_target(target) ? qs->occlusion : qs->xfb;
+    q = !qs ? 0 : *slot(qs, k);
     if (params) /* the active query of that target's kind, if it is of that target */
         *params = q && q->target == target ? (GLint)q->name : 0;
 }
@@ -316,6 +346,14 @@ void ogles2_query_xfb_add(struct OGLES3Context *ctx, ULONG primitives)
 {
     if (ctx->query && ctx->query->xfb)
         ctx->query->xfb->primitives += primitives;
+}
+
+/* A draw generated `primitives` (draw.c, xfb.c): GL_PRIMITIVES_GENERATED's
+ * active query counts them. */
+void ogles2_query_gen_add(struct OGLES3Context *ctx, ULONG primitives)
+{
+    if (ctx->query && ctx->query->gen)
+        ctx->query->gen->primitives += primitives;
 }
 
 /* aglDestroyContext (its jobs finished). */
