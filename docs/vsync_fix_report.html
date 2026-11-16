@@ -59,8 +59,7 @@ li { margin: 4px 0; }
 <main>
 
 <h1>ogles3: vsync swaps that wait two refreshes — investigation and fix</h1>
-<div class="meta">2026-11-16 · The report: a userThe report: <code>ogles3_vsync_report.md</code> (this folder)rsquo;s, "aglSwapBuffers with OGLES3_CCT_VSYNC sometimes waits two vblanks" (2026-11, with its <code>VsyncTest.c</code>: <code>tests/vsync/</code>) · The work: branch
-<code>vsync</code> from <code>gles3</code>, worktree <code>C:\- CPP\ogles3-vsync</code>, not committed yet</div>
+<div class="meta">2026-11-16 · The report: a user's, "aglSwapBuffers with OGLES3_CCT_VSYNC sometimes waits two vblanks" (its <code>VsyncTest.c</code> is in <code>tests/vsync/</code>) · The work: branch <code>vsync</code> from <code>gles3</code></div>
 
 <h2>Summary</h2>
 <p>With <code>OGLES3_CCT_VSYNC</code> on a screen of the library's own, <code>aglSwapBuffers</code> waited with
@@ -275,7 +274,7 @@ one that a window covers completely:</p>
   <tr><td>The reporter's sound case</td><td>AHI's paula.audio mixing on the 68k has not been run.</td></tr>
   <tr><td>A newer VideoCore.card</td><td>With the vblank interrupt, <code>WaitBOVP</code> would sleep. The counter wait
     doesn't depend on which card version is installed.</td></tr>
-  <tr><td>Commit</td><td>On <code>vsync</code>, or onto <code>gles3</code>. Nothing is committed yet.</td></tr>
+  <tr><td>Merge</td><td>The work is on branch <code>vsync</code>; not merged into <code>gles3</code> yet.</td></tr>
 </table></div>
 
 </main>
