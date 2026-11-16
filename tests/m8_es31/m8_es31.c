@@ -13,7 +13,11 @@
  * GL_DEPTH_STENCIL_TEXTURE_MODE, the GL_TEXTURE_2D_MULTISAMPLE target (no
  * sampler state, base level 0), glBindProgramPipeline(0), the image units
  * (glBindImageTexture's errors, the GL_IMAGE_BINDING_* queries); the same
- * refused in an ES 3.0 context.
+ * refused in an ES 3.0 context. EXT_geometry_shader (docs/GLES3_PLAN.md
+ * item 9): the extension, its limits, a vertex + geometry + fragment
+ * program linked from its file (shaders/es32gs.*, `make test-v3dp`; the
+ * library's program hash against the compiler's), its queries, layered
+ * framebuffer attachments and their completeness.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,6 +26,7 @@
 #include <proto/exec.h>
 #include <proto/ogles3.h>
 #include <GLES3/gl31.h>
+#include <GLES2/gl2ext.h> /* EXT_geometry_shader's enums */
 
 static int failures, checks;
 
@@ -83,6 +88,20 @@ static void print_limits(void)
         L(GL_MAX_PROGRAM_TEXTURE_GATHER_OFFSET), L(GL_MAX_SAMPLE_MASK_WORDS), L(GL_MAX_COLOR_TEXTURE_SAMPLES),
         L(GL_MAX_DEPTH_TEXTURE_SAMPLES), L(GL_MAX_INTEGER_SAMPLES), L(GL_MAX_VERTEX_ATTRIB_RELATIVE_OFFSET),
         L(GL_MAX_VERTEX_ATTRIB_BINDINGS), L(GL_MAX_VERTEX_ATTRIB_STRIDE),
+        /* EXT_geometry_shader's, by `-L`'s ES 3.2 names */
+        { GL_MAX_GEOMETRY_INPUT_COMPONENTS_EXT, "GL_MAX_GEOMETRY_INPUT_COMPONENTS" },
+        { GL_MAX_GEOMETRY_OUTPUT_COMPONENTS_EXT, "GL_MAX_GEOMETRY_OUTPUT_COMPONENTS" },
+        { GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS_EXT, "GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS" },
+        { GL_MAX_GEOMETRY_OUTPUT_VERTICES_EXT, "GL_MAX_GEOMETRY_OUTPUT_VERTICES" },
+        { GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS_EXT, "GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS" },
+        { GL_MAX_GEOMETRY_UNIFORM_COMPONENTS_EXT, "GL_MAX_GEOMETRY_UNIFORM_COMPONENTS" },
+        { GL_MAX_GEOMETRY_UNIFORM_BLOCKS_EXT, "GL_MAX_GEOMETRY_UNIFORM_BLOCKS" },
+        { GL_MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS_EXT, "GL_MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS" },
+        { GL_MAX_GEOMETRY_SHADER_INVOCATIONS_EXT, "GL_MAX_GEOMETRY_SHADER_INVOCATIONS" },
+        { GL_MAX_GEOMETRY_IMAGE_UNIFORMS_EXT, "GL_MAX_GEOMETRY_IMAGE_UNIFORMS" },
+        { GL_MAX_GEOMETRY_ATOMIC_COUNTER_BUFFERS_EXT, "GL_MAX_GEOMETRY_ATOMIC_COUNTER_BUFFERS" },
+        { GL_MAX_GEOMETRY_ATOMIC_COUNTERS_EXT, "GL_MAX_GEOMETRY_ATOMIC_COUNTERS" },
+        { GL_MAX_GEOMETRY_SHADER_STORAGE_BLOCKS_EXT, "GL_MAX_GEOMETRY_SHADER_STORAGE_BLOCKS" },
     };
     static const struct { GLenum e; const char *name; } indexed[] = {
         L(GL_MAX_COMPUTE_WORK_GROUP_COUNT), L(GL_MAX_COMPUTE_WORK_GROUP_SIZE),
@@ -330,6 +349,151 @@ static void in_es30(void)
 /* KHR_debug (GLES3 plan §7, item 7): a callback's message for an error,
  * the log without one, an inserted message, a debug group's push and pop
  * messages and its stack errors, a filter, labels and the limits. */
+/* A shader from shaders/ in the current directory (tools/v3dglslc/test/shaders,
+ * whose programs `make test-v3dp` compiles into files named by their hash). */
+static char *read_text(const char *name)
+{
+    char path[64];
+    FILE *f;
+    long n;
+    char *s;
+    snprintf(path, sizeof(path), "shaders/%s", name);
+    if (!(f = fopen(path, "rb")))
+        return 0;
+    fseek(f, 0, SEEK_END);
+    n = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    s = malloc(n + 1);
+    if (s && fread(s, 1, n, f) != (size_t)n) {
+        free(s);
+        s = 0;
+    }
+    if (s)
+        s[n] = 0;
+    fclose(f);
+    return s;
+}
+
+static GLenum fb_status(void)
+{
+    return glCheckFramebufferStatus(GL_FRAMEBUFFER);
+}
+
+static GLint layered(GLenum attachment)
+{
+    GLint v = -1;
+    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, attachment, GL_FRAMEBUFFER_ATTACHMENT_LAYERED_EXT, &v);
+    return v;
+}
+
+static void geometry(void)
+{
+    static const char *const names[3] = { "es32gs.vert", "es32gs.geom", "es32gs.frag" };
+    static const GLenum types[3] = { GL_VERTEX_SHADER, GL_GEOMETRY_SHADER_EXT, GL_FRAGMENT_SHADER };
+    GLint n = 0, i, ext = 0, ok = 0, v[4] = { -1, -1, -1, -1 };
+    GLuint p, t[3], fb;
+
+    glGetIntegerv(GL_NUM_EXTENSIONS, &n);
+    for (i = 0; i < n; i++)
+        if (!strcmp((const char *)glGetStringi(GL_EXTENSIONS, (GLuint)i), "GL_EXT_geometry_shader"))
+            ext = 1;
+    check(ext, "geometry: GL_EXT_geometry_shader offered");
+    check(get_int(GL_MAX_FRAMEBUFFER_LAYERS_EXT) == 256 &&
+              get_int(GL_LAYER_PROVOKING_VERTEX_EXT) == GL_UNDEFINED_VERTEX_EXT && glGetError() == GL_NO_ERROR,
+          "geometry: 256 framebuffer layers, the layer's provoking vertex undefined");
+
+    p = glCreateProgram();
+    for (i = 0; i < 3; i++) {
+        char *src = read_text(names[i]);
+        GLuint s;
+        if (!src) {
+            printf("     (no shaders/%s)\n", names[i]);
+            continue;
+        }
+        s = glCreateShader(types[i]);
+        glShaderSource(s, 1, (const GLchar *const *)&src, 0);
+        glCompileShader(s);
+        glAttachShader(p, s);
+        glDeleteShader(s);
+        free(src);
+    }
+    glGetProgramiv(p, GL_ATTACHED_SHADERS, v);
+    check(v[0] == 3 && glGetError() == GL_NO_ERROR, "geometry: a geometry shader made and attached");
+    glLinkProgram(p);
+    glGetProgramiv(p, GL_LINK_STATUS, &ok);
+    if (!ok) {
+        char log[256];
+        log[0] = 0;
+        glGetProgramInfoLog(p, sizeof(log), 0, log);
+        printf("     link es32gs: %s\n", log);
+    }
+    check(ok, "geometry: a vertex, geometry and fragment program links from its file");
+    if (ok) {
+        GLenum props[3] = { GL_REFERENCED_BY_VERTEX_SHADER, GL_REFERENCED_BY_GEOMETRY_SHADER_EXT,
+                            GL_REFERENCED_BY_FRAGMENT_SHADER };
+        GLint a[3] = { -1, -1, -1 }, b[3] = { -1, -1, -1 };
+        glGetProgramiv(p, GL_GEOMETRY_LINKED_VERTICES_OUT_EXT, &v[0]);
+        glGetProgramiv(p, GL_GEOMETRY_LINKED_INPUT_TYPE_EXT, &v[1]);
+        glGetProgramiv(p, GL_GEOMETRY_LINKED_OUTPUT_TYPE_EXT, &v[2]);
+        glGetProgramiv(p, GL_GEOMETRY_SHADER_INVOCATIONS_EXT, &v[3]);
+        check(v[0] == 3 && v[1] == GL_TRIANGLES && v[2] == GL_TRIANGLE_STRIP && v[3] == 2 &&
+                  glGetError() == GL_NO_ERROR,
+              "geometry: its layout (3 vertices, triangles in, a strip out, 2 invocations)");
+        glGetProgramResourceiv(p, GL_UNIFORM, glGetProgramResourceIndex(p, GL_UNIFORM, "gscale"), 3, props, 3, 0, a);
+        glGetProgramResourceiv(p, GL_UNIFORM, glGetProgramResourceIndex(p, GL_UNIFORM, "tint"), 3, props, 3, 0, b);
+        check(a[0] == 0 && a[1] == 1 && a[2] == 0 && b[0] == 0 && b[1] == 0 && b[2] == 1 &&
+                  glGetError() == GL_NO_ERROR,
+              "geometry: each uniform referenced by its own stage");
+        glUseProgram(p);
+        glUniform1f(glGetUniformLocation(p, "gscale"), 2.0f);
+        {
+            GLfloat f = 0.0f;
+            glGetUniformfv(p, glGetUniformLocation(p, "gscale"), &f);
+            check(f == 2.0f && glGetError() == GL_NO_ERROR, "geometry: the geometry stage's uniform set and read");
+        }
+        glUseProgram(0);
+    }
+    glDeleteProgram(p);
+
+    glGenTextures(3, t);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, t[0]);
+    glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, 16, 16, 4);
+    glBindTexture(GL_TEXTURE_2D, t[1]);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, 16, 16);
+    glBindTexture(GL_TEXTURE_3D, t[2]);
+    glTexStorage3D(GL_TEXTURE_3D, 1, GL_RGBA8, 16, 16, 8);
+    glGenFramebuffers(1, &fb);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb);
+    glFramebufferTextureEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, t[0], 0);
+    check(layered(GL_COLOR_ATTACHMENT0) == GL_TRUE && fb_status() == GL_FRAMEBUFFER_COMPLETE &&
+              glGetError() == GL_NO_ERROR,
+          "layered: a 2D array attached layered, complete");
+    glFramebufferTextureEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, t[1], 0);
+    check(layered(GL_COLOR_ATTACHMENT1) == GL_FALSE && fb_status() == GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS_EXT,
+          "layered: a 2D texture beside it (not layered): GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS");
+    glFramebufferTextureEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, t[2], 0);
+    check(layered(GL_COLOR_ATTACHMENT1) == GL_TRUE && fb_status() == GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS_EXT,
+          "layered: a 3D texture beside a 2D array: GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS");
+    glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, t[2], 0, 3);
+    check(layered(GL_COLOR_ATTACHMENT1) == GL_FALSE && fb_status() == GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS_EXT,
+          "layered: a layer beside a layered attachment: GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS");
+    glFramebufferTextureEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, 0, 0);
+    check(fb_status() == GL_FRAMEBUFFER_COMPLETE && glGetError() == GL_NO_ERROR, "layered: detached, complete again");
+    glFramebufferTextureEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, 4321, 0);
+    check(glGetError() == GL_INVALID_OPERATION, "layered: no such texture: GL_INVALID_OPERATION");
+    glFramebufferTextureEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, t[0], -1);
+    check(glGetError() == GL_INVALID_VALUE, "layered: level -1: GL_INVALID_VALUE");
+    glFramebufferTextureEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, 0, 0);
+    glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_LAYERS_EXT, 6);
+    glGetFramebufferParameteriv(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_LAYERS_EXT, v);
+    check(v[0] == 6 && glGetError() == GL_NO_ERROR, "layered: GL_FRAMEBUFFER_DEFAULT_LAYERS set and read");
+    glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_LAYERS_EXT, 257);
+    check(glGetError() == GL_INVALID_VALUE, "layered: 257 default layers: GL_INVALID_VALUE");
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDeleteFramebuffers(1, &fb);
+    glDeleteTextures(3, t);
+}
+
 static GLenum cb_source, cb_type, cb_severity;
 static GLuint cb_id;
 static int cb_calls;
@@ -460,6 +624,7 @@ int main(int argc, char **argv)
         attrib_binding();
         others(gpu);
         khr_debug();
+        geometry();
         check(glGetError() == GL_NO_ERROR, "ES 3.1: no GL error left over");
         aglDestroyContext(c31);
         c30 = context(30, &err);

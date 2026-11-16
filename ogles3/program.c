@@ -2905,6 +2905,7 @@ void ogles2_glGetProgramPipelineiv(struct OGLES3Context *ctx, GLuint pipeline, G
     case GL_VERTEX_SHADER:      v = pp->stage[0] ? (GLint)pp->stage[0]->name : 0; break;
     case GL_FRAGMENT_SHADER:    v = pp->stage[1] ? (GLint)pp->stage[1]->name : 0; break;
     case GL_COMPUTE_SHADER:     v = pp->stage[2] ? (GLint)pp->stage[2]->name : 0; break;
+    case GL_GEOMETRY_SHADER_EXT: v = 0; break; /* no separable geometry stage */
     case GL_VALIDATE_STATUS:    v = pp->validated; break;
     case GL_INFO_LOG_LENGTH:    v = pp->info_log && pp->info_log[0] ? (GLint)str_len(pp->info_log) + 1 : 0; break;
     default:
@@ -3895,12 +3896,14 @@ static ULONG uniform_stages(const struct OGLES3Image *im, const struct OGLES3Ima
         return im->abuffers[u->block].stages;
     if (u->block >= 0)
         return (u->flags & OGLES3_UNIFORM_BUFFER ? im->sblocks : im->ublocks)[u->block].stages;
-    for (k = 0; k < u->nplaces; k++)
-        m |= u->places[k].stage ? 0x10 : first;
+    for (k = 0; k < u->nplaces; k++) /* slots 0, 1 and 2 (stage_slot): Mesa's stages 0, 4 and 3 */
+        m |= u->places[k].stage == 1 ? 0x10 : u->places[k].stage == 2 ? 0x08 : first;
     if (u->sampler[0] != ~0UL)
         m |= first;
     if (u->sampler[1] != ~0UL)
         m |= 0x10;
+    if (u->sampler[2] != ~0UL)
+        m |= 0x08;
     return m;
 }
 
@@ -4157,11 +4160,13 @@ static LONG property(struct OGLES3Program *p, GLenum iface, const struct resourc
     case GL_REFERENCED_BY_VERTEX_SHADER:
     case GL_REFERENCED_BY_FRAGMENT_SHADER:
     case GL_REFERENCED_BY_COMPUTE_SHADER:
+    case GL_REFERENCED_BY_GEOMETRY_SHADER_EXT: /* EXT_geometry_shader (ES 3.1 contexts) */
         if (iface == GL_TRANSFORM_FEEDBACK_VARYING)
             return -1;
         stages = u ? uniform_stages(im, u) : r->b ? r->b->stages : r->a ? r->a->stages : r->v ? r->v->stages : 0;
         v[0] = (stages & (prop == GL_REFERENCED_BY_VERTEX_SHADER     ? 0x01
                           : prop == GL_REFERENCED_BY_FRAGMENT_SHADER ? 0x10
+                          : prop == GL_REFERENCED_BY_GEOMETRY_SHADER_EXT ? 0x08
                                                                      : 0x20)) != 0;
         return 1;
     case GL_LOCATION:

@@ -132,6 +132,20 @@ extension offered.**
   framebuffer is loaded and stored by each job into it.
 - **To run:** dEQP-GLES31 `functional.geometry_shading.*`, and
   `functional.state_query` and `negative_api` with the extension.
+- **Checked under vamos (2026-11-16):** `m8_es31` links a vertex +
+  geometry (`gl_Layer`, 2 invocations) + fragment program from its file
+  (`tools/v3dglslc/test/shaders/es32gs.*`; `make test-v3dp` passes a
+  `.geom` between the pair): the library's program hash is the
+  compiler's, the loader reads the file, the layout queries,
+  `GL_REFERENCED_BY_GEOMETRY_SHADER`, a geometry uniform set and read, and
+  the layered attachments' completeness and errors (68 of 68);
+  `check_limits.sh` with the geometry limits, identical (57 lines).
+  **Found by it:** stage B's loader still refused a program whose stages
+  were not 0x11 (a geometry one's are 0x19: no geometry program could
+  link), and `uniform_stages` counted a geometry place as the fragment
+  stage's; both fixed. `m2_link` looked for the 1.x name
+  `T:ogles2_missing_shaders.txt` (the library writes `ogles3_`): fixed, 27
+  of 27.
 
 **Stages B to D, what is left (the map for the next session):**
 - **B, the library reads it.** `program.c`: `GL_GEOMETRY_SHADER_EXT` in

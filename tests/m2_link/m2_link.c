@@ -11,7 +11,7 @@
  *   state, tex  samplers (TMU_CONFIG recipes), state variables
  *   skin    an indirectly indexed uniform array (UBO_ADDR)
  *   a program without a binary fails to link and lands in
- *           T:ogles2_missing_shaders.txt
+ *           T:ogles3_missing_shaders.txt
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -208,7 +208,7 @@ static void test_debug_log(void)
 
 /* A program no binary exists for: compiled on the Amiga when the compiler
  * is installed (LIBS:v3dglslc3, plan 8.4), else a link failure that leaves
- * its sources in T:ogles2_missing_shaders.txt. */
+ * its sources in T:ogles3_missing_shaders.txt. */
 static void test_missing(void)
 {
     GLint ok;
@@ -221,14 +221,14 @@ static void test_missing(void)
     if (l)
         UnLock(l);
     sprintf(vs, "%s// a comment no binary has\n", smooth_vs);
-    DeleteFile((STRPTR) "T:ogles2_missing_shaders.txt");
+    DeleteFile((STRPTR) "T:ogles3_missing_shaders.txt");
     p = link("smooth+comment", vs, smooth_fs, &ok);
     if (compiler) {
         check(ok, "a program without a binary is compiled on the Amiga (LIBS:v3dglslc3)");
     } else {
         check(!ok, "a program without a binary fails to link");
-        l = Lock((STRPTR) "T:ogles2_missing_shaders.txt", ACCESS_READ);
-        check(l != 0, "its sources are in T:ogles2_missing_shaders.txt");
+        l = Lock((STRPTR) "T:ogles3_missing_shaders.txt", ACCESS_READ);
+        check(l != 0, "its sources are in T:ogles3_missing_shaders.txt");
         if (l)
             UnLock(l);
     }
