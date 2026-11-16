@@ -1151,6 +1151,47 @@ ULONG ogles2_buffer_texels(struct OGLES3Context *ctx, struct OGLES3Buffer *b, in
     return (ULONG)b->texels.hostptr;
 }
 
+/* A buffer's two GPU copies, its words (uniform, storage and atomic
+ * blocks, 32-bit buffer textures) and its texels (8- and 16-bit buffer
+ * textures), may disagree once such texels exist: the GPU wrote one, a
+ * draw reads the other. Set by glTexBuffer of such a format and by a store
+ * into them (ogles2_buffer_mixed_seen). */
+BOOL ogles2_mixed_writes_seen;
+
+void ogles2_buffer_mixed_seen(void)
+{
+    ogles2_mixed_writes_seen = TRUE;
+}
+
+/* Before a draw or a dispatch builds its job (draw.c, compute.c): each
+ * buffer it may read through the other copy than the GPU wrote copied back
+ * (gpu_written: the job rendered first) and so made again from the data,
+ * never while the job is being built. Uniform, storage and atomic bindings
+ * whose texels a store wrote; buffer textures of 8- or 16-bit texels on a
+ * unit whose words the GPU wrote (transform feedback, storage stores), and
+ * 32-bit ones whose texels a store wrote. */
+void ogles2_buffers_settle(struct OGLES3Context *ctx)
+{
+    struct OGLES3BufState *bs = ctx->buf;
+    int i, cs;
+    if (!bs)
+        return;
+    for (i = 0; i < MAX_UNIFORM_BINDINGS; i++)
+        if (bs->ubo[i].b && (bs->ubo[i].b->tex_job || bs->ubo[i].b->tex_cs_written))
+            gpu_written(ctx, bs->ubo[i].b);
+    for (i = 0; i < MAX_SSBO_BINDINGS; i++)
+        if (bs->ssbo[i].b && (bs->ssbo[i].b->tex_job || bs->ssbo[i].b->tex_cs_written))
+            gpu_written(ctx, bs->ssbo[i].b);
+    for (i = 0; i < MAX_ATOMIC_BINDINGS; i++)
+        if (bs->acbo[i].b && (bs->acbo[i].b->tex_job || bs->acbo[i].b->tex_cs_written))
+            gpu_written(ctx, bs->acbo[i].b);
+    for (i = 0; i < OGLES3_MAX_TEXTURE_UNITS; i++) {
+        struct OGLES3Buffer *b = ogles2_texture_unit_buffer(ctx, i, &cs);
+        if (b && (cs != 4 ? b->xfb_job || b->cs_written : b->tex_job || b->tex_cs_written))
+            gpu_written(ctx, b);
+    }
+}
+
 /* EXT_texture_buffer's imageBuffer: a shader writes b through an image of
  * `cs`-byte components, in a job (`serial`, a draw's) or a dispatch (0,
  * waited for). The words' writes are read back as a storage buffer's
@@ -1162,6 +1203,7 @@ void ogles2_buffer_image_written(struct OGLES3Context *ctx, struct OGLES3Buffer 
         return;
     if (cs != 4) {
         ogles2_gpu_writes_seen = TRUE;
+        ogles2_mixed_writes_seen = TRUE;
         if (serial)
             b->tex_job = serial;
         else

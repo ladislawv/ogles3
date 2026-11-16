@@ -3334,6 +3334,9 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
      * the GPU wrote. Its job is its own (the open one rendered first), read
      * back after it (ogles2_xfb_gpu_counts). */
     gpu_count = im->geometry ? gen || ogles2_xfb_drawing(ctx) : gen && ((el && el->restart) || (gd && gd->ind_addr));
+    /* a buffer's two GPU copies one apart: settled before the job is built */
+    if (__builtin_expect(ogles2_mixed_writes_seen, 0))
+        ogles2_buffers_settle(ctx);
     if (__builtin_expect(gpu_count, 0) && v && v->frame_active)
         ogles2_job_flush(ctx, FALSE);
     /* A 4x MSAA default framebuffer, or multisampled renderbuffers, with

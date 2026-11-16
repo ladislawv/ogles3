@@ -1,0 +1,8 @@
+#version 310 es
+// m8_draw (docs/GLES3_PLAN.md item 4): the buffer es32ib stored into
+// through an RGBA8UI image read as a uniform block (its words, made again
+// from what the store wrote: ogles2_buffers_settle) and copied out.
+layout(local_size_x = 1) in;
+layout(std140, binding = 0) uniform Src { uvec4 w; };
+layout(std430, binding = 1) writeonly buffer Dst { uvec4 o; };
+void main() { o = w; }

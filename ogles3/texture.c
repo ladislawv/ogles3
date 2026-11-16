@@ -1473,6 +1473,8 @@ static void tex_buffer(struct OGLES3Context *ctx, GLenum target, GLenum ifmt, GL
     old = t->tbo;
     t->tbo = b;
     t->tbo_format = ifmt;
+    if (b && tbo_fmt_of(ifmt)->cs != 4) /* texels beside the words (ogles2_buffers_settle) */
+        ogles2_buffer_mixed_seen();
     t->tbo_range = range && b;
     t->tbo_offset = t->tbo_range ? (ULONG)offset : 0;
     t->tbo_size = t->tbo_range ? (ULONG)size : 0;
@@ -1504,6 +1506,20 @@ void ogles2_glTexBufferRangeOES(struct OGLES3Context *ctx, GLenum target, GLenum
 }
 
 /* buffer.c: a texture of the share group reads b (a deleted buffer stays). */
+/* Unit `unit`'s buffer texture's buffer and its texels' component bytes
+ * (ogles2_buffers_settle); NULL without one. */
+struct OGLES3Buffer *ogles2_texture_unit_buffer(struct OGLES3Context *ctx, int unit, int *cs)
+{
+    struct OGLES3TexState *ts = ctx->tex;
+    const struct OGLES3Texture *t;
+    const struct tbo_fmt *tf;
+    if (!ts || unit < 0 || unit >= OGLES3_MAX_TEXTURE_UNITS || !(t = ts->unitbuffer[unit]) || !t->tbo ||
+        !(tf = tbo_fmt_of(t->tbo_format)))
+        return 0;
+    *cs = tf->cs;
+    return t->tbo;
+}
+
 BOOL ogles2_texture_uses_buffer(struct OGLES3Context *ctx, const struct OGLES3Buffer *b)
 {
     struct OGLES3Share *sh = ctx->share;

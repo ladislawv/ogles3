@@ -239,9 +239,7 @@ written, by size:
   without a RAM copy, to be copied tile-wise (`v3d_load_tiled_image` and
   `v3d_store_tiled_image`, as the S8 images are filled); dEQP's
   `copy_image` groups copy colour formats only.
-- A uniform or storage block read of a buffer after an 8- or 16-bit
-  imageBuffer store into it in the same job reads the words, not the
-  texels the store wrote.
+- (Done since: a buffer's words and texels kept in step, below.)
 - Not possible on this GPU and its Mesa driver: RGB32 buffer textures,
   `EXT_gpu_shader5`, tessellation (so no ES 3.2 context), ASTC HDR and 3D.
 Everything written on `es32` waits for the A1200 (amigent): `m8_draw`'s
@@ -330,10 +328,21 @@ A1200).**
   (`texels_back`: bytes as they are, 16-bit values from the GPU's order),
   as the words are for 32-bit stores; a draw sampling them meanwhile reads
   them where they are (`ogles2_buffer_texels`, no copy back while a draw
-  builds). Not covered: a uniform or storage block read of the same buffer
-  after such a store in the same job reads the words, which the store did
-  not reach. m8_draw `test_image_buffer_small` (es32ib: RGBA8UI and
+  builds). m8_draw `test_image_buffer_small` (es32ib: RGBA8UI and
   RGBA16UI stores, both buffers mapped).
+- **A buffer's words and texels kept in step** (`buffer.c`,
+  `ogles2_buffers_settle`): once a buffer texture of 8- or 16-bit texels
+  exists or such a store happened (`ogles2_mixed_writes_seen`), each draw
+  and dispatch first settles the buffers it may read through the other
+  copy than the GPU wrote: uniform, storage and atomic bindings whose
+  texels a store wrote, buffer textures on a unit whose words the GPU wrote
+  (8- and 16-bit) or whose texels a store wrote (32-bit), copied back
+  (`gpu_written`, the job rendered first) and so made again from the data,
+  before the job is built. That also ends a flush in the middle of a draw's
+  build, which `ogles2_buffer_texels`' read-back could cause when a buffer
+  texture was sampled after transform feedback or a storage store into it
+  in the same job. m8_draw: es32ibu reads the RGBA8UI buffer after a store
+  as a uniform block (its first word the store's bytes).
 
 **Layered depth and stencil; depth and stencil by face or layer
 (2026-11-16, built; not run on the A1200).** Depth textures attached as 2D

@@ -345,6 +345,8 @@ static void dispatch(struct OGLES3Context *ctx, const ULONG *groups)
     }
     if (!groups[0] || !groups[1] || !groups[2] || !ctx->v3d)
         return;
+    if (ogles2_mixed_writes_seen) /* a buffer's two GPU copies one apart (buffer.c) */
+        ogles2_buffers_settle(ctx);
     /* A float or depth texture bound to a sampler: the 32-bit-sampler
      * variant of the program's .v3dw (the compiler writes one for a
      * program with samplers). */

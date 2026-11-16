@@ -3777,6 +3777,39 @@ static void test_image_buffer_small(void)
         }
     check(m8 && ok && glGetError() == GL_NO_ERROR, "imageBuffer: RGBA8UI stores in the buffer's data");
     glUnmapBuffer(GL_TEXTURE_BUFFER_EXT);
+    /* the same buffer's words after the store, as a uniform block: a
+     * second store first, then es32ibu copies the block's first 16 bytes */
+    {
+        GLuint u = compute_program("es32ibu"), o;
+        const GLuint *w;
+        if (u) {
+            glUseProgram(p);
+            glDispatchCompute(1, 1, 1);
+            glMemoryBarrier(GL_UNIFORM_BARRIER_BIT);
+            glGenBuffers(1, &o);
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, o);
+            glBufferData(GL_SHADER_STORAGE_BUFFER, 16, zeros, GL_DYNAMIC_COPY);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, o);
+            glBindBufferBase(GL_UNIFORM_BUFFER, 0, b[0]);
+            glUseProgram(u);
+            glDispatchCompute(1, 1, 1);
+            glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT);
+            w = glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, 16, GL_MAP_READ_BIT);
+            /* texel 0 (10, 20, 30, 40) as the uniform block's first word, the
+             * buffer's bytes in order: a little-endian GPU word */
+            check(w && w[0] == (10u | 20u << 8 | 30u << 16 | 40u << 24) && glGetError() == GL_NO_ERROR,
+                  "imageBuffer: an RGBA8UI store read as a uniform block afterwards");
+            if (w && w[0] != (10u | 20u << 8 | 30u << 16 | 40u << 24))
+                printf("     word 0x%08lx\n", (unsigned long)w[0]);
+            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+            glBindBufferBase(GL_UNIFORM_BUFFER, 0, 0);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, 0);
+            glDeleteBuffers(1, &o);
+            glDeleteProgram(u);
+        } else {
+            check(0, "imageBuffer: es32ibu links");
+        }
+    }
     ok = 1;
     glBindBuffer(GL_TEXTURE_BUFFER_EXT, b[1]);
     m16 = glMapBufferRange(GL_TEXTURE_BUFFER_EXT, 0, 32, GL_MAP_READ_BIT);

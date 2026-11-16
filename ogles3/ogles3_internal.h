@@ -1296,6 +1296,10 @@ void ogles2_program_unref(struct OGLES3Context *ctx, struct OGLES3Program *p);
 void ogles2_query_xfb_add(struct OGLES3Context *ctx, ULONG primitives);
 void ogles2_query_gen_add(struct OGLES3Context *ctx, ULONG primitives);
 void ogles2_xfb_gpu_counts(struct OGLES3Context *ctx, BOOL fed);
+extern BOOL ogles2_mixed_writes_seen;
+void ogles2_buffer_mixed_seen(void);
+void ogles2_buffers_settle(struct OGLES3Context *ctx);
+struct OGLES3Buffer *ogles2_texture_unit_buffer(struct OGLES3Context *ctx, int unit, int *cs);
 /* vao.c: the bound vertex array object's name (0: object 0); whether an
  * object not bound uses b; freed with the context. */
 GLuint ogles2_vao_bound(const struct OGLES3Context *ctx);
