@@ -1687,6 +1687,15 @@ static BOOL level_param(struct OGLES3Context *ctx, GLenum target, GLint level, G
     case GL_TEXTURE_ALPHA_TYPE:   *v = lf && lf->a ? (GLint)lf->ctype : GL_NONE; break;
     case GL_TEXTURE_DEPTH_TYPE:   *v = lf && lf->d ? (GLint)lf->dtype : GL_NONE; break;
     case GL_TEXTURE_COMPRESSED:   *v = lf && lf->compressed ? GL_TRUE : GL_FALSE; break;
+    case GL_TEXTURE_BUFFER_DATA_STORE_BINDING_OES: /* EXT_texture_buffer (ES 3.1 contexts): 0 of */
+    case GL_TEXTURE_BUFFER_OFFSET_OES:             /* other targets (Mesa's */
+    case GL_TEXTURE_BUFFER_SIZE_OES:               /* get_tex_level_parameter_image) */
+        if (!ogles2_es31(ctx)) {
+            ogles2_error(ctx, GL_INVALID_ENUM);
+            return FALSE;
+        }
+        *v = 0;
+        break;
     default:
         ogles2_error(ctx, GL_INVALID_ENUM);
         return FALSE;
@@ -5297,6 +5306,12 @@ static void tex_storage(struct OGLES3Context *ctx, GLenum target, GLsizei levels
     GLenum format, type;
     BOOL layers = target == GL_TEXTURE_3D || target == GL_TEXTURE_2D_ARRAY || target == GL_TEXTURE_CUBE_MAP_ARRAY_OES;
     int l, k, max, n = 1, big;
+    /* ES 3.0 8.18: compressed formats too (ETC2/EAC; S3TC; ASTC with
+     * KHR_texture_compression_astc_ldr): levels of zeroed blocks, as
+     * glCompressedTexImage2D keeps them (dxt_image); not ETC1 (Mesa's
+     * _mesa_is_legal_tex_storage_format), no 3D textures (no ETC2 3D, no
+     * sliced 3D ASTC). Found by m8_draw's ASTC levels test (2026-11-16). */
+    ULONG bs = dxt_block_bytes(ifmt);
     /* GLES2 contexts: EXT_texture_storage's (2D, cube maps, OES_texture_3D's 3D) */
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
         return;
@@ -5311,9 +5326,18 @@ static void tex_storage(struct OGLES3Context *ctx, GLenum target, GLsizei levels
     }
     if (!(t = bound(ctx, ts, target)))
         return;
-    if (!sized_storage(ifmt, &format, &type)) {
+    if (bs && ifmt != GL_ETC1_RGB8_OES && ((!etc2_format(ifmt) && !astc_format(ifmt)) || ogles2_es3(ctx))) {
+        if (target == GL_TEXTURE_3D) {
+            ogles2_error(ctx, GL_INVALID_OPERATION);
+            return;
+        }
+        format = ifmt; /* a compressed level's format, its type 0 (dxt_image's) */
+        type = 0;
+    } else if (!sized_storage(ifmt, &format, &type)) {
         ogles2_error(ctx, es3_sized(ifmt) ? GL_INVALID_OPERATION : GL_INVALID_ENUM);
         return;
+    } else {
+        bs = 0;
     }
     max = target == GL_TEXTURE_2D_ARRAY || target == GL_TEXTURE_CUBE_MAP_ARRAY_OES ? 2048 : MAX_SIZE;
     if (levels < 1 || width < 1 || height < 1 || depth < 1 || width > MAX_SIZE || height > MAX_SIZE ||
@@ -5351,19 +5375,23 @@ static void tex_storage(struct OGLES3Context *ctx, GLenum target, GLsizei levels
         int w = width >> l ? width >> l : 1, h = height >> l ? height >> l : 1;
         int d = target == GL_TEXTURE_3D ? (depth >> l ? depth >> l : 1) : layers ? depth : 1;
         int nf = target == GL_TEXTURE_CUBE_MAP ? 6 : d;
-        ULONG bytes = (ULONG)w * h * copy_bytes(class_of(format, type));
+        ULONG bytes = bs ? bdiv((ULONG)w, blk_w(ifmt)) * bdiv((ULONG)h, blk_h(ifmt)) * bs
+                         : (ULONG)w * h * copy_bytes(class_of(format, type));
         for (k = 0; k < nf; k++) {
             UBYTE *img = AllocVec(bytes, MEMF_ANY | MEMF_CLEAR);
             if (!img) {
                 ogles2_error(ctx, GL_OUT_OF_MEMORY);
                 return;
             }
-            put_level(&t->f[k], l, img, w, h, format, type, FALSE, keep_sized(ifmt), TRUE, ifmt);
+            if (bs)
+                put_level(&t->f[k], l, img, w, h, format, 0, FALSE, 0, FALSE, format);
+            else
+                put_level(&t->f[k], l, img, w, h, format, type, FALSE, keep_sized(ifmt), TRUE, ifmt);
         }
         if (layers)
             t->d[l] = (UWORD)d;
     }
-    if (class_of(format, type) != CLASS_RGBA8)
+    if (!bs && class_of(format, type) != CLASS_RGBA8)
         ogles2_wide_seen |= wide_class(format, type);
     t->immutable_levels = (UBYTE)levels;
     t->es3_rules = TRUE;
@@ -6362,13 +6390,36 @@ static BOOL copy_bounds(struct OGLES3Context *ctx, const struct OGLES3Texture *t
     return TRUE;
 }
 
-/* ES 3.2 8.3's compatibility: the same internal format, one view class, or
- * a compressed format and a 64- or 128-bit one of its block's size. */
+/* A compressed format's view class (ES 3.2 table 8.27), 0 for none: a
+ * format and its signed or sRGB twin, the same blocks (dEQP-GLES31
+ * copy_image.compressed). */
+static int compressed_class(GLenum f)
+{
+    switch (f) {
+    case GL_COMPRESSED_R11_EAC: case GL_COMPRESSED_SIGNED_R11_EAC: return 1;
+    case GL_COMPRESSED_RG11_EAC: case GL_COMPRESSED_SIGNED_RG11_EAC: return 2;
+    case GL_COMPRESSED_RGB8_ETC2: case GL_COMPRESSED_SRGB8_ETC2: return 3;
+    case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2: case GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2: return 4;
+    case GL_COMPRESSED_RGBA8_ETC2_EAC: case GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC: return 5;
+    default: break;
+    }
+    if (f >= GL_COMPRESSED_RGBA_ASTC_4x4_KHR && f <= GL_COMPRESSED_RGBA_ASTC_12x12_KHR)
+        return 16 + (int)(f - GL_COMPRESSED_RGBA_ASTC_4x4_KHR);
+    if (f >= GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR && f <= GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR)
+        return 16 + (int)(f - GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR);
+    return 0;
+}
+
+/* ES 3.2 8.3's compatibility: the same internal format, one view class
+ * (compressed ones too), or a compressed format and a 64- or 128-bit one of
+ * its block's size. */
 static BOOL copy_compatible(GLenum a, GLenum b)
 {
     const struct copy_fmt *fa = copy_fmt_of(a), *fb = copy_fmt_of(b);
     ULONG ba = dxt_block_bytes(a), bb = dxt_block_bytes(b);
     if (a == b)
+        return TRUE;
+    if (compressed_class(a) && compressed_class(a) == compressed_class(b))
         return TRUE;
     if (fa && fb)
         return fa->bits == fb->bits;
@@ -7553,12 +7604,15 @@ BOOL ogles2_texture_state(struct OGLES3Context *ctx, int unit, int kind, ULONG *
     struct OGLES3TexState *ts = ctx->tex;
     struct OGLES3Texture *t;
     struct OGLES3Sampler *so;
-    if (ts && kind != OGLES3_TEX_NONE && !(ctx->probe & OGLES3_PROBE_CPU_UPLOAD)) {
+    /* texelFetch's (OGLES3_TEX_TXF): the records' own, sRGB decoded (the
+     * top bit of the sampler version they were made with) */
+    ULONG txf = (kind & OGLES3_TEX_TXF) ? 0x80000000UL : 0;
+    if (ts && (kind & ~OGLES3_TEX_TXF) != OGLES3_TEX_NONE && !(ctx->probe & OGLES3_PROBE_CPU_UPLOAD)) {
         so = ts->unitsmp[unit];
-        t = based_view(ctx, ts, unit_texture(ts, kind, unit));
+        t = based_view(ctx, ts, unit_texture(ts, kind & ~OGLES3_TEX_TXF, unit));
         if (t->gpu && (t->st_own || (t->st_gen == g_v3d_cl_generation && t->st_ctx == ctx)) &&
             t->st_mem == t->gpu->texture_mem.hostptr && t->st_pver == t->pver &&
-            t->st_sver == (so ? so->ver : 0)) {
+            t->st_sver == ((so ? so->ver : 0) | txf)) {
             t->used_serial = ctx->job_serial;
             *tex_state = t->st_tex;
             *sampler_state = t->st_smp;
@@ -7586,7 +7640,7 @@ static BOOL texture_state_build(struct OGLES3Context *ctx, int unit, int kind, U
     struct OGLES3Sampler *so;
     const struct OGLES3SamplerParams *sp;
     ULONG sver;
-    BOOL isfb;
+    BOOL isfb, txf;
     static const UBYTE stencil_sw[4] = { v3d_SWIZZLE_RED, v3d_SWIZZLE_ZERO, v3d_SWIZZLE_ZERO, v3d_SWIZZLE_ONE };
     const UBYTE *fsw;
     UBYTE hw;                       /* the format the TMU reads (the border words') */
@@ -7594,8 +7648,12 @@ static BOOL texture_state_build(struct OGLES3Context *ctx, int unit, int kind, U
 
     if (!ts)
         return FALSE;
+    /* EXT_texture_sRGB_decode: texelFetch always decodes (Mesa's
+     * st_get_sampler_views, textures_used_by_txf) */
+    txf = (kind & OGLES3_TEX_TXF) != 0;
+    kind &= ~OGLES3_TEX_TXF;
     so = ts->unitsmp[unit];
-    sver = so ? so->ver : 0;
+    sver = (so ? so->ver : 0) | (txf ? 0x80000000UL : 0);
     /* A sampler of a kind with no textures yet (OGLES3_TEX_NONE: GLSL ES
      * 3.00's integer samplers until stage B) reads what an incomplete
      * texture reads. */
@@ -7707,9 +7765,9 @@ static BOOL texture_state_build(struct OGLES3Context *ctx, int unit, int kind, U
     }
     /* ES 3.0's sRGB formats: RGBA8 the TMU decodes (Mesa: util_format_is_srgb),
      * unless EXT_texture_sRGB_decode's SKIP_DECODE (Mesa samples the linear
-     * format then) */
+     * format then) and no texelFetch reads it */
     tsr->srgb = (t->f[0].sized[0] == GL_SRGB8 || t->f[0].sized[0] == GL_SRGB8_ALPHA8 ||
-                 srgb_etc2(t->f[0].format[0])) && sp->srgb_decode != GL_SKIP_DECODE_EXT;
+                 srgb_etc2(t->f[0].format[0])) && (sp->srgb_decode != GL_SKIP_DECODE_EXT || txf);
     hw = (UBYTE)tsr->texture_type;
     fsw = stencil ? stencil_sw : t->swizzle;
     /* The GL swizzle composed with the format's (Mesa's

@@ -1317,6 +1317,77 @@ static void test_etc2(void)
     glDeleteProgram(pa);
 }
 
+/* ASTC 5x4 (ES 3.2 plan item 4) of every level, linear and sRGB:
+ * 130x124 textures of 8 levels, every block a void-extent one (one colour,
+ * 16 bits a channel; sRGB decodes the top 8: 128, 64, 192 to 55, 13, 134),
+ * each level sampled (its base level, nearest); then glCopyImageSubData of
+ * level 0 within the view class (linear to sRGB, sRGB to sRGB) and every
+ * level of each sampled again. dEQP-GLES31 copy_image.compressed's sRGB
+ * ASTC levels 2 on failed after its copies (2026-11-16). */
+static int astc_levels_are(GLuint p, GLuint t, int r, int g, int b, const char *what)
+{
+    int l, ok = 1;
+    glBindTexture(GL_TEXTURE_2D, t);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    for (l = 0; l < 8 && ok; l++) {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, l);
+        glClear(GL_COLOR_BUFFER_BIT);
+        draw_cover(p);
+        if (!pixel_is(32, 32, r, g, b, 255, 3)) {
+            printf("     %s: level %d\n", what, l);
+            ok = 0;
+        }
+    }
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+    return ok && glGetError() == GL_NO_ERROR;
+}
+
+static void test_astc_levels(void)
+{
+    static const GLubyte ve[16] = { 0xFC, 0xFD, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                                    0x00, 0x80, 0x00, 0x40, 0x00, 0xC0, 0xFF, 0xFF };
+    GLuint p = program("es3wide"), t[3];
+    GLubyte *blocks = malloc(26 * 31 * 16);
+    int s, l, k;
+    if (!p || !blocks) {
+        check(0, "ASTC levels: es3wide links");
+        free(blocks);
+        return;
+    }
+    for (k = 0; k < 26 * 31; k++)
+        memcpy(blocks + k * 16, ve, 16);
+    glUseProgram(p);
+    glUniform1i(glGetUniformLocation(p, "tex"), 0);
+    glGenTextures(3, t);
+    for (s = 0; s < 3; s++) { /* linear, sRGB, sRGB */
+        GLenum f = s ? GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR : GL_COMPRESSED_RGBA_ASTC_5x4_KHR;
+        glBindTexture(GL_TEXTURE_2D, t[s]);
+        glTexStorage2D(GL_TEXTURE_2D, 8, f, 130, 124);
+        for (l = 0; l < 8; l++) {
+            int w = 130 >> l, h = 124 >> l;
+            w = w ? w : 1;
+            h = h ? h : 1;
+            glCompressedTexSubImage2D(GL_TEXTURE_2D, l, 0, 0, w, h, f, ((w + 4) / 5) * ((h + 3) / 4) * 16, blocks);
+        }
+    }
+    check(glGetError() == GL_NO_ERROR && astc_levels_are(p, t[0], 128, 64, 192, "linear"),
+          "ASTC levels: a linear 5x4 texture's 8 levels (128, 64, 192)");
+    check(astc_levels_are(p, t[1], 55, 13, 134, "sRGB"),
+          "ASTC levels: an sRGB 5x4 texture's 8 levels (128, 64, 192 decoded to 55, 13, 134)");
+    glCopyImageSubDataEXT(t[1], GL_TEXTURE_2D, 0, 0, 0, 0, t[2], GL_TEXTURE_2D, 0, 0, 0, 0, 130, 124, 1);
+    check(glGetError() == GL_NO_ERROR && astc_levels_are(p, t[1], 55, 13, 134, "sRGB source") &&
+              astc_levels_are(p, t[2], 55, 13, 134, "sRGB destination"),
+          "ASTC levels: sRGB to sRGB copied, both textures' levels still right");
+    glCopyImageSubDataEXT(t[0], GL_TEXTURE_2D, 1, 0, 0, 0, t[2], GL_TEXTURE_2D, 1, 0, 0, 0, 65, 62, 1);
+    check(glGetError() == GL_NO_ERROR && astc_levels_are(p, t[0], 128, 64, 192, "linear source") &&
+              astc_levels_are(p, t[2], 55, 13, 134, "sRGB destination of linear blocks"),
+          "ASTC levels: linear to sRGB within the view class (ES 3.2 table 8.27)");
+    glDeleteTextures(3, t);
+    glDeleteProgram(p);
+    free(blocks);
+}
+
 /* ---- render targets beyond 8 bits (GLES3 plan stage B item 10) ---- */
 
 static GLuint storage_texture(GLenum ifmt)
@@ -4093,6 +4164,8 @@ int main(void)
                 test_copy_exact();
             if (!skipped("copy_gpu"))
                 test_copy_gpu();
+            if (!skipped("astc_levels"))
+                test_astc_levels();
             if (!skipped("pipeline_geometry"))
                 test_pipeline_geometry();
             if (!skipped("image_buffer_small"))

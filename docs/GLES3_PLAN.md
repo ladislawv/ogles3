@@ -237,12 +237,62 @@ another program"): `pipe_validate` says so too, a draw
 when Mesa refuses a key-state draw through it. Not possible on this GPU
 and its Mesa driver: RGB32 buffer textures, `EXT_gpu_shader5`,
 tessellation (so no ES 3.2 context), ASTC HDR and 3D.
+**dEQP-GLES31's "To run" groups on the A1200 (2026-11-16, evening; amigent,
+`BRIDGE=1 tests/a1200/a_run.sh m8-3`, the programs compiled on the PC).**
+After the fixes below, none failed: `geometry_shading` 198 (9 not
+supported), `texture.border_clamp` 601 (23: no `OES_texture_float_linear`,
+V3D 4.2 filters no 32-bit floats), `srgb_texture_decode` 7 (14: the
+`EXT_texture_sRGB_R8`/`RG8` formats), `shaders.framebuffer_fetch` 44,
+`texture.multisample` 55 (102: 4 samples only), `blend_equation_advanced`
+102, `sample_shading` 20, `separate_shader` 223 (40: GLSL ES 3.20),
+`state_query` 1,095 (236), `debug.negative_coverage` 1,377 (117: ES 3.2
+contexts, tessellation, `EXT_gpu_shader5`), `texture.texture_buffer` 351,
+`texture.filtering.cube_array` 200, `texture.format` 178,
+`texture.specification` 236, `texture.gather` 435 (396: `EXT_gpu_shader5`),
+`copy_image.non_compressed` 7,835 of 7,835. This dEQP has no
+`draw_buffers_indexed` group (`state_query.indexed` covers its state);
+dEQP's `--deqp-case` takes no `*` inside a name (the cube array groups by
+name). Fixed on the way:
+- **v3dglslc crashed on `textureSize()` of a buffer texture** (290 of
+  `texture_buffer`'s cases): its key-state draws bound no texture for
+  buffer, cube map array or 2D multisample array samplers (Mesa's sampler
+  view NULL, `get_texture_size` read it). `more_samplers` has them now.
+- **texelFetch decodes sRGB whatever `SKIP_DECODE` says**
+  (EXT_texture_sRGB_decode; Mesa's `textures_used_by_txf`): `UNIFORMS`
+  flags bit 4 (FORMAT.md), `OGLES3_UNIFORM_TXF`, `OGLES3_TEX_TXF` into
+  `ogles2_texture_state` (the records' sampler version's top bit).
+- **A pipeline's interface blocks matched by type** (Mesa's `validate_io`
+  compares `interface_type`): `INTERFACE_TYPES` hashes the block's identity
+  and array size too (a member's order, a block against a variable).
+- **64 combined texture units** (four stages of 16, as Mesa sums them with
+  a geometry stage; dEQP wants 64 with `EXT_geometry_shader`), in every
+  context version and `gl_MaxCombinedTextureImageUnits`.
+- `glGetInternalformativ` of `GL_TEXTURE_2D_MULTISAMPLE_ARRAY`;
+  `glGetTexLevelParameter`'s `GL_TEXTURE_BUFFER_*` 0 for other targets;
+  KHR_blend_equation_advanced's errors for empty draws too.
+- **Compressed copies within a view class** (ES 3.2 table 8.27: R11 and
+  signed R11, ETC2 and its sRGB, each ASTC size and its sRGB):
+  `compressed_class` (not yet rerun).
+- **`glTexStorage2D`/`3D` of compressed formats** (ES 3.0 8.18; none was
+  accepted): zeroed blocks, as `glCompressedTexImage2D` keeps them; found by
+  `m8_draw`'s new ASTC levels test (not yet rerun).
+- The program cache is not keyed on the compiler: after a compiler change
+  `Stuff:amigent/work/ogles2-m8-3/cache` must be emptied (the reruns of
+  `srgb_texture_decode` and `separate_shader` read the old files until it
+  was).
+Open: `copy_image.compressed`'s sRGB ASTC copies (same format) failed at
+level 2 and below, the RGBA ones passed: `m8_draw`'s ASTC levels test
+(130x124, 8 levels, void-extent blocks) is to tell sampling from copying.
+`copy_image.compressed` and `.mixed` are slow (dEQP decodes the references
+on the 68k: 15 cases a minute).
+
 **dEQP-GLES31 `functional.geometry_shading.*` on the A1200 (2026-11-16,
 `BRIDGE=1 ARGS="CASES=... NAME=gs" tests/a1200/a_run.sh m8-3`, the
 programs compiled on the PC): 198 of 207 passed, none failed, 9 not
 supported** (`basic.output_256`: 2048 output components, the limit is
-1024; eight `*_2d_multisample_array` cases:
-`OES_texture_storage_multisample_2d_array`, not offered). The first run
+1024; eight `*_2d_multisample_array` cases: dEQP wants an ES 3.2
+context beside `OES_texture_storage_multisample_2d_array`, which is
+offered; no ES 3.2 context without tessellation). The first run
 (176 passed, 11 failed, then aborted) found two faults, fixed:
 - **The adjacency primitives** went to the GPU as GL's numbers (0xA to
   0xD); the hardware's are 8 to 11 (Mesa's `v3d_hw_prim_type`):

@@ -288,6 +288,21 @@ static struct { GLenum type, target; char kind; GLuint tex[2]; } more_samplers[]
     { GL_SAMPLER_2D_MULTISAMPLE, GL_TEXTURE_2D_MULTISAMPLE, 'f' },
     { GL_INT_SAMPLER_2D_MULTISAMPLE, GL_TEXTURE_2D_MULTISAMPLE, 'i' },
     { GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE, GL_TEXTURE_2D_MULTISAMPLE, 'u' },
+    /* OES_texture_storage_multisample_2d_array */
+    { GL_SAMPLER_2D_MULTISAMPLE_ARRAY, GL_TEXTURE_2D_MULTISAMPLE_ARRAY, 'f' },
+    { GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY, GL_TEXTURE_2D_MULTISAMPLE_ARRAY, 'i' },
+    { GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY, GL_TEXTURE_2D_MULTISAMPLE_ARRAY, 'u' },
+    /* EXT_texture_cube_map_array */
+    { GL_SAMPLER_CUBE_MAP_ARRAY, GL_TEXTURE_CUBE_MAP_ARRAY, 'f' },
+    { GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW, GL_TEXTURE_CUBE_MAP_ARRAY, 'd' },
+    { GL_INT_SAMPLER_CUBE_MAP_ARRAY, GL_TEXTURE_CUBE_MAP_ARRAY, 'i' },
+    { GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY, GL_TEXTURE_CUBE_MAP_ARRAY, 'u' },
+    /* EXT_texture_buffer: a buffer's texels (nothing bound, Mesa's sampler
+     * view is NULL and textureSize's uniform read it: the compiler crashed,
+     * 2026-11-16, dEQP-GLES31 texture.texture_buffer) */
+    { GL_SAMPLER_BUFFER, GL_TEXTURE_BUFFER, 'f' },
+    { GL_INT_SAMPLER_BUFFER, GL_TEXTURE_BUFFER, 'i' },
+    { GL_UNSIGNED_INT_SAMPLER_BUFFER, GL_TEXTURE_BUFFER, 'u' },
 };
 
 static int more_sampler(GLenum type)
@@ -325,8 +340,23 @@ static GLuint make_key_texture(GLenum target, char kind, int wide)
             _mesa_TexImage2D(face, 0, ifmt, 1, 1, 0, fmt, type, zeros);
     } else if (target == GL_TEXTURE_3D || target == GL_TEXTURE_2D_ARRAY) {
         _mesa_TexImage3D(target, 0, ifmt, 1, 1, 1, 0, fmt, type, zeros);
+    } else if (target == GL_TEXTURE_CUBE_MAP_ARRAY) { /* one cube: six layers */
+        _mesa_TexImage3D(target, 0, ifmt, 1, 1, 6, 0, fmt, type, zeros);
     } else if (target == GL_TEXTURE_2D_MULTISAMPLE) { /* no sampler state */
         _mesa_TexStorage2DMultisample(target, 4, ifmt, 1, 1, GL_TRUE);
+        _mesa_BindTexture(target, 0);
+        return t;
+    } else if (target == GL_TEXTURE_2D_MULTISAMPLE_ARRAY) {
+        _mesa_TexStorage3DMultisample(target, 4, ifmt, 1, 1, 1, GL_TRUE);
+        _mesa_BindTexture(target, 0);
+        return t;
+    } else if (target == GL_TEXTURE_BUFFER) { /* a buffer of one texel; no sampler state */
+        GLuint b;
+        _mesa_GenBuffers(1, &b);
+        _mesa_BindBuffer(GL_TEXTURE_BUFFER, b);
+        _mesa_BufferData(GL_TEXTURE_BUFFER, 16, zeros, GL_STATIC_DRAW);
+        _mesa_BindBuffer(GL_TEXTURE_BUFFER, 0);
+        _mesa_TexBuffer(target, ifmt, b);
         _mesa_BindTexture(target, 0);
         return t;
     } else {
@@ -1620,9 +1650,11 @@ int main(int argc, char **argv)
      * gl_Max* constants must equal them: dEQP-GLES2 builtin_variable): four
      * draw buffers (EXT_draw_buffers, M7 step 5; OGLES3_MAX_DRAW_BUFFERS), 16
      * texture units in each stage (OGLES3_MAX_STAGE_SAMPLERS; the driver
-     * offers 24) and 48 in all (OGLES3_MAX_TEXTURE_UNITS: ES 3.1's minimum,
-     * in every context version, so a GLSL ES 1.00 program's file is the same
-     * in both, docs/GLES3_PLAN.md §2; the driver offers 96). */
+     * offers 24) and 64 in all (OGLES3_MAX_TEXTURE_UNITS: four stages of
+     * 16, EXT_geometry_shader's minimum, as Mesa sums them; 48, ES 3.1's
+     * minimum, until 2026-11-16; in every context version, so a GLSL ES 1.00
+     * program's file is the same in both, docs/GLES3_PLAN.md §2; the driver
+     * offers 96). */
     {
         GET_CURRENT_CONTEXT(ctx);
         ctx->Const.MaxDrawBuffers = 4;
@@ -1630,7 +1662,7 @@ int main(int argc, char **argv)
         ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxTextureImageUnits = 16;
         ctx->Const.Program[MESA_SHADER_COMPUTE].MaxTextureImageUnits = 16;
         ctx->Const.Program[MESA_SHADER_GEOMETRY].MaxTextureImageUnits = 16; /* EXT_geometry_shader's too */
-        ctx->Const.MaxCombinedTextureImageUnits = 48;
+        ctx->Const.MaxCombinedTextureImageUnits = 64;
         /* Not GLSL's, but kept equal so -L lists exactly what ogles3.library
          * answers: indices up to 2^24 - 1 (ES 3.0's minimum; the draws rebase
          * indices on the CPU), no server-side wait (glWaitSync waits for

@@ -114,12 +114,14 @@ struct OGLES3PixelStore
 /* A GL context. Opaque to clients (struct OGLES3Context in the headers). */
 #define OGLES3_CONTEXT_MAGIC 0x474c4532UL /* "GLE2" */
 #define OGLES3_MAX_VERTEX_ATTRIBS 16
-/* Texture units are binding points: a program may use units 0-47 across its
- * stages (GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS: ES 3.1's minimum, in every
- * context version, docs/GLES3_PLAN.md §2; 32 until 1.3), but a stage has at
+/* Texture units are binding points: a program may use units 0-63 across its
+ * stages (GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS: four stages of 16 with
+ * EXT_geometry_shader's, as Mesa sums them, in every context version,
+ * docs/GLES3_PLAN.md §2; 48, ES 3.1's minimum, until 2026-11-16; 32 until
+ * 1.3), but a stage has at
  * most 16 samplers, its texture indices 0-15 (GL_MAX_TEXTURE_IMAGE_UNITS, the
  * TMU_CONFIG recipes' index). M7 step 2; plan 7.6. */
-#define OGLES3_MAX_TEXTURE_UNITS  48
+#define OGLES3_MAX_TEXTURE_UNITS  64
 #define OGLES3_MAX_STAGE_SAMPLERS 16
 #define OGLES3_MAX_STAGE_IMAGES 32 /* ES 3.1: GL_MAX_*_IMAGE_UNIFORMS */
 #define OGLES3_MAX_VIEWPORT 4096 /* V3D_MAX_FRAMEBUFFER_SIZE on 4.2; GL_MAX_VIEWPORT_DIMS */
@@ -410,6 +412,7 @@ struct OGLES3Place
 #define OGLES3_UNIFORM_BUFFER  8 /* ES 3.1: a storage block's member (GL_BUFFER_VARIABLE), no uniform */
 #define OGLES3_UNIFORM_ATOMIC  16 /* ES 3.1: an atomic counter (block: its atomic counter buffer), no location */
 #define OGLES3_UNIFORM_IMAGE   32 /* ES 3.1: an image (sampler: its image index), its unit layout(binding)'s */
+#define OGLES3_UNIFORM_TXF     64 /* a sampler texelFetch reads in some stage (FORMAT.md, flags bit 4) */
 
 struct OGLES3ImageUniform
 {
@@ -1096,6 +1099,8 @@ BOOL ogles2_texture_zs_surface(struct OGLES3Context *ctx, struct OGLES3Texture *
 #define OGLES3_TEX_2DMSARRAY 9 /* OES_texture_storage_multisample_2d_array (texelFetch only) */
 #define OGLES3_TEX_INT   0x10 /* ORed in: an integer sampler (isampler*, usampler*): its incomplete
                                * texture's (0, 0, 0, 1) integers */
+#define OGLES3_TEX_TXF   0x40 /* ORed in for ogles2_texture_state only: a sampler texelFetch reads
+                               * (sRGB decoded whatever SKIP_DECODE says) */
 static inline int ogles2_sampler_kind(GLenum type)
 {
     return type == GL_SAMPLER_2D || type == GL_SAMPLER_2D_SHADOW ? OGLES3_TEX_2D

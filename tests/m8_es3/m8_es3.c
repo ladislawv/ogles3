@@ -9,7 +9,7 @@
  * Covered so far (stage A item 1): the version tag and its errors, the
  * version strings, GL_MAJOR/MINOR_VERSION, GL_EXTENSIONS against
  * glGetStringi, ES3-only entries and queries refused in GLES2 contexts, the
- * share groups' one version, 48 combined texture units in both versions;
+ * share groups' one version, 64 combined texture units in both versions;
  * (items 2 and 3) the #version check, GLSL ES 3.00 programs linked from
  * their format 2 files (shaders/ in the current directory, the files in
  * PROGDIR:, as `make test-v3dp` names them), explicit locations,
@@ -589,13 +589,13 @@ int main(int argc, char **argv)
         return 10;
     }
 
-    /* The GLES2 context: as 1.x, with 48 combined units; the ES3 entries and
+    /* The GLES2 context: as 1.x, with 64 combined units; the ES3 entries and
      * queries refused. */
     aglMakeCurrent(c2);
     check(prefix(glGetString(GL_VERSION), "OpenGL ES 2.0 ogles3.library "), "ES 2.0: GL_VERSION");
     check(prefix(glGetString(GL_SHADING_LANGUAGE_VERSION), "OpenGL ES GLSL ES 1.00"), "ES 2.0: GLSL ES 1.00");
-    check(get_int(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS) == 48 && glGetError() == GL_NO_ERROR,
-          "ES 2.0: 48 combined texture units");
+    check(get_int(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS) == 64 && glGetError() == GL_NO_ERROR,
+          "ES 2.0: 64 combined texture units");
     check(get_int(GL_MAJOR_VERSION) == -12345 && glGetError() == GL_INVALID_ENUM,
           "ES 2.0: GL_MAJOR_VERSION is GL_INVALID_ENUM");
     check(glGetStringi(GL_EXTENSIONS, 0) == 0 && glGetError() == GL_INVALID_OPERATION,
@@ -605,10 +605,10 @@ int main(int argc, char **argv)
         glGetInteger64v(GL_MAX_TEXTURE_SIZE, &v);
         check(v == -5 && glGetError() == GL_INVALID_OPERATION, "ES 2.0: glGetInteger64v is GL_INVALID_OPERATION");
     }
-    glActiveTexture(GL_TEXTURE0 + 47);
-    check(glGetError() == GL_NO_ERROR, "ES 2.0: glActiveTexture(GL_TEXTURE47)");
-    glActiveTexture(GL_TEXTURE0 + 48);
-    check(glGetError() == GL_INVALID_ENUM, "ES 2.0: glActiveTexture(GL_TEXTURE48) is GL_INVALID_ENUM");
+    glActiveTexture(GL_TEXTURE0 + 63);
+    check(glGetError() == GL_NO_ERROR, "ES 2.0: glActiveTexture(GL_TEXTURE63)");
+    glActiveTexture(GL_TEXTURE0 + 64);
+    check(glGetError() == GL_INVALID_ENUM, "ES 2.0: glActiveTexture(GL_TEXTURE64) is GL_INVALID_ENUM");
     glActiveTexture(GL_TEXTURE0);
     glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
     check(glGetError() == GL_INVALID_ENUM, "ES 2.0: GL_PRIMITIVE_RESTART_FIXED_INDEX is GL_INVALID_ENUM");
@@ -692,9 +692,9 @@ int main(int argc, char **argv)
             glGetInteger64v(GL_MAX_ELEMENT_INDEX, &v);
             check(v == 0xffffff && glGetError() == GL_NO_ERROR, "ES 3.0: GL_MAX_ELEMENT_INDEX 2^24 - 1");
         }
-        check(get_int(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS) == 48 && get_int(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT) == 256 &&
+        check(get_int(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS) == 64 && get_int(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT) == 256 &&
                   glGetError() == GL_NO_ERROR,
-              "ES 3.0: 48 combined texture units, uniform buffer offsets aligned to 256");
+              "ES 3.0: 64 combined texture units, uniform buffer offsets aligned to 256");
         {
             GLboolean on = GL_FALSE;
             glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
@@ -992,8 +992,8 @@ int main(int argc, char **argv)
             check(b == (GLint)s && glGetError() == GL_NO_ERROR, "ES 3.0: GL_SAMPLER_BINDING of the active unit");
             glBindSampler(3, s + 1000);
             check(glGetError() == GL_INVALID_OPERATION, "ES 3.0: binding a name glGenSamplers did not give");
-            glBindSampler(48, s);
-            check(glGetError() == GL_INVALID_VALUE, "ES 3.0: binding to unit 48 is GL_INVALID_VALUE");
+            glBindSampler(64, s);
+            check(glGetError() == GL_INVALID_VALUE, "ES 3.0: binding to unit 64 is GL_INVALID_VALUE");
             glDeleteSamplers(1, &s);
             glGetIntegerv(GL_SAMPLER_BINDING, &b);
             check(b == 0 && !glIsSampler(s) && glGetError() == GL_NO_ERROR, "ES 3.0: a deleted sampler is unbound");

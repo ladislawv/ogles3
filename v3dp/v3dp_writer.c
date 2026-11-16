@@ -639,6 +639,24 @@ static int put_stage_params(struct buf *b, struct buf *strings, mesa_shader_stag
     return 0;
 }
 
+/* A sampler some stage reads with texelFetch (Mesa's textures_used_by_txf,
+ * by texture index: EXT_texture_sRGB_decode's texelFetch decodes whatever
+ * SKIP_DECODE says, st_get_sampler_views): flags bit 4. */
+static int read_by_txf(const struct gl_shader_program *prog, const struct gl_uniform_storage *u)
+{
+    unsigned st, e, n = u->array_elements ? u->array_elements : 1;
+    for (st = 0; st < MESA_SHADER_STAGES; st++) {
+        const struct gl_linked_shader *sh = prog->_LinkedShaders[st];
+        if (!sh || !sh->Program || !u->opaque[st].active)
+            continue;
+        for (e = 0; e < n; e++)
+            if (u->opaque[st].index + e < 128 &&
+                BITSET_TEST(sh->Program->info.textures_used_by_txf, u->opaque[st].index + e))
+                return 1;
+    }
+    return 0;
+}
+
 static int put_uniforms(struct buf *b, struct buf *strings, struct gl_shader_program *prog, int format2)
 {
     const struct gl_shader_program_data *data = prog->data;
@@ -654,7 +672,8 @@ static int put_uniforms(struct buf *b, struct buf *strings, struct gl_shader_pro
         put_u32(b, str_add(strings, u->name.string));
         put_u32(b, u->type->gl_type);
         put_u32(b, u->array_elements);
-        put_u32(b, (sampler ? 1u : 0u) | (u->builtin ? 2u : 0u) | (u->hidden ? 4u : 0u) | (image ? 8u : 0u));
+        put_u32(b, (sampler ? 1u : 0u) | (u->builtin ? 2u : 0u) | (u->hidden ? 4u : 0u) | (image ? 8u : 0u) |
+                       (sampler && read_by_txf(prog, u) ? 16u : 0u));
         put_u32(b, u->num_driver_storage);
         for (j = 0; j < u->num_driver_storage; j++) {
             const struct gl_uniform_driver_storage *ds = &u->driver_storage[j];
@@ -992,10 +1011,15 @@ static uint32_t struct_hash(const struct glsl_type *t)
 }
 
 /* Format 2, ES 3.1: per INTERFACE entry (in its order) the identity of the
- * structure it is a member of (0: none). */
+ * structure it is a member of (0: none), and of the interface block that
+ * holds it (Mesa's validate_io compares both; a block's members in order,
+ * its array size: 2026-11-16, dEQP-GLES31 separate_shader.validation
+ * io_blocks). A geometry stage's inputs are per-vertex arrays, compared as
+ * their element (as Mesa does). Outside a block the word is as before. */
 static void put_interface_types(struct buf *b, struct gl_shader_program *prog)
 {
     const struct gl_program_resource *res = prog->data->ProgramResourceList;
+    int gs_first = prog->_LinkedShaders[MESA_SHADER_GEOMETRY] && !prog->_LinkedShaders[MESA_SHADER_VERTEX];
     unsigned i, n = 0;
     for (i = 0; i < prog->data->NumProgramResourceList; i++)
         if (res[i].Type == GL_PROGRAM_INPUT || res[i].Type == GL_PROGRAM_OUTPUT)
@@ -1003,8 +1027,23 @@ static void put_interface_types(struct buf *b, struct gl_shader_program *prog)
     put_u32(b, n);
     for (i = 0; i < prog->data->NumProgramResourceList; i++) {
         const struct gl_shader_variable *var = res[i].Data;
-        if (res[i].Type == GL_PROGRAM_INPUT || res[i].Type == GL_PROGRAM_OUTPUT)
-            put_u32(b, struct_hash(var->outermost_struct_type));
+        const struct glsl_type *it;
+        uint32_t h, w[2];
+        if (res[i].Type != GL_PROGRAM_INPUT && res[i].Type != GL_PROGRAM_OUTPUT)
+            continue;
+        h = struct_hash(var->outermost_struct_type);
+        it = var->interface_type;
+        if (it && gs_first && res[i].Type == GL_PROGRAM_INPUT && glsl_type_is_array(it))
+            it = it->fields.array;
+        if (it) {
+            w[0] = h;
+            w[1] = glsl_type_is_array(it) ? glsl_get_length(it) : 0xffffffffu;
+            h = fnv(2166136261u, w, sizeof(w));
+            w[0] = struct_hash(glsl_without_array(it));
+            h = fnv(h, w, 4);
+            h = h ? h : 1;
+        }
+        put_u32(b, h);
     }
 }
 

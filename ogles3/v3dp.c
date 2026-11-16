@@ -373,6 +373,8 @@ struct OGLES3Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                     u[k].flags = (UBYTE)(fl & 7);
                     if (format2 && (fl & 8)) /* an image (ES 3.1) */
                         u[k].flags |= OGLES3_UNIFORM_IMAGE;
+                    if (fl & 16) /* texelFetch reads it (EXT_texture_sRGB_decode) */
+                        u[k].flags |= OGLES3_UNIFORM_TXF;
                 }
                 np = u32(&s);
                 if (np > (im->geometry ? 3UL : 2UL))

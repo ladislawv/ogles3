@@ -1093,8 +1093,9 @@ static BOOL texture_states(struct OGLES3Context *ctx, struct OGLES3Program *p,
                     break;
                 ts->unit[row][idx] = unit_of(p, u, e);
                 ts->kind[row][idx] = (UBYTE)ogles2_sampler_kind(un->type);
-                if (!ogles2_texture_state(ctx, ts->unit[row][idx], ts->kind[row][idx], &ts->tex[row][idx],
-                                          &ts->smp[row][idx]))
+                if (!ogles2_texture_state(ctx, ts->unit[row][idx],
+                                          ts->kind[row][idx] | (un->flags & OGLES3_UNIFORM_TXF ? OGLES3_TEX_TXF : 0),
+                                          &ts->tex[row][idx], &ts->smp[row][idx]))
                     return FALSE;
             }
         }
@@ -3086,6 +3087,23 @@ static __attribute__((noinline)) void scan_u16(const UWORD *in, ULONG count, ULO
     *hi_out = (ULONG)h;
 }
 
+/* KHR_blend_equation_advanced (Mesa's draw_validate.c): blending with an
+ * advanced equation, a draw buffer past the first not GL_NONE, or a
+ * fragment shader without that equation's blend_support (the file's
+ * ADVANCED_BLEND), is GL_INVALID_OPERATION; an empty draw's too (Mesa
+ * validates before it skips one: dEQP-GLES31 debug.negative_coverage). */
+static BOOL advanced_blend_ok(struct OGLES3Context *ctx, const struct OGLES3Image *im)
+{
+    if (__builtin_expect(ogles2_advanced_blend(ctx) != 0, 0)) {
+        ULONG m = ogles2_advanced_blend(ctx);
+        if ((ctx->draw_fb && ogles2_fbo_draws_beyond_0(ctx->draw_fb)) || !im || !(im->blend_modes & (1UL << m))) {
+            ogles2_error(ctx, GL_INVALID_OPERATION);
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
 /* A draw mode GL knows: ES 3.1 contexts' the adjacency ones too
  * (EXT_geometry_shader; draw_arrays wants a geometry shader for them). */
 static BOOL draw_mode_ok(const struct OGLES3Context *ctx, GLenum mode)
@@ -3312,17 +3330,8 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
-    /* KHR_blend_equation_advanced (Mesa's draw_validate.c): blending with an
-     * advanced equation, a draw buffer past the first not GL_NONE, or a
-     * fragment shader without that equation's blend_support (the file's
-     * ADVANCED_BLEND), is GL_INVALID_OPERATION */
-    if (__builtin_expect(ogles2_advanced_blend(ctx) != 0, 0)) {
-        ULONG m = ogles2_advanced_blend(ctx);
-        if ((ctx->draw_fb && ogles2_fbo_draws_beyond_0(ctx->draw_fb)) || !(im->blend_modes & (1UL << m))) {
-            ogles2_error(ctx, GL_INVALID_OPERATION);
-            return;
-        }
-    }
+    if (!advanced_blend_ok(ctx, im)) /* KHR_blend_equation_advanced */
+        return;
     if (im->geometry) {
         if (!packets_ok(v)) { /* v3dcore's writers: no GL_SHADER_STATE_INCLUDING_GS */
             if (!d->gs_refused_logged) {
@@ -3959,8 +3968,12 @@ static void draw_instances(struct OGLES3Context *ctx, GLenum mode, GLint first, 
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
-    if (!p || !ctx->v3d || count == 0 || instances == 0) /* no program: undefined; nothing is drawn */
+    if (!p || !ctx->v3d) /* no program: undefined; nothing is drawn */
         return;
+    if (count == 0 || instances == 0) { /* nothing drawn, its errors still */
+        advanced_blend_ok(ctx, p->image);
+        return;
+    }
     if (!arrays_ok(ctx, p, (ULONG)first + (ULONG)count, instances, "glDrawArrays"))
         return;
     draw_arrays(ctx, p, mode, first, count, 0, instances, 0);
@@ -4100,8 +4113,12 @@ static void draw_elements(struct OGLES3Context *ctx, GLenum mode, GLsizei count,
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
-    if (!p || !ctx->v3d || count == 0)
+    if (!p || !ctx->v3d)
         return;
+    if (count == 0) { /* nothing drawn, its errors still */
+        advanced_blend_ok(ctx, p->image);
+        return;
+    }
     if (ogles2_gpu_writes_seen && type == GL_UNSIGNED_INT &&
         gpu_elements(ctx, p, mode, count, indices, basevertex, instances, restart, fn))
         return;

@@ -863,7 +863,8 @@ void ogles2_glGetInternalformativ(struct OGLES3Context *ctx, GLenum target, GLen
     BOOL none;
     if (!ogles2_es3_entry(ctx))
         return;
-    if ((target != GL_RENDERBUFFER && !(ogles2_es31(ctx) && target == GL_TEXTURE_2D_MULTISAMPLE)) ||
+    if ((target != GL_RENDERBUFFER && !(ogles2_es31(ctx) && (target == GL_TEXTURE_2D_MULTISAMPLE ||
+                                                              target == GL_TEXTURE_2D_MULTISAMPLE_ARRAY_OES))) ||
         (pname != GL_NUM_SAMPLE_COUNTS && pname != GL_SAMPLES) ||
         !(es3_color(internalformat) || is_depth(internalformat) || is_stencil(internalformat))) {
         ogles2_error(ctx, GL_INVALID_ENUM);

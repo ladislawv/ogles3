@@ -179,7 +179,8 @@ static BOOL sampler_unit(const struct OGLES3Program *p, ULONG k, int *unit, int 
         ULONG ne = un->array ? un->array : 1;
         if ((un->flags & OGLES3_UNIFORM_SAMPLER) && k >= un->sampler[0] && k - un->sampler[0] < ne) {
             *unit = p->uniform_loc[u] == OGLES3_LOC_NONE ? 0 : p->sampler_unit[p->uniform_loc[u] + k - un->sampler[0]];
-            *kind = ogles2_sampler_kind(un->type);
+            /* texelFetch's: ogles2_texture_state's (sRGB decoded) */
+            *kind = ogles2_sampler_kind(un->type) | (un->flags & OGLES3_UNIFORM_TXF ? OGLES3_TEX_TXF : 0);
             return TRUE;
         }
     }
@@ -195,7 +196,7 @@ static BOOL wants_wide(struct OGLES3Context *ctx, const struct OGLES3Program *p)
     if (!ogles2_wide_seen)
         return FALSE;
     for (k = 0; k < OGLES3_MAX_STAGE_SAMPLERS; k++)
-        if (sampler_unit(p, k, &unit, &kind) && ogles2_texture_wide(ctx, unit, kind))
+        if (sampler_unit(p, k, &unit, &kind) && ogles2_texture_wide(ctx, unit, kind & ~OGLES3_TEX_TXF))
             return TRUE;
     return FALSE;
 }
@@ -295,7 +296,7 @@ static ULONG write_stream(struct OGLES3Context *ctx, struct OGLES3Compute *c, co
         case OGLES3_U_TEXTURE_ARRAY_SIZE: {
             int unit = 0, kind = OGLES3_TEX_NONE;
             sampler_unit(p, d & (OGLES3_MAX_STAGE_SAMPLERS - 1), &unit, &kind);
-            w = ogles2_texture_size(ctx, unit, kind, (int)(v->rtype[i] - OGLES3_U_TEXTURE_WIDTH));
+            w = ogles2_texture_size(ctx, unit, kind & ~OGLES3_TEX_TXF, (int)(v->rtype[i] - OGLES3_U_TEXTURE_WIDTH));
             break;
         }
         case OGLES3_U_IMAGE_TMU_CONFIG_P0: /* Mesa's write_image_tmu_p0 */

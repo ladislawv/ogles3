@@ -115,7 +115,7 @@ recipe types below.
 | `str` | name as Mesa stores it (an array of a basic type without `[0]`, struct members as `s.m`, `s[1].m`) |
 | `u32` | GL type (`GL_FLOAT_MAT4`, `GL_SAMPLER_2D`, ...) of one element |
 | `u32` | array elements (0 if not an array) |
-| `u32` | flags: bit 0 sampler, bit 1 built-in (`gl_*`; a state variable, no storage places), bit 2 hidden (not visible to the application) |
+| `u32` | flags: bit 0 sampler, bit 1 built-in (`gl_*`; a state variable, no storage places), bit 2 hidden (not visible to the application), bit 4 (2026-11-16) a sampler some stage reads with `texelFetch` (Mesa's `textures_used_by_txf`: EXT_texture_sRGB_decode's texelFetch decodes whatever `SKIP_DECODE` says; files before have none) |
 | `u32` | number of storage places |
 | per storage place: | where `glUniform*` writes the value; one per stage that uses the uniform |
 | `u32` | stage |
@@ -374,7 +374,11 @@ elements, `u32[n]` each one's unit (Mesa's storage). Without the section every o
 count (`INTERFACE`'s), then per entry in its order `u32` the identity of the structure it is a
 member of (Mesa's `outermost_struct_type`: FNV-1a of the type's name and its members' names,
 types, array sizes and precisions in order, nested structures' identities included; never 0),
-0 for none. Without the section structures are not compared.
+0 for none. Without the section structures are not compared. An entry of an interface block
+(Mesa's `interface_type`; since 2026-11-16) has instead FNV-1a of that identity and the
+block's array size (0xffffffff: no array; a geometry stage's inputs as their per-vertex
+element), then of the block type's identity (as a structure's): matched words mean the same
+block, its members in the same order.
 
 **`ATOMIC_BUFFERS`**: `u32` count, then per buffer (Mesa's `AtomicBuffers`, in its order):
 `u32` binding, `u32` minimum size in bytes, `u32` stages that reference it (bit per stage),
