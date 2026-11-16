@@ -141,3 +141,53 @@ command glDrawElementsInstancedBaseVertexEXT
 command glMultiDrawElementsBaseVertexEXT
 command glPrimitiveBoundingBoxOES
 command glPrimitiveBoundingBoxEXT
+# EXT_ and OES_texture_border_clamp (every context): the border colour's
+# integers (texture.c)
+command glTexParameterIivEXT
+command glTexParameterIuivEXT
+command glGetTexParameterIivEXT
+command glGetTexParameterIuivEXT
+command glSamplerParameterIivEXT
+command glSamplerParameterIuivEXT
+command glGetSamplerParameterIivEXT
+command glGetSamplerParameterIuivEXT
+command glTexParameterIivOES
+command glTexParameterIuivOES
+command glGetTexParameterIivOES
+command glGetTexParameterIuivOES
+command glSamplerParameterIivOES
+command glSamplerParameterIuivOES
+command glGetSamplerParameterIivOES
+command glGetSamplerParameterIuivOES
+# EXT_ and OES_draw_buffers_indexed (ES3 contexts): blending and colour
+# masks by draw buffer (state.c)
+command glEnableiEXT
+command glDisableiEXT
+command glBlendEquationiEXT
+command glBlendEquationSeparateiEXT
+command glBlendFunciEXT
+command glBlendFuncSeparateiEXT
+command glColorMaskiEXT
+command glIsEnablediEXT
+command glEnableiOES
+command glDisableiOES
+command glBlendEquationiOES
+command glBlendEquationSeparateiOES
+command glBlendFunciOES
+command glBlendFuncSeparateiOES
+command glColorMaskiOES
+command glIsEnablediOES
+# EXT_ and KHR_robustness (every context): bounded reads, no reset
+# notification (frame.c, program.c, state.c)
+command glGetGraphicsResetStatusEXT
+command glReadnPixelsEXT
+command glGetnUniformfvEXT
+command glGetnUniformivEXT
+command glGetGraphicsResetStatusKHR
+command glReadnPixelsKHR
+command glGetnUniformfvKHR
+command glGetnUniformivKHR
+command glGetnUniformuivKHR
+# EXT_ and OES_copy_image (ES3 contexts): textures (texture.c)
+command glCopyImageSubDataEXT
+command glCopyImageSubDataOES

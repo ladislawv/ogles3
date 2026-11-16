@@ -391,6 +391,18 @@ static const struct { const char *name; UBYTE in; } extensions[] = {
     /* The compiler's (Mesa's dummy_true in ES 3.1 contexts) */
     {"GL_EXT_shader_io_blocks", EXT_ES31}, {"GL_OES_shader_io_blocks", EXT_ES31},
     {"GL_EXT_shader_implicit_conversions", EXT_ES31},
+    /* ES 3.2 plan item 2, the sampler state (texture.c): the border colour
+     * in every context (Mesa's too), the sRGB decode where sRGB formats are */
+    {"GL_EXT_texture_border_clamp", EXT_ALL}, {"GL_OES_texture_border_clamp", EXT_ALL},
+    {"GL_EXT_texture_sRGB_decode", EXT_ES3},
+    /* item 3: blending and colour masks by draw buffer (state.c, draw.c) */
+    {"GL_EXT_draw_buffers_indexed", EXT_ES3}, {"GL_OES_draw_buffers_indexed", EXT_ES3},
+    /* item 8: the bounded reads, no reset notification (frame.c, program.c, state.c) */
+    {"GL_EXT_robustness", EXT_ALL}, {"GL_KHR_robustness", EXT_ALL},
+    /* item 5: glCopyImageSubData between textures (texture.c) */
+    {"GL_EXT_copy_image", EXT_ES3}, {"GL_OES_copy_image", EXT_ES3},
+    /* item 4: cube map arrays (texture.c; the compiler has them) */
+    {"GL_EXT_texture_cube_map_array", EXT_ES31}, {"GL_OES_texture_cube_map_array", EXT_ES31},
 };
 #define NUM_EXTENSIONS (sizeof(extensions) / sizeof(extensions[0]))
 

@@ -146,7 +146,7 @@ void ogles2_read_format(struct OGLES3Context *ctx, GLenum *format, GLenum *type)
 }
 
 static void read_pixels(struct OGLES3Context *ctx, GLint x, GLint y, GLsizei width, GLsizei height,
-                        GLenum format, GLenum type, void *pixels);
+                        GLenum format, GLenum type, void *pixels, ULONG room);
 
 /* ES 3.0: from the read framebuffer (fbo.c, ogles2_fbo_read_begin). */
 void ogles2_glReadPixels(struct OGLES3Context *ctx, GLint x, GLint y, GLsizei width, GLsizei height,
@@ -156,12 +156,36 @@ void ogles2_glReadPixels(struct OGLES3Context *ctx, GLint x, GLint y, GLsizei wi
     if (!ogles2_context_valid(ctx))
         return;
     saved = ogles2_fbo_read_begin(ctx);
-    read_pixels(ctx, x, y, width, height, format, type, pixels);
+    read_pixels(ctx, x, y, width, height, format, type, pixels, ~0UL);
     ogles2_fbo_read_end(ctx, saved);
 }
 
+/* KHR_ and EXT_robustness: at most bufSize bytes into the application's
+ * memory (GL_INVALID_OPERATION if the read needs more; a pixel pack
+ * buffer's bounds are its own, as Mesa's _mesa_validate_pbo_access). */
+void ogles2_glReadnPixelsEXT(struct OGLES3Context *ctx, GLint x, GLint y, GLsizei width, GLsizei height,
+                             GLenum format, GLenum type, GLsizei bufSize, void *data)
+{
+    struct OGLES3Framebuffer *saved;
+    if (!ogles2_context_valid(ctx))
+        return;
+    if (bufSize < 0) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    saved = ogles2_fbo_read_begin(ctx);
+    read_pixels(ctx, x, y, width, height, format, type, data, (ULONG)bufSize);
+    ogles2_fbo_read_end(ctx, saved);
+}
+
+void ogles2_glReadnPixelsKHR(struct OGLES3Context *ctx, GLint x, GLint y, GLsizei width, GLsizei height,
+                             GLenum format, GLenum type, GLsizei bufSize, void *data)
+{
+    ogles2_glReadnPixelsEXT(ctx, x, y, width, height, format, type, bufSize, data);
+}
+
 static void read_pixels(struct OGLES3Context *ctx, GLint x, GLint y, GLsizei width, GLsizei height,
-                        GLenum format, GLenum type, void *pixels)
+                        GLenum format, GLenum type, void *pixels, ULONG room)
 {
     LONG x0, y0, x1, y1;
     ULONG stride, bpp, rgba_stride;
@@ -200,10 +224,9 @@ static void read_pixels(struct OGLES3Context *ctx, GLint x, GLint y, GLsizei wid
     /* ES 3.0's pixel pack buffer: `pixels` is an offset into it. */
     if (width && height) {
         BOOL bad;
-        UBYTE *dst = ogles2_buffer_pixels(ctx, TRUE, (ULONG)pixels,
-                                          (ULONG)(ctx->pack.skip_rows + height - 1) * stride +
-                                              (ULONG)(ctx->pack.skip_pixels + width) * bpp, &bad);
-        if (bad) {
+        ULONG need = (ULONG)(ctx->pack.skip_rows + height - 1) * stride + (ULONG)(ctx->pack.skip_pixels + width) * bpp;
+        UBYTE *dst = ogles2_buffer_pixels(ctx, TRUE, (ULONG)pixels, need, &bad);
+        if (bad || (!dst && need > room)) { /* room: glReadnPixels' bufSize */
             ogles2_error(ctx, GL_INVALID_OPERATION);
             return;
         }
@@ -322,6 +345,17 @@ void ogles2_glHint(struct OGLES3Context *ctx, GLenum target, GLenum mode)
  * were loaded (kept from a mid-frame flush, or a framebuffer object's) they
  * hold nothing before a job's first draw, so clearing only one there is
  * still exact. */
+/* A draw buffer's colour mask other than all four (EXT_draw_buffers_indexed:
+ * each its own). */
+static BOOL color_masked(const struct OGLES3State *s)
+{
+    int k;
+    for (k = 0; k < OGLES3_MAX_DRAW_BUFFERS; k++)
+        if (!(s->color_mask[k][0] && s->color_mask[k][1] && s->color_mask[k][2] && s->color_mask[k][3]))
+            return TRUE;
+    return FALSE;
+}
+
 static BOOL clear_partial(struct OGLES3Context *ctx, GLbitfield mask)
 {
     const struct OGLES3State *s = &ctx->state;
@@ -330,7 +364,7 @@ static BOOL clear_partial(struct OGLES3Context *ctx, GLbitfield mask)
              ctx->scissor[0] + ctx->scissor[2] < (GLint)ctx->fb_w ||
              ctx->scissor[1] + ctx->scissor[3] < (GLint)ctx->fb_h)) ||
            ((mask & GL_COLOR_BUFFER_BIT) &&
-            !(s->color_mask[0] && s->color_mask[1] && s->color_mask[2] && s->color_mask[3])) ||
+            color_masked(s)) ||
            ((mask & GL_DEPTH_BUFFER_BIT) && !s->depth_mask) ||
            ((mask & GL_STENCIL_BUFFER_BIT) && (s->stencil_write_mask[0] & 0xff) != 0xff) ||
            ((ctx->draw_fb || ctx->zs_saved) && ctx->fb_stencil_bits && ctx->fb_depth_bits &&
@@ -393,7 +427,7 @@ static void clear(struct OGLES3Context *ctx, GLbitfield mask, UBYTE rts, const U
         for (k = 0; k < 4 && x0 < x1 && y0 < y1; k++)
             if (cpu & (1 << k))
                 ogles2_fbo_fill(ctx, k, (int)x0, (int)y0, (int)(x1 - x0), (int)(y1 - y0), cv, is_int,
-                                ctx->state.color_mask);
+                                ctx->state.color_mask[k]);
         rts &= (UBYTE)~cpu;
         if (!rts)
             mask &= ~(GLbitfield)GL_COLOR_BUFFER_BIT;

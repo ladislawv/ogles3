@@ -163,10 +163,12 @@ struct OGLES3TexState
     struct OGLES3Texture default2d, defaultcube, defaultrect; /* name 0: the context's own */
     struct OGLES3Texture default3d, defaultarray; /* ES 3.0 */
     struct OGLES3Texture default2dms; /* ES 3.1 */
+    struct OGLES3Texture defaultcubearray; /* EXT_/OES_texture_cube_map_array (ES 3.1 contexts) */
     struct OGLES3Texture *unit2d[OGLES3_MAX_TEXTURE_UNITS], *unitcube[OGLES3_MAX_TEXTURE_UNITS];
     struct OGLES3Texture *unitrect[OGLES3_MAX_TEXTURE_UNITS]; /* ARB_texture_rectangle */
     struct OGLES3Texture *unit3d[OGLES3_MAX_TEXTURE_UNITS], *unitarray[OGLES3_MAX_TEXTURE_UNITS]; /* ES 3.0 */
     struct OGLES3Texture *unit2dms[OGLES3_MAX_TEXTURE_UNITS]; /* ES 3.1's GL_TEXTURE_2D_MULTISAMPLE */
+    struct OGLES3Texture *unitcubearray[OGLES3_MAX_TEXTURE_UNITS];
     struct OGLES3ImageUnit *images; /* ES 3.1's glBindImageTexture units (NULL until first bound) */
     struct OGLES3Texture fallback;  /* 1x1 (0,0,0,1): what an incomplete texture samples */
     struct OGLES3Texture fallback_int; /* the same in RGBA8UI, for an integer sampler (ES 3.0) */
@@ -212,6 +214,8 @@ static void smp_defaults(struct OGLES3SamplerParams *sp)
     sp->max_lod = 1000.0f;
     sp->compare_mode = GL_NONE;
     sp->compare_func = GL_LEQUAL;
+    sp->srgb_decode = GL_DECODE_EXT;
+    sp->border[0] = sp->border[1] = sp->border[2] = sp->border[3] = 0; /* (0,0,0,0) */
 }
 
 static void init_object(struct OGLES3Texture *t, GLuint name, GLenum target)
@@ -259,6 +263,7 @@ static struct OGLES3TexState *ts_get(struct OGLES3Context *ctx)
     init_object(&ts->default3d, 0, GL_TEXTURE_3D);
     init_object(&ts->defaultarray, 0, GL_TEXTURE_2D_ARRAY);
     init_object(&ts->default2dms, 0, GL_TEXTURE_2D_MULTISAMPLE);
+    init_object(&ts->defaultcubearray, 0, GL_TEXTURE_CUBE_MAP_ARRAY_OES);
     for (i = 0; i < OGLES3_MAX_TEXTURE_UNITS; i++) {
         ts->unit2d[i] = &ts->default2d;
         ts->unitcube[i] = &ts->defaultcube;
@@ -266,6 +271,7 @@ static struct OGLES3TexState *ts_get(struct OGLES3Context *ctx)
         ts->unit3d[i] = &ts->default3d;
         ts->unitarray[i] = &ts->defaultarray;
         ts->unit2dms[i] = &ts->default2dms;
+        ts->unitcubearray[i] = &ts->defaultcubearray;
     }
     ctx->tex = ts;
     return ts;
@@ -371,6 +377,7 @@ void ogles2_textures_free(struct OGLES3Context *ctx)
     free_levels(&ts->default3d);
     free_levels(&ts->defaultarray);
     free_levels(&ts->default2dms);
+    free_levels(&ts->defaultcubearray);
     if (ts->images)
         FreeVec(ts->images);
     free_levels(&ts->fallback);
@@ -668,6 +675,8 @@ void ogles2_glDeleteTextures(struct OGLES3Context *ctx, GLsizei n, const GLuint 
                     mts->unitarray[u] = &mts->defaultarray;
                 if (mts->unit2dms[u] == t)
                     mts->unit2dms[u] = &mts->default2dms;
+                if (mts->unitcubearray[u] == t)
+                    mts->unitcubearray[u] = &mts->defaultcubearray;
             }
             image_units_forget(mts, t); /* ES 3.1: the image units it was bound to */
         }
@@ -734,7 +743,7 @@ void ogles2_glBindTexture(struct OGLES3Context *ctx, GLenum target, GLuint textu
     if (target != GL_TEXTURE_2D && target != GL_TEXTURE_CUBE_MAP && target != GL_TEXTURE_RECTANGLE &&
         target != GL_TEXTURE_3D && /* GLES2 contexts too: OES_texture_3D */
         !(ogles2_es3(ctx) && target == GL_TEXTURE_2D_ARRAY) &&
-        !(ogles2_es31(ctx) && target == GL_TEXTURE_2D_MULTISAMPLE)) {
+        !(ogles2_es31(ctx) && (target == GL_TEXTURE_2D_MULTISAMPLE || target == GL_TEXTURE_CUBE_MAP_ARRAY_OES))) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
@@ -743,7 +752,8 @@ void ogles2_glBindTexture(struct OGLES3Context *ctx, GLenum target, GLuint textu
           : target == GL_TEXTURE_CUBE_MAP ? &ts->defaultcube
           : target == GL_TEXTURE_3D ? &ts->default3d
           : target == GL_TEXTURE_2D_ARRAY ? &ts->defaultarray
-          : target == GL_TEXTURE_2D_MULTISAMPLE ? &ts->default2dms : &ts->defaultrect;
+          : target == GL_TEXTURE_2D_MULTISAMPLE ? &ts->default2dms
+          : target == GL_TEXTURE_CUBE_MAP_ARRAY_OES ? &ts->defaultcubearray : &ts->defaultrect;
     } else {
         t = by_name(ts, texture);
         /* GLES2 lets a program bind a name glGenTextures did not return. */
@@ -770,6 +780,8 @@ void ogles2_glBindTexture(struct OGLES3Context *ctx, GLenum target, GLuint textu
         ts->unitarray[ts->active] = t;
     else if (target == GL_TEXTURE_2D_MULTISAMPLE)
         ts->unit2dms[ts->active] = t;
+    else if (target == GL_TEXTURE_CUBE_MAP_ARRAY_OES)
+        ts->unitcubearray[ts->active] = t;
     else
         ts->unitrect[ts->active] = t;
 }
@@ -790,6 +802,8 @@ static struct OGLES3Texture *bound(struct OGLES3Context *ctx, struct OGLES3TexSt
         return ts->unitarray[ts->active];
     if (ogles2_es31(ctx) && target == GL_TEXTURE_2D_MULTISAMPLE)
         return ts->unit2dms[ts->active];
+    if (ogles2_es31(ctx) && target == GL_TEXTURE_CUBE_MAP_ARRAY_OES)
+        return ts->unitcubearray[ts->active];
     ogles2_error(ctx, GL_INVALID_ENUM);
     return 0;
 }
@@ -802,7 +816,8 @@ static struct OGLES3Texture *unit_texture(struct OGLES3TexState *ts, int kind, i
          : kind == OGLES3_TEX_RECT    ? ts->unitrect[unit]
          : kind == OGLES3_TEX_3D      ? ts->unit3d[unit]
          : kind == OGLES3_TEX_ARRAY   ? ts->unitarray[unit]
-         : kind == OGLES3_TEX_2DMS    ? ts->unit2dms[unit] : ts->unit2d[unit];
+         : kind == OGLES3_TEX_2DMS    ? ts->unit2dms[unit]
+         : kind == OGLES3_TEX_CUBEARRAY ? ts->unitcubearray[unit] : ts->unit2d[unit];
 }
 
 /* The largest anisotropy (the sampler's 2, 4, 8 or 16) and LOD bias (its
@@ -834,7 +849,8 @@ static GLenum smp_param(struct OGLES3Context *ctx, struct OGLES3SamplerParams *s
         /* fall through */
     case GL_TEXTURE_WRAP_S:
     case GL_TEXTURE_WRAP_T:
-        if (e != GL_REPEAT && e != GL_CLAMP_TO_EDGE && e != GL_MIRRORED_REPEAT && e != GL_MIRROR_CLAMP_TO_EDGE)
+        if (e != GL_REPEAT && e != GL_CLAMP_TO_EDGE && e != GL_MIRRORED_REPEAT && e != GL_MIRROR_CLAMP_TO_EDGE &&
+            e != GL_CLAMP_TO_BORDER_EXT) /* EXT_texture_border_clamp, every context */
             return GL_INVALID_ENUM;
         if (pname == GL_TEXTURE_WRAP_S)
             sp->wrap_s = e;
@@ -866,6 +882,13 @@ static GLenum smp_param(struct OGLES3Context *ctx, struct OGLES3SamplerParams *s
             return GL_INVALID_ENUM;
         sp->compare_func = e;
         return GL_NO_ERROR;
+    case GL_TEXTURE_SRGB_DECODE_EXT: /* ES3 contexts (the sRGB formats are theirs) */
+        if (!ogles2_es3(ctx))
+            return GL_INVALID_ENUM;
+        if (e != GL_DECODE_EXT && e != GL_SKIP_DECODE_EXT)
+            return GL_INVALID_ENUM;
+        sp->srgb_decode = e;
+        return GL_NO_ERROR;
     default:
         return GL_INVALID_ENUM;
     }
@@ -887,6 +910,11 @@ static BOOL smp_get(struct OGLES3Context *ctx, const struct OGLES3SamplerParams 
     case GL_TEXTURE_COMPARE_FUNC:
         *v = (GLfloat)(pname == GL_TEXTURE_WRAP_R ? sp->wrap_r
                        : pname == GL_TEXTURE_COMPARE_MODE ? sp->compare_mode : sp->compare_func);
+        return TRUE;
+    case GL_TEXTURE_SRGB_DECODE_EXT:
+        if (!ogles2_es3(ctx))
+            return FALSE;
+        *v = (GLfloat)sp->srgb_decode;
         return TRUE;
     default:
         return FALSE;
@@ -995,18 +1023,116 @@ void ogles2_glTexParameterf(struct OGLES3Context *ctx, GLenum target, GLenum pna
     tex_param(ctx, target, pname, round_param(param), param);
 }
 
+/* EXT_texture_border_clamp's colour (ES 3.2 8.10, Mesa's
+ * _mesa_TexParameter*): given as floats (BORDER_F), as glTexParameteriv's
+ * integers, normalized (BORDER_N), or as glTexParameterI*'s integers, kept
+ * as they are for an integer texture (BORDER_I, BORDER_UI). The words are
+ * stored as given; the sampler record converts them for the format. */
+enum { BORDER_F, BORDER_N, BORDER_I, BORDER_UI };
+
+static ULONG f2u(GLfloat f);
+static GLfloat u2f(ULONG u);
+
+static void border_set(struct OGLES3SamplerParams *sp, const void *v, int how)
+{
+    int k;
+    for (k = 0; k < 4; k++) {
+        if (how == BORDER_F) {
+            sp->border[k] = f2u(((const GLfloat *)v)[k]);
+        } else if (how == BORDER_N) {
+            GLfloat f = (GLfloat)((double)((const GLint *)v)[k] / 2147483647.0);
+            sp->border[k] = f2u(f < -1.0f ? -1.0f : f);
+        } else {
+            sp->border[k] = ((const ULONG *)v)[k];
+        }
+    }
+}
+
+/* The colour read back as glGet*Parameterfv's floats, glGet*Parameteriv's
+ * normalized integers (Mesa: clamped to [0,1], FLOAT_TO_INT) or
+ * glGet*ParameterI*'s words. */
+static void border_get(const struct OGLES3SamplerParams *sp, void *v, int how)
+{
+    int k;
+    for (k = 0; k < 4; k++) {
+        if (how == BORDER_F) {
+            ((GLfloat *)v)[k] = u2f(sp->border[k]);
+        } else if (how == BORDER_N) {
+            GLfloat f = u2f(sp->border[k]);
+            ((GLint *)v)[k] = !(f > 0.0f) ? 0 : f >= 1.0f ? 0x7FFFFFFF : (GLint)((double)f * 2147483647.0);
+        } else {
+            ((ULONG *)v)[k] = sp->border[k];
+        }
+    }
+}
+
+/* The bound texture whose border colour is set or read; 0 (the error set) if none. */
+static struct OGLES3Texture *border_texture(struct OGLES3Context *ctx, GLenum target)
+{
+    struct OGLES3TexState *ts;
+    struct OGLES3Texture *t;
+    if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)) || !(t = bound(ctx, ts, target)))
+        return 0;
+    if (target == GL_TEXTURE_2D_MULTISAMPLE) { /* no sampler state (ES 3.1 8.10) */
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return 0;
+    }
+    return t;
+}
+
+static void tex_border(struct OGLES3Context *ctx, GLenum target, const void *v, int how)
+{
+    struct OGLES3Texture *t = border_texture(ctx, target);
+    if (!t)
+        return;
+    border_set(&t->s, v, how);
+    t->pver++;
+}
+
 void ogles2_glTexParameteriv(struct OGLES3Context *ctx, GLenum target, GLenum pname,
                              const GLint *params)
 {
-    if (params)
+    if (params && pname == GL_TEXTURE_BORDER_COLOR_EXT)
+        tex_border(ctx, target, params, BORDER_N);
+    else if (params)
         tex_param(ctx, target, pname, params[0], (GLfloat)params[0]);
 }
 
 void ogles2_glTexParameterfv(struct OGLES3Context *ctx, GLenum target, GLenum pname,
                              const GLfloat *params)
 {
-    if (params)
+    if (params && pname == GL_TEXTURE_BORDER_COLOR_EXT)
+        tex_border(ctx, target, params, BORDER_F);
+    else if (params)
         tex_param(ctx, target, pname, round_param(params[0]), params[0]);
+}
+
+/* EXT_/OES_texture_border_clamp's glTexParameterI*: the border colour's
+ * integers as they are; any other parameter as glTexParameteriv's. */
+void ogles2_glTexParameterIivEXT(struct OGLES3Context *ctx, GLenum target, GLenum pname, const GLint *params)
+{
+    if (params && pname == GL_TEXTURE_BORDER_COLOR_EXT)
+        tex_border(ctx, target, params, BORDER_I);
+    else if (params)
+        tex_param(ctx, target, pname, params[0], (GLfloat)params[0]);
+}
+
+void ogles2_glTexParameterIuivEXT(struct OGLES3Context *ctx, GLenum target, GLenum pname, const GLuint *params)
+{
+    if (params && pname == GL_TEXTURE_BORDER_COLOR_EXT)
+        tex_border(ctx, target, params, BORDER_UI);
+    else if (params)
+        tex_param(ctx, target, pname, (GLint)params[0], (GLfloat)params[0]);
+}
+
+void ogles2_glTexParameterIivOES(struct OGLES3Context *ctx, GLenum target, GLenum pname, const GLint *params)
+{
+    ogles2_glTexParameterIivEXT(ctx, target, pname, params);
+}
+
+void ogles2_glTexParameterIuivOES(struct OGLES3Context *ctx, GLenum target, GLenum pname, const GLuint *params)
+{
+    ogles2_glTexParameterIuivEXT(ctx, target, pname, params);
 }
 
 /* A parameter's value, as a float; FALSE (GL_INVALID_ENUM set) if pname is none. */
@@ -1055,15 +1181,54 @@ void ogles2_glGetTexParameteriv(struct OGLES3Context *ctx, GLenum target, GLenum
                                 GLint *params)
 {
     GLfloat v;
-    if (params && get_param(ctx, target, pname, &v))
+    struct OGLES3Texture *t;
+    if (params && pname == GL_TEXTURE_BORDER_COLOR_EXT) {
+        if ((t = border_texture(ctx, target)))
+            border_get(&t->s, params, BORDER_N);
+    } else if (params && get_param(ctx, target, pname, &v))
         *params = exact_param(pname) ? (GLint)(ULONG)v : round_param(v);
+}
+
+/* glGetTexParameterI*: the border colour's words, else glGetTexParameteriv's. */
+static void get_tex_param_i(struct OGLES3Context *ctx, GLenum target, GLenum pname, GLint *params, int how)
+{
+    struct OGLES3Texture *t;
+    if (params && pname == GL_TEXTURE_BORDER_COLOR_EXT) {
+        if ((t = border_texture(ctx, target)))
+            border_get(&t->s, params, how);
+    } else
+        ogles2_glGetTexParameteriv(ctx, target, pname, params);
+}
+
+void ogles2_glGetTexParameterIivEXT(struct OGLES3Context *ctx, GLenum target, GLenum pname, GLint *params)
+{
+    get_tex_param_i(ctx, target, pname, params, BORDER_I);
+}
+
+void ogles2_glGetTexParameterIuivEXT(struct OGLES3Context *ctx, GLenum target, GLenum pname, GLuint *params)
+{
+    get_tex_param_i(ctx, target, pname, (GLint *)params, BORDER_UI);
+}
+
+void ogles2_glGetTexParameterIivOES(struct OGLES3Context *ctx, GLenum target, GLenum pname, GLint *params)
+{
+    get_tex_param_i(ctx, target, pname, params, BORDER_I);
+}
+
+void ogles2_glGetTexParameterIuivOES(struct OGLES3Context *ctx, GLenum target, GLenum pname, GLuint *params)
+{
+    get_tex_param_i(ctx, target, pname, (GLint *)params, BORDER_UI);
 }
 
 void ogles2_glGetTexParameterfv(struct OGLES3Context *ctx, GLenum target, GLenum pname,
                                 GLfloat *params)
 {
     GLfloat v;
-    if (params && get_param(ctx, target, pname, &v))
+    struct OGLES3Texture *t;
+    if (params && pname == GL_TEXTURE_BORDER_COLOR_EXT) {
+        if ((t = border_texture(ctx, target)))
+            border_get(&t->s, params, BORDER_F);
+    } else if (params && get_param(ctx, target, pname, &v))
         *params = v;
 }
 
@@ -1175,7 +1340,7 @@ static BOOL level_param(struct OGLES3Context *ctx, GLenum target, GLint level, G
     if (!ogles2_es31_entry(ctx) || !(ts = ts_get(ctx)))
         return FALSE;
     if (bind != GL_TEXTURE_2D && bind != GL_TEXTURE_3D && bind != GL_TEXTURE_2D_ARRAY &&
-        bind != GL_TEXTURE_2D_MULTISAMPLE && !face_target(target)) {
+        bind != GL_TEXTURE_2D_MULTISAMPLE && bind != GL_TEXTURE_CUBE_MAP_ARRAY_OES && !face_target(target)) {
         ogles2_error(ctx, GL_INVALID_ENUM); /* GL_TEXTURE_CUBE_MAP itself too */
         return FALSE;
     }
@@ -1202,7 +1367,8 @@ static BOOL level_param(struct OGLES3Context *ctx, GLenum target, GLint level, G
     case GL_TEXTURE_WIDTH:  *v = defined ? (GLint)f->w[level] >> MS_SHIFT(t) : 0; break;
     case GL_TEXTURE_HEIGHT: *v = defined ? (GLint)f->h[level] >> MS_SHIFT(t) : 0; break;
     case GL_TEXTURE_DEPTH:
-        *v = !defined ? 0 : (bind == GL_TEXTURE_3D || bind == GL_TEXTURE_2D_ARRAY) ? (GLint)t->d[level] : 1;
+        *v = !defined ? 0 : (bind == GL_TEXTURE_3D || bind == GL_TEXTURE_2D_ARRAY || bind == GL_TEXTURE_CUBE_MAP_ARRAY_OES)
+                                ? (GLint)t->d[level] : 1;
         break;
     case GL_TEXTURE_SAMPLES: *v = defined ? t->samples : 0; break;
     case GL_TEXTURE_FIXED_SAMPLE_LOCATIONS: *v = defined && t->samples ? t->fixed_samples : GL_TRUE; break;
@@ -1294,6 +1460,11 @@ BOOL ogles2_texture_query(struct OGLES3Context *ctx, GLenum pname, GLint *v)
         if (!ogles2_es31(ctx))
             return FALSE;
         *v = ts ? (GLint)ts->unit2dms[ts->active]->name : 0;
+        return TRUE;
+    case GL_TEXTURE_BINDING_CUBE_MAP_ARRAY_OES:
+        if (!ogles2_es31(ctx))
+            return FALSE;
+        *v = ts ? (GLint)ts->unitcubearray[ts->active]->name : 0;
         return TRUE;
     case GL_TEXTURE_BINDING_3D: /* OES_texture_3D's in GLES2 contexts */
     case GL_TEXTURE_BINDING_2D_ARRAY:
@@ -2161,10 +2332,12 @@ static BOOL consistent(const struct OGLES3Face *f, int l)
     return f->w[l] == (w ? w : 1) && f->h[l] == (h ? h : 1);
 }
 
-/* A 2D array or a 3D texture (ES 3.0): its faces are layers, or slices. */
+/* A 2D array or a 3D texture (ES 3.0): its faces are layers, or slices.
+ * A cube map array (EXT_texture_cube_map_array) too: its layer-faces (the
+ * six of cube i are layers 6i to 6i + 5), laid out as a 2D array's. */
 static BOOL layered(const struct OGLES3Texture *t)
 {
-    return t->target == GL_TEXTURE_2D_ARRAY || t->target == GL_TEXTURE_3D;
+    return t->target == GL_TEXTURE_2D_ARRAY || t->target == GL_TEXTURE_3D || t->target == GL_TEXTURE_CUBE_MAP_ARRAY_OES;
 }
 
 /* The faces of level 0: a cube map's six, an array's layers, a 3D
@@ -4290,8 +4463,21 @@ static struct OGLES3Texture *image_texture_3d(struct OGLES3Context *ctx, struct 
         return ts->unit3d[ts->active];
     if (target == GL_TEXTURE_2D_ARRAY)
         return ts->unitarray[ts->active];
+    if (target == GL_TEXTURE_CUBE_MAP_ARRAY_OES && ogles2_es31(ctx))
+        return ts->unitcubearray[ts->active];
     ogles2_error(ctx, GL_INVALID_ENUM);
     return 0;
+}
+
+/* A cube map array's levels: square, whole cubes of layer-faces (ES 3.2
+ * 8.5.3: GL_INVALID_VALUE). */
+static BOOL cube_array_ok(struct OGLES3Context *ctx, GLenum target, GLsizei width, GLsizei height, GLsizei depth)
+{
+    if (target == GL_TEXTURE_CUBE_MAP_ARRAY_OES && (width != height || depth % 6)) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return FALSE;
+    }
+    return TRUE;
 }
 
 void ogles2_glTexImage3D(struct OGLES3Context *ctx, GLenum target, GLint level, GLint internalformat,
@@ -4318,6 +4504,8 @@ void ogles2_glTexImage3D(struct OGLES3Context *ctx, GLenum target, GLint level, 
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
+    if (!cube_array_ok(ctx, target, width, height, depth))
+        return;
     if ((GLenum)internalformat == GL_BGRA8_EXT && format == GL_BGRA_EXT) /* as glTexImage2D takes it */
         internalformat = GL_BGRA_EXT;
     if (sized_base((GLenum)internalformat, format, type) == NOT_FILLED) {
@@ -4522,7 +4710,7 @@ static void tex_storage(struct OGLES3Context *ctx, GLenum target, GLsizei levels
     struct OGLES3TexState *ts;
     struct OGLES3Texture *t;
     GLenum format, type;
-    BOOL layers = target == GL_TEXTURE_3D || target == GL_TEXTURE_2D_ARRAY;
+    BOOL layers = target == GL_TEXTURE_3D || target == GL_TEXTURE_2D_ARRAY || target == GL_TEXTURE_CUBE_MAP_ARRAY_OES;
     int l, k, max, n = 1, big;
     /* GLES2 contexts: EXT_texture_storage's (2D, cube maps, OES_texture_3D's 3D) */
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
@@ -4541,12 +4729,14 @@ static void tex_storage(struct OGLES3Context *ctx, GLenum target, GLsizei levels
         ogles2_error(ctx, es3_sized(ifmt) ? GL_INVALID_OPERATION : GL_INVALID_ENUM);
         return;
     }
-    max = target == GL_TEXTURE_2D_ARRAY ? 2048 : MAX_SIZE;
+    max = target == GL_TEXTURE_2D_ARRAY || target == GL_TEXTURE_CUBE_MAP_ARRAY_OES ? 2048 : MAX_SIZE;
     if (levels < 1 || width < 1 || height < 1 || depth < 1 || width > MAX_SIZE || height > MAX_SIZE ||
         depth > max) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
+    if (!cube_array_ok(ctx, target, width, height, depth))
+        return;
     big = width > height ? width : height;
     if (target == GL_TEXTURE_3D && depth > big)
         big = depth;
@@ -4608,7 +4798,8 @@ void ogles2_glTexStorage2D(struct OGLES3Context *ctx, GLenum target, GLsizei lev
 void ogles2_glTexStorage3D(struct OGLES3Context *ctx, GLenum target, GLsizei levels, GLenum internalformat,
                            GLsizei width, GLsizei height, GLsizei depth)
 {
-    if (target != GL_TEXTURE_3D && target != GL_TEXTURE_2D_ARRAY) {
+    if (target != GL_TEXTURE_3D && target != GL_TEXTURE_2D_ARRAY &&
+        !(target == GL_TEXTURE_CUBE_MAP_ARRAY_OES && ogles2_es31(ctx))) {
         if (ogles2_es3_entry(ctx))
             ogles2_error(ctx, GL_INVALID_ENUM);
         return;
@@ -4714,6 +4905,8 @@ void ogles2_glCompressedTexImage3D(struct OGLES3Context *ctx, GLenum target, GLi
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
+    if (!cube_array_ok(ctx, target, width, height, depth))
+        return;
     if (t->immutable_levels) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
@@ -5162,6 +5355,380 @@ void ogles2_glCompressedTexSubImage2D(struct OGLES3Context *ctx, GLenum target, 
         ogles2_error(ctx, GL_OUT_OF_MEMORY);
 }
 
+/* ---- EXT_/OES_copy_image (ES 3.2 plan item 5) ----
+ * glCopyImageSubData between textures, on the CPU: the texels' bits as the
+ * application gives them (the format and type that take a format's texels
+ * bit for bit, `nc` components of `cs` bytes in this machine's order; a
+ * packed format one of 4), read from the source's RAM copy through the GPU's
+ * byte order (pack, pack_wide) and given to the destination as
+ * glTexSubImage takes them (convert), so a copy between formats of a view
+ * class reinterprets them as dEQP's references do on a big-endian machine.
+ * The same format both sides: the RAM copy's texels as they are (every
+ * format, depth and RGB565 too). A compressed format's blocks are a 64- or
+ * 128-bit format's texels (ES 3.2 table 8.27). Renderbuffers and
+ * multisample textures are not copied (GL_INVALID_OPERATION, logged). */
+struct copy_fmt
+{
+    GLenum sized, format, type;
+    UBYTE nc, cs, bits;             /* bits: the view class (ES 3.2 table 8.26) */
+};
+
+static const struct copy_fmt copy_fmts[] = {
+    {GL_RGBA32F, GL_RGBA, GL_FLOAT, 4, 4, 128},
+    {GL_RGBA32UI, GL_RGBA_INTEGER, GL_UNSIGNED_INT, 4, 4, 128},
+    {GL_RGBA32I, GL_RGBA_INTEGER, GL_INT, 4, 4, 128},
+    {GL_RGB32F, GL_RGB, GL_FLOAT, 3, 4, 96},
+    {GL_RGB32UI, GL_RGB_INTEGER, GL_UNSIGNED_INT, 3, 4, 96},
+    {GL_RGB32I, GL_RGB_INTEGER, GL_INT, 3, 4, 96},
+    {GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT_OES, 4, 2, 64},
+    {GL_RG32F, GL_RG, GL_FLOAT, 2, 4, 64},
+    {GL_RGBA16UI, GL_RGBA_INTEGER, GL_UNSIGNED_SHORT, 4, 2, 64},
+    {GL_RG32UI, GL_RG_INTEGER, GL_UNSIGNED_INT, 2, 4, 64},
+    {GL_RGBA16I, GL_RGBA_INTEGER, GL_SHORT, 4, 2, 64},
+    {GL_RG32I, GL_RG_INTEGER, GL_INT, 2, 4, 64},
+    {GL_RGB16F, GL_RGB, GL_HALF_FLOAT_OES, 3, 2, 48},
+    {GL_RGB16UI, GL_RGB_INTEGER, GL_UNSIGNED_SHORT, 3, 2, 48},
+    {GL_RGB16I, GL_RGB_INTEGER, GL_SHORT, 3, 2, 48},
+    {GL_RG16F, GL_RG, GL_HALF_FLOAT_OES, 2, 2, 32},
+    {GL_R11F_G11F_B10F, GL_RGB, GL_UNSIGNED_INT_10F_11F_11F_REV, 1, 4, 32},
+    {GL_R32F, GL_RED, GL_FLOAT, 1, 4, 32},
+    {GL_RGB10_A2UI, GL_RGBA_INTEGER, GL_UNSIGNED_INT_2_10_10_10_REV, 1, 4, 32},
+    {GL_RGBA8UI, GL_RGBA_INTEGER, GL_UNSIGNED_BYTE, 4, 1, 32},
+    {GL_RG16UI, GL_RG_INTEGER, GL_UNSIGNED_SHORT, 2, 2, 32},
+    {GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, 1, 4, 32},
+    {GL_RGBA8I, GL_RGBA_INTEGER, GL_BYTE, 4, 1, 32},
+    {GL_RG16I, GL_RG_INTEGER, GL_SHORT, 2, 2, 32},
+    {GL_R32I, GL_RED_INTEGER, GL_INT, 1, 4, 32},
+    {GL_RGB10_A2, GL_RGBA, GL_UNSIGNED_INT_2_10_10_10_REV, 1, 4, 32},
+    {GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, 4, 1, 32},
+    {GL_RGBA8_SNORM, GL_RGBA, GL_BYTE, 4, 1, 32},
+    {GL_SRGB8_ALPHA8, GL_RGBA, GL_UNSIGNED_BYTE, 4, 1, 32},
+    {GL_RGB9_E5, GL_RGB, GL_UNSIGNED_INT_5_9_9_9_REV, 1, 4, 32},
+    {GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE, 3, 1, 24},
+    {GL_RGB8_SNORM, GL_RGB, GL_BYTE, 3, 1, 24},
+    {GL_SRGB8, GL_RGB, GL_UNSIGNED_BYTE, 3, 1, 24},
+    {GL_RGB8UI, GL_RGB_INTEGER, GL_UNSIGNED_BYTE, 3, 1, 24},
+    {GL_RGB8I, GL_RGB_INTEGER, GL_BYTE, 3, 1, 24},
+    {GL_R16F, GL_RED, GL_HALF_FLOAT_OES, 1, 2, 16},
+    {GL_RG8UI, GL_RG_INTEGER, GL_UNSIGNED_BYTE, 2, 1, 16},
+    {GL_R16UI, GL_RED_INTEGER, GL_UNSIGNED_SHORT, 1, 2, 16},
+    {GL_RG8I, GL_RG_INTEGER, GL_BYTE, 2, 1, 16},
+    {GL_R16I, GL_RED_INTEGER, GL_SHORT, 1, 2, 16},
+    {GL_RG8, GL_RG, GL_UNSIGNED_BYTE, 2, 1, 16},
+    {GL_RG8_SNORM, GL_RG, GL_BYTE, 2, 1, 16},
+    {GL_R8UI, GL_RED_INTEGER, GL_UNSIGNED_BYTE, 1, 1, 8},
+    {GL_R8I, GL_RED_INTEGER, GL_BYTE, 1, 1, 8},
+    {GL_R8, GL_RED, GL_UNSIGNED_BYTE, 1, 1, 8},
+    {GL_R8_SNORM, GL_RED, GL_BYTE, 1, 1, 8},
+};
+
+static const struct copy_fmt *copy_fmt_of(GLenum sized)
+{
+    ULONG k;
+    for (k = 0; k < sizeof(copy_fmts) / sizeof(copy_fmts[0]); k++)
+        if (copy_fmts[k].sized == sized)
+            return &copy_fmts[k];
+    return 0;
+}
+
+/* A level's internal format as copy_image compares them: as given, an
+ * unsized RGB or RGBA (GLES2's) as the sized one it stores; the luminance
+ * and alpha formats stay theirs (compatible with themselves only). */
+static GLenum level_sized(const struct OGLES3Face *f, int l)
+{
+    GLenum i = f->ifmt[l] ? f->ifmt[l] : f->format[l];
+    if (i == GL_RGB || i == GL_RGBA) {
+        GLenum s = f->sized[l] ? f->sized[l] : unsized_as_sized(i, f->type[l]);
+        return s ? s : i;
+    }
+    return i;
+}
+
+/* The object glCopyImageSubData names (Mesa's prepare_target_err, its
+ * order of checks): its texture, else 0 with the error set. */
+static struct OGLES3Texture *copy_object(struct OGLES3Context *ctx, GLuint name, GLenum target, GLint level,
+                                         GLint z, GLsizei depth)
+{
+    static BOOL warned;
+    struct OGLES3Texture *t;
+    int first, last, i;
+    if (!name) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return 0;
+    }
+    switch (target) {
+    case GL_RENDERBUFFER:
+    case GL_TEXTURE_2D:
+    case GL_TEXTURE_3D:
+    case GL_TEXTURE_CUBE_MAP:
+    case GL_TEXTURE_2D_ARRAY:
+    case GL_TEXTURE_2D_MULTISAMPLE:
+    case GL_TEXTURE_CUBE_MAP_ARRAY_OES:
+        break;
+    default:
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return 0;
+    }
+    if (target == GL_RENDERBUFFER || target == GL_TEXTURE_2D_MULTISAMPLE) {
+        if (target == GL_RENDERBUFFER ? !ogles2_glIsRenderbuffer(ctx, name) : !ogles2_texture_get(ctx, name)) {
+            ogles2_error(ctx, GL_INVALID_VALUE);
+            return 0;
+        }
+        if (!warned) {
+            warned = TRUE;
+            ogles2_log("glCopyImageSubData: renderbuffers and multisample textures are not copied "
+                       "(GL_INVALID_OPERATION; logged once)");
+        }
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return 0;
+    }
+    if (!(t = ogles2_texture_get(ctx, name))) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return 0;
+    }
+    /* Mesa's copyimage.c: complete aside from the formats' rules (an
+     * integer texture with the default linear filters still copies): the
+     * mip chain if the filter mipmaps, else the base level. */
+    if (!t->target || (!t->gpu && !upload_all(t)) ||
+        !complete(t, mipmapped(t->s.min_filter) ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST, GL_NEAREST, &first, &last)) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return 0;
+    }
+    if (t->target != target) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return 0;
+    }
+    if (level < 0 || level >= MAX_LEVELS) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return 0;
+    }
+    if (target == GL_TEXTURE_CUBE_MAP) {
+        if (z < 0 || z >= 6) {
+            ogles2_error(ctx, GL_INVALID_VALUE);
+            return 0;
+        }
+        for (i = 0; i < depth; i++)
+            if (z + i >= 6 || !(t->f[z + i].defined & (1UL << level))) {
+                ogles2_error(ctx, GL_INVALID_VALUE); /* a missing face */
+                return 0;
+            }
+    }
+    if (!(t->f[0].defined & (1UL << level))) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return 0;
+    }
+    return t;
+}
+
+/* Mesa's check_region_bounds: the box within the level (a cube's six faces,
+ * an array's layers, a 3D texture's slices its depth). */
+static BOOL copy_bounds(struct OGLES3Context *ctx, const struct OGLES3Texture *t, GLint level, GLint x, GLint y,
+                        GLint z, GLsizei w, GLsizei h, GLsizei d)
+{
+    LONG depth = t->target == GL_TEXTURE_CUBE_MAP ? 6 : t->target == GL_TEXTURE_2D ? 1 : t->d[level];
+    if (w < 0 || h < 0 || d < 0 || x < 0 || y < 0 || z < 0 || x + w > t->f[0].w[level] ||
+        y + h > t->f[0].h[level] || z + d > depth) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return FALSE;
+    }
+    return TRUE;
+}
+
+/* ES 3.2 8.3's compatibility: the same internal format, one view class, or
+ * a compressed format and a 64- or 128-bit one of its block's size. */
+static BOOL copy_compatible(GLenum a, GLenum b)
+{
+    const struct copy_fmt *fa = copy_fmt_of(a), *fb = copy_fmt_of(b);
+    ULONG ba = dxt_block_bytes(a), bb = dxt_block_bytes(b);
+    if (a == b)
+        return TRUE;
+    if (fa && fb)
+        return fa->bits == fb->bits;
+    if (ba && fb)
+        return (fb->bits == 64 || fb->bits == 128) && fb->bits == ba * 8 && fb->nc * fb->cs == ba;
+    if (bb && fa)
+        return (fa->bits == 64 || fa->bits == 128) && fa->bits == bb * 8 && fa->nc * fa->cs == bb;
+    return FALSE;
+}
+
+/* A box of face k's level l as the application's texels of cf (`nc` x `cs`
+ * bytes each, tight rows) from the RAM copy, through the GPU's byte order. */
+static BOOL copy_read(struct OGLES3Texture *t, int k, int l, const struct copy_fmt *cf, int x, int y, int w,
+                      int h, UBYTE *out)
+{
+    struct OGLES3Face *f = &t->f[k];
+    ULONG cb = copy_bytes(level_class(f, l)), cl = (ULONG)cf->nc * cf->cs, i, c, b;
+    UBYTE *hw;
+    int j;
+    if (!f->shadow[l] || t->cpp < cl || !(hw = AllocVec((ULONG)w * t->cpp + 4, MEMF_ANY)))
+        return FALSE;
+    for (j = 0; j < h; j++) {
+        const UBYTE *ram = f->shadow[l] + ((ULONG)(y + j) * f->w[l] + x) * cb, *s = ram;
+        UBYTE *d = out + (ULONG)j * w * cl;
+        if (t->hw_type != V3D_TEXTURE_DATA_FORMAT_RGBA8) { /* as store_box packs them */
+            if (float_type(t->hw_type) || depth_type(t->hw_type) || encoded_type(t->hw_type) || int_type(t->hw_type))
+                pack_wide(t, ram, hw, (ULONG)w);
+            else
+                pack(t, ram, hw, (ULONG)w);
+            s = hw;
+        }
+        for (i = 0; i < (ULONG)w; i++) /* the GPU's components are little-endian */
+            for (c = 0; c < cf->nc; c++)
+                for (b = 0; b < cf->cs; b++)
+                    d[i * cl + c * cf->cs + b] = s[i * t->cpp + c * cf->cs + cf->cs - 1 - b];
+    }
+    FreeVec(hw);
+    return TRUE;
+}
+
+/* A box of face k's level l given as the RAM copy holds it (`box`, tight
+ * rows; a compressed level's blocks), into the RAM copy and the GPU's, as
+ * glTexSubImage2D and glCompressedTexSubImage2D store theirs. */
+static void copy_write(struct OGLES3Context *ctx, struct OGLES3Texture *t, int k, int l, const UBYTE *box, int x,
+                       int y, int w, int h)
+{
+    struct OGLES3Face *f = &t->f[k];
+    ULONG bs = dxt_block_bytes(f->format[l]), j;
+    if (bs) {
+        ULONG row = blocks4(f->w[l]) * bs, bw = blocks4((ULONG)w);
+        for (j = 0; j < blocks4((ULONG)h); j++)
+            CopyMem((APTR)(box + j * bw * bs), f->shadow[l] + ((ULONG)y / 4 + j) * row + (ULONG)x / 4 * bs, bw * bs);
+    } else {
+        ULONG cb = copy_bytes(level_class(f, l));
+        for (j = 0; j < (ULONG)h; j++)
+            memcpy(f->shadow[l] + ((ULONG)(y + j) * f->w[l] + x) * cb, box + j * w * cb, (ULONG)w * cb);
+    }
+    f->blank &= ~(1UL << l);
+    if (t->gpu && l < t->gpu->num_levels && consistent(f, l))
+        store_box(t, k, l, box, x, y, w, h);
+    else if (!t->gpu && ctx->v3d && !upload_all(t)) /* renamed: a new copy, whole */
+        ogles2_error(ctx, GL_OUT_OF_MEMORY);
+}
+
+void ogles2_glCopyImageSubDataEXT(struct OGLES3Context *ctx, GLuint srcName, GLenum srcTarget, GLint srcLevel,
+                                  GLint srcX, GLint srcY, GLint srcZ, GLuint dstName, GLenum dstTarget,
+                                  GLint dstLevel, GLint dstX, GLint dstY, GLint dstZ, GLsizei srcWidth,
+                                  GLsizei srcHeight, GLsizei srcDepth)
+{
+    struct OGLES3TexState *ts;
+    struct OGLES3Texture *st, *dt;
+    struct OGLES3Context *m;
+    struct OGLES3Face *sf, *df;
+    GLenum sfmt, dfmt;
+    const struct copy_fmt *scf, *dcf;
+    ULONG sbs, dbs, sw, sh, unit, cb;
+    GLsizei dw, dh;
+    UBYTE *buf, *box;
+    int z;
+    if (!ogles2_es3_entry(ctx) || !(ts = ts_get(ctx)))
+        return;
+    if (!(st = copy_object(ctx, srcName, srcTarget, srcLevel, srcZ, srcDepth)) ||
+        !(dt = copy_object(ctx, dstName, dstTarget, dstLevel, dstZ, srcDepth)))
+        return;
+    sf = &st->f[0];
+    df = &dt->f[0];
+    sfmt = level_sized(sf, srcLevel);
+    dfmt = level_sized(df, dstLevel);
+    sbs = dxt_block_bytes(sf->format[srcLevel]);
+    dbs = dxt_block_bytes(df->format[dstLevel]);
+    /* Whole blocks (a box may end at the level's edge) */
+    if (sbs && ((srcX | srcY) & 3 || ((srcWidth & 3) && srcX + srcWidth != sf->w[srcLevel]) ||
+                ((srcHeight & 3) && srcY + srcHeight != sf->h[srcLevel]))) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    if (dbs && ((dstX | dstY) & 3)) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return;
+    }
+    /* The destination's box: a compressed source's blocks are texels, a
+     * compressed destination's texels blocks. */
+    dw = sbs && !dbs ? (GLsizei)blocks4((ULONG)srcWidth) : !sbs && dbs ? srcWidth * 4 : srcWidth;
+    dh = sbs && !dbs ? (GLsizei)blocks4((ULONG)srcHeight) : !sbs && dbs ? srcHeight * 4 : srcHeight;
+    if (srcWidth < 0 || srcHeight < 0)
+        dw = srcWidth, dh = srcHeight;
+    if (!copy_bounds(ctx, st, srcLevel, srcX, srcY, srcZ, srcWidth, srcHeight, srcDepth) ||
+        !copy_bounds(ctx, dt, dstLevel, dstX, dstY, dstZ, dw, dh, srcDepth))
+        return;
+    if (!copy_compatible(sfmt, dfmt) ||
+        (sfmt == dfmt && !sbs && level_class(sf, srcLevel) != level_class(df, dstLevel))) {
+        ogles2_error(ctx, GL_INVALID_OPERATION); /* (the second: LUMINANCE given as bytes and as floats) */
+        return;
+    }
+    if (!srcWidth || !srcHeight || !srcDepth)
+        return;
+    scf = copy_fmt_of(sfmt);
+    dcf = copy_fmt_of(dfmt);
+    /* Units of the copy: blocks or texels of the source (sw x sh of them). */
+    sw = sbs ? blocks4((ULONG)srcWidth) : (ULONG)srcWidth;
+    sh = sbs ? blocks4((ULONG)srcHeight) : (ULONG)srcHeight;
+    unit = sfmt == dfmt ? (sbs ? sbs : copy_bytes(level_class(sf, srcLevel))) : sbs ? sbs : (ULONG)scf->nc * scf->cs;
+    cb = dbs ? dbs : copy_bytes(level_class(df, dstLevel));
+    if (!(buf = AllocVec(sw * sh * unit + 4, MEMF_ANY)) ||
+        !(box = AllocVec((ULONG)(dbs ? blocks4((ULONG)dw) * blocks4((ULONG)dh) : (ULONG)dw * dh) * cb + 4, MEMF_ANY))) {
+        FreeVec(buf);
+        ogles2_error(ctx, GL_OUT_OF_MEMORY);
+        return;
+    }
+    /* The source's RAM copies current (a job drawing into it rendered
+     * first), the destination's old GPU copy left to the jobs using it. */
+    for (m = ctx->share->first; m; m = m->share_next)
+        ogles2_fbo_texture_changing(m, st);
+    sync(st);
+    before_change(ctx, ts, dt);
+    for (z = 0; z < srcDepth; z++) {
+        struct OGLES3Face *s = &st->f[srcZ + z], *d = &dt->f[dstZ + z];
+        ULONG j;
+        const UBYTE *from = buf;
+        if (!s->shadow[srcLevel] || !d->shadow[dstLevel]) {
+            ogles2_error(ctx, GL_OUT_OF_MEMORY);
+            break;
+        }
+        /* the source's units */
+        if (sbs) {
+            ULONG row = blocks4(s->w[srcLevel]) * sbs;
+            for (j = 0; j < sh; j++)
+                CopyMem(s->shadow[srcLevel] + ((ULONG)srcY / 4 + j) * row + (ULONG)srcX / 4 * sbs, buf + j * sw * sbs,
+                        sw * sbs);
+        } else if (sfmt == dfmt) {
+            for (j = 0; j < sh; j++)
+                memcpy(buf + j * sw * unit, s->shadow[srcLevel] + ((ULONG)(srcY + j) * s->w[srcLevel] + srcX) * unit,
+                       sw * unit);
+        } else if (!copy_read(st, srcZ + z, srcLevel, scf, srcX, srcY, srcWidth, srcHeight, buf)) {
+            ogles2_error(ctx, GL_OUT_OF_MEMORY);
+            break;
+        }
+        /* as the destination's RAM copy holds them */
+        if (sfmt == dfmt || dbs) {
+            from = buf; /* its own texels, or blocks */
+        } else {
+            convert(box, (ULONG)dw * cb, buf, dcf->format, dcf->type, dw, dh, (ULONG)dw * dcf->nc * dcf->cs);
+            from = box;
+        }
+        /* DEPTH32F_STENCIL8: the stencil indices beside the depth */
+        if (sfmt == dfmt && s->stencil[srcLevel] && (d->stencil[dstLevel] ||
+            (d->stencil[dstLevel] = AllocVec((ULONG)d->w[dstLevel] * d->h[dstLevel], MEMF_ANY | MEMF_CLEAR)))) {
+            for (j = 0; j < sh; j++)
+                memcpy(d->stencil[dstLevel] + (ULONG)(dstY + j) * d->w[dstLevel] + dstX,
+                       s->stencil[srcLevel] + (ULONG)(srcY + j) * s->w[srcLevel] + srcX, sw);
+            if (dt->s8)
+                dt->s8->stale |= 1UL << dstLevel;
+        }
+        copy_write(ctx, dt, dstZ + z, dstLevel, from, dstX, dstY, dw, dh);
+    }
+    FreeVec(box);
+    FreeVec(buf);
+}
+
+void ogles2_glCopyImageSubDataOES(struct OGLES3Context *ctx, GLuint srcName, GLenum srcTarget, GLint srcLevel,
+                                  GLint srcX, GLint srcY, GLint srcZ, GLuint dstName, GLenum dstTarget,
+                                  GLint dstLevel, GLint dstX, GLint dstY, GLint dstZ, GLsizei srcWidth,
+                                  GLsizei srcHeight, GLsizei srcDepth)
+{
+    ogles2_glCopyImageSubDataEXT(ctx, srcName, srcTarget, srcLevel, srcX, srcY, srcZ, dstName, dstTarget, dstLevel,
+                                 dstX, dstY, dstZ, srcWidth, srcHeight, srcDepth);
+}
+
 /* Level l+1 from level l: each texel the mean of a 2x2 box (a 1-texel edge
  * reuses its row or column). */
 static void box_down(const UBYTE *src, int sw, int sh, UBYTE *dst, int dw, int dh)
@@ -5539,7 +6106,7 @@ ULONG ogles2_image_size(struct OGLES3Context *ctx, int unit, int what)
     case 0: return t->f[0].w[im->level];
     case 1: return t->f[0].h[im->level];
     case 2: return t->target == GL_TEXTURE_3D ? t->d[im->level] : 1;
-    default: return (ULONG)faces(t);
+    default: return t->target == GL_TEXTURE_CUBE_MAP_ARRAY_OES ? (ULONG)faces(t) / 6 : (ULONG)faces(t);
     }
 }
 
@@ -5576,11 +6143,15 @@ ULONG ogles2_texture_size(struct OGLES3Context *ctx, int unit, int kind, int wha
         return 1;
     t = unit_texture(ts, kind, unit); /* the integer flag aside */
     /* the depth of a 3D texture (minified as width and height), the layers of an array */
-    if (what >= 2 && !(what == 2 ? t->target == GL_TEXTURE_3D : t->target == GL_TEXTURE_2D_ARRAY))
+    if (what >= 2 && !(what == 2 ? t->target == GL_TEXTURE_3D
+                                 : t->target == GL_TEXTURE_2D_ARRAY || t->target == GL_TEXTURE_CUBE_MAP_ARRAY_OES))
         return 1;
+    /* a cube map array's layers are its cubes (Mesa: QUNIFORM_TEXTURE_ARRAY_SIZE / 6) */
     if ((b = chain_base(t)) != 0) /* the base level's own (its view's level 0) */
-        return what >= 2 ? t->d[b] : what ? t->f[0].h[b] : t->f[0].w[b];
-    s = what == 3 ? t->d[0] : what == 2 ? t->d[0] : what ? t->f[0].h[0] : t->f[0].w[0];
+        return what >= 2 ? (t->target == GL_TEXTURE_CUBE_MAP_ARRAY_OES ? t->d[b] / 6 : t->d[b])
+                         : what ? t->f[0].h[b] : t->f[0].w[b];
+    s = what == 3 ? (t->target == GL_TEXTURE_CUBE_MAP_ARRAY_OES ? t->d[0] / 6 : t->d[0])
+      : what == 2 ? t->d[0] : what ? t->f[0].h[0] : t->f[0].w[0];
     if (!s || what == 3)
         return s;
     s >>= MS_SHIFT(t);
@@ -5724,16 +6295,67 @@ void ogles2_glSamplerParameterf(struct OGLES3Context *ctx, GLuint sampler, GLenu
     sampler_param(ctx, sampler, pname, round_param(param), param);
 }
 
+/* The sampler object whose border colour is set or read; 0 (the error set) if none. */
+static struct OGLES3Sampler *border_sampler(struct OGLES3Context *ctx, GLuint sampler)
+{
+    struct OGLES3Sampler *so;
+    if (!ogles2_es3_entry(ctx))
+        return 0;
+    if (!(so = smp_by_name(ctx->share, sampler)))
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+    return so;
+}
+
+static void sampler_border(struct OGLES3Context *ctx, GLuint sampler, const void *v, int how)
+{
+    struct OGLES3Sampler *so = border_sampler(ctx, sampler);
+    if (!so)
+        return;
+    border_set(&so->s, v, how);
+    so->ver = ++smp_serial;
+}
+
 void ogles2_glSamplerParameteriv(struct OGLES3Context *ctx, GLuint sampler, GLenum pname, const GLint *param)
 {
-    if (param)
+    if (param && pname == GL_TEXTURE_BORDER_COLOR_EXT)
+        sampler_border(ctx, sampler, param, BORDER_N);
+    else if (param)
         sampler_param(ctx, sampler, pname, param[0], (GLfloat)param[0]);
 }
 
 void ogles2_glSamplerParameterfv(struct OGLES3Context *ctx, GLuint sampler, GLenum pname, const GLfloat *param)
 {
-    if (param)
+    if (param && pname == GL_TEXTURE_BORDER_COLOR_EXT)
+        sampler_border(ctx, sampler, param, BORDER_F);
+    else if (param)
         sampler_param(ctx, sampler, pname, round_param(param[0]), param[0]);
+}
+
+/* EXT_/OES_texture_border_clamp's glSamplerParameterI*, as glTexParameterI*'s. */
+void ogles2_glSamplerParameterIivEXT(struct OGLES3Context *ctx, GLuint sampler, GLenum pname, const GLint *param)
+{
+    if (param && pname == GL_TEXTURE_BORDER_COLOR_EXT)
+        sampler_border(ctx, sampler, param, BORDER_I);
+    else if (param)
+        sampler_param(ctx, sampler, pname, param[0], (GLfloat)param[0]);
+}
+
+void ogles2_glSamplerParameterIuivEXT(struct OGLES3Context *ctx, GLuint sampler, GLenum pname, const GLuint *param)
+{
+    if (param && pname == GL_TEXTURE_BORDER_COLOR_EXT)
+        sampler_border(ctx, sampler, param, BORDER_UI);
+    else if (param)
+        sampler_param(ctx, sampler, pname, (GLint)param[0], (GLfloat)param[0]);
+}
+
+void ogles2_glSamplerParameterIivOES(struct OGLES3Context *ctx, GLuint sampler, GLenum pname, const GLint *param)
+{
+    ogles2_glSamplerParameterIivEXT(ctx, sampler, pname, param);
+}
+
+void ogles2_glSamplerParameterIuivOES(struct OGLES3Context *ctx, GLuint sampler, GLenum pname, const GLuint *param)
+{
+    ogles2_glSamplerParameterIuivEXT(ctx, sampler, pname, param);
 }
 
 static BOOL get_sampler_param(struct OGLES3Context *ctx, GLuint sampler, GLenum pname, GLfloat *v)
@@ -5755,15 +6377,54 @@ static BOOL get_sampler_param(struct OGLES3Context *ctx, GLuint sampler, GLenum 
 void ogles2_glGetSamplerParameteriv(struct OGLES3Context *ctx, GLuint sampler, GLenum pname, GLint *params)
 {
     GLfloat v;
-    if (params && get_sampler_param(ctx, sampler, pname, &v))
+    struct OGLES3Sampler *so;
+    if (params && pname == GL_TEXTURE_BORDER_COLOR_EXT) {
+        if ((so = border_sampler(ctx, sampler)))
+            border_get(&so->s, params, BORDER_N);
+    } else if (params && get_sampler_param(ctx, sampler, pname, &v))
         *params = exact_param(pname) ? (GLint)(ULONG)v : round_param(v);
 }
 
 void ogles2_glGetSamplerParameterfv(struct OGLES3Context *ctx, GLuint sampler, GLenum pname, GLfloat *params)
 {
     GLfloat v;
-    if (params && get_sampler_param(ctx, sampler, pname, &v))
+    struct OGLES3Sampler *so;
+    if (params && pname == GL_TEXTURE_BORDER_COLOR_EXT) {
+        if ((so = border_sampler(ctx, sampler)))
+            border_get(&so->s, params, BORDER_F);
+    } else if (params && get_sampler_param(ctx, sampler, pname, &v))
         *params = v;
+}
+
+/* glGetSamplerParameterI*: the border colour's words, else glGetSamplerParameteriv's. */
+static void get_sampler_param_i(struct OGLES3Context *ctx, GLuint sampler, GLenum pname, GLint *params, int how)
+{
+    struct OGLES3Sampler *so;
+    if (params && pname == GL_TEXTURE_BORDER_COLOR_EXT) {
+        if ((so = border_sampler(ctx, sampler)))
+            border_get(&so->s, params, how);
+    } else
+        ogles2_glGetSamplerParameteriv(ctx, sampler, pname, params);
+}
+
+void ogles2_glGetSamplerParameterIivEXT(struct OGLES3Context *ctx, GLuint sampler, GLenum pname, GLint *params)
+{
+    get_sampler_param_i(ctx, sampler, pname, params, BORDER_I);
+}
+
+void ogles2_glGetSamplerParameterIuivEXT(struct OGLES3Context *ctx, GLuint sampler, GLenum pname, GLuint *params)
+{
+    get_sampler_param_i(ctx, sampler, pname, (GLint *)params, BORDER_UI);
+}
+
+void ogles2_glGetSamplerParameterIivOES(struct OGLES3Context *ctx, GLuint sampler, GLenum pname, GLint *params)
+{
+    get_sampler_param_i(ctx, sampler, pname, params, BORDER_I);
+}
+
+void ogles2_glGetSamplerParameterIuivOES(struct OGLES3Context *ctx, GLuint sampler, GLenum pname, GLuint *params)
+{
+    get_sampler_param_i(ctx, sampler, pname, (GLint *)params, BORDER_UI);
 }
 
 /* The fallback texture, 1x1 (0,0,0,1) (GLES 2.0 3.8.2: an incomplete
@@ -5821,7 +6482,80 @@ static UBYTE wrap_mode(GLenum w)
 {
     return w == GL_CLAMP_TO_EDGE ? V3D_WRAP_MODE_CLAMP
          : w == GL_MIRRORED_REPEAT ? V3D_WRAP_MODE_MIRROR
-         : w == GL_MIRROR_CLAMP_TO_EDGE ? V3D_WRAP_MODE_MIRRORONCE : V3D_WRAP_MODE_REPEAT;
+         : w == GL_MIRROR_CLAMP_TO_EDGE ? V3D_WRAP_MODE_MIRRORONCE
+         : w == GL_CLAMP_TO_BORDER_EXT ? V3D_WRAP_MODE_BORDER : V3D_WRAP_MODE_REPEAT;
+}
+
+static ULONG clamp_word(ULONG w, BOOL is_signed, LONG lo, LONG hi)
+{
+    if (is_signed)
+        return (ULONG)((LONG)w < lo ? lo : (LONG)w > hi ? hi : (LONG)w);
+    return w > (ULONG)hi ? (ULONG)hi : w;
+}
+
+static GLfloat clamp_float(GLfloat f, GLfloat lo)
+{
+    return !(f > lo) ? lo : f > 1.0f ? 1.0f : f; /* NaN: lo */
+}
+
+/* EXT_texture_border_clamp: the sampler record's colour words for a
+ * texture of TMU format `hw` read through the format's swizzle `fsw`
+ * (Mesa's v3d_upload_sampler_state_variant and its variants by format,
+ * v3d_create_sampler_view). In the hardware's channel order: each channel
+ * the GL colour's component the swizzle reads it as (Mesa's BGRA, A and LA
+ * cases; an RGB format's alpha, ONE, none). Clamped to what the format
+ * holds; 32-bit words for the formats the TMU returns 32 bits for, else
+ * halves (V3D 4.2 takes them as it returns). */
+static void border_words(const struct OGLES3SamplerParams *sp, UBYTE hw, const UBYTE *fsw, ULONG *w)
+{
+    int c, k;
+    for (c = 0; c < 4; c++) {
+        w[c] = 0;
+        for (k = 0; k < 4; k++)
+            if (fsw[k] == v3d_SWIZZLE_RED + c) {
+                w[c] = sp->border[k];
+                break;
+            }
+    }
+    if (hw == V3D_TEXTURE_DATA_FORMAT_RGB10A2UI) {
+        for (c = 0; c < 4; c++)
+            w[c] = clamp_word(w[c], FALSE, 0, c < 3 ? 1023 : 3);
+    } else if (hw >= V3D_TEXTURE_DATA_FORMAT_R8I && hw <= V3D_TEXTURE_DATA_FORMAT_RGBA16UI) {
+        /* R8I, R8UI, RG8I, ...: the signed and unsigned ones alternate */
+        BOOL is_signed = !((hw - V3D_TEXTURE_DATA_FORMAT_R8I) & 1);
+        BOOL bits16 = hw >= V3D_TEXTURE_DATA_FORMAT_R16I;
+        for (c = 0; c < 4; c++)
+            w[c] = is_signed ? clamp_word(w[c], TRUE, bits16 ? -32768 : -128, bits16 ? 32767 : 127)
+                             : clamp_word(w[c], FALSE, 0, bits16 ? 65535 : 255);
+    } else if (int_type(hw)) {
+        ; /* the 32-bit integers as they are */
+    } else {
+        BOOL unorm, snorm;
+        switch (hw) {
+        case V3D_TEXTURE_DATA_FORMAT_R8_SNORM: case V3D_TEXTURE_DATA_FORMAT_RG8_SNORM:
+        case V3D_TEXTURE_DATA_FORMAT_RGBA8_SNORM: case V3D_TEXTURE_DATA_FORMAT_R16_SNORM:
+        case V3D_TEXTURE_DATA_FORMAT_RG16_SNORM: case V3D_TEXTURE_DATA_FORMAT_RGBA16_SNORM:
+        case V3D_TEXTURE_DATA_FORMAT_SIGNEDR11EAC: case V3D_TEXTURE_DATA_FORMAT_SIGNEDRG11EAC:
+            unorm = FALSE, snorm = TRUE;
+            break;
+        case V3D_TEXTURE_DATA_FORMAT_R16F: case V3D_TEXTURE_DATA_FORMAT_RG16F:
+        case V3D_TEXTURE_DATA_FORMAT_RGBA16F: case V3D_TEXTURE_DATA_FORMAT_R11FG11FB10F:
+        case V3D_TEXTURE_DATA_FORMAT_RGB9E5: case V3D_TEXTURE_DATA_FORMAT_R32F:
+        case V3D_TEXTURE_DATA_FORMAT_RG32F: case V3D_TEXTURE_DATA_FORMAT_RGBA32F:
+        case V3D_TEXTURE_DATA_FORMAT_DEPTH_COMP32F:
+            unorm = snorm = FALSE;
+            break;
+        default: /* the rest are normalized unsigned, DEPTH_COMP16 and DEPTH24X8 too */
+            unorm = TRUE, snorm = FALSE;
+            break;
+        }
+        for (c = 0; c < 4; c++) {
+            GLfloat f = u2f(w[c]);
+            if (unorm || snorm)
+                f = clamp_float(f, unorm ? 0.0f : -1.0f);
+            w[c] = wide_type(hw) ? f2u(f) : ogles2_float_to_half(f);
+        }
+    }
 }
 
 /* What a draw samples for t: t, or the view of its base level (chain_base;
@@ -5951,6 +6685,10 @@ static BOOL texture_state_build(struct OGLES3Context *ctx, int unit, int kind, U
     const struct OGLES3SamplerParams *sp;
     ULONG sver;
     BOOL isfb;
+    static const UBYTE stencil_sw[4] = { v3d_SWIZZLE_RED, v3d_SWIZZLE_ZERO, v3d_SWIZZLE_ZERO, v3d_SWIZZLE_ONE };
+    const UBYTE *fsw;
+    UBYTE hw;                       /* the format the TMU reads (the border words') */
+    BOOL border;
 
     if (!ts)
         return FALSE;
@@ -6024,8 +6762,14 @@ static BOOL texture_state_build(struct OGLES3Context *ctx, int unit, int kind, U
     /* A cube map: six layers, a face stride apart (Mesa's v3dx_state.c); a
      * 2D array its layers so, a 3D texture its slices (the stride level
      * 0's). The fallback is 2D: as a cube, every face reads its one texel. */
-    tsr->image_depth_lo = (ULONG)faces(t) & 0x3ff; /* a 2D array's layers, a 3D texture's depth */
-    tsr->image_depth_hi = (ULONG)faces(t) >> 10;
+    /* a 2D array's layers, a 3D texture's depth; a cube map array's cubes
+     * (Mesa's v3d_create_sampler_view: layers / 6 when sampled, not for
+     * images) */
+    {
+        ULONG depth = t->target == GL_TEXTURE_CUBE_MAP_ARRAY_OES ? (ULONG)faces(t) / 6 : (ULONG)faces(t);
+        tsr->image_depth_lo = depth & 0x3ff;
+        tsr->image_depth_hi = depth >> 10;
+    }
     tsr->array_stride_64_byte_aligned = faces(t) > 1 ? t->face_stride / 64 : 0;
     tsr->texture_type = t->hw_type;
     stencil = stencil_sampled(t);
@@ -6043,22 +6787,27 @@ static BOOL texture_state_build(struct OGLES3Context *ctx, int unit, int kind, U
             tsr->image_width_lo = t->f[0].w[first] & 0x3f;
             tsr->image_width_hi = t->f[0].w[first] >> 6;
             tsr->image_height = t->f[0].h[first];
-            /* a cube's or an array's layers, a layer's bytes apart */
-            tsr->image_depth_lo = (ULONG)faces_at(t, first) & 0x3ff;
-            tsr->image_depth_hi = (ULONG)faces_at(t, first) >> 10;
+            /* a cube's or an array's layers, a layer's bytes apart (a cube
+             * map array's cubes, as above) */
+            ULONG depth = (ULONG)faces_at(t, first) / (t->target == GL_TEXTURE_CUBE_MAP_ARRAY_OES ? 6 : 1);
+            tsr->image_depth_lo = depth & 0x3ff;
+            tsr->image_depth_hi = depth >> 10;
             tsr->array_stride_64_byte_aligned = faces_at(t, first) > 1 ? s8.bytes / 64 : 0;
             tsr->texture_type = V3D_TEXTURE_DATA_FORMAT_R8UI;
             s8_uif = TRUE;
         }
     }
-    /* ES 3.0's sRGB formats: RGBA8 the TMU decodes (Mesa: util_format_is_srgb) */
-    tsr->srgb = t->f[0].sized[0] == GL_SRGB8 || t->f[0].sized[0] == GL_SRGB8_ALPHA8 || srgb_etc2(t->f[0].format[0]);
+    /* ES 3.0's sRGB formats: RGBA8 the TMU decodes (Mesa: util_format_is_srgb),
+     * unless EXT_texture_sRGB_decode's SKIP_DECODE (Mesa samples the linear
+     * format then) */
+    tsr->srgb = (t->f[0].sized[0] == GL_SRGB8 || t->f[0].sized[0] == GL_SRGB8_ALPHA8 ||
+                 srgb_etc2(t->f[0].format[0])) && sp->srgb_decode != GL_SKIP_DECODE_EXT;
+    hw = (UBYTE)tsr->texture_type;
+    fsw = stencil ? stencil_sw : t->swizzle;
     /* The GL swizzle composed with the format's (Mesa's
      * util_format_compose_swizzles): component k reads the format's channel
      * the GL swizzle names, or zero or one. */
     {
-        static const UBYTE stencil_sw[4] = { v3d_SWIZZLE_RED, v3d_SWIZZLE_ZERO, v3d_SWIZZLE_ZERO, v3d_SWIZZLE_ONE };
-        const UBYTE *fsw = stencil ? stencil_sw : t->swizzle;
         UBYTE sw[4];
         int k;
         for (k = 0; k < 4; k++)
@@ -6119,6 +6868,13 @@ static BOOL texture_state_build(struct OGLES3Context *ctx, int unit, int kind, U
     ss->wrap_s = wrap_mode(sp->wrap_s);
     ss->wrap_t = wrap_mode(sp->wrap_t);
     ss->wrap_r = wrap_mode(sp->wrap_r);
+    /* EXT_texture_border_clamp: the colour follows, always (the standard
+     * colours are in the hardware's order, which an alpha format's swizzle
+     * would turn); the record is 32-byte aligned for it (claim32, rec + 32). */
+    border = ss->wrap_s == V3D_WRAP_MODE_BORDER || ss->wrap_t == V3D_WRAP_MODE_BORDER ||
+             ss->wrap_r == V3D_WRAP_MODE_BORDER;
+    if (border)
+        ss->border_color_mode = V3D_BORDER_COLOR_FOLLOWS;
     /* The LOD range, Mesa's v3dx_state.c: SGIS_texture_lod's limits within
      * the field's 0 to 15; without mipmapping clamped just above the base
      * level, so the hardware still chooses between the min and mag filters. */
@@ -6148,6 +6904,13 @@ static BOOL texture_state_build(struct OGLES3Context *ctx, int unit, int kind, U
     swivel16 = (UWORD *)ss;
     swivel16[2] = LE16(swivel16[2]); /* the bias */
     swivel16[3] = LE16(swivel16[3]);
+    if (border) {
+        ULONG w[4];
+        int c;
+        border_words(sp, hw, fsw, w);
+        for (c = 0; c < 4; c++)
+            ((ULONG *)ss)[2 + c] = LE32(w[c]);
+    }
     *sampler_state = (ULONG)ss;
     t->st_gen = g_v3d_cl_generation;
     t->st_ctx = ctx;

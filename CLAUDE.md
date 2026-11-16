@@ -25,7 +25,12 @@ repositories: git in WSL needs credentials (CONTRIBUTING.md, "Access").
   in the same change; do not write separate documents.
 - Commit only when asked; the commit message ends with the agent attribution line.
 - Never commit `tools/amictl/station.local` (the test station's token) or screenshots.
-- Tests on the A1200 run through `tools/amictl` (`runpkg` a package from
+- From 2026-11-16 the A1200's runs go through amigent instead of amictl (the fork
+  `ladislawv/amigent`, `C:\- CPP\amigent`, port 6502, `amigent-ctl`; ogles2pi3's
+  CONTRIBUTING.md "The Pi 3 card and the amigent station" and `tests/a1200/p5_run.sh`
+  are the model; ogles3's scripts are not switched yet: docs/GLES3_PLAN.md, at the top).
+  Never commit the amigent key (`~/.config/amigent/key-*`).
+- Tests on the A1200 ran through `tools/amictl` (`runpkg` a package from
   `tests/a1200/<name>`); it is the `ladislawv/amictl` repository as a git submodule:
   improvements to amictl are made there (its own clone or the submodule's checkout),
   committed and pushed there, then the submodule moved here; visible tests show each state about a second; benchmarks run short.

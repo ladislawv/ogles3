@@ -46,10 +46,15 @@ void ogles2_state_init(struct OGLES3Context *ctx)
 
     s->caps = OGLES3_CAP_DITHER; /* the only capability enabled initially */
     s->depth_mask = GL_TRUE;
-    for (i = 0; i < 4; i++) {
-        s->color_mask[i] = GL_TRUE;
+    for (i = 0; i < 4; i++)
         s->clear_color[i] = 0.0f;
+    for (i = 0; i < OGLES3_MAX_DRAW_BUFFERS; i++) {
+        s->color_mask[i][0] = s->color_mask[i][1] = s->color_mask[i][2] = s->color_mask[i][3] = GL_TRUE;
+        s->blend_src_rgb[i] = s->blend_src_alpha[i] = GL_ONE;
+        s->blend_dst_rgb[i] = s->blend_dst_alpha[i] = GL_ZERO;
+        s->blend_eq_rgb[i] = s->blend_eq_alpha[i] = GL_FUNC_ADD;
     }
+    s->blend_rts = 0;
     s->clear_depth = 1.0f;
     s->line_width = 1.0f;
     s->generate_mipmap_hint = GL_DONT_CARE;
@@ -75,9 +80,6 @@ void ogles2_state_init(struct OGLES3Context *ctx)
     s->cull_face_mode = GL_BACK;
     s->front_face = GL_CCW;
     s->depth_func = GL_LESS;
-    s->blend_src_rgb = s->blend_src_alpha = GL_ONE;
-    s->blend_dst_rgb = s->blend_dst_alpha = GL_ZERO;
-    s->blend_eq_rgb = s->blend_eq_alpha = GL_FUNC_ADD;
     for (i = 0; i < 4; i++)
         s->blend_color[i] = 0.0f;
     for (i = 0; i < 8; i++)
@@ -151,9 +153,30 @@ static const struct cap_ent
     [CAP_SLOT(GL_SAMPLE_MASK)] = { GL_SAMPLE_MASK, 31, OGLES3_CAP_SAMPLE_MASK, OGLES3_SG_CFG | OGLES3_SG_SAMPLE },
 };
 
+/* EXT_draw_buffers_indexed: the draw buffers blended (rts); OGLES3_CAP_BLEND
+ * while any is. */
+static void set_blend(struct OGLES3Context *ctx, UBYTE rts)
+{
+    struct OGLES3State *s = &ctx->state;
+    if (s->blend_rts == rts && !(s->caps & OGLES3_CAP_BLEND) == !rts)
+        return;
+    s->blend_rts = rts;
+    if (rts)
+        s->caps |= OGLES3_CAP_BLEND;
+    else
+        s->caps &= ~OGLES3_CAP_BLEND;
+    OGLES3_STATE_CHANGED(ctx, OGLES3_SG_CFG | OGLES3_SG_BLEND);
+}
+
+#define ALL_RTS ((UBYTE)((1 << OGLES3_MAX_DRAW_BUFFERS) - 1))
+
 static __attribute__((noinline)) void set_cap_slow(struct OGLES3Context *ctx, GLenum cap, int on)
 {
     ULONG bit = cap_bit(ctx, cap);
+    if (bit == OGLES3_CAP_BLEND) {
+        set_blend(ctx, on ? ALL_RTS : 0);
+        return;
+    }
     if (!bit) {
         if (!ogles2_debug_cap(ctx, cap, on, 0)) /* KHR_debug's two: asked only for a cap not above */
             ogles2_error(ctx, GL_INVALID_ENUM);
@@ -177,8 +200,13 @@ static void set_cap(struct OGLES3Context *ctx, GLenum cap, int on)
         set_cap_slow(ctx, cap, on);
         return;
     }
-    if (!(ctx->state.caps & e->bit) == !on)
+    if (!(ctx->state.caps & e->bit) == !on && (e->bit != OGLES3_CAP_BLEND || !on ||
+                                                ctx->state.blend_rts == ALL_RTS))
         return; /* unchanged: gl4es disables what is off on every draw */
+    if (e->bit == OGLES3_CAP_BLEND) { /* every draw buffer's (EXT_draw_buffers_indexed) */
+        set_blend(ctx, on ? ALL_RTS : 0);
+        return;
+    }
     ctx->state.caps ^= e->bit;
     OGLES3_STATE_CHANGED(ctx, e->group);
 }
@@ -206,7 +234,73 @@ GLboolean ogles2_glIsEnabled(struct OGLES3Context *ctx, GLenum cap)
         ogles2_error(ctx, GL_INVALID_ENUM);
         return GL_FALSE;
     }
+    if (bit == OGLES3_CAP_BLEND) /* draw buffer 0's */
+        return (ctx->state.caps & bit) && (ctx->state.blend_rts & 1) ? GL_TRUE : GL_FALSE;
     return (ctx->state.caps & bit) ? GL_TRUE : GL_FALSE;
+}
+
+/* ---- EXT_/OES_draw_buffers_indexed (ES3 contexts): GL_BLEND by draw buffer ---- */
+
+static BOOL draw_buffer_ok(struct OGLES3Context *ctx, GLuint index)
+{
+    if (index >= OGLES3_MAX_DRAW_BUFFERS) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return FALSE;
+    }
+    return TRUE;
+}
+
+static void set_cap_i(struct OGLES3Context *ctx, GLenum target, GLuint index, int on)
+{
+    UBYTE rts;
+    if (!ogles2_es3_entry(ctx))
+        return;
+    if (target != GL_BLEND) { /* the one indexed capability of ES 3.2 */
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    if (!draw_buffer_ok(ctx, index))
+        return;
+    rts = (ctx->state.caps & OGLES3_CAP_BLEND) ? ctx->state.blend_rts : 0;
+    set_blend(ctx, on ? (UBYTE)(rts | (1 << index)) : (UBYTE)(rts & ~(1 << index)));
+}
+
+void ogles2_glEnableiEXT(struct OGLES3Context *ctx, GLenum target, GLuint index)
+{
+    set_cap_i(ctx, target, index, 1);
+}
+
+void ogles2_glDisableiEXT(struct OGLES3Context *ctx, GLenum target, GLuint index)
+{
+    set_cap_i(ctx, target, index, 0);
+}
+
+GLboolean ogles2_glIsEnablediEXT(struct OGLES3Context *ctx, GLenum target, GLuint index)
+{
+    if (!ogles2_es3_entry(ctx))
+        return GL_FALSE;
+    if (target != GL_BLEND) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return GL_FALSE;
+    }
+    if (!draw_buffer_ok(ctx, index))
+        return GL_FALSE;
+    return (ctx->state.caps & OGLES3_CAP_BLEND) && (ctx->state.blend_rts & (1 << index)) ? GL_TRUE : GL_FALSE;
+}
+
+void ogles2_glEnableiOES(struct OGLES3Context *ctx, GLenum target, GLuint index)
+{
+    set_cap_i(ctx, target, index, 1);
+}
+
+void ogles2_glDisableiOES(struct OGLES3Context *ctx, GLenum target, GLuint index)
+{
+    set_cap_i(ctx, target, index, 0);
+}
+
+GLboolean ogles2_glIsEnablediOES(struct OGLES3Context *ctx, GLenum target, GLuint index)
+{
+    return ogles2_glIsEnablediEXT(ctx, target, index);
 }
 
 /* ---- masks, clear values, rasterisation parameters ---- */
@@ -222,13 +316,37 @@ void ogles2_glDepthMask(struct OGLES3Context *ctx, GLboolean flag)
 void ogles2_glColorMask(struct OGLES3Context *ctx, GLboolean red, GLboolean green,
                         GLboolean blue, GLboolean alpha)
 {
+    int k;
     if (!ogles2_context_valid(ctx))
         return;
-    ctx->state.color_mask[0] = red ? GL_TRUE : GL_FALSE;
-    ctx->state.color_mask[1] = green ? GL_TRUE : GL_FALSE;
-    ctx->state.color_mask[2] = blue ? GL_TRUE : GL_FALSE;
-    ctx->state.color_mask[3] = alpha ? GL_TRUE : GL_FALSE;
+    for (k = 0; k < OGLES3_MAX_DRAW_BUFFERS; k++) { /* every draw buffer's */
+        ctx->state.color_mask[k][0] = red ? GL_TRUE : GL_FALSE;
+        ctx->state.color_mask[k][1] = green ? GL_TRUE : GL_FALSE;
+        ctx->state.color_mask[k][2] = blue ? GL_TRUE : GL_FALSE;
+        ctx->state.color_mask[k][3] = alpha ? GL_TRUE : GL_FALSE;
+    }
     OGLES3_STATE_CHANGED(ctx, OGLES3_SG_MASK);
+}
+
+/* EXT_/OES_draw_buffers_indexed: one draw buffer's mask. */
+void ogles2_glColorMaskiEXT(struct OGLES3Context *ctx, GLuint index, GLboolean r, GLboolean g, GLboolean b,
+                            GLboolean a)
+{
+    GLboolean *m;
+    if (!ogles2_es3_entry(ctx) || !draw_buffer_ok(ctx, index))
+        return;
+    m = ctx->state.color_mask[index];
+    m[0] = r ? GL_TRUE : GL_FALSE;
+    m[1] = g ? GL_TRUE : GL_FALSE;
+    m[2] = b ? GL_TRUE : GL_FALSE;
+    m[3] = a ? GL_TRUE : GL_FALSE;
+    OGLES3_STATE_CHANGED(ctx, OGLES3_SG_MASK);
+}
+
+void ogles2_glColorMaskiOES(struct OGLES3Context *ctx, GLuint index, GLboolean r, GLboolean g, GLboolean b,
+                            GLboolean a)
+{
+    ogles2_glColorMaskiEXT(ctx, index, r, g, b, a);
 }
 
 void ogles2_glClearColor(struct OGLES3Context *ctx, GLfloat red, GLfloat green, GLfloat blue,
@@ -357,7 +475,25 @@ void ogles2_glGetMultisamplefv(struct OGLES3Context *ctx, GLenum pname, GLuint i
  * 0: an error set; 1: *v. */
 int ogles2_indexed_query(struct OGLES3Context *ctx, GLenum pname, GLuint index, GLint64 *v)
 {
+    const struct OGLES3State *s = &ctx->state;
     int r;
+    switch (pname) { /* EXT_draw_buffers_indexed (ES3 contexts) */
+    case GL_BLEND_SRC_RGB: case GL_BLEND_DST_RGB: case GL_BLEND_SRC_ALPHA: case GL_BLEND_DST_ALPHA:
+    case GL_BLEND_EQUATION_RGB: case GL_BLEND_EQUATION_ALPHA:
+        if (!draw_buffer_ok(ctx, index))
+            return 0;
+        *v = (GLint64)(pname == GL_BLEND_SRC_RGB ? s->blend_src_rgb[index]
+                       : pname == GL_BLEND_DST_RGB ? s->blend_dst_rgb[index]
+                       : pname == GL_BLEND_SRC_ALPHA ? s->blend_src_alpha[index]
+                       : pname == GL_BLEND_DST_ALPHA ? s->blend_dst_alpha[index]
+                       : pname == GL_BLEND_EQUATION_RGB ? s->blend_eq_rgb[index] : s->blend_eq_alpha[index]);
+        return 1;
+    case GL_BLEND: /* glGetBooleani_v's, as glIsEnabledi's */
+        if (!draw_buffer_ok(ctx, index))
+            return 0;
+        *v = (s->caps & OGLES3_CAP_BLEND) && (s->blend_rts & (1 << index));
+        return 1;
+    }
     if (ogles2_es31(ctx)) {
         switch (pname) {
         case GL_SAMPLE_MASK_VALUE:
@@ -381,6 +517,34 @@ int ogles2_indexed_query(struct OGLES3Context *ctx, GLenum pname, GLuint index, 
     }
     ogles2_error(ctx, GL_INVALID_ENUM);
     return -1;
+}
+
+/* glGet*i_v's GL_COLOR_WRITEMASK (EXT_draw_buffers_indexed): a draw
+ * buffer's four. 0: not that query; -1: the error set; 4: v[0..3]. */
+int ogles2_indexed_mask(struct OGLES3Context *ctx, GLenum pname, GLuint index, GLint64 *v)
+{
+    int k;
+    if (pname != GL_COLOR_WRITEMASK)
+        return 0;
+    if (!draw_buffer_ok(ctx, index))
+        return -1;
+    for (k = 0; k < 4; k++)
+        v[k] = ctx->state.color_mask[index][k];
+    return 4;
+}
+
+/* KHR_ and EXT_robustness: with GL_NO_RESET_NOTIFICATION, the only
+ * strategy a context has, never a reset to report (KHR_robustness: "will
+ * always return NO_ERROR"); the GPU resets device.c makes after a job that
+ * did not finish are logged. */
+GLenum ogles2_glGetGraphicsResetStatusEXT(struct OGLES3Context *ctx)
+{
+    return GL_NO_ERROR;
+}
+
+GLenum ogles2_glGetGraphicsResetStatusKHR(struct OGLES3Context *ctx)
+{
+    return GL_NO_ERROR;
 }
 
 /* ---- current vertex attributes ---- */
@@ -582,23 +746,32 @@ static int blend_factor_ok(GLenum f, int is_dst, BOOL es3)
     }
 }
 
-void ogles2_glBlendFuncSeparate(struct OGLES3Context *ctx, GLenum srcRGB, GLenum dstRGB,
-                                GLenum srcAlpha, GLenum dstAlpha)
+/* The factors of the draw buffers `rts` (GL_INVALID_ENUM for one that is none). */
+static void blend_func(struct OGLES3Context *ctx, UBYTE rts, GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha,
+                       GLenum dstAlpha)
 {
-    struct OGLES3State *s;
-    if (!ogles2_context_valid(ctx))
-        return;
+    struct OGLES3State *s = &ctx->state;
+    int k;
     if (!blend_factor_ok(srcRGB, 0, FALSE) || !blend_factor_ok(dstRGB, 1, ogles2_es3(ctx)) ||
         !blend_factor_ok(srcAlpha, 0, FALSE) || !blend_factor_ok(dstAlpha, 1, ogles2_es3(ctx))) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
-    s = &ctx->state;
-    s->blend_src_rgb = srcRGB;
-    s->blend_dst_rgb = dstRGB;
-    s->blend_src_alpha = srcAlpha;
-    s->blend_dst_alpha = dstAlpha;
+    for (k = 0; k < OGLES3_MAX_DRAW_BUFFERS; k++)
+        if (rts & (1 << k)) {
+            s->blend_src_rgb[k] = srcRGB;
+            s->blend_dst_rgb[k] = dstRGB;
+            s->blend_src_alpha[k] = srcAlpha;
+            s->blend_dst_alpha[k] = dstAlpha;
+        }
     OGLES3_STATE_CHANGED(ctx, OGLES3_SG_BLEND);
+}
+
+void ogles2_glBlendFuncSeparate(struct OGLES3Context *ctx, GLenum srcRGB, GLenum dstRGB,
+                                GLenum srcAlpha, GLenum dstAlpha)
+{
+    if (ogles2_context_valid(ctx))
+        blend_func(ctx, ALL_RTS, srcRGB, dstRGB, srcAlpha, dstAlpha);
 }
 
 void ogles2_glBlendFunc(struct OGLES3Context *ctx, GLenum sfactor, GLenum dfactor)
@@ -612,22 +785,75 @@ static int blend_eq_ok(GLenum e)
            e == GL_MIN_EXT || e == GL_MAX_EXT; /* EXT_blend_minmax */
 }
 
-void ogles2_glBlendEquationSeparate(struct OGLES3Context *ctx, GLenum modeRGB, GLenum modeAlpha)
+static void blend_equation(struct OGLES3Context *ctx, UBYTE rts, GLenum modeRGB, GLenum modeAlpha)
 {
-    if (!ogles2_context_valid(ctx))
-        return;
+    int k;
     if (!blend_eq_ok(modeRGB) || !blend_eq_ok(modeAlpha)) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
-    ctx->state.blend_eq_rgb = modeRGB;
-    ctx->state.blend_eq_alpha = modeAlpha;
+    for (k = 0; k < OGLES3_MAX_DRAW_BUFFERS; k++)
+        if (rts & (1 << k)) {
+            ctx->state.blend_eq_rgb[k] = modeRGB;
+            ctx->state.blend_eq_alpha[k] = modeAlpha;
+        }
     OGLES3_STATE_CHANGED(ctx, OGLES3_SG_BLEND);
+}
+
+void ogles2_glBlendEquationSeparate(struct OGLES3Context *ctx, GLenum modeRGB, GLenum modeAlpha)
+{
+    if (ogles2_context_valid(ctx))
+        blend_equation(ctx, ALL_RTS, modeRGB, modeAlpha);
 }
 
 void ogles2_glBlendEquation(struct OGLES3Context *ctx, GLenum mode)
 {
     ogles2_glBlendEquationSeparate(ctx, mode, mode);
+}
+
+/* EXT_/OES_draw_buffers_indexed: one draw buffer's equations and factors. */
+void ogles2_glBlendEquationSeparateiEXT(struct OGLES3Context *ctx, GLuint buf, GLenum modeRGB, GLenum modeAlpha)
+{
+    if (ogles2_es3_entry(ctx) && draw_buffer_ok(ctx, buf))
+        blend_equation(ctx, (UBYTE)(1 << buf), modeRGB, modeAlpha);
+}
+
+void ogles2_glBlendEquationiEXT(struct OGLES3Context *ctx, GLuint buf, GLenum mode)
+{
+    ogles2_glBlendEquationSeparateiEXT(ctx, buf, mode, mode);
+}
+
+void ogles2_glBlendFuncSeparateiEXT(struct OGLES3Context *ctx, GLuint buf, GLenum srcRGB, GLenum dstRGB,
+                                    GLenum srcAlpha, GLenum dstAlpha)
+{
+    if (ogles2_es3_entry(ctx) && draw_buffer_ok(ctx, buf))
+        blend_func(ctx, (UBYTE)(1 << buf), srcRGB, dstRGB, srcAlpha, dstAlpha);
+}
+
+void ogles2_glBlendFunciEXT(struct OGLES3Context *ctx, GLuint buf, GLenum src, GLenum dst)
+{
+    ogles2_glBlendFuncSeparateiEXT(ctx, buf, src, dst, src, dst);
+}
+
+void ogles2_glBlendEquationSeparateiOES(struct OGLES3Context *ctx, GLuint buf, GLenum modeRGB, GLenum modeAlpha)
+{
+    ogles2_glBlendEquationSeparateiEXT(ctx, buf, modeRGB, modeAlpha);
+}
+
+void ogles2_glBlendEquationiOES(struct OGLES3Context *ctx, GLuint buf, GLenum mode)
+{
+    ogles2_glBlendEquationSeparateiEXT(ctx, buf, mode, mode);
+}
+
+void ogles2_glBlendFuncSeparateiOES(struct OGLES3Context *ctx, GLuint buf, GLenum srcRGB, GLenum dstRGB,
+                                    GLenum srcAlpha, GLenum dstAlpha)
+{
+    ogles2_glBlendFuncSeparateiEXT(ctx, buf, srcRGB, dstRGB, srcAlpha, dstAlpha);
+}
+
+void ogles2_glBlendFunciOES(struct OGLES3Context *ctx, GLuint buf, GLenum src, GLenum dst)
+{
+    ogles2_glBlendFuncSeparateiEXT(ctx, buf, src, dst, src, dst);
 }
 
 /* OES_ and EXT_primitive_bounding_box (ES 3.1 contexts): the box a
@@ -901,7 +1127,7 @@ static int lookup(struct OGLES3Context *ctx, GLenum pname, struct value *v)
     if (bit) {
         v->kind = K_BOOL;
         v->n = 1;
-        v->i[0] = (s->caps & bit) != 0;
+        v->i[0] = (s->caps & bit) != 0 && (bit != OGLES3_CAP_BLEND || (s->blend_rts & 1)); /* draw buffer 0's */
         return 1;
     }
     switch (pname) {
@@ -911,7 +1137,7 @@ static int lookup(struct OGLES3Context *ctx, GLenum pname, struct value *v)
     case GL_COLOR_WRITEMASK:
         v->kind = K_BOOL; v->n = 4;
         for (k = 0; k < 4; k++)
-            v->i[k] = s->color_mask[k];
+            v->i[k] = s->color_mask[0][k];
         return 1;
     case GL_SAMPLE_COVERAGE_INVERT:
         v->kind = K_BOOL; v->n = 1; v->i[0] = s->sample_coverage_invert;
@@ -1075,27 +1301,35 @@ static int lookup(struct OGLES3Context *ctx, GLenum pname, struct value *v)
         v->kind = K_INT; v->n = 1; v->i[0] = (GLint)s->depth_func;
         return 1;
     case GL_BLEND_SRC_RGB:
-        v->kind = K_INT; v->n = 1; v->i[0] = (GLint)s->blend_src_rgb;
+        v->kind = K_INT; v->n = 1; v->i[0] = (GLint)s->blend_src_rgb[0];
         return 1;
     case GL_BLEND_DST_RGB:
-        v->kind = K_INT; v->n = 1; v->i[0] = (GLint)s->blend_dst_rgb;
+        v->kind = K_INT; v->n = 1; v->i[0] = (GLint)s->blend_dst_rgb[0];
         return 1;
     case GL_BLEND_SRC_ALPHA:
-        v->kind = K_INT; v->n = 1; v->i[0] = (GLint)s->blend_src_alpha;
+        v->kind = K_INT; v->n = 1; v->i[0] = (GLint)s->blend_src_alpha[0];
         return 1;
     case GL_BLEND_DST_ALPHA:
-        v->kind = K_INT; v->n = 1; v->i[0] = (GLint)s->blend_dst_alpha;
+        v->kind = K_INT; v->n = 1; v->i[0] = (GLint)s->blend_dst_alpha[0];
         return 1;
     case GL_BLEND_EQUATION_RGB: /* = GL_BLEND_EQUATION */
-        v->kind = K_INT; v->n = 1; v->i[0] = (GLint)s->blend_eq_rgb;
+        v->kind = K_INT; v->n = 1; v->i[0] = (GLint)s->blend_eq_rgb[0];
         return 1;
     case GL_BLEND_EQUATION_ALPHA:
-        v->kind = K_INT; v->n = 1; v->i[0] = (GLint)s->blend_eq_alpha;
+        v->kind = K_INT; v->n = 1; v->i[0] = (GLint)s->blend_eq_alpha[0];
         return 1;
     case GL_BLEND_COLOR:
         v->kind = K_NFLOAT; v->n = 4;
         for (k = 0; k < 4; k++)
             v->f[k] = s->blend_color[k];
+        return 1;
+    /* KHR_ and EXT_robustness: no robust access asked for (a context
+     * cannot ask), no reset notification (glGetGraphicsResetStatus) */
+    case GL_RESET_NOTIFICATION_STRATEGY_EXT:
+        v->kind = K_INT; v->n = 1; v->i[0] = GL_NO_RESET_NOTIFICATION_EXT;
+        return 1;
+    case GL_CONTEXT_ROBUST_ACCESS_EXT:
+        v->kind = K_BOOL; v->n = 1; v->i[0] = GL_FALSE;
         return 1;
     case GL_PRIMITIVE_BOUNDING_BOX_OES:
         if (!ogles2_es31(ctx))

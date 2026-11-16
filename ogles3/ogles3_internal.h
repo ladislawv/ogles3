@@ -138,12 +138,21 @@ struct OGLES3PixelStore
 #define OGLES3_CAP_RASTERIZER_DISCARD      (1UL << 10) /* GL_RASTERIZER_DISCARD (ES 3.0) */
 #define OGLES3_CAP_SAMPLE_MASK             (1UL << 11) /* GL_SAMPLE_MASK (ES 3.1) */
 
+/* EXT_draw_buffers (M7 step 5): colour attachments 0..3, each a render
+ * target of the tile buffer. */
+#define OGLES3_MAX_DRAW_BUFFERS 4
+
 /* Fixed-function state (state.c), GLES 2.0 defaults set by ogles2_state_init. */
 struct OGLES3State
 {
-    ULONG caps;                     /* OGLES3_CAP_* bits (glEnable) */
+    ULONG caps;                     /* OGLES3_CAP_* bits (glEnable); OGLES3_CAP_BLEND: some draw buffer
+                                     * blends (blend_rts) */
     GLboolean depth_mask;
-    GLboolean color_mask[4];
+    /* EXT_draw_buffers_indexed: blending and the colour masks by draw
+     * buffer; glEnable(GL_BLEND), glBlendFunc, glColorMask, ... set all of
+     * them, their queries answer draw buffer 0's (ES 3.2 17.3.6, 17.4.2) */
+    UBYTE blend_rts;                /* the draw buffers blended, while OGLES3_CAP_BLEND is set */
+    GLboolean color_mask[OGLES3_MAX_DRAW_BUFFERS][4];
     GLboolean sample_coverage_invert;
     GLfloat clear_color[4];
     GLfloat clear_depth;
@@ -159,8 +168,9 @@ struct OGLES3State
     GLenum polygon_mode;            /* glPolygonMode (AmigaOS 4): GL_FILL, GL_LINE, GL_POINT */
     GLenum provoking_vertex;        /* glProvokingVertex (AmigaOS 4) */
     GLenum cull_face_mode, front_face, depth_func;
-    GLenum blend_src_rgb, blend_dst_rgb, blend_src_alpha, blend_dst_alpha;
-    GLenum blend_eq_rgb, blend_eq_alpha;
+    GLenum blend_src_rgb[OGLES3_MAX_DRAW_BUFFERS], blend_dst_rgb[OGLES3_MAX_DRAW_BUFFERS];
+    GLenum blend_src_alpha[OGLES3_MAX_DRAW_BUFFERS], blend_dst_alpha[OGLES3_MAX_DRAW_BUFFERS];
+    GLenum blend_eq_rgb[OGLES3_MAX_DRAW_BUFFERS], blend_eq_alpha[OGLES3_MAX_DRAW_BUFFERS];
     GLfloat blend_color[4];
     GLfloat bounding_box[8];        /* OES_primitive_bounding_box: kept, never used */
     /* stencil, [0] front and [1] back */
@@ -729,8 +739,7 @@ struct OGLES3RtFormat
 /* What a framebuffer object's job renders into (ogles2_fbo_target). */
 struct OGLES3Texture;
 /* EXT_draw_buffers (M7 step 5): colour attachments 0..3, each a render
- * target of the tile buffer. */
-#define OGLES3_MAX_DRAW_BUFFERS 4
+ * target of the tile buffer (OGLES3_MAX_DRAW_BUFFERS, above). */
 
 struct OGLES3Target
 {
@@ -981,6 +990,9 @@ struct OGLES3SamplerParams
     GLfloat max_aniso;              /* EXT_texture_filter_anisotropic: 1 = off */
     GLfloat min_lod, max_lod;       /* SGIS_texture_lod */
     GLenum compare_mode, compare_func; /* ES 3.0: GL_TEXTURE_COMPARE_MODE and _FUNC */
+    GLenum srgb_decode;             /* EXT_texture_sRGB_decode: GL_DECODE_EXT or GL_SKIP_DECODE_EXT */
+    ULONG border[4];                /* EXT_texture_border_clamp: the colour's words as given (floats,
+                                     * or the integers of glTexParameterI*), Mesa's union */
 };
 struct OGLES3TexParams
 {
@@ -1025,6 +1037,7 @@ BOOL ogles2_texture_zs_surface(struct OGLES3Context *ctx, struct OGLES3Texture *
 #define OGLES3_TEX_3D    4 /* ES 3.0 */
 #define OGLES3_TEX_ARRAY 5 /* a 2D array */
 #define OGLES3_TEX_2DMS  6 /* ES 3.1: GL_TEXTURE_2D_MULTISAMPLE (texelFetch only) */
+#define OGLES3_TEX_CUBEARRAY 7 /* EXT_/OES_texture_cube_map_array (ES 3.1 contexts) */
 #define OGLES3_TEX_INT   0x10 /* ORed in: an integer sampler (isampler*, usampler*): its incomplete
                                * texture's (0, 0, 0, 1) integers */
 static inline int ogles2_sampler_kind(GLenum type)
@@ -1039,6 +1052,9 @@ static inline int ogles2_sampler_kind(GLenum type)
          : type == GL_INT_SAMPLER_3D || type == GL_UNSIGNED_INT_SAMPLER_3D ? OGLES3_TEX_3D | OGLES3_TEX_INT
          : type == GL_INT_SAMPLER_2D_ARRAY || type == GL_UNSIGNED_INT_SAMPLER_2D_ARRAY ? OGLES3_TEX_ARRAY | OGLES3_TEX_INT
          : type == GL_SAMPLER_2D_MULTISAMPLE ? OGLES3_TEX_2DMS
+         : type == GL_SAMPLER_CUBE_MAP_ARRAY_OES || type == GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW_OES ? OGLES3_TEX_CUBEARRAY
+         : type == GL_INT_SAMPLER_CUBE_MAP_ARRAY_OES || type == GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY_OES
+               ? OGLES3_TEX_CUBEARRAY | OGLES3_TEX_INT
          : type == GL_INT_SAMPLER_2D_MULTISAMPLE || type == GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE
                ? OGLES3_TEX_2DMS | OGLES3_TEX_INT
                                                                                     : OGLES3_TEX_NONE;
@@ -1102,6 +1118,7 @@ BOOL ogles2_fbo_read_ready(struct OGLES3Context *ctx);  /* and, read from, not m
 /* glGetIntegeri_v's state beyond the buffer bindings (state.c), and the
  * image units' (texture.c): -1 no such query, 0 an error set, 1 *v. */
 int ogles2_indexed_query(struct OGLES3Context *ctx, GLenum pname, GLuint index, GLint64 *v);
+int ogles2_indexed_mask(struct OGLES3Context *ctx, GLenum pname, GLuint index, GLint64 *v);
 int ogles2_image_query(struct OGLES3Context *ctx, GLenum pname, GLuint index, GLint64 *v);
 int ogles2_vab_query(struct OGLES3Context *ctx, GLenum pname, GLuint index, GLint64 *v); /* draw.c's bindings */
 struct OGLES3Buffer *ogles2_buffer_get(struct OGLES3Context *ctx, GLuint name); /* NULL: no such buffer */

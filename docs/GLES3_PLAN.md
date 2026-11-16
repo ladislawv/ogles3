@@ -1,5 +1,87 @@
 # OpenGL ES 3.0 and 3.1 on ogles2.library
 
+**ES 3.2 plan items 2-5 and 8, written without the A1200 (2026-11-16, branch
+`es32`, the developer's request: "implement as much as you can without
+testing on amiga").** Built, **not run on the A1200** (it was not
+available); each item's dEQP groups are its test when it is. The A1200's
+runs go through amigent from now on, not amictl (the developer's call;
+the fork `ladislawv/amigent`, `C:\- CPP\amigent`, port 6502;
+ogles2pi3's `tests/a1200/p5_run.sh` and its CONTRIBUTING.md, "The Pi 3
+card and the amigent station", are the model; ogles3's run scripts are
+not switched yet). What was written (the plan's list below, "Plan:
+OpenGL ES 3.2's features"):
+- **Item 2, sampler state:** `EXT_texture_sRGB_decode` (ES3 contexts:
+  `GL_TEXTURE_SRGB_DECODE_EXT` on textures and samplers; `SKIP_DECODE`
+  clears the texture record's `srgb` bit, as Mesa samples the linear
+  format); `EXT_`/`OES_texture_border_clamp` (every context:
+  `GL_CLAMP_TO_BORDER`, `GL_TEXTURE_BORDER_COLOR` through
+  `gl*Parameter{f,i}v` and the 16 `I*` entries, the colour's words kept as
+  given, Mesa's union; the sampler record's colour always "follows", in
+  the hardware's channel order through the inverse of the format's
+  swizzle, clamped to what the format holds, halves or 32-bit words by
+  the TMU's return size, Mesa's `v3d_upload_sampler_state_variant`).
+  `OES_texture_stencil8` is **left**: formats, uploads, the stencil
+  attachment and sampling, too much to write unchecked.
+- **Item 3, per-target blending:** `EXT_`/`OES_draw_buffers_indexed`
+  (ES3 contexts; the 16 entries; `glGetIntegeri_v`'s blend queries,
+  `glGet*i_v`'s `GL_COLOR_WRITEMASK`, `glGetBooleani_v(GL_BLEND, i)`).
+  `OGLES3State`'s blend factors, equations and colour masks are arrays by
+  draw buffer, `blend_rts` the ones blended; `OGLES3_CAP_BLEND` is set
+  while any is (so the library's own draws, which clear `caps`, still
+  blend nothing), `glIsEnabled(GL_BLEND)` answers draw buffer 0's. The
+  draw emits a `BLEND_CFG` for each set of targets alike (one as a rule,
+  as before) and `BLEND_ENABLES` the targets blended; software
+  blending's key and the clears (`frame.c`) use each target's state.
+- **Item 5, copies:** `EXT_`/`OES_copy_image` (ES3 contexts):
+  `glCopyImageSubData` between textures on the CPU, Mesa's order of
+  checks (`copyimage.c`). The same format both sides: the RAM copy's
+  texels as they are (any format; DEPTH32F_STENCIL8's stencil copy too);
+  between formats of a view class (ES 3.2 table 8.26) and between a
+  compressed format's blocks and a 64- or 128-bit format's texels: the
+  bits as an application gives them, read through the GPU's byte order
+  (`pack`, `pack_wide`) and given to `convert`, so a reinterpretation
+  matches dEQP's references on this big-endian machine (a raw copy of the
+  GPU's bytes would not, RGBA8 into R32UI). Completeness as Mesa's
+  (aside from the formats' rules: an integer texture with the default
+  linear filters copies). **Not bit-exact** where the RAM copy keeps
+  floats: SNORM's 0x80 (read as -1.0, stored 0x81 already at the upload),
+  RGB9_E5's non-canonical encodings, half and small floats' NaN payloads;
+  dEQP's copies of random bits from those into integer formats will show
+  it (a fix: those formats' RAM copies keeping the bits given).
+  Renderbuffers and multisample textures: not copied
+  (`GL_INVALID_OPERATION`, logged once). An independent review of the
+  diff found that and the four fixed: the completeness rule,
+  `glCompressedTexImage3D`'s cube array checks, `glTexStorage3DEXT`'s
+  target, a stencil-sampled cube array's depth.
+- **Item 4, in part:** `EXT_`/`OES_texture_cube_map_array` (ES 3.1
+  contexts): the target, its default texture and units, layered as a 2D
+  array of layer-faces (cube i's faces layers 6i to 6i + 5),
+  `glTexImage3D`/`glTexStorage3D` (square, whole cubes), framebuffer
+  layers, the sampler and image types; the texture record's depth the
+  cubes when sampled (Mesa: layers / 6), the layers for images;
+  `textureSize` and `imageSize` the cubes. The compiler had them already
+  (a `samplerCubeArray` program compiled and linked, and
+  `sampler2DMSArray`'s and `EXT_shader_framebuffer_fetch`'s: items 4's
+  multisample arrays and 7 need no compiler change); `GL_EXT_texture_buffer`,
+  `OES_sample_variables` and `OES_shader_multisample_interpolation` are
+  refused by it (Mesa's v3d does not offer them: no RGB32 buffer formats,
+  no `ARB_gpu_shader5`), and the compiler has no geometry stage. The rest
+  of item 4 (texture buffers, multisample arrays, ASTC: v3dcore's blocks
+  are square, ASTC's are not) is left.
+- **Item 8, robustness:** `EXT_`/`KHR_robustness` (every context):
+  `glReadnPixels` and `glGetnUniform*` within `bufSize` (a pixel pack
+  buffer's own bounds, as Mesa), `GL_NO_RESET_NOTIFICATION` (a context
+  cannot ask for another), so `glGetGraphicsResetStatus` answers
+  `GL_NO_ERROR`, `GL_CONTEXT_ROBUST_ACCESS` false.
+- 43 entry points appended to `gen/abi_order.txt`; `release/ogles3.doc`'s
+  EXTENSIONS lists the new ones. GL_EXTENSIONS of a 3.1 context: 1,688 of
+  its 2,048 bytes.
+- **To run when the A1200 is back**, dEQP-GLES31: `texture.border_clamp`,
+  `srgb_texture_decode`, `draw_buffers_indexed`, `copy_image`,
+  `texture.*cube_map_array*` and `state_query` (the new queries); dEQP-GLES3
+  `draw_buffers_indexed`; then `m8-5`, `m5-1` and drawbench (the blend
+  emission changed shape: it must cost the same).
+
 **Release 1.0 (2026-11-14, the developer's call): 1.0-beta2 made the full
 release, on GitHub as `v1.0`.** `OGLES3_RELEASE` 1.0; the library and
 `v3dglslc3` are beta2's, unchanged (version 1.0, dated 05.11.2026: only
@@ -209,18 +291,21 @@ and most used first:
    three times since and the whole group: no freeze. Not tied to the
    case: the A1200 had run 8 hours since its reboot (the other one 3.5).
    To watch.
-2. **Sampler state** (2-3 days): `EXT_texture_sRGB_decode` (the sampler's
+2. **Sampler state** (2-3 days; **written 2026-11-16 but for stencil8, not
+   run yet**, at the top): `EXT_texture_sRGB_decode` (the sampler's
    or texture's `SKIP_DECODE`: the linear format in the texture state;
    `srgb_texture_decode` 21); `EXT_texture_border_clamp` (V3D 4.2's border
    colour words in the sampler state, `CLAMP_TO_BORDER`; parts of
    `texture`); `OES_texture_stencil8` (STENCIL_INDEX8 textures, the S8
    image `ogles2_texture_s8_surface` already keeps for D32F_S8;
    `stencil_texturing`, `fbo`).
-3. **Per-target blending** (2 days): `EXT_draw_buffers_indexed`
+3. **Per-target blending** (2 days; **written 2026-11-16, not run yet**):
+   `EXT_draw_buffers_indexed`
    (`glEnablei`, `glBlendFunci`, `glBlendEquationi`, `glColorMaski`: the
    render list's per-target blend and mask, today one for all;
    dEQP-GLES3 `draw_buffers_indexed` 76).
-4. **Textures the GPU reads as they are** (a week):
+4. **Textures the GPU reads as they are** (a week; **cube map arrays
+   written 2026-11-16, not run yet**):
    `EXT_texture_cube_map_array` (the TMU's cube arrays, `samplerCubeArray`,
    images), `EXT_texture_buffer` (a buffer's words as a 1D texel array;
    formats other than RGBA through the swizzle as Mesa does),
@@ -228,7 +313,8 @@ and most used first:
    astc_ldr` (blocks given to the GPU as they are, no CPU decoding; ASTC
    HDR not). Parts of `texture` (most of its 2,098), `image_load_store`,
    `state_query`.
-5. **Copies** (3 days): `EXT_copy_image` (`glCopyImageSubData`: the CPU's
+5. **Copies** (3 days; **written 2026-11-16 for textures, not run
+   yet**): `EXT_copy_image` (`glCopyImageSubData`: the CPU's
    copy between the GPU images, uncompressed and compressed, the TFU where
    it fits; `copy_image` 12,395, a third of dEQP-GLES31).
 6. **Multisampling's shader parts** (a week): `OES_sample_shading`,
@@ -245,7 +331,8 @@ and most used first:
    `KHR_blend_equation_advanced` (the advanced equations in the fragment
    shader on the fetched colour, Mesa's NIR lowering;
    `blend_equation_advanced` 102, `shaders-framebuffer_fetch` 44).
-8. **Robustness** (2 days): `KHR_robustness` / `EXT_robustness`
+8. **Robustness** (2 days; **written 2026-11-16, not run yet**):
+   `KHR_robustness` / `EXT_robustness`
    (`glGetGraphicsResetStatus` from the GPU resets `device.c` already
    counts, the `glReadnPixels`/`glGetnUniform*` entries; robust buffer
    access the GPU gives).

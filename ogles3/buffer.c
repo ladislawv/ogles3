@@ -1416,10 +1416,15 @@ static int indexed(struct OGLES3Context *ctx, GLenum pname, GLuint index, GLint6
 
 void ogles2_glGetIntegeri_v(struct OGLES3Context *ctx, GLenum target, GLuint index, GLint *data)
 {
-    GLint64 v;
+    GLint64 v, m[4];
     int r;
     if (!ogles2_es3_entry(ctx) || !data)
         return;
+    if ((r = ogles2_indexed_mask(ctx, target, index, m)) != 0) { /* GL_COLOR_WRITEMASK's four */
+        while (--r >= 0)
+            data[r] = (GLint)m[r];
+        return;
+    }
     if ((r = indexed(ctx, target, index, &v)) < 0)
         r = ogles2_indexed_query(ctx, target, index, &v);
     if (r > 0)
@@ -1430,10 +1435,15 @@ void ogles2_glGetIntegeri_v(struct OGLES3Context *ctx, GLenum target, GLuint ind
  * kind; the rest converted as glGetBooleanv converts). */
 void ogles2_glGetBooleani_v(struct OGLES3Context *ctx, GLenum target, GLuint index, GLboolean *data)
 {
-    GLint64 v;
+    GLint64 v, m[4];
     int r;
     if (!ogles2_es31_entry(ctx) || !data)
         return;
+    if ((r = ogles2_indexed_mask(ctx, target, index, m)) != 0) {
+        while (--r >= 0)
+            data[r] = m[r] ? GL_TRUE : GL_FALSE;
+        return;
+    }
     if ((r = indexed(ctx, target, index, &v)) < 0)
         r = ogles2_indexed_query(ctx, target, index, &v);
     if (r > 0)
@@ -1442,10 +1452,15 @@ void ogles2_glGetBooleani_v(struct OGLES3Context *ctx, GLenum target, GLuint ind
 
 void ogles2_glGetInteger64i_v(struct OGLES3Context *ctx, GLenum target, GLuint index, GLint64 *data)
 {
-    GLint64 v;
+    GLint64 v, m[4];
     int r;
     if (!ogles2_es3_entry(ctx) || !data)
         return;
+    if ((r = ogles2_indexed_mask(ctx, target, index, m)) != 0) {
+        while (--r >= 0)
+            data[r] = m[r];
+        return;
+    }
     if ((r = indexed(ctx, target, index, &v)) < 0)
         r = ogles2_indexed_query(ctx, target, index, &v);
     if (r > 0)

@@ -52,7 +52,8 @@ struct dedup
     UBYTE stencil[2][5];  /* the STENCIL_CFG bytes last sent, front and back */
     UWORD cw_l, cw_t, cw_w, cw_h;
     UWORD vp_w, vp_h, vp_cx2, vp_cy2;
-    UBYTE b_src, b_dst, b_eq, b_asrc, b_adst, b_aeq, b_one;
+    UBYTE b_cfg[OGLES3_MAX_DRAW_BUFFERS][6]; /* each target's BLEND_CFG, as blend_cfgs makes them */
+    UBYTE b_en;           /* the BLEND_ENABLES mask */
     UWORD b_color[4];
     ULONG cwm_mask;
     float lw_value, do_factor, do_units;
@@ -2183,7 +2184,7 @@ static void emit_state_all(struct OGLES3Context *ctx, struct dedup *dd, int prim
     edo = (s->caps & OGLES3_CAP_POLYGON_OFFSET_FILL) ? TRUE : FALSE;
     /* be: Mesa's v3dx_emit.c, the tile buffer does not blend while the
      * shader does (a 32-bit float or integer target in the framebuffer) */
-    be = (s->caps & OGLES3_CAP_BLEND) && !ctx->fb_soft_blend ? TRUE : FALSE;
+    be = (s->caps & OGLES3_CAP_BLEND) && s->blend_rts && !ctx->fb_soft_blend ? TRUE : FALSE;
     /* 4x MSAA (the job's, job.c): the rasterizer samples four
      * points a pixel (Mesa v3dx_emit.c), and glSampleCoverage's mask, as
      * Mesa's state tracker makes one: round(value x 4) samples, inverted on
@@ -2291,38 +2292,52 @@ static void emit_state_all(struct OGLES3Context *ctx, struct dedup *dd, int prim
     }
     }
 
-    /* Blending: BLEND_ENABLES, BLEND_CFG (all four render targets, as Mesa
-     * and PiStorm3D), BLEND_CONSTANT_COLOR. Targets whose format has no
-     * alpha (R8, RG8, RGB8, RGB565, R16F, ...) read a destination alpha of
-     * 1: a BLEND_CFG of their own where the others have alpha (Mesa's
-     * blend_dst_alpha_one). */
+    /* Blending: BLEND_ENABLES (the draw buffers blended,
+     * EXT_draw_buffers_indexed's), a BLEND_CFG for each set of render targets
+     * alike (one for all four as a rule, as Mesa and PiStorm3D), and
+     * BLEND_CONSTANT_COLOR. Draw buffer k is render target k (ES 3.0's
+     * glDrawBuffers). Targets whose format has no alpha (R8, RG8, RGB8,
+     * RGB565, R16F, ...) read a destination alpha of 1: factors of their own
+     * (Mesa's blend_dst_alpha_one). */
     if (!(g & OGLES3_SG_BLEND)) {
         /* unchanged */
     } else if (be) {
-        UBYTE src = blend_factor_for(s->blend_src_rgb, s->blend_eq_rgb);
-        UBYTE dst = blend_factor_for(s->blend_dst_rgb, s->blend_eq_rgb);
-        UBYTE asrc = blend_factor_for(s->blend_src_alpha, s->blend_eq_alpha);
-        UBYTE adst = blend_factor_for(s->blend_dst_alpha, s->blend_eq_alpha);
-        UBYTE eq = blend_mode(s->blend_eq_rgb), aeq = blend_mode(s->blend_eq_alpha);
-        UBYTE one = 0;
+        UBYTE cfg[OGLES3_MAX_DRAW_BUFFERS][6], en = (UBYTE)(s->blend_rts & 0x0F), done, mask;
         UWORD c[4];
+        int j;
+        for (k = 0; k < OGLES3_MAX_DRAW_BUFFERS; k++) {
+            UBYTE *b = cfg[k];
+            b[0] = blend_factor_for(s->blend_dst_rgb[k], s->blend_eq_rgb[k]);
+            b[1] = blend_factor_for(s->blend_src_rgb[k], s->blend_eq_rgb[k]);
+            b[2] = blend_mode(s->blend_eq_rgb[k]);
+            b[3] = blend_factor_for(s->blend_dst_alpha[k], s->blend_eq_alpha[k]);
+            b[4] = blend_factor_for(s->blend_src_alpha[k], s->blend_eq_alpha[k]);
+            b[5] = blend_mode(s->blend_eq_alpha[k]);
+            if (k < ctx->fb_nrt && (ctx->fb_draw_mask & (1 << k)) && ctx->fb_rt[k].no_alpha) {
+                b[0] = alpha_one(b[0]);
+                b[1] = alpha_one(b[1]);
+                b[3] = alpha_one(b[3]);
+                b[4] = alpha_one(b[4]);
+            }
+        }
         for (k = 0; k < 4; k++)
             c[k] = half(s->blend_color[k]);
-        for (k = 0; k < ctx->fb_nrt; k++)
-            if ((ctx->fb_draw_mask & (1 << k)) && ctx->fb_rt[k].no_alpha)
-                one |= (UBYTE)(1 << k);
-        if (!dd->blend || !dd->be || dd->b_src != src || dd->b_dst != dst || dd->b_eq != eq ||
-            dd->b_asrc != asrc || dd->b_adst != adst || dd->b_aeq != aeq || dd->b_one != one ||
+        if (!dd->blend || !dd->be || dd->b_en != en || memcmp(dd->b_cfg, cfg, sizeof(cfg)) ||
             dd->b_color[0] != c[0] || dd->b_color[1] != c[1] || dd->b_color[2] != c[2] ||
             dd->b_color[3] != c[3]) {
-            BlendEnables(v, 0x0F);
-            if (one != 0x0F)
-                BlendCfg(v, (UBYTE)(0x0F & ~one), dst, src, eq, adst, asrc, aeq);
-            if (one)
-                BlendCfg(v, one, alpha_one(dst), alpha_one(src), eq, alpha_one(adst), alpha_one(asrc), aeq);
+            BlendEnables(v, en);
+            for (k = 0, done = 0; k < OGLES3_MAX_DRAW_BUFFERS; k++) {
+                if (done & (1 << k))
+                    continue;
+                for (j = k, mask = 0; j < OGLES3_MAX_DRAW_BUFFERS; j++)
+                    if (!(done & (1 << j)) && !memcmp(cfg[j], cfg[k], 6))
+                        mask |= (UBYTE)(1 << j);
+                done |= mask;
+                BlendCfg(v, mask, cfg[k][0], cfg[k][1], cfg[k][2], cfg[k][3], cfg[k][4], cfg[k][5]);
+            }
             BlendConstantColor(v, c[3], c[2], c[1], c[0]);
-            dd->b_src = src; dd->b_dst = dst; dd->b_eq = eq;
-            dd->b_asrc = asrc; dd->b_adst = adst; dd->b_aeq = aeq; dd->b_one = one;
+            memcpy(dd->b_cfg, cfg, sizeof(cfg));
+            dd->b_en = en;
             for (k = 0; k < 4; k++)
                 dd->b_color[k] = c[k];
         }
@@ -2335,15 +2350,17 @@ static void emit_state_all(struct OGLES3Context *ctx, struct dedup *dd, int prim
     }
 
     /* COLOR_WRITE_MASKS: a set bit disables a channel (R, G, B, A = bits
-     * 0-3), four bits a render target. GLES2's one mask for every draw
-     * buffer; a target no draw buffer names (EXT_draw_buffers' GL_NONE, a
-     * missing attachment) is not written at all. */
+     * 0-3), four bits a render target: each draw buffer's mask
+     * (EXT_draw_buffers_indexed; glColorMask sets them all); a target no
+     * draw buffer names (EXT_draw_buffers' GL_NONE, a missing attachment) is
+     * not written at all. */
     if (g & OGLES3_SG_MASK) {
-        ULONG m = (s->color_mask[0] ? 0 : 1) | (s->color_mask[1] ? 0 : 2) |
-                  (s->color_mask[2] ? 0 : 4) | (s->color_mask[3] ? 0 : 8);
         cwm = 0;
-        for (k = 0; k < OGLES3_MAX_DRAW_BUFFERS; k++)
+        for (k = 0; k < OGLES3_MAX_DRAW_BUFFERS; k++) {
+            const GLboolean *cm = s->color_mask[k];
+            ULONG m = (cm[0] ? 0 : 1) | (cm[1] ? 0 : 2) | (cm[2] ? 0 : 4) | (cm[3] ? 0 : 8);
             cwm |= ((ctx->fb_draw_mask & ctx->draw_rts & (1 << k)) ? m : 0xF) << (4 * k);
+        }
         if (!dd->cwm || dd->cwm_mask != cwm) {
             ColorWriteMasks(v, cwm);
             dd->cwm = TRUE;
@@ -2634,13 +2651,13 @@ static void vk_targets(struct OGLES3Context *ctx, struct OGLES3VkTargets *t)
         t->cbufs |= (UBYTE)(1 << i);
         t->fmt[i] = rf->pipe;
         memcpy(t->swz[i], rf->swz, 4);
-        if ((s->caps & OGLES3_CAP_BLEND) && !integer) {
-            t->blend[i][0] = pipe_func(s->blend_eq_rgb);
-            t->blend[i][1] = pipe_factor(s->blend_src_rgb, s->blend_eq_rgb);
-            t->blend[i][2] = pipe_factor(s->blend_dst_rgb, s->blend_eq_rgb);
-            t->blend[i][3] = pipe_func(s->blend_eq_alpha);
-            t->blend[i][4] = pipe_factor(s->blend_src_alpha, s->blend_eq_alpha);
-            t->blend[i][5] = pipe_factor(s->blend_dst_alpha, s->blend_eq_alpha);
+        if ((s->caps & OGLES3_CAP_BLEND) && (s->blend_rts & (1 << i)) && !integer) {
+            t->blend[i][0] = pipe_func(s->blend_eq_rgb[i]);
+            t->blend[i][1] = pipe_factor(s->blend_src_rgb[i], s->blend_eq_rgb[i]);
+            t->blend[i][2] = pipe_factor(s->blend_dst_rgb[i], s->blend_eq_rgb[i]);
+            t->blend[i][3] = pipe_func(s->blend_eq_alpha[i]);
+            t->blend[i][4] = pipe_factor(s->blend_src_alpha[i], s->blend_eq_alpha[i]);
+            t->blend[i][5] = pipe_factor(s->blend_dst_alpha[i], s->blend_eq_alpha[i]);
         } else {
             t->blend[i][0] = t->blend[i][3] = 0;  /* PIPE_BLEND_ADD */
             t->blend[i][1] = t->blend[i][4] = 1;  /* PIPE_BLENDFACTOR_ONE */
@@ -4209,7 +4226,7 @@ BOOL ogles2_draw_copy(struct OGLES3Context *ctx, struct OGLES3Texture *src, cons
     }
     s->caps = 0;
     s->polygon_mode = GL_FILL;
-    s->color_mask[0] = s->color_mask[1] = s->color_mask[2] = s->color_mask[3] = GL_TRUE;
+    memset(s->color_mask, GL_TRUE, sizeof(s->color_mask));
     s->depth_range[0] = 0.0f;
     s->depth_range[1] = 1.0f;
     s->clip_origin = GL_LOWER_LEFT_EXT;
@@ -4317,7 +4334,7 @@ void ogles2_draw_clear(struct OGLES3Context *ctx, GLbitfield mask, UBYTE rts, co
     s->caps &= OGLES3_CAP_SCISSOR_TEST;
     s->polygon_mode = GL_FILL;
     if (!(mask & GL_COLOR_BUFFER_BIT))
-        s->color_mask[0] = s->color_mask[1] = s->color_mask[2] = s->color_mask[3] = GL_FALSE;
+        memset(s->color_mask, GL_FALSE, sizeof(s->color_mask));
     if (mask & GL_DEPTH_BUFFER_BIT) {
         s->caps |= OGLES3_CAP_DEPTH_TEST;
         s->depth_func = GL_ALWAYS;

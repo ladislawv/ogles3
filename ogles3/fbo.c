@@ -992,7 +992,7 @@ void ogles2_glFramebufferTextureLayer(struct OGLES3Context *ctx, GLenum target, 
     if (texture) {
         GLenum tt;
         if (!(t = ogles2_texture_get(ctx, texture)) || !(tt = ogles2_texture_target(t)) ||
-            (tt != GL_TEXTURE_3D && tt != GL_TEXTURE_2D_ARRAY)) {
+            (tt != GL_TEXTURE_3D && tt != GL_TEXTURE_2D_ARRAY && tt != GL_TEXTURE_CUBE_MAP_ARRAY_OES)) {
             ogles2_error(ctx, GL_INVALID_OPERATION);
             return;
         }
@@ -2309,7 +2309,7 @@ void ogles2_glGetFramebufferAttachmentParameteriv(struct OGLES3Context *ctx, GLe
     case GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LAYER:
         if (es3 && at->type == GL_TEXTURE) {
             GLenum tt = ogles2_texture_target(at->tex);
-            *params = tt == GL_TEXTURE_3D || tt == GL_TEXTURE_2D_ARRAY ? at->face : 0;
+            *params = tt == GL_TEXTURE_3D || tt == GL_TEXTURE_2D_ARRAY || tt == GL_TEXTURE_CUBE_MAP_ARRAY_OES ? at->face : 0;
             return;
         }
         break;

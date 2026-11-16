@@ -118,7 +118,16 @@ ogles3.library/--background--                   ogles3.library/--background--
        the GPU has no use for it), OES_ and EXT_shader_io_blocks and
        EXT_shader_implicit_conversions. Every context also lists
        EXT_draw_elements_base_vertex (OES_draw_elements_base_vertex's
-       entries under EXT names).
+       entries under EXT names), EXT_ and OES_texture_border_clamp
+       (GL_CLAMP_TO_BORDER, the border colour, glTexParameterI* and
+       glSamplerParameterI*) and EXT_ and KHR_robustness (glReadnPixels,
+       glGetnUniform*; GL_NO_RESET_NOTIFICATION, no robust access asked
+       for). OpenGL ES 3.x contexts also list EXT_texture_sRGB_decode,
+       EXT_ and OES_draw_buffers_indexed (blending and colour masks by
+       draw buffer) and EXT_ and OES_copy_image (glCopyImageSubData
+       between textures; renderbuffers and multisample textures are not
+       copied: GL_INVALID_OPERATION); 3.1 contexts EXT_ and
+       OES_texture_cube_map_array.
 
        KHR_debug: debug messages with their filters and debug groups, the
        message log (64 messages of at most 256 characters) or the

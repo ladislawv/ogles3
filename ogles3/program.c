@@ -3177,11 +3177,14 @@ static int type_shape(GLenum t, int *kind, int *comps, int *cols)
     case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
     case GL_SAMPLER_2D_MULTISAMPLE: case GL_INT_SAMPLER_2D_MULTISAMPLE: /* GLSL ES 3.10 */
     case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE:
+    case GL_SAMPLER_CUBE_MAP_ARRAY_OES: case GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW_OES: /* EXT_texture_cube_map_array */
+    case GL_INT_SAMPLER_CUBE_MAP_ARRAY_OES: case GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY_OES:
         *kind = K_SAMPLER; *comps = 1; return 1;
     case GL_IMAGE_2D: case GL_IMAGE_3D: case GL_IMAGE_CUBE: case GL_IMAGE_2D_ARRAY:
     case GL_INT_IMAGE_2D: case GL_INT_IMAGE_3D: case GL_INT_IMAGE_CUBE: case GL_INT_IMAGE_2D_ARRAY:
     case GL_UNSIGNED_INT_IMAGE_2D: case GL_UNSIGNED_INT_IMAGE_3D: case GL_UNSIGNED_INT_IMAGE_CUBE:
     case GL_UNSIGNED_INT_IMAGE_2D_ARRAY:
+    case GL_IMAGE_CUBE_MAP_ARRAY_OES: case GL_INT_IMAGE_CUBE_MAP_ARRAY_OES: case GL_UNSIGNED_INT_IMAGE_CUBE_MAP_ARRAY_OES:
         *kind = K_IMAGE; *comps = 1; return 1;
     default:              return 0;
     }
@@ -3519,9 +3522,11 @@ void ogles2_glUniform4ui(struct OGLES3Context *ctx, GLint location, GLuint v0, G
 }
 
 /* glGetUniformfv / iv / uiv: the value as the first storage place holds it
- * (uns: iv receives unsigned values). */
+ * (uns: iv receives unsigned values); at most `room` bytes of it (KHR_ and
+ * EXT_robustness' glGetnUniform*: GL_INVALID_OPERATION for a value that
+ * needs more). */
 static void get_uniform(struct OGLES3Context *ctx, GLuint program, GLint location, GLfloat *fv,
-                        GLint *iv, BOOL uns)
+                        GLint *iv, BOOL uns, ULONG room)
 {
     struct OGLES3Program *p;
     const struct OGLES3ImageUniform *u;
@@ -3536,6 +3541,10 @@ static void get_uniform(struct OGLES3Context *ctx, GLuint program, GLint locatio
     u = &p->image->uniforms[p->loc_uniform[location]];
     if (!type_shape(u->type, &kind, &comps, &cols))
         return;
+    if ((kind == K_SAMPLER || kind == K_IMAGE ? 4UL : (ULONG)comps * (ULONG)cols * 4) > room) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
     if (kind == K_SAMPLER || kind == K_IMAGE) {
         if (fv) *fv = (GLfloat)p->sampler_unit[location];
         if (iv) *iv = p->sampler_unit[location];
@@ -3573,20 +3582,65 @@ void ogles2_glGetUniformfv(struct OGLES3Context *ctx, GLuint program, GLint loca
                            GLfloat *params)
 {
     if (params)
-        get_uniform(ctx, program, location, params, 0, FALSE);
+        get_uniform(ctx, program, location, params, 0, FALSE, ~0UL);
 }
 
 void ogles2_glGetUniformiv(struct OGLES3Context *ctx, GLuint program, GLint location,
                            GLint *params)
 {
     if (params)
-        get_uniform(ctx, program, location, 0, params, FALSE);
+        get_uniform(ctx, program, location, 0, params, FALSE, ~0UL);
 }
 
 void ogles2_glGetUniformuiv(struct OGLES3Context *ctx, GLuint program, GLint location, GLuint *params)
 {
     if (ogles2_es3_entry(ctx) && params)
-        get_uniform(ctx, program, location, 0, (GLint *)params, TRUE);
+        get_uniform(ctx, program, location, 0, (GLint *)params, TRUE, ~0UL);
+}
+
+/* KHR_ and EXT_robustness: glGetUniform* into bufSize bytes. */
+static BOOL buf_size_ok(struct OGLES3Context *ctx, GLsizei bufSize)
+{
+    if (!ogles2_context_valid(ctx))
+        return FALSE;
+    if (bufSize < 0) {
+        ogles2_error(ctx, GL_INVALID_VALUE);
+        return FALSE;
+    }
+    return TRUE;
+}
+
+void ogles2_glGetnUniformfvEXT(struct OGLES3Context *ctx, GLuint program, GLint location, GLsizei bufSize,
+                               GLfloat *params)
+{
+    if (buf_size_ok(ctx, bufSize))
+        get_uniform(ctx, program, location, params, 0, FALSE, (ULONG)bufSize);
+}
+
+void ogles2_glGetnUniformivEXT(struct OGLES3Context *ctx, GLuint program, GLint location, GLsizei bufSize,
+                               GLint *params)
+{
+    if (buf_size_ok(ctx, bufSize))
+        get_uniform(ctx, program, location, 0, params, FALSE, (ULONG)bufSize);
+}
+
+void ogles2_glGetnUniformfvKHR(struct OGLES3Context *ctx, GLuint program, GLint location, GLsizei bufSize,
+                               GLfloat *params)
+{
+    ogles2_glGetnUniformfvEXT(ctx, program, location, bufSize, params);
+}
+
+void ogles2_glGetnUniformivKHR(struct OGLES3Context *ctx, GLuint program, GLint location, GLsizei bufSize,
+                               GLint *params)
+{
+    ogles2_glGetnUniformivEXT(ctx, program, location, bufSize, params);
+}
+
+void ogles2_glGetnUniformuivKHR(struct OGLES3Context *ctx, GLuint program, GLint location, GLsizei bufSize,
+                                GLuint *params)
+{
+    if (ogles2_es3_entry(ctx) && buf_size_ok(ctx, bufSize))
+        get_uniform(ctx, program, location, 0, (GLint *)params, TRUE, (ULONG)bufSize);
 }
 
 /* All precisions are fp32 and 32-bit ints on V3D (plan 7.8). */

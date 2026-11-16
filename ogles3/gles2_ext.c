@@ -91,7 +91,8 @@ void ogles2_glTexStorage3DEXT(struct OGLES3Context *ctx, GLenum target, GLsizei 
 {
     if (!ogles2_context_valid(ctx))
         return;
-    if (target != GL_TEXTURE_3D && !(ogles2_es3(ctx) && target == GL_TEXTURE_2D_ARRAY)) {
+    if (target != GL_TEXTURE_3D && !(ogles2_es3(ctx) && target == GL_TEXTURE_2D_ARRAY) &&
+        !(ogles2_es31(ctx) && target == GL_TEXTURE_CUBE_MAP_ARRAY_OES)) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
