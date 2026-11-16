@@ -1059,10 +1059,10 @@ BOOL ogles2_texture_depth(const struct OGLES3Texture *t, int l, UBYTE *bits, BOO
 BOOL ogles2_texture_stencil8(const struct OGLES3Texture *t, int l);
 struct OGLES3Texture *ogles2_fbo_rb_color(struct OGLES3Context *ctx, GLuint name);
 /* That image as a job's depth/stencil surface, its GPU storage made first; FALSE: none. */
-BOOL ogles2_texture_s8_surface(struct OGLES3Context *ctx, struct OGLES3Texture *t, int l,
+BOOL ogles2_texture_s8_surface(struct OGLES3Context *ctx, struct OGLES3Texture *t, int k, int l,
                                struct OGLES3Surface *s);
 BOOL ogles2_fbo_zs_alloc(UWORD w, UWORD h, ULONG cpp, ULONG layers, struct v3d_mem *mem, ULONG *base, ULONG *ub, ULONG *bytes);
-BOOL ogles2_texture_zs_surface(struct OGLES3Context *ctx, struct OGLES3Texture *t, int l,
+BOOL ogles2_texture_zs_surface(struct OGLES3Context *ctx, struct OGLES3Texture *t, int k, int l,
                                struct OGLES3Surface *s);
 /* The texture kinds a sampler reads (its uniform's type). */
 #define OGLES3_TEX_2D   0

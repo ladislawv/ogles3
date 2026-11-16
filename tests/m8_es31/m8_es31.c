@@ -493,6 +493,58 @@ static void geometry(void)
     glDeleteFramebuffers(1, &fb);
     glDeleteTextures(3, t);
 
+    /* layered depth and stencil, and depth by a cube map's face or an
+     * array's layer */
+    {
+        GLuint zt[4], f2;
+        glGenTextures(4, zt);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, zt[0]);
+        glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, 16, 16, 4);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, zt[1]);
+        glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_DEPTH_COMPONENT32F, 16, 16, 4);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, zt[2]);
+        glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_DEPTH24_STENCIL8, 16, 16, 4);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, zt[3]);
+        glTexStorage2D(GL_TEXTURE_CUBE_MAP, 1, GL_DEPTH_COMPONENT24, 16, 16);
+        check(glGetError() == GL_NO_ERROR, "layered depth: the textures made");
+        glGenFramebuffers(1, &f2);
+        glBindFramebuffer(GL_FRAMEBUFFER, f2);
+        glFramebufferTextureEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, zt[0], 0);
+        glFramebufferTextureEXT(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, zt[1], 0);
+        check(layered(GL_DEPTH_ATTACHMENT) == GL_TRUE && fb_status() == GL_FRAMEBUFFER_COMPLETE &&
+                  glGetError() == GL_NO_ERROR,
+              "layered depth: a DEPTH_COMPONENT32F array's layers with a layered colour array, complete");
+        glFramebufferTextureEXT(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, 0, 0);
+        glFramebufferTextureEXT(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, zt[2], 0);
+        check(layered(GL_STENCIL_ATTACHMENT) == GL_TRUE && fb_status() == GL_FRAMEBUFFER_COMPLETE &&
+                  glGetError() == GL_NO_ERROR,
+              "layered depth: a DEPTH24_STENCIL8 array as depth and stencil, complete");
+        glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, zt[2], 0, 2);
+        check(layered(GL_DEPTH_ATTACHMENT) == GL_FALSE &&
+                  fb_status() == GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS_EXT,
+              "layered depth: one layer of it beside layered colour: GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS");
+        glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, zt[0], 0, 1);
+        check(fb_status() == GL_FRAMEBUFFER_COMPLETE && glGetError() == GL_NO_ERROR,
+              "depth: a colour layer and a depth-stencil array's layer, complete");
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, 0, 0);
+        glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, zt[2], 0, 3);
+        glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, zt[2], 0, 2);
+        check(fb_status() == GL_FRAMEBUFFER_UNSUPPORTED,
+              "depth: depth and stencil from two layers of one texture: not one image (unsupported)");
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, 0, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, zt[3], 0);
+        check(fb_status() == GL_FRAMEBUFFER_COMPLETE && glGetError() == GL_NO_ERROR,
+              "depth: a depth cube map's face, complete");
+        glFramebufferTextureEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, zt[0], 0);
+        glFramebufferTextureEXT(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, zt[3], 0);
+        check(layered(GL_DEPTH_ATTACHMENT) == GL_TRUE && fb_status() == GL_FRAMEBUFFER_COMPLETE &&
+                  glGetError() == GL_NO_ERROR,
+              "layered depth: a depth cube map's faces with a colour array's layers, complete");
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glDeleteFramebuffers(1, &f2);
+        glDeleteTextures(4, zt);
+    }
+
     /* GL_PRIMITIVES_GENERATED (no draws here: a state-only context) */
     {
         GLuint q = 0, r = 99;

@@ -3902,16 +3902,20 @@ BOOL ogles2_texture_surface(struct OGLES3Context *ctx, struct OGLES3Texture *t, 
     return TRUE;
 }
 
-/* OES_depth_texture: level l of a 2D texture is a depth image; its depth
+/* OES_depth_texture: level l of a 2D texture is a depth image (ES 3.0's
+ * cube maps and 2D arrays, ES 3.1's multisample textures and the cube map
+ * and multisample arrays too: each face or layer one, fbo.c); its depth
  * bits (16, 24, or ES 3.0's 32 of a float) and whether it holds stencil
  * too (DEPTH_STENCIL_OES; DEPTH32F_STENCIL8's in an image of its own,
- * ogles2_texture_s8_surface). */
+ * ogles2_texture_s8_surface). Face 0's format: a cube map's others are
+ * checked where one is attached. */
 BOOL ogles2_texture_depth(const struct OGLES3Texture *t, int l, UBYTE *bits, BOOL *stencil)
 {
     const struct OGLES3Face *f = &t->f[0];
     int c;
-    if ((t->target != GL_TEXTURE_2D && t->target != GL_TEXTURE_2D_MULTISAMPLE) || l < 0 || l >= MAX_LEVELS ||
-        !(f->defined & (1UL << l)))
+    if ((t->target != GL_TEXTURE_2D && t->target != GL_TEXTURE_2D_MULTISAMPLE && t->target != GL_TEXTURE_CUBE_MAP &&
+         !layered(t)) ||
+        t->target == GL_TEXTURE_3D || l < 0 || l >= MAX_LEVELS || !(f->defined & (1UL << l)))
         return FALSE;
     c = level_class(f, l);
     if (c != CLASS_DEPTH16 && c != CLASS_DEPTH24)
@@ -3925,20 +3929,29 @@ BOOL ogles2_texture_depth(const struct OGLES3Texture *t, int l, UBYTE *bits, BOO
  * storage made first: the tile buffer stores into the level's own layout
  * as D16 or D24S8, which the TMU then samples as DEPTH_COMP16 or
  * DEPTH24_X8 (Mesa's depth textures). FALSE: none. */
-BOOL ogles2_texture_zs_surface(struct OGLES3Context *ctx, struct OGLES3Texture *t, int l,
+BOOL ogles2_texture_zs_surface(struct OGLES3Context *ctx, struct OGLES3Texture *t, int k, int l,
                                struct OGLES3Surface *s)
 {
     const V3DTexture *g;
     UBYTE bits;
     BOOL st;
     (void)ctx;
-    if (!ogles2_texture_depth(t, l, &bits, &st) || !consistent(&t->f[0], l))
+    /* face or layer k (a cube map's face defined as face 0, in level 0's
+     * format: the GPU copy is in it) */
+    if (!ogles2_texture_depth(t, l, &bits, &st) || !consistent(&t->f[0], l) || k < 0 || k >= faces_at(t, l) ||
+        (t->target == GL_TEXTURE_CUBE_MAP &&
+         (!(t->f[k].defined & (1UL << l)) || t->f[k].format[l] != t->f[0].format[l] ||
+          t->f[k].type[l] != t->f[0].type[l])))
         return FALSE;
     if ((!t->gpu || l >= t->gpu->num_levels) && !upload_all(t))
         return FALSE;
     if (!(g = t->gpu) || l >= g->num_levels)
         return FALSE;
-    s->addr = V3D_ALIGN_UP((v3d_uintptr)g->texture_mem.hostptr, 256) + g->levels[l].offset;
+    {
+        V3DTexture tmp;
+        const V3DTexture *gk = face_gpu(t, k, l, &tmp); /* a face stride on (fbo.c's layered images: the same) */
+        s->addr = V3D_ALIGN_UP((v3d_uintptr)gk->texture_mem.hostptr, 256) + gk->levels[l].offset;
+    }
     s->bytes = g->levels[l].stride * g->levels[l].padded_h;
     s->mem_format = g->levels[l].tiling_format;
     s->format = bits == 16 ? V3D_OUTPUT_IMAGE_FORMAT_D16 : bits == 32 ? V3D_OUTPUT_IMAGE_FORMAT_D32F
@@ -3951,13 +3964,14 @@ BOOL ogles2_texture_zs_surface(struct OGLES3Context *ctx, struct OGLES3Texture *
     return TRUE;
 }
 
-/* DEPTH32F_STENCIL8's level l: its stencil as a job's S8 image (layer 0;
- * the TMU samples every face's, a layer each), made at the first use and
+/* DEPTH32F_STENCIL8's level l: its stencil as a job's S8 image (face or
+ * layer k, p->bytes[l] apart: a layered attachment steps by them; the TMU
+ * samples every face's, a layer each), made at the first use and
  * again when the level's size changed, and filled from the faces' stencil
  * copies (zeros without one) when made and when given since (the
  * callers of keep_stencil dealt with the jobs that use the texture first).
  * FALSE: none, or no memory. */
-BOOL ogles2_texture_s8_surface(struct OGLES3Context *ctx, struct OGLES3Texture *t, int l,
+BOOL ogles2_texture_s8_surface(struct OGLES3Context *ctx, struct OGLES3Texture *t, int kk, int l,
                                struct OGLES3Surface *s)
 {
     const struct OGLES3Face *f = &t->f[0];
@@ -3968,6 +3982,8 @@ BOOL ogles2_texture_s8_surface(struct OGLES3Context *ctx, struct OGLES3Texture *
           f->format[l] == GL_STENCIL_INDEX)) /* OES_texture_stencil8's: its texels */
         return FALSE;
     n = faces_at(t, l);
+    if (kk < 0 || kk >= n)
+        return FALSE;
     if (!t->s8 && !(t->s8 = AllocVec(sizeof(*t->s8), MEMF_ANY | MEMF_CLEAR)))
         return FALSE;
     p = t->s8;
@@ -4001,7 +4017,7 @@ BOOL ogles2_texture_s8_surface(struct OGLES3Context *ctx, struct OGLES3Texture *
         }
         p->stale &= ~(1UL << l);
     }
-    s->addr = p->base[l];
+    s->addr = p->base[l] + (ULONG)kk * p->bytes[l];
     s->ub = p->ub[l];
     s->bytes = p->bytes[l];
     s->cpp = 1;
@@ -4021,11 +4037,13 @@ static BOOL stencil_sampled(const struct OGLES3Texture *t)
 }
 
 /* OES_texture_stencil8: level l of t is a stencil image (fbo.c: a
- * stencil attachment of its own, its S8 image). */
+ * stencil attachment of its own, its S8 image; of a cube map or an array
+ * each face or layer one). */
 BOOL ogles2_texture_stencil8(const struct OGLES3Texture *t, int l)
 {
-    return t->target == GL_TEXTURE_2D && l >= 0 && l < MAX_LEVELS && (t->f[0].defined & (1UL << l)) &&
-           t->f[0].format[l] == GL_STENCIL_INDEX;
+    return (t->target == GL_TEXTURE_2D || t->target == GL_TEXTURE_CUBE_MAP ||
+            (layered(t) && t->target != GL_TEXTURE_3D)) &&
+           l >= 0 && l < MAX_LEVELS && (t->f[0].defined & (1UL << l)) && t->f[0].format[l] == GL_STENCIL_INDEX;
 }
 
 /* draw.c: unit `unit`'s texture of that kind returns 32 bits (by its level
@@ -7273,7 +7291,7 @@ static BOOL texture_state_build(struct OGLES3Context *ctx, int unit, int kind, U
         /* DEPTH32F_STENCIL8: its S8 image of the base level, R8UI (Mesa's
          * separate stencil), as a texture of one level */
         struct OGLES3Surface s8;
-        if (ogles2_texture_s8_surface(ctx, t, first, &s8)) {
+        if (ogles2_texture_s8_surface(ctx, t, 0, first, &s8)) {
             tsr->texture_base_pointer_rshift_6 = s8.addr >> 6;
             tsr->base_level = tsr->max_level = 0;
             tsr->image_width_lo = t->f[0].w[first] & 0x3f;

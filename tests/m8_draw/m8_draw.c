@@ -3341,7 +3341,11 @@ static void test_wide_a2c(void)
  * an RGBA32F texel (32-bit samplers there), es32gsd draws into an RGBA32F
  * target (its fragment variant's f32_color_rb). GL_PRIMITIVES_GENERATED:
  * es32gsx's 3 points make 6 triangles (the binner's count), es3flat's
- * triangle 1 (the CPU's), with the rasterizer off. */
+ * triangle 1 (the CPU's), with the rasterizer off. Layered depth: es32gs
+ * draws layers 0 and 1 blue with a DEPTH_COMPONENT32F array's layers, the
+ * job rendered (glFinish), then green at the same depth with GL_LESS:
+ * each layer's depth stored and loaded where it belongs, the green draw
+ * fails everywhere (layers 0 and 1 stay blue, 2 and 3 red). */
 static int gs_tri_is(const GLfloat *w, int base, GLfloat x, GLfloat y)
 {
     GLfloat lo = w[0], sum = 0;
@@ -3519,6 +3523,47 @@ static void test_geometry(void)
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glDeleteFramebuffers(2, fb);
         glDeleteTextures(1, &tex);
+
+        /* layered depth */
+        {
+            GLuint lt[2];
+            glGenTextures(2, lt);
+            glBindTexture(GL_TEXTURE_2D_ARRAY, lt[0]);
+            glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, 16, 16, 4);
+            glBindTexture(GL_TEXTURE_2D_ARRAY, lt[1]);
+            glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_DEPTH_COMPONENT32F, 16, 16, 4);
+            glGenFramebuffers(2, fb);
+            glBindFramebuffer(GL_FRAMEBUFFER, fb[0]);
+            glFramebufferTextureEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, lt[0], 0);
+            glFramebufferTextureEXT(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, lt[1], 0);
+            ok = glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
+            glClearColor(1, 0, 0, 1);
+            glClearDepthf(1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); /* every layer */
+            glEnable(GL_DEPTH_TEST);
+            glDepthFunc(GL_LESS);
+            glUseProgram(pl);
+            glUniform4f(glGetUniformLocation(pl, "tint"), 0, 0, 1, 1);
+            glVertexAttribPointer((GLuint)lpos, 2, GL_FLOAT, GL_FALSE, 0, cover);
+            glEnableVertexAttribArray((GLuint)lpos);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+            glFinish(); /* rendered: the next job loads each layer's depth */
+            glUniform4f(glGetUniformLocation(pl, "tint"), 0, 1, 0, 1);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+            glDisableVertexAttribArray((GLuint)lpos);
+            glDisable(GL_DEPTH_TEST);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, fb[1]);
+            for (i = 0; i < 4; i++) {
+                glFramebufferTextureLayer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, lt[0], 0, i);
+                ok &= i < 2 ? pixel_is(8, 8, 0, 0, 128, 255, 2) : pixel_is(8, 8, 255, 0, 0, 255, 0);
+            }
+            check(ok && glGetError() == GL_NO_ERROR,
+                  "layered depth: each layer's depth kept across jobs (the second draw fails the test)");
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glDeleteFramebuffers(2, fb);
+            glDeleteTextures(2, lt);
+        }
         glClearColor(0, 0, 0, 0);
         glViewport(0, 0, 64, 64);
         glDeleteProgram(pl);

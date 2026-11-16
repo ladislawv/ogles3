@@ -218,12 +218,41 @@ extension offered.**
   `glUseProgramStages` takes `GL_GEOMETRY_SHADER_BIT` (a separable program
   has no geometry stage). A program with `gl_Layer`, `invocations = 4` and
   `gl_PointSize` compiled on the PC.
-- **Not yet:** layered depth or stencil (depth textures attach as 2D
-  only: an array's is `GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT`, a
-  renderbuffer beside a layered attachment `_LAYER_TARGETS`); a big
-  layered job may overflow the render list (64 KB: supertile coordinates
-  per layer; dropped and logged, `any_overflow`). Every layer of a layered
-  framebuffer is loaded and stored by each job into it.
+- **Not yet:** a big layered job may overflow the render list (64 KB:
+  supertile coordinates per layer; dropped and logged, `any_overflow`).
+  Every layer of a layered framebuffer is loaded and stored by each job
+  into it. (Layered depth and stencil: done 2026-11-16, next entry; a
+  renderbuffer beside a layered attachment stays `_LAYER_TARGETS`, as the
+  extension says.)
+
+**Layered depth and stencil; depth and stencil by face or layer
+(2026-11-16, built; not run on the A1200).** Depth textures attached as 2D
+only (`ogles2_texture_depth` took 2D targets; a face or layer was
+`GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT`), though ES 3.0 makes them in cube
+maps and 2D arrays. Now:
+- `texture.c`: `ogles2_texture_depth` takes cube maps and the arrays (2D,
+  cube map, multisample) too; `ogles2_texture_zs_surface` and
+  `_s8_surface` take a face or layer (`face_gpu`'s address; an S8 image's
+  layers `bytes` apart, already made for every layer; a cube map's face
+  checked defined in level 0's format); `ogles2_texture_stencil8` takes a
+  cube map's or an array's stencil textures.
+- `fbo.c`: completeness without the face and layered refusals (the face or
+  layer checked by `att_size`); `same_image` compares the face and the
+  layered flag (depth and stencil from two layers of one texture are two
+  images: `GL_FRAMEBUFFER_UNSUPPORTED`, as before for two textures);
+  `ogles2_fbo_target` gives the depth and stencil surfaces their face and,
+  layered (`zs_layered`), their layer stride (a depth image's face stride,
+  an S8 image's bytes), which job.c's per-layer render list already adds;
+  `ogles2_fbo_rendered` marks the face, or every layer.
+- **Tests:** m8_es31 (vamos, 80 of 80): a DEPTH_COMPONENT32F array and a
+  DEPTH24_STENCIL8 array layered beside a layered colour array, a layer
+  of it beside layered colour (`_LAYER_TARGETS`), a colour layer with a
+  depth-stencil layer, depth and stencil from two layers
+  (`_UNSUPPORTED`), a depth cube map's face, its faces layered beside a
+  colour array's layers; m8_draw (the A1200): es32gs into a colour array
+  with a DEPTH_COMPONENT32F array, the job finished between a blue and a
+  green draw at the same depth with `GL_LESS`: layers 0 and 1 stay blue
+  only if each layer's depth was stored and loaded where it belongs.
 - **To run:** dEQP-GLES31 `functional.geometry_shading.*`, and
   `functional.state_query` and `negative_api` with the extension.
 - **Checked under vamos (2026-11-16):** `m8_es31` links a vertex +
