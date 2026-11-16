@@ -86,6 +86,12 @@ struct OGLES3Buffer
     ULONG sto_job;           /* a job whose draws write it as a storage buffer (their fragment
                               * shaders run at its render): no draw of that job reads its words
                               * directly (ogles2_buffer_gpu_words). 0: none */
+    /* EXT_texture_buffer: the data as a buffer texture of 8- or 16-bit
+     * components reads them (ogles2_buffer_texels), made and renamed as the
+     * words are. */
+    v3d_mem texels;
+    ULONG texels_bytes, texels_serial, texels_job;
+    UBYTE texels_cs;         /* the component bytes they are in the GPU's order for: 1 or 2 */
     struct OGLES3Buffer *next_orphan;
 };
 
@@ -116,6 +122,7 @@ struct OGLES3BufState
      * buffers and their indexed bindings (item 2). */
     struct OGLES3Buffer *draw_indirect, *dispatch_indirect, *storage, *atomic;
     struct buf_range ssbo[MAX_SSBO_BINDINGS], acbo[MAX_ATOMIC_BINDINGS];
+    struct OGLES3Buffer *texture;         /* EXT_/OES_texture_buffer's GL_TEXTURE_BUFFER binding */
 };
 
 static struct OGLES3BufState *bs_get(struct OGLES3Context *ctx)
@@ -196,12 +203,22 @@ void ogles2_buffer_cpu(struct OGLES3Context *ctx, struct OGLES3Buffer *b)
     gpu_written(ctx, b);
 }
 
+static void drop_texels(struct OGLES3Context *ctx, struct OGLES3Buffer *b)
+{
+    if (!b->texels.hostptr)
+        return;
+    ogles2_share_defer_free(ctx, b->texels_job, &b->texels);
+    memset(&b->texels, 0, sizeof(b->texels));
+    b->texels_bytes = b->texels_serial = b->texels_job = 0;
+}
+
 static void drop_copies(struct OGLES3Context *ctx, struct OGLES3Buffer *b)
 {
     int k;
     for (k = 0; k < OGLES3_BUFFER_COPIES; k++)
         drop_copy(ctx, &b->copy[k]);
     drop_words(ctx, b);
+    drop_texels(ctx, b);
 }
 
 static void free_buffer(struct OGLES3Context *ctx, struct OGLES3Buffer *b)
@@ -276,6 +293,7 @@ static struct OGLES3Buffer **slot_es3(struct OGLES3Context *ctx, struct OGLES3Bu
     case GL_DISPATCH_INDIRECT_BUFFER: return &bs->dispatch_indirect;
     case GL_SHADER_STORAGE_BUFFER:    return &bs->storage;
     case GL_ATOMIC_COUNTER_BUFFER:    return &bs->atomic;
+    case GL_TEXTURE_BUFFER_OES:       return &bs->texture; /* EXT_texture_buffer */
     default:                          return 0;
     }
 }
@@ -295,7 +313,7 @@ static BOOL valid_usage(struct OGLES3Context *ctx, GLenum usage)
 static void unbind_all(struct OGLES3Context *ctx, struct OGLES3BufState *bs, struct OGLES3Buffer *b)
 {
     struct OGLES3XfbBinding *x = ogles2_xfb_bindings(ctx);
-    struct OGLES3Buffer **one[12];
+    struct OGLES3Buffer **one[13];
     int i;
     one[0] = &bs->array;
     one[1] = &bs->element;
@@ -309,7 +327,8 @@ static void unbind_all(struct OGLES3Context *ctx, struct OGLES3BufState *bs, str
     one[9] = &bs->dispatch_indirect;
     one[10] = &bs->storage;
     one[11] = &bs->atomic;
-    for (i = 0; i < 12; i++)
+    one[12] = &bs->texture;
+    for (i = 0; i < 13; i++)
         if (*one[i] == b)
             *one[i] = 0;
     for (i = 0; i < MAX_UNIFORM_BINDINGS; i++)
@@ -341,7 +360,7 @@ static BOOL in_use(struct OGLES3Context *ctx, const struct OGLES3Buffer *b)
         if (ogles2_vao_uses_buffer(m, b) || ogles2_xfb_uses_buffer(m, b))
             return TRUE;
     }
-    return FALSE;
+    return ogles2_texture_uses_buffer(ctx, b); /* a buffer texture's (EXT_texture_buffer) */
 }
 
 /* A reference to b dropped: a deleted buffer nothing uses any more is freed. */
@@ -967,6 +986,7 @@ BOOL ogles2_buffer_query(struct OGLES3Context *ctx, GLenum pname, GLint *v)
     case GL_DISPATCH_INDIRECT_BUFFER_BINDING:  target = GL_DISPATCH_INDIRECT_BUFFER; break;
     case GL_SHADER_STORAGE_BUFFER_BINDING:     target = GL_SHADER_STORAGE_BUFFER; break;
     case GL_ATOMIC_COUNTER_BUFFER_BINDING:     target = GL_ATOMIC_COUNTER_BUFFER; break;
+    case GL_TEXTURE_BUFFER_BINDING_OES:        target = GL_TEXTURE_BUFFER_OES; break;
     default:                                   return FALSE;
     }
     if (!bs) {
@@ -1036,6 +1056,53 @@ ULONG ogles2_buffer_words(struct OGLES3Context *ctx, struct OGLES3Buffer *b)
     b->words_serial = b->serial;
     b->words_job = ctx->job_serial;
     return (ULONG)b->words.hostptr;
+}
+
+/* EXT_texture_buffer: the data as a buffer texture of `cs`-byte components
+ * reads them (texture.c): 4, the words (ogles2_buffer_words: the GPU's
+ * newest whoever wrote them); 1, the bytes as they are; 2, each 16-bit value
+ * in the GPU's byte order, after what the GPU wrote is copied back
+ * (gpu_written). Made, kept and renamed as the words are. Its address; 0
+ * without data or memory. */
+ULONG ogles2_buffer_texels(struct OGLES3Context *ctx, struct OGLES3Buffer *b, int cs)
+{
+    ULONG bytes, i;
+    if (!b)
+        return 0;
+    if (cs == 4)
+        return ogles2_buffer_words(ctx, b);
+    gpu_written(ctx, b);
+    if (!b->data || !b->size)
+        return 0;
+    bytes = (b->size + 63) & ~63UL;
+    if (b->texels.hostptr && b->texels_serial == b->serial && b->texels_cs == cs) {
+        b->texels_job = ctx->job_serial;
+        return (ULONG)b->texels.hostptr;
+    }
+    if (b->texels.hostptr && (b->texels_bytes != bytes || (b->texels_job && ogles2_job_uses(ctx, b->texels_job))))
+        drop_texels(ctx, b);
+    if (!b->texels.hostptr) {
+        if (v3d_mem_alloc(ogles2_device(), &b->texels, bytes) < 0) {
+            memset(&b->texels, 0, sizeof(b->texels));
+            return 0;
+        }
+        b->texels_bytes = bytes;
+    }
+    if (cs == 1) {
+        CopyMem(b->data, b->texels.hostptr, b->size);
+    } else {
+        UBYTE *d = (UBYTE *)b->texels.hostptr;
+        for (i = 0; i + 1 < b->size; i += 2) {
+            d[i] = b->data[i + 1];
+            d[i + 1] = b->data[i];
+        }
+        if (b->size & 1)
+            d[b->size - 1] = b->data[b->size - 1];
+    }
+    b->texels_serial = b->serial;
+    b->texels_cs = (UBYTE)cs;
+    b->texels_job = ctx->job_serial;
+    return (ULONG)b->texels.hostptr;
 }
 
 /* Uniform buffer binding `index` as a draw reads it (§5 item 6): the GPU

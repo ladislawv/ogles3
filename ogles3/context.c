@@ -403,6 +403,15 @@ static const struct { const char *name; UBYTE in; } extensions[] = {
     {"GL_EXT_copy_image", EXT_ES3}, {"GL_OES_copy_image", EXT_ES3},
     /* item 4: cube map arrays (texture.c; the compiler has them) */
     {"GL_EXT_texture_cube_map_array", EXT_ES31}, {"GL_OES_texture_cube_map_array", EXT_ES31},
+    /* buffer textures (texture.c, buffer.c; the compiler's OES_texture_buffer on) */
+    {"GL_EXT_texture_buffer", EXT_ES31}, {"GL_OES_texture_buffer", EXT_ES31},
+    /* multisample 2D arrays (texture.c; the compiler has sampler2DMSArray) */
+    {"GL_OES_texture_storage_multisample_2d_array", EXT_ES31},
+    /* item 7's first half: the compiler reads the tile buffer (Mesa's
+     * v3d_nir_lower_logic_ops, coherent); the keys need nothing more than
+     * the draws give (8-bit and 16F targets read as halves, 32-bit ones by
+     * f32_color_rb) */
+    {"GL_EXT_shader_framebuffer_fetch", EXT_ES3},
 };
 #define NUM_EXTENSIONS (sizeof(extensions) / sizeof(extensions[0]))
 
@@ -423,7 +432,7 @@ ULONG ogles2_num_extensions(const struct OGLES3Context *ctx)
 /* GL_EXTENSIONS of a context version, built at its first query. */
 static const char *ext_string(const struct OGLES3Context *ctx)
 {
-    static char s[3][2048];
+    static char s[3][3072]; /* 1,868 bytes in a 3.1 context (2026-11-16) */
     static BOOL made[3];
     int v = ogles2_es31(ctx) ? 2 : ogles2_es3(ctx);
     if (!made[v]) {

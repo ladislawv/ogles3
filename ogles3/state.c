@@ -1042,6 +1042,10 @@ static const struct { GLenum pname; GLint value; } es31_limits[] = {
     {GL_MAX_COMPUTE_IMAGE_UNIFORMS, 32},
     {GL_MAX_COMPUTE_SHADER_STORAGE_BLOCKS, 16},
     {GL_MAX_UNIFORM_LOCATIONS, 4096}, /* v3dglslc's too (UNIFORM_LOCATIONS, a location an entry) */
+    /* EXT_texture_buffer: 14 + 14 bits of texels (texture.c), the record's
+     * 64-byte address */
+    {GL_MAX_TEXTURE_BUFFER_SIZE_OES, 134217728},
+    {GL_TEXTURE_BUFFER_OFFSET_ALIGNMENT_OES, 64},
     {GL_MAX_FRAMEBUFFER_WIDTH, 4096},
     {GL_MAX_FRAMEBUFFER_HEIGHT, 4096},
     {GL_MAX_FRAMEBUFFER_SAMPLES, 4},

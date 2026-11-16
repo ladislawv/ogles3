@@ -191,3 +191,10 @@ command glGetnUniformuivKHR
 # EXT_ and OES_copy_image (ES3 contexts): textures (texture.c)
 command glCopyImageSubDataEXT
 command glCopyImageSubDataOES
+# EXT_ and OES_texture_buffer (ES 3.1 contexts; texture.c)
+command glTexBufferEXT
+command glTexBufferRangeEXT
+command glTexBufferOES
+command glTexBufferRangeOES
+# OES_texture_storage_multisample_2d_array (ES 3.1 contexts; texture.c)
+command glTexStorage3DMultisampleOES

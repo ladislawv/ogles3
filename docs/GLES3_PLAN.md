@@ -1,5 +1,49 @@
 # OpenGL ES 3.0 and 3.1 on ogles2.library
 
+**More of items 4 and 7, written without the A1200 (2026-11-16, after
+the entry below; built, not run).**
+- **`EXT_`/`OES_texture_buffer`** (ES 3.1 contexts): the compiler's
+  `OES_texture_buffer` turned on (`v3dglslc.c`: Mesa's state tracker
+  leaves it off for want of the RGB32 buffer formats; the driver reads
+  buffer textures, its desktop GL 3.1 has them; a `samplerBuffer` and a
+  `usamplerBuffer` program compiled and linked; both compilers rebuilt).
+  The library: the target, `glTexBuffer`/`glTexBufferRange` (EXT and OES),
+  the `GL_TEXTURE_BUFFER` buffer binding, the queries
+  (`glGetTexLevelParameter*`'s, `GL_MAX_TEXTURE_BUFFER_SIZE` 2^27,
+  `GL_TEXTURE_BUFFER_OFFSET_ALIGNMENT` 64), and the TMU's 1D raster record at
+  the buffer's GPU copy (Mesa's `v3d_setup_texture_shader_state_from_buffer`:
+  the width's upper 14 bits in the height), made at every draw. The copy is
+  in the GPU's byte order for the format's components
+  (`ogles2_buffer_texels`): the words for 32-bit ones (`ogles2_buffer_words`,
+  so what the GPU wrote is read as it is), else the bytes as they are or
+  16-bit values swapped, made and renamed as the words are; a deleted
+  buffer a texture holds lives on (`ogles2_texture_uses_buffer`). The RGB32
+  formats: `GL_INVALID_ENUM`, logged (V3D has no RGB32 textures); image
+  units take no buffer textures (an `imageBuffer` reads the fallback).
+- **`OES_texture_storage_multisample_2d_array`** (ES 3.1 contexts):
+  `glTexStorage3DMultisampleOES`, the target (no sampler state, one level),
+  its layers stored as `GL_TEXTURE_2D_MULTISAMPLE`'s image is (every
+  sample, twice the size), layered as a 2D array; framebuffer layers;
+  `sampler2DMSArray` (the compiler had it).
+- **`EXT_shader_framebuffer_fetch`** (ES3 contexts): the name only. Mesa's
+  v3d reads the tile buffer for it (`v3d_nir_lower_logic_ops`, coherent:
+  `fbfetch_coherent`) with the keys a draw already gives: the formats only
+  for logic ops and software blending, 8-bit and 16F targets read as
+  halves, 32-bit ones by `f32_color_rb`.
+- **Not done:** `KHR_blend_equation_advanced` (the state tracker's
+  lowering to framebuffer fetch is a compile-time key per blend mode, which
+  the offline variants do not have); item 6 (`OES_sample_shading`,
+  `_sample_variables`, `_shader_multisample_interpolation`: Mesa gates
+  all three on `OES_sample_variables`, which needs `ARB_gpu_shader5`'s
+  sample parts; turning it on in the compiler also needs the program file
+  to carry `force_per_sample_msaa` for the shader state's sample-rate
+  shading, as `v3dx_draw.c` sets it); ASTC (v3dcore's blocks are square).
+- GL_EXTENSIONS of a 3.1 context: 1,868 bytes, its buffer now 3,072.
+  48 entry points in all on this branch.
+- **To run** besides those below: dEQP-GLES31 `texture.texture_buffer`,
+  `shaders.framebuffer_fetch`, `texture.multisample` (its arrays), and the
+  m68k `v3dglslc3` against the host one (`compare_v3dp.sh`).
+
 **ES 3.2 plan items 2-5 and 8, written without the A1200 (2026-11-16, branch
 `es32`, the developer's request: "implement as much as you can without
 testing on amiga").** Built, **not run on the A1200** (it was not

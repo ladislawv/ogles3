@@ -1462,6 +1462,12 @@ int main(int argc, char **argv)
          * tables hold one entry a location, 16-bit. A larger
          * layout(location) fails to compile, as GLSL wants. */
         ctx->Const.MaxUserAssignableUniformLocations = 4096;
+        /* EXT_/OES_texture_buffer's samplerBuffer (docs/GLES3_PLAN.md, the
+         * ES 3.2 plan's item 4): the state tracker leaves it off for want of
+         * the RGB32 buffer formats (ARB_texture_buffer_object_rgb32), which
+         * the library refuses instead; the driver reads buffer textures
+         * (Mesa's desktop GL 3.1 has them). */
+        ctx->Extensions.OES_texture_buffer = GL_TRUE;
     }
     if (limits)
         return print_limits();

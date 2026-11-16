@@ -423,3 +423,8 @@ glGetnUniformivKHR
 glGetnUniformuivKHR
 glCopyImageSubDataEXT
 glCopyImageSubDataOES
+glTexBufferEXT
+glTexBufferRangeEXT
+glTexBufferOES
+glTexBufferRangeOES
+glTexStorage3DMultisampleOES

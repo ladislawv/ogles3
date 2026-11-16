@@ -1038,6 +1038,8 @@ BOOL ogles2_texture_zs_surface(struct OGLES3Context *ctx, struct OGLES3Texture *
 #define OGLES3_TEX_ARRAY 5 /* a 2D array */
 #define OGLES3_TEX_2DMS  6 /* ES 3.1: GL_TEXTURE_2D_MULTISAMPLE (texelFetch only) */
 #define OGLES3_TEX_CUBEARRAY 7 /* EXT_/OES_texture_cube_map_array (ES 3.1 contexts) */
+#define OGLES3_TEX_BUFFER 8 /* EXT_/OES_texture_buffer (ES 3.1 contexts) */
+#define OGLES3_TEX_2DMSARRAY 9 /* OES_texture_storage_multisample_2d_array (texelFetch only) */
 #define OGLES3_TEX_INT   0x10 /* ORed in: an integer sampler (isampler*, usampler*): its incomplete
                                * texture's (0, 0, 0, 1) integers */
 static inline int ogles2_sampler_kind(GLenum type)
@@ -1055,6 +1057,12 @@ static inline int ogles2_sampler_kind(GLenum type)
          : type == GL_SAMPLER_CUBE_MAP_ARRAY_OES || type == GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW_OES ? OGLES3_TEX_CUBEARRAY
          : type == GL_INT_SAMPLER_CUBE_MAP_ARRAY_OES || type == GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY_OES
                ? OGLES3_TEX_CUBEARRAY | OGLES3_TEX_INT
+         : type == GL_SAMPLER_BUFFER_OES ? OGLES3_TEX_BUFFER
+         : type == GL_SAMPLER_2D_MULTISAMPLE_ARRAY_OES ? OGLES3_TEX_2DMSARRAY
+         : type == GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY_OES || type == GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY_OES
+               ? OGLES3_TEX_2DMSARRAY | OGLES3_TEX_INT
+         : type == GL_INT_SAMPLER_BUFFER_OES || type == GL_UNSIGNED_INT_SAMPLER_BUFFER_OES
+               ? OGLES3_TEX_BUFFER | OGLES3_TEX_INT
          : type == GL_INT_SAMPLER_2D_MULTISAMPLE || type == GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE
                ? OGLES3_TEX_2DMS | OGLES3_TEX_INT
                                                                                     : OGLES3_TEX_NONE;
@@ -1191,6 +1199,8 @@ UBYTE *ogles2_buffer_pixels(struct OGLES3Context *ctx, BOOL pack, ULONG offset, 
 /* The GPU's copy of a buffer (32-bit words in its byte order), and uniform
  * buffer binding `index`'s address and bytes (0: none bound). */
 ULONG ogles2_buffer_words(struct OGLES3Context *ctx, struct OGLES3Buffer *b);
+ULONG ogles2_buffer_texels(struct OGLES3Context *ctx, struct OGLES3Buffer *b, int cs);
+BOOL ogles2_texture_uses_buffer(struct OGLES3Context *ctx, const struct OGLES3Buffer *b);
 ULONG ogles2_buffer_uniform(struct OGLES3Context *ctx, ULONG index, ULONG *size);
 /* Uniform buffer binding `index`'s buffer was written by transform feedback
  * in the open job (its GPU words, which a draw's block reads) */
