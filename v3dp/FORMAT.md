@@ -286,7 +286,10 @@ has no `.v3dw` either). Bit 5 (0x20, 2026-11-16, `EXT_geometry_shader`): a geome
 its stages bit 3 with 0 and 4 (Mesa's `MESA_SHADER_GEOMETRY`), its `STAGE_PARAMS` and uniform
 block list of stage 3 after the others, its variants of stages 2 (geometry) and 3 (geometry
 binning), and each uniform's sampler indexes three words (the geometry stage's third); its
-hash has the geometry shader's source after the vertex shader's, as stage 3. Images and
+hash has the geometry shader's source after the vertex shader's, as stage 3. Its section
+`GEOMETRY` (16, after `STRINGS`): `u32` each, the input primitive, the output primitive
+(Mesa's `enum mesa_prim`, GL's values: 0 points, 1 lines, 4 triangles, 0xA and 0xC the
+adjacency ones in; 0, 3 and 5 out), the vertices out (`max_vertices`) and the invocations. Images and
 explicit uniform locations need no bit: their sections and
 flags are format 2's.
 

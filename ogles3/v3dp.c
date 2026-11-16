@@ -177,8 +177,17 @@ static UBYTE matrix_columns(GLenum t)
 #define V3DP_FEATURE_COMPUTE 0x4 /* a compute program (ES 3.1), */
 #define V3DP_FEATURE_ATOMIC 0x8 /* atomic counter buffers (ES 3.1), */
 #define V3DP_FEATURE_SEPARABLE 0x10 /* a separable program, of one stage or two (ES 3.1) */
+#define V3DP_FEATURE_GEOMETRY 0x20 /* a geometry stage (EXT_geometry_shader, docs/GLES3_PLAN.md item 9) */
 #define V3DP_FEATURES                                                                                       \
-    (V3DP_FEATURE_TF | V3DP_FEATURE_STORAGE | V3DP_FEATURE_COMPUTE | V3DP_FEATURE_ATOMIC | V3DP_FEATURE_SEPARABLE)
+    (V3DP_FEATURE_TF | V3DP_FEATURE_STORAGE | V3DP_FEATURE_COMPUTE | V3DP_FEATURE_ATOMIC | V3DP_FEATURE_SEPARABLE | \
+     V3DP_FEATURE_GEOMETRY)
+
+/* A file stage's constant buffer: 0 vertex (a compute program's one), 1
+ * fragment, 2 geometry (OGLES3_GL_STAGES). */
+static ULONG stage_slot(ULONG stage)
+{
+    return stage == 4 ? 1 : stage == 3 ? 2 : 0;
+}
 #define MAX_ATOMIC_BINDINGS 16 /* GL_MAX_ATOMIC_COUNTER_BUFFER_BINDINGS (state.c) */
 #define COMPUTE_STAGES 0x20 /* PROGRAM's stages: bit 5 */
 
@@ -284,6 +293,7 @@ struct OGLES3Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             if (format2 && ((features = u32(&s)) & ~V3DP_FEATURES))
                 FAIL("the program uses features this library does not know", 0, ~0UL);
             im->compute = (features & V3DP_FEATURE_COMPUTE) != 0;
+            im->geometry = (features & V3DP_FEATURE_GEOMETRY) != 0;
             im->separable = (features & V3DP_FEATURE_SEPARABLE) != 0;
             im->stages = (UBYTE)stages;
             break;
@@ -291,9 +301,9 @@ struct OGLES3Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             ULONG stage = u32(&s), nvalues = u32(&s), nparams = u32(&s), si;
             ULONG *tmpl;
             struct OGLES3StateVar *sv;
-            if (stage != 0 && stage != 4 && stage != 5)
+            if (stage != 0 && stage != 4 && stage != 5 && !(stage == 3 && im->geometry))
                 FAIL("STAGE_PARAMS for an unknown stage", 0, stage);
-            si = stage == 4; /* a compute program's one stage in slot 0 */
+            si = stage_slot(stage); /* a compute program's one stage in slot 0 */
             if (nvalues > 4096)
                 FAIL("constant buffer too large:", 0, nvalues);
             /* Parameters: only state variables matter (the template holds the rest). */
@@ -363,14 +373,14 @@ struct OGLES3Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                         u[k].flags |= OGLES3_UNIFORM_IMAGE;
                 }
                 np = u32(&s);
-                if (np > 2)
-                    FAIL("uniform with more than two storage places: ", u[k].name, np);
+                if (np > (im->geometry ? 3UL : 2UL))
+                    FAIL("uniform with more storage places than stages: ", u[k].name, np);
                 pl = alloc(im, (np + 1) * sizeof(*pl));
                 if (!pl)
                     FAIL("out of memory", 0, ~0UL);
                 for (j = 0; j < np; j++) {
                     ULONG stage = u32(&s);
-                    pl[j].stage = stage == 4;
+                    pl[j].stage = (UBYTE)stage_slot(stage);
                     pl[j].offset = (UWORD)u32(&s);
                     pl[j].elem_stride = (UBYTE)(u8(&s) / 4);
                     pl[j].vec_stride = (UBYTE)(u8(&s) / 4);
@@ -381,6 +391,7 @@ struct OGLES3Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                 u[k].places = pl;
                 u[k].sampler[0] = u32(&s);
                 u[k].sampler[1] = u32(&s);
+                u[k].sampler[2] = im->geometry ? u32(&s) : ~0UL; /* the geometry stage's (feature bit 5) */
                 if ((u[k].flags & OGLES3_UNIFORM_IMAGE) &&
                     ((u[k].sampler[0] != ~0UL && u[k].sampler[0] >= OGLES3_MAX_STAGE_IMAGES) ||
                      (u[k].sampler[1] != ~0UL && u[k].sampler[1] >= OGLES3_MAX_STAGE_IMAGES)))
@@ -507,6 +518,33 @@ struct OGLES3Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                     v->noperspective_flags[j] = u32(&s);
                 for (j = 0; j < 3; j++)
                     v->centroid_flags[j] = u32(&s);
+            } else if ((v->stage == OGLES3_VARIANT_GS || v->stage == OGLES3_VARIANT_GS_BIN) && im->geometry) {
+                /* EXT_geometry_shader (FORMAT.md, feature bit 5) */
+                skip(&s, COMMON_KEY_BYTES);
+                skip(&s, 4 + 64);                 /* num_used_outputs+pad, used_outputs */
+                (void)u8(&s);                     /* is_coord (the stage says it) */
+                v->per_vertex_point_size = u8(&s);
+                skip(&s, 2);
+                klen = OGLES3_GS_KEY_BYTES;
+                if (!s.bad && (ULONG)(s.p - kstart) != klen)
+                    FAIL("a geometry key of another size:", 0, (ULONG)(s.p - kstart));
+                read_common_prog_data(&s, v);
+                v->uses_pid = u8(&s);
+                v->num_inputs = u8(&s);
+                v->gs_simd_width = u8(&s);
+                v->gs_out_prim = u8(&s);
+                v->gs_invocations = u8(&s);
+                v->writes_psiz = u8(&s);
+                skip(&s, 2 + 16);                 /* pad, input_sizes */
+                {
+                    UBYTE *slots = need(&s, 64) ? alloc(im, 64) : 0;
+                    if (!slots)
+                        FAIL("truncated or unreadable geometry input slots", 0, ~0UL);
+                    memcpy(slots, s.p, 64);       /* the vertex variant's used outputs */
+                    v->input_slots = slots;
+                    s.p += 64;
+                }
+                v->vpm_output_size = u32(&s);
             } else if (v->stage == OGLES3_VARIANT_COMPUTE) {
                 skip(&s, COMMON_KEY_BYTES);       /* the key: the common one (FORMAT.md) */
                 klen = COMMON_KEY_BYTES;
@@ -637,9 +675,9 @@ struct OGLES3Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             for (k = 0; k < nmaps && !s.bad; k++) {
                 ULONG stage = u32(&s), nb = u32(&s), si;
                 UWORD *map;
-                if (stage != 0 && stage != 4 && stage != 5)
+                if (stage != 0 && stage != 4 && stage != 5 && !(stage == 3 && im->geometry))
                     FAIL("a uniform block map for an unknown stage", 0, stage);
-                si = stage == 4;
+                si = stage_slot(stage);
                 if (nb > 255 || !(map = alloc(im, nb * 2 + 2)))
                     FAIL("a stage's uniform blocks:", 0, nb);
                 for (j = 0; j < nb; j++) {
@@ -690,9 +728,9 @@ struct OGLES3Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             for (k = 0; k < nmaps && !s.bad; k++) {
                 ULONG stage = u32(&s), nb = u32(&s), si;
                 UWORD *map;
-                if (stage != 0 && stage != 4 && stage != 5)
+                if (stage != 0 && stage != 4 && stage != 5 && !(stage == 3 && im->geometry))
                     FAIL("a storage block map for an unknown stage", 0, stage);
-                si = stage == 4;
+                si = stage_slot(stage);
                 if (nb > 255 || !(map = alloc(im, nb * 2 + 2)))
                     FAIL("a stage's storage blocks:", 0, nb);
                 for (j = 0; j < nb; j++) {
@@ -759,6 +797,15 @@ struct OGLES3Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             im->opaque_units = o;
             break;
         }
+        case 16: /* GEOMETRY (feature bit 5): the geometry shader's layout */
+            if (!im->geometry || sec_len[i] < 16)
+                FAIL("a GEOMETRY section without the feature bit, or short", 0, ~0UL);
+            im->gs_in = (UWORD)u32(&s);
+            im->gs_out = (UWORD)u32(&s);
+            im->gs_vertices = (UWORD)u32(&s);
+            im->gs_invocations = (UBYTE)u32(&s);
+            im->gs_layout = TRUE;
+            break;
         case 15: { /* INTERFACE_TYPES (format 2): each interface entry's structure */
             ULONG n = u32(&s), j;
             ULONG *t;
@@ -910,7 +957,7 @@ struct OGLES3Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
      * .v3dx's are checked against its program's when it is taken). */
     for (k = 0; k < im->nvariants && !im->v3dx; k++) {
         const struct OGLES3Variant *v = &vars[k];
-        ULONG j, si = v->stage == OGLES3_VARIANT_FS;
+        ULONG j, si = v->stage == OGLES3_VARIANT_FS ? 1 : v->stage == OGLES3_VARIANT_GS || v->stage == OGLES3_VARIANT_GS_BIN ? 2 : 0;
         for (j = 0; j < v->nrecipe; j++) {
             if ((v->rtype[j] == OGLES3_U_UBO_ADDR && (v->rdata[j] >> 24) > im->stage_nblocks[si]) ||
                 (v->rtype[j] == OGLES3_U_GET_UBO_SIZE && v->rdata[j] >= im->stage_nblocks[si]))
@@ -1023,6 +1070,8 @@ void ogles2_image_free(struct OGLES3Image *im, struct OGLES3Context *ctx)
         FreeVec(im->vs_src);
     if (im->fs_src)
         FreeVec(im->fs_src);
+    if (im->gs_src)
+        FreeVec(im->gs_src);
     free_blocks(im);
     FreeVec(im);
 }

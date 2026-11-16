@@ -280,7 +280,12 @@ struct OGLES3Array
 
 #define OGLES3_VARIANT_VS 0 /* .v3dp VARIANT stages */
 #define OGLES3_VARIANT_CS 1 /* binning (coordinate) shader */
+#define OGLES3_VARIANT_GS 2 /* EXT_geometry_shader (docs/GLES3_PLAN.md item 9) */
+#define OGLES3_VARIANT_GS_BIN 3 /* its binning variant */
 #define OGLES3_VARIANT_FS 4
+/* The stages with constant buffers: 0 vertex (and its binning variant), 1
+ * fragment, 2 geometry (and its binning variant); a compute program's in 0. */
+#define OGLES3_GL_STAGES 3
 #define OGLES3_VARIANT_COMPUTE 5 /* ES 3.1's compute shader (docs/GLES3_PLAN.md stage D item 1) */
 
 /* One compiled shader (a .v3dp VARIANT): its key fields the runtime selects
@@ -330,8 +335,13 @@ struct OGLES3Variant
     UBYTE uses_images;            /* the recipe has OGLES3_U_IMAGE_TMU_CONFIG_P0 (ES 3.1) */
     UBYTE force_per_sample_msaa;  /* fragment: a sample at a time in a 4x job (gl_SampleID, sample
                                    * inputs: OES_sample_variables; draw.c) */
+    /* geometry (EXT_geometry_shader; uses_pid, num_inputs, writes_psiz,
+     * vpm_output_size and input_slots as above): its SIMD width, output
+     * primitive (Mesa's enum mesa_prim) and invocations */
+    UBYTE gs_simd_width, gs_out_prim, gs_invocations;
 };
 #define OGLES3_VS_KEY_BYTES 88  /* struct v3d_vs_key as the file writes it */
+#define OGLES3_GS_KEY_BYTES 84  /* struct v3d_gs_key (EXT_geometry_shader) */
 #define OGLES3_FS_KEY_BYTES 296 /* struct v3d_fs_key */
 
 struct OGLES3ImageAttrib
@@ -408,7 +418,7 @@ struct OGLES3ImageUniform
     UBYTE flags;          /* OGLES3_UNIFORM_* */
     UBYTE nplaces;
     const struct OGLES3Place *places;
-    ULONG sampler[2];     /* texture index in the vertex and fragment stage, ~0: none */
+    ULONG sampler[OGLES3_GL_STAGES]; /* texture index in the vertex, fragment and geometry stage, ~0: none */
     /* Format 2: a uniform block member's place in its block (block -1: none). */
     WORD block;
     UBYTE row_major;
@@ -458,8 +468,8 @@ struct OGLES3Image
     const struct OGLES3ImageAttrib *attribs;
     UWORD nuniforms;
     const struct OGLES3ImageUniform *uniforms;
-    UWORD cbuf_words[2];                  /* constant buffers, vertex and fragment */
-    const ULONG *cbuf_template[2];
+    UWORD cbuf_words[OGLES3_GL_STAGES];   /* constant buffers, vertex, fragment and geometry */
+    const ULONG *cbuf_template[OGLES3_GL_STAGES];
     UWORD nstatevars;
     const struct OGLES3StateVar *statevars;
     ULONG code_total;                     /* bytes of code, all variants */
@@ -483,7 +493,7 @@ struct OGLES3Image
      * draw into a 4x MSAA default framebuffer with GL_SAMPLE_ALPHA_TO_COVERAGE. */
     struct OGLES3Image *a2c;
     BOOL a2c_tried;
-    char *vs_src, *fs_src;
+    char *vs_src, *fs_src, *gs_src; /* gs_src: a geometry shader's (EXT_geometry_shader), else NULL */
     struct OGLES3Image *next;             /* the context's program cache (program.c) */
     /* Format 2 (an OpenGL ES 3 program; v3dp/FORMAT.md): its uniform blocks,
      * each stage's map from its block i (QUNIFORM_UBO_ADDR unit i + 1) to
@@ -491,8 +501,8 @@ struct OGLES3Image
     BOOL format2;
     UWORD nublocks;
     const struct OGLES3ImageBlock *ublocks;
-    UBYTE stage_nblocks[2];               /* vertex, fragment */
-    const UWORD *stage_block[2];
+    UBYTE stage_nblocks[OGLES3_GL_STAGES]; /* vertex, fragment, geometry */
+    const UWORD *stage_block[OGLES3_GL_STAGES];
     UWORD ninterface;
     const struct OGLES3ImageVar *interface;
     /* Draw-time variants (docs/GLES3_PLAN.md stage A item 5). A program
@@ -514,12 +524,18 @@ struct OGLES3Image
      * blocks and each stage's map from its storage buffer i
      * (QUNIFORM_SSBO_OFFSET data i) to them, as the uniform blocks'. */
     BOOL compute;
+    BOOL geometry;                        /* EXT_geometry_shader: the file's feature bit 5 */
+    /* its GEOMETRY section: the input and output primitive (GL's enums),
+     * the vertices out and the invocations */
+    UWORD gs_in, gs_out, gs_vertices;
+    UBYTE gs_invocations;
+    BOOL gs_layout;                       /* the section was there */
     BOOL separable;                   /* ES 3.1: GL_PROGRAM_SEPARABLE (stage D item 5) */
     UBYTE stages;                     /* PROGRAM's: bit 0 vertex, bit 4 fragment, bit 5 compute */
     UWORD nsblocks;
     const struct OGLES3ImageBlock *sblocks;
-    UBYTE stage_nsblocks[2];
-    const UWORD *stage_sblock[2];       /* 0x8000 | b: atomic counter buffer binding b (FORMAT.md) */
+    UBYTE stage_nsblocks[OGLES3_GL_STAGES];
+    const UWORD *stage_sblock[OGLES3_GL_STAGES]; /* 0x8000 | b: atomic counter buffer binding b (FORMAT.md) */
     UWORD nabuffers;                    /* atomic counter buffers (ES 3.1) */
     const struct OGLES3ImageAtomic *abuffers;
     /* Format 2's UNIFORM_LOCATIONS (explicit locations, ES 3.1): per
@@ -586,12 +602,13 @@ struct OGLES3Program
     BOOL delete_pending;
     GLuint name;
     struct OGLES3Shader *vs, *fs;
+    struct OGLES3Shader *gs;          /* EXT_geometry_shader (ES 3.1 contexts) */
     struct OGLES3Shader *cs;          /* ES 3.1: a compute shader (a program of it alone) */
     GLboolean linked;
     const struct OGLES3Image *image;  /* after a successful link */
     UBYTE attrib_index[OGLES3_MAX_IMAGE_ATTRIBS]; /* image attribute i <- generic attribute */
-    ULONG *cbuf[2];                   /* constant buffers, vertex and fragment */
-    ULONG *cbuf_le[2];                /* the same in the GPU's byte order, for the draws'
+    ULONG *cbuf[OGLES3_GL_STAGES];    /* constant buffers, vertex, fragment and geometry */
+    ULONG *cbuf_le[OGLES3_GL_STAGES]; /* the same in the GPU's byte order, for the draws'
                                          uniform streams: written with ogles2_cbuf_set */
     UWORD nlocations;                 /* uniform locations: one per array element */
     UWORD *loc_uniform, *loc_element; /* location -> uniform, element */
@@ -624,7 +641,7 @@ struct OGLES3Program
      * reused while the vertex constant buffer and the state they read are
      * the same (cbuf_ver[0], the context's ustate_ver), in the same
      * context's job (a shared program draws in several). */
-    ULONG cbuf_ver[2];                /* bumped by every change to cbuf[k] */
+    ULONG cbuf_ver[OGLES3_GL_STAGES]; /* bumped by every change to cbuf[k] */
     const struct OGLES3Variant *us_var[2];
     ULONG us_gen[2], us_cbuf_ver[2], us_state_ver[2], us_addr[2];
     struct OGLES3Context *us_ctx[2];
@@ -1170,10 +1187,11 @@ BOOL ogles2_compile_program(const char *vs, const char *fs, const char *path, ch
 /* The same program's variants for samplers returning 32 bits (its .v3dw). */
 BOOL ogles2_compile_program_bound(const char *vs, const char *fs, const char *bindings, const char *path,
                                   char *log, ULONG log_size);
-BOOL ogles2_compile_program_wide(const char *vs, const char *fs, const char *path, char *log,
+BOOL ogles2_compile_program_wide(const char *vs, const char *fs, const char *bindings, const char *path, char *log,
                                  ULONG log_size);
-BOOL ogles2_compile_program_a2c(const char *vs, const char *fs, const char *path, char *log,
+BOOL ogles2_compile_program_a2c(const char *vs, const char *fs, const char *bindings, const char *path, char *log,
                                 ULONG log_size);
+int ogles2_compile_geometry_shader(const char *src, char *log, ULONG log_size);
 /* A program's draw-time variants into its .v3dx beside path: 1 written, 0
  * not, -1 no compiler that knows the request (stage A item 5). */
 int ogles2_compile_variants(const char *vs, const char *fs, const char *bindings, const UBYTE *keys,

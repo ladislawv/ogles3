@@ -42,6 +42,7 @@ enum {
     SEC_UNIFORM_LOCATIONS = 13,  /* format 2 */
     SEC_OPAQUE_UNITS = 14,       /* format 2 */
     SEC_INTERFACE_TYPES = 15,    /* format 2: INTERFACE's structures (ES 3.1's interface matching) */
+    SEC_GEOMETRY = 16,           /* format 2, with the feature bit V3DP_FEATURE_GEOMETRY */
 };
 
 enum { VARIANT_VS = 0, VARIANT_VS_BIN = 1, VARIANT_GS = 2, VARIANT_GS_BIN = 3, VARIANT_FS = 4, VARIANT_CS = 5 };
@@ -1208,6 +1209,19 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
     put_section(&program, SEC_PROGRAM, &sec);
     num_sections++;
     buf_free(&sec);
+
+    /* GEOMETRY (feature bit 5): the geometry shader's layout, for the
+     * library's program queries and draws */
+    if (prog->_LinkedShaders[MESA_SHADER_GEOMETRY]) {
+        const struct gl_program *gp = prog->_LinkedShaders[MESA_SHADER_GEOMETRY]->Program;
+        put_u32(&sec, (uint32_t)gp->info.gs.input_primitive);  /* Mesa's enum mesa_prim: GL's values */
+        put_u32(&sec, (uint32_t)gp->info.gs.output_primitive);
+        put_u32(&sec, gp->info.gs.vertices_out);
+        put_u32(&sec, gp->info.gs.invocations);
+        put_section(&body, SEC_GEOMETRY, &sec);
+        num_sections++;
+        buf_free(&sec);
+    }
 
     /* STAGE_PARAMS */
     for (i = 0; i < NUM_FILE_STAGES; i++) {

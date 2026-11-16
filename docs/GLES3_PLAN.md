@@ -30,6 +30,39 @@ is read there), and `V3DGLSL_COMPILE_GEOMETRY` (12) checks one alone. A
 `SERVE` request of the program above wrote a file identical to the command
 line's; the bridge's 31 programs as before. Both compilers rebuilt.
 
+**Stage B, done (2026-11-16, built; the reader not run anywhere):**
+- `ogles3_internal.h`: `OGLES3_GL_STAGES` (3: vertex 0, fragment 1,
+  geometry 2) sizes the per-stage arrays (`sampler`, `cbuf_words`,
+  `cbuf_template`, `stage_nblocks`/`stage_block`, `stage_nsblocks`/
+  `stage_sblock`, the program's `cbuf`, `cbuf_le`, `cbuf_ver`);
+  `OGLES3_VARIANT_GS` 2, `_GS_BIN` 3; a variant's `gs_simd_width`,
+  `gs_out_prim`, `gs_invocations` (its `uses_pid`, `num_inputs`,
+  `writes_psiz`, `input_slots`, `vpm_output_size` the others'); the image's
+  `geometry`, `gs_src` and the GEOMETRY section's layout. The built-in
+  program's image is a designated initializer now (it was positional: a
+  field more shifted it).
+- `v3dp.c`: feature bit 5, stage 3's `STAGE_PARAMS` and block maps
+  (`stage_slot`), up to three storage places, the third sampler index,
+  VARIANT stages 2 and 3 (`OGLES3_GS_KEY_BYTES` 84), the `GEOMETRY`
+  section (16: in, out, vertices, invocations; FORMAT.md).
+- `program.c`, `compiler.c`: `glCreateShader(GL_GEOMETRY_SHADER_EXT)` in
+  ES 3.1 contexts, its compile check (`V3DGLSL_COMPILE_GEOMETRY`), `p->gs`
+  (attach, detach, `glGetAttachedShaders`, `GL_ATTACHED_SHADERS`, its
+  release), the link (a vertex and a fragment shader with it, not
+  separable: logged), the hash (stage 3 after the vertex shader), the
+  requests' link state with the geometry shader in front (`geometry_state`,
+  kept as the image's `bind_src`: the draw-time, 32-bit and
+  alpha-to-coverage compiles carry it; `ogles2_compile_program_wide`/`_a2c`
+  take link state now), `GL_GEOMETRY_LINKED_VERTICES_OUT`, `_INPUT_TYPE`,
+  `_OUTPUT_TYPE`, `GL_GEOMETRY_SHADER_INVOCATIONS`. The compiler: a
+  `LINK_BOUND` whose link state was the geometry shader alone links as
+  `LINK`; `-L` lists the geometry limits (64 input and output components,
+  16 texture units, 256 vertices, 1024 total components, 16352 uniform
+  components, 15 blocks, 32 invocations, 32 images, no atomic counters or
+  storage blocks); both rebuilt. Draws with such a program stay
+  `GL_INVALID_OPERATION` (its stages 0x19, not 0x11) until stage C; the
+  extension is not offered yet.
+
 **Stages B to D, what is left (the map for the next session):**
 - **B, the library reads it.** `program.c`: `GL_GEOMETRY_SHADER_EXT` in
   `glCreateShader` (ES 3.1 contexts), its compile through

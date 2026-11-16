@@ -311,20 +311,20 @@ BOOL ogles2_compile_program_bound(const char *vs, const char *fs, const char *bi
 
 /* The variants for samplers that return 32 bits (the program's .v3dw). A
  * compiler older than V3DGLSL_LINK32 refuses the request (result 3). */
-BOOL ogles2_compile_program_wide(const char *vs, const char *fs, const char *path, char *log,
+BOOL ogles2_compile_program_wide(const char *vs, const char *fs, const char *bindings, const char *path, char *log,
                                  ULONG log_size)
 {
-    LONG result;
-    return request(V3DGLSL_LINK32, vs, fs, 0, path, log, log_size, &result, 0, 0, 0) && result == 0;
+    LONG result; /* bindings: only a geometry shader in front is read (V3DGLSL_GEOM_MARK) */
+    return request(V3DGLSL_LINK32, vs, fs, bindings, path, log, log_size, &result, 0, 0, 0) && result == 0;
 }
 
 /* The alpha-to-coverage variants (the program's .v3da). A compiler older
  * than V3DGLSL_LINK_A2C refuses the request (result 3). */
-BOOL ogles2_compile_program_a2c(const char *vs, const char *fs, const char *path, char *log,
+BOOL ogles2_compile_program_a2c(const char *vs, const char *fs, const char *bindings, const char *path, char *log,
                                 ULONG log_size)
 {
     LONG result;
-    return request(V3DGLSL_LINK_A2C, vs, fs, 0, path, log, log_size, &result, 0, 0, 0) && result == 0;
+    return request(V3DGLSL_LINK_A2C, vs, fs, bindings, path, log, log_size, &result, 0, 0, 0) && result == 0;
 }
 
 /* A program's draw-time variants (docs/GLES3_PLAN.md stage A item 5): the
@@ -376,6 +376,16 @@ int ogles2_compile_compute_shader(const char *src, char *log, ULONG log_size)
 {
     LONG result;
     if (!request(V3DGLSL_COMPILE_COMPUTE, src, 0, 0, 0, log, log_size, &result, 0, 0, 0))
+        return -1;
+    return result == 0 ? 1 : result == 1 ? 0 : -1;
+}
+
+/* EXT_geometry_shader: as ogles2_compile_shader, a geometry shader (a
+ * compiler older than V3DGLSL_COMPILE_GEOMETRY answers 3: -1). */
+int ogles2_compile_geometry_shader(const char *src, char *log, ULONG log_size)
+{
+    LONG result;
+    if (!request(V3DGLSL_COMPILE_GEOMETRY, src, 0, 0, 0, log, log_size, &result, 0, 0, 0))
         return -1;
     return result == 0 ? 1 : result == 1 ? 0 : -1;
 }

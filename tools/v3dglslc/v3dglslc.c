@@ -1052,6 +1052,14 @@ static int print_limits(void)
         L(GL_MAX_DEPTH_TEXTURE_SAMPLES, 1), L(GL_MAX_INTEGER_SAMPLES, 1),
         L(GL_MAX_VERTEX_ATTRIB_RELATIVE_OFFSET, 1), L(GL_MAX_VERTEX_ATTRIB_BINDINGS, 1),
         L(GL_MAX_VERTEX_ATTRIB_STRIDE, 1),
+        /* EXT_geometry_shader (docs/GLES3_PLAN.md item 9) */
+        L(GL_MAX_GEOMETRY_INPUT_COMPONENTS, 1), L(GL_MAX_GEOMETRY_OUTPUT_COMPONENTS, 1),
+        L(GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS, 1), L(GL_MAX_GEOMETRY_OUTPUT_VERTICES, 1),
+        L(GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS, 1), L(GL_MAX_GEOMETRY_UNIFORM_COMPONENTS, 1),
+        L(GL_MAX_GEOMETRY_UNIFORM_BLOCKS, 1), L(GL_MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS, 1),
+        L(GL_MAX_GEOMETRY_SHADER_INVOCATIONS, 1), L(GL_MAX_GEOMETRY_IMAGE_UNIFORMS, 1),
+        L(GL_MAX_GEOMETRY_ATOMIC_COUNTER_BUFFERS, 1), L(GL_MAX_GEOMETRY_ATOMIC_COUNTERS, 1),
+        L(GL_MAX_GEOMETRY_SHADER_STORAGE_BLOCKS, 1),
     };
 #undef L
     static const GLenum indexed[] = { GL_MAX_COMPUTE_WORK_GROUP_COUNT, GL_MAX_COMPUTE_WORK_GROUP_SIZE };
@@ -1117,6 +1125,8 @@ static int handle(uint32_t op, const char *vs, const char *fs, const char *out_p
         return 3;
     }
     link_gs_src = gs;
+    if (gs && !bindings && op == V3DGLSL_LINK_BOUND) /* the geometry shader was all its link state */
+        op = V3DGLSL_LINK;
     result = handle_one(op, vs, fs, out_path, bindings, keys, keys_len, layout_crc, log, log_size);
     link_gs_src = NULL;
     free(gs);
@@ -1507,6 +1517,7 @@ int main(int argc, char **argv)
         ctx->Const.Program[MESA_SHADER_VERTEX].MaxTextureImageUnits = 16;
         ctx->Const.Program[MESA_SHADER_FRAGMENT].MaxTextureImageUnits = 16;
         ctx->Const.Program[MESA_SHADER_COMPUTE].MaxTextureImageUnits = 16;
+        ctx->Const.Program[MESA_SHADER_GEOMETRY].MaxTextureImageUnits = 16; /* EXT_geometry_shader's too */
         ctx->Const.MaxCombinedTextureImageUnits = 48;
         /* Not GLSL's, but kept equal so -L lists exactly what ogles3.library
          * answers: indices up to 2^24 - 1 (ES 3.0's minimum; the draws rebase

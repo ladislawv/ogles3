@@ -339,6 +339,10 @@ def dump(path, show_qpu):
                        " (explicit)" if loc & 0x40000000 else "",
                        "-" if slot == 0xffffffff else slot))
             r.done()
+        elif t == 16:
+            gin, gout, nv, inv = r.u32(), r.u32(), r.u32(), r.u32()
+            r.done()
+            print("GEOMETRY in 0x%x, out 0x%x, %d vertices, %d invocations" % (gin, gout, nv, inv))
         elif t == 6:
             stage = r.u32()
             if stage in (0, 1):

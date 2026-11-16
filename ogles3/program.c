@@ -44,7 +44,7 @@ static const struct OGLES3ImageAttrib smooth_attribs[] = {
 static const struct OGLES3Place smooth_mvp_place[] = {{0, 16, 4, 0, 0}};
 
 static const struct OGLES3ImageUniform smooth_uniforms[] = {
-    {"u_mvp", GL_FLOAT_MAT4, 0, 0, 1, smooth_mvp_place, {~0UL, ~0UL}, -1, 0, 0, 0, 0}, /* in no block */
+    {"u_mvp", GL_FLOAT_MAT4, 0, 0, 1, smooth_mvp_place, {~0UL, ~0UL, ~0UL}, -1, 0, 0, 0, 0}, /* in no block */
 };
 
 /* The vertex and coordinate shaders read the same stream (v3d_assembler.c:
@@ -66,40 +66,30 @@ static const ULONG smooth_rdata[20] = {0, 0, 0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10,
 static const struct OGLES3Variant smooth_variants[3] = {
     {OGLES3_VARIANT_CS, 4, 1, 0, 0, 4, 0, 0, 0, {3}, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
      {0}, {0}, {0}, 0, {0}, 0, 0, builtin_coordinate, sizeof(builtin_coordinate), 0, 20, smooth_rtype,
-     smooth_rdata, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+     smooth_rdata, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {OGLES3_VARIANT_VS, 4, 1, 0, 0, 4, 0, 0, 0, {3, 4}, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
      {0}, {0}, {0}, 0, {0}, 0, 0, builtin_vertex_smooth, sizeof(builtin_vertex_smooth),
-     sizeof(builtin_coordinate), 20, smooth_rtype, smooth_rdata, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+     sizeof(builtin_coordinate), 20, smooth_rtype, smooth_rdata, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {OGLES3_VARIANT_FS, 4, 0, 0, 0, 0, 0, 0, 0, {0}, 0, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 0,
      {0}, {0}, {0}, 0, {0}, 0, 0, builtin_fragment_smooth, sizeof(builtin_fragment_smooth),
      sizeof(builtin_coordinate) + sizeof(builtin_vertex_smooth), 0, 0, 0, 0, 0, 0, 0, 0,
-     1 /* render target 0 */, 0, 0, 0, 0, 0, 0},
+     1 /* render target 0 */, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 };
 
+/* Designated: the fields it has; every other (code memory, files, blocks,
+ * draw-time variants, ES 3 sections, ...) zero. */
 static const struct OGLES3Image builtin_smooth = {
-    "built-in smooth colour (PiStorm3D VERTEX_SMOOTH, FRAGMENT_UNTEXTURED_SMOOTH)",
-    {0},
-    3, smooth_variants,
-    2, smooth_attribs,
-    1, smooth_uniforms,
-    {16, 0}, {0, 0},
-    0, 0,
-    sizeof(builtin_coordinate) + sizeof(builtin_vertex_smooth) + sizeof(builtin_fragment_smooth),
-    0,          /* no OGLES3_U_CLIP_Z_COEFF: clears are drawn NEGATIVE_ONE_TO_ONE */
-    0, 0, 0,    /* code memory (draw.c uploads it per context), not borrowed, allocations */
-    0, 0,       /* no binary */
-    0, 0,       /* no 32-bit-sampler variants */
-    0, 0,       /* no alpha-to-coverage variants */
-    0, 0,       /* no sources */
-    0,          /* in no program cache */
-    0, 0, 0, {0, 0}, {0, 0}, 0, 0, /* format 1.0: no uniform blocks or interface */
-    0, 0, 0, 0, 0, 0, 0, 0, 0,     /* no draw-time variants */
-    0,                             /* no transform feedback */
-    0, 0, 0, 0, 0, {0, 0}, {0, 0}, /* not a compute or separable program, no storage blocks */
-    0, 0,                          /* no atomic counter buffers */
-    0, 0,                          /* locations numbered by the runtime */
-    0, 0,                          /* samplers start at unit 0 */
-    0,                             /* no interface types */
+    .name = "built-in smooth colour (PiStorm3D VERTEX_SMOOTH, FRAGMENT_UNTEXTURED_SMOOTH)",
+    .nvariants = 3,
+    .variants = smooth_variants,
+    .nattribs = 2,
+    .attribs = smooth_attribs,
+    .nuniforms = 1,
+    .uniforms = smooth_uniforms,
+    .cbuf_words = {16, 0, 0},
+    .code_total = sizeof(builtin_coordinate) + sizeof(builtin_vertex_smooth) + sizeof(builtin_fragment_smooth),
+    /* no OGLES3_U_CLIP_Z_COEFF: clears are drawn NEGATIVE_ONE_TO_ONE; the
+     * code goes to each context's GPU memory (draw.c) */
 };
 
 const struct OGLES3Image *ogles2_builtin_image(void)
@@ -211,7 +201,7 @@ static void release_shader(struct OGLES3Context *ctx, struct OGLES3Shader *s)
 static void unlink_program(struct OGLES3Context *ctx, struct OGLES3Program *p)
 {
     int k;
-    for (k = 0; k < 2; k++) {
+    for (k = 0; k < OGLES3_GL_STAGES; k++) {
         if (p->cbuf[k])
             FreeVec(p->cbuf[k]);
         if (p->cbuf_le[k])
@@ -269,6 +259,7 @@ static void free_program(struct OGLES3Context *ctx, struct OGLES3Program *p)
     release_shader(ctx, p->vs);
     release_shader(ctx, p->fs);
     release_shader(ctx, p->cs);
+    release_shader(ctx, p->gs);
     unlink_program(ctx, p);
     if (p->info_log)
         FreeVec(p->info_log);
@@ -357,7 +348,8 @@ GLuint ogles2_glCreateShader(struct OGLES3Context *ctx, GLenum type)
     if (!ogles2_context_valid(ctx))
         return 0;
     if (type != GL_VERTEX_SHADER && type != GL_FRAGMENT_SHADER &&
-        !(type == GL_COMPUTE_SHADER && ogles2_es31(ctx))) { /* ES 3.1's compute shaders */
+        !(type == GL_COMPUTE_SHADER && ogles2_es31(ctx)) && /* ES 3.1's compute shaders */
+        !(type == GL_GEOMETRY_SHADER_EXT && ogles2_es31(ctx))) { /* EXT_geometry_shader's */
         ogles2_error(ctx, GL_INVALID_ENUM);
         return 0;
     }
@@ -526,8 +518,9 @@ void ogles2_glCompileShader(struct OGLES3Context *ctx, GLuint shader)
         s->compiled = GL_TRUE; /* checked again at link */
         return;
     }
-    rc = s->type == GL_COMPUTE_SHADER ? ogles2_compile_compute_shader(s->source, log, 4096)
-                                      : ogles2_compile_shader(s->type == GL_FRAGMENT_SHADER, s->source, log, 4096);
+    rc = s->type == GL_COMPUTE_SHADER    ? ogles2_compile_compute_shader(s->source, log, 4096)
+       : s->type == GL_GEOMETRY_SHADER_EXT ? ogles2_compile_geometry_shader(s->source, log, 4096)
+                                           : ogles2_compile_shader(s->type == GL_FRAGMENT_SHADER, s->source, log, 4096);
     if (rc < 0) {
         s->compiled = GL_TRUE; /* no compiler after all: as S1, the link decides */
     } else {
@@ -641,7 +634,8 @@ void ogles2_glAttachShader(struct OGLES3Context *ctx, GLuint program, GLuint sha
     if (!(p = lookup(ctx, program, OGLES3_OBJ_PROGRAM)) ||
         !(s = lookup(ctx, shader, OGLES3_OBJ_SHADER)))
         return;
-    slot = s->type == GL_VERTEX_SHADER ? &p->vs : s->type == GL_COMPUTE_SHADER ? &p->cs : &p->fs;
+    slot = s->type == GL_VERTEX_SHADER ? &p->vs : s->type == GL_COMPUTE_SHADER ? &p->cs
+         : s->type == GL_GEOMETRY_SHADER_EXT ? &p->gs : &p->fs;
     if (*slot) { /* already attached, or one of that type already is */
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
@@ -665,6 +659,8 @@ void ogles2_glDetachShader(struct OGLES3Context *ctx, GLuint program, GLuint sha
         p->fs = 0;
     else if (p->cs == s)
         p->cs = 0;
+    else if (p->gs == s)
+        p->gs = 0;
     else {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
@@ -691,6 +687,8 @@ void ogles2_glGetAttachedShaders(struct OGLES3Context *ctx, GLuint program, GLsi
         shaders[n++] = p->fs->name;
     if (p->cs && n < maxCount)
         shaders[n++] = p->cs->name;
+    if (p->gs && n < maxCount)
+        shaders[n++] = p->gs->name;
     if (count)
         *count = n;
 }
@@ -843,8 +841,8 @@ static void program_hash(const struct OGLES3Program *p, const char *state, UBYTE
 {
     static const char digits[] = "0123456789abcdef";
     struct blake3 h;
-    const char *src[5], *x;
-    ULONG stage[5], len[5];
+    const char *src[6], *x;
+    ULONG stage[6], len[6];
     BOOL sepa = state && !strncmp(state, V3DGLSL_SEPA_MARK, sizeof(V3DGLSL_SEPA_MARK) - 1);
     int k, n = 0;
     if (sepa) {
@@ -860,6 +858,10 @@ static void program_hash(const struct OGLES3Program *p, const char *state, UBYTE
     if (!p->cs && p->vs) { /* a separable program may have one stage (ES 3.1) */
         src[n] = p->vs->source;
         stage[n++] = 0;
+    }
+    if (!p->cs && p->gs) { /* EXT_geometry_shader: v3dglslc's write_program order */
+        src[n] = p->gs->source;
+        stage[n++] = 3;
     }
     if (!p->cs && p->fs) {
         src[n] = p->fs->source;
@@ -937,7 +939,8 @@ static void shader_record_path(char *path, const char *dir, const struct OGLES3S
     struct blake3 h;
     UBYTE out[32], w[8];
     char sub[16];
-    ULONG stage = s->type == GL_FRAGMENT_SHADER ? 4 : s->type == GL_COMPUTE_SHADER ? 5 : 0, len = str_len(s->source), i;
+    ULONG stage = s->type == GL_FRAGMENT_SHADER ? 4 : s->type == GL_COMPUTE_SHADER ? 5 : s->type == GL_GEOMETRY_SHADER_EXT ? 3 : 0,
+          len = str_len(s->source), i;
     char *q;
     blake3_init(&h);
     for (i = 0; i < 4; i++) {
@@ -1137,6 +1140,20 @@ static void file_path(char *path, const char *dir, const char *hex)
  * sources go to T:ogles3_missing_shaders.txt. A file the library cannot use
  * does not end the search (docs/GLES3_PLAN.md §3): the next place is tried,
  * and the compiler replaces the cache's. */
+/* EXT_geometry_shader: link state with the geometry shader in front
+ * (V3DGLSL_GEOM_MARK), AllocVec'd; NULL: no memory. */
+static char *geometry_state(const char *gs, const char *state)
+{
+    ULONG ng = str_len(gs), ns = state ? str_len(state) : 0, n;
+    char *t = AllocVec(ng + ns + 24, MEMF_ANY);
+    if (!t)
+        return 0;
+    n = ogles2_format(t, 24, V3DGLSL_GEOM_MARK "%lu\n", ng);
+    memcpy(t + n, gs, ng);
+    memcpy(t + n + ng, state ? state : "", ns + 1);
+    return t;
+}
+
 static struct OGLES3Image *load_image(struct OGLES3Program *p, const UBYTE *hash, const char *hex,
                                       const char *bindings)
 {
@@ -1220,7 +1237,8 @@ static struct OGLES3Image *try_wide(const UBYTE *hash, const char *path)
  * for the compile (about a second on the A1200). */
 static struct OGLES3Image *extra_image(struct OGLES3Image *im, struct OGLES3Image **slot, BOOL *tried,
                                        const char *ext, const char *what,
-                                       BOOL (*compile)(const char *, const char *, const char *, char *, ULONG))
+                                       BOOL (*compile)(const char *, const char *, const char *, const char *, char *,
+                                                       ULONG))
 {
     static const char digits[] = "0123456789abcdef";
     char hex[FILE_HASH_DIGITS + 1], path[96], sub[16];
@@ -1251,7 +1269,7 @@ static struct OGLES3Image *extra_image(struct OGLES3Image *im, struct OGLES3Imag
         return *slot;
     if (!*slot && im->vs_src && im->fs_src && ogles2_compiler_installed()) {
         char *log = AllocVec(1024, MEMF_ANY | MEMF_CLEAR);
-        if (log && compile(im->vs_src, im->fs_src, path, log, 1024))
+        if (log && compile(im->vs_src, im->fs_src, im->bind_src, path, log, 1024))
             *slot = try_wide(im->hash, path);
         else
             ogles2_log("draw: the compiler made no %s for program %s: %s", (ULONG)what, (ULONG)hex,
@@ -1490,12 +1508,12 @@ static BOOL bind_image(struct OGLES3Program *p, const struct OGLES3Image *im)
     p->sampler_unit = AllocVec(nloc + 1, MEMF_ANY | MEMF_CLEAR);
     p->uniform_loc = AllocVec((im->nuniforms + 1) * sizeof(UWORD), MEMF_ANY);
     p->block_binding = AllocVec((im->nublocks + 1) * sizeof(ULONG), MEMF_ANY);
-    for (k = 0; k < 2; k++) {
+    for (k = 0; k < OGLES3_GL_STAGES; k++) {
         p->cbuf[k] = AllocVec(im->cbuf_words[k] * 4 + 4, MEMF_ANY | MEMF_CLEAR);
         p->cbuf_le[k] = AllocVec(im->cbuf_words[k] * 4 + 4, MEMF_ANY | MEMF_CLEAR);
     }
     if (!p->loc_uniform || !p->sampler_unit || !p->uniform_loc || !p->block_binding || !p->cbuf[0] || !p->cbuf[1] ||
-        !p->cbuf_le[0] || !p->cbuf_le[1]) {
+        !p->cbuf[2] || !p->cbuf_le[0] || !p->cbuf_le[1] || !p->cbuf_le[2]) {
         set_log(p, "out of memory", 0);
         return FALSE;
     }
@@ -1543,7 +1561,7 @@ static BOOL bind_image(struct OGLES3Program *p, const struct OGLES3Image *im)
     }
     for (u = 0; u < im->nublocks; u++)
         p->block_binding[u] = im->ublocks[u].binding;
-    for (k = 0; k < 2; k++)
+    for (k = 0; k < OGLES3_GL_STAGES; k++)
         if (im->cbuf_template[k]) {
             UWORD w;
             for (w = 0; w < im->cbuf_words[k]; w++)
@@ -1591,6 +1609,15 @@ static void link_program(struct OGLES3Context *ctx, struct OGLES3Program *p, con
             set_log(p, "the compute shader did not compile:\n", p->cs->info_log);
             return;
         }
+    } else if (p->gs && (p->separable || !p->vs || !p->fs)) {
+        /* EXT_geometry_shader: with a vertex and a fragment shader, not
+         * separable (the compiler's pipelines have no geometry stage) */
+        set_log(p, p->separable ? "a geometry shader in a separable program is not supported"
+                                : "a geometry shader needs a vertex and a fragment shader", 0);
+        return;
+    } else if (p->gs && !p->gs->compiled) {
+        set_log(p, "the geometry shader did not compile:\n", p->gs->info_log);
+        return;
     } else if (p->separable && (p->vs || p->fs)) { /* ES 3.1 7.3: one stage, or both */
         if ((p->vs && !p->vs->compiled) || (p->fs && !p->fs->compiled)) {
             set_log(p, p->vs && !p->vs->compiled ? "the vertex shader did not compile:\n"
@@ -1610,6 +1637,17 @@ static void link_program(struct OGLES3Context *ctx, struct OGLES3Program *p, con
     }
     bindings = p->cs ? 0 : state ? dup_text(state, str_len(state)) : link_state(p); /* compute: none */
     program_hash(p, bindings, hash, hex);
+    /* EXT_geometry_shader: the compiler's requests carry the geometry shader
+     * in front of the link state (V3DGLSL_GEOM_MARK), the hash not */
+    if (p->gs) {
+        char *g = geometry_state(p->gs->source, bindings);
+        if (bindings)
+            FreeVec(bindings);
+        if (!(bindings = g)) {
+            set_log(p, "out of memory", 0);
+            return;
+        }
+    }
     for (im = ctx->share->images; im && memcmp(im->hash, hash, 32); im = im->next)
         ;
     if (!im) {
@@ -1631,6 +1669,8 @@ static void link_program(struct OGLES3Context *ctx, struct OGLES3Program *p, con
             im->vs_src = dup_text(p->vs->source, str_len(p->vs->source));
         if (!p->cs && p->fs)
             im->fs_src = dup_text(p->fs->source, str_len(p->fs->source));
+        if (p->gs)
+            im->gs_src = dup_text(p->gs->source, str_len(p->gs->source));
         /* A binary proves its shaders compile: record them, so the next
          * glCompileShader of one needs no compiler. */
         if (ogles2_compiler_installed()) {
@@ -1640,6 +1680,8 @@ static void link_program(struct OGLES3Context *ctx, struct OGLES3Program *p, con
                 mark_compiled(p->vs);
             if (!p->cs && p->fs)
                 mark_compiled(p->fs);
+            if (p->gs)
+                mark_compiled(p->gs);
         }
     }
     if (bindings)
@@ -1813,7 +1855,7 @@ void ogles2_glGetProgramiv(struct OGLES3Context *ctx, GLuint program, GLenum pna
     case GL_INFO_LOG_LENGTH:
         *params = (p->info_log && p->info_log[0]) ? (GLint)str_len(p->info_log) + 1 : 0;
         break;
-    case GL_ATTACHED_SHADERS:  *params = (p->vs ? 1 : 0) + (p->fs ? 1 : 0) + (p->cs ? 1 : 0); break;
+    case GL_ATTACHED_SHADERS:  *params = (p->vs ? 1 : 0) + (p->fs ? 1 : 0) + (p->cs ? 1 : 0) + (p->gs ? 1 : 0); break;
     case GL_ACTIVE_ATTRIBUTES:
         for (n = 0; im && active_attrib(im, (GLuint)n); n++)
             ;
@@ -1854,6 +1896,24 @@ void ogles2_glGetProgramiv(struct OGLES3Context *ctx, GLuint program, GLenum pna
             break;
         }
         *params = p->separable;
+        break;
+    /* EXT_geometry_shader: a linked program's geometry shader's layout (its
+     * file's GEOMETRY section); GL_INVALID_OPERATION without one */
+    case GL_GEOMETRY_LINKED_VERTICES_OUT_EXT:
+    case GL_GEOMETRY_LINKED_INPUT_TYPE_EXT:
+    case GL_GEOMETRY_LINKED_OUTPUT_TYPE_EXT:
+    case GL_GEOMETRY_SHADER_INVOCATIONS_EXT:
+        if (!ogles2_es31(ctx)) {
+            ogles2_error(ctx, GL_INVALID_ENUM);
+            break;
+        }
+        if (!p->linked || !im || !im->gs_layout) {
+            ogles2_error(ctx, GL_INVALID_OPERATION);
+            break;
+        }
+        *params = pname == GL_GEOMETRY_LINKED_VERTICES_OUT_EXT ? im->gs_vertices
+                : pname == GL_GEOMETRY_LINKED_INPUT_TYPE_EXT  ? im->gs_in
+                : pname == GL_GEOMETRY_LINKED_OUTPUT_TYPE_EXT ? im->gs_out : im->gs_invocations;
         break;
     case GL_COMPUTE_WORK_GROUP_SIZE: /* ES 3.1: a linked compute program's local size */
         if (!ogles2_es31(ctx)) {
