@@ -198,3 +198,5 @@ command glTexBufferOES
 command glTexBufferRangeOES
 # OES_texture_storage_multisample_2d_array (ES 3.1 contexts; texture.c)
 command glTexStorage3DMultisampleOES
+# OES_sample_shading (ES3 contexts; state.c, draw.c)
+command glMinSampleShadingOES

@@ -491,7 +491,8 @@ struct OGLES3Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                 v->uses_center_w = u8(&s);
                 v->uses_implicit_point_line_varyings = u8(&s);
                 v->lock_scoreboard_on_first_thrsw = u8(&s);
-                skip(&s, 1 + 3);                  /* force_per_sample_msaa, pad */
+                v->force_per_sample_msaa = u8(&s); /* OES_sample_variables' (draw.c's shader record) */
+                skip(&s, 3);                      /* pad */
                 {
                     UBYTE *slots = need(&s, 64) ? alloc(im, 64) : 0;
                     if (!slots)

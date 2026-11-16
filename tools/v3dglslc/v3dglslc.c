@@ -1468,6 +1468,12 @@ int main(int argc, char **argv)
          * the library refuses instead; the driver reads buffer textures
          * (Mesa's desktop GL 3.1 has them). */
         ctx->Extensions.OES_texture_buffer = GL_TRUE;
+        /* OES_sample_variables (gl_SampleID, gl_SamplePosition,
+         * gl_SampleMaskIn, gl_SampleMask; with it OES_sample_shading's and
+         * OES_shader_multisample_interpolation's GLSL): the state tracker
+         * wants ARB_gpu_shader5's other parts too; the driver runs such a
+         * shader a sample at a time (force_per_sample_msaa, the file's). */
+        ctx->Extensions.OES_sample_variables = GL_TRUE;
     }
     if (limits)
         return print_limits();

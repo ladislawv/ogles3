@@ -416,6 +416,10 @@ static const struct { const char *name; UBYTE in; } extensions[] = {
     {"GL_OES_texture_stencil8", EXT_ES31},
     /* item 4: ASTC LDR, blocks the TMU decodes (texture.c, v3dcore's block_h) */
     {"GL_KHR_texture_compression_astc_ldr", EXT_ES3},
+    /* item 6: sample shading (the compiler's OES_sample_variables; draw.c's
+     * sample-rate shading) */
+    {"GL_OES_sample_shading", EXT_ES3}, {"GL_OES_sample_variables", EXT_ES3},
+    {"GL_OES_shader_multisample_interpolation", EXT_ES3},
 };
 #define NUM_EXTENSIONS (sizeof(extensions) / sizeof(extensions[0]))
 

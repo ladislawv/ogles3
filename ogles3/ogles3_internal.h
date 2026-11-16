@@ -137,6 +137,7 @@ struct OGLES3PixelStore
 #define OGLES3_CAP_PRIMITIVE_RESTART       (1UL << 9) /* GL_PRIMITIVE_RESTART_FIXED_INDEX (ES 3.0) */
 #define OGLES3_CAP_RASTERIZER_DISCARD      (1UL << 10) /* GL_RASTERIZER_DISCARD (ES 3.0) */
 #define OGLES3_CAP_SAMPLE_MASK             (1UL << 11) /* GL_SAMPLE_MASK (ES 3.1) */
+#define OGLES3_CAP_SAMPLE_SHADING          (1UL << 12) /* OES_sample_shading's GL_SAMPLE_SHADING (draw.c) */
 
 /* EXT_draw_buffers (M7 step 5): colour attachments 0..3, each a render
  * target of the tile buffer. */
@@ -161,6 +162,7 @@ struct OGLES3State
     GLenum clip_origin, clip_depth; /* glClipControlEXT (M7): GL_LOWER_LEFT_EXT, GL_NEGATIVE_ONE_TO_ONE_EXT */
     GLfloat polygon_offset_factor, polygon_offset_units;
     GLfloat sample_coverage_value;
+    GLfloat min_sample_shading;     /* OES_sample_shading's glMinSampleShadingOES, [0, 1] */
     GLbitfield sample_mask;         /* ES 3.1's glSampleMaski word 0 (GL_MAX_SAMPLE_MASK_WORDS 1) */
     GLfloat attrib[OGLES3_MAX_VERTEX_ATTRIBS][4]; /* current generic attributes */
     GLenum generate_mipmap_hint;    /* glHint */
@@ -324,6 +326,8 @@ struct OGLES3Variant
     const UBYTE *input_slots;     /* fragment: prog data's 64 input slots (a vertex key's used outputs) */
     UBYTE uses_storage;           /* the recipe has OGLES3_U_SSBO_OFFSET (ES 3.1; v3dp.c) */
     UBYTE uses_images;            /* the recipe has OGLES3_U_IMAGE_TMU_CONFIG_P0 (ES 3.1) */
+    UBYTE force_per_sample_msaa;  /* fragment: a sample at a time in a 4x job (gl_SampleID, sample
+                                   * inputs: OES_sample_variables; draw.c) */
 };
 #define OGLES3_VS_KEY_BYTES 88  /* struct v3d_vs_key as the file writes it */
 #define OGLES3_FS_KEY_BYTES 296 /* struct v3d_fs_key */
@@ -603,6 +607,7 @@ struct OGLES3Program
     const struct OGLES3Variant *rec_var[3];
     ULONG rec_code[3];
     BOOL rec_points;
+    BOOL rec_sample_rate;           /* its sample-rate shading (a 4x job's, force_per_sample_msaa) */
     /* draw.c: the variants and code addresses for the last primitive mode
      * drawn, and the image's sampler uniforms (0xff: not listed yet). */
     BOOL var_ok;

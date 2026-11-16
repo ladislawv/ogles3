@@ -30,6 +30,8 @@ static ULONG cap_bit(const struct OGLES3Context *ctx, GLenum cap)
     case GL_RASTERIZER_DISCARD: return ogles2_es3(ctx) ? OGLES3_CAP_RASTERIZER_DISCARD : 0;
     /* ES 3.1: glSampleMaski's mask on the samples covered (draw.c) */
     case GL_SAMPLE_MASK: return ogles2_es31(ctx) ? OGLES3_CAP_SAMPLE_MASK : 0;
+    /* OES_sample_shading (ES3 contexts): a sample at a time (draw.c) */
+    case GL_SAMPLE_SHADING_OES: return ogles2_es3(ctx) ? OGLES3_CAP_SAMPLE_SHADING : 0;
     default:                          return 0;
     }
 }
@@ -531,6 +533,16 @@ int ogles2_indexed_mask(struct OGLES3Context *ctx, GLenum pname, GLuint index, G
     for (k = 0; k < 4; k++)
         v[k] = ctx->state.color_mask[index][k];
     return 4;
+}
+
+/* OES_sample_shading: at least value x the samples shaded apart (4x: more
+ * than 0.25 is a sample at a time, draw.c). */
+void ogles2_glMinSampleShadingOES(struct OGLES3Context *ctx, GLfloat value)
+{
+    if (!ogles2_es3_entry(ctx))
+        return;
+    ctx->state.min_sample_shading = clamp01(value);
+    OGLES3_STATE_CHANGED(ctx, OGLES3_SG_ALL);
 }
 
 /* KHR_ and EXT_robustness: with GL_NO_RESET_NOTIFICATION, the only
@@ -1175,6 +1187,24 @@ static int lookup(struct OGLES3Context *ctx, GLenum pname, struct value *v)
         return 1;
     case GL_SAMPLE_COVERAGE_VALUE:
         v->kind = K_FLOAT; v->n = 1; v->f[0] = s->sample_coverage_value;
+        return 1;
+    case GL_MIN_SAMPLE_SHADING_VALUE_OES: /* OES_sample_shading */
+        if (!ogles2_es3(ctx))
+            return 0;
+        v->kind = K_FLOAT; v->n = 1; v->f[0] = s->min_sample_shading;
+        return 1;
+    /* OES_shader_multisample_interpolation: interpolateAtOffset's range
+     * (Mesa's: half a pixel, 4 bits) */
+    case GL_MIN_FRAGMENT_INTERPOLATION_OFFSET_OES:
+    case GL_MAX_FRAGMENT_INTERPOLATION_OFFSET_OES:
+        if (!ogles2_es3(ctx))
+            return 0;
+        v->kind = K_FLOAT; v->n = 1; v->f[0] = pname == GL_MIN_FRAGMENT_INTERPOLATION_OFFSET_OES ? -0.5f : 0.4375f;
+        return 1;
+    case GL_FRAGMENT_INTERPOLATION_OFFSET_BITS_OES:
+        if (!ogles2_es3(ctx))
+            return 0;
+        v->kind = K_INT; v->n = 1; v->i[0] = 4;
         return 1;
     case GL_MAX_VERTEX_ATTRIBS:
         v->kind = K_INT; v->n = 1; v->i[0] = OGLES3_MAX_VERTEX_ATTRIBS;

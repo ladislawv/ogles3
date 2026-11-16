@@ -1803,13 +1803,19 @@ static ULONG shader_record(struct OGLES3Context *ctx, struct OGLES3Program *p, U
     int i;
 
     BOOL points = mode == GL_POINTS && vs->per_vertex_point_size;
+    /* Mesa's v3dx_draw.c: a fragment shader that reads the sample (ES 3.2
+     * plan item 6) runs a sample at a time in a 4x job */
+    BOOL sample_rate = ctx->job_msaa && (fs->force_per_sample_msaa ||
+                                         ((ctx->state.caps & OGLES3_CAP_SAMPLE_SHADING) &&
+                                          ctx->state.min_sample_shading > 0.25f)); /* OES_sample_shading */
 
     if (!r)
         return 0;
     /* The program's template when it was made for these variants: only
      * the four addresses below differ from draw to draw. */
     if (p->rec_tmpl && p->rec_var[0] == cs && p->rec_var[1] == vs && p->rec_var[2] == fs &&
-        p->rec_points == points && p->rec_code[0] == code[0] && p->rec_code[1] == code[1] &&
+        p->rec_points == points && p->rec_sample_rate == sample_rate && p->rec_code[0] == code[0] &&
+        p->rec_code[1] == code[1] &&
         p->rec_code[2] == code[2]) {
         memcpy(r, p->rec_tmpl, sizeof(*r));
         goto addresses;
@@ -1817,6 +1823,7 @@ static ULONG shader_record(struct OGLES3Context *ctx, struct OGLES3Program *p, U
     memset(r, 0, size);
     r->enable_clipping = TRUE;
     r->point_size_in_shaded_vertex_data = points;
+    r->enable_sample_rate_shading = sample_rate;
     r->fragment_shader_does_z_writes = fs->writes_z;
     r->turn_off_early_z_test = fs->disable_ez;
     r->fragment_shader_uses_real_pixel_centre_w_in_addition_to_centroid_w2 = fs->uses_center_w;
@@ -1866,6 +1873,7 @@ static ULONG shader_record(struct OGLES3Context *ctx, struct OGLES3Program *p, U
         p->rec_var[1] = vs;
         p->rec_var[2] = fs;
         p->rec_points = points;
+        p->rec_sample_rate = sample_rate;
         p->rec_code[0] = code[0];
         p->rec_code[1] = code[1];
         p->rec_code[2] = code[2];

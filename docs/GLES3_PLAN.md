@@ -1,5 +1,23 @@
 # OpenGL ES 3.0 and 3.1 on ogles2.library
 
+**Item 6, sample shading (2026-11-16, built, not run; ES3 contexts).**
+`OES_sample_variables`, `OES_sample_shading` and
+`OES_shader_multisample_interpolation`. The compiler's context turns
+`OES_sample_variables` on (`v3dglslc.c`; Mesa gates all three on it, its
+state tracker on `ARB_gpu_shader5`'s other parts too): programs with
+`gl_SampleID`, `gl_SamplePosition`, `gl_SampleMaskIn`/`gl_SampleMask`,
+`sample in` and `interpolateAtSample`/`Offset`/`Centroid` compiled and
+linked. The library reads the file's `force_per_sample_msaa` (written all
+along, skipped until now: v3dp.c) and sets the shader record's
+`enable_sample_rate_shading` in a 4x job for it (Mesa's `v3dx_draw.c`), and
+for `GL_SAMPLE_SHADING` with `glMinSampleShadingOES` above 0.25 (more than
+one of the 4 samples). **Unsure:** the latter runs a program a sample at a
+time without the state tracker's per-sample lowering of its inputs (Mesa
+compiles a variant with `persample_shading` for it; the offline variants
+have no such key), so the samples may still read the pixel's centre
+values. `GL_MIN_SAMPLE_SHADING_VALUE`, the interpolation offset limits
+(-0.5, 0.4375, 4 bits, Mesa's). Both compilers rebuilt.
+
 **`KHR_texture_compression_astc_ldr` (2026-11-16, built, not run; ES3
 contexts).** The 28 2D formats (14 block sizes, linear and sRGB) kept as
 their 16-byte blocks and given to the TMU as they are (Mesa's table:

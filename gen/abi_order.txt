@@ -428,3 +428,4 @@ glTexBufferRangeEXT
 glTexBufferOES
 glTexBufferRangeOES
 glTexStorage3DMultisampleOES
+glMinSampleShadingOES
