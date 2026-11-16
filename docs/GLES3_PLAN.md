@@ -227,9 +227,13 @@ extension offered.**
 
 **What is left on `es32` (2026-11-16, after the batch below).** Not
 written, by size:
-- (Done since: program pipelines with a geometry stage, below.) Still
-  refused: one program of the vertex and fragment stages beside a
-  geometry program of its own (`GL_INVALID_OPERATION`, logged).
+- (Done since: program pipelines with a geometry stage, below.) One
+  program of the vertex and fragment stages around a geometry program of
+  its own is an invalid pipeline by ES 3.2 7.4.1 (as Mesa says, "Program is
+  active for multiple shader stages with an intervening stage provided by
+  another program"): `pipe_validate` says so too, a draw
+  `GL_INVALID_OPERATION`. v3dglslc prints a pipeline's validation message
+  when Mesa refuses a key-state draw through it.
 - (Done since: `glCopyImageSubData` of depth, stencil and multisample
   images, below.)
 - (Done since: a buffer's words and texels kept in step, below.)

@@ -723,6 +723,7 @@ static int draw_key_states(GLuint p, int wide)
     static const GLfloat zeros[4 * 4 * 6]; /* 6 vertices (an adjacency triangle) of a mat4 attribute */
     GLint n = 0, i, err;
     GLuint pipe = 0, fp = pipe_fs ? pipe_fs : p; /* the fragment shader's program */
+    GLenum pipe_err = GL_NO_ERROR;
     unsigned m, nmodes = ARRAY_SIZE(all_modes);
     const GLenum *modes = all_modes;
     GLenum gs_mode;
@@ -829,6 +830,16 @@ static int draw_key_states(GLuint p, int wide)
             _mesa_BindFramebuffer(GL_FRAMEBUFFER, draw_fbo);
         }
     }
+    /* a pipeline Mesa would not draw with: why, from its validation */
+    if (pipe && (err = _mesa_GetError()) != GL_NO_ERROR) {
+        char info[512];
+        info[0] = 0;
+        _mesa_ValidateProgramPipeline(pipe);
+        _mesa_GetProgramPipelineInfoLog(pipe, sizeof(info), NULL, info);
+        fprintf(stderr, "v3dglslc: GL error 0x%04x drawing through the pipeline: %s\n", (unsigned)err,
+                info[0] ? info : "(no validation message)");
+        pipe_err = err;
+    }
     capture_tf();
     /* Submit the job (a no-op on the fake device) so jobs do not pile up.
      * Not glFinish: its fence needs a sync file the fake device cannot give. */
@@ -844,7 +855,7 @@ static int draw_key_states(GLuint p, int wide)
         _mesa_DeleteProgramPipelines(1, &pipe);
     }
     _mesa_UseProgram(0);
-    err = _mesa_GetError();
+    err = pipe_err ? pipe_err : _mesa_GetError();
     if (err != GL_NO_ERROR) {
         fprintf(stderr, "v3dglslc: GL error 0x%04x in the key-state draws\n", (unsigned)err);
         return 0;

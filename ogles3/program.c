@@ -2634,6 +2634,14 @@ static BOOL pipe_validate(struct OGLES3Pipeline *pp)
             return FALSE;
         }
     }
+    /* ES 3.2 7.4.1: one program active for two stages with a stage
+     * between them another program's (a vertex and fragment program around
+     * a geometry program of its own) */
+    if (pp->stage[3] && pp->stage[0] && pp->stage[0] == pp->stage[1] && pp->stage[3] != pp->stage[0]) {
+        pipe_log(pp, "Program is active for multiple shader stages with an intervening stage provided by "
+                     "another program");
+        return FALSE;
+    }
     for (k = 0; k < 4; k++)
         if (pp->stage[k] && (!pp->stage[k]->image || !pp->stage[k]->image->separable)) {
             pipe_log(pp, "Program was relinked without PROGRAM_SEPARABLE state");
@@ -2898,18 +2906,6 @@ struct OGLES3Program *ogles2_pipeline_program(struct OGLES3Context *ctx, BOOL co
     /* one program of all its stages: that program */
     if (pp->stage[0] == pp->stage[1] && (!pp->stage[3] || pp->stage[3] == pp->stage[0]))
         return pp->stage[0];
-    /* EXT_geometry_shader: one program of the vertex and fragment stages
-     * beside a geometry program would need the pair linked otherwise than
-     * that program's file was (GL_INVALID_OPERATION, logged once) */
-    if (pp->stage[0] == pp->stage[1]) {
-        static BOOL logged;
-        if (!logged) {
-            logged = TRUE;
-            ogles2_log("draw: a pipeline of one vertex and fragment program and a geometry program is not drawn "
-                       "(logged once)");
-        }
-        return 0;
-    }
     if (!pp->pair || pp->pair_img[0] != pp->stage[0]->image || pp->pair_img[1] != pp->stage[1]->image ||
         pp->pair_img[2] != (pp->stage[3] ? pp->stage[3]->image : 0)) {
         pair_free(ctx, pp);
