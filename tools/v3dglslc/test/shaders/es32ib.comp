@@ -1,0 +1,15 @@
+#version 310 es
+#extension GL_OES_texture_buffer : require
+// m8_draw (docs/GLES3_PLAN.md item 4): imageBuffer stores through 8- and
+// 16-bit formats, read back into the buffers' data: texel i of an RGBA8UI
+// buffer (i + 10, i + 20, i + 30, i + 40), of an RGBA16UI one those + 1000.
+layout(local_size_x = 4) in;
+layout(rgba8ui, binding = 0) writeonly uniform highp uimageBuffer b8;
+layout(rgba16ui, binding = 1) writeonly uniform highp uimageBuffer b16;
+void main()
+{
+    uint i = gl_LocalInvocationID.x;
+    uvec4 v = uvec4(i + 10u, i + 20u, i + 30u, i + 40u);
+    imageStore(b8, int(i), v);
+    imageStore(b16, int(i), v + 1000u);
+}

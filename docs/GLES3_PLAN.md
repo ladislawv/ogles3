@@ -261,6 +261,18 @@ A1200).**
   read back as given). Not checkable under vamos: a state-only context
   reads no pixels, and `glTexImage2D` times itself on the system timer,
   which vamos has not got (as `glBufferData`).
+- **imageBuffer's 8- and 16-bit stores reach the buffer's data**
+  (`buffer.c`): a store through such a format marks the buffer's texels
+  GPU-written (`tex_job` for a draw's job, `tex_cs_written` after a
+  dispatch); the next CPU access (`gpu_written`, which the element path
+  now also takes for them) renders that job and copies the texels back
+  (`texels_back`: bytes as they are, 16-bit values from the GPU's order),
+  as the words are for 32-bit stores; a draw sampling them meanwhile reads
+  them where they are (`ogles2_buffer_texels`, no copy back while a draw
+  builds). Not covered: a uniform or storage block read of the same buffer
+  after such a store in the same job reads the words, which the store did
+  not reach. m8_draw `test_image_buffer_small` (es32ib: RGBA8UI and
+  RGBA16UI stores, both buffers mapped).
 
 **Layered depth and stencil; depth and stencil by face or layer
 (2026-11-16, built; not run on the A1200).** Depth textures attached as 2D
@@ -440,8 +452,9 @@ the entry below; built, not run).**
   the image format's component order, `imageSize` its texels. Stores
   through 32-bit formats go to the words and are read back as a storage
   buffer's (`ogles2_buffer_image_written`: `cs_written` after a dispatch,
-  `xfb_job`/`sto_job` for a draw's job); through 8- and 16-bit formats they
-  reach later GPU reads only, not the buffer's data (logged).
+  `xfb_job`/`sto_job` for a draw's job); through 8- and 16-bit formats
+  they go to the texels, read back since "Remaining items, the first
+  batch".
 - **`OES_texture_storage_multisample_2d_array`** (ES 3.1 contexts):
   `glTexStorage3DMultisampleOES`, the target (no sampler state, one level),
   its layers stored as `GL_TEXTURE_2D_MULTISAMPLE`'s image is (every

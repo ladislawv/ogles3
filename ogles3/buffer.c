@@ -92,6 +92,11 @@ struct OGLES3Buffer
     v3d_mem texels;
     ULONG texels_bytes, texels_serial, texels_job;
     UBYTE texels_cs;         /* the component bytes they are in the GPU's order for: 1 or 2 */
+    /* imageBuffer stores through 8- or 16-bit formats went to the texels:
+     * by a job's draws (tex_job, not known rendered) or a finished dispatch
+     * (tex_cs_written); the shadow is stale until gpu_written copies them back */
+    ULONG tex_job;
+    BOOL tex_cs_written;
     struct OGLES3Buffer *next_orphan;
 };
 
@@ -161,14 +166,48 @@ static void gpu_written_now(struct OGLES3Context *ctx, struct OGLES3Buffer *b);
 
 static inline void gpu_written(struct OGLES3Context *ctx, struct OGLES3Buffer *b)
 {
-    if (b && (b->xfb_job || b->cs_written))
+    if (b && (b->xfb_job || b->cs_written || b->tex_job || b->tex_cs_written))
         gpu_written_now(ctx, b);
+}
+
+/* imageBuffer's 8- and 16-bit stores (ogles2_buffer_image_written): the
+ * texels copied back into the shadow, as ogles2_buffer_texels made them
+ * (bytes as they are, 16-bit values from the GPU's byte order). */
+static void texels_back(struct OGLES3Context *ctx, struct OGLES3Buffer *b)
+{
+    struct OGLES3Context *user;
+    ULONG i, len;
+    if (b->tex_job && (user = ogles2_job_user(ctx, b->tex_job)) != 0 && user->v3d) {
+        ogles2_job_flush(user, FALSE);
+        ogles2_job_finish(user);
+    }
+    b->tex_job = 0;
+    b->tex_cs_written = FALSE;
+    if (!b->texels.hostptr || !b->data || b->texels_serial != b->serial)
+        return;
+    len = b->texels_bytes;
+    CachePostDMA(b->texels.hostptr, &len, 0);
+    if (b->texels_cs == 1) {
+        CopyMem(b->texels.hostptr, b->data, b->size);
+    } else {
+        const UBYTE *s = (const UBYTE *)b->texels.hostptr;
+        for (i = 0; i + 1 < b->size; i += 2) {
+            b->data[i] = s[i + 1];
+            b->data[i + 1] = s[i];
+        }
+        if (b->size & 1)
+            b->data[b->size - 1] = s[b->size - 1];
+    }
+    b->serial++;
+    b->texels_serial = b->serial; /* the texels are the data still */
 }
 
 static __attribute__((noinline)) void gpu_written_now(struct OGLES3Context *ctx, struct OGLES3Buffer *b)
 {
     struct OGLES3Context *user;
     ULONG i, n, len;
+    if (b && (b->tex_job || b->tex_cs_written))
+        texels_back(ctx, b);
     if (!b || (!b->xfb_job && !b->cs_written))
         return;
     if (b->xfb_job && (user = ogles2_job_user(ctx, b->xfb_job)) != 0 && user->v3d) {
@@ -1071,6 +1110,13 @@ ULONG ogles2_buffer_texels(struct OGLES3Context *ctx, struct OGLES3Buffer *b, in
         return 0;
     if (cs == 4)
         return ogles2_buffer_words(ctx, b);
+    /* texels an imageBuffer store wrote (maybe in the open job): read where
+     * they are, not copied back now (a draw is building) */
+    if ((b->tex_job || b->tex_cs_written) && b->texels.hostptr && b->texels_serial == b->serial &&
+        b->texels_cs == cs) {
+        b->texels_job = ctx->job_serial;
+        return (ULONG)b->texels.hostptr;
+    }
     gpu_written(ctx, b);
     if (!b->data || !b->size)
         return 0;
@@ -1108,18 +1154,18 @@ ULONG ogles2_buffer_texels(struct OGLES3Context *ctx, struct OGLES3Buffer *b, in
 /* EXT_texture_buffer's imageBuffer: a shader writes b through an image of
  * `cs`-byte components, in a job (`serial`, a draw's) or a dispatch (0,
  * waited for). The words' writes are read back as a storage buffer's
- * (gpu_written); 8- and 16-bit ones stay in the GPU's copy (logged). */
+ * (gpu_written), the 8- and 16-bit ones from the texels they went to
+ * (texels_back). */
 void ogles2_buffer_image_written(struct OGLES3Context *ctx, struct OGLES3Buffer *b, int cs, ULONG serial)
 {
-    static BOOL warned;
     if (!b)
         return;
     if (cs != 4) {
-        if (!warned) {
-            warned = TRUE;
-            ogles2_log("imageBuffer: stores in 8- or 16-bit formats reach later GPU reads only, not the buffer's "
-                       "data (logged once)");
-        }
+        ogles2_gpu_writes_seen = TRUE;
+        if (serial)
+            b->tex_job = serial;
+        else
+            b->tex_cs_written = TRUE;
         return;
     }
     ogles2_gpu_writes_seen = TRUE;
@@ -1256,7 +1302,7 @@ ULONG ogles2_buffer_element_words(struct OGLES3Context *ctx, BOOL cpu, BOOL *fed
         return 0;
     if ((a = ogles2_buffer_gpu_words(ctx, b, fed, size)) != 0 || !cpu)
         return a;
-    if (b->xfb_job || b->cs_written)
+    if (b->xfb_job || b->cs_written || b->tex_job || b->tex_cs_written)
         return 0; /* GPU-written but not readable now: the CPU path */
     *size = b->size;
     return ogles2_buffer_words(ctx, b);

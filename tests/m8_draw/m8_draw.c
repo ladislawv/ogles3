@@ -3742,6 +3742,61 @@ static void test_copy_exact(void)
         printf("     read 0x%lx\n", (unsigned long)v);
 }
 
+/* imageBuffer stores through 8- and 16-bit formats (docs/GLES3_PLAN.md
+ * item 4): es32ib writes 4 texels into an RGBA8UI and an RGBA16UI buffer
+ * texture; each buffer mapped holds them (copied back from the texels). */
+static void test_image_buffer_small(void)
+{
+    static const GLubyte zeros[32];
+    GLuint p = compute_program("es32ib"), b[2], t[2], i, ok = 1;
+    const GLubyte *m8;
+    const GLushort *m16;
+    if (!p) {
+        check(0, "imageBuffer 8/16-bit: es32ib links");
+        return;
+    }
+    glGenBuffers(2, b);
+    glGenTextures(2, t);
+    for (i = 0; i < 2; i++) {
+        glBindBuffer(GL_TEXTURE_BUFFER_EXT, b[i]);
+        glBufferData(GL_TEXTURE_BUFFER_EXT, i ? 32 : 16, zeros, GL_DYNAMIC_COPY);
+        glBindTexture(GL_TEXTURE_BUFFER_EXT, t[i]);
+        glTexBufferEXT(GL_TEXTURE_BUFFER_EXT, i ? GL_RGBA16UI : GL_RGBA8UI, b[i]);
+        glBindImageTexture(i, t[i], 0, GL_FALSE, 0, GL_WRITE_ONLY, i ? GL_RGBA16UI : GL_RGBA8UI);
+    }
+    glUseProgram(p);
+    glDispatchCompute(1, 1, 1);
+    glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT);
+    glBindBuffer(GL_TEXTURE_BUFFER_EXT, b[0]);
+    m8 = glMapBufferRange(GL_TEXTURE_BUFFER_EXT, 0, 16, GL_MAP_READ_BIT);
+    for (i = 0; m8 && i < 16; i++)
+        if (m8[i] != (i / 4) + 10 * (i % 4 + 1)) {
+            printf("     RGBA8UI byte %lu: %d\n", (unsigned long)i, m8[i]);
+            ok = 0;
+            break;
+        }
+    check(m8 && ok && glGetError() == GL_NO_ERROR, "imageBuffer: RGBA8UI stores in the buffer's data");
+    glUnmapBuffer(GL_TEXTURE_BUFFER_EXT);
+    ok = 1;
+    glBindBuffer(GL_TEXTURE_BUFFER_EXT, b[1]);
+    m16 = glMapBufferRange(GL_TEXTURE_BUFFER_EXT, 0, 32, GL_MAP_READ_BIT);
+    for (i = 0; m16 && i < 16; i++)
+        if (m16[i] != 1000 + (i / 4) + 10 * (i % 4 + 1)) {
+            printf("     RGBA16UI value %lu: %d\n", (unsigned long)i, m16[i]);
+            ok = 0;
+            break;
+        }
+    check(m16 && ok && glGetError() == GL_NO_ERROR, "imageBuffer: RGBA16UI stores in the buffer's data");
+    glUnmapBuffer(GL_TEXTURE_BUFFER_EXT);
+    for (i = 0; i < 2; i++)
+        glBindImageTexture(i, 0, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32UI);
+    glBindBuffer(GL_TEXTURE_BUFFER_EXT, 0);
+    glDeleteTextures(2, t);
+    glDeleteBuffers(2, b);
+    glUseProgram(0);
+    glDeleteProgram(p);
+}
+
 static int skipped(const char *name)
 {
     const char *list = getenv("M8_SKIP");
@@ -3859,6 +3914,8 @@ int main(void)
                 test_advanced_blend();
             if (!skipped("copy_exact"))
                 test_copy_exact();
+            if (!skipped("image_buffer_small"))
+                test_image_buffer_small();
         }
     }
     check(glGetError() == GL_NO_ERROR, "no GL error left over");
