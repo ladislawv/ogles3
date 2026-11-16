@@ -84,8 +84,15 @@ the entry below; built, not run).**
   so what the GPU wrote is read as it is), else the bytes as they are or
   16-bit values swapped, made and renamed as the words are; a deleted
   buffer a texture holds lives on (`ogles2_texture_uses_buffer`). The RGB32
-  formats: `GL_INVALID_ENUM`, logged (V3D has no RGB32 textures); image
-  units take no buffer textures (an `imageBuffer` reads the fallback).
+  formats: `GL_INVALID_ENUM`, logged (V3D has no RGB32 textures).
+  **`imageBuffer`** (added after): `glBindImageTexture` takes a buffer
+  texture (no immutable storage needed), an image format of its texel
+  size; the image record is the same 1D raster one at the buffer's copy in
+  the image format's component order, `imageSize` its texels. Stores
+  through 32-bit formats go to the words and are read back as a storage
+  buffer's (`ogles2_buffer_image_written`: `cs_written` after a dispatch,
+  `xfb_job`/`sto_job` for a draw's job); through 8- and 16-bit formats they
+  reach later GPU reads only, not the buffer's data (logged).
 - **`OES_texture_storage_multisample_2d_array`** (ES 3.1 contexts):
   `glTexStorage3DMultisampleOES`, the target (no sampler state, one level),
   its layers stored as `GL_TEXTURE_2D_MULTISAMPLE`'s image is (every

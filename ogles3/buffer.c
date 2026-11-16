@@ -1105,6 +1105,32 @@ ULONG ogles2_buffer_texels(struct OGLES3Context *ctx, struct OGLES3Buffer *b, in
     return (ULONG)b->texels.hostptr;
 }
 
+/* EXT_texture_buffer's imageBuffer: a shader writes b through an image of
+ * `cs`-byte components, in a job (`serial`, a draw's) or a dispatch (0,
+ * waited for). The words' writes are read back as a storage buffer's
+ * (gpu_written); 8- and 16-bit ones stay in the GPU's copy (logged). */
+void ogles2_buffer_image_written(struct OGLES3Context *ctx, struct OGLES3Buffer *b, int cs, ULONG serial)
+{
+    static BOOL warned;
+    if (!b)
+        return;
+    if (cs != 4) {
+        if (!warned) {
+            warned = TRUE;
+            ogles2_log("imageBuffer: stores in 8- or 16-bit formats reach later GPU reads only, not the buffer's "
+                       "data (logged once)");
+        }
+        return;
+    }
+    ogles2_gpu_writes_seen = TRUE;
+    if (serial) {
+        b->xfb_job = serial;
+        b->sto_job = serial;
+    } else {
+        b->cs_written = TRUE;
+    }
+}
+
 /* Uniform buffer binding `index` as a draw reads it (§5 item 6): the GPU
  * address of its range's start and the range's bytes (*size); 0 with no
  * buffer there, an empty one, or a range starting past its end. */

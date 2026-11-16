@@ -132,8 +132,8 @@ ogles3.library/--background--                   ogles3.library/--background--
        OES_shader_multisample_interpolation and KHR_blend_equation_advanced
        with _coherent (blended in the fragment shader);
        3.1 contexts EXT_ and OES_texture_cube_map_array, EXT_ and
-       OES_texture_buffer (not the RGB32 formats: GL_INVALID_ENUM; no
-       imageBuffer), OES_texture_storage_multisample_2d_array and
+       OES_texture_buffer (not the RGB32 formats: GL_INVALID_ENUM;
+       imageBuffer stores of 8- and 16-bit formats are not read back), OES_texture_storage_multisample_2d_array and
        OES_texture_stencil8.
 
        KHR_debug: debug messages with their filters and debug groups, the

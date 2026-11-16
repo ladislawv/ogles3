@@ -608,7 +608,8 @@ void ogles2_glBindImageTexture(struct OGLES3Context *ctx, GLuint unit, GLuint te
             ogles2_error(ctx, GL_INVALID_VALUE);
             return;
         }
-        if (!t->immutable_levels) { /* ES 3.1: an immutable texture's only */
+        if (!t->immutable_levels && t->target != GL_TEXTURE_BUFFER_OES) { /* ES 3.1: an immutable texture's
+                                                                             * only; a buffer texture (EXT_texture_buffer) */
             ogles2_error(ctx, GL_INVALID_OPERATION);
             return;
         }
@@ -6432,6 +6433,14 @@ static UBYTE image_hw_type(GLenum f, UBYTE *cpp)
 /* Unit u's image when shaders can read and write it (ES 3.1 8.22: a
  * texture, its level and layer there, a format of its texel size), else
  * NULL. */
+/* EXT_texture_buffer's imageBuffer: an image format's component bytes (its
+ * buffer copy's order, ogles2_buffer_texels). */
+static int image_cs(GLenum f)
+{
+    return f == GL_RGBA16F || f == GL_RGBA16UI || f == GL_RGBA16I ? 2
+         : f == GL_RGBA8 || f == GL_RGBA8UI || f == GL_RGBA8I || f == GL_RGBA8_SNORM ? 1 : 4;
+}
+
 static struct OGLES3ImageUnit *valid_image(struct OGLES3TexState *ts, int u)
 {
     struct OGLES3ImageUnit *im;
@@ -6441,6 +6450,10 @@ static struct OGLES3ImageUnit *valid_image(struct OGLES3TexState *ts, int u)
         return 0;
     im = &ts->images[u];
     t = im->t;
+    if (t && t->target == GL_TEXTURE_BUFFER_OES) { /* a buffer, of the format's texel size */
+        const struct tbo_fmt *tf = tbo_fmt_of(t->tbo_format);
+        return tf && tbo_texels(t) && image_hw_type(im->format, &cpp) && cpp == tf->bytes ? im : 0;
+    }
     if (!t || !t->immutable_levels || im->level >= t->immutable_levels || !image_hw_type(im->format, &cpp))
         return 0;
     if (!(t->f[0].defined & (1UL << im->level)))
@@ -6464,6 +6477,32 @@ ULONG ogles2_image_state(struct OGLES3Context *ctx, int unit, void *dst)
     int n, k;
     if (!ts)
         return 0;
+    /* imageBuffer: the buffer's copy in the image format's order, a 1D
+     * raster texture as a sampler's (buffer_state) */
+    if (im && im->t->target == GL_TEXTURE_BUFFER_OES) {
+        ULONG texels, addr;
+        UBYTE hw = image_hw_type(im->format, &cpp);
+        t = im->t;
+        texels = tbo_bytes(t) / cpp;
+        if (!(addr = ogles2_buffer_texels(ctx, t->tbo, image_cs(im->format))) ||
+            !(tsr = dst ? (v3d_texture_shader_state *)dst : claim32(ctx->v3d, sizeof(*tsr))))
+            return 0;
+        memset(tsr, 0, sizeof(*tsr));
+        tsr->texture_base_pointer_rshift_6 = (addr + t->tbo_offset) >> 6;
+        tsr->image_width_lo = texels & 0x3f;
+        tsr->image_width_hi = (texels >> 6) & 0xff;
+        tsr->image_height = (texels >> 14) & 0x3fff;
+        tsr->image_depth_lo = 1;
+        tsr->texture_type = hw;
+        tsr->swizzle_r = v3d_SWIZZLE_RED;
+        tsr->swizzle_g = v3d_SWIZZLE_GREEN;
+        tsr->swizzle_b = v3d_SWIZZLE_BLUE;
+        tsr->swizzle_a = v3d_SWIZZLE_ALPHA;
+        w = (ULONG *)tsr;
+        for (k = 0; k < 5; k++)
+            w[k] = LE32(w[k]);
+        return (ULONG)tsr;
+    }
     /* No image: the fallback's texel, which nothing reads (its sizes are
      * 0: the shader's bounds checks drop every access, Mesa patch 0017). */
     if (im)
@@ -6520,6 +6559,11 @@ ULONG ogles2_image_size(struct OGLES3Context *ctx, int unit, int what)
     if (!im)
         return 0;
     t = im->t;
+    if (t->target == GL_TEXTURE_BUFFER_OES) { /* imageBuffer: its texels */
+        UBYTE cpp;
+        image_hw_type(im->format, &cpp);
+        return what ? 1 : tbo_bytes(t) / cpp;
+    }
     switch (what) { /* Mesa's get_image_size: the level's, an array's layers */
     case 0: return t->f[0].w[im->level];
     case 1: return t->f[0].h[im->level];
@@ -6536,6 +6580,10 @@ void ogles2_image_written(struct OGLES3Context *ctx, int unit, ULONG serial)
     if (!im || im->access == GL_READ_ONLY)
         return;
     t = im->t;
+    if (t->target == GL_TEXTURE_BUFFER_OES) { /* the buffer's words, as a storage buffer's */
+        ogles2_buffer_image_written(ctx, t->tbo, image_cs(im->format), serial);
+        return;
+    }
     for (k = 0; k < faces_at(t, im->level); k++)
         if (im->layered || k == im->layer)
             ogles2_texture_rendered(t, k, im->level);

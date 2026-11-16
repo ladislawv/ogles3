@@ -1212,6 +1212,7 @@ UBYTE *ogles2_buffer_pixels(struct OGLES3Context *ctx, BOOL pack, ULONG offset, 
  * buffer binding `index`'s address and bytes (0: none bound). */
 ULONG ogles2_buffer_words(struct OGLES3Context *ctx, struct OGLES3Buffer *b);
 ULONG ogles2_buffer_texels(struct OGLES3Context *ctx, struct OGLES3Buffer *b, int cs);
+void ogles2_buffer_image_written(struct OGLES3Context *ctx, struct OGLES3Buffer *b, int cs, ULONG serial);
 BOOL ogles2_texture_uses_buffer(struct OGLES3Context *ctx, const struct OGLES3Buffer *b);
 ULONG ogles2_buffer_uniform(struct OGLES3Context *ctx, ULONG index, ULONG *size);
 /* Uniform buffer binding `index`'s buffer was written by transform feedback
