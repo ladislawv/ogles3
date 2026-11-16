@@ -124,8 +124,12 @@ static inline ULONG slot_fold(ULONG x)
 #define SC_SLOT(uid, ptr, stride, key) \
     (slot_fold((ULONG)(ptr) ^ ((ULONG)(uid) << 12) ^ ((ULONG)(stride) << 20) ^ (key)) & (SC_SLOTS - 1))
 
+struct tex_states;
+
 struct OGLES3Draw
 {
+    struct tex_states *gs_tst;     /* EXT_geometry_shader: the geometry stage's (row 0), made at its first draw */
+    BOOL gs_refused_logged;
     v3d_mem builtin_code;          /* the built-in image's code, uploaded at first use */
     struct OGLES3Program quad;     /* clears drawn as rectangles (built-in image) */
     BOOL quad_ready;
@@ -711,6 +715,8 @@ void ogles2_draw_free(struct OGLES3Context *ctx)
         ogles2_program_builtin_free(&d->copy_prog);
     if (d->copy_image)
         ogles2_image_free(d->copy_image, ctx);
+    if (d->gs_tst)
+        FreeVec(d->gs_tst);
     FreeVec(d);
     ctx->draw = 0;
 }
@@ -845,6 +851,21 @@ struct tex_states
  * the images', which most draws never read. */
 #define TEX_STATES_CLEAR offsetof(struct tex_states, img)
 
+/* A variant's constant buffer: 0 the vertex stage's (its binning variant's
+ * too), 1 the fragment stage's, 2 the geometry stage's (EXT_geometry_shader). */
+static inline int var_slot(const struct OGLES3Variant *v)
+{
+    return v->stage == OGLES3_VARIANT_FS ? 1 : v->stage == OGLES3_VARIANT_GS || v->stage == OGLES3_VARIANT_GS_BIN ? 2 : 0;
+}
+
+/* Its row in a struct tex_states: the fragment stage's 1, the others 0 (a
+ * geometry stage's in the draw's second one, OGLES3Draw's gs_tst: the
+ * common draw's tex_states keeps its size). */
+static inline int var_row(const struct OGLES3Variant *v)
+{
+    return v->stage == OGLES3_VARIANT_FS;
+}
+
 /* The largest uniform block (GL_MAX_UNIFORM_BLOCK_SIZE). */
 #define ZERO_UBO_BYTES 65536
 
@@ -853,12 +874,13 @@ struct tex_states
  * asks for it gets a little-endian copy in the state buffer. Made before any
  * uniform stream (a claim must not happen while another is half filled). */
 static BOOL ubo_copies(struct OGLES3Context *ctx, const struct OGLES3Program *p,
-                       const struct OGLES3Variant *const v[3], struct tex_states *ts)
+                       const struct OGLES3Variant *const v[], int nv, struct tex_states *ts)
 {
-    int k, si;
-    for (k = 0; k < 3; k++) {
-        si = v[k]->stage == OGLES3_VARIANT_FS ? 1 : 0;
-        if (ts->ubo[si])
+    int k, si, row;
+    for (k = 0; k < nv; k++) {
+        si = var_slot(v[k]);
+        row = var_row(v[k]);
+        if (ts->ubo[row])
             continue;
         if (v[k]->uses_ubo) {
             UWORD n = p->image->cbuf_words[si];
@@ -866,7 +888,7 @@ static BOOL ubo_copies(struct OGLES3Context *ctx, const struct OGLES3Program *p,
             if (!c)
                 return FALSE;
             memcpy(c, p->cbuf_le[si], n * 4UL);
-            ts->ubo[si] = (ULONG)c;
+            ts->ubo[row] = (ULONG)c;
         }
         /* A uniform block (GLSL ES 3.00) with no buffer bound reads zeros:
          * one block of the context's, made once. Only the GPU reads it; the
@@ -975,12 +997,12 @@ static void xfb_wait(struct OGLES3Context *ctx, const struct OGLES3Program *p)
  * (core << 6) | (qpu << 2) | thread, so QPUs x 4 slices of the largest spill
  * size drawn with yet. Only the GPU touches it. A smaller old area goes when
  * the open job has rendered (its draws may use it). */
-static BOOL spill_area(struct OGLES3Context *ctx, const struct OGLES3Variant *const v[3])
+static BOOL spill_area(struct OGLES3Context *ctx, const struct OGLES3Variant *const v[], int nv)
 {
     struct OGLES3Draw *d = ctx->draw;
     ULONG need = 0;
     int k;
-    for (k = 0; k < 3; k++)
+    for (k = 0; k < nv; k++)
         if (v[k]->spill_size > need)
             need = v[k]->spill_size;
     if (need <= d->spill_size)
@@ -1049,11 +1071,11 @@ static BOOL wants_wide(struct OGLES3Context *ctx, struct OGLES3Program *p)
 /* Every sampler uniform of the program: its texture index in each stage
  * that uses it reads the texture unit glUniform1i gave it. */
 static BOOL texture_states(struct OGLES3Context *ctx, struct OGLES3Program *p,
-                           struct tex_states *ts)
+                           struct tex_states *ts, BOOL gs)
 {
     const struct OGLES3Image *im = p->image;
     UWORD u, k, n;
-    int st;
+    int st, row;
     n = list_samplers(p);
     for (k = 0; k < n; k++) {
         const struct OGLES3ImageUniform *un;
@@ -1061,16 +1083,18 @@ static BOOL texture_states(struct OGLES3Context *ctx, struct OGLES3Program *p,
         un = &im->uniforms[u];
         if (!(un->flags & OGLES3_UNIFORM_SAMPLER))
             continue;
-        for (st = 0; st < 2; st++) {
+        /* gs: the geometry stage's samplers, into row 0 (var_row) */
+        for (st = gs ? 2 : 0; st < (gs ? 3 : 2); st++) {
             UWORD e, ne = un->array ? un->array : 1;
+            row = gs ? 0 : st;
             for (e = 0; e < ne; e++) { /* an array: an element a texture index */
                 ULONG idx = un->sampler[st] + e;
                 if (un->sampler[st] >= OGLES3_MAX_STAGE_SAMPLERS || idx >= OGLES3_MAX_STAGE_SAMPLERS)
                     break;
-                ts->unit[st][idx] = unit_of(p, u, e);
-                ts->kind[st][idx] = (UBYTE)ogles2_sampler_kind(un->type);
-                if (!ogles2_texture_state(ctx, ts->unit[st][idx], ts->kind[st][idx], &ts->tex[st][idx],
-                                          &ts->smp[st][idx]))
+                ts->unit[row][idx] = unit_of(p, u, e);
+                ts->kind[row][idx] = (UBYTE)ogles2_sampler_kind(un->type);
+                if (!ogles2_texture_state(ctx, ts->unit[row][idx], ts->kind[row][idx], &ts->tex[row][idx],
+                                          &ts->smp[row][idx]))
                     return FALSE;
             }
         }
@@ -1082,25 +1106,27 @@ static BOOL texture_states(struct OGLES3Context *ctx, struct OGLES3Program *p,
  * reads images: its image index in each stage that uses it reads the image
  * unit its layout(binding) gave it, which the draw may store into (the job
  * then cleans its caches after the render, job_storage). */
-static BOOL image_states(struct OGLES3Context *ctx, struct OGLES3Program *p, const struct OGLES3Variant *const v[3],
-                         struct tex_states *ts)
+static BOOL image_states(struct OGLES3Context *ctx, struct OGLES3Program *p, const struct OGLES3Variant *const v[],
+                         int nv, struct tex_states *ts, BOOL gs)
 {
     const struct OGLES3Image *im = p->image;
     UWORD u, e;
-    int st;
-    if (!v[0]->uses_images && !v[1]->uses_images && !v[2]->uses_images)
+    int st, k, row;
+    for (k = 0; k < nv && !v[k]->uses_images; k++)
+        ;
+    if (k == nv)
         return TRUE;
     for (u = 0; u < im->nuniforms; u++) {
         const struct OGLES3ImageUniform *un = &im->uniforms[u];
         UWORD ne = un->array ? un->array : 1;
         if (!(un->flags & OGLES3_UNIFORM_IMAGE))
             continue;
-        for (st = 0; st < 2; st++)
-            for (e = 0; e < ne && un->sampler[st] + e < OGLES3_MAX_STAGE_IMAGES; e++) {
+        for (st = gs ? 2 : 0; st < (gs ? 3 : 2); st++)
+            for (e = 0, row = gs ? 0 : st; e < ne && un->sampler[st] + e < OGLES3_MAX_STAGE_IMAGES; e++) {
                 ULONG idx = un->sampler[st] + e;
                 UBYTE unit = unit_of(p, u, e);
-                ts->iunit[st][idx] = unit;
-                if (!(ts->img[st][idx] = ogles2_image_state(ctx, unit, 0)))
+                ts->iunit[row][idx] = unit;
+                if (!(ts->img[row][idx] = ogles2_image_state(ctx, unit, 0)))
                     return FALSE;
                 ogles2_image_written(ctx, unit, ctx->job_serial);
             }
@@ -1118,17 +1144,17 @@ static BOOL image_states(struct OGLES3Context *ctx, struct OGLES3Program *p, con
  * worse with each case added (DEVELOPMENT_PLAN.md section 13, bb8665d: a
  * value in the frame instead of a register, 20-40% slower). */
 static __attribute__((noinline)) ULONG rare_uniform(struct OGLES3Context *ctx, const struct OGLES3Program *p, int si,
-                                                     ULONG type, ULONG d, const struct tex_states *tst)
+                                                     int ti, ULONG type, ULONG d, const struct tex_states *tst)
 {
     ULONG w = 0;
     switch (type) {
     case OGLES3_U_IMAGE_TMU_CONFIG_P0: /* Mesa's write_image_tmu_p0 (the loader checked the index) */
-        return tst->img[si][d >> 24] | (d & 0xffffff);
+        return tst->img[ti][d >> 24] | (d & 0xffffff);
     case OGLES3_U_IMAGE_WIDTH:
     case OGLES3_U_IMAGE_HEIGHT:
     case OGLES3_U_IMAGE_DEPTH:
     case OGLES3_U_IMAGE_ARRAY_SIZE:
-        return ogles2_image_size(ctx, tst->iunit[si][d], (int)(type - OGLES3_U_IMAGE_WIDTH));
+        return ogles2_image_size(ctx, tst->iunit[ti][d], (int)(type - OGLES3_U_IMAGE_WIDTH));
     case OGLES3_U_UBO_ADDR: /* a uniform block (unit 0, the constant buffer, is write_uniforms') */
         return block_buffer(ctx, p, si, (d >> 24) - 1, tst, 0) + (d & 0xffffff);
     case OGLES3_U_GET_UBO_SIZE: /* Mesa's cb[data].buffer_size, cb[0] the constant buffer */
@@ -1141,7 +1167,7 @@ static __attribute__((noinline)) ULONG rare_uniform(struct OGLES3Context *ctx, c
     case OGLES3_U_TEXTURE_DEPTH:
     case OGLES3_U_TEXTURE_ARRAY_SIZE:
         d &= OGLES3_MAX_STAGE_SAMPLERS - 1;
-        return ogles2_texture_size(ctx, tst->unit[si][d], tst->kind[si][d], (int)(type - OGLES3_U_TEXTURE_WIDTH));
+        return ogles2_texture_size(ctx, tst->unit[ti][d], tst->kind[ti][d], (int)(type - OGLES3_U_TEXTURE_WIDTH));
     case OGLES3_U_SPILL_OFFSET:
         return (ULONG)V3D_ALIGN_UP((v3d_uintptr)ctx->draw->spill.hostptr, 256);
     case OGLES3_U_SPILL_SIZE_PER_THREAD:
@@ -1222,12 +1248,12 @@ static __attribute__((noinline)) const ULONG *state_fx(struct OGLES3Context *ctx
 static ULONG write_uniforms(struct OGLES3Context *ctx, const struct OGLES3Program *p,
                             const struct OGLES3Variant *var, const struct tex_states *tst)
 {
-    int si = var->stage == OGLES3_VARIANT_FS ? 1 : 0;
+    int si = var_slot(var), ti = var_row(var);
     const ULONG *rtype = var->rtype, *rdata = var->rdata, *cbuf = p->cbuf[si];
-    const ULONG *tex = tst->tex[si], *smp = tst->smp[si];
+    const ULONG *tex = tst->tex[ti], *smp = tst->smp[ti];
     const UWORD *special = var->uidx ? var->special : 0;
     const ULONG *fx = 0; /* state_fx's, at the first value that needs them */
-    ULONG ubo = tst->ubo[si];
+    ULONG ubo = tst->ubo[ti];
     ULONG *u;
     int i, k, n;
     if (!(u = claim(ctx->v3d, (var->nrecipe + 1) * 4UL, 4)))
@@ -1267,7 +1293,7 @@ static ULONG write_uniforms(struct OGLES3Context *ctx, const struct OGLES3Progra
                 break;
             }
             /* fall through */
-        default: w = rare_uniform(ctx, p, si, t, d, tst); break;
+        default: w = rare_uniform(ctx, p, si, ti, t, d, tst); break;
         }
         u[i] = le32(w);
     }
@@ -1791,19 +1817,112 @@ static void attr_record(UBYTE *b, ULONG address, UBYTE normalized, UBYTE is_sign
     put_le32(b + 12, maxindex);
 }
 
+/* EXT_geometry_shader (docs/GLES3_PLAN.md item 9): a draw's geometry
+ * stage. Its VPM configuration for binning [0] and rendering [1] (Mesa's
+ * struct vpm_config: As 1 and Gs 1 always). */
+struct gs_vpm
+{
+    UBYTE Vc, Ve, Gd, Gv, width;
+};
+
+struct gs_draw
+{
+    const struct OGLES3Variant *bin, *gs; /* the geometry binning and geometry variants */
+    ULONG code[2], unif[2];
+    struct gs_vpm cfg[2];
+};
+
+/* Mesa's compute_vpm_config_gs (compiler/vir.c): the VPM's use with a
+ * geometry shader fitted into half the VPM (a binning and a render program
+ * at once), else into all of it; FALSE when even that cannot be. vs: the
+ * (binning or render) vertex variant before gs. */
+static BOOL vpm_gs(const struct OGLES3Variant *vs, const struct OGLES3Variant *gs, struct gs_vpm *out)
+{
+    ULONG A = vs->separate_segments ? 1 : 0, Ad = vs->vpm_input_size, Vd = vs->vpm_output_size;
+    ULONG size = (ULONG)ogles2_device()->deviceInfo.vpm_size / 512; /* sectors: 16 channels x 4 bytes x 8 */
+    struct gs_vpm c[2], *fin = 0;
+    int phase = 0;
+    c[0].Gd = (UBYTE)gs->vpm_output_size;
+    c[0].width = gs->gs_simd_width;
+    c[0].Vc = 2; /* GFXH-1744: no lower; Broadcom's choice */
+    c[0].Gv = 3;
+    for (;;) {
+        ULONG sectors;
+        c[phase].Ve = c[phase].Gv; /* without tessellation Ve >= Gv */
+        sectors = A * Ad + ((ULONG)c[phase].Vc + c[phase].Ve) * Vd + c[phase].Gd;
+        if (sectors <= size / 2) {
+            fin = &c[phase];
+            break;
+        }
+        if (phase == 0 && sectors <= size) {
+            c[1] = c[0];
+            phase = 1;
+        }
+        if (c[phase].Gv > 0) {
+            c[phase].Gv--;
+            continue;
+        }
+        if (c[phase].width > 1) { /* a narrower dispatch: 16, 8, 4 or 1 */
+            do {
+                c[phase].width >>= 1;
+                c[phase].Gd = (UBYTE)((c[phase].Gd + 1) / 2);
+            } while (c[phase].width == 2);
+            c[phase].Gv = 3;
+            continue;
+        }
+        if (phase == 1)
+            fin = &c[0];
+        break;
+    }
+    if (!fin)
+        return FALSE;
+    *out = *fin;
+    return TRUE;
+}
+
+/* Mesa's v3d_emit_gs_state_record, v3d_emit_tes_gs_common_params and
+ * v3d_emit_tes_gs_shader_params (bin, then render), V3D 4.2's packing
+ * (v3d_packet.xml): 36 bytes before the GL shader state record, which
+ * GL_SHADER_STATE_INCLUDING_GS points at. */
+static void gs_records(ULONG *w, const struct gs_draw *g)
+{
+    static const UBYTE fmt[6] = {0, 0, 0, 1, 1, 2}; /* mesa_prim POINTS, LINE_STRIP, TRIANGLE_STRIP */
+    int k;
+    w[0] = le32((g->code[0] & ~7UL) | (g->bin->threads == 4 ? 1 : 0) | (g->bin->single_seg ? 2 : 0) | 4);
+    w[1] = le32(g->unif[0]);
+    w[2] = le32((g->code[1] & ~7UL) | (g->gs->threads == 4 ? 1 : 0) | (g->gs->single_seg ? 2 : 0) | 4);
+    w[3] = le32(g->unif[1]);
+    /* tessellation's defaults (triangles, even spacing, clockwise, one
+     * invocation), the output primitive and the instances (32 as 0) */
+    w[4] = le32((1UL << 6) | (1UL << 12) | ((ULONG)fmt[g->gs->gs_out_prim < 6 ? g->gs->gs_out_prim : 5] << 17) |
+                (((ULONG)g->gs->gs_invocations & 0x1f) << 19));
+    for (k = 0; k < 2; k++) {
+        const struct gs_vpm *c = &g->cfg[k];
+        ULONG pack = c->width == 16 ? 0 : c->width == 8 ? 1 : c->width == 4 ? 2 : 3;
+        /* TCS fully packed, per-patch depth 1, TCS and TES segments 1
+         * (16-way), the GS segment size and pack mode; the minus-one
+         * fields of 1 are 0; GBG's vertex segments a batch Gv */
+        w[5 + 2 * k] = le32((1UL << 2) | (1UL << 8) | (1UL << 16) | (((ULONG)c->Gd & 63) << 24) | (pack << 30));
+        w[6 + 2 * k] = le32(((ULONG)c->Gv & 3) << 25);
+    }
+}
+
 /* The GL shader state record and its attribute records, one per vertex
  * input slot (Mesa's emit_shader_state_record and v3d_emit_gl_shader_state,
- * V3D 4.2, no geometry shader); the record's address. */
+ * V3D 4.2), after a geometry stage's records (g; NULL: none); the address
+ * of the first. */
 static ULONG shader_record(struct OGLES3Context *ctx, struct OGLES3Program *p, ULONG defattr,
                            const ULONG code[3], const ULONG unif[3], const struct OGLES3Variant *cs,
                            const struct OGLES3Variant *vs, const struct OGLES3Variant *fs,
-                           GLenum mode, const struct attr_src *src, int nslots)
+                           GLenum mode, const struct attr_src *src, int nslots, const struct gs_draw *g)
 {
     V3DContext *v = ctx->v3d;
     int nrec = nslots ? nslots : 1;
     ULONG size = sizeof(v3d_gl_shader_state_record) +
                  nrec * sizeof(v3d_gl_shader_state_attribute_record);
-    v3d_gl_shader_state_record *r = claim(v, size, 32); /* GL_SHADER_STATE holds address >> 5 */
+    ULONG pre = g ? 36 : 0; /* a geometry stage's records first (gs_records) */
+    UBYTE *block = claim(v, size + pre, 32); /* GL_SHADER_STATE(_INCLUDING_GS) holds address >> 5 */
+    v3d_gl_shader_state_record *r = block ? (v3d_gl_shader_state_record *)(block + pre) : 0;
     v3d_static_buffer attrs, *saved;
     ULONG *swivel;
     BOOL direct = packets_ok(v);
@@ -1811,7 +1930,8 @@ static ULONG shader_record(struct OGLES3Context *ctx, struct OGLES3Program *p, U
     BOOL cs_builtins = cs->uses_iid || cs->uses_vid;
     int i;
 
-    BOOL points = mode == GL_POINTS && vs->per_vertex_point_size;
+    /* with a geometry stage, its points' size (Mesa: per vertex when it writes it) */
+    BOOL points = g ? g->gs->gs_out_prim == 0 && g->gs->writes_psiz : mode == GL_POINTS && vs->per_vertex_point_size;
     /* Mesa's v3dx_draw.c: a fragment shader that reads the sample (ES 3.2
      * plan item 6) runs a sample at a time in a 4x job */
     BOOL sample_rate = ctx->job_msaa && (fs->force_per_sample_msaa ||
@@ -1820,9 +1940,12 @@ static ULONG shader_record(struct OGLES3Context *ctx, struct OGLES3Program *p, U
 
     if (!r)
         return 0;
+    if (g)
+        gs_records((ULONG *)block, g);
     /* The program's template when it was made for these variants: only
-     * the four addresses below differ from draw to draw. */
-    if (p->rec_tmpl && p->rec_var[0] == cs && p->rec_var[1] == vs && p->rec_var[2] == fs &&
+     * the four addresses below differ from draw to draw (not with a
+     * geometry stage: made each time). */
+    if (!g && p->rec_tmpl && p->rec_var[0] == cs && p->rec_var[1] == vs && p->rec_var[2] == fs &&
         p->rec_points == points && p->rec_sample_rate == sample_rate && p->rec_code[0] == code[0] &&
         p->rec_code[1] == code[1] &&
         p->rec_code[2] == code[2]) {
@@ -1836,8 +1959,8 @@ static ULONG shader_record(struct OGLES3Context *ctx, struct OGLES3Program *p, U
     r->fragment_shader_does_z_writes = fs->writes_z;
     r->turn_off_early_z_test = fs->disable_ez;
     r->fragment_shader_uses_real_pixel_centre_w_in_addition_to_centroid_w2 = fs->uses_center_w;
-    r->any_shader_reads_hardware_written_primitive_id = fs->uses_pid;
-    r->insert_primitive_id_as_first_varying_to_fragment_shader = fs->uses_pid;
+    r->any_shader_reads_hardware_written_primitive_id = fs->uses_pid || (g && g->gs->uses_pid);
+    r->insert_primitive_id_as_first_varying_to_fragment_shader = fs->uses_pid && !g;
     r->do_scoreboard_wait_on_first_thread_switch = fs->lock_scoreboard_on_first_thrsw;
     r->disable_implicit_point_line_varyings = !fs->uses_implicit_point_line_varyings;
     r->number_of_varyings_in_fragment_shader = fs->num_inputs;
@@ -1847,8 +1970,13 @@ static ULONG shader_record(struct OGLES3Context *ctx, struct OGLES3Program *p, U
     r->vertex_shader_input_vpm_segment_size = vs->separate_segments ? vs->vpm_input_size : 1;
     r->coordinate_shader_output_vpm_segment_size = cs->vpm_output_size;
     r->vertex_shader_output_vpm_segment_size = vs->vpm_output_size;
-    /* v3d_compute_vpm_config without a geometry shader: As = 1 (stored
-     * minus one), Ve = 0, and Vc from VCM_CACHE_SIZE: the zeroes stay. */
+    /* v3d_compute_vpm_config: As = 1 (stored minus one), Ve = 0 without a
+     * geometry shader (the zeroes stay) and its Ve with one; Vc in
+     * VCM_CACHE_SIZE. */
+    if (g) {
+        r->min_coord_shader_output_segments_required_in_play_in_addition_to_vcm_cache_size = g->cfg[0].Ve;
+        r->min_vertex_shader_output_segments_required_in_play_in_addition_to_vcm_cache_size = g->cfg[1].Ve;
+    }
     r->vertex_id_read_by_coordinate_shader = cs->uses_vid;
     r->instance_id_read_by_coordinate_shader = cs->uses_iid;
     r->vertex_id_read_by_vertex_shader = vs->uses_vid;
@@ -1874,9 +2002,9 @@ static ULONG shader_record(struct OGLES3Context *ctx, struct OGLES3Program *p, U
     swivel[3] = le32(swivel[3]);
     swivel[5] = le32(swivel[5]);
     swivel[7] = le32(swivel[7]);
-    if (!p->rec_tmpl)
+    if (!g && !p->rec_tmpl)
         p->rec_tmpl = AllocVec(sizeof(*r), MEMF_ANY);
-    if (p->rec_tmpl) {
+    if (!g && p->rec_tmpl) {
         memcpy(p->rec_tmpl, r, sizeof(*r));
         p->rec_var[0] = cs;
         p->rec_var[1] = vs;
@@ -1930,7 +2058,7 @@ addresses:
                                          vs->vattr_sizes[i], cs_n, src[i].divisor, src[i].stride, 0xFFFFFF);
     }
     v->current_buf = saved;
-    return (ULONG)r;
+    return (ULONG)block; /* the record, or the geometry stage's records before it */
 }
 
 /* ---- state packets ---- */
@@ -2873,6 +3001,37 @@ static __attribute__((noinline)) void scan_u16(const UWORD *in, ULONG count, ULO
     *hi_out = (ULONG)h;
 }
 
+/* A draw mode GL knows: ES 3.1 contexts' the adjacency ones too
+ * (EXT_geometry_shader; draw_arrays wants a geometry shader for them). */
+static BOOL draw_mode_ok(const struct OGLES3Context *ctx, GLenum mode)
+{
+    return mode <= GL_TRIANGLE_FAN ||
+           (ogles2_es31(ctx) && mode >= GL_LINES_ADJACENCY_EXT && mode <= GL_TRIANGLE_STRIP_ADJACENCY_EXT);
+}
+
+/* EXT_geometry_shader: draw_packets' VCM_CACHE_SIZE with the geometry
+ * stage's VPM (Vc, bin and render) and GL_SHADER_STATE_INCLUDING_GS (66:
+ * the record starts with the geometry stage's, shader_record). */
+static void gs_packets(UBYTE *b, const struct gs_draw *g)
+{
+    b[6] = (UBYTE)((g->cfg[1].Vc << 4) | (g->cfg[0].Vc & 15));
+    b[7] = 66;
+}
+
+/* A draw mode a geometry shader of input `in` takes (ES 3.2 11.3.1). */
+static BOOL gs_takes(GLenum in, GLenum mode)
+{
+    switch (in) {
+    case GL_POINTS:              return mode == GL_POINTS;
+    case GL_LINES:               return mode == GL_LINES || mode == GL_LINE_LOOP || mode == GL_LINE_STRIP;
+    case GL_LINES_ADJACENCY_EXT: return mode == GL_LINES_ADJACENCY_EXT || mode == GL_LINE_STRIP_ADJACENCY_EXT;
+    case GL_TRIANGLES:           return mode == GL_TRIANGLES || mode == GL_TRIANGLE_STRIP || mode == GL_TRIANGLE_FAN;
+    case GL_TRIANGLES_ADJACENCY_EXT:
+        return mode == GL_TRIANGLES_ADJACENCY_EXT || mode == GL_TRIANGLE_STRIP_ADJACENCY_EXT;
+    default:                     return FALSE;
+    }
+}
+
 /* An indirect draw's packets: draw_packets' first 12 bytes, then (indexed)
  * INDEX_BUFFER_SETUP and INDIRECT_INDEXED_INSTANCED_PRIM_LIST, or
  * INDIRECT_VERTEX_ARRAY_INSTANCED_PRIMS: the GPU reads one command record
@@ -3002,6 +3161,7 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
     BOOL xfb;        /* it feeds back (transform feedback, xfb.c) */
     ULONG unif[3], code[3], defattr, rec, idx_addr = 0, idx_size = 0, ioffset;
     int a, nslots = 0, i;
+    struct gs_draw gsd, *g = 0; /* EXT_geometry_shader: the draw's geometry stage, if it has one */
 
     /* GL_RASTERIZER_DISCARD: no fragments, and without transform feedback a
      * draw then has no effect at all: nothing is drawn. With it, binning
@@ -3020,6 +3180,26 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
      * v3d_rasterizes_lines/points). */
     fsmode = mode >= GL_TRIANGLES && ctx->state.polygon_mode != GL_FILL
                  ? (ctx->state.polygon_mode == GL_POINT ? GL_POINTS : GL_LINES) : mode;
+    /* EXT_geometry_shader: the draw's mode one of the geometry shader's
+     * input primitive (GL_INVALID_OPERATION; the adjacency ones only with
+     * one), the fragment shader's class its output's; precompiled variants
+     * only (es3_variants keys the vertex shader's outputs on the fragment
+     * shader's inputs), no transform feedback or GPU-read draw yet. */
+    if (im->geometry ? !gs_takes(im->gs_in, mode) : mode > GL_TRIANGLE_FAN) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
+    if (im->geometry) {
+        if (ctx->xfb_begun || gd || !packets_ok(v)) {
+            if (!d->gs_refused_logged) {
+                d->gs_refused_logged = TRUE;
+                ogles2_log("draw: a geometry shader with transform feedback or an indirect or GPU-read draw is "
+                           "not drawn yet (logged once)");
+            }
+            return;
+        }
+        fsmode = im->gs_out == GL_POINTS ? GL_POINTS : im->gs_out == GL_LINE_STRIP ? GL_LINES : GL_TRIANGLES;
+    }
     /* A 4x MSAA default framebuffer, or multisampled renderbuffers, with
      * GL_SAMPLE_ALPHA_TO_COVERAGE (Mesa turns alpha into the sample mask in
      * the fragment shader). */
@@ -3071,8 +3251,8 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
         code[2] = p->var_code[2];
     } else {
         UBYTE cbufs = (UBYTE)((1 << ctx->fb_nrt) - 1);
-        cs = ogles2_image_variant(im, OGLES3_VARIANT_CS, 0, mode);
-        vs = ogles2_image_variant(im, OGLES3_VARIANT_VS, 0, mode);
+        cs = ogles2_image_variant(im, OGLES3_VARIANT_CS, 0, im->geometry ? GL_TRIANGLES : mode);
+        vs = ogles2_image_variant(im, OGLES3_VARIANT_VS, 0, im->geometry ? GL_TRIANGLES : mode);
         fs = ogles2_image_variant(fim, OGLES3_VARIANT_FS, cbufs, fsmode);
         if (!cs || !vs || !fs) {
             ogles2_log("glDrawArrays: the program has no shader for this primitive; nothing drawn");
@@ -3098,7 +3278,7 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
                 vk_targets(ctx, &tg);
                 tg_made = TRUE;
             }
-            if (im->format2)
+            if (im->format2 && !im->geometry)
                 es3_variants(ctx, p, fsmode, ctx->draw_fb ? ctx->fb_draw_mask : 1, bits, a2c, &tg, &vs, &fs,
                              &vown, &fown);
             code[0] = code_address(d, im, cs);
@@ -3148,6 +3328,29 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
             return;
         }
     }
+    if (im->geometry) {
+        GLenum gmode = im->gs_out == GL_POINTS ? GL_POINTS : GL_TRIANGLES;
+        g = &gsd;
+        g->bin = ogles2_image_variant(im, OGLES3_VARIANT_GS_BIN, 0, gmode);
+        g->gs = ogles2_image_variant(im, OGLES3_VARIANT_GS, 0, gmode);
+        if (!g->bin || !g->gs) {
+            ogles2_log("glDrawArrays: the program has no geometry shader variant; nothing drawn");
+            return;
+        }
+        g->code[0] = code_address(d, im, g->bin);
+        g->code[1] = code_address(d, im, g->gs);
+        if (!g->code[0] || !g->code[1]) {
+            ogles2_error(ctx, GL_OUT_OF_MEMORY);
+            return;
+        }
+        if (!vpm_gs(cs, g->bin, &g->cfg[0]) || !vpm_gs(vs, g->gs, &g->cfg[1])) {
+            if (!d->gs_refused_logged) {
+                d->gs_refused_logged = TRUE;
+                ogles2_log("draw: the geometry shader's outputs do not fit the VPM; not drawn (logged once)");
+            }
+            return;
+        }
+    }
     if (v->frame_active && ctx->job_fb == ctx->draw_fb)
         ctx->job_discard = 0; /* ogles2_job_begin's first case, without its call: the job is open */
     else
@@ -3172,16 +3375,32 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
                     vv[2]->uses_blocks | vv[0]->uses_storage | vv[1]->uses_storage | vv[2]->uses_storage |
                     vv[0]->spill_size | vv[1]->spill_size | vv[2]->spill_size | vv[0]->uses_images |
                     vv[1]->uses_images | vv[2]->uses_images;
-        if (any && (!ubo_copies(ctx, p, vv, &tst) || !spill_area(ctx, vv) || !image_states(ctx, p, vv, &tst)))
+        if (any && (!ubo_copies(ctx, p, vv, 3, &tst) || !spill_area(ctx, vv, 3) ||
+                    !image_states(ctx, p, vv, 3, &tst, FALSE)))
             goto nomem;
     }
-    if (!texture_states(ctx, p, &tst))
+    if (!texture_states(ctx, p, &tst, FALSE))
         goto nomem;
+    /* The geometry stage's: its own tex_states, the stage in row 0 */
+    if (g) {
+        const struct OGLES3Variant *gv[2];
+        if (!d->gs_tst && !(d->gs_tst = AllocVec(sizeof(struct tex_states), MEMF_ANY | MEMF_CLEAR)))
+            goto nomem;
+        memset(d->gs_tst, 0, TEX_STATES_CLEAR);
+        gv[0] = g->bin;
+        gv[1] = g->gs;
+        if (!ubo_copies(ctx, p, gv, 2, d->gs_tst) || !spill_area(ctx, gv, 2) ||
+            !image_states(ctx, p, gv, 2, d->gs_tst, TRUE) || !texture_states(ctx, p, d->gs_tst, TRUE))
+            goto nomem;
+    }
     mark(ctx, 2);
     uniform_state(ctx);
     unif[0] = vertex_uniforms(ctx, p, 0, cs, &tst);
     unif[1] = vertex_uniforms(ctx, p, 1, vs, &tst);
     unif[2] = write_uniforms(ctx, p, fs, &tst);
+    if (g && (!(g->unif[0] = write_uniforms(ctx, p, g->bin, d->gs_tst)) ||
+              !(g->unif[1] = write_uniforms(ctx, p, g->gs, d->gs_tst))))
+        goto nomem;
     defattr = default_attribs(ctx, d);
     if (!unif[0] || !unif[1] || !unif[2] || !defattr)
         goto nomem;
@@ -3292,7 +3511,7 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
                 goto nomem;
         }
     mark(ctx, 4);
-    if (!(rec = shader_record(ctx, p, defattr, code, unif, cs, vs, fs, mode, src, nslots)))
+    if (!(rec = shader_record(ctx, p, defattr, code, unif, cs, vs, fs, mode, src, nslots, g)))
         goto nomem;
     mark(ctx, 5);
     if (el) {
@@ -3407,11 +3626,14 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
                   : itype_gl == GL_UNSIGNED_INT ? v3d_INDEX_TYPE_32_BIT
                   : itype_gl == GL_UNSIGNED_SHORT ? v3d_INDEX_TYPE_16_BIT : v3d_INDEX_TYPE_8_BIT;
         UBYTE *b = v3d_buffer_claim_memory(v->current_buf, (el ? 31 : 22) + (instances > 1 ? 4 : 0));
-        if (b)
+        if (b) {
             draw_packets(b, cs->vcm_cache_size, vs->vcm_cache_size, rec, nslots ? nslots : 1, (UBYTE)mode,
                          itype, idx_addr, idx_size,
                          el ? ((ULONG)el->count & 0x7FFFFFFFUL) | (el->restart ? 0x80000000UL : 0) : (ULONG)count,
                          vid ? (ULONG)first : 0, (ULONG)instances, ioffset);
+            if (g)
+                gs_packets(b, g);
+        }
         if (xfb)
             ogles2_xfb_after_draw(ctx, mode, count, instances);
         mark(ctx, 7);
@@ -3419,13 +3641,16 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
     }
     if (instances > 1) { /* v3dcore has no writers for the instanced packets: ours */
         UBYTE *b = v3d_buffer_claim_memory(v->current_buf, el ? 35 : 26);
-        if (b)
+        if (b) {
             draw_packets(b, cs->vcm_cache_size, vs->vcm_cache_size, rec, nslots ? nslots : 1, (UBYTE)mode,
                          el ? (itype_gl == GL_UNSIGNED_INT ? v3d_INDEX_TYPE_32_BIT
                                : itype_gl == GL_UNSIGNED_SHORT ? v3d_INDEX_TYPE_16_BIT : v3d_INDEX_TYPE_8_BIT) : -1,
                          idx_addr, idx_size,
                          el ? ((ULONG)el->count & 0x7FFFFFFFUL) | (el->restart ? 0x80000000UL : 0) : (ULONG)count,
                          vid ? (ULONG)first : 0, (ULONG)instances, ioffset);
+            if (g)
+                gs_packets(b, g);
+        }
         if (xfb)
             ogles2_xfb_after_draw(ctx, mode, count, instances);
         mark(ctx, 7);
@@ -3524,7 +3749,7 @@ static void draw_instances(struct OGLES3Context *ctx, GLenum mode, GLint first, 
     if (!ogles2_entry_valid(ctx))
         return;
     mark(ctx, -1);
-    if (mode > GL_TRIANGLE_FAN) {
+    if (!draw_mode_ok(ctx, mode)) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
@@ -3539,7 +3764,7 @@ static void draw_instances(struct OGLES3Context *ctx, GLenum mode, GLint first, 
     p = ctx->program;
     /* ES 3.1 11.1.3.11: no vertex or fragment shader (a compute program, a
      * separable one of one stage) */
-    if (p && p->image && (p->image->compute || p->image->stages != 0x11)) {
+    if (p && p->image && (p->image->compute || (p->image->stages & ~0x08) != 0x11 /* with or without a geometry stage */)) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
@@ -3660,7 +3885,7 @@ static void draw_elements(struct OGLES3Context *ctx, GLenum mode, GLsizei count,
         return;
     mark(ctx, -1);
     restart = (ctx->state.caps & OGLES3_CAP_PRIMITIVE_RESTART) != 0;
-    if (mode > GL_TRIANGLE_FAN ||
+    if (!draw_mode_ok(ctx, mode) ||
         (type != GL_UNSIGNED_BYTE && type != GL_UNSIGNED_SHORT && type != GL_UNSIGNED_INT)) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
@@ -3676,7 +3901,7 @@ static void draw_elements(struct OGLES3Context *ctx, GLenum mode, GLsizei count,
     if (!ogles2_fb_ready(ctx))
         return;
     p = ctx->program;
-    if (p && p->image && (p->image->compute || p->image->stages != 0x11)) { /* ES 3.1 11.1.3.11 */
+    if (p && p->image && (p->image->compute || (p->image->stages & ~0x08) != 0x11 /* with or without a geometry stage */)) { /* ES 3.1 11.1.3.11 */
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
@@ -4015,7 +4240,7 @@ static BOOL gpu_indirect(struct OGLES3Context *ctx, GLenum mode, GLenum type, co
     if (!ogles2_fb_ready(ctx))
         return TRUE;
     p = ctx->program;
-    if (p && p->image && (p->image->compute || p->image->stages != 0x11)) {
+    if (p && p->image && (p->image->compute || (p->image->stages & ~0x08) != 0x11 /* with or without a geometry stage */)) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return TRUE;
     }
@@ -4070,7 +4295,7 @@ void ogles2_glDrawArraysIndirect(struct OGLES3Context *ctx, GLenum mode, const v
     ULONG cmd[4];
     if (!ogles2_es31_entry(ctx))
         return;
-    if (mode > GL_TRIANGLE_FAN) {
+    if (!draw_mode_ok(ctx, mode)) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
@@ -4095,7 +4320,7 @@ void ogles2_glDrawElementsIndirect(struct OGLES3Context *ctx, GLenum mode, GLenu
     ULONG cmd[5], size;
     if (!ogles2_es31_entry(ctx))
         return;
-    if (mode > GL_TRIANGLE_FAN ||
+    if (!draw_mode_ok(ctx, mode) ||
         (type != GL_UNSIGNED_BYTE && type != GL_UNSIGNED_SHORT && type != GL_UNSIGNED_INT)) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;

@@ -63,6 +63,37 @@ line's; the bridge's 31 programs as before. Both compilers rebuilt.
   `GL_INVALID_OPERATION` (its stages 0x19, not 0x11) until stage C; the
   extension is not offered yet.
 
+**Stage C, done (2026-11-16, built; not run):** `draw.c`.
+- A draw with a geometry program: its mode one the geometry shader's input
+  takes (`gs_takes`; the adjacency modes, accepted by the entry points in
+  ES 3.1 contexts, `draw_mode_ok`, only with one: else
+  `GL_INVALID_OPERATION`); the fragment variant's class the geometry
+  output's; the vertex and binning variants the non-point ones; the
+  precompiled variants only (`es3_variants` keys the vertex outputs on the
+  fragment inputs: skipped).
+- The geometry and geometry binning variants (`ogles2_image_variant`),
+  their code, their uniform streams (`write_uniforms`: a variant's
+  constant buffer by `var_slot`, its texture states by `var_row`, the
+  geometry stage's in a second `struct tex_states` of the draw's,
+  `OGLES3Draw.gs_tst`, its row 0, so the common draw's stays as it was),
+  their UBO copies, spill area, images and textures (`ubo_copies`,
+  `spill_area`, `image_states`, `texture_states` take a variant count and
+  the geometry stage).
+- `vpm_gs`: Mesa's `compute_vpm_config_gs` (half the VPM, else all of it;
+  Gv, then the dispatch width lowered; the VPM size v3dcore reads from the
+  core's IDENT1), for binning and rendering.
+- `gs_records`: the geometry shader state record, the common params (the
+  output format, the instances) and the bin and render shader params
+  (the GS segment size and pack mode, Gv), V3D 4.2's bit layout from
+  v3d_packet.xml, 36 bytes before the shader state record
+  (`shader_record`'s block, not cached as a template); the record's Ve
+  fields, the primitive id flags (Mesa's), the point size by the geometry
+  output; VCM_CACHE_SIZE's Vc and GL_SHADER_STATE_INCLUDING_GS (66) patched
+  into draw_packets' bytes (`gs_packets`).
+- Not yet: transform feedback with a geometry shader, indirect and
+  GPU-read draws (logged, not drawn); the 32-bit-sampler, alpha-to-coverage
+  and draw-time variants of geometry programs.
+
 **Stages B to D, what is left (the map for the next session):**
 - **B, the library reads it.** `program.c`: `GL_GEOMETRY_SHADER_EXT` in
   `glCreateShader` (ES 3.1 contexts), its compile through
