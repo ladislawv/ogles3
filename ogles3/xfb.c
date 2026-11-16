@@ -391,10 +391,27 @@ BOOL ogles2_xfb_paused(const struct OGLES3Context *ctx)
 /* ---- draws ---- */
 
 /* The vertices a draw of `count` writes in `mode` (whole primitives only). */
+/* The vertices feedback writes for `count` of `mode`: each primitive's own
+ * (Mesa's u_stream_outputs_for_vertices; the strips, loops and fans only
+ * with EXT_geometry_shader). */
 static ULONG verts(GLenum mode, GLsizei count)
 {
     ULONG n = (ULONG)count;
-    return mode == GL_TRIANGLES ? n - n % 3 : mode == GL_LINES ? n & ~1UL : n;
+    switch (mode) {
+    case GL_TRIANGLES:      return n - n % 3;
+    case GL_LINES:          return n & ~1UL;
+    case GL_LINE_STRIP:     return n >= 2 ? 2 * (n - 1) : 0;
+    case GL_LINE_LOOP:      return n >= 2 ? 2 * n : 0;
+    case GL_TRIANGLE_STRIP:
+    case GL_TRIANGLE_FAN:   return n >= 3 ? 3 * (n - 2) : 0;
+    default:                return n;
+    }
+}
+
+/* The mode feedback begins with that a draw mode's primitives are. */
+static GLenum xfb_class(GLenum mode)
+{
+    return mode == GL_POINTS ? GL_POINTS : mode <= GL_LINE_STRIP ? GL_LINES : GL_TRIANGLES;
 }
 
 /* Binding k's room in bytes. */
@@ -406,12 +423,26 @@ static ULONG room(const struct OGLES3XfbBinding *r)
     return r->size && r->size < size - r->offset ? r->size : size - r->offset;
 }
 
+/* Room in every buffer for what `count` of `mode` (non-indexed, with no
+ * geometry shader) writes `instances` times. */
+BOOL ogles2_xfb_fits(struct OGLES3Context *ctx, GLenum mode, GLsizei count, GLsizei instances)
+{
+    struct OGLES3Xfb *o = ctx->xfb->bound;
+    const struct OGLES3ImageXfb *x = o->program && o->program->image ? o->program->image->xfb : 0;
+    ULONG n = verts(mode, count) * (ULONG)(instances > 0 ? instances : 0);
+    int k;
+    if (!x)
+        return FALSE;
+    for (k = 0; k < OGLES3_MAX_XFB_BUFFERS; k++)
+        if (x->stride[k] && (o->written[k] + n) * x->stride[k] * 4 > room(&o->bind[k]))
+            return FALSE;
+    return TRUE;
+}
+
 BOOL ogles2_xfb_draw_ok(struct OGLES3Context *ctx, GLenum mode, GLsizei count, GLsizei instances)
 {
     struct OGLES3Xfb *o;
     const struct OGLES3ImageXfb *x;
-    ULONG n;
-    int k;
     if (!ogles2_xfb_drawing(ctx))
         return TRUE;
     o = ctx->xfb->bound;
@@ -427,17 +458,19 @@ BOOL ogles2_xfb_draw_ok(struct OGLES3Context *ctx, GLenum mode, GLsizei count, G
         }
         return TRUE;
     }
-    /* ES 3.0 2.15.2: the mode begun with, and room for every vertex */
-    if (mode != o->mode || !x) {
+    /* ES 3.0 2.15.2: the mode begun with, and room for every vertex;
+     * EXT_geometry_shader's relaxation (ES 3.1 contexts offer it): a strip,
+     * loop or fan of the primitives begun with too */
+    if (!x || (mode != o->mode && (!ogles2_es31(ctx) || xfb_class(mode) != o->mode))) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return FALSE;
     }
-    n = verts(mode, count) * (ULONG)(instances > 0 ? instances : 0);
-    for (k = 0; k < OGLES3_MAX_XFB_BUFFERS; k++)
-        if (x->stride[k] && (o->written[k] + n) * x->stride[k] * 4 > room(&o->bind[k])) {
-            ogles2_error(ctx, GL_INVALID_OPERATION);
-            return FALSE;
-        }
+    /* EXT_geometry_shader: no room is no error, the writes stop at a
+     * buffer's end (ES 3.2 12.1.2; draw.c then reads the binner's counts) */
+    if (!ogles2_es31(ctx) && !ogles2_xfb_fits(ctx, mode, count, instances)) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return FALSE;
+    }
     return TRUE;
 }
 
@@ -509,7 +542,7 @@ void ogles2_xfb_after_draw(struct OGLES3Context *ctx, GLenum mode, GLsizei count
     for (k = 0; k < OGLES3_MAX_XFB_BUFFERS; k++)
         if (x->stride[k])
             o->written[k] += n;
-    ogles2_query_xfb_add(ctx, n / (mode == GL_TRIANGLES ? 3 : mode == GL_LINES ? 2 : 1));
+    ogles2_query_xfb_add(ctx, n / (o->mode == GL_TRIANGLES ? 3 : o->mode == GL_LINES ? 2 : 1));
 }
 
 /* PRIMITIVE_COUNTS_FEEDBACK's seven words, at a 32-byte boundary (0-3 the

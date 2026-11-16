@@ -1300,6 +1300,7 @@ BOOL ogles2_xfb_drawing(const struct OGLES3Context *ctx);
 BOOL ogles2_xfb_program_busy(const struct OGLES3Context *ctx, const struct OGLES3Program *p);
 BOOL ogles2_xfb_uses_buffer(const struct OGLES3Context *ctx, const struct OGLES3Buffer *b);
 BOOL ogles2_xfb_draw_ok(struct OGLES3Context *ctx, GLenum mode, GLsizei count, GLsizei instances);
+BOOL ogles2_xfb_fits(struct OGLES3Context *ctx, GLenum mode, GLsizei count, GLsizei instances);
 BOOL ogles2_xfb_before_draw(struct OGLES3Context *ctx, GLenum mode, BOOL psiz);
 void ogles2_xfb_after_draw(struct OGLES3Context *ctx, GLenum mode, GLsizei count, GLsizei instances);
 void ogles2_xfb_job_end(struct OGLES3Context *ctx);

@@ -237,6 +237,29 @@ another program"): `pipe_validate` says so too, a draw
 when Mesa refuses a key-state draw through it. Not possible on this GPU
 and its Mesa driver: RGB32 buffer textures, `EXT_gpu_shader5`,
 tessellation (so no ES 3.2 context), ASTC HDR and 3D.
+**dEQP-GLES31 `functional.geometry_shading.*` on the A1200 (2026-11-16,
+`BRIDGE=1 ARGS="CASES=... NAME=gs" tests/a1200/a_run.sh m8-3`, the
+programs compiled on the PC): 198 of 207 passed, none failed, 9 not
+supported** (`basic.output_256`: 2048 output components, the limit is
+1024; eight `*_2d_multisample_array` cases:
+`OES_texture_storage_multisample_2d_array`, not offered). The first run
+(176 passed, 11 failed, then aborted) found two faults, fixed:
+- **The adjacency primitives** went to the GPU as GL's numbers (0xA to
+  0xD); the hardware's are 8 to 11 (Mesa's `v3d_hw_prim_type`):
+  `GL_LINES_ADJACENCY` drew as triangles with adjacency. `draw.c`'s
+  `HW_PRIM` at each packet.
+- **EXT_geometry_shader's feedback relaxations** (ES 3.1 contexts, which
+  offer it; Mesa's draw_validate.c with `OES_geometry_shader`): a strip,
+  loop or fan of the primitives begun with feeds back (its primitives'
+  vertices each: `xfb.c`'s `verts`, Mesa's u_stream_outputs_for_vertices);
+  indexed and indirect draws feed back; no room is no error (the writes
+  stop at the buffer's end). Such a draw, indexed, GPU-read indirect or
+  without room, reads the binner's counts after its own job (as a geometry
+  shader's: `gpu_count`, `ogles2_xfb_fits`); the GPU-read indirect path
+  passed `fed` FALSE there, now the draw's. ES 3.0 contexts keep 3.0's
+  errors (`m8_es3`).
+`m8-5` after these: 330 checks, none failed.
+
 **Run on the A1200 (2026-11-16, amigent, `tests/a1200/a_run.sh m8-5`
 with `LIBS_INSTALL=1`): 330 checks, 0 failed.** `m8_es31` 94 of 94 on the
 GPU; `m8_draw` 236 of 236 with every new `es32` test (`test_geometry`:

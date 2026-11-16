@@ -2575,6 +2575,11 @@ static void put_le32(UBYTE *b, ULONG x)
     b[3] = (UBYTE)(x >> 24);
 }
 
+/* A GL draw mode as the packets' primitive (Mesa's v3d_hw_prim_type): the
+ * same up to GL_TRIANGLE_FAN; the adjacency modes (GL 0xA to 0xD) are 8 to
+ * 11 (V3D_PRIM_LINES_ADJACENCY on). */
+#define HW_PRIM(m) ((UBYTE)((m) >= GL_LINES_ADJACENCY_EXT ? (m) - 2 : (m)))
+
 /* POINT_SIZE 1.0, VCM_CACHE_SIZE, GL_SHADER_STATE, then INDEX_BUFFER_SETUP
  * and INDEXED_PRIM_LIST (itype: v3d_INDEX_TYPE_*), or VERTEX_ARRAY_PRIMS
  * when itype < 0: v3dcore's writers' bytes (v3d_commands.c), written
@@ -3154,7 +3159,7 @@ static __attribute__((noinline)) void indirect_packets(V3DContext *v, const stru
     UBYTE *b = v3d_buffer_claim_memory(v->current_buf, el ? 32 : 23);
     if (!b)
         return;
-    draw_packets(b, cs->vcm_cache_size, vs->vcm_cache_size, rec, nslots ? nslots : 1, (UBYTE)mode, -1, 0, 0, 0, 0, 1,
+    draw_packets(b, cs->vcm_cache_size, vs->vcm_cache_size, rec, nslots ? nslots : 1, HW_PRIM(mode), -1, 0, 0, 0, 0, 1,
                  0); /* bytes 0-11: point size, VCM cache, shader state */
     if (g)
         gs_packets(b, g); /* the geometry stage's VPM and shader state (EXT_geometry_shader) */
@@ -3165,13 +3170,13 @@ static __attribute__((noinline)) void indirect_packets(V3DContext *v, const stru
         b[21] = v3d_OP_INDIRECT_INDEXED_INSTANCED_PRIM_LIST;
         b[22] = (UBYTE)(((itype_gl == GL_UNSIGNED_INT ? v3d_INDEX_TYPE_32_BIT
                           : itype_gl == GL_UNSIGNED_SHORT ? v3d_INDEX_TYPE_16_BIT : v3d_INDEX_TYPE_8_BIT) << 6) |
-                        (mode & 63));
+                        HW_PRIM(mode));
         put_le32(b + 23, 1 | (el->restart ? 0x80000000UL : 0)); /* one record, primitive restart */
         put_le32(b + 27, ind);
         b[31] = 5; /* DrawElementsIndirectCommand: 20 bytes */
     } else {
         b[12] = v3d_OP_INDIRECT_VERTEX_ARRAY_INSTANCED_PRIMS;
-        b[13] = (UBYTE)mode;
+        b[13] = HW_PRIM(mode);
         put_le32(b + 14, 1);
         put_le32(b + 18, ind);
         b[22] = 4; /* DrawArraysIndirectCommand: 16 bytes */
@@ -3332,8 +3337,14 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
     /* Counts only the binner knows: a geometry shader's output fed back or
      * counted, or a draw counted whose primitives restart or whose command
      * the GPU wrote. Its job is its own (the open one rendered first), read
-     * back after it (ogles2_xfb_gpu_counts). */
-    gpu_count = im->geometry ? gen || ogles2_xfb_drawing(ctx) : gen && ((el && el->restart) || (gd && gd->ind_addr));
+     * back after it (ogles2_xfb_gpu_counts). EXT_geometry_shader's
+     * feedback of an indexed or GPU-read indirect draw, or of one with no
+     * room for all it writes (the writes stop at the end; ES 3.1 contexts),
+     * too. */
+    gpu_count = im->geometry ? gen || ogles2_xfb_drawing(ctx)
+              : (gen && ((el && el->restart) || (gd && gd->ind_addr))) ||
+                (__builtin_expect(ctx->xfb_begun, 0) && ogles2_xfb_drawing(ctx) &&
+                 (el || (gd && gd->ind_addr) || !ogles2_xfb_fits(ctx, mode, count, instances)));
     /* a buffer's two GPU copies one apart: settled before the job is built */
     if (__builtin_expect(ogles2_mixed_writes_seen, 0))
         ogles2_buffers_settle(ctx);
@@ -3777,7 +3788,8 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
     v->current_buf = &v->binning_buf[v->build_slot];
     emit_state(ctx, &d->dd, (int)mode, fs);
     /* Transform feedback: its specs and buffers before the primitives, its
-     * flush after them (xfb.c; never indexed: draw_elements refuses that). */
+     * flush after them (xfb.c; indexed only in ES 3.1 contexts, with
+     * EXT_geometry_shader: draw_elements refuses it in others). */
     if (__builtin_expect(ctx->job_xfb, 0) && ctx->xfb_draws != ctx->xfb_waited)
         xfb_wait(ctx, p);
     /* never begun: never used; a geometry shader's: its binning variant's
@@ -3792,7 +3804,7 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
     if (__builtin_expect(gd != 0, 0) && gd->ind_addr) {
         indirect_packets(v, cs, vs, rec, nslots, mode, el, itype_gl, idx_addr, idx_size, gd->ind_addr, g);
         if (gpu_count)
-            ogles2_xfb_gpu_counts(ctx, FALSE);
+            ogles2_xfb_gpu_counts(ctx, xfb);
         mark(ctx, 7);
         return;
     }
@@ -3802,7 +3814,7 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
                   : itype_gl == GL_UNSIGNED_SHORT ? v3d_INDEX_TYPE_16_BIT : v3d_INDEX_TYPE_8_BIT;
         UBYTE *b = v3d_buffer_claim_memory(v->current_buf, (el ? 31 : 22) + (instances > 1 ? 4 : 0));
         if (b) {
-            draw_packets(b, cs->vcm_cache_size, vs->vcm_cache_size, rec, nslots ? nslots : 1, (UBYTE)mode,
+            draw_packets(b, cs->vcm_cache_size, vs->vcm_cache_size, rec, nslots ? nslots : 1, HW_PRIM(mode),
                          itype, idx_addr, idx_size,
                          el ? ((ULONG)el->count & 0x7FFFFFFFUL) | (el->restart ? 0x80000000UL : 0) : (ULONG)count,
                          vid ? (ULONG)first : 0, (ULONG)instances, ioffset);
@@ -3817,7 +3829,7 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
     if (instances > 1) { /* v3dcore has no writers for the instanced packets: ours */
         UBYTE *b = v3d_buffer_claim_memory(v->current_buf, el ? 35 : 26);
         if (b) {
-            draw_packets(b, cs->vcm_cache_size, vs->vcm_cache_size, rec, nslots ? nslots : 1, (UBYTE)mode,
+            draw_packets(b, cs->vcm_cache_size, vs->vcm_cache_size, rec, nslots ? nslots : 1, HW_PRIM(mode),
                          el ? (itype_gl == GL_UNSIGNED_INT ? v3d_INDEX_TYPE_32_BIT
                                : itype_gl == GL_UNSIGNED_SHORT ? v3d_INDEX_TYPE_16_BIT : v3d_INDEX_TYPE_8_BIT) : -1,
                          idx_addr, idx_size,
@@ -3838,14 +3850,14 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
         /* Mesa's order: INDEX_BUFFER_SETUP, then INDEXED_PRIM_LIST.
          * Primitive restart: ES 3.0's fixed index only (none in GLES2). */
         IndexBufferSetup(v, idx_addr, idx_size);
-        IndexedPrimList(v, (UBYTE)mode, itype_gl == GL_UNSIGNED_INT     ? v3d_INDEX_TYPE_32_BIT
+        IndexedPrimList(v, HW_PRIM(mode), itype_gl == GL_UNSIGNED_INT     ? v3d_INDEX_TYPE_32_BIT
                                         : itype_gl == GL_UNSIGNED_SHORT ? v3d_INDEX_TYPE_16_BIT
                                                                         : v3d_INDEX_TYPE_8_BIT,
                         (ULONG)el->count, el->restart, 0);
     } else {
         /* The copies start at `first`: vertex 0 is their first, except for
          * gl_VertexID (the addresses moved back, above). */
-        VertexArrayPrims(v, (UBYTE)mode, (ULONG)count, vid ? (ULONG)first : 0);
+        VertexArrayPrims(v, HW_PRIM(mode), (ULONG)count, vid ? (ULONG)first : 0);
     }
     if (xfb || gpu_count)
         xfb_after(ctx, gpu_count, xfb, mode, count, instances);
@@ -4069,8 +4081,12 @@ static void draw_elements(struct OGLES3Context *ctx, GLenum mode, GLsizei count,
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
-    if (ctx->xfb_begun && ogles2_xfb_drawing(ctx)) { /* ES 3.0 2.15.2: no indexed draw feeds back */
-        ogles2_error(ctx, GL_INVALID_OPERATION);
+    /* ES 3.0 2.15.2: no indexed draw feeds back; EXT_geometry_shader (ES
+     * 3.1 contexts): one does, of the mode begun with or its strips */
+    if (ctx->xfb_begun && ogles2_xfb_drawing(ctx) &&
+        (!ogles2_es31(ctx) || !ogles2_xfb_draw_ok(ctx, mode, 0, 1))) {
+        if (!ogles2_es31(ctx))
+            ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
     if (!ogles2_fb_ready(ctx))
@@ -4363,7 +4379,8 @@ static BOOL indirect_command(struct OGLES3Context *ctx, const void *indirect, UL
 {
     GLenum e;
     int k;
-    if (!ogles2_vao_bound(ctx) || ogles2_xfb_drawing(ctx)) {
+    /* EXT_geometry_shader (ES 3.1 contexts) lifts the feedback error */
+    if (!ogles2_vao_bound(ctx) || (ogles2_xfb_drawing(ctx) && !ogles2_es31(ctx))) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return FALSE;
     }
@@ -4396,10 +4413,12 @@ static BOOL gpu_indirect(struct OGLES3Context *ctx, GLenum mode, GLenum type, co
     BOOL fed;
     GLenum e;
     int k;
-    if (!ogles2_vao_bound(ctx) || ogles2_xfb_drawing(ctx)) {
+    if (!ogles2_vao_bound(ctx) || (ogles2_xfb_drawing(ctx) && !ogles2_es31(ctx))) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return TRUE;
     }
+    if (ctx->xfb_begun && !ogles2_xfb_draw_ok(ctx, mode, 0, 1)) /* the mode begun with */
+        return TRUE;
     for (k = 0; k < OGLES3_MAX_VERTEX_ATTRIBS; k++)
         if (ctx->array[k].enabled && !ctx->array[k].buffer) {
             ogles2_error(ctx, GL_INVALID_OPERATION);
