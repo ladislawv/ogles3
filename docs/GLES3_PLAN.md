@@ -28,7 +28,48 @@ its bytes, then the rest as before: `take_geometry`), the serve paths now
 pass `bindings` for `LINK`, `LINK32` and `LINK_A2C` too (only the GEOM part
 is read there), and `V3DGLSL_COMPILE_GEOMETRY` (12) checks one alone. A
 `SERVE` request of the program above wrote a file identical to the command
-line's; the bridge's 31 programs as before.
+line's; the bridge's 31 programs as before. Both compilers rebuilt.
+
+**Stages B to D, what is left (the map for the next session):**
+- **B, the library reads it.** `program.c`: `GL_GEOMETRY_SHADER_EXT` in
+  `glCreateShader` (ES 3.1 contexts), its compile through
+  `V3DGLSL_COMPILE_GEOMETRY` (`compiler.c`), `p->gs` beside `vs`/`fs`
+  (attach, detach, `GL_ATTACHED_SHADERS`), the link request's `bindings`
+  with the GEOM part in front, and `program_hash` with the geometry source
+  as stage 3 after the vertex shader's (`write_program`'s order: vertex,
+  geometry, fragment, then the link state). `v3dp.c`: feature bit 5,
+  `STAGE_PARAMS` and the uniform block list of stage 3, a uniform's third
+  sampler index, VARIANT stages 2 and 3 into `struct OGLES3Variant` (the
+  gs prog data: `uses_pid`, `num_inputs`, `simd_width`, `out_prim_type`,
+  `num_invocations`, `writes_psiz`, `input_slots`, `vpm_output_size`). The
+  stage-sized arrays become three: `ogles3_internal.h`'s `sampler[2]`,
+  `cbuf_words[2]`, `cbuf_template[2]`, `stage_nblocks[2]`, `stage_block[2]`,
+  `stage_nsblocks[2]`, `stage_sblock[2]`, the program's `cbuf[2]`,
+  `cbuf_le[2]`, `cbuf_ver[2]`, `us_var[2]`/`us_*[2]`, `var_bits[2]`, and
+  draw.c's `struct tex_states`' `[2]`s, with each loop over them. The
+  program queries: `GL_GEOMETRY_LINKED_VERTICES_OUT`, `_INPUT_TYPE`,
+  `_OUTPUT_TYPE`, `_SHADER_INVOCATIONS`; the limits (`v3dglslc -L` lists
+  them).
+- **C, the draw** (Mesa's `v3dx_draw.c`, lines 340-460 and 700-890 at the
+  pinned commit): a `GEOMETRY_SHADER_STATE_RECORD` (the gs_bin and gs
+  code, uniforms, threading) and `TESSELLATION_GEOMETRY_COMMON_PARAMS` and
+  two `TESSELLATION_GEOMETRY_SHADER_PARAMS` (bin and render: output
+  primitive `GEOMETRY_SHADER_POINTS`/`LINE_STRIP`/`TRI_STRIP`, invocations,
+  SIMD width, VPM output sizes) in the indirect list after the shader
+  state record; `GL_SHADER_STATE_INCLUDING_GS` instead of `GL_SHADER_STATE`;
+  `v3d_compute_vpm_config` with the geometry stages (the VPM's
+  segments for vs, gs and their binning ones; v3dcore has the 1.x form
+  without them); the geometry variants' uniform streams (their own
+  `TMU_CONFIG`s: a third stage in `write_uniforms`); the vertex variant's
+  key's used outputs from the geometry stage's inputs; the adjacency
+  primitive types (`GL_*_ADJACENCY_EXT`, V3D's own primitive codes); the
+  draw refused for a primitive the geometry shader does not take.
+- **D, layered rendering:** `glFramebufferTextureEXT` (all layers),
+  `GL_FRAMEBUFFER_ATTACHMENT_LAYERED`, completeness
+  (`GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS`), and the job: Mesa's
+  `TILE_BINNING_MODE_CFG.number_of_layers` (`v3dx_draw.c` 61), the tile
+  allocation by layers (`v3d_tile_alloc_sizes`) and one render of every
+  layer in the RCL (`v3dx_rcl.c` 941, its supertile coordinates by layer).
 
 **`KHR_blend_equation_advanced` and `_coherent`, item 7's second half
 (2026-11-16, built, not run; ES3 contexts).** The compiler had them: Mesa's
