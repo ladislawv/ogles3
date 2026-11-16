@@ -2501,7 +2501,8 @@ void ogles2_glUseProgramStages(struct OGLES3Context *ctx, GLuint pipeline, GLbit
     }
     pp->bound_once = TRUE;
     if (stages != GL_ALL_SHADER_BITS &&
-        (stages & ~(GLbitfield)(GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT | GL_COMPUTE_SHADER_BIT))) {
+        (stages & ~(GLbitfield)(GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT | GL_COMPUTE_SHADER_BIT |
+                                GL_GEOMETRY_SHADER_BIT_EXT))) { /* a separable program has no geometry stage */
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }

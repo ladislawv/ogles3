@@ -3853,6 +3853,23 @@ BOOL ogles2_texture_renderable(struct OGLES3Texture *t, int k, int l)
     return ogles2_texture_rt(t, k, l, &rf);
 }
 
+/* EXT_geometry_shader: level l of t as a layered attachment (fbo.c): its
+ * layers (a cube map's six faces, an array's layers, a cube map array's
+ * layer-faces, a 3D texture's slices at l) and, with a GPU copy, the bytes
+ * from one layer's image to the next in it (face_gpu's steps); 0: not a
+ * layered target. */
+int ogles2_texture_layers(const struct OGLES3Texture *t, int l, ULONG *stride)
+{
+    if (stride)
+        *stride = 0;
+    if ((t->target != GL_TEXTURE_CUBE_MAP && !layered(t)) || l < 0 || l >= MAX_LEVELS)
+        return 0;
+    if (stride && t->gpu && l < t->gpu->num_levels)
+        *stride = t->target == GL_TEXTURE_3D ? (ULONG)t->gpu->levels[l].padded_h * t->gpu->levels[l].stride
+                                              : t->face_stride;
+    return faces_at(t, l);
+}
+
 BOOL ogles2_texture_surface(struct OGLES3Context *ctx, struct OGLES3Texture *t, int k, int l,
                             struct OGLES3Surface *s)
 {

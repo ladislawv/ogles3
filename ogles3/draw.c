@@ -1172,6 +1172,8 @@ static __attribute__((noinline)) ULONG rare_uniform(struct OGLES3Context *ctx, c
         return (ULONG)V3D_ALIGN_UP((v3d_uintptr)ctx->draw->spill.hostptr, 256);
     case OGLES3_U_SPILL_SIZE_PER_THREAD:
         return ctx->draw->spill_size;
+    case OGLES3_U_FB_LAYERS: /* Mesa's job->num_layers */
+        return ctx->job_layers ? ctx->job_layers : 1;
     case OGLES3_U_PISTORM_VP_WIDTH:
         return float_bits((GLfloat)ctx->viewport[2]);
     case OGLES3_U_PISTORM_VP_HEIGHT:

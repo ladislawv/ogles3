@@ -430,3 +430,5 @@ glTexBufferRangeOES
 glTexStorage3DMultisampleOES
 glMinSampleShadingOES
 glBlendBarrierKHR
+glFramebufferTextureEXT
+glFramebufferTextureOES

@@ -267,6 +267,7 @@ struct OGLES3Array
 #define OGLES3_U_SPILL_OFFSET      31 /* the context's spill area (register spilling, draw.c) */
 #define OGLES3_U_SPILL_SIZE_PER_THREAD 32
 #define OGLES3_U_SHARED_OFFSET     33 /* compute: the dispatch's shared memory's address */
+#define OGLES3_U_FB_LAYERS         35 /* EXT_geometry_shader: the job's layers (gl_Layer beyond: layer 0) */
 #define OGLES3_U_BLEND_CONSTANT_R  42 /* to _A, 45 */
 #define OGLES3_U_CLIP_Z_COEFF      46 /* Mesa patch 0013 (EXT_clip_control): z lerped towards w */
 #define OGLES3_U_PISTORM_VP_WIDTH  0x100 /* PiStorm3D's scale_p: viewport width in pixels */
@@ -735,6 +736,7 @@ struct OGLES3Surface
     UBYTE force_alpha1;    /* load: an RGB format */
     UBYTE cpp;             /* bytes per pixel of the image */
     ULONG ub;              /* UIF: padded height in UIF blocks; else 0 */
+    ULONG layer_stride;    /* EXT_geometry_shader: a layered attachment's bytes from a layer to the next */
 };
 
 /* A colour render target's format (texture.c, ogles2_texture_rt; GLES3
@@ -778,6 +780,7 @@ struct OGLES3Target
     struct OGLES3RtFormat rt[OGLES3_MAX_DRAW_BUFFERS]; /* the drawn targets' formats */
     UBYTE depth_type;      /* V3D_INTERNAL_TYPE_DEPTH* for the tile buffer */
     ULONG ta_addr, ta_size, ts_addr; /* own tile pools, 4096-aligned; 0: the context's fit */
+    UWORD layers;          /* EXT_geometry_shader: a layered framebuffer's layers rendered (1: not layered) */
 };
 
 struct OGLES3Context
@@ -870,6 +873,7 @@ struct OGLES3Context
     struct OGLES3Framebuffer *read_fb; /* ES 3.0's GL_READ_FRAMEBUFFER binding (GLES2: draw_fb's) */
     struct OGLES3Framebuffer *job_fb;  /* what the open job renders into */
     BOOL job_msaa;                  /* the open job is 4x MSAA (the default framebuffer's, or multisampled renderbuffers', job.c) */
+    UWORD job_layers;               /* the open job's layers (EXT_geometry_shader's layered framebuffers, job.c) */
     UWORD fb_w, fb_h;
     BOOL fb_flip;                   /* the default framebuffer: drawn upside down (plan 7.11) */
     UBYTE fb_depth_bits, fb_stencil_bits, fb_depth_format;
@@ -996,6 +1000,7 @@ BOOL ogles2_texture_image(const struct OGLES3Texture *t, int k, int l, UWORD *w,
 /* Colour-renderable (plan 7.7; ES 3.0's formats, stage B item 10), and the
  * image's format as a render target. */
 BOOL ogles2_texture_renderable(struct OGLES3Texture *t, int k, int l);
+int ogles2_texture_layers(const struct OGLES3Texture *t, int l, ULONG *stride);
 BOOL ogles2_texture_rt(struct OGLES3Texture *t, int k, int l, struct OGLES3RtFormat *rf);
 UWORD ogles2_float_to_half(GLfloat f); /* IEEE half precision, by the bits (texture.c) */
 /* glCopyTex* on the GPU (copy.c): the default framebuffer's region tiled by

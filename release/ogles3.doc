@@ -133,8 +133,10 @@ ogles3.library/--background--                   ogles3.library/--background--
        with _coherent (blended in the fragment shader);
        3.1 contexts EXT_ and OES_texture_cube_map_array, EXT_ and
        OES_texture_buffer (not the RGB32 formats: GL_INVALID_ENUM;
-       imageBuffer stores of 8- and 16-bit formats are not read back), OES_texture_storage_multisample_2d_array and
-       OES_texture_stencil8.
+       imageBuffer stores of 8- and 16-bit formats are not read back), OES_texture_storage_multisample_2d_array,
+       OES_texture_stencil8, and EXT_ and OES_geometry_shader with
+       _geometry_point_size (layered colour attachments, up to 256 layers;
+       not with transform feedback, indirect draws or separable programs).
 
        KHR_debug: debug messages with their filters and debug groups, the
        message log (64 messages of at most 256 characters) or the
@@ -275,8 +277,12 @@ ogles3.library/--deviations--                   ogles3.library/--deviations--
      renderbuffer, a multisample texture, the default framebuffer) gets
      4, and GL_MAX_SAMPLES is 4.
    - Textures of 32-bit float formats are sampled with nearest filtering.
-   - No OpenGL ES 3.2: no geometry or tessellation shaders, no texture
-     buffers, cube map arrays or ES 3.2's extensions.
+   - No OpenGL ES 3.2 contexts and no tessellation shaders; ES 3.2's
+     other features come as the extensions above.
+   - A geometry shader draws only with the program's precompiled
+     variants; with transform feedback, or an indirect draw, it draws
+     nothing (logged). Layered framebuffers have no layered depth or
+     stencil.
    - Stencil a draw wrote into a DEPTH32F_STENCIL8 texture is replaced by
      the uploaded stencil when part of that texture is uploaded again
      (glTexSubImage*).

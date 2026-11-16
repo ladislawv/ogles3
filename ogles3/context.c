@@ -423,6 +423,10 @@ static const struct { const char *name; UBYTE in; } extensions[] = {
     /* item 7's second half: the advanced equations, blended in the shader
      * by Mesa's lowering to framebuffer fetch (state.c, draw.c) */
     {"GL_KHR_blend_equation_advanced", EXT_ES3}, {"GL_KHR_blend_equation_advanced_coherent", EXT_ES3},
+    /* item 9: geometry shaders (the compiler's, program.c, draw.c; layered
+     * framebuffers: fbo.c, job.c) */
+    {"GL_EXT_geometry_shader", EXT_ES31}, {"GL_OES_geometry_shader", EXT_ES31},
+    {"GL_EXT_geometry_point_size", EXT_ES31}, {"GL_OES_geometry_point_size", EXT_ES31},
 };
 #define NUM_EXTENSIONS (sizeof(extensions) / sizeof(extensions[0]))
 

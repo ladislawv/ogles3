@@ -94,6 +94,45 @@ line's; the bridge's 31 programs as before. Both compilers rebuilt.
   GPU-read draws (logged, not drawn); the 32-bit-sampler, alpha-to-coverage
   and draw-time variants of geometry programs.
 
+**Stage D, done (2026-11-16, built; not run): layered rendering, and the
+extension offered.**
+- `fbo.c`: `glFramebufferTextureEXT`/`OES` (new entries, `gen/api.txt`):
+  a level of a 3D texture, cube map, 2D or cube map array or multisample
+  array is attached layered (`OGLES3Attachment.layered`, face 0), of any
+  other the level's one image; `GL_FRAMEBUFFER_ATTACHMENT_LAYERED`;
+  `GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS` when some attachments are
+  layered and some not, or the layered colour ones are of two targets;
+  `GL_FRAMEBUFFER_DEFAULT_LAYERS` (at most 256). A job's layers
+  (`OGLES3Target.layers`, `fb_layers`): the fewest of its layered
+  attachments' (`ogles2_texture_layers`: faces, layers, a cube map
+  array's layer-faces, a 3D level's slices), the default layers without
+  attachments, at most 256 (`NUMBER_OF_LAYERS`' eight bits; also
+  `GL_MAX_FRAMEBUFFER_LAYERS`); each layered surface's `layer_stride`
+  (`face_stride`, a 3D level's slice size: `face_gpu`'s steps); tile pools
+  by layers (Mesa's `v3d_job_allocate_tile_state`); every layer marked
+  rendered.
+- `job.c`: `NUMBER_OF_LAYERS` the job's layers; the render list's
+  configuration once, then per layer (Mesa's `emit_render_layer`) a
+  generic tile list loading and storing that layer's images, its tile
+  list base a layer of tiles on in the tile allocation, the supertile
+  configuration, the two dummy tiles and its supertiles. `draw.c`:
+  `QUNIFORM_FB_LAYERS` (35, which a geometry shader writing `gl_Layer`
+  reads) the job's layers (`ctx->job_layers`).
+- Offered in ES 3.1 contexts: `EXT_`/`OES_geometry_shader` and
+  `_geometry_point_size` (`context.c`); the geometry limits (`state.c`,
+  `v3dglslc -L`'s), `GL_LAYER_PROVOKING_VERTEX` `GL_UNDEFINED_VERTEX`;
+  `glUseProgramStages` takes `GL_GEOMETRY_SHADER_BIT` (a separable program
+  has no geometry stage). A program with `gl_Layer`, `invocations = 4` and
+  `gl_PointSize` compiled on the PC.
+- **Not yet:** layered depth or stencil (depth textures attach as 2D
+  only: an array's is `GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT`, a
+  renderbuffer beside a layered attachment `_LAYER_TARGETS`); a big
+  layered job may overflow the render list (64 KB: supertile coordinates
+  per layer; dropped and logged, `any_overflow`). Every layer of a layered
+  framebuffer is loaded and stored by each job into it.
+- **To run:** dEQP-GLES31 `functional.geometry_shading.*`, and
+  `functional.state_query` and `negative_api` with the extension.
+
 **Stages B to D, what is left (the map for the next session):**
 - **B, the library reads it.** `program.c`: `GL_GEOMETRY_SHADER_EXT` in
   `glCreateShader` (ES 3.1 contexts), its compile through

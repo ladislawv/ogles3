@@ -95,6 +95,7 @@ struct OGLES3Attachment
     struct OGLES3Texture *tex;
     UWORD face;                 /* a cube map's face, a 2D array's layer, a 3D texture's slice */
     UBYTE level;
+    BOOL layered;               /* EXT_geometry_shader's glFramebufferTextureEXT: every layer (face 0) */
     struct OGLES3Renderbuffer *rb;
 };
 
@@ -113,7 +114,11 @@ struct OGLES3Framebuffer
     UWORD default_w, default_h;
     UBYTE default_samples;
     GLboolean default_fixed;
+    UWORD default_layers;       /* EXT_geometry_shader's GL_FRAMEBUFFER_DEFAULT_LAYERS */
 };
+
+/* GL_MAX_FRAMEBUFFER_LAYERS_EXT: NUMBER_OF_LAYERS' eight bits (job.c) */
+#define MAX_FB_LAYERS 256
 
 struct OGLES3FboState
 {
@@ -900,8 +905,9 @@ static void attach(struct OGLES3Context *ctx, struct OGLES3Framebuffer *fb, int 
         } else if (t) {
             at->type = GL_TEXTURE;
             at->tex = t;
-            at->face = (UWORD)face;
+            at->face = face < 0 ? 0 : (UWORD)face; /* -1: layered (glFramebufferTextureEXT) */
             at->level = (UBYTE)level;
+            at->layered = face < 0;
         }
     }
     ogles2_fb_update(ctx);
@@ -1016,6 +1022,61 @@ void ogles2_glFramebufferTextureLayer(struct OGLES3Context *ctx, GLenum target, 
         }
     }
     attach(ctx, fb, a, 0, t, layer, level);
+}
+
+/* EXT_geometry_shader 9.2.8 (ES 3.2's glFramebufferTexture): a level of a
+ * texture; of a 3D texture, a cube map, a 2D or cube map array or a
+ * multisample array every layer (a layered attachment, rendered into by
+ * gl_Layer), else the level's one image. */
+static void fb_texture(struct OGLES3Context *ctx, GLenum target, GLenum attachment, GLuint texture, GLint level)
+{
+    struct OGLES3Texture *t = 0;
+    struct OGLES3Framebuffer *fb;
+    int a, which, face = 0;
+    if (!ogles2_es31_entry(ctx) || !fs_get(ctx))
+        return;
+    a = attachment_index(ctx, attachment);
+    if (!(which = fb_target(ctx, target))) {
+        ogles2_error(ctx, GL_INVALID_ENUM);
+        return;
+    }
+    if (a < 0) {
+        ogles2_error(ctx, bad_attachment(ctx, attachment));
+        return;
+    }
+    if (!(fb = target_fb(ctx, which))) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return;
+    }
+    if (texture) {
+        GLenum tt;
+        if (!(t = ogles2_texture_get(ctx, texture)) || !(tt = ogles2_texture_target(t)) ||
+            tt == GL_TEXTURE_BUFFER_OES) {
+            ogles2_error(ctx, GL_INVALID_OPERATION);
+            return;
+        }
+        if (level < 0 || level > (tt == GL_TEXTURE_3D ? 11 : 12) ||
+            ((tt == GL_TEXTURE_2D_MULTISAMPLE || tt == GL_TEXTURE_2D_MULTISAMPLE_ARRAY_OES ||
+              tt == GL_TEXTURE_RECTANGLE) && level != 0)) {
+            ogles2_error(ctx, GL_INVALID_VALUE);
+            return;
+        }
+        if (ogles2_texture_layers(t, level, 0) || tt == GL_TEXTURE_CUBE_MAP)
+            face = -1;
+    }
+    attach(ctx, fb, a, 0, t, face, level);
+}
+
+void ogles2_glFramebufferTextureEXT(struct OGLES3Context *ctx, GLenum target, GLenum attachment, GLuint texture,
+                                    GLint level)
+{
+    fb_texture(ctx, target, attachment, texture, level);
+}
+
+void ogles2_glFramebufferTextureOES(struct OGLES3Context *ctx, GLenum target, GLenum attachment, GLuint texture,
+                                    GLint level)
+{
+    fb_texture(ctx, target, attachment, texture, level);
 }
 
 /* ---- EXT_discard_framebuffer, ES 3.0's invalidation ---- */
@@ -1292,13 +1353,25 @@ static GLenum status_of(struct OGLES3Context *ctx, struct OGLES3Framebuffer *fb)
     const struct OGLES3Attachment *d = &fb->att[ATT_DEPTH], *s = &fb->att[ATT_STENCIL];
     BOOL es3 = ogles2_es3(ctx);
     UWORD w0 = 0, h0 = 0, w, h;
-    int a, n = 0, samples = -1, fixed = -1;
+    int a, n = 0, samples = -1, fixed = -1, layered = -1;
+    GLenum layer_target = 0;
     for (a = 0; a < NATT; a++) {
         const struct OGLES3Attachment *at = &fb->att[a];
         int ns;
         GLboolean fx = GL_TRUE;
         if (at->type == GL_NONE)
             continue;
+        /* EXT_geometry_shader 9.4.2: every attachment layered or none, the
+         * layered colour ones of one texture target */
+        if (layered >= 0 && (int)at->layered != layered)
+            return GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS_EXT;
+        layered = at->layered;
+        if (at->layered && a < ATT_DEPTH) {
+            GLenum tt = ogles2_texture_target(at->tex);
+            if (layer_target && tt != layer_target)
+                return GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS_EXT;
+            layer_target = tt;
+        }
         if (!att_size(at, &w, &h) || !w || !h)
             return GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT;
         if (at->type == GL_RENDERBUFFER) {
@@ -1315,9 +1388,10 @@ static GLenum status_of(struct OGLES3Context *ctx, struct OGLES3Framebuffer *fb)
             UBYTE bits;
             BOOL st;
             /* OES_texture_stencil8: a stencil texture for the stencil */
-            if (a == ATT_STENCIL && !at->face && ogles2_texture_stencil8(at->tex, at->level))
+            if (a == ATT_STENCIL && !at->face && !at->layered && ogles2_texture_stencil8(at->tex, at->level))
                 ;
-            else if (at->face || !ogles2_texture_depth(at->tex, at->level, &bits, &st) || (a == ATT_STENCIL && !st))
+            else if (at->face || at->layered || !ogles2_texture_depth(at->tex, at->level, &bits, &st) ||
+                     (a == ATT_STENCIL && !st))
                 return GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT;
         }
         /* ES 3.1 9.4.2: the same samples (a multisample texture's
@@ -1528,7 +1602,8 @@ static BOOL pools(struct OGLES3Context *ctx, struct OGLES3Framebuffer *fb, struc
     v3d_u32 zs, ts, ta, tx, ty;
     /* The job's tiles (smaller with several render targets), and as many
      * as the context's pools were made for (32x32 with 4x MSAA). */
-    ULONG tiles = (ULONG)((t->w + t->tile_w - 1) / t->tile_w) * ((t->h + t->tile_h - 1) / t->tile_h);
+    ULONG tiles = (ULONG)((t->w + t->tile_w - 1) / t->tile_w) * ((t->h + t->tile_h - 1) / t->tile_h) *
+                  (t->layers ? t->layers : 1); /* a layered job's: each layer's tile lists and state */
     ULONG ct = ctx->msaa ? 32 : 64, mine = (ULONG)((v->width + ct - 1) / ct) * ((v->height + ct - 1) / ct);
     t->ta_addr = t->ta_size = t->ts_addr = 0;
     if (tiles <= mine)
@@ -1546,6 +1621,10 @@ static BOOL pools(struct OGLES3Context *ctx, struct OGLES3Framebuffer *fb, struc
         v3d_frame_compute_pool_sizes(t->tile_w < 32 ? (UWORD)(t->w * (32 / t->tile_w)) : t->w,
                                      t->tile_h < 32 ? (UWORD)(t->h * (32 / t->tile_h)) : t->h, 16,
                                      t->tile_w < 64 || t->tile_h < 64, &zs, &ts, &ta, &tx, &ty);
+        if (t->layers > 1) { /* Mesa's sizes for that many layers (v3d_job_allocate_tile_state) */
+            ts *= t->layers;
+            ta = ((ta - 8192 - 512 * 1024) * t->layers + 4095) / 4096 * 4096 + 8192 + 512 * 1024;
+        }
         if (v3d_mem_alloc(ogles2_device(), &fb->pool_alloc, ta + 4096) < 0)
             return FALSE;
         if (v3d_mem_alloc(ogles2_device(), &fb->pool_state, ts + 4096) < 0) {
@@ -1566,6 +1645,27 @@ static BOOL pools(struct OGLES3Context *ctx, struct OGLES3Framebuffer *fb, struc
     t->ta_size = (ULONG)fb->pool_alloc.size - (t->ta_addr - (ULONG)fb->pool_alloc.hostptr);
     t->ts_addr = ((ULONG)fb->pool_state.hostptr + 4095) & ~4095UL;
     return TRUE;
+}
+
+/* EXT_geometry_shader: the layers a job of fb renders: 1 unless layered,
+ * else the fewest its layered attachments have (ES 3.2 9.8: a layer
+ * beyond an attachment's is not drawn), or its default layers without
+ * attachments; at most NUMBER_OF_LAYERS' 256. */
+static UWORD fb_layers(const struct OGLES3Framebuffer *fb)
+{
+    int a, n = 0;
+    for (a = 0; a < NATT; a++) {
+        const struct OGLES3Attachment *at = &fb->att[a];
+        int k;
+        if (at->type != GL_TEXTURE || !at->layered)
+            continue;
+        k = ogles2_texture_layers(at->tex, at->level, 0);
+        if (k > 0 && (!n || k < n))
+            n = k;
+    }
+    if (no_attachments(fb))
+        n = fb->default_layers;
+    return (UWORD)(n < 1 ? 1 : n > MAX_FB_LAYERS ? MAX_FB_LAYERS : n);
 }
 
 BOOL ogles2_fbo_target(struct OGLES3Context *ctx, struct OGLES3Framebuffer *fb, BOOL surfaces,
@@ -1606,6 +1706,7 @@ BOOL ogles2_fbo_target(struct OGLES3Context *ctx, struct OGLES3Framebuffer *fb, 
         t->tile_w = sizes[2 * k];
         t->tile_h = sizes[2 * k + 1];
     }
+    t->layers = fb_layers(fb);
     if (!t->w || !t->h || !pools(ctx, fb, t))
         return FALSE;
     if (!surfaces)
@@ -1617,6 +1718,8 @@ BOOL ogles2_fbo_target(struct OGLES3Context *ctx, struct OGLES3Framebuffer *fb, 
         if (c->type == GL_TEXTURE) {
             if (!ogles2_texture_surface(ctx, c->tex, c->face, c->level, &t->color[i]))
                 return FALSE;
+            if (c->layered)
+                ogles2_texture_layers(c->tex, c->level, &t->color[i].layer_stride);
         } else if (c->type == GL_RENDERBUFFER) {
             if (!c->rb->color || !ogles2_texture_surface(ctx, c->rb->color, 0, 0, &t->color[i]))
                 return FALSE;
@@ -1683,7 +1786,11 @@ void ogles2_fbo_rendered(struct OGLES3Context *ctx, struct OGLES3Framebuffer *fb
     (void)ctx;
     for (a = ATT_COLOR; a < ATT_DEPTH; a++) {
         const struct OGLES3Attachment *c = &fb->att[a];
-        if (c->type == GL_TEXTURE)
+        if (c->type == GL_TEXTURE && c->layered) { /* every layer (EXT_geometry_shader) */
+            int k, n = ogles2_texture_layers(c->tex, c->level, 0);
+            for (k = 0; k < n; k++)
+                ogles2_texture_rendered(c->tex, k, c->level);
+        } else if (c->type == GL_TEXTURE)
             ogles2_texture_rendered(c->tex, c->face, c->level);
         else if (c->type == GL_RENDERBUFFER && c->rb->color)
             ogles2_texture_rendered(c->rb->color, 0, 0);
@@ -2045,7 +2152,8 @@ static struct OGLES3Framebuffer *param_fb(struct OGLES3Context *ctx, GLenum targ
     int which;
     if (!(which = fb_target(ctx, target)) ||
         (pname != GL_FRAMEBUFFER_DEFAULT_WIDTH && pname != GL_FRAMEBUFFER_DEFAULT_HEIGHT &&
-         pname != GL_FRAMEBUFFER_DEFAULT_SAMPLES && pname != GL_FRAMEBUFFER_DEFAULT_FIXED_SAMPLE_LOCATIONS)) {
+         pname != GL_FRAMEBUFFER_DEFAULT_SAMPLES && pname != GL_FRAMEBUFFER_DEFAULT_FIXED_SAMPLE_LOCATIONS &&
+         pname != GL_FRAMEBUFFER_DEFAULT_LAYERS_EXT)) { /* EXT_geometry_shader's */
         ogles2_error(ctx, GL_INVALID_ENUM);
         return 0;
     }
@@ -2061,6 +2169,7 @@ void ogles2_glFramebufferParameteri(struct OGLES3Context *ctx, GLenum target, GL
         return;
     if (param < 0 || ((pname == GL_FRAMEBUFFER_DEFAULT_WIDTH || pname == GL_FRAMEBUFFER_DEFAULT_HEIGHT)
                           ? param > OGLES3_MAX_VIEWPORT /* GL_MAX_FRAMEBUFFER_WIDTH, _HEIGHT */
+                          : pname == GL_FRAMEBUFFER_DEFAULT_LAYERS_EXT ? param > MAX_FB_LAYERS
                           : pname == GL_FRAMEBUFFER_DEFAULT_SAMPLES && param > 4)) { /* GL_MAX_FRAMEBUFFER_SAMPLES */
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
@@ -2070,6 +2179,7 @@ void ogles2_glFramebufferParameteri(struct OGLES3Context *ctx, GLenum target, GL
     case GL_FRAMEBUFFER_DEFAULT_WIDTH:   fb->default_w = (UWORD)param; break;
     case GL_FRAMEBUFFER_DEFAULT_HEIGHT:  fb->default_h = (UWORD)param; break;
     case GL_FRAMEBUFFER_DEFAULT_SAMPLES: fb->default_samples = (UBYTE)param; break;
+    case GL_FRAMEBUFFER_DEFAULT_LAYERS_EXT: fb->default_layers = (UWORD)param; break;
     default:                             fb->default_fixed = param ? GL_TRUE : GL_FALSE; break;
     }
 }
@@ -2082,6 +2192,7 @@ void ogles2_glGetFramebufferParameteriv(struct OGLES3Context *ctx, GLenum target
     *params = pname == GL_FRAMEBUFFER_DEFAULT_WIDTH     ? fb->default_w
             : pname == GL_FRAMEBUFFER_DEFAULT_HEIGHT    ? fb->default_h
             : pname == GL_FRAMEBUFFER_DEFAULT_SAMPLES   ? fb->default_samples
+            : pname == GL_FRAMEBUFFER_DEFAULT_LAYERS_EXT ? fb->default_layers
                                                         : fb->default_fixed;
 }
 
@@ -2329,6 +2440,12 @@ void ogles2_glGetFramebufferAttachmentParameteriv(struct OGLES3Context *ctx, GLe
         if (at->type == GL_TEXTURE) {
             *params = ogles2_texture_target(at->tex) == GL_TEXTURE_CUBE_MAP
                           ? (GLint)(GL_TEXTURE_CUBE_MAP_POSITIVE_X + at->face) : 0;
+            return;
+        }
+        break;
+    case GL_FRAMEBUFFER_ATTACHMENT_LAYERED_EXT: /* EXT_geometry_shader */
+        if (ogles2_es31(ctx) && at->type == GL_TEXTURE) {
+            *params = at->layered;
             return;
         }
         break;

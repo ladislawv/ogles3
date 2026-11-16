@@ -169,7 +169,9 @@ to 45 `QUNIFORM_BLEND_CONSTANT_A` at 74b69717c52b, and 46 `QUNIFORM_CLIP_Z_COEFF
 `EXT_clip_control`'s `ZERO_TO_ONE`, else 0; `v3dp_dump.py` lists them); the reader
 checks the commit (header) and rejects types it does not implement (plan section 8.6). For
 `QUNIFORM_UNIFORM` the data word is an index, in 32-bit units, into the stage's constant
-buffer (`STAGE_PARAMS`); for `QUNIFORM_CONSTANT` it is the value itself.
+buffer (`STAGE_PARAMS`); for `QUNIFORM_CONSTANT` it is the value itself. A geometry shader
+that writes `gl_Layer` reads 35 `QUNIFORM_FB_LAYERS`, the job's framebuffer layers (1 when
+not layered; Mesa's compiler sends a layer beyond them to layer 0).
 
 Variants appear in the order the driver compiled them, without duplicates. The runtime uses
 a variant only when its key equals the key the draw computes, field by field; anything else

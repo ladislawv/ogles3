@@ -143,7 +143,8 @@ static BOOL recipe_ok(ULONG t)
            t == OGLES3_U_LINE_WIDTH || t == OGLES3_U_AA_LINE_WIDTH ||
            t == OGLES3_U_SPILL_OFFSET || t == OGLES3_U_SPILL_SIZE_PER_THREAD ||
            (t >= OGLES3_U_BLEND_CONSTANT_R && t <= OGLES3_U_BLEND_CONSTANT_R + 3) || t == OGLES3_U_CLIP_Z_COEFF ||
-           t == OGLES3_U_IMAGE_TMU_CONFIG_P0 || (t >= OGLES3_U_IMAGE_WIDTH && t <= OGLES3_U_IMAGE_ARRAY_SIZE);
+           t == OGLES3_U_IMAGE_TMU_CONFIG_P0 || (t >= OGLES3_U_IMAGE_WIDTH && t <= OGLES3_U_IMAGE_ARRAY_SIZE) ||
+           t == OGLES3_U_FB_LAYERS; /* a geometry shader writing gl_Layer */
 }
 
 /* ES 3.1's types, a compute shader's only so far (compute.c writes them;

@@ -41,7 +41,7 @@ void BlendCfg(V3DContext* context, UBYTE renderTargetMask, UBYTE colorDstFactor,
 void TransformFeedbackSpecs(V3DContext* context, UBYTE enable, UBYTE no16b);
 void SampleState(V3DContext* context, UWORD coverage, UBYTE mask);
 void VCMCacheSize(V3DContext* context, UBYTE cbinning, UBYTE crendering);
-void NumberOfLayers(V3DContext* context, UBYTE layers);
+void NumberOfLayers(V3DContext* context, UWORD layers);
 void glShaderState(V3DContext* context, ULONG staterecordAddress, ULONG attr_count);
 void VertexArrayPrims(V3DContext* context, UBYTE mode, ULONG length, ULONG index);
 void VertexArrayInstancedPrims(V3DContext* context, UBYTE mode, ULONG length, ULONG instances, ULONG index);

@@ -208,6 +208,7 @@ void ogles2_job_begin(struct OGLES3Context *ctx)
     struct OGLES3Target tg;
     UWORD w = v->width, h = v->height;
     UBYTE nrt = 1, bpp = V3D_INTERNAL_BPP_32, tw, th;
+    UWORD layers = 1; /* EXT_geometry_shader: a layered framebuffer's (ogles2_fbo_target) */
     BOOL bad = FALSE;
     v3d_u8 s;
 
@@ -229,11 +230,13 @@ void ogles2_job_begin(struct OGLES3Context *ctx)
             h = tg.h;
             nrt = tg.nrt;
             bpp = tg.bpp;
+            layers = tg.layers ? tg.layers : 1;
         } else {
             bad = TRUE; /* no memory for its tile pools: the job is dropped at the flush */
         }
     }
     ctx->job_fb = ctx->draw_fb;
+    ctx->job_layers = layers;
     /* 4x MSAA on the default framebuffer (plan 7.2): 32x32 tiles, Mesa's
      * v3d_choose_tile_size for one 32-bpp target; the hardware derives the
      * same from the configuration packets. An object's with multisampled
@@ -273,8 +276,9 @@ void ogles2_job_begin(struct OGLES3Context *ctx)
 
     v->current_buf = &v->binning_buf[s];
     SetBuffer(v, &v->binning_buf[s]);
-    /* As Mesa's v3d_start_binning (v3dx_draw.c). */
-    NumberOfLayers(v, 1);
+    /* As Mesa's v3d_start_binning (v3dx_draw.c): a layered framebuffer's
+     * layers, each with tile lists of its own (gl_Layer picks them). */
+    NumberOfLayers(v, layers);
     TileBinningModeCfg(v, v3d_TILE_ALLOCATION_INITIAL_BLOCK_SIZE_64B,
                        v3d_TILE_ALLOCATION_BLOCK_SIZE_64B, nrt, bpp, ctx->job_msaa, FALSE, w, h);
     DoCommand(v, v3d_OP_FLUSH_VCD_CACHE);
@@ -666,6 +670,7 @@ static void build_render_fbo(struct OGLES3Context *ctx, const struct OGLES3Targe
     UBYTE early_zs_clear = !(tg->has_z || tg->has_s);
     UBYTE dm = tg->msaa ? V3D_DECIMATE_MODE_ALL_SAMPLES : V3D_DECIMATE_MODE_SAMPLE_0;
     const struct OGLES3Surface *c, *z = &tg->z, *st = &tg->s;
+    ULONG layer, nl = tg->layers ? tg->layers : 1; /* EXT_geometry_shader: a layered framebuffer's */
 
     v->current_buf = &v->binning_buf[s];
     SetBuffer(v, &v->binning_buf[s]);
@@ -674,53 +679,7 @@ static void build_render_fbo(struct OGLES3Context *ctx, const struct OGLES3Targe
         DoCommand(v, v3d_OP_INCREMENT_SEMAPHORE);
     DoCommand(v, v3d_OP_FLUSH);
 
-    /* Generic tile list. */
-    v->current_buf = &v->tile_list_buf[s];
-    SetBuffer(v, &v->tile_list_buf[s]);
-    start = CurrentBufferAddress(v);
-    DoCommand(v, v3d_OP_TILE_COORDINATES_IMPLICIT);
-    if (!(no_load & OGLES3_DISCARD_COLOR))
-        for (rt = 0; rt < tg->nrt; rt++)
-            if ((tg->colors & (1 << rt)) && !(clear_color && (ctx->job_clear_targets & (1 << rt)))) {
-                c = &tg->color[rt];
-                LoadTileBufferGeneral(v, v3d_RENDER_TARGET_0 + rt, c->mem_format, FALSE, dm, c->format,
-                                      c->force_alpha1, FALSE, FALSE, c->ub, 0, c->addr);
-            }
-    if (!clear_zs) {
-        if (tg->has_z && !((no_load & OGLES3_DISCARD_DEPTH) &&
-                           (!tg->packed_zs || (no_load & OGLES3_DISCARD_STENCIL) || !ctx->fb_stencil_bits)))
-            LoadTileBufferGeneral(v, tg->packed_zs ? v3d_ZSTENCIL : v3d_Z, z->mem_format, FALSE, dm, z->format,
-                                  FALSE, FALSE, FALSE, z->ub, 0, z->addr);
-        if (tg->has_s && !(no_load & OGLES3_DISCARD_STENCIL))
-            LoadTileBufferGeneral(v, v3d_STENCIL, st->mem_format, FALSE, dm, st->format, FALSE, FALSE, FALSE,
-                                  st->ub, 0, st->addr);
-    }
-    DoCommand(v, v3d_OP_END_OF_LOADS);
-    PrimListFormat(v, v3d_LIST_TRIANGLES, FALSE);
-    SetInstanceid(v, 0);
-    BranchToImplicitTileList(v, 0);
-    if (store_c)
-        for (rt = 0; rt < tg->nrt; rt++)
-            if (tg->colors & (1 << rt)) {
-                c = &tg->color[rt];
-                StoreTileBufferGeneral(v, v3d_RENDER_TARGET_0 + rt, c->mem_format, FALSE, V3D_DITHER_MODE_NONE,
-                                       dm, c->format, FALSE, FALSE, FALSE, c->ub, 0, c->addr);
-            }
-    if (store_z)
-        StoreTileBufferGeneral(v, tg->packed_zs ? v3d_ZSTENCIL : v3d_Z, z->mem_format, FALSE,
-                               V3D_DITHER_MODE_NONE, dm, z->format, FALSE, FALSE, FALSE, z->ub, 0, z->addr);
-    if (store_s)
-        StoreTileBufferGeneral(v, v3d_STENCIL, st->mem_format, FALSE, V3D_DITHER_MODE_NONE, dm, st->format,
-                               FALSE, FALSE, FALSE, st->ub, 0, st->addr);
-    if (!store_c && !store_z && !store_s) /* Mesa: a tile stores something */
-        StoreTileBufferGeneral(v, v3d_NONE, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    if (clear_color || clear_zs)
-        ClearTileBuffers(v, !early_zs_clear, TRUE);
-    DoCommand(v, v3d_OP_END_OF_TILE_MARKER);
-    DoCommand(v, v3d_OP_RETURN_FROM_SUB_LIST);
-    end = CurrentBufferAddress(v);
-
-    /* Render list. */
+    /* Render list (its layers' parts after the configuration, below). */
     v->current_buf = &v->render_buf[s];
     SetBuffer(v, &v->render_buf[s]);
     if (ctx->probe & OGLES3_PROBE_SEMAPHORE)
@@ -768,22 +727,84 @@ static void build_render_fbo(struct OGLES3Context *ctx, const struct OGLES3Targe
         else
             sh++;
     }
-    Multicore_Rendering_Tile_List_Set_Base(v, ta, 0);
-    MulticoreRenderingSupertileCFG(v, sw, sh, fw, fh, 1, FALSE, FALSE, tilesY, tilesX);
+    /* Each layer (one without a layered framebuffer; Mesa's
+     * emit_render_layer): its generic tile list, loading and storing its
+     * images (a layer stride on in each layered image), then its part of
+     * the render list: its tile lists (the binner's, a layer of tiles on in
+     * the tile allocation), the two dummy tiles, its supertiles. */
+    for (layer = 0; layer < nl; layer++) {
+        ULONG cl[OGLES3_MAX_DRAW_BUFFERS], za = z->addr + layer * z->layer_stride,
+              sa = st->addr + layer * st->layer_stride;
+        for (rt = 0; rt < tg->nrt; rt++)
+            cl[rt] = tg->color[rt].addr + layer * tg->color[rt].layer_stride;
 
-    TileCoordinates(v, 0, 0);
-    DoCommand(v, v3d_OP_END_OF_LOADS);
-    StoreTileBufferGeneral(v, v3d_NONE, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    ClearTileBuffers(v, !early_zs_clear, TRUE);
-    DoCommand(v, v3d_OP_END_OF_TILE_MARKER);
-    TileCoordinates(v, 0, 0);
-    DoCommand(v, v3d_OP_END_OF_LOADS);
-    StoreTileBufferGeneral(v, v3d_NONE, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    DoCommand(v, v3d_OP_END_OF_TILE_MARKER);
-    DoCommand(v, v3d_OP_FLUSH_VCD_CACHE);
+        /* Generic tile list. */
+        v->current_buf = &v->tile_list_buf[s];
+        SetBuffer(v, &v->tile_list_buf[s]);
+        start = CurrentBufferAddress(v);
+        DoCommand(v, v3d_OP_TILE_COORDINATES_IMPLICIT);
+        if (!(no_load & OGLES3_DISCARD_COLOR))
+            for (rt = 0; rt < tg->nrt; rt++)
+                if ((tg->colors & (1 << rt)) && !(clear_color && (ctx->job_clear_targets & (1 << rt)))) {
+                    c = &tg->color[rt];
+                    LoadTileBufferGeneral(v, v3d_RENDER_TARGET_0 + rt, c->mem_format, FALSE, dm, c->format,
+                                          c->force_alpha1, FALSE, FALSE, c->ub, 0, cl[rt]);
+                }
+        if (!clear_zs) {
+            if (tg->has_z && !((no_load & OGLES3_DISCARD_DEPTH) &&
+                               (!tg->packed_zs || (no_load & OGLES3_DISCARD_STENCIL) || !ctx->fb_stencil_bits)))
+                LoadTileBufferGeneral(v, tg->packed_zs ? v3d_ZSTENCIL : v3d_Z, z->mem_format, FALSE, dm,
+                                      z->format, FALSE, FALSE, FALSE, z->ub, 0, za);
+            if (tg->has_s && !(no_load & OGLES3_DISCARD_STENCIL))
+                LoadTileBufferGeneral(v, v3d_STENCIL, st->mem_format, FALSE, dm, st->format, FALSE, FALSE, FALSE,
+                                      st->ub, 0, sa);
+        }
+        DoCommand(v, v3d_OP_END_OF_LOADS);
+        PrimListFormat(v, v3d_LIST_TRIANGLES, FALSE);
+        SetInstanceid(v, 0);
+        BranchToImplicitTileList(v, 0);
+        if (store_c)
+            for (rt = 0; rt < tg->nrt; rt++)
+                if (tg->colors & (1 << rt)) {
+                    c = &tg->color[rt];
+                    StoreTileBufferGeneral(v, v3d_RENDER_TARGET_0 + rt, c->mem_format, FALSE,
+                                           V3D_DITHER_MODE_NONE, dm, c->format, FALSE, FALSE, FALSE, c->ub, 0,
+                                           cl[rt]);
+                }
+        if (store_z)
+            StoreTileBufferGeneral(v, tg->packed_zs ? v3d_ZSTENCIL : v3d_Z, z->mem_format, FALSE,
+                                   V3D_DITHER_MODE_NONE, dm, z->format, FALSE, FALSE, FALSE, z->ub, 0, za);
+        if (store_s)
+            StoreTileBufferGeneral(v, v3d_STENCIL, st->mem_format, FALSE, V3D_DITHER_MODE_NONE, dm, st->format,
+                                   FALSE, FALSE, FALSE, st->ub, 0, sa);
+        if (!store_c && !store_z && !store_s) /* Mesa: a tile stores something */
+            StoreTileBufferGeneral(v, v3d_NONE, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        if (clear_color || clear_zs)
+            ClearTileBuffers(v, !early_zs_clear, TRUE);
+        DoCommand(v, v3d_OP_END_OF_TILE_MARKER);
+        DoCommand(v, v3d_OP_RETURN_FROM_SUB_LIST);
+        end = CurrentBufferAddress(v);
 
-    StartAddressOfGenericTileList(v, start, end);
-    supertiles(v, width, height, sw, sh, tg->tile_w, tg->tile_h);
+        /* The layer's part of the render list. */
+        v->current_buf = &v->render_buf[s];
+        SetBuffer(v, &v->render_buf[s]);
+        Multicore_Rendering_Tile_List_Set_Base(v, ta + layer * tilesX * tilesY * 64, 0);
+        MulticoreRenderingSupertileCFG(v, sw, sh, fw, fh, 1, FALSE, FALSE, tilesY, tilesX);
+
+        TileCoordinates(v, 0, 0);
+        DoCommand(v, v3d_OP_END_OF_LOADS);
+        StoreTileBufferGeneral(v, v3d_NONE, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        ClearTileBuffers(v, !early_zs_clear, TRUE);
+        DoCommand(v, v3d_OP_END_OF_TILE_MARKER);
+        TileCoordinates(v, 0, 0);
+        DoCommand(v, v3d_OP_END_OF_LOADS);
+        StoreTileBufferGeneral(v, v3d_NONE, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        DoCommand(v, v3d_OP_END_OF_TILE_MARKER);
+        DoCommand(v, v3d_OP_FLUSH_VCD_CACHE);
+
+        StartAddressOfGenericTileList(v, start, end);
+        supertiles(v, width, height, sw, sh, tg->tile_w, tg->tile_h);
+    }
     DoCommand(v, v3d_OP_END_OF_RENDERING);
 }
 

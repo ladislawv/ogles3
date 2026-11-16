@@ -432,7 +432,7 @@ void SampleState(V3DContext* context, UWORD coverage, UBYTE mask)
  * mode configuration. It is required for layered framebuffers to work",
  * v3dx_draw.c:58-65) with num_layers = 1 for an ordinary framebuffer. The
  * field is minus-one encoded (v3d_packet.xml:940). */
-void NumberOfLayers(V3DContext* context, UBYTE layers)
+void NumberOfLayers(V3DContext* context, UWORD layers)
 {
     v3d_static_buffer* buffer = context->current_buf;
 
