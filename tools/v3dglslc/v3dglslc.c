@@ -1084,12 +1084,49 @@ static int print_limits(void)
  * as struct V3DGLSLRequest's (0 done, 1 compile or link failed, 3 not
  * understood), the messages into log. `bindings` and `keys` only for the
  * ops that carry them (NULL else). */
+static int handle_one(uint32_t op, const char *vs, const char *fs, const char *out_path, const char *bindings,
+                      const uint8_t *keys, uint32_t keys_len, uint32_t layout_crc, char *log, size_t log_size);
+
+/* A request: its geometry shader taken off the link state first
+ * (V3DGLSL_GEOM_MARK, any link op's), then handle_one. */
 static int handle(uint32_t op, const char *vs, const char *fs, const char *out_path, const char *bindings,
                   const uint8_t *keys, uint32_t keys_len, uint32_t layout_crc, char *log, size_t log_size)
 {
-    int result;
+    char *gs;
+    int bad, result;
     if (log && log_size)
         log[0] = 0;
+    if (op == V3DGLSL_COMPILE_GEOMETRY) { /* EXT_geometry_shader: the front end only */
+        int ok;
+        GLuint s;
+        char info[2048];
+        if (!vs) {
+            log_add(log, log_size, "the compiler does not understand this request", NULL);
+            return 3;
+        }
+        s = compile_src(GL_GEOMETRY_SHADER, "geometry shader", vs, &ok, NULL, 0);
+        info[0] = 0;
+        glGetShaderInfoLog(s, sizeof(info), NULL, info);
+        log_add(log, log_size, info, NULL);
+        glDeleteShader(s);
+        return ok ? 0 : 1;
+    }
+    bindings = take_geometry(bindings, &gs, &bad);
+    if (bad) {
+        log_add(log, log_size, "the compiler does not understand this request", NULL);
+        return 3;
+    }
+    link_gs_src = gs;
+    result = handle_one(op, vs, fs, out_path, bindings, keys, keys_len, layout_crc, log, log_size);
+    link_gs_src = NULL;
+    free(gs);
+    return result;
+}
+
+static int handle_one(uint32_t op, const char *vs, const char *fs, const char *out_path, const char *bindings,
+                      const uint8_t *keys, uint32_t keys_len, uint32_t layout_crc, char *log, size_t log_size)
+{
+    int result;
     /* ES 3.1: a compute shader, its source in `vs` */
     if (op == V3DGLSL_COMPILE_COMPUTE || op == V3DGLSL_LINK_COMPUTE) {
         int ok;
@@ -1252,7 +1289,8 @@ static int serve_stdio(void)
         }
         k = handle(op, s[0], s[1], s[4],
                    op == V3DGLSL_LINK_BOUND || op == V3DGLSL_COMPILE_VARIANT || op == V3DGLSL_LINK_SEPARABLE ||
-                           op == V3DGLSL_LINK_PIPELINE
+                           op == V3DGLSL_LINK_PIPELINE || op == V3DGLSL_LINK || op == V3DGLSL_LINK32 ||
+                           op == V3DGLSL_LINK_A2C
                        ? s[2]
                        : NULL,
                    op == V3DGLSL_COMPILE_VARIANT ? (const uint8_t *)s[3] : NULL, n[3], crc, log, sizeof(log));
@@ -1320,9 +1358,12 @@ static int serve(void)
                 quit = 1;
             } else {
                 /* An older sender's request ends before the fields its op
-                 * does not read (v3dglsl_port.h). */
+                 * does not read (v3dglsl_port.h); every ogles3.library's has
+                 * `bindings`, which every link op reads for a geometry
+                 * shader in front (V3DGLSL_GEOM_MARK). */
                 int bound = r->op == V3DGLSL_LINK_BOUND || r->op == V3DGLSL_COMPILE_VARIANT ||
-                            r->op == V3DGLSL_LINK_SEPARABLE || r->op == V3DGLSL_LINK_PIPELINE;
+                            r->op == V3DGLSL_LINK_SEPARABLE || r->op == V3DGLSL_LINK_PIPELINE ||
+                            r->op == V3DGLSL_LINK || r->op == V3DGLSL_LINK32 || r->op == V3DGLSL_LINK_A2C;
                 int variant = r->op == V3DGLSL_COMPILE_VARIANT;
                 r->result = handle(r->op, r->vs, r->fs, r->out_path, bound ? r->bindings : NULL,
                                    variant ? r->keys : NULL, variant ? r->keys_len : 0,

@@ -20,8 +20,15 @@ one keep their layout), a third sampler index per uniform, and feature bit
 in, a strip of 3 out, a uniform) + fragment program: its file holds
 vertex, vertex binning, geometry, geometry binning and fragment variants,
 the vertex key's used outputs the geometry stage's inputs. The library
-refuses such a file until stage B (an unknown feature bit). The request
-protocol (a geometry source in `V3DGLSL_LINK`) is stage B's.
+refuses such a file until stage B (an unknown feature bit). **The request
+protocol, done (stage B's first part):** a geometry shader rides in front
+of any link op's link state (`V3DGLSL_GEOM_MARK`, "GEOM <length>
+" and
+its bytes, then the rest as before: `take_geometry`), the serve paths now
+pass `bindings` for `LINK`, `LINK32` and `LINK_A2C` too (only the GEOM part
+is read there), and `V3DGLSL_COMPILE_GEOMETRY` (12) checks one alone. A
+`SERVE` request of the program above wrote a file identical to the command
+line's; the bridge's 31 programs as before.
 
 **`KHR_blend_equation_advanced` and `_coherent`, item 7's second half
 (2026-11-16, built, not run; ES3 contexts).** The compiler had them: Mesa's

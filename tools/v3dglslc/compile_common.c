@@ -171,6 +171,32 @@ static GLuint compile_src(GLenum type, const char *label, const char *src, int *
  * geometry shader the next link_pair links between its two, NULL for none
  * (the command line's .geom; a request's geometry source). */
 static const char *link_gs_src;
+#ifndef V3DGLSL_GEOM_MARK
+#define V3DGLSL_GEOM_MARK "GEOM " /* v3dp/v3dglsl_port.h's (included after this file) */
+#endif
+
+/* A request's link state with a geometry shader in front (V3DGLSL_GEOM_MARK):
+ * its source copied into *gs (to free), the rest returned (NULL: none);
+ * without one `b` itself and *gs NULL. *bad: the part is malformed. */
+static const char *take_geometry(const char *b, char **gs, int *bad)
+{
+    unsigned long n = 0;
+    const char *p;
+    *gs = NULL;
+    *bad = 0;
+    if (!b || strncmp(b, V3DGLSL_GEOM_MARK, sizeof(V3DGLSL_GEOM_MARK) - 1))
+        return b;
+    for (p = b + sizeof(V3DGLSL_GEOM_MARK) - 1; *p >= '0' && *p <= '9'; p++)
+        n = n * 10 + (unsigned long)(*p - '0');
+    if (*p != '\n' || strlen(p + 1) < n || !(*gs = malloc(n + 1))) {
+        *bad = 1;
+        return NULL;
+    }
+    memcpy(*gs, p + 1, n);
+    (*gs)[n] = 0;
+    p += 1 + n;
+    return *p ? p : NULL;
+}
 
 /* Compile and link one vertex+fragment pair from memory, delete the GL
  * objects again, and with V3DC_WRITER and a `target` write the program

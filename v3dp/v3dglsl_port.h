@@ -78,6 +78,14 @@
                                   * (docs/GLES3_PLAN.md stage D item 5). A compiler older than this
                                   * answers 3. */
 #define V3DGLSL_PIPE_MARK "PIPE "
+/* EXT_geometry_shader (docs/GLES3_PLAN.md, the ES 3.2 plan's item 9): a
+ * program's geometry shader rides in front of its link state, in any link
+ * op's `bindings`: "GEOM <decimal length>
+" and the source's bytes, then
+ * the rest of the link state (the SEPA mark, bindings, XFBV) as before. */
+#define V3DGLSL_GEOM_MARK "GEOM "
+#define V3DGLSL_COMPILE_GEOMETRY 12 /* as COMPILE, `vs` a geometry shader. A compiler older than this
+                                     * answers 3. */
 #define V3DGLSL_KEY_OUTPUTS_FROM_FS 0x100 /* in a vertex key's stage word: its used outputs are
                                            * the inputs of the fragment variant compiled just
                                            * before it in the same request (Mesa's
