@@ -3660,6 +3660,44 @@ static void test_geometry(void)
     glDeleteProgram(pd);
 }
 
+/* KHR_blend_equation_advanced (docs/GLES3_PLAN.md item 7): es32adv declares
+ * blend_support_multiply only; drawn (0.5, 0.5, 0.5, 1) with GL_MULTIPLY_KHR
+ * over (1, 0.5, 0, 1): the product (128, 64, 0). The same program with
+ * GL_SCREEN_KHR, and es3flat (none declared) with GL_MULTIPLY_KHR, draw
+ * nothing: GL_INVALID_OPERATION (the file's ADVANCED_BLEND section). */
+static void test_advanced_blend(void)
+{
+    GLuint p = program("es32adv"), q = program("es3flat");
+    if (!p || !q) {
+        check(0, "advanced blending: es32adv and es3flat link");
+        if (p)
+            glDeleteProgram(p);
+        if (q)
+            glDeleteProgram(q);
+        return;
+    }
+    glClearColor(1, 0.5f, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glEnable(GL_BLEND);
+    glBlendEquation(GL_MULTIPLY_KHR);
+    draw_cover(p);
+    check(glGetError() == GL_NO_ERROR && pixel_is(32, 32, 128, 64, 0, 255, 2),
+          "advanced blending: multiply, as declared");
+    glBlendEquation(GL_SCREEN_KHR);
+    draw_cover(p);
+    check(glGetError() == GL_INVALID_OPERATION && pixel_is(32, 32, 128, 64, 0, 255, 2),
+          "advanced blending: screen, not declared: GL_INVALID_OPERATION, nothing drawn");
+    glBlendEquation(GL_MULTIPLY_KHR);
+    draw_cover(q);
+    check(glGetError() == GL_INVALID_OPERATION, "advanced blending: a program declaring none: GL_INVALID_OPERATION");
+    glBlendEquation(GL_FUNC_ADD);
+    glDisable(GL_BLEND);
+    glClearColor(0, 0, 0, 0);
+    glUseProgram(0);
+    glDeleteProgram(p);
+    glDeleteProgram(q);
+}
+
 static int skipped(const char *name)
 {
     const char *list = getenv("M8_SKIP");
@@ -3773,6 +3811,8 @@ int main(void)
                 test_pipelines();
             if (!skipped("geometry"))
                 test_geometry();
+            if (!skipped("advanced_blend"))
+                test_advanced_blend();
         }
     }
     check(glGetError() == GL_NO_ERROR, "no GL error left over");

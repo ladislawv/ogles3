@@ -14,7 +14,7 @@ KINDS = {0: "uniform", 1: "constant", 2: "state"}
 SECTIONS = {1: "PROGRAM", 2: "STRINGS", 3: "STAGE_PARAMS", 4: "UNIFORMS", 5: "ATTRIBUTES",
             6: "VARIANT", 7: "UNIFORM_BLOCKS", 8: "INTERFACE", 9: "VARIANT_OF",
             10: "TRANSFORM_FEEDBACK", 11: "STORAGE_BLOCKS", 12: "ATOMIC_BUFFERS", 13: "UNIFORM_LOCATIONS", 14: "OPAQUE_UNITS",
-            15: "INTERFACE_TYPES"}
+            15: "INTERFACE_TYPES", 16: "GEOMETRY", 17: "ADVANCED_BLEND"}
 FEATURE_TF = 0x1  # format 2: transform feedback (a TRANSFORM_FEEDBACK section)
 FEATURE_STORAGE = 0x2  # ES 3.1: shader storage blocks (a STORAGE_BLOCKS section)
 FEATURE_COMPUTE = 0x4  # ES 3.1: a compute program
@@ -339,6 +339,10 @@ def dump(path, show_qpu):
                        " (explicit)" if loc & 0x40000000 else "",
                        "-" if slot == 0xffffffff else slot))
             r.done()
+        elif t == 17:
+            modes = r.u32()
+            r.done()
+            print("ADVANCED_BLEND modes 0x%x" % modes)
         elif t == 16:
             gin, gout, nv, inv = r.u32(), r.u32(), r.u32(), r.u32()
             r.done()

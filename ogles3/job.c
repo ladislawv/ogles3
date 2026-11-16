@@ -641,6 +641,31 @@ static void pack_clear(struct OGLES3Context *ctx, const struct OGLES3RtFormat *r
     }
 }
 
+/* A layered job's lists (EXT_geometry_shader) grow with its layers: a
+ * slot's render or tile list buffer too small for `need` more bytes is
+ * replaced by a larger one before anything is written into it (its slot is
+ * not the GPU's: ogles2_job_flush waited for the render before). The new
+ * one stays the slot's. FALSE: no memory (the list overflows, the job is
+ * dropped and logged as before). */
+static BOOL list_room(v3d_mem *m, v3d_static_buffer *b, ULONG need)
+{
+    v3d_mem n;
+    if ((ULONG)(b->capacity - b->used) >= need)
+        return TRUE;
+    if (b->used)
+        return FALSE;
+    need = (need + 0xFFFFUL) & ~0xFFFFUL;
+    memset(&n, 0, sizeof(n));
+    if (v3d_mem_alloc(ogles2_device(), &n, need) < 0)
+        return FALSE;
+    v3d_mem_free(ogles2_device(), m);
+    *m = n;
+    b->start = (v3d_u8 *)m->hostptr;
+    v3d_cl_reset(m, b);
+    ogles2_log("job: a list buffer of %ld bytes for a layered framebuffer", (LONG)need);
+    return TRUE;
+}
+
 /* The render list of a framebuffer object's job (Mesa's v3dx_rcl.c): colour
  * loaded unless cleared, depth and stencil loaded unless cleared, all
  * stored, in the images' own layouts; no Y flip. Each colour image drawn
@@ -671,6 +696,14 @@ static void build_render_fbo(struct OGLES3Context *ctx, const struct OGLES3Targe
     UBYTE dm = tg->msaa ? V3D_DECIMATE_MODE_ALL_SAMPLES : V3D_DECIMATE_MODE_SAMPLE_0;
     const struct OGLES3Surface *c, *z = &tg->z, *st = &tg->s;
     ULONG layer, nl = tg->layers ? tg->layers : 1; /* EXT_geometry_shader: a layered framebuffer's */
+
+    /* A layered job's lists: per layer at most 256 bytes of generic tile
+     * list (loads and stores of 4 targets, depth and stencil) and 900 of
+     * render list (its tile lists, the dummy tiles, up to 255 supertiles'
+     * coordinates); the configuration once */
+    if (nl > 1 && (!list_room(&v->render_mem[s], &v->render_buf[s], 1024 + nl * 900) ||
+                   !list_room(&v->tile_list_mem[s], &v->tile_list_buf[s], 256 + nl * 256)))
+        ogles2_log("job: no memory for a layered framebuffer's lists (%ld layers)", (LONG)nl);
 
     v->current_buf = &v->binning_buf[s];
     SetBuffer(v, &v->binning_buf[s]);

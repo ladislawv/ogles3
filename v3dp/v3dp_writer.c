@@ -43,6 +43,7 @@ enum {
     SEC_OPAQUE_UNITS = 14,       /* format 2 */
     SEC_INTERFACE_TYPES = 15,    /* format 2: INTERFACE's structures (ES 3.1's interface matching) */
     SEC_GEOMETRY = 16,           /* format 2, with the feature bit V3DP_FEATURE_GEOMETRY */
+    SEC_ADVANCED_BLEND = 17,     /* format 2: KHR_blend_equation_advanced's blend_support modes */
 };
 
 enum { VARIANT_VS = 0, VARIANT_VS_BIN = 1, VARIANT_GS = 2, VARIANT_GS_BIN = 3, VARIANT_FS = 4, VARIANT_CS = 5 };
@@ -1310,6 +1311,20 @@ static int write_file(const char *path, struct gl_shader_program *prog, unsigned
         put_section(&body, SEC_UNIFORM_LOCATIONS, &sec);
         num_sections++;
         buf_free(&sec);
+        /* ADVANCED_BLEND: the fragment shader's blend_support modes (Mesa's
+         * info.fs.advanced_blend_modes, a bit per enum gl_advanced_blend_mode),
+         * which a draw blending with an advanced equation needs (Mesa's
+         * draw_validate.c); only when it declares some */
+        if (prog->_LinkedShaders[MESA_SHADER_FRAGMENT]) {
+            const struct gl_program *fp = prog->_LinkedShaders[MESA_SHADER_FRAGMENT]->Program;
+            uint32_t modes = fp->info.fs.advanced_blend_modes | (fp->nir ? fp->nir->info.fs.advanced_blend_modes : 0);
+            if (modes) {
+                put_u32(&sec, modes);
+                put_section(&body, SEC_ADVANCED_BLEND, &sec);
+                num_sections++;
+                buf_free(&sec);
+            }
+        }
     }
 
     if (v3dx) {

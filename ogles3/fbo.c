@@ -1650,6 +1650,17 @@ static BOOL pools(struct OGLES3Context *ctx, struct OGLES3Framebuffer *fb, struc
     return TRUE;
 }
 
+/* KHR_blend_equation_advanced's draw rule (Mesa's draw_validate.c): a
+ * draw buffer past the first is not GL_NONE. */
+BOOL ogles2_fbo_draws_beyond_0(const struct OGLES3Framebuffer *fb)
+{
+    int i;
+    for (i = 1; i < OGLES3_MAX_DRAW_BUFFERS; i++)
+        if (fb->draw_buf[i] != GL_NONE)
+            return TRUE;
+    return FALSE;
+}
+
 /* EXT_geometry_shader: a layered depth or stencil attachment's surface
  * steps a layer on per layer (job.c): a depth image a face stride, an S8
  * image (`s8`) its own bytes (ogles2_texture_s8_surface's layers). */

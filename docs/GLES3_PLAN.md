@@ -225,6 +225,25 @@ extension offered.**
   renderbuffer beside a layered attachment stays `_LAYER_TARGETS`, as the
   extension says.)
 
+**Remaining items, the first batch (2026-11-16, built; not run on the
+A1200).**
+- **A layered job's lists** (`job.c`, `list_room`): a render list (64 KB a
+  slot) or generic tile list buffer (32 KB) too small for a layered job's
+  layers (about 900 and 256 bytes each) is replaced by a larger one, the
+  slot's from then on, before the job's lists are written (the slot is not
+  the GPU's then); 256 layers fit now instead of being dropped.
+- **`KHR_blend_equation_advanced`'s draw rules** (Mesa's
+  `draw_validate.c`): a draw blending with an advanced equation is
+  `GL_INVALID_OPERATION` when a draw buffer past the first is not
+  `GL_NONE` (`ogles2_fbo_draws_beyond_0`) or the fragment shader does not
+  declare that equation's `blend_support`. The modes come from the
+  program file's new `ADVANCED_BLEND` section (17, FORMAT.md: Mesa's
+  `info.fs.advanced_blend_modes`, written only when some are declared,
+  after the layout CRC; older readers skip it; `blend_support_all_equations`
+  0xfffe), `OGLES3Image.blend_modes`, a pipeline's its fragment
+  program's. m8_draw `test_advanced_blend` (es32adv: multiply declared and
+  drawn, screen refused, es3flat refused).
+
 **Layered depth and stencil; depth and stencil by face or layer
 (2026-11-16, built; not run on the A1200).** Depth textures attached as 2D
 only (`ogles2_texture_depth` took 2D targets; a face or layer was
@@ -324,8 +343,8 @@ buffer 0 blends with one, the state variable holds its mode (Mesa's
 `_mesa_get_advanced_blend_sh_constant`, 1 to 15) and the tile buffer does
 not blend (`be`, software blending's key). `glBlendBarrierKHR` does nothing
 (the reads are coherent); `GL_BLEND_ADVANCED_COHERENT_KHR` is a capability,
-on. Not checked at the draw: a program that does not declare the mode, or
-more than one draw buffer (both `GL_INVALID_OPERATION` in the extension).
+on. Checked at the draw since (the entry "Remaining items" at the top): a
+program that does not declare the mode, or more than one draw buffer.
 
 **`glCopyImageSubData` of colour renderbuffers (2026-11-16, built, not
 run).** A colour renderbuffer is its hidden texture's one level
@@ -375,7 +394,8 @@ attachment of its own (`fbo.c`: complete as the stencil, the stencil bits 8,
 the depth the depth attachment's). The texture's own GPU copy (R8 of the
 RAM copy's red) is never read. As DEPTH32F_STENCIL8's: an upload after a
 render refills the whole S8 level from the RAM bytes (what was drawn
-outside the box is lost); 2D textures only as attachments.
+outside the box is lost). Attached from 2D textures, and since the
+layered depth entry also a cube map's face or an array's layer (or all).
 
 **More of items 4 and 7, written without the A1200 (2026-11-16, after
 the entry below; built, not run).**

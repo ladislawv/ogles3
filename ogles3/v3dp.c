@@ -798,6 +798,11 @@ struct OGLES3Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
             im->opaque_units = o;
             break;
         }
+        case 17: /* ADVANCED_BLEND: the fragment shader's blend_support modes */
+            if (sec_len[i] < 4)
+                FAIL("a short ADVANCED_BLEND section", 0, ~0UL);
+            im->blend_modes = u32(&s);
+            break;
         case 16: /* GEOMETRY (feature bit 5): the geometry shader's layout */
             if (!im->geometry || sec_len[i] < 16)
                 FAIL("a GEOMETRY section without the feature bit, or short", 0, ~0UL);
@@ -1181,6 +1186,7 @@ struct OGLES3Image *ogles2_v3dp_compose(const struct OGLES3Image *a, const struc
     im->separable = TRUE;
     im->stages = 0x11;
     im->code_borrowed = TRUE;
+    im->blend_modes = b->blend_modes; /* the fragment program's blend_support (KHR_blend_equation_advanced) */
     /* uniforms: a's, then b's (their blocks moved past a's) */
     im->nuniforms = (UWORD)(a->nuniforms + b->nuniforms);
     if (!(u = alloc(im, (im->nuniforms + 1UL) * sizeof(*u))))

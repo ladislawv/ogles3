@@ -3287,6 +3287,17 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
     }
+    /* KHR_blend_equation_advanced (Mesa's draw_validate.c): blending with an
+     * advanced equation, a draw buffer past the first not GL_NONE, or a
+     * fragment shader without that equation's blend_support (the file's
+     * ADVANCED_BLEND), is GL_INVALID_OPERATION */
+    if (__builtin_expect(ogles2_advanced_blend(ctx) != 0, 0)) {
+        ULONG m = ogles2_advanced_blend(ctx);
+        if ((ctx->draw_fb && ogles2_fbo_draws_beyond_0(ctx->draw_fb)) || !(im->blend_modes & (1UL << m))) {
+            ogles2_error(ctx, GL_INVALID_OPERATION);
+            return;
+        }
+    }
     if (im->geometry) {
         if (!packets_ok(v)) { /* v3dcore's writers: no GL_SHADER_STATE_INCLUDING_GS */
             if (!d->gs_refused_logged) {

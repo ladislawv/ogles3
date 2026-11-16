@@ -531,6 +531,7 @@ struct OGLES3Image
     UWORD gs_in, gs_out, gs_vertices;
     UBYTE gs_invocations;
     BOOL gs_layout;                       /* the section was there */
+    ULONG blend_modes;                    /* ADVANCED_BLEND: the fragment shader's blend_support, bit m mode m */
     BOOL separable;                   /* ES 3.1: GL_PROGRAM_SEPARABLE (stage D item 5) */
     UBYTE stages;                     /* PROGRAM's: bit 0 vertex, bit 4 fragment, bit 5 compute */
     UWORD nsblocks;
@@ -1165,6 +1166,7 @@ int ogles2_indexed_mask(struct OGLES3Context *ctx, GLenum pname, GLuint index, G
 /* KHR_blend_equation_advanced: the advanced mode the draws blend with
  * (Mesa's enum pipe_advanced_blend_mode, 1 to 15), 0 for none (state.c). */
 ULONG ogles2_advanced_blend(const struct OGLES3Context *ctx);
+BOOL ogles2_fbo_draws_beyond_0(const struct OGLES3Framebuffer *fb);
 int ogles2_image_query(struct OGLES3Context *ctx, GLenum pname, GLuint index, GLint64 *v);
 int ogles2_vab_query(struct OGLES3Context *ctx, GLenum pname, GLuint index, GLint64 *v); /* draw.c's bindings */
 struct OGLES3Buffer *ogles2_buffer_get(struct OGLES3Context *ctx, GLuint name); /* NULL: no such buffer */

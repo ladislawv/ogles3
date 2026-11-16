@@ -289,7 +289,11 @@ its stages bit 3 with 0 and 4 (Mesa's `MESA_SHADER_GEOMETRY`), its `STAGE_PARAMS
 block list of stage 3 after the others, its variants of stages 2 (geometry) and 3 (geometry
 binning), and each uniform's sampler indexes three words (the geometry stage's third); its
 hash has the geometry shader's source after the vertex shader's, as stage 3. Its section
-`GEOMETRY` (16, after `STRINGS`): `u32` each, the input primitive, the output primitive
+`ADVANCED_BLEND` (17, format 2, 2026-11-16; after `UNIFORM_LOCATIONS`, outside the layout CRC;
+only when the fragment shader declares `blend_support` modes): one `u32`, Mesa's
+`info.fs.advanced_blend_modes`, bit *m* for `enum gl_advanced_blend_mode` *m* (1 multiply to
+15 HSL luminosity), the modes a draw with that `KHR_blend_equation_advanced` equation needs;
+a reader that does not know it skips it. `GEOMETRY` (16, after `STRINGS`): `u32` each, the input primitive, the output primitive
 (Mesa's `enum mesa_prim`, GL's values: 0 points, 1 lines, 4 triangles, 0xA and 0xC the
 adjacency ones in; 0, 3 and 5 out), the vertices out (`max_vertices`) and the invocations. Images and
 explicit uniform locations need no bit: their sections and
