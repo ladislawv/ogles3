@@ -225,6 +225,31 @@ extension offered.**
   renderbuffer beside a layered attachment stays `_LAYER_TARGETS`, as the
   extension says.)
 
+**What is left on `es32` (2026-11-16, after the batch below).** Not
+written, by size:
+- A program pipeline drawing with a geometry program of its own (beside
+  separate vertex and fragment programs): the pair program's link would
+  need a three-program link (`link_pipeline` with the geometry shader, a
+  Mesa pipeline of three in the key-state draws) and the composed image
+  the geometry program's uniforms, blocks and samplers as stage 2
+  (`ogles2_v3dp_compose`); refused now (`GL_INVALID_OPERATION`, logged).
+  dEQP's `separate_shader` groups have no geometry stage.
+- `glCopyImageSubData` of depth, stencil and multisample renderbuffers
+  and multisample textures (`GL_INVALID_OPERATION`, logged): GPU images
+  without a RAM copy, to be copied tile-wise (`v3d_load_tiled_image` and
+  `v3d_store_tiled_image`, as the S8 images are filled); dEQP's
+  `copy_image` groups copy colour formats only.
+- A uniform or storage block read of a buffer after an 8- or 16-bit
+  imageBuffer store into it in the same job reads the words, not the
+  texels the store wrote.
+- Not possible on this GPU and its Mesa driver: RGB32 buffer textures,
+  `EXT_gpu_shader5`, tessellation (so no ES 3.2 context), ASTC HDR and 3D.
+Everything written on `es32` waits for the A1200 (amigent): `m8_draw`'s
+new tests (`test_geometry`, `test_advanced_blend`, `test_copy_exact`,
+`test_image_buffer_small`), then dEQP-GLES31 (the plan's "To run" lists),
+with `v3dglslc3` rebuilt (`~/ogles3-build/v3dglslc/v3dglslc.stripped`, 39
+of 39 identical with the host compiler).
+
 **Remaining items, the first batch (2026-11-16, built; not run on the
 A1200).**
 - **A layered job's lists** (`job.c`, `list_room`): a render list (64 KB a
