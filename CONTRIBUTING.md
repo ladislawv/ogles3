@@ -130,6 +130,16 @@ run.
 
 ### The remote test station
 
+From 2026-11-16 the A1200's runs go through amigent (the fork `ladislawv/amigent`, amictl's
+successor: `amigentd` on port 6502, `amigent-ctl` on the PC), with
+`bash tests/a1200/a_run.sh <package>...` from Git Bash: it builds each package in WSL, uploads
+only changed files, runs its `Run-*` script and counts PASS/FAIL under
+`tests/a1200/results/`. `LIBS_INSTALL=1` first copies the package's `ogles3.library` and
+`v3dglslc3` into `LIBS:` (an installed one wins over the package's); `AMIGENT_HOST` (default:
+`tools/amictl/station.local`'s host), `AMIGENT_CTL`, `TIMEOUT` and `ARGS` adjust it. Never
+commit the amigent key (`~/.config/amigent/key-*`). The amictl steps below are how it ran
+before.
+
 `tools/amictl` lets the PC upload a package, run it, fetch its results and take screenshots,
 so nobody has to copy files by hand. It is the [amictl](https://github.com/ladislawv/amictl)
 repository, shared with ogles2 and ogles2pi3, as a git submodule: its README describes it, and

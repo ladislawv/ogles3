@@ -237,10 +237,18 @@ another program"): `pipe_validate` says so too, a draw
 when Mesa refuses a key-state draw through it. Not possible on this GPU
 and its Mesa driver: RGB32 buffer textures, `EXT_gpu_shader5`,
 tessellation (so no ES 3.2 context), ASTC HDR and 3D.
-Everything written on `es32` waits for the A1200 (amigent): `m8_draw`'s
-new tests (`test_geometry`, `test_advanced_blend`, `test_copy_exact`,
-`test_image_buffer_small`, `test_copy_gpu`, `test_pipeline_geometry`),
-then dEQP-GLES31 (the plan's "To run" lists), with `v3dglslc3` rebuilt
+**Run on the A1200 (2026-11-16, amigent, `tests/a1200/a_run.sh m8-5`
+with `LIBS_INSTALL=1`): 330 checks, 0 failed.** `m8_es31` 94 of 94 on the
+GPU; `m8_draw` 236 of 236 with every new `es32` test (`test_geometry`:
+moved triangle, indirect, GPU indirect, feedback, primitives generated,
+layered colour and depth, 32-bit samplers, RGBA32F; `test_advanced_blend`,
+`test_copy_exact`, `test_image_buffer_small`, `test_copy_gpu`,
+`test_pipeline_geometry`). The first run's two failures were the test's:
+`GL_NUM_COMPRESSED_TEXTURE_FORMATS` is 43 with ASTC's 28, and an RGBA8UI
+store's bytes (10, 20, 30, 40) read as a uniform block's uint are
+`0x0a141e28` on the 68k (a buffer holds the client's representation; the
+test now makes the word from the bytes). Next: dEQP-GLES31 (the plan's
+"To run" lists), with `v3dglslc3` rebuilt
 (`~/ogles3-build/v3dglslc/v3dglslc.stripped`, 39 of 39 identical with the
 host compiler) and the tree's Mesa patches 0015 to 0019 all present.
 
@@ -606,8 +614,8 @@ available); each item's dEQP groups are its test when it is. The A1200's
 runs go through amigent from now on, not amictl (the developer's call;
 the fork `ladislawv/amigent`, `C:\- CPP\amigent`, port 6502;
 ogles2pi3's `tests/a1200/p5_run.sh` and its CONTRIBUTING.md, "The Pi 3
-card and the amigent station", are the model; ogles3's run scripts are
-not switched yet). What was written (the plan's list below, "Plan:
+card and the amigent station", are the model; ogles3's runner is
+`tests/a1200/a_run.sh`, since 2026-11-16). What was written (the plan's list below, "Plan:
 OpenGL ES 3.2's features"):
 - **Item 2, sampler state:** `EXT_texture_sRGB_decode` (ES3 contexts:
   `GL_TEXTURE_SRGB_DECODE_EXT` on textures and samplers; `SKIP_DECODE`

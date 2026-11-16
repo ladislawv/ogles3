@@ -1278,7 +1278,7 @@ static void test_etc2(void)
         return;
     }
     glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS, &n);
-    check(n == 15, "ETC2/EAC: 15 compressed formats listed");
+    check(n == 15 + 28, "ETC2/EAC: 43 compressed formats listed (with ASTC's 28)");
     glUseProgram(p);
     glUniform1i(glGetUniformLocation(p, "tex"), 0);
     check(block_is(p, GL_ETC1_RGB8_OES, red, 8, 255, 2, 2, 255, 1) &&
@@ -3780,7 +3780,8 @@ static void test_image_buffer_small(void)
     /* the same buffer's words after the store, as a uniform block: a
      * second store first, then es32ibu copies the block's first 16 bytes */
     {
-        GLuint u = compute_program("es32ibu"), o;
+        static const GLubyte t0[4] = { 10, 20, 30, 40 };
+        GLuint u = compute_program("es32ibu"), o, want;
         const GLuint *w;
         if (u) {
             glUseProgram(p);
@@ -3795,11 +3796,13 @@ static void test_image_buffer_small(void)
             glDispatchCompute(1, 1, 1);
             glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT);
             w = glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, 16, GL_MAP_READ_BIT);
-            /* texel 0 (10, 20, 30, 40) as the uniform block's first word, the
-             * buffer's bytes in order: a little-endian GPU word */
-            check(w && w[0] == (10u | 20u << 8 | 30u << 16 | 40u << 24) && glGetError() == GL_NO_ERROR,
+            /* texel 0 (10, 20, 30, 40) as the uniform block's first word: the
+             * buffer's bytes read as the CPU's word (a buffer holds the
+             * client's representation; 0x0a141e28 on the 68k) */
+            memcpy(&want, t0, 4);
+            check(w && w[0] == want && glGetError() == GL_NO_ERROR,
                   "imageBuffer: an RGBA8UI store read as a uniform block afterwards");
-            if (w && w[0] != (10u | 20u << 8 | 30u << 16 | 40u << 24))
+            if (w && w[0] != want)
                 printf("     word 0x%08lx\n", (unsigned long)w[0]);
             glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
             glBindBufferBase(GL_UNIFORM_BUFFER, 0, 0);
