@@ -279,7 +279,7 @@ static BOOL in_use(struct OGLES3Context *ctx, struct OGLES3Program *p)
             return TRUE;
         for (i = 0; i < m->npipes; i++) /* or a program pipeline's (ES 3.1) */
             if (m->pipes[i]) {
-                for (k = 0; k < 3; k++)
+                for (k = 0; k < 4; k++)
                     if (m->pipes[i]->stage[k] == p)
                         return TRUE;
                 if (m->pipes[i]->active == p)
@@ -1061,11 +1061,19 @@ static void note_missing(const struct OGLES3Program *p, const char *hex)
     if (p->cs) {
         FPuts(fh, (STRPTR) "\n--- compute shader\n");
         FPuts(fh, (STRPTR)p->cs->source);
-    } else {
-        FPuts(fh, (STRPTR) "\n--- vertex shader\n");
-        FPuts(fh, (STRPTR)p->vs->source);
-        FPuts(fh, (STRPTR) "\n--- fragment shader\n");
-        FPuts(fh, (STRPTR)p->fs->source);
+    } else { /* a separable program's stages it has (ES 3.1) */
+        if (p->vs) {
+            FPuts(fh, (STRPTR) "\n--- vertex shader\n");
+            FPuts(fh, (STRPTR)p->vs->source);
+        }
+        if (p->gs) {
+            FPuts(fh, (STRPTR) "\n--- geometry shader\n");
+            FPuts(fh, (STRPTR)p->gs->source);
+        }
+        if (p->fs) {
+            FPuts(fh, (STRPTR) "\n--- fragment shader\n");
+            FPuts(fh, (STRPTR)p->fs->source);
+        }
     }
     FPuts(fh, (STRPTR) "\n--- end\n");
     Close(fh);
@@ -1078,7 +1086,8 @@ static void note_missing(const struct OGLES3Program *p, const char *hex)
  * ES3 parts: docs/GLES3_PLAN.md §3). */
 static BOOL es3_program(const struct OGLES3Program *p)
 {
-    return p->cs || glsl_version(p->vs->source) >= 300 || glsl_version(p->fs->source) >= 300;
+    return p->cs || p->gs || (p->vs && glsl_version(p->vs->source) >= 300) ||
+           (p->fs && glsl_version(p->fs->source) >= 300);
 }
 
 /* Reads and checks one .v3dp file: the image, or 0 (with *refused set and
@@ -1610,16 +1619,15 @@ static void link_program(struct OGLES3Context *ctx, struct OGLES3Program *p, con
             set_log(p, "the compute shader did not compile:\n", p->cs->info_log);
             return;
         }
-    } else if (p->gs && (p->separable || !p->vs || !p->fs)) {
-        /* EXT_geometry_shader: with a vertex and a fragment shader, not
-         * separable (the compiler's pipelines have no geometry stage) */
-        set_log(p, p->separable ? "a geometry shader in a separable program is not supported"
-                                : "a geometry shader needs a vertex and a fragment shader", 0);
+    } else if (p->gs && !p->separable && (!p->vs || !p->fs)) {
+        /* EXT_geometry_shader: with a vertex and a fragment shader, unless
+         * separable (then of any stages beside it) */
+        set_log(p, "a geometry shader needs a vertex and a fragment shader", 0);
         return;
     } else if (p->gs && !p->gs->compiled) {
         set_log(p, "the geometry shader did not compile:\n", p->gs->info_log);
         return;
-    } else if (p->separable && (p->vs || p->fs)) { /* ES 3.1 7.3: one stage, or both */
+    } else if (p->separable && (p->vs || p->fs || p->gs)) { /* ES 3.1 7.3: one stage, or more */
         if ((p->vs && !p->vs->compiled) || (p->fs && !p->fs->compiled)) {
             set_log(p, p->vs && !p->vs->compiled ? "the vertex shader did not compile:\n"
                                                  : "the fragment shader did not compile:\n",
@@ -2359,11 +2367,11 @@ static void pipe_release(struct OGLES3Context *ctx, struct OGLES3Program *p)
 
 static void pipe_free(struct OGLES3Context *ctx, struct OGLES3Pipeline *pp)
 {
-    struct OGLES3Program *held[4];
+    struct OGLES3Program *held[5];
     int k;
-    for (k = 0; k < 3; k++)
+    for (k = 0; k < 4; k++)
         held[k] = pp->stage[k];
-    held[3] = pp->active;
+    held[4] = pp->active;
     pair_free(ctx, pp);
     ctx->pipes[pp->name] = 0;
     if (pp->info_log)
@@ -2372,7 +2380,7 @@ static void pipe_free(struct OGLES3Context *ctx, struct OGLES3Pipeline *pp)
     /* each once: a program of two stages, or a stage's and the active one,
      * was released twice, freed by the first (2026-10-28: the A1200's
      * recoverable alerts in dEQP's separate_shader.random) */
-    for (k = 0; k < 4; k++) {
+    for (k = 0; k < 5; k++) {
         int j;
         for (j = 0; j < k && held[j] != held[k]; j++)
             ;
@@ -2490,7 +2498,8 @@ void ogles2_glBindProgramPipeline(struct OGLES3Context *ctx, GLuint pipeline)
 
 void ogles2_glUseProgramStages(struct OGLES3Context *ctx, GLuint pipeline, GLbitfield stages, GLuint program)
 {
-    static const GLbitfield bits[3] = { GL_VERTEX_SHADER_BIT, GL_FRAGMENT_SHADER_BIT, GL_COMPUTE_SHADER_BIT };
+    static const GLbitfield bits[4] = { GL_VERTEX_SHADER_BIT, GL_FRAGMENT_SHADER_BIT, GL_COMPUTE_SHADER_BIT,
+                                        GL_GEOMETRY_SHADER_BIT_EXT };
     struct OGLES3Pipeline *pp;
     struct OGLES3Program *p = 0, *old;
     int k;
@@ -2503,7 +2512,7 @@ void ogles2_glUseProgramStages(struct OGLES3Context *ctx, GLuint pipeline, GLbit
     pp->bound_once = TRUE;
     if (stages != GL_ALL_SHADER_BITS &&
         (stages & ~(GLbitfield)(GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT | GL_COMPUTE_SHADER_BIT |
-                                GL_GEOMETRY_SHADER_BIT_EXT))) { /* a separable program has no geometry stage */
+                                GL_GEOMETRY_SHADER_BIT_EXT))) {
         ogles2_error(ctx, GL_INVALID_VALUE);
         return;
     }
@@ -2520,14 +2529,14 @@ void ogles2_glUseProgramStages(struct OGLES3Context *ctx, GLuint pipeline, GLbit
             return;
         }
     }
-    for (k = 0; k < 3; k++) {
+    for (k = 0; k < 4; k++) {
         struct OGLES3Program *s;
         if (!(stages & bits[k]))
             continue;
         /* the stage the program has, else none */
         s = !p || !p->image ? 0
           : k == 2          ? (p->image->compute ? p : 0)
-          : !p->image->compute && (p->image->stages & (k ? 0x10 : 0x01)) ? p : 0;
+          : !p->image->compute && (p->image->stages & (k == 3 ? 0x08 : k ? 0x10 : 0x01)) ? p : 0;
         old = pp->stage[k];
         pp->stage[k] = s;
         if (old != s)
@@ -2614,20 +2623,23 @@ static BOOL pipe_validate(struct OGLES3Pipeline *pp)
     if (pp->info_log)
         FreeVec(pp->info_log);
     pp->info_log = 0;
-    /* a program active for some of the stages it was linked with, not all */
-    for (k = 0; k < 2; k++) {
+    /* a program active for some of the stages it was linked with, not all
+     * (vertex, fragment and geometry) */
+    for (k = 0; k < 4; k++) {
         struct OGLES3Program *p = pp->stage[k];
-        if (p && p->image && !p->image->compute && p->image->stages == 0x11 && pp->stage[1 - k] != p) {
+        if (p && p->image && !p->image->compute &&
+            (((p->image->stages & 0x01) && pp->stage[0] != p) || ((p->image->stages & 0x10) && pp->stage[1] != p) ||
+             ((p->image->stages & 0x08) && pp->stage[3] != p))) {
             pipe_log(pp, "Program is not active for all shaders that was linked");
             return FALSE;
         }
     }
-    for (k = 0; k < 3; k++)
+    for (k = 0; k < 4; k++)
         if (pp->stage[k] && (!pp->stage[k]->image || !pp->stage[k]->image->separable)) {
             pipe_log(pp, "Program was relinked without PROGRAM_SEPARABLE state");
             return FALSE;
         }
-    if (!pp->stage[0] && !pp->stage[1] && !pp->stage[2])
+    if (!pp->stage[0] && !pp->stage[1] && !pp->stage[2] && !pp->stage[3])
         return FALSE; /* empty */
     if (pp->stage[0] && pp->stage[1] && pp->stage[0] != pp->stage[1] &&
         !interfaces_match(pp->stage[0]->image, pp->stage[1]->image))
@@ -2860,6 +2872,16 @@ struct OGLES3Program *ogles2_pipeline_program(struct OGLES3Context *ctx, BOOL co
         return 0;
     if (compute)
         return pp->stage[2];
+    /* a geometry stage only as one program of all three (the pair program's
+     * link has no geometry stage: GL_INVALID_OPERATION, logged once) */
+    if (pp->stage[3] && !(pp->stage[3] == pp->stage[0] && pp->stage[0] == pp->stage[1])) {
+        static BOOL logged;
+        if (!logged) {
+            logged = TRUE;
+            ogles2_log("draw: a program pipeline with a geometry program of its own is not drawn (logged once)");
+        }
+        return 0;
+    }
     if (pp->stage[0] == pp->stage[1]) /* one program of both stages */
         return pp->stage[0];
     if (!pp->pair || pp->pair_img[0] != pp->stage[0]->image || pp->pair_img[1] != pp->stage[1]->image) {
@@ -2906,7 +2928,7 @@ void ogles2_glGetProgramPipelineiv(struct OGLES3Context *ctx, GLuint pipeline, G
     case GL_VERTEX_SHADER:      v = pp->stage[0] ? (GLint)pp->stage[0]->name : 0; break;
     case GL_FRAGMENT_SHADER:    v = pp->stage[1] ? (GLint)pp->stage[1]->name : 0; break;
     case GL_COMPUTE_SHADER:     v = pp->stage[2] ? (GLint)pp->stage[2]->name : 0; break;
-    case GL_GEOMETRY_SHADER_EXT: v = 0; break; /* no separable geometry stage */
+    case GL_GEOMETRY_SHADER_EXT: v = pp->stage[3] ? (GLint)pp->stage[3]->name : 0; break;
     case GL_VALIDATE_STATUS:    v = pp->validated; break;
     case GL_INFO_LOG_LENGTH:    v = pp->info_log && pp->info_log[0] ? (GLint)str_len(pp->info_log) + 1 : 0; break;
     default:

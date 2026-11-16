@@ -917,7 +917,8 @@ struct OGLES3Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
     }
     if (im->compute ? stages != COMPUTE_STAGES
                     : stages != (im->geometry ? 0x19UL : 0x11UL) && /* EXT_geometry_shader: bit 3 too */
-                          !(im->separable && !im->geometry && (stages == 0x01 || stages == 0x10)))
+                          !(im->separable && !im->geometry && (stages == 0x01 || stages == 0x10)) &&
+                          !(im->separable && im->geometry && (stages & 0x08) && !(stages & ~0x19UL)))
         FAIL(im->compute ? "a compute program of other stages" : "not a vertex and fragment program", 0, ~0UL);
     if ((features & V3DP_FEATURE_STORAGE) && !im->v3dx && !im->sblocks)
         FAIL("storage blocks without their STORAGE_BLOCKS section", 0, ~0UL);

@@ -220,7 +220,9 @@ static int link_pair(const char *vs_label, const char *fs_label, const char *vs_
         fs = compile_src(GL_FRAGMENT_SHADER, fs_label, fs_src, &fs_ok, log, log_size);
     if (link_gs_src)
         gs = compile_src(GL_GEOMETRY_SHADER, "geometry shader", link_gs_src, &gs_ok, log, log_size);
-    if (!vs_ok || !fs_ok || !gs_ok || (!vs_src && !fs_src) || (!link_separable && (!vs_src || !fs_src))) {
+    /* a separable program of a geometry shader alone too (EXT_geometry_shader) */
+    if (!vs_ok || !fs_ok || !gs_ok || (!vs_src && !fs_src && !link_gs_src) ||
+        (!link_separable && (!vs_src || !fs_src))) {
         if (vs)
             glDeleteShader(vs);
         if (fs)

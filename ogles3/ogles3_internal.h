@@ -580,7 +580,7 @@ struct OGLES3Pipeline
 {
     GLuint name;
     BOOL bound_once;                  /* an object (glIsProgramPipeline) once bound or used */
-    struct OGLES3Program *stage[3];
+    struct OGLES3Program *stage[4];   /* vertex, fragment, compute, geometry (EXT_geometry_shader) */
     struct OGLES3Program *active;
     GLboolean validated;
     char *info_log;                   /* AllocVec'd or NULL */

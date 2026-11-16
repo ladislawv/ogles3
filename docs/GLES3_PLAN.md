@@ -277,6 +277,26 @@ A1200).**
   key through `-x` plain and per-sample: two fragment variants, the second
   `force_per_sample_msaa=1`. To run: dEQP-GLES31 `sample_shading` with
   `MSAA=1`.
+- **Separable programs with a geometry stage** (EXT_geometry_shader): a
+  geometry shader alone or beside either or both of the others links
+  (`program.c`; the compiler's `link_pair` and `LINK_SEPARABLE` take a
+  geometry shader alone, `write_program` writes no variants unless the
+  vertex and fragment stages are both there; the loader takes a separable
+  file's stages with bit 3 and any of 0 and 4). A program pipeline has a
+  geometry stage (`stage[3]`): `glUseProgramStages`'
+  `GL_GEOMETRY_SHADER_BIT`, `GL_GEOMETRY_SHADER`'s query, validation (a
+  program active for every stage it was linked with, the geometry one
+  too). A pipeline draws with a geometry stage only when one program
+  holds the vertex, geometry and fragment stages (it draws as that
+  program); a geometry program of its own beside others is
+  `GL_INVALID_OPERATION`, logged (the pair program's link has no geometry
+  stage: a three-program link is not written). Fixed on the way: the
+  missing-shaders file and `es3_program` read a separable program's
+  absent vertex or fragment shader. `make test-v3dp` makes the two
+  separable files by SERVE requests (`tools/v3dp_tests/separable_gs.py`:
+  the command line links no separable programs); m8_es31 links them,
+  their uniform's geometry stage, a pipeline's geometry stage set and
+  queried, an invalid pipeline (85 of 85 under vamos).
 - **imageBuffer's 8- and 16-bit stores reach the buffer's data**
   (`buffer.c`): a store through such a format marks the buffer's texels
   GPU-written (`tex_job` for a draw's job, `tex_cs_written` after a

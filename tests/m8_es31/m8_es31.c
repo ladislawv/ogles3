@@ -545,6 +545,64 @@ static void geometry(void)
         glDeleteTextures(4, zt);
     }
 
+    /* separable programs with a geometry stage (their files: make test-v3dp's
+     * separable_gs.py), in a program pipeline */
+    {
+        static const char *const names[2] = { "es32gs.vert", "es32gs.geom" };
+        static const GLenum types[2] = { GL_VERTEX_SHADER, GL_GEOMETRY_SHADER_EXT };
+        GLuint sp[2], pipe;
+        GLint ok[2] = { 0, 0 }, j, v = -1;
+        for (i = 0; i < 2; i++) {
+            sp[i] = glCreateProgram();
+            glProgramParameteri(sp[i], GL_PROGRAM_SEPARABLE, GL_TRUE);
+            for (j = i ? 0 : 1; j < 2; j++) { /* sp[0]: the geometry shader; sp[1]: both */
+                char *src = read_text(names[j]);
+                GLuint s;
+                if (!src) {
+                    printf("     (no shaders/%s)\n", names[j]);
+                    continue;
+                }
+                s = glCreateShader(types[j]);
+                glShaderSource(s, 1, (const GLchar *const *)&src, 0);
+                glCompileShader(s);
+                glAttachShader(sp[i], s);
+                glDeleteShader(s);
+                free(src);
+            }
+            glLinkProgram(sp[i]);
+            glGetProgramiv(sp[i], GL_LINK_STATUS, &ok[i]);
+            if (!ok[i]) {
+                char log[256];
+                log[0] = 0;
+                glGetProgramInfoLog(sp[i], sizeof(log), 0, log);
+                printf("     link %d: %s\n", (int)i, log);
+            }
+        }
+        check(ok[0] && ok[1], "geometry: separable programs, a geometry shader alone and with a vertex shader, link");
+        if (ok[0] && ok[1]) {
+            GLenum prop = GL_REFERENCED_BY_GEOMETRY_SHADER_EXT;
+            glGetProgramResourceiv(sp[0], GL_UNIFORM, glGetProgramResourceIndex(sp[0], GL_UNIFORM, "gscale"), 1, &prop,
+                                   1, 0, &v);
+            check(v == 1 && glGetError() == GL_NO_ERROR, "geometry: the geometry program's uniform is its stage's");
+            glGenProgramPipelines(1, &pipe);
+            glUseProgramStages(pipe, GL_GEOMETRY_SHADER_BIT_EXT, sp[0]);
+            glGetProgramPipelineiv(pipe, GL_GEOMETRY_SHADER_EXT, &v);
+            check(v == (GLint)sp[0] && glGetError() == GL_NO_ERROR, "geometry: a pipeline's geometry stage");
+            glUseProgramStages(pipe, GL_VERTEX_SHADER_BIT | GL_GEOMETRY_SHADER_BIT_EXT, sp[1]);
+            glGetProgramPipelineiv(pipe, GL_VERTEX_SHADER, &v);
+            glGetProgramPipelineiv(pipe, GL_GEOMETRY_SHADER_EXT, &j);
+            check(v == (GLint)sp[1] && j == (GLint)sp[1] && glGetError() == GL_NO_ERROR,
+                  "geometry: a vertex and geometry program for both stages");
+            glUseProgramStages(pipe, GL_GEOMETRY_SHADER_BIT_EXT, sp[0]);
+            glValidateProgramPipeline(pipe);
+            glGetProgramPipelineiv(pipe, GL_VALIDATE_STATUS, &v);
+            check(v == GL_FALSE, "geometry: the program not active for its geometry stage: not valid");
+            glDeleteProgramPipelines(1, &pipe);
+        }
+        glDeleteProgram(sp[0]);
+        glDeleteProgram(sp[1]);
+    }
+
     /* GL_PRIMITIVES_GENERATED (no draws here: a state-only context) */
     {
         GLuint q = 0, r = 99;

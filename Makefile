@@ -367,7 +367,7 @@ builtin-shaders: $(B)/tools/mkshaders
 V3DGLSLC ?= $(HOME)/ogles2-build/v3dglslc/host/v3dglslc
 .PHONY: test-v3dp
 test-v3dp: $(B)/v3dp/.stamp
-$(B)/v3dp/.stamp: $(wildcard tests/common/*.h) tools/v3dp_tests/emit.c v3dp/v3dp_hashname.py \
+$(B)/v3dp/.stamp: $(wildcard tests/common/*.h) tools/v3dp_tests/emit.c tools/v3dp_tests/separable_gs.py v3dp/v3dp_hashname.py \
                $(wildcard tools/v3dglslc/test/shaders/*)
 	@mkdir -p $(B)/v3dp/src
 	rm -f $(B)/v3dp/*.v3dp $(B)/v3dp/*.v3dw
@@ -386,7 +386,8 @@ $(B)/v3dp/.stamp: $(wildcard tests/common/*.h) tools/v3dp_tests/emit.c v3dp/v3dp
 	cd $(B)/v3dp/src && ../emit && for v in *.vert; do \
 	    $(V3DGLSLC) -o .. $$([ -f $${v%.vert}.link ] && echo -b $${v%.vert}.link) $$v \
 	        $$([ -f $${v%.vert}.geom ] && echo $${v%.vert}.geom) $${v%.vert}.frag || exit 1; done && \
-	    for c in *.comp; do $(V3DGLSLC) -o .. $$c || exit 1; done
+	    for c in *.comp; do $(V3DGLSLC) -o .. $$c || exit 1; done && \
+	    $(PYTHON) "$(CURDIR)/tools/v3dp_tests/separable_gs.py" $(V3DGLSLC) . ..
 	$(PYTHON) v3dp/v3dp_hashname.py $(B)/v3dp/*.v3dp $$(ls $(B)/v3dp/*.v3dw 2>/dev/null)
 	touch $@
 

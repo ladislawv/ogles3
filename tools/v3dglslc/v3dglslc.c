@@ -933,8 +933,11 @@ static int write_files(struct gl_shader_program *prog, GLuint p, const char *pat
 
     /* A separable program of one stage (ES 3.1) draws nothing alone: its
      * file holds no variants (a pipeline's draws get theirs, stage D item
-     * 5), and it has no .v3dw. */
-    if (!pipe_fs && !prog->_LinkedShaders[MESA_SHADER_VERTEX] != !prog->_LinkedShaders[MESA_SHADER_FRAGMENT]) {
+     * 5), and it has no .v3dw. So too one with a geometry stage but not
+     * both the others (EXT_geometry_shader). */
+    if (!pipe_fs && (!prog->_LinkedShaders[MESA_SHADER_VERTEX] != !prog->_LinkedShaders[MESA_SHADER_FRAGMENT] ||
+                     (prog->_LinkedShaders[MESA_SHADER_GEOMETRY] &&
+                      (!prog->_LinkedShaders[MESA_SHADER_VERTEX] || !prog->_LinkedShaders[MESA_SHADER_FRAGMENT])))) {
         if (write_mode == WRITE_WIDE || variant_keys || write_mode == WRITE_A2C)
             return 0;
         v3dp_capture_begin();
@@ -1258,7 +1261,7 @@ static int handle_one(uint32_t op, const char *vs, const char *fs, const char *o
     }
     if ((op != V3DGLSL_LINK && op != V3DGLSL_COMPILE && op != V3DGLSL_LINK32 && op != V3DGLSL_LINK_BOUND &&
          op != V3DGLSL_LINK_A2C && op != V3DGLSL_COMPILE_VARIANT && op != V3DGLSL_LINK_SEPARABLE) ||
-        (op == V3DGLSL_LINK_SEPARABLE && ((!vs && !fs) || !out_path)) ||
+        (op == V3DGLSL_LINK_SEPARABLE && ((!vs && !fs && !link_gs_src) || !out_path)) ||
         (op != V3DGLSL_COMPILE && op != V3DGLSL_LINK_SEPARABLE && (!vs || !fs || !out_path)) ||
         (op == V3DGLSL_LINK_BOUND && !bindings) ||
         (op == V3DGLSL_COMPILE_VARIANT && (!keys || !keys_len)) || (op == V3DGLSL_COMPILE && !vs == !fs)) {
