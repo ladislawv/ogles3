@@ -298,6 +298,25 @@ group's cases from the last one without a result, from the package's
 `caselists/<group>.txt` (dEQP's order), into
 `tests/a1200/out/extra-lists/<name>.txt` (not in git; `m8-3/build.sh` copies
 them into the package), then `ARGS="LIST=<name> NAME=<name>"`.
+**Why `copy_image` was slow: a full retire list, a leak and the serial port
+(2026-11-17).** Timed inside dEQP (a temporary patch) and sampled
+(`pc_sample`, the Doom 3 port's; dEQP's own functions by
+`m68k-amigaos-nm`): the 2D array cases took 92% of `copy_image.compressed`
+(18 s an array texture, 37.6 s array to array; 2D cases 0.4 s), 29.7 s of
+it in dEQP's draws, yet 1% in the library: 64% of the samples in exec's
+RawPutChar. A RawPutChar spy (its characters kept in RAM) showed
+v3dcore's `v3d_frame_defer_free: retire list full -- leaking a 112-byte
+block` once a draw: dEQP replaces its quad's vertex buffer before each
+draw, the old copy waits on the frame's retire list until the job renders,
+and an array's verification draws 136 images in one job, past the list's
+128. Each block then leaked and the line went out on the serial port, a
+character at a time. Fixed: `ogles2_share_defer_free` renders the job
+first when the list is nearly full (as `texture.c`'s `before_change`), and
+`V3D_RETIRE_MAX` is 1024. The ASTC 5x4 array case: 37.6 s to 8.2 s (its
+draws 29.7 s to 0.27 s); what is left is dEQP's (decoding 3.1 s, the
+reference images 3.2 s, comparing 1.4 s). (An A1200 restart at 15:28 while
+a run started: its cause not found; the next run went normally.)
+
 **dEQP's compressed references decoded on the PC: tried, no gain
 (2026-11-17).** A `V3DGLSL_DECODE` request from dEQP's `tcu::decompress`
 through `v3dglslc-remote` to `compile_bridge.py`, which ran the CTS's own

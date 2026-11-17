@@ -105,7 +105,19 @@ void ogles2_share_defer_free(struct OGLES3Context *ctx, ULONG serial, struct v3d
     struct OGLES3Context *user;
     if (!m->hostptr)
         return;
-    if ((user = ogles2_job_user(ctx, serial)) && user->v3d)
+    /* A job not rendered yet uses it: freed after that job's render. The
+     * frame's retire list nearly full (a buffer replaced before each of more
+     * draws than it holds, all in one job: dEQP's copy_image on a 2D array,
+     * a quad's vertices each draw), that job is rendered first and the block
+     * freed now, as texture.c's before_change does; a full list leaked the
+     * block and printed a line on the serial port for each (most of such a
+     * dEQP case's time, 2026-11-17). */
+    if ((user = ogles2_job_user(ctx, serial)) && user->v3d && user->v3d->frame.retire_count >= V3D_RETIRE_MAX - 8) {
+        ogles2_job_flush(user, FALSE);
+        ogles2_job_finish(user);
+        user = 0;
+    }
+    if (user && user->v3d)
         v3d_frame_defer_free(&user->v3d->frame, m);
     else
         v3d_mem_free(ogles2_device(), m);

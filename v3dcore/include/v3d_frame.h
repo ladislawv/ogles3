@@ -55,7 +55,7 @@
 /* ogles2: the retire list and job sequence numbers below were file statics
  * in v3d_frame.c (one list for the whole process); they are per frame, that
  * is per context, now, so two contexts cannot retire each other's blocks. */
-#define V3D_RETIRE_MAX 128 /* ogles2: was 32; the spill blocks and the binning list's chained blocks of one frame (plan 9 M4) */
+#define V3D_RETIRE_MAX 1024 /* ogles2: was 32, then 128; the spill blocks and the binning list's chained blocks of one frame (plan 9 M4), and the buffers replaced between draws of one job (1024 since 2026-11-17: dEQP drew a 2D array's 136 images in one job, a buffer replaced before each) */
 typedef struct {
     v3d_mem mem;
     v3d_u32 seq;
