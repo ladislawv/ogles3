@@ -298,6 +298,17 @@ group's cases from the last one without a result, from the package's
 `caselists/<group>.txt` (dEQP's order), into
 `tests/a1200/out/extra-lists/<name>.txt` (not in git; `m8-3/build.sh` copies
 them into the package), then `ARGS="LIST=<name> NAME=<name>"`.
+**dEQP's compressed references decoded on the PC: tried, no gain
+(2026-11-17).** A `V3DGLSL_DECODE` request from dEQP's `tcu::decompress`
+through `v3dglslc-remote` to `compile_bridge.py`, which ran the CTS's own
+decoder built for the PC (identical output): it worked (about 130 decodes a
+case, 0-1 ms each on the PC), but `copy_image.compressed`'s ASTC 5x4 class
+took 15.1 s a case against 13.4 s decoding on the 68k: the decoding is not
+where those cases spend their time (the reference images sampled from half
+floats on the CPU and compared, likely; to measure before anything else).
+Set aside, not committed. A build note: `ports/deqp/build.sh` does not
+recompile a file whose patch was removed (rsync restores it with its old
+time): delete its object in `obj/`.
 `copy_image.compressed` and `.mixed` are slow (dEQP decodes the references
 on the 68k: 15 cases a minute).
 
