@@ -1,0 +1,5 @@
+ogles2 M8 run 3: --deqp-caselist-file M8R3:caselists/timing.txt
+Tuesday 17-Nov-26 15:24:23
+timing done
+finished
+Tuesday 17-Nov-26 15:24:30

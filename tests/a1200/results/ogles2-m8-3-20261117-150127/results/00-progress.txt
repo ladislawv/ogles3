@@ -1,0 +1,5 @@
+ogles2 M8 run 3: --deqp-case dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.*
+Tuesday 17-Nov-26 15:01:27
+astc54 done
+finished
+Tuesday 17-Nov-26 15:10:33

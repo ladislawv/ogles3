@@ -1,0 +1,5 @@
+ogles2 M8 run 3: --deqp-caselist-file M8R3:caselists/cimrest2.txt
+Sunday 01-Jan-78 00:31:43
+cimrest2 done
+finished
+Sunday 01-Jan-78 02:32:05

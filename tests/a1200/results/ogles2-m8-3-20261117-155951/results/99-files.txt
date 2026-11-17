@@ -1,0 +1,8 @@
+Directory "M8R3:results" on Sunday 01-Jan-78
+00-progress.txt                 106 ----rwed Today     02:32:04
+cimrest2.txt                 513136 ----rwed Today     02:32:04
+cimrest2.qpa               45291437 ----rwed Today     02:32:04
+ogles2.log                    46832 ----rwed Today     02:32:04
+notes.txt                       228 ----rwed Today     02:32:05
+99-files.txt                    196 ----rwed Today     02:32:05
+6 files - 43M bytes - 89564 blocks used

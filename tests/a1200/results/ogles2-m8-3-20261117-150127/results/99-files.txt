@@ -1,0 +1,8 @@
+Directory "M8R3:results" on Tuesday 17-Nov-26
+00-progress.txt                 139 ----rwed Today     15:10:33
+astc54.txt                    13044 ----rwed Today     15:10:33
+astc54.qpa                   789751 ----rwed Today     15:10:33
+ogles2.log                     2130 ----rwed Today     15:10:33
+notes.txt                       228 ----rwed Today     15:10:33
+99-files.txt                    196 ----rwed Today     15:10:33
+6 files - 786K bytes - 1583 blocks used

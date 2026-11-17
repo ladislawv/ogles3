@@ -298,6 +298,14 @@ group's cases from the last one without a result, from the package's
 `caselists/<group>.txt` (dEQP's order), into
 `tests/a1200/out/extra-lists/<name>.txt` (not in git; `m8-3/build.sh` copies
 them into the package), then `ARGS="LIST=<name> NAME=<name>"`.
+**`copy_image.mixed` on the A1200 (2026-11-17): 2,800 passed, none failed,
+784 not supported** (ASTC on a 3D texture: no sliced 3D ASTC), in three
+parts (`ogles2-m8-3-20261117-140147`, `-151243`, `-155951`, lists
+`cimrest`, `cimrest2`); the last 3,121 cases, after the retire list fix
+below, in two hours (20 a minute, 5 before). With it every group of the
+plan's "To run" lists has run: `copy_image` in all, 11,219 passed, none
+failed.
+
 **Why `copy_image` was slow: a full retire list, a leak and the serial port
 (2026-11-17).** Timed inside dEQP (a temporary patch) and sampled
 (`pc_sample`, the Doom 3 port's; dEQP's own functions by

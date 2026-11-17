@@ -1,0 +1,8 @@
+Directory "M8R3:results" on Sunday 01-Jan-78
+00-progress.txt                 104 ----rwed Today     00:30:04
+timing3.txt                     763 ----rwed Today     00:30:04
+timing3.qpa                   67188 ----rwed Today     00:30:04
+ogles2.log                     1992 ----rwed Today     00:30:04
+notes.txt                       228 ----rwed Today     00:30:04
+99-files.txt                    196 ----rwed Today     00:30:04
+6 files - 68K bytes - 147 blocks used

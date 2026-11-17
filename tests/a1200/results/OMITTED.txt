@@ -62,3 +62,8 @@ Over 1 MB, left out (2026-11-17):
 
     10557392  ogles2-m8-3-20261117-120441/results/cicomp.qpa
      1427127  ogles2-m8-3-20261117-134615/results/cirest.qpa
+
+Over 1 MB, left out (2026-11-17, afternoon):
+
+     6097602  ogles2-m8-3-20261117-140147/results/cimixed.qpa
+    45291437  ogles2-m8-3-20261117-155951/results/cimrest2.qpa

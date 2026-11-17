@@ -1,0 +1,107 @@
+m8_es31: OpenGL ES 3.1 contexts
+PASS: ES 3.1: the version strings and numbers
+PASS: buffers: the four targets bound and queried
+PASS: buffers: a storage buffer range at binding 31, the general binding too
+PASS: buffers: storage binding 32 is GL_INVALID_VALUE
+PASS: buffers: a storage offset of 2 is GL_INVALID_VALUE
+PASS: buffers: an atomic counter buffer at binding 15
+PASS: buffers: atomic counter binding 16 is GL_INVALID_VALUE
+PASS: buffers: deleted, unbound from every binding
+PASS: binding: refused with vertex array object 0 (GL_INVALID_OPERATION)
+PASS: binding: a buffer name glGenBuffers did not give
+PASS: binding: attribute 7 on binding 7, stride 16 (the initial state)
+PASS: binding: a buffer at offset 8, stride 12, on binding 3
+PASS: binding: attribute 0 reads binding 3 as 3 floats at relative offset 4
+PASS: binding: an integer format
+PASS: binding: binding 16 is GL_INVALID_VALUE
+PASS: binding: a stride of 2049 is GL_INVALID_VALUE
+PASS: binding: a relative offset of 2048 is GL_INVALID_VALUE
+PASS: binding: an integer format of floats is GL_INVALID_ENUM
+PASS: binding: attribute 0 on binding 16 is GL_INVALID_VALUE
+PASS: binding: glVertexAttribDivisor sets binding 2's divisor
+PASS: binding: glVertexAttribPointer puts attribute 5 on binding 5, stride 0 as 16 there
+PASS: binding: glVertexAttribPointer's stride of 2049 is GL_INVALID_VALUE
+PASS: binding: the buffer deleted, binding 3 and attribute 0 without it
+PASS: sample mask: off, all ones
+PASS: sample mask: enabled, word 0 set
+PASS: sample mask: word 1 is GL_INVALID_VALUE
+PASS: textures: GL_DEPTH_STENCIL_TEXTURE_MODE is GL_DEPTH_COMPONENT
+PASS: textures: set to GL_STENCIL_INDEX
+PASS: textures: GL_RGBA is GL_INVALID_ENUM
+PASS: textures: a 2D multisample texture bound, its swizzle and max level set
+PASS: textures: no sampler state for it (GL_INVALID_ENUM)
+PASS: textures: its base level 1 is GL_INVALID_OPERATION
+PASS: textures: glTexStorage2D of it is GL_INVALID_ENUM
+PASS: textures: a multisample name bound as 2D is GL_INVALID_OPERATION
+PASS: pipelines: 0 bound
+PASS: images: unit 255 unbound, GL_READ_ONLY, GL_R32UI
+PASS: images: unit 256 is GL_INVALID_VALUE
+PASS: images: GL_RGB8 is GL_INVALID_VALUE
+PASS: images: an access of GL_RGBA is GL_INVALID_ENUM
+PASS: images: a mutable texture is GL_INVALID_OPERATION
+PASS: level queries: an RGBA8 texture's levels, one not defined
+PASS: level queries: GL_TEXTURE_CUBE_MAP is GL_INVALID_ENUM
+PASS: level queries: level -1 is GL_INVALID_VALUE
+PASS: images: an immutable texture's level 1 bound to unit 3, every query
+PASS: images: the texture deleted, unit 3 unbound
+PASS: compressed: a copy within a view class, R11 to signed R11
+PASS: compressed: a copy within a view class, signed RG11 to RG11
+PASS: compressed: a copy within a view class, ETC2 RGB8 to sRGB8
+PASS: compressed: a copy within a view class, ETC2 sRGB8 alpha to RGBA8
+PASS: compressed: a copy within a view class, ETC2 punch-through to its sRGB
+PASS: compressed: a copy within a view class, ASTC 4x4 to its sRGB
+PASS: compressed: ASTC to R11 (another class) GL_INVALID_OPERATION
+PASS: compressed: glTexStorage2D of sRGB ASTC 5x4, 4 levels
+PASS: compressed: its level 3 replaced (16x15, edge blocks)
+PASS: compressed: an ASTC 5x4 storage of 8 levels, each level replaced
+PASS: compressed: glTexStorage2D of ETC1 refused
+PASS: KHR_debug: offered
+PASS: KHR_debug: output off, its limits
+PASS: KHR_debug: an error is a message to the callback
+PASS: KHR_debug: without a callback the log, an inserted message
+PASS: KHR_debug: a push message, an error filtered in the group
+PASS: KHR_debug: the pop message, the filter gone with its group
+PASS: KHR_debug: a pop past the default group: GL_STACK_UNDERFLOW
+PASS: KHR_debug: a buffer's label
+PASS: KHR_debug: a label cut to the buffer given
+PASS: KHR_debug: a deleted buffer has no label (GL_INVALID_VALUE)
+PASS: KHR_debug: not an identifier: GL_INVALID_ENUM
+PASS: geometry: GL_EXT_geometry_shader offered
+PASS: geometry: 256 framebuffer layers, the layer's provoking vertex undefined
+PASS: geometry: a geometry shader made and attached
+PASS: geometry: a vertex, geometry and fragment program links from its file
+PASS: geometry: its layout (3 vertices, triangles in, a strip out, 2 invocations)
+PASS: geometry: each uniform referenced by its own stage
+PASS: geometry: the geometry stage's uniform set and read
+PASS: layered: a 2D array attached layered, complete
+PASS: layered: a 2D texture beside it (not layered): GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS
+PASS: layered: a 3D texture beside a 2D array: GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS
+PASS: layered: a layer beside a layered attachment: GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS
+PASS: layered: detached, complete again
+PASS: layered: no such texture: GL_INVALID_OPERATION
+PASS: layered: level -1: GL_INVALID_VALUE
+PASS: layered: GL_FRAMEBUFFER_DEFAULT_LAYERS set and read
+PASS: layered: 257 default layers: GL_INVALID_VALUE
+PASS: layered depth: the textures made
+PASS: layered depth: a DEPTH_COMPONENT32F array's layers with a layered colour array, complete
+PASS: layered depth: a DEPTH24_STENCIL8 array as depth and stencil, complete
+PASS: layered depth: one layer of it beside layered colour: GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS
+PASS: depth: a colour layer and a depth-stencil array's layer, complete
+PASS: depth: depth and stencil from two layers of one texture: not one image (unsupported)
+PASS: depth: a depth cube map's face, complete
+PASS: layered depth: a depth cube map's faces with a colour array's layers, complete
+PASS: geometry: separable programs, a geometry shader alone and with a vertex shader, link
+PASS: geometry: the geometry program's uniform is its stage's
+PASS: geometry: a pipeline's geometry stage
+PASS: geometry: a vertex and geometry program for both stages
+PASS: geometry: the program not active for its geometry stage: not valid
+PASS: pipeline: three separable programs, a vertex, a geometry and a fragment one, link
+PASS: pipeline: valid with its geometry program
+PASS: pipeline: a draw finds its program (the three composed, the .v3dx by its hash)
+PASS: primitives generated: a query begun, current
+PASS: primitives generated: begun twice: GL_INVALID_OPERATION
+PASS: primitives generated: ended, nothing drawn: 0
+PASS: primitives generated: the query of another target
+PASS: ES 3.1: no GL error left over
+PASS: ES 3.0 asked: 3.1 given (the highest)
+PASSED: 105 of 105

@@ -1,0 +1,969 @@
+#sessionInfo releaseName unknown
+#sessionInfo releaseId 0xcafebabe
+#sessionInfo targetName "AmigaOS3"
+#sessionInfo logFormatVersion "0.3.4"
+#sessionInfo vendor "ogles3.library"
+#sessionInfo renderer "V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM"
+#sessionInfo commandLineParameters "--deqp-caselist-file M8R3:caselists/timing2.txt --deqp-archive-dir=M8R3:bin --deqp-log-filename=M8R3:results/timing3.qpa --deqp-log-images=disable --deqp-log-shader-sources=disable --deqp-surface-width=256 --deqp-surface-height=256 --deqp-gl-config-name=rgba8888d24s8ms0"
+
+#beginSession
+
+#beginTestCaseResult dEQP-GLES31.functional.copy_image.non_compressed.viewclass_128_bits.rgba32f_rgba32f.texture2d_array_to_texture2d_array
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.copy_image.non_compressed.viewclass_128_bits.rgba32f_rgba32f.texture2d_array_to_texture2d_array" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="TestCaseInfo" Description="Test case info">
+  <Text>Testing copying from texture2d_array to texture2d_array.</Text>
+  <Section Name="Source image info." Description="Source image info.">
+   <Text>Target: texture2d_array</Text>
+   <Text>Size: (65, 65, 9)</Text>
+   <Text>Levels: 7</Text>
+   <Text>Format: rgba32f</Text>
+</Section>
+  <Section Name="Destination image info." Description="Destination image info.">
+   <Text>Target: texture2d_array</Text>
+   <Text>Size: (65, 65, 9)</Text>
+   <Text>Levels: 7</Text>
+   <Text>Format: rgba32f</Text>
+</Section>
+</Section>
+ <Text>Creating source image.</Text>
+ <Text>Creating destination image.</Text>
+ <Section Name="Source image verify." Description="Source image verify.">
+  <Text>Verifying source image.</Text>
+  <Text>TIMING (ms, so far in this case): decode 0, draw 105, reference 0, readPixels 0, compare 0, reference copy 0, upload 0</Text>
+</Section>
+ <Section Name="Destination image verify." Description="Destination image verify.">
+  <Text>Verifying destination image.</Text>
+  <Text>TIMING (ms, so far in this case): decode 0, draw 132, reference 0, readPixels 0, compare 0, reference copy 0, upload 0</Text>
+</Section>
+ <Text>Copying area with size (65, 65, 9) from source image position (0, 0, 0) and mipmap level 0 to destination image position (0, 0, 0) and mipmap level 0. Size in destination format is (65, 65, 9)</Text>
+ <Text>Copying area with size (31, 31, 3) from source image position (34, 34, 6) and mipmap level 0 to destination image position (0, 0, 0) and mipmap level 0. Size in destination format is (31, 31, 3)</Text>
+ <Text>Copying area with size (31, 31, 3) from source image position (0, 0, 0) and mipmap level 0 to destination image position (34, 34, 6) and mipmap level 0. Size in destination format is (31, 31, 3)</Text>
+ <Text>Copying area with size (31, 31, 3) from source image position (33, 33, 5) and mipmap level 0 to destination image position (33, 33, 5) and mipmap level 0. Size in destination format is (31, 31, 3)</Text>
+ <Text>Copying area with size (32, 32, 9) from source image position (0, 0, 0) and mipmap level 1 to destination image position (0, 0, 0) and mipmap level 1. Size in destination format is (32, 32, 9)</Text>
+ <Text>Copying area with size (15, 15, 3) from source image position (17, 17, 6) and mipmap level 1 to destination image position (0, 0, 0) and mipmap level 1. Size in destination format is (15, 15, 3)</Text>
+ <Text>Copying area with size (15, 15, 3) from source image position (0, 0, 0) and mipmap level 1 to destination image position (17, 17, 6) and mipmap level 1. Size in destination format is (15, 15, 3)</Text>
+ <Text>Copying area with size (15, 15, 3) from source image position (17, 17, 5) and mipmap level 1 to destination image position (17, 17, 5) and mipmap level 1. Size in destination format is (15, 15, 3)</Text>
+ <Text>Copying area with size (1, 1, 9) from source image position (0, 0, 0) and mipmap level 6 to destination image position (0, 0, 0) and mipmap level 6. Size in destination format is (1, 1, 9)</Text>
+ <Text>Copying area with size (1, 1, 3) from source image position (0, 0, 6) and mipmap level 6 to destination image position (0, 0, 0) and mipmap level 6. Size in destination format is (1, 1, 3)</Text>
+ <Text>Copying area with size (1, 1, 3) from source image position (0, 0, 0) and mipmap level 6 to destination image position (0, 0, 6) and mipmap level 6. Size in destination format is (1, 1, 3)</Text>
+ <Text>Copying area with size (1, 1, 3) from source image position (0, 0, 5) and mipmap level 6 to destination image position (0, 0, 5) and mipmap level 6. Size in destination format is (1, 1, 3)</Text>
+ <Section Name="Source image verify." Description="Source image verify.">
+  <Text>Verifying source image.</Text>
+  <Text>Image comparison of level 0 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 8 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 0, draw 152, reference 94, readPixels 6, compare 49, reference copy 0, upload 0</Text>
+</Section>
+ <Section Name="Destination image verify." Description="Destination image verify.">
+  <Text>Verifying destination image.</Text>
+  <Text>Image comparison of level 0 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 8 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 0, draw 172, reference 187, readPixels 9, compare 99, reference copy 0, upload 0</Text>
+</Section>
+ <Text>Deleting source image. </Text>
+ <Text>Deleting destination image. </Text>
+ <Text>Creating source image.</Text>
+ <Text>Creating destination image.</Text>
+ <Text>Copying area with size (65, 65, 9) from source image position (0, 0, 0) and mipmap level 0 to destination image position (0, 0, 0) and mipmap level 0. Size in destination format is (65, 65, 9)</Text>
+ <Text>Copying area with size (31, 31, 3) from source image position (34, 34, 6) and mipmap level 0 to destination image position (0, 0, 0) and mipmap level 0. Size in destination format is (31, 31, 3)</Text>
+ <Text>Copying area with size (31, 31, 3) from source image position (0, 0, 0) and mipmap level 0 to destination image position (34, 34, 6) and mipmap level 0. Size in destination format is (31, 31, 3)</Text>
+ <Text>Copying area with size (31, 31, 3) from source image position (33, 33, 5) and mipmap level 0 to destination image position (33, 33, 5) and mipmap level 0. Size in destination format is (31, 31, 3)</Text>
+ <Text>Copying area with size (32, 32, 9) from source image position (0, 0, 0) and mipmap level 1 to destination image position (0, 0, 0) and mipmap level 1. Size in destination format is (32, 32, 9)</Text>
+ <Text>Copying area with size (15, 15, 3) from source image position (17, 17, 6) and mipmap level 1 to destination image position (0, 0, 0) and mipmap level 1. Size in destination format is (15, 15, 3)</Text>
+ <Text>Copying area with size (15, 15, 3) from source image position (0, 0, 0) and mipmap level 1 to destination image position (17, 17, 6) and mipmap level 1. Size in destination format is (15, 15, 3)</Text>
+ <Text>Copying area with size (15, 15, 3) from source image position (17, 17, 5) and mipmap level 1 to destination image position (17, 17, 5) and mipmap level 1. Size in destination format is (15, 15, 3)</Text>
+ <Text>Copying area with size (1, 1, 9) from source image position (0, 0, 0) and mipmap level 6 to destination image position (0, 0, 0) and mipmap level 6. Size in destination format is (1, 1, 9)</Text>
+ <Text>Copying area with size (1, 1, 3) from source image position (0, 0, 6) and mipmap level 6 to destination image position (0, 0, 0) and mipmap level 6. Size in destination format is (1, 1, 3)</Text>
+ <Text>Copying area with size (1, 1, 3) from source image position (0, 0, 0) and mipmap level 6 to destination image position (0, 0, 6) and mipmap level 6. Size in destination format is (1, 1, 3)</Text>
+ <Text>Copying area with size (1, 1, 3) from source image position (0, 0, 5) and mipmap level 6 to destination image position (0, 0, 5) and mipmap level 6. Size in destination format is (1, 1, 3)</Text>
+ <Section Name="Source image verify." Description="Source image verify.">
+  <Text>Verifying source image.</Text>
+  <Text>Image comparison of level 0 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 8 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 0, draw 192, reference 282, readPixels 13, compare 154, reference copy 0, upload 0</Text>
+</Section>
+ <Section Name="Destination image verify." Description="Destination image verify.">
+  <Text>Verifying destination image.</Text>
+  <Text>Image comparison of level 0 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 8 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 0, draw 212, reference 376, readPixels 16, compare 204, reference copy 0, upload 0</Text>
+</Section>
+ <Text>Deleting source image. </Text>
+ <Text>Deleting destination image. </Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">1122682</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_array_to_texture2d_array
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_array_to_texture2d_array" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="TestCaseInfo" Description="Test case info">
+  <Text>Testing copying from texture2d_array to texture2d_array.</Text>
+  <Section Name="Source image info." Description="Source image info.">
+   <Text>Target: texture2d_array</Text>
+   <Text>Size: (130, 132, 17)</Text>
+   <Text>Levels: 8</Text>
+   <Text>Format: rgba_astc_5x4_khr</Text>
+</Section>
+  <Section Name="Destination image info." Description="Destination image info.">
+   <Text>Target: texture2d_array</Text>
+   <Text>Size: (130, 132, 17)</Text>
+   <Text>Levels: 8</Text>
+   <Text>Format: rgba_astc_5x4_khr</Text>
+</Section>
+</Section>
+ <Text>Creating source image.</Text>
+ <Text>Creating destination image.</Text>
+ <Section Name="Source image verify." Description="Source image verify.">
+  <Text>Verifying source image.</Text>
+  <Text>TIMING (ms, so far in this case): decode 531, draw 256, reference 376, readPixels 16, compare 204, reference copy 0, upload 0</Text>
+</Section>
+ <Section Name="Destination image verify." Description="Destination image verify.">
+  <Text>Verifying destination image.</Text>
+  <Text>TIMING (ms, so far in this case): decode 1060, draw 287, reference 376, readPixels 16, compare 204, reference copy 0, upload 0</Text>
+</Section>
+ <Text>Copying area with size (130, 132, 17) from source image position (0, 0, 0) and mipmap level 0 to destination image position (0, 0, 0) and mipmap level 0. Size in destination format is (130, 132, 17)</Text>
+ <Text>Copying area with size (55, 60, 7) from source image position (75, 72, 10) and mipmap level 0 to destination image position (0, 0, 0) and mipmap level 0. Size in destination format is (55, 60, 7)</Text>
+ <Text>Copying area with size (55, 60, 7) from source image position (0, 0, 0) and mipmap level 0 to destination image position (75, 72, 10) and mipmap level 0. Size in destination format is (55, 60, 7)</Text>
+ <Text>Copying area with size (55, 60, 7) from source image position (65, 68, 9) and mipmap level 0 to destination image position (65, 68, 9) and mipmap level 0. Size in destination format is (55, 60, 7)</Text>
+ <Text>Copying area with size (65, 66, 17) from source image position (0, 0, 0) and mipmap level 1 to destination image position (0, 0, 0) and mipmap level 1. Size in destination format is (65, 66, 17)</Text>
+ <Text>Copying area with size (25, 28, 7) from source image position (40, 36, 10) and mipmap level 1 to destination image position (0, 0, 0) and mipmap level 1. Size in destination format is (25, 28, 7)</Text>
+ <Text>Copying area with size (25, 28, 7) from source image position (0, 0, 0) and mipmap level 1 to destination image position (40, 36, 10) and mipmap level 1. Size in destination format is (25, 28, 7)</Text>
+ <Text>Copying area with size (25, 28, 7) from source image position (35, 36, 9) and mipmap level 1 to destination image position (35, 36, 9) and mipmap level 1. Size in destination format is (25, 28, 7)</Text>
+ <Text>Copying area with size (8, 8, 17) from source image position (0, 0, 0) and mipmap level 4 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (8, 8, 17)</Text>
+ <Text>Copying area with size (5, 4, 7) from source image position (0, 4, 10) and mipmap level 4 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (5, 4, 7)</Text>
+ <Text>Copying area with size (5, 4, 7) from source image position (0, 0, 0) and mipmap level 4 to destination image position (0, 4, 10) and mipmap level 4. Size in destination format is (5, 4, 7)</Text>
+ <Text>Copying area with size (5, 4, 7) from source image position (0, 0, 9) and mipmap level 4 to destination image position (0, 0, 9) and mipmap level 4. Size in destination format is (5, 4, 7)</Text>
+ <Section Name="Source image verify." Description="Source image verify.">
+  <Text>Verifying source image.</Text>
+  <Text>Image comparison of level 0 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 16 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 1593, draw 338, reference 1168, readPixels 35, compare 569, reference copy 0, upload 0</Text>
+</Section>
+ <Section Name="Destination image verify." Description="Destination image verify.">
+  <Text>Verifying destination image.</Text>
+  <Text>Image comparison of level 0 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 16 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 2092, draw 387, reference 1952, readPixels 55, compare 927, reference copy 0, upload 0</Text>
+</Section>
+ <Text>Deleting source image. </Text>
+ <Text>Deleting destination image. </Text>
+ <Text>Creating source image.</Text>
+ <Text>Creating destination image.</Text>
+ <Text>Copying area with size (130, 132, 17) from source image position (0, 0, 0) and mipmap level 0 to destination image position (0, 0, 0) and mipmap level 0. Size in destination format is (130, 132, 17)</Text>
+ <Text>Copying area with size (55, 60, 7) from source image position (75, 72, 10) and mipmap level 0 to destination image position (0, 0, 0) and mipmap level 0. Size in destination format is (55, 60, 7)</Text>
+ <Text>Copying area with size (55, 60, 7) from source image position (0, 0, 0) and mipmap level 0 to destination image position (75, 72, 10) and mipmap level 0. Size in destination format is (55, 60, 7)</Text>
+ <Text>Copying area with size (55, 60, 7) from source image position (65, 68, 9) and mipmap level 0 to destination image position (65, 68, 9) and mipmap level 0. Size in destination format is (55, 60, 7)</Text>
+ <Text>Copying area with size (65, 66, 17) from source image position (0, 0, 0) and mipmap level 1 to destination image position (0, 0, 0) and mipmap level 1. Size in destination format is (65, 66, 17)</Text>
+ <Text>Copying area with size (25, 28, 7) from source image position (40, 36, 10) and mipmap level 1 to destination image position (0, 0, 0) and mipmap level 1. Size in destination format is (25, 28, 7)</Text>
+ <Text>Copying area with size (25, 28, 7) from source image position (0, 0, 0) and mipmap level 1 to destination image position (40, 36, 10) and mipmap level 1. Size in destination format is (25, 28, 7)</Text>
+ <Text>Copying area with size (25, 28, 7) from source image position (35, 36, 9) and mipmap level 1 to destination image position (35, 36, 9) and mipmap level 1. Size in destination format is (25, 28, 7)</Text>
+ <Text>Copying area with size (8, 8, 17) from source image position (0, 0, 0) and mipmap level 4 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (8, 8, 17)</Text>
+ <Text>Copying area with size (5, 4, 7) from source image position (0, 4, 10) and mipmap level 4 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (5, 4, 7)</Text>
+ <Text>Copying area with size (5, 4, 7) from source image position (0, 0, 0) and mipmap level 4 to destination image position (0, 4, 10) and mipmap level 4. Size in destination format is (5, 4, 7)</Text>
+ <Text>Copying area with size (5, 4, 7) from source image position (0, 0, 9) and mipmap level 4 to destination image position (0, 0, 9) and mipmap level 4. Size in destination format is (5, 4, 7)</Text>
+ <Section Name="Source image verify." Description="Source image verify.">
+  <Text>Verifying source image.</Text>
+  <Text>Image comparison of level 0 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 16 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 2619, draw 436, reference 2744, readPixels 75, compare 1284, reference copy 0, upload 0</Text>
+</Section>
+ <Section Name="Destination image verify." Description="Destination image verify.">
+  <Text>Verifying destination image.</Text>
+  <Text>Image comparison of level 0 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 0 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 1 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 2 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 3 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 4 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 5 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 6 and Layer 16 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 0 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 1 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 2 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 3 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 4 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 5 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 6 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 7 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 8 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 9 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 10 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 11 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 12 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 13 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 14 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 15 passed.</Text>
+  <Text>Image comparison of level 7 and Layer 16 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 3140, draw 484, reference 3534, readPixels 95, compare 1640, reference copy 0, upload 0</Text>
+</Section>
+ <Text>Deleting source image. </Text>
+ <Text>Deleting destination image. </Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">8238305</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+Run took 9.80 seconds
+
+#endSession

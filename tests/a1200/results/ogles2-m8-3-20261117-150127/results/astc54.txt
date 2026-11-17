@@ -1,0 +1,205 @@
+Writing test log into M8R3:results/astc54.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles3.library: 4 functions of the ES 3.0 table not implemented yet: glTexStorage1DEXT glTextureStorage1DEXT glTextureStorage2DEXT glTextureStorage3DEXT
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_to_texture2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture3d_to_texture2d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture3d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture3d_to_cubemap'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture3d_to_texture2d_array'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.cubemap_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.cubemap_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.cubemap_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.cubemap_to_texture2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_array_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_array_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_array_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_array_to_texture2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_to_texture2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture3d_to_texture2d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture3d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture3d_to_cubemap'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture3d_to_texture2d_array'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.cubemap_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.cubemap_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.cubemap_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.cubemap_to_texture2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_array_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_array_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_array_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_array_to_texture2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_to_texture2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.texture3d_to_texture2d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.texture3d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.texture3d_to_cubemap'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.texture3d_to_texture2d_array'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.cubemap_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.cubemap_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.cubemap_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.cubemap_to_texture2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_array_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_array_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_array_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_array_to_texture2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_to_texture2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture3d_to_texture2d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture3d_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture3d_to_cubemap'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture3d_to_texture2d_array'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.cubemap_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.cubemap_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.cubemap_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.cubemap_to_texture2d_array'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_array_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_array_to_texture3d'..
+  NotSupported (TEXTURE_3D target not supported. at es31fCopyImageTests.cpp:1946)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_array_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.srgb8_alpha8_astc_5x4_khr_srgb8_alpha8_astc_5x4_khr.texture2d_array_to_texture2d_array'..
+  Pass (Pass)
+
+DONE!
+
+Test run totals:
+  Passed:        36/64 (56.3%)
+  Failed:        0/64 (0.0%)
+  Not supported: 28/64 (43.8%)
+  Warnings:      0/64 (0.0%)
+  Waived:        0/64 (0.0%)

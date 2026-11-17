@@ -1,0 +1,28 @@
+Writing test log into M8R3:results/timing.qpa
+dEQP Core unknown (0xcafebabe) starting..
+  target implementation = 'AmigaOS3'
+ogles3.library: 4 functions of the ES 3.0 table not implemented yet: glTexStorage1DEXT glTextureStorage1DEXT glTextureStorage2DEXT glTextureStorage3DEXT
+
+Test case 'dEQP-GLES31.functional.copy_image.non_compressed.viewclass_128_bits.rgba32f_rgba32f.texture2d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_r11.r11_eac_r11_eac.texture2d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_to_texture2d'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.cubemap_to_cubemap'..
+  Pass (Pass)
+
+Test case 'dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba32f_rgba_astc_5x4_khr.texture2d_to_texture2d'..
+  Pass (Pass)
+
+DONE!
+
+Test run totals:
+  Passed:        5/5 (100.0%)
+  Failed:        0/5 (0.0%)
+  Not supported: 0/5 (0.0%)
+  Warnings:      0/5 (0.0%)
+  Waived:        0/5 (0.0%)

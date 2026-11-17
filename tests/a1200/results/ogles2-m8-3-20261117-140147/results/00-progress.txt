@@ -1,0 +1,5 @@
+ogles2 M8 run 3: --deqp-case dEQP-GLES31.functional.copy_image.mixed.*
+Tuesday 17-Nov-26 14:01:47
+cimixed done
+finished
+Tuesday 17-Nov-26 14:59:25

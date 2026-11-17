@@ -1,0 +1,669 @@
+#sessionInfo releaseName unknown
+#sessionInfo releaseId 0xcafebabe
+#sessionInfo targetName "AmigaOS3"
+#sessionInfo logFormatVersion "0.3.4"
+#sessionInfo vendor "ogles3.library"
+#sessionInfo renderer "V3D 4.2.14 (PiStorm), 8 QPUs, 64 KB VPM"
+#sessionInfo commandLineParameters "--deqp-caselist-file M8R3:caselists/timing.txt --deqp-archive-dir=M8R3:bin --deqp-log-filename=M8R3:results/timing.qpa --deqp-log-images=disable --deqp-log-shader-sources=disable --deqp-surface-width=256 --deqp-surface-height=256 --deqp-gl-config-name=rgba8888d24s8ms0"
+
+#beginSession
+
+#beginTestCaseResult dEQP-GLES31.functional.copy_image.non_compressed.viewclass_128_bits.rgba32f_rgba32f.texture2d_to_texture2d
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.copy_image.non_compressed.viewclass_128_bits.rgba32f_rgba32f.texture2d_to_texture2d" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="TestCaseInfo" Description="Test case info">
+  <Text>Testing copying from texture2d to texture2d.</Text>
+  <Section Name="Source image info." Description="Source image info.">
+   <Text>Target: texture2d</Text>
+   <Text>Size: (65, 63, 1)</Text>
+   <Text>Levels: 7</Text>
+   <Text>Format: rgba32f</Text>
+</Section>
+  <Section Name="Destination image info." Description="Destination image info.">
+   <Text>Target: texture2d</Text>
+   <Text>Size: (65, 63, 1)</Text>
+   <Text>Levels: 7</Text>
+   <Text>Format: rgba32f</Text>
+</Section>
+</Section>
+ <Text>Creating source image.</Text>
+ <Text>Creating destination image.</Text>
+ <Section Name="Source image verify." Description="Source image verify.">
+  <Text>Verifying source image.</Text>
+  <Text>TIMING (ms, so far in this case): decode 0, draw 56, reference 0, readPixels 0, compare 0, reference copy 0, upload 0</Text>
+</Section>
+ <Section Name="Destination image verify." Description="Destination image verify.">
+  <Text>Verifying destination image.</Text>
+  <Text>TIMING (ms, so far in this case): decode 0, draw 59, reference 0, readPixels 0, compare 0, reference copy 0, upload 0</Text>
+</Section>
+ <Text>Copying area with size (65, 63, 1) from source image position (0, 0, 0) and mipmap level 0 to destination image position (0, 0, 0) and mipmap level 0. Size in destination format is (65, 63, 1)</Text>
+ <Text>Copying area with size (31, 29, 1) from source image position (34, 34, 0) and mipmap level 0 to destination image position (0, 0, 0) and mipmap level 0. Size in destination format is (31, 29, 1)</Text>
+ <Text>Copying area with size (31, 29, 1) from source image position (0, 0, 0) and mipmap level 0 to destination image position (34, 34, 0) and mipmap level 0. Size in destination format is (31, 29, 1)</Text>
+ <Text>Copying area with size (31, 29, 1) from source image position (33, 31, 0) and mipmap level 0 to destination image position (33, 31, 0) and mipmap level 0. Size in destination format is (31, 29, 1)</Text>
+ <Text>Copying area with size (32, 31, 1) from source image position (0, 0, 0) and mipmap level 1 to destination image position (0, 0, 0) and mipmap level 1. Size in destination format is (32, 31, 1)</Text>
+ <Text>Copying area with size (15, 13, 1) from source image position (17, 18, 0) and mipmap level 1 to destination image position (0, 0, 0) and mipmap level 1. Size in destination format is (15, 13, 1)</Text>
+ <Text>Copying area with size (15, 13, 1) from source image position (0, 0, 0) and mipmap level 1 to destination image position (17, 18, 0) and mipmap level 1. Size in destination format is (15, 13, 1)</Text>
+ <Text>Copying area with size (15, 13, 1) from source image position (17, 15, 0) and mipmap level 1 to destination image position (17, 15, 0) and mipmap level 1. Size in destination format is (15, 13, 1)</Text>
+ <Text>Copying area with size (1, 1, 1) from source image position (0, 0, 0) and mipmap level 6 to destination image position (0, 0, 0) and mipmap level 6. Size in destination format is (1, 1, 1)</Text>
+ <Text>Copying area with size (1, 1, 1) from source image position (0, 0, 0) and mipmap level 6 to destination image position (0, 0, 0) and mipmap level 6. Size in destination format is (1, 1, 1)</Text>
+ <Text>Copying area with size (1, 1, 1) from source image position (0, 0, 0) and mipmap level 6 to destination image position (0, 0, 0) and mipmap level 6. Size in destination format is (1, 1, 1)</Text>
+ <Text>Copying area with size (1, 1, 1) from source image position (0, 0, 0) and mipmap level 6 to destination image position (0, 0, 0) and mipmap level 6. Size in destination format is (1, 1, 1)</Text>
+ <Section Name="Source image verify." Description="Source image verify.">
+  <Text>Verifying source image.</Text>
+  <Text>Image comparison of level 0 passed.</Text>
+  <Text>Image comparison of level 1 passed.</Text>
+  <Text>Image comparison of level 2 passed.</Text>
+  <Text>Image comparison of level 3 passed.</Text>
+  <Text>Image comparison of level 4 passed.</Text>
+  <Text>Image comparison of level 5 passed.</Text>
+  <Text>Image comparison of level 6 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 0, draw 62, reference 10, readPixels 5, compare 5, reference copy 0, upload 0</Text>
+</Section>
+ <Section Name="Destination image verify." Description="Destination image verify.">
+  <Text>Verifying destination image.</Text>
+  <Text>Image comparison of level 0 passed.</Text>
+  <Text>Image comparison of level 1 passed.</Text>
+  <Text>Image comparison of level 2 passed.</Text>
+  <Text>Image comparison of level 3 passed.</Text>
+  <Text>Image comparison of level 4 passed.</Text>
+  <Text>Image comparison of level 5 passed.</Text>
+  <Text>Image comparison of level 6 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 0, draw 64, reference 20, readPixels 6, compare 12, reference copy 0, upload 0</Text>
+</Section>
+ <Text>Deleting source image. </Text>
+ <Text>Deleting destination image. </Text>
+ <Text>Creating source image.</Text>
+ <Text>Creating destination image.</Text>
+ <Text>Copying area with size (65, 63, 1) from source image position (0, 0, 0) and mipmap level 0 to destination image position (0, 0, 0) and mipmap level 0. Size in destination format is (65, 63, 1)</Text>
+ <Text>Copying area with size (31, 29, 1) from source image position (34, 34, 0) and mipmap level 0 to destination image position (0, 0, 0) and mipmap level 0. Size in destination format is (31, 29, 1)</Text>
+ <Text>Copying area with size (31, 29, 1) from source image position (0, 0, 0) and mipmap level 0 to destination image position (34, 34, 0) and mipmap level 0. Size in destination format is (31, 29, 1)</Text>
+ <Text>Copying area with size (31, 29, 1) from source image position (33, 31, 0) and mipmap level 0 to destination image position (33, 31, 0) and mipmap level 0. Size in destination format is (31, 29, 1)</Text>
+ <Text>Copying area with size (32, 31, 1) from source image position (0, 0, 0) and mipmap level 1 to destination image position (0, 0, 0) and mipmap level 1. Size in destination format is (32, 31, 1)</Text>
+ <Text>Copying area with size (15, 13, 1) from source image position (17, 18, 0) and mipmap level 1 to destination image position (0, 0, 0) and mipmap level 1. Size in destination format is (15, 13, 1)</Text>
+ <Text>Copying area with size (15, 13, 1) from source image position (0, 0, 0) and mipmap level 1 to destination image position (17, 18, 0) and mipmap level 1. Size in destination format is (15, 13, 1)</Text>
+ <Text>Copying area with size (15, 13, 1) from source image position (17, 15, 0) and mipmap level 1 to destination image position (17, 15, 0) and mipmap level 1. Size in destination format is (15, 13, 1)</Text>
+ <Text>Copying area with size (1, 1, 1) from source image position (0, 0, 0) and mipmap level 6 to destination image position (0, 0, 0) and mipmap level 6. Size in destination format is (1, 1, 1)</Text>
+ <Text>Copying area with size (1, 1, 1) from source image position (0, 0, 0) and mipmap level 6 to destination image position (0, 0, 0) and mipmap level 6. Size in destination format is (1, 1, 1)</Text>
+ <Text>Copying area with size (1, 1, 1) from source image position (0, 0, 0) and mipmap level 6 to destination image position (0, 0, 0) and mipmap level 6. Size in destination format is (1, 1, 1)</Text>
+ <Text>Copying area with size (1, 1, 1) from source image position (0, 0, 0) and mipmap level 6 to destination image position (0, 0, 0) and mipmap level 6. Size in destination format is (1, 1, 1)</Text>
+ <Section Name="Source image verify." Description="Source image verify.">
+  <Text>Verifying source image.</Text>
+  <Text>Image comparison of level 0 passed.</Text>
+  <Text>Image comparison of level 1 passed.</Text>
+  <Text>Image comparison of level 2 passed.</Text>
+  <Text>Image comparison of level 3 passed.</Text>
+  <Text>Image comparison of level 4 passed.</Text>
+  <Text>Image comparison of level 5 passed.</Text>
+  <Text>Image comparison of level 6 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 0, draw 67, reference 29, readPixels 7, compare 17, reference copy 0, upload 0</Text>
+</Section>
+ <Section Name="Destination image verify." Description="Destination image verify.">
+  <Text>Verifying destination image.</Text>
+  <Text>Image comparison of level 0 passed.</Text>
+  <Text>Image comparison of level 1 passed.</Text>
+  <Text>Image comparison of level 2 passed.</Text>
+  <Text>Image comparison of level 3 passed.</Text>
+  <Text>Image comparison of level 4 passed.</Text>
+  <Text>Image comparison of level 5 passed.</Text>
+  <Text>Image comparison of level 6 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 0, draw 69, reference 39, readPixels 8, compare 22, reference copy 0, upload 0</Text>
+</Section>
+ <Text>Deleting source image. </Text>
+ <Text>Deleting destination image. </Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">219775</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_r11.r11_eac_r11_eac.texture2d_to_texture2d
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.copy_image.compressed.viewclass_eac_r11.r11_eac_r11_eac.texture2d_to_texture2d" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="TestCaseInfo" Description="Test case info">
+  <Text>Testing copying from texture2d to texture2d.</Text>
+  <Section Name="Source image info." Description="Source image info.">
+   <Text>Target: texture2d</Text>
+   <Text>Size: (132, 124, 1)</Text>
+   <Text>Levels: 8</Text>
+   <Text>Format: r11_eac</Text>
+</Section>
+  <Section Name="Destination image info." Description="Destination image info.">
+   <Text>Target: texture2d</Text>
+   <Text>Size: (132, 124, 1)</Text>
+   <Text>Levels: 8</Text>
+   <Text>Format: r11_eac</Text>
+</Section>
+</Section>
+ <Text>Creating source image.</Text>
+ <Text>Creating destination image.</Text>
+ <Section Name="Source image verify." Description="Source image verify.">
+  <Text>Verifying source image.</Text>
+  <Text>TIMING (ms, so far in this case): decode 4, draw 76, reference 39, readPixels 8, compare 22, reference copy 0, upload 0</Text>
+</Section>
+ <Section Name="Destination image verify." Description="Destination image verify.">
+  <Text>Verifying destination image.</Text>
+  <Text>TIMING (ms, so far in this case): decode 8, draw 79, reference 39, readPixels 8, compare 22, reference copy 0, upload 0</Text>
+</Section>
+ <Text>Copying area with size (132, 124, 1) from source image position (0, 0, 0) and mipmap level 0 to destination image position (0, 0, 0) and mipmap level 0. Size in destination format is (132, 124, 1)</Text>
+ <Text>Copying area with size (60, 52, 1) from source image position (72, 72, 0) and mipmap level 0 to destination image position (0, 0, 0) and mipmap level 0. Size in destination format is (60, 52, 1)</Text>
+ <Text>Copying area with size (60, 52, 1) from source image position (0, 0, 0) and mipmap level 0 to destination image position (72, 72, 0) and mipmap level 0. Size in destination format is (60, 52, 1)</Text>
+ <Text>Copying area with size (60, 52, 1) from source image position (68, 60, 0) and mipmap level 0 to destination image position (68, 60, 0) and mipmap level 0. Size in destination format is (60, 52, 1)</Text>
+ <Text>Copying area with size (66, 62, 1) from source image position (0, 0, 0) and mipmap level 1 to destination image position (0, 0, 0) and mipmap level 1. Size in destination format is (66, 62, 1)</Text>
+ <Text>Copying area with size (28, 20, 1) from source image position (36, 40, 0) and mipmap level 1 to destination image position (0, 0, 0) and mipmap level 1. Size in destination format is (28, 20, 1)</Text>
+ <Text>Copying area with size (28, 20, 1) from source image position (0, 0, 0) and mipmap level 1 to destination image position (36, 40, 0) and mipmap level 1. Size in destination format is (28, 20, 1)</Text>
+ <Text>Copying area with size (28, 20, 1) from source image position (36, 28, 0) and mipmap level 1 to destination image position (36, 28, 0) and mipmap level 1. Size in destination format is (28, 20, 1)</Text>
+ <Text>Copying area with size (8, 7, 1) from source image position (0, 0, 0) and mipmap level 4 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (8, 7, 1)</Text>
+ <Text>Copying area with size (4, 4, 1) from source image position (4, 0, 0) and mipmap level 4 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (4, 4, 1)</Text>
+ <Text>Copying area with size (4, 4, 1) from source image position (0, 0, 0) and mipmap level 4 to destination image position (4, 0, 0) and mipmap level 4. Size in destination format is (4, 4, 1)</Text>
+ <Text>Copying area with size (4, 4, 1) from source image position (0, 0, 0) and mipmap level 4 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (4, 4, 1)</Text>
+ <Section Name="Source image verify." Description="Source image verify.">
+  <Text>Verifying source image.</Text>
+  <Text>Image comparison of level 0 passed.</Text>
+  <Text>Image comparison of level 1 passed.</Text>
+  <Text>Image comparison of level 2 passed.</Text>
+  <Text>Image comparison of level 3 passed.</Text>
+  <Text>Image comparison of level 4 passed.</Text>
+  <Text>Image comparison of level 5 passed.</Text>
+  <Text>Image comparison of level 6 passed.</Text>
+  <Text>Image comparison of level 7 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 13, draw 82, reference 76, readPixels 10, compare 40, reference copy 0, upload 0</Text>
+</Section>
+ <Section Name="Destination image verify." Description="Destination image verify.">
+  <Text>Verifying destination image.</Text>
+  <Text>Image comparison of level 0 passed.</Text>
+  <Text>Image comparison of level 1 passed.</Text>
+  <Text>Image comparison of level 2 passed.</Text>
+  <Text>Image comparison of level 3 passed.</Text>
+  <Text>Image comparison of level 4 passed.</Text>
+  <Text>Image comparison of level 5 passed.</Text>
+  <Text>Image comparison of level 6 passed.</Text>
+  <Text>Image comparison of level 7 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 17, draw 86, reference 113, readPixels 12, compare 57, reference copy 0, upload 0</Text>
+</Section>
+ <Text>Deleting source image. </Text>
+ <Text>Deleting destination image. </Text>
+ <Text>Creating source image.</Text>
+ <Text>Creating destination image.</Text>
+ <Text>Copying area with size (132, 124, 1) from source image position (0, 0, 0) and mipmap level 0 to destination image position (0, 0, 0) and mipmap level 0. Size in destination format is (132, 124, 1)</Text>
+ <Text>Copying area with size (60, 52, 1) from source image position (72, 72, 0) and mipmap level 0 to destination image position (0, 0, 0) and mipmap level 0. Size in destination format is (60, 52, 1)</Text>
+ <Text>Copying area with size (60, 52, 1) from source image position (0, 0, 0) and mipmap level 0 to destination image position (72, 72, 0) and mipmap level 0. Size in destination format is (60, 52, 1)</Text>
+ <Text>Copying area with size (60, 52, 1) from source image position (68, 60, 0) and mipmap level 0 to destination image position (68, 60, 0) and mipmap level 0. Size in destination format is (60, 52, 1)</Text>
+ <Text>Copying area with size (66, 62, 1) from source image position (0, 0, 0) and mipmap level 1 to destination image position (0, 0, 0) and mipmap level 1. Size in destination format is (66, 62, 1)</Text>
+ <Text>Copying area with size (28, 20, 1) from source image position (36, 40, 0) and mipmap level 1 to destination image position (0, 0, 0) and mipmap level 1. Size in destination format is (28, 20, 1)</Text>
+ <Text>Copying area with size (28, 20, 1) from source image position (0, 0, 0) and mipmap level 1 to destination image position (36, 40, 0) and mipmap level 1. Size in destination format is (28, 20, 1)</Text>
+ <Text>Copying area with size (28, 20, 1) from source image position (36, 28, 0) and mipmap level 1 to destination image position (36, 28, 0) and mipmap level 1. Size in destination format is (28, 20, 1)</Text>
+ <Text>Copying area with size (8, 7, 1) from source image position (0, 0, 0) and mipmap level 4 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (8, 7, 1)</Text>
+ <Text>Copying area with size (4, 4, 1) from source image position (4, 0, 0) and mipmap level 4 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (4, 4, 1)</Text>
+ <Text>Copying area with size (4, 4, 1) from source image position (0, 0, 0) and mipmap level 4 to destination image position (4, 0, 0) and mipmap level 4. Size in destination format is (4, 4, 1)</Text>
+ <Text>Copying area with size (4, 4, 1) from source image position (0, 0, 0) and mipmap level 4 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (4, 4, 1)</Text>
+ <Section Name="Source image verify." Description="Source image verify.">
+  <Text>Verifying source image.</Text>
+  <Text>Image comparison of level 0 passed.</Text>
+  <Text>Image comparison of level 1 passed.</Text>
+  <Text>Image comparison of level 2 passed.</Text>
+  <Text>Image comparison of level 3 passed.</Text>
+  <Text>Image comparison of level 4 passed.</Text>
+  <Text>Image comparison of level 5 passed.</Text>
+  <Text>Image comparison of level 6 passed.</Text>
+  <Text>Image comparison of level 7 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 20, draw 89, reference 152, readPixels 14, compare 75, reference copy 0, upload 0</Text>
+</Section>
+ <Section Name="Destination image verify." Description="Destination image verify.">
+  <Text>Verifying destination image.</Text>
+  <Text>Image comparison of level 0 passed.</Text>
+  <Text>Image comparison of level 1 passed.</Text>
+  <Text>Image comparison of level 2 passed.</Text>
+  <Text>Image comparison of level 3 passed.</Text>
+  <Text>Image comparison of level 4 passed.</Text>
+  <Text>Image comparison of level 5 passed.</Text>
+  <Text>Image comparison of level 6 passed.</Text>
+  <Text>Image comparison of level 7 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 24, draw 92, reference 190, readPixels 16, compare 96, reference copy 0, upload 0</Text>
+</Section>
+ <Text>Deleting source image. </Text>
+ <Text>Deleting destination image. </Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">332676</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_to_texture2d
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.texture2d_to_texture2d" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="TestCaseInfo" Description="Test case info">
+  <Text>Testing copying from texture2d to texture2d.</Text>
+  <Section Name="Source image info." Description="Source image info.">
+   <Text>Target: texture2d</Text>
+   <Text>Size: (130, 124, 1)</Text>
+   <Text>Levels: 8</Text>
+   <Text>Format: rgba_astc_5x4_khr</Text>
+</Section>
+  <Section Name="Destination image info." Description="Destination image info.">
+   <Text>Target: texture2d</Text>
+   <Text>Size: (130, 124, 1)</Text>
+   <Text>Levels: 8</Text>
+   <Text>Format: rgba_astc_5x4_khr</Text>
+</Section>
+</Section>
+ <Text>Creating source image.</Text>
+ <Text>Creating destination image.</Text>
+ <Section Name="Source image verify." Description="Source image verify.">
+  <Text>Verifying source image.</Text>
+  <Text>TIMING (ms, so far in this case): decode 53, draw 100, reference 190, readPixels 16, compare 96, reference copy 0, upload 0</Text>
+</Section>
+ <Section Name="Destination image verify." Description="Destination image verify.">
+  <Text>Verifying destination image.</Text>
+  <Text>TIMING (ms, so far in this case): decode 82, draw 103, reference 190, readPixels 16, compare 96, reference copy 0, upload 0</Text>
+</Section>
+ <Text>Copying area with size (130, 124, 1) from source image position (0, 0, 0) and mipmap level 0 to destination image position (0, 0, 0) and mipmap level 0. Size in destination format is (130, 124, 1)</Text>
+ <Text>Copying area with size (55, 52, 1) from source image position (75, 72, 0) and mipmap level 0 to destination image position (0, 0, 0) and mipmap level 0. Size in destination format is (55, 52, 1)</Text>
+ <Text>Copying area with size (55, 52, 1) from source image position (0, 0, 0) and mipmap level 0 to destination image position (75, 72, 0) and mipmap level 0. Size in destination format is (55, 52, 1)</Text>
+ <Text>Copying area with size (55, 52, 1) from source image position (65, 60, 0) and mipmap level 0 to destination image position (65, 60, 0) and mipmap level 0. Size in destination format is (55, 52, 1)</Text>
+ <Text>Copying area with size (65, 62, 1) from source image position (0, 0, 0) and mipmap level 1 to destination image position (0, 0, 0) and mipmap level 1. Size in destination format is (65, 62, 1)</Text>
+ <Text>Copying area with size (25, 20, 1) from source image position (40, 40, 0) and mipmap level 1 to destination image position (0, 0, 0) and mipmap level 1. Size in destination format is (25, 20, 1)</Text>
+ <Text>Copying area with size (25, 20, 1) from source image position (0, 0, 0) and mipmap level 1 to destination image position (40, 40, 0) and mipmap level 1. Size in destination format is (25, 20, 1)</Text>
+ <Text>Copying area with size (25, 20, 1) from source image position (35, 28, 0) and mipmap level 1 to destination image position (35, 28, 0) and mipmap level 1. Size in destination format is (25, 20, 1)</Text>
+ <Text>Copying area with size (8, 7, 1) from source image position (0, 0, 0) and mipmap level 4 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (8, 7, 1)</Text>
+ <Text>Copying area with size (5, 4, 1) from source image position (0, 0, 0) and mipmap level 4 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (5, 4, 1)</Text>
+ <Text>Copying area with size (5, 4, 1) from source image position (0, 0, 0) and mipmap level 4 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (5, 4, 1)</Text>
+ <Text>Copying area with size (5, 4, 1) from source image position (0, 0, 0) and mipmap level 4 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (5, 4, 1)</Text>
+ <Section Name="Source image verify." Description="Source image verify.">
+  <Text>Verifying source image.</Text>
+  <Text>Image comparison of level 0 passed.</Text>
+  <Text>Image comparison of level 1 passed.</Text>
+  <Text>Image comparison of level 2 passed.</Text>
+  <Text>Image comparison of level 3 passed.</Text>
+  <Text>Image comparison of level 4 passed.</Text>
+  <Text>Image comparison of level 5 passed.</Text>
+  <Text>Image comparison of level 6 passed.</Text>
+  <Text>Image comparison of level 7 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 109, draw 106, reference 231, readPixels 18, compare 115, reference copy 0, upload 0</Text>
+</Section>
+ <Section Name="Destination image verify." Description="Destination image verify.">
+  <Text>Verifying destination image.</Text>
+  <Text>Image comparison of level 0 passed.</Text>
+  <Text>Image comparison of level 1 passed.</Text>
+  <Text>Image comparison of level 2 passed.</Text>
+  <Text>Image comparison of level 3 passed.</Text>
+  <Text>Image comparison of level 4 passed.</Text>
+  <Text>Image comparison of level 5 passed.</Text>
+  <Text>Image comparison of level 6 passed.</Text>
+  <Text>Image comparison of level 7 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 137, draw 110, reference 271, readPixels 21, compare 137, reference copy 0, upload 0</Text>
+</Section>
+ <Text>Deleting source image. </Text>
+ <Text>Deleting destination image. </Text>
+ <Text>Creating source image.</Text>
+ <Text>Creating destination image.</Text>
+ <Text>Copying area with size (130, 124, 1) from source image position (0, 0, 0) and mipmap level 0 to destination image position (0, 0, 0) and mipmap level 0. Size in destination format is (130, 124, 1)</Text>
+ <Text>Copying area with size (55, 52, 1) from source image position (75, 72, 0) and mipmap level 0 to destination image position (0, 0, 0) and mipmap level 0. Size in destination format is (55, 52, 1)</Text>
+ <Text>Copying area with size (55, 52, 1) from source image position (0, 0, 0) and mipmap level 0 to destination image position (75, 72, 0) and mipmap level 0. Size in destination format is (55, 52, 1)</Text>
+ <Text>Copying area with size (55, 52, 1) from source image position (65, 60, 0) and mipmap level 0 to destination image position (65, 60, 0) and mipmap level 0. Size in destination format is (55, 52, 1)</Text>
+ <Text>Copying area with size (65, 62, 1) from source image position (0, 0, 0) and mipmap level 1 to destination image position (0, 0, 0) and mipmap level 1. Size in destination format is (65, 62, 1)</Text>
+ <Text>Copying area with size (25, 20, 1) from source image position (40, 40, 0) and mipmap level 1 to destination image position (0, 0, 0) and mipmap level 1. Size in destination format is (25, 20, 1)</Text>
+ <Text>Copying area with size (25, 20, 1) from source image position (0, 0, 0) and mipmap level 1 to destination image position (40, 40, 0) and mipmap level 1. Size in destination format is (25, 20, 1)</Text>
+ <Text>Copying area with size (25, 20, 1) from source image position (35, 28, 0) and mipmap level 1 to destination image position (35, 28, 0) and mipmap level 1. Size in destination format is (25, 20, 1)</Text>
+ <Text>Copying area with size (8, 7, 1) from source image position (0, 0, 0) and mipmap level 4 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (8, 7, 1)</Text>
+ <Text>Copying area with size (5, 4, 1) from source image position (0, 0, 0) and mipmap level 4 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (5, 4, 1)</Text>
+ <Text>Copying area with size (5, 4, 1) from source image position (0, 0, 0) and mipmap level 4 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (5, 4, 1)</Text>
+ <Text>Copying area with size (5, 4, 1) from source image position (0, 0, 0) and mipmap level 4 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (5, 4, 1)</Text>
+ <Section Name="Source image verify." Description="Source image verify.">
+  <Text>Verifying source image.</Text>
+  <Text>Image comparison of level 0 passed.</Text>
+  <Text>Image comparison of level 1 passed.</Text>
+  <Text>Image comparison of level 2 passed.</Text>
+  <Text>Image comparison of level 3 passed.</Text>
+  <Text>Image comparison of level 4 passed.</Text>
+  <Text>Image comparison of level 5 passed.</Text>
+  <Text>Image comparison of level 6 passed.</Text>
+  <Text>Image comparison of level 7 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 167, draw 113, reference 314, readPixels 23, compare 158, reference copy 0, upload 0</Text>
+</Section>
+ <Section Name="Destination image verify." Description="Destination image verify.">
+  <Text>Verifying destination image.</Text>
+  <Text>Image comparison of level 0 passed.</Text>
+  <Text>Image comparison of level 1 passed.</Text>
+  <Text>Image comparison of level 2 passed.</Text>
+  <Text>Image comparison of level 3 passed.</Text>
+  <Text>Image comparison of level 4 passed.</Text>
+  <Text>Image comparison of level 5 passed.</Text>
+  <Text>Image comparison of level 6 passed.</Text>
+  <Text>Image comparison of level 7 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 195, draw 116, reference 356, readPixels 25, compare 175, reference copy 0, upload 0</Text>
+</Section>
+ <Text>Deleting source image. </Text>
+ <Text>Deleting destination image. </Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">489410</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.cubemap_to_cubemap
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.copy_image.compressed.viewclass_astc_5x4_rgba.rgba_astc_5x4_khr_rgba_astc_5x4_khr.cubemap_to_cubemap" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="TestCaseInfo" Description="Test case info">
+  <Text>Testing copying from cubemap to cubemap.</Text>
+  <Section Name="Source image info." Description="Source image info.">
+   <Text>Target: cubemap</Text>
+   <Text>Size: (140, 140, 1)</Text>
+   <Text>Levels: 8</Text>
+   <Text>Format: rgba_astc_5x4_khr</Text>
+</Section>
+  <Section Name="Destination image info." Description="Destination image info.">
+   <Text>Target: cubemap</Text>
+   <Text>Size: (140, 140, 1)</Text>
+   <Text>Levels: 8</Text>
+   <Text>Format: rgba_astc_5x4_khr</Text>
+</Section>
+</Section>
+ <Text>Creating source image.</Text>
+ <Text>Creating destination image.</Text>
+ <Section Name="Source image verify." Description="Source image verify.">
+  <Text>Verifying source image.</Text>
+  <Text>TIMING (ms, so far in this case): decode 399, draw 139, reference 356, readPixels 25, compare 175, reference copy 0, upload 0</Text>
+</Section>
+ <Section Name="Destination image verify." Description="Destination image verify.">
+  <Text>Verifying destination image.</Text>
+  <Text>TIMING (ms, so far in this case): decode 613, draw 148, reference 356, readPixels 25, compare 175, reference copy 0, upload 0</Text>
+</Section>
+ <Text>Copying area with size (65, 60, 1) from source image position (75, 80, 5) and mipmap level 0 to destination image position (0, 0, 0) and mipmap level 0. Size in destination format is (65, 60, 1)</Text>
+ <Text>Copying area with size (65, 60, 1) from source image position (0, 0, 0) and mipmap level 0 to destination image position (75, 80, 5) and mipmap level 0. Size in destination format is (65, 60, 1)</Text>
+ <Text>Copying area with size (65, 60, 1) from source image position (75, 68, 3) and mipmap level 0 to destination image position (75, 68, 3) and mipmap level 0. Size in destination format is (65, 60, 1)</Text>
+ <Text>Copying area with size (25, 28, 1) from source image position (45, 40, 5) and mipmap level 1 to destination image position (0, 0, 0) and mipmap level 1. Size in destination format is (25, 28, 1)</Text>
+ <Text>Copying area with size (25, 28, 1) from source image position (0, 0, 0) and mipmap level 1 to destination image position (45, 40, 5) and mipmap level 1. Size in destination format is (25, 28, 1)</Text>
+ <Text>Copying area with size (25, 28, 1) from source image position (35, 36, 3) and mipmap level 1 to destination image position (35, 36, 3) and mipmap level 1. Size in destination format is (25, 28, 1)</Text>
+ <Text>Copying area with size (5, 4, 1) from source image position (0, 4, 5) and mipmap level 4 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (5, 4, 1)</Text>
+ <Text>Copying area with size (5, 4, 1) from source image position (0, 0, 0) and mipmap level 4 to destination image position (0, 4, 5) and mipmap level 4. Size in destination format is (5, 4, 1)</Text>
+ <Text>Copying area with size (5, 4, 1) from source image position (0, 0, 3) and mipmap level 4 to destination image position (0, 0, 3) and mipmap level 4. Size in destination format is (5, 4, 1)</Text>
+ <Section Name="Source image verify." Description="Source image verify.">
+  <Text>Verifying source image.</Text>
+  <Text>Image comparison of level 0 and Face 0 passed.</Text>
+  <Text>Image comparison of level 0 and Face 1 passed.</Text>
+  <Text>Image comparison of level 0 and Face 2 passed.</Text>
+  <Text>Image comparison of level 0 and Face 3 passed.</Text>
+  <Text>Image comparison of level 0 and Face 4 passed.</Text>
+  <Text>Image comparison of level 0 and Face 5 passed.</Text>
+  <Text>Image comparison of level 1 and Face 0 passed.</Text>
+  <Text>Image comparison of level 1 and Face 1 passed.</Text>
+  <Text>Image comparison of level 1 and Face 2 passed.</Text>
+  <Text>Image comparison of level 1 and Face 3 passed.</Text>
+  <Text>Image comparison of level 1 and Face 4 passed.</Text>
+  <Text>Image comparison of level 1 and Face 5 passed.</Text>
+  <Text>Image comparison of level 2 and Face 0 passed.</Text>
+  <Text>Image comparison of level 2 and Face 1 passed.</Text>
+  <Text>Image comparison of level 2 and Face 2 passed.</Text>
+  <Text>Image comparison of level 2 and Face 3 passed.</Text>
+  <Text>Image comparison of level 2 and Face 4 passed.</Text>
+  <Text>Image comparison of level 2 and Face 5 passed.</Text>
+  <Text>Image comparison of level 3 and Face 0 passed.</Text>
+  <Text>Image comparison of level 3 and Face 1 passed.</Text>
+  <Text>Image comparison of level 3 and Face 2 passed.</Text>
+  <Text>Image comparison of level 3 and Face 3 passed.</Text>
+  <Text>Image comparison of level 3 and Face 4 passed.</Text>
+  <Text>Image comparison of level 3 and Face 5 passed.</Text>
+  <Text>Image comparison of level 4 and Face 0 passed.</Text>
+  <Text>Image comparison of level 4 and Face 1 passed.</Text>
+  <Text>Image comparison of level 4 and Face 2 passed.</Text>
+  <Text>Image comparison of level 4 and Face 3 passed.</Text>
+  <Text>Image comparison of level 4 and Face 4 passed.</Text>
+  <Text>Image comparison of level 4 and Face 5 passed.</Text>
+  <Text>Image comparison of level 5 and Face 0 passed.</Text>
+  <Text>Image comparison of level 5 and Face 1 passed.</Text>
+  <Text>Image comparison of level 5 and Face 2 passed.</Text>
+  <Text>Image comparison of level 5 and Face 3 passed.</Text>
+  <Text>Image comparison of level 5 and Face 4 passed.</Text>
+  <Text>Image comparison of level 5 and Face 5 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 819, draw 163, reference 855, readPixels 33, compare 317, reference copy 0, upload 0</Text>
+</Section>
+ <Section Name="Destination image verify." Description="Destination image verify.">
+  <Text>Verifying destination image.</Text>
+  <Text>Image comparison of level 0 and Face 0 passed.</Text>
+  <Text>Image comparison of level 0 and Face 1 passed.</Text>
+  <Text>Image comparison of level 0 and Face 2 passed.</Text>
+  <Text>Image comparison of level 0 and Face 3 passed.</Text>
+  <Text>Image comparison of level 0 and Face 4 passed.</Text>
+  <Text>Image comparison of level 0 and Face 5 passed.</Text>
+  <Text>Image comparison of level 1 and Face 0 passed.</Text>
+  <Text>Image comparison of level 1 and Face 1 passed.</Text>
+  <Text>Image comparison of level 1 and Face 2 passed.</Text>
+  <Text>Image comparison of level 1 and Face 3 passed.</Text>
+  <Text>Image comparison of level 1 and Face 4 passed.</Text>
+  <Text>Image comparison of level 1 and Face 5 passed.</Text>
+  <Text>Image comparison of level 2 and Face 0 passed.</Text>
+  <Text>Image comparison of level 2 and Face 1 passed.</Text>
+  <Text>Image comparison of level 2 and Face 2 passed.</Text>
+  <Text>Image comparison of level 2 and Face 3 passed.</Text>
+  <Text>Image comparison of level 2 and Face 4 passed.</Text>
+  <Text>Image comparison of level 2 and Face 5 passed.</Text>
+  <Text>Image comparison of level 3 and Face 0 passed.</Text>
+  <Text>Image comparison of level 3 and Face 1 passed.</Text>
+  <Text>Image comparison of level 3 and Face 2 passed.</Text>
+  <Text>Image comparison of level 3 and Face 3 passed.</Text>
+  <Text>Image comparison of level 3 and Face 4 passed.</Text>
+  <Text>Image comparison of level 3 and Face 5 passed.</Text>
+  <Text>Image comparison of level 4 and Face 0 passed.</Text>
+  <Text>Image comparison of level 4 and Face 1 passed.</Text>
+  <Text>Image comparison of level 4 and Face 2 passed.</Text>
+  <Text>Image comparison of level 4 and Face 3 passed.</Text>
+  <Text>Image comparison of level 4 and Face 4 passed.</Text>
+  <Text>Image comparison of level 4 and Face 5 passed.</Text>
+  <Text>Image comparison of level 5 and Face 0 passed.</Text>
+  <Text>Image comparison of level 5 and Face 1 passed.</Text>
+  <Text>Image comparison of level 5 and Face 2 passed.</Text>
+  <Text>Image comparison of level 5 and Face 3 passed.</Text>
+  <Text>Image comparison of level 5 and Face 4 passed.</Text>
+  <Text>Image comparison of level 5 and Face 5 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 1026, draw 178, reference 1353, readPixels 41, compare 458, reference copy 0, upload 0</Text>
+</Section>
+ <Text>Deleting source image. </Text>
+ <Text>Deleting destination image. </Text>
+ <Text>Creating source image.</Text>
+ <Text>Creating destination image.</Text>
+ <Text>Copying area with size (65, 60, 1) from source image position (75, 80, 5) and mipmap level 0 to destination image position (0, 0, 0) and mipmap level 0. Size in destination format is (65, 60, 1)</Text>
+ <Text>Copying area with size (65, 60, 1) from source image position (0, 0, 0) and mipmap level 0 to destination image position (75, 80, 5) and mipmap level 0. Size in destination format is (65, 60, 1)</Text>
+ <Text>Copying area with size (65, 60, 1) from source image position (75, 68, 3) and mipmap level 0 to destination image position (75, 68, 3) and mipmap level 0. Size in destination format is (65, 60, 1)</Text>
+ <Text>Copying area with size (25, 28, 1) from source image position (45, 40, 5) and mipmap level 1 to destination image position (0, 0, 0) and mipmap level 1. Size in destination format is (25, 28, 1)</Text>
+ <Text>Copying area with size (25, 28, 1) from source image position (0, 0, 0) and mipmap level 1 to destination image position (45, 40, 5) and mipmap level 1. Size in destination format is (25, 28, 1)</Text>
+ <Text>Copying area with size (25, 28, 1) from source image position (35, 36, 3) and mipmap level 1 to destination image position (35, 36, 3) and mipmap level 1. Size in destination format is (25, 28, 1)</Text>
+ <Text>Copying area with size (5, 4, 1) from source image position (0, 4, 5) and mipmap level 4 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (5, 4, 1)</Text>
+ <Text>Copying area with size (5, 4, 1) from source image position (0, 0, 0) and mipmap level 4 to destination image position (0, 4, 5) and mipmap level 4. Size in destination format is (5, 4, 1)</Text>
+ <Text>Copying area with size (5, 4, 1) from source image position (0, 0, 3) and mipmap level 4 to destination image position (0, 0, 3) and mipmap level 4. Size in destination format is (5, 4, 1)</Text>
+ <Section Name="Source image verify." Description="Source image verify.">
+  <Text>Verifying source image.</Text>
+  <Text>Image comparison of level 0 and Face 0 passed.</Text>
+  <Text>Image comparison of level 0 and Face 1 passed.</Text>
+  <Text>Image comparison of level 0 and Face 2 passed.</Text>
+  <Text>Image comparison of level 0 and Face 3 passed.</Text>
+  <Text>Image comparison of level 0 and Face 4 passed.</Text>
+  <Text>Image comparison of level 0 and Face 5 passed.</Text>
+  <Text>Image comparison of level 1 and Face 0 passed.</Text>
+  <Text>Image comparison of level 1 and Face 1 passed.</Text>
+  <Text>Image comparison of level 1 and Face 2 passed.</Text>
+  <Text>Image comparison of level 1 and Face 3 passed.</Text>
+  <Text>Image comparison of level 1 and Face 4 passed.</Text>
+  <Text>Image comparison of level 1 and Face 5 passed.</Text>
+  <Text>Image comparison of level 2 and Face 0 passed.</Text>
+  <Text>Image comparison of level 2 and Face 1 passed.</Text>
+  <Text>Image comparison of level 2 and Face 2 passed.</Text>
+  <Text>Image comparison of level 2 and Face 3 passed.</Text>
+  <Text>Image comparison of level 2 and Face 4 passed.</Text>
+  <Text>Image comparison of level 2 and Face 5 passed.</Text>
+  <Text>Image comparison of level 3 and Face 0 passed.</Text>
+  <Text>Image comparison of level 3 and Face 1 passed.</Text>
+  <Text>Image comparison of level 3 and Face 2 passed.</Text>
+  <Text>Image comparison of level 3 and Face 3 passed.</Text>
+  <Text>Image comparison of level 3 and Face 4 passed.</Text>
+  <Text>Image comparison of level 3 and Face 5 passed.</Text>
+  <Text>Image comparison of level 4 and Face 0 passed.</Text>
+  <Text>Image comparison of level 4 and Face 1 passed.</Text>
+  <Text>Image comparison of level 4 and Face 2 passed.</Text>
+  <Text>Image comparison of level 4 and Face 3 passed.</Text>
+  <Text>Image comparison of level 4 and Face 4 passed.</Text>
+  <Text>Image comparison of level 4 and Face 5 passed.</Text>
+  <Text>Image comparison of level 5 and Face 0 passed.</Text>
+  <Text>Image comparison of level 5 and Face 1 passed.</Text>
+  <Text>Image comparison of level 5 and Face 2 passed.</Text>
+  <Text>Image comparison of level 5 and Face 3 passed.</Text>
+  <Text>Image comparison of level 5 and Face 4 passed.</Text>
+  <Text>Image comparison of level 5 and Face 5 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 1237, draw 193, reference 1845, readPixels 49, compare 599, reference copy 0, upload 0</Text>
+</Section>
+ <Section Name="Destination image verify." Description="Destination image verify.">
+  <Text>Verifying destination image.</Text>
+  <Text>Image comparison of level 0 and Face 0 passed.</Text>
+  <Text>Image comparison of level 0 and Face 1 passed.</Text>
+  <Text>Image comparison of level 0 and Face 2 passed.</Text>
+  <Text>Image comparison of level 0 and Face 3 passed.</Text>
+  <Text>Image comparison of level 0 and Face 4 passed.</Text>
+  <Text>Image comparison of level 0 and Face 5 passed.</Text>
+  <Text>Image comparison of level 1 and Face 0 passed.</Text>
+  <Text>Image comparison of level 1 and Face 1 passed.</Text>
+  <Text>Image comparison of level 1 and Face 2 passed.</Text>
+  <Text>Image comparison of level 1 and Face 3 passed.</Text>
+  <Text>Image comparison of level 1 and Face 4 passed.</Text>
+  <Text>Image comparison of level 1 and Face 5 passed.</Text>
+  <Text>Image comparison of level 2 and Face 0 passed.</Text>
+  <Text>Image comparison of level 2 and Face 1 passed.</Text>
+  <Text>Image comparison of level 2 and Face 2 passed.</Text>
+  <Text>Image comparison of level 2 and Face 3 passed.</Text>
+  <Text>Image comparison of level 2 and Face 4 passed.</Text>
+  <Text>Image comparison of level 2 and Face 5 passed.</Text>
+  <Text>Image comparison of level 3 and Face 0 passed.</Text>
+  <Text>Image comparison of level 3 and Face 1 passed.</Text>
+  <Text>Image comparison of level 3 and Face 2 passed.</Text>
+  <Text>Image comparison of level 3 and Face 3 passed.</Text>
+  <Text>Image comparison of level 3 and Face 4 passed.</Text>
+  <Text>Image comparison of level 3 and Face 5 passed.</Text>
+  <Text>Image comparison of level 4 and Face 0 passed.</Text>
+  <Text>Image comparison of level 4 and Face 1 passed.</Text>
+  <Text>Image comparison of level 4 and Face 2 passed.</Text>
+  <Text>Image comparison of level 4 and Face 3 passed.</Text>
+  <Text>Image comparison of level 4 and Face 4 passed.</Text>
+  <Text>Image comparison of level 4 and Face 5 passed.</Text>
+  <Text>Image comparison of level 5 and Face 0 passed.</Text>
+  <Text>Image comparison of level 5 and Face 1 passed.</Text>
+  <Text>Image comparison of level 5 and Face 2 passed.</Text>
+  <Text>Image comparison of level 5 and Face 3 passed.</Text>
+  <Text>Image comparison of level 5 and Face 4 passed.</Text>
+  <Text>Image comparison of level 5 and Face 5 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 1440, draw 208, reference 2340, readPixels 57, compare 740, reference copy 0, upload 0</Text>
+</Section>
+ <Text>Deleting source image. </Text>
+ <Text>Deleting destination image. </Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">3999386</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+#beginTestCaseResult dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba32f_rgba_astc_5x4_khr.texture2d_to_texture2d
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseResult CasePath="dEQP-GLES31.functional.copy_image.mixed.viewclass_128_bits_mixed.rgba32f_rgba_astc_5x4_khr.texture2d_to_texture2d" Version="0.3.4" CaseType="SelfValidate">
+ <Section Name="TestCaseInfo" Description="Test case info">
+  <Text>Testing copying from texture2d to texture2d.</Text>
+  <Section Name="Source image info." Description="Source image info.">
+   <Text>Target: texture2d</Text>
+   <Text>Size: (129, 127, 1)</Text>
+   <Text>Levels: 8</Text>
+   <Text>Format: rgba32f</Text>
+</Section>
+  <Section Name="Destination image info." Description="Destination image info.">
+   <Text>Target: texture2d</Text>
+   <Text>Size: (130, 124, 1)</Text>
+   <Text>Levels: 8</Text>
+   <Text>Format: rgba_astc_5x4_khr</Text>
+</Section>
+</Section>
+ <Text>Creating source image.</Text>
+ <Text>Creating destination image.</Text>
+ <Section Name="Source image verify." Description="Source image verify.">
+  <Text>Verifying source image.</Text>
+  <Text>TIMING (ms, so far in this case): decode 1440, draw 222, reference 2340, readPixels 57, compare 740, reference copy 0, upload 0</Text>
+</Section>
+ <Section Name="Destination image verify." Description="Destination image verify.">
+  <Text>Verifying destination image.</Text>
+  <Text>TIMING (ms, so far in this case): decode 1467, draw 224, reference 2340, readPixels 57, compare 740, reference copy 0, upload 0</Text>
+</Section>
+ <Text>Copying area with size (11, 13, 1) from source image position (118, 114, 0) and mipmap level 0 to destination image position (0, 0, 0) and mipmap level 0. Size in destination format is (55, 52, 1)</Text>
+ <Text>Copying area with size (11, 13, 1) from source image position (0, 0, 0) and mipmap level 0 to destination image position (75, 72, 0) and mipmap level 0. Size in destination format is (55, 52, 1)</Text>
+ <Text>Copying area with size (11, 13, 1) from source image position (117, 111, 0) and mipmap level 0 to destination image position (65, 60, 0) and mipmap level 0. Size in destination format is (55, 52, 1)</Text>
+ <Text>Copying area with size (5, 5, 1) from source image position (59, 58, 0) and mipmap level 1 to destination image position (0, 0, 0) and mipmap level 1. Size in destination format is (25, 20, 1)</Text>
+ <Text>Copying area with size (5, 5, 1) from source image position (0, 0, 0) and mipmap level 1 to destination image position (40, 40, 0) and mipmap level 1. Size in destination format is (25, 20, 1)</Text>
+ <Text>Copying area with size (5, 5, 1) from source image position (59, 55, 0) and mipmap level 1 to destination image position (35, 28, 0) and mipmap level 1. Size in destination format is (25, 20, 1)</Text>
+ <Text>Copying area with size (1, 1, 1) from source image position (0, 0, 0) and mipmap level 7 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (5, 4, 1)</Text>
+ <Text>Copying area with size (1, 1, 1) from source image position (0, 0, 0) and mipmap level 7 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (5, 4, 1)</Text>
+ <Text>Copying area with size (1, 1, 1) from source image position (0, 0, 0) and mipmap level 7 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (5, 4, 1)</Text>
+ <Section Name="Source image verify." Description="Source image verify.">
+  <Text>Verifying source image.</Text>
+  <Text>Image comparison of level 0 passed.</Text>
+  <Text>Image comparison of level 1 passed.</Text>
+  <Text>Image comparison of level 2 passed.</Text>
+  <Text>Image comparison of level 3 passed.</Text>
+  <Text>Image comparison of level 4 passed.</Text>
+  <Text>Image comparison of level 5 passed.</Text>
+  <Text>Image comparison of level 6 passed.</Text>
+  <Text>Image comparison of level 7 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 1467, draw 228, reference 2378, readPixels 59, compare 758, reference copy 0, upload 0</Text>
+</Section>
+ <Section Name="Destination image verify." Description="Destination image verify.">
+  <Text>Verifying destination image.</Text>
+  <Text>Image comparison of level 0 passed.</Text>
+  <Text>Image comparison of level 1 passed.</Text>
+  <Text>Image comparison of level 2 passed.</Text>
+  <Text>Image comparison of level 3 passed.</Text>
+  <Text>Image comparison of level 4 passed.</Text>
+  <Text>Image comparison of level 5 passed.</Text>
+  <Text>Image comparison of level 6 passed.</Text>
+  <Text>Image comparison of level 7 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 1495, draw 231, reference 2421, readPixels 61, compare 777, reference copy 0, upload 0</Text>
+</Section>
+ <Text>Deleting source image. </Text>
+ <Text>Deleting destination image. </Text>
+ <Text>Creating source image.</Text>
+ <Text>Creating destination image.</Text>
+ <Text>Copying area with size (11, 13, 1) from source image position (118, 114, 0) and mipmap level 0 to destination image position (0, 0, 0) and mipmap level 0. Size in destination format is (55, 52, 1)</Text>
+ <Text>Copying area with size (11, 13, 1) from source image position (0, 0, 0) and mipmap level 0 to destination image position (75, 72, 0) and mipmap level 0. Size in destination format is (55, 52, 1)</Text>
+ <Text>Copying area with size (11, 13, 1) from source image position (117, 111, 0) and mipmap level 0 to destination image position (65, 60, 0) and mipmap level 0. Size in destination format is (55, 52, 1)</Text>
+ <Text>Copying area with size (5, 5, 1) from source image position (59, 58, 0) and mipmap level 1 to destination image position (0, 0, 0) and mipmap level 1. Size in destination format is (25, 20, 1)</Text>
+ <Text>Copying area with size (5, 5, 1) from source image position (0, 0, 0) and mipmap level 1 to destination image position (40, 40, 0) and mipmap level 1. Size in destination format is (25, 20, 1)</Text>
+ <Text>Copying area with size (5, 5, 1) from source image position (59, 55, 0) and mipmap level 1 to destination image position (35, 28, 0) and mipmap level 1. Size in destination format is (25, 20, 1)</Text>
+ <Text>Copying area with size (1, 1, 1) from source image position (0, 0, 0) and mipmap level 7 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (5, 4, 1)</Text>
+ <Text>Copying area with size (1, 1, 1) from source image position (0, 0, 0) and mipmap level 7 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (5, 4, 1)</Text>
+ <Text>Copying area with size (1, 1, 1) from source image position (0, 0, 0) and mipmap level 7 to destination image position (0, 0, 0) and mipmap level 4. Size in destination format is (5, 4, 1)</Text>
+ <Section Name="Source image verify." Description="Source image verify.">
+  <Text>Verifying source image.</Text>
+  <Text>Image comparison of level 0 passed.</Text>
+  <Text>Image comparison of level 1 passed.</Text>
+  <Text>Image comparison of level 2 passed.</Text>
+  <Text>Image comparison of level 3 passed.</Text>
+  <Text>Image comparison of level 4 passed.</Text>
+  <Text>Image comparison of level 5 passed.</Text>
+  <Text>Image comparison of level 6 passed.</Text>
+  <Text>Image comparison of level 7 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 1495, draw 235, reference 2460, readPixels 63, compare 796, reference copy 0, upload 0</Text>
+</Section>
+ <Section Name="Destination image verify." Description="Destination image verify.">
+  <Text>Verifying destination image.</Text>
+  <Text>Image comparison of level 0 passed.</Text>
+  <Text>Image comparison of level 1 passed.</Text>
+  <Text>Image comparison of level 2 passed.</Text>
+  <Text>Image comparison of level 3 passed.</Text>
+  <Text>Image comparison of level 4 passed.</Text>
+  <Text>Image comparison of level 5 passed.</Text>
+  <Text>Image comparison of level 6 passed.</Text>
+  <Text>Image comparison of level 7 passed.</Text>
+  <Text>TIMING (ms, so far in this case): decode 1523, draw 238, reference 2503, readPixels 65, compare 814, reference copy 0, upload 0</Text>
+</Section>
+ <Text>Deleting source image. </Text>
+ <Text>Deleting destination image. </Text>
+ <Number Name="TestDuration" Description="Test case duration in microseconds" Tag="Time" Unit="us">414122</Number>
+ <Result StatusCode="Pass">Pass</Result>
+</TestCaseResult>
+
+#endTestCaseResult
+
+Run took 5.90 seconds
+
+#endSession

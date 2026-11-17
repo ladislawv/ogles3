@@ -1,0 +1,8 @@
+Directory "M8R3:results" on Tuesday 17-Nov-26
+00-progress.txt                 111 ----rwed Today     14:59:25
+cimixed.txt                   63974 ----rwed Today     14:59:25
+cimixed.qpa                 6097602 ----rwed Today     14:59:25
+ogles2.log                     3006 ----rwed Today     14:59:25
+notes.txt                       228 ----rwed Today     14:59:25
+99-files.txt                    196 ----rwed Today     14:59:25
+6 files - 6020K bytes - 12050 blocks used
