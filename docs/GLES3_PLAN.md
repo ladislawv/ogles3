@@ -299,6 +299,56 @@ group's cases from the last one without a result, from the package's
 `caselists/<group>.txt` (dEQP's order), into
 `tests/a1200/out/extra-lists/<name>.txt` (not in git; `m8-3/build.sh` copies
 them into the package), then `ARGS="LIST=<name> NAME=<name>"`.
+**dEQP on the Pi's free ARM cores (Core 3 SDK 1.4, investigated
+2026-11-17).** `C:\- CPP\Core3_SDK_1.4`: an Emu68 kernel with a service
+on Core 3 (and Core 1, a second coprocessor) and `core3.library`: an
+Amiga program loads an AArch64 big-endian module (`.c3m`) and calls its
+kernels, which work in place on Fast RAM (the same byte order and
+addresses), about 10x the emulated m68k; no AmigaOS on those cores, 64-bit
+pointers there (the shared blocks are 32-bit fields), C++ with
+`std::vector` and the like, a heap the program hands over, **exceptions
+fatal**, no global constructors; each kernel may have an m68k twin of the
+same source. **The A1200 has it:** `LIBS:core3.library` 1.4, `C3Info`
+`RESULT OK`, Core 1 too.
+- **Where dEQP's time goes** (`pc_sample` over 150 cases of dEQP-GLES3's
+  `shaders-builtin_functions`, its programs cached; `nm` of
+  `deqp-gles3`): 90.5% in dEQP's own code, 0.3% in ogles3.library, and
+  every sample "ready": the CPU, never the GPU or the compiler. The
+  precision checks' interval arithmetic in doubles
+  (`tcu::FloatFormat::convert/round/ulp`, `tcu::Interval`,
+  `BuiltinPrecisionTests::...::applyMonotone`), libnix's software
+  `ldexp`/`frexp`/`scalbn`/`modf` (14%), `deSetRoundingMode` and
+  `deGetRoundingMode` (6%: the FPU's rounding mode changed per
+  operation), `printf` (4%). That group was the longest of the run (1,347
+  of its 1,637 cases in about 70 minutes; dEQP-GLES2's 59 groups 101
+  minutes in all). `copy_image`'s were dEQP's too (decoding, reference
+  images, comparing: 90% of an array case, above).
+- **What could move to the ARM cores**, by gain against work:
+  1. **The built-in functions' precision check** (`glsBuiltinPrecisionTests.cpp`
+     with `tcuInterval`, `tcuFloatFormat`): a module of that code; dEQP
+     on the m68k runs the shader and reads its outputs, a kernel builds the
+     same case from its name and checks every value (the inputs and outputs
+     in Fast RAM), returning the failures for the m68k to log (`TestLog`
+     is file I/O: not on Core 3). The check loop must not throw (a throw is
+     fatal there); static objects with constructors must go. Core 1 can
+     take half the values. The group could take a fifth of its time.
+  2. **Reference images and comparisons**: `tcu::decompress` (pure
+     functions, easy), `sampleTexture` for 2D, 2D array and cube views,
+     `intThresholdCompare`/`fuzzyCompare`: flat parameter blocks of the
+     level accesses (format, size, pitch, a Fast RAM address).
+  3. The reference rasterizer (`rr`, `sglr::ReferenceContext`:
+     `fragment_ops`, `fbo`, about a fifth of the GLES2/3 time): object-heavy,
+     more work.
+  - Not so: **all of dEQP on Core 3** with its GL calls served by the
+    m68k through shared memory (the SDK's persistent kernels): the most to
+    gain, but dEQP throws for every "not supported" case and test error,
+    and exceptions are fatal on Core 3 (the SDK's runtime would need an
+    unwinder: not this repository's), and it reads and writes files.
+- **Without the ARM cores**, smaller: libnix's `ldexp`, `frexp`,
+  `scalbn` replaced by the 68881's `fscale`/`fgetexp`/`fgetman` (in the
+  port's `amiga-compat.cpp`), and `deSetRoundingMode` skipping a write of
+  the mode already set: about a fifth of that group's time.
+
 **The regression run on the final library (2026-11-17, evening; paused
 at 22:3x by the developer).** `tests/a1200/a_regress.sh`, every program
 compiled on the PC:
