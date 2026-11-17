@@ -285,7 +285,8 @@ name). Fixed on the way:
   right on the A1200, `m8-5` 345 checks, none failed.
 - **`glTexStorage2D`/`3D` of compressed formats** (ES 3.0 8.18; none was
   accepted): zeroed blocks, as `glCompressedTexImage2D` keeps them; found by
-  `m8_draw`'s new ASTC levels test (not yet rerun).
+  `m8_draw`'s new ASTC levels test (run on the A1200 since: `m8-5`, 345
+  checks, none failed).
 - The program cache is not keyed on the compiler: after a compiler change
   `Stuff:amigent/work/ogles2-m8-3/cache` must be emptied (the reruns of
   `srgb_texture_decode` and `separate_shader` read the old files until it
