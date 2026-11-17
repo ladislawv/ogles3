@@ -215,8 +215,12 @@ ogles3.library/--shaders--                         ogles3.library/--shaders--
        2. PROGDIR:shaders/<hash>.v3dp, then PROGDIR:<hash>.v3dp: a binary
           the program ships in a shaders/ drawer beside itself, or beside
           itself;
-       3. OGLES3Cache:<hash>.v3dp (when that assign exists), else
-          T:<hash>.v3dp: binaries compiled before;
+       3. OGLES3Cache:<compiler>/<d>/<hash>.v3dp (when that assign exists;
+          <compiler> eight hexadecimal digits naming the installed
+          v3dglslc3, <d> the hash's first digit), else T:<hash>.v3dp:
+          binaries compiled before. A new v3dglslc3 starts a cache drawer
+          of its own: binaries another compiler made are not used (the
+          drawers of compilers no longer installed may be deleted);
        4. the compiler, if found: LIBS:v3dglslc3, else PROGDIR:libs/v3dglslc3,
           else PROGDIR:v3dglslc3. It compiles the program into the cache of
           step 3 (about 0.2 s per program; its first start takes about a

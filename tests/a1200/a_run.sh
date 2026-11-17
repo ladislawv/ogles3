@@ -18,7 +18,10 @@
 # the Run-* scripts add after it; CLAUDE.md); AMIGENT_CTL: the amigent-ctl;
 # AMIGENT_HOST: the A1200 (default: tools/amictl/station.local's host);
 # OGLES3_WSL: the WSL distribution; TIMEOUT: the script's limit (s); ARGS:
-# its KEY=VALUE words.
+# its KEY=VALUE words. NOBUILD=1: the package as tests/a1200/out/ has it (a
+# dEQP group after group: no build each time); BUILD_ENV: words before the
+# build, e.g. 'B=$BS' for the GLES2 regression packages built against the
+# sync build (docs/GLES3_PLAN.md, "The GLES2 regression set").
 set -u
 HERE=$(cd "$(dirname "$0")" && pwd)
 REPO=$(cd "$HERE/../.." && pwd)
@@ -59,10 +62,14 @@ if [ "${BRIDGE:-}" = 1 ]; then
     need run -t 30 "Protect $BRIDGE_DIR/v3dglslc-remote +rwed" > /dev/null
 fi
 for t in "$@"; do
-    echo "$(date +%T) $t: building"
-    in_wsl bash -c "cd '$WREPO' && . ./local.env > /dev/null && OUT=\$V bash tests/a1200/build_package.sh $t" \
-        > "$HERE/out/a_run-$t-build.txt" 2>&1 || { echo "$t: build failed (out/a_run-$t-build.txt)"; continue; }
     PKG=$HERE/out/ogles2-$t
+    if [ "${NOBUILD:-}" = 1 ] && [ -d "$PKG" ]; then
+        :
+    else
+        echo "$(date +%T) $t: building"
+        in_wsl bash -c "cd '$WREPO' && . ./local.env > /dev/null && ${BUILD_ENV:-} OUT=\$V bash tests/a1200/build_package.sh $t" \
+            > "$HERE/out/a_run-$t-build.txt" 2>&1 || { echo "$t: build failed (out/a_run-$t-build.txt)"; continue; }
+    fi
     if [ "${LIBS_INSTALL:-}" = 1 ]; then
         echo "$(date +%T) $t: its ogles3.library and v3dglslc3 into LIBS:"
         need run -t 30 "Avail FLUSH" > /dev/null

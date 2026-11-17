@@ -3347,6 +3347,33 @@ static void test_int_textures(void)
  * (no file has that variant: compiled at the first draw, then from the
  * cache's .v3dx). The float texture with alpha to coverage needs both in
  * one key, which no file has either. */
+/* Alpha to coverage through a geometry program (docs/GLES3_PLAN.md item
+ * 9's last "not yet"): es32gsa's geometry stage gives the colour (0.25, 0.5,
+ * 0.75) and alpha 0.5; in a 4x MSAA ES 3.1 context with
+ * GL_SAMPLE_ALPHA_TO_COVERAGE half the samples are covered (the fragment
+ * variant's key, compiled at the draw), without it all. */
+static void test_geometry_a2c(void)
+{
+    GLuint p = program("es32gsa");
+    if (!p) {
+        check(0, "geometry and alpha to coverage: es32gsa links");
+        return;
+    }
+    glUseProgram(p);
+    glClearColor(0, 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    check(pixel_is(20, 20, 64, 128, 191, 128, 2) && glGetError() == GL_NO_ERROR,
+          "geometry and alpha to coverage: without it every sample covered");
+    glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw_cover(p);
+    check(pixel_is(20, 20, 32, 64, 96, 64, 20) && glGetError() == GL_NO_ERROR,
+          "geometry and alpha to coverage: alpha 0.5 covers half the samples");
+    glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+    glDeleteProgram(p);
+}
+
 static void test_wide_a2c(void)
 {
     static const GLfloat fl[4] = { 0.25f, 0.5f, 0.75f, 0.5f };
@@ -4191,6 +4218,16 @@ int main(void)
         aglDestroyContext(ctx);
     } else {
         check(0, "a 4x MSAA ES 3.0 context");
+    }
+    /* a 4x MSAA ES 3.1 context: geometry programs (an ES3=1 build has none) */
+    if ((ctx = aglCreateContextTags2(&e, OGLES3_CCT_BITMAP, (ULONG)bm, OGLES3_CCT_PISTORM_ES_VERSION, 31,
+                                     OGLES3_CCT_PISTORM_MSAA, 4, TAG_DONE))) {
+        aglMakeCurrent(ctx);
+        glViewport(0, 0, 64, 64);
+        if (!skipped("geometry_a2c"))
+            test_geometry_a2c();
+        check(glGetError() == GL_NO_ERROR, "no GL error left over (4x MSAA, ES 3.1)");
+        aglDestroyContext(ctx);
     }
     FreeBitMap(bm);
     OGLES3Close();

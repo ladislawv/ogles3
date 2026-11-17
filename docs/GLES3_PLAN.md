@@ -90,8 +90,8 @@ line's; the bridge's 31 programs as before. Both compilers rebuilt.
   fields, the primitive id flags (Mesa's), the point size by the geometry
   output; VCM_CACHE_SIZE's Vc and GL_SHADER_STATE_INCLUDING_GS (66) patched
   into draw_packets' bytes (`gs_packets`).
-- Not yet: the 32-bit-sampler, alpha-to-coverage and draw-time variants
-  of geometry programs. (Transform feedback, indirect and GPU-read draws:
+- (Done since: the 32-bit-sampler, alpha-to-coverage and draw-time
+  variants of geometry programs, 2026-11-16/17.) (Transform feedback, indirect and GPU-read draws:
   done 2026-11-16, below; the draw-time variants and
   `GL_PRIMITIVES_GENERATED` too, below that.)
 
@@ -299,6 +299,31 @@ group's cases from the last one without a result, from the package's
 `caselists/<group>.txt` (dEQP's order), into
 `tests/a1200/out/extra-lists/<name>.txt` (not in git; `m8-3/build.sh` copies
 them into the package), then `ARGS="LIST=<name> NAME=<name>"`.
+**The cache by compiler; geometry programs with alpha to coverage
+(2026-11-17, evening).**
+- **The program cache keyed on the compiler:** `OGLES3Cache:<compiler>/<d>/`,
+  `<compiler>` the compiler's id (`ogles2_compiler_id`, its size and
+  build stamp, 8 hex digits): a new `v3dglslc3` starts a drawer of its own
+  and another compiler's files are never read (the cache before the
+  subdrawers, read only, too: `ogles2_cache_old` is none with a compiler).
+  Shipped files (`PROGDIR:shaders/`) are named by the program's hash as
+  before. Without a compiler the layout is the old one. `release/ogles3.doc`
+  says so. The log names the drawer once (`cache: ...`) and each compiler
+  start (`compiler: starting ...`). On the A1200: `m8-5` 348 checks, none
+  failed, its compiles into `OGLES3Cache:145EE868/`.
+- **Alpha to coverage through a geometry program:** done by the draw-time
+  variants (the fragment variant's key; item 9's "not yet" above was
+  older). `m8_draw`'s `test_geometry_a2c` (`es32gsa`: alpha 0.5 from the
+  geometry stage) in a 4x MSAA ES 3.1 context: half the samples covered
+  with it, all without.
+- An A1200 hang at 18:2x while `m8-5` started (ping answered, amigent and
+  amictld did not; reset by the developer): its log ended at the compiler's
+  id, the same build then ran through; as the restart at 15:28, not found.
+- `tests/a1200/a_run.sh`: `NOBUILD=1` (the package as built) and
+  `BUILD_ENV`; `tests/a1200/a_regress.sh`: the regression run (the test
+  packages, dEQP-GLES2, -GLES3 and -GLES31 a must-pass list at a time,
+  drawbench).
+
 **`copy_image.mixed` on the A1200 (2026-11-17): 2,800 passed, none failed,
 784 not supported** (ASTC on a 3D texture: no sliced 3D ASTC), in three
 parts (`ogles2-m8-3-20261117-140147`, `-151243`, `-155951`, lists

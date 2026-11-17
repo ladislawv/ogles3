@@ -63,24 +63,56 @@ const char *ogles2_cache_dir(void)
     return ogles2_cache_assigned() ? "OGLES3Cache:" : "T:";
 }
 
-/* The drawer a cache file whose name begins with hex digit `d` goes in:
- * OGLES3Cache:<d>/, made when missing (16 subdrawers: a dEQP run leaves tens
- * of thousands of files, and a lookup in one drawer of them all was slow;
- * the developer's call, docs/GLES3_PLAN.md, the remaining gaps); T: as it
- * is without the assign. Into `buf` (at least 16 bytes). */
-const char *ogles2_cache_subdir(char *buf, char d)
+static void make_dir(const char *path)
 {
     BPTR l;
+    if ((l = Lock((STRPTR)path, SHARED_LOCK)) != 0 || (l = CreateDir((STRPTR)path)) != 0)
+        UnLock(l);
+}
+
+/* The drawer a cache file whose name begins with hex digit `d` goes in:
+ * OGLES3Cache:<compiler>/<d>/, made when missing; <compiler> is the
+ * compiler's id (ogles2_compiler_id, 8 hex digits): another compiler's files
+ * are in a drawer of their own, never read for this one (2026-11-17: a
+ * rebuilt compiler's fixes were not seen until the cache was emptied by
+ * hand). 16 subdrawers: a dEQP run leaves tens of thousands of files, and a
+ * lookup in one drawer of them all was slow (the developer's call,
+ * docs/GLES3_PLAN.md, the remaining gaps). Without a compiler,
+ * OGLES3Cache:<d>/ as before; T: as it is without the assign. Into `buf`
+ * (at least 32 bytes). */
+const char *ogles2_cache_subdir(char *buf, char d)
+{
+    ULONG id, n;
     if (!ogles2_cache_assigned() || !((d >= '0' && d <= '9') || (d >= 'a' && d <= 'f')))
         return ogles2_cache_dir();
     strcpy(buf, "OGLES3Cache:");
-    buf[12] = d;
-    buf[13] = 0;
-    if ((l = Lock((STRPTR)buf, SHARED_LOCK)) != 0 || (l = CreateDir((STRPTR)buf)) != 0)
-        UnLock(l);
-    buf[13] = '/';
-    buf[14] = 0;
+    if ((id = ogles2_compiler_id()) != 0) {
+        ogles2_format(buf + 12, 9, "%08lx", id);
+        make_dir(buf);
+        buf[20] = '/';
+        buf[21] = 0;
+    }
+    n = strlen(buf);
+    buf[n] = d;
+    buf[n + 1] = 0;
+    make_dir(buf);
+    buf[n + 1] = '/';
+    buf[n + 2] = 0;
+    {
+        static BOOL told;
+        if (!told) {
+            told = TRUE;
+            ogles2_log("cache: %s", (ULONG)buf);
+        }
+    }
     return buf;
+}
+
+/* A cache from before its subdrawers, read only: OGLES3Cache: itself; NULL
+ * with a compiler (its files may be another compiler's). */
+const char *ogles2_cache_old(void)
+{
+    return ogles2_cache_assigned() && ogles2_compiler_id() ? 0 : ogles2_cache_dir();
 }
 
 /* The compiler (compiler_where's first): its size and build stamp, hashed
@@ -181,6 +213,7 @@ static BOOL start_server(void)
     if (!ogles2_compiler_id()) /* finds the compiler (compiler_path) */
         return FALSE;
     ogles2_format(cmd, sizeof(cmd), "\"%s\" SERVER", (ULONG)compiler_path);
+    ogles2_log("compiler: starting %s", (ULONG)cmd);
     in = Open((STRPTR) "NIL:", MODE_OLDFILE);
     out = Open((STRPTR) "NIL:", MODE_NEWFILE);
     if (!in || !out) {
