@@ -24,3 +24,11 @@ cp "$B31/deqp-gles31/deqp-gles31" "$B31S/cmd/OGLES3Log" "$PKG/bin/"
 cp -r "$B31/deqp-gles31/gles31" "$PKG/bin/gles31"
 # The must-pass list, a file per group (Run-M1 LIST=<group>).
 MODULE=gles31 bash "$REPO/ports/deqp/caselists.sh" "$PKG/caselists" > /dev/null
+# Lists of our own beside the must-pass groups (Run-M1 LIST=<name>), e.g. a
+# group's cases from where a stopped run left off: tests/a1200/out/extra-lists/
+# (not in git; a_run.sh's builds pick them up).
+if ls "$HERE/../out/extra-lists/"*.txt > /dev/null 2>&1; then
+    for f in "$HERE/../out/extra-lists/"*.txt; do
+        sed 's/\r$//' "$f" > "$PKG/caselists/$(basename "$f")"
+    done
+fi

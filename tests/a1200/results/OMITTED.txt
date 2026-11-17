@@ -57,3 +57,8 @@ case's result is also in the run's <name>.txt):
      2495500  ogles2-m8-3-20261116-211106/results/gather.qpa
      3541384  ogles2-m8-3-20261116-211339/results/cicomp.qpa
      1832413  ogles2-m8-3-20261116-220903/results/cicomp.qpa
+
+Over 1 MB, left out (2026-11-17):
+
+    10557392  ogles2-m8-3-20261117-120441/results/cicomp.qpa
+     1427127  ogles2-m8-3-20261117-134615/results/cirest.qpa

@@ -290,6 +290,14 @@ name). Fixed on the way:
   `Stuff:amigent/work/ogles2-m8-3/cache` must be emptied (the reruns of
   `srgb_texture_decode` and `separate_shader` read the old files until it
   was).
+**`copy_image.compressed` after the ASTC fix (2026-11-17): 584 passed, none
+failed, 392 not supported** (3D targets: no sliced 3D ASTC), in two parts:
+stopped after 863 cases (`ogles2-m8-3-20261117-120441`) and resumed from the
+case cut off (`-134615`, list `cirest`). A stopped run resumes so: its
+group's cases from the last one without a result, from the package's
+`caselists/<group>.txt` (dEQP's order), into
+`tests/a1200/out/extra-lists/<name>.txt` (not in git; `m8-3/build.sh` copies
+them into the package), then `ARGS="LIST=<name> NAME=<name>"`.
 `copy_image.compressed` and `.mixed` are slow (dEQP decodes the references
 on the 68k: 15 cases a minute).
 

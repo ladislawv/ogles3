@@ -1,0 +1,5 @@
+ogles2 M8 run 3: --deqp-case dEQP-GLES31.functional.copy_image.compressed.*
+Tuesday 17-Nov-26 12:04:42
+cicomp done
+finished
+Tuesday 17-Nov-26 13:44:57
