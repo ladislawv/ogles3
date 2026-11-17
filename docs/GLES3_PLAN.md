@@ -272,12 +272,17 @@ name). Fixed on the way:
   KHR_blend_equation_advanced's errors for empty draws too.
 - **Compressed copies within a view class** (ES 3.2 table 8.27: R11 and
   signed R11, ETC2 and its sRGB, each ASTC size and its sRGB):
-  `compressed_class`. **Still refused on the A1200** (22:09 run,
-  `ogles2-m8-3-20261116-220903`, about 400 of 976 cases before the pause:
-  76 view-class pairs `GL_INVALID_OPERATION`, every class): either the
-  installed library lacked it or another check refuses; next, check
-  `LIBS:ogles3.library` is the new build, then step through
-  `ogles2_glCopyImageSubDataEXT` with an R11 to signed R11 copy.
+  `compressed_class`. `m8_es31` (vamos) checks each class's pair and a
+  refused one between classes. (The 22:09 run's 76 refusals,
+  `ogles2-m8-3-20261116-220903`, were the library installed before.)
+- **ASTC's small levels: v3dcore's power-of-two padding from the block
+  size** (2026-11-17), as Mesa's `v3d_get_dimension_mpad(dim, 1, block)`:
+  `v3d_texture_alloc_mipchain` padded the texels' power of two, the same for
+  blocks of 1, 4 and 8 but not ASTC's 5, 6, 10 and 12, so levels 2 on of a
+  130x124 ASTC 5x4 texture were laid out where the TMU did not read them
+  (the error colour; dEQP's sRGB ASTC level-2 failures). `m8_draw`'s ASTC
+  levels test (8 levels, linear and sRGB, copies within the class): all
+  right on the A1200, `m8-5` 345 checks, none failed.
 - **`glTexStorage2D`/`3D` of compressed formats** (ES 3.0 8.18; none was
   accepted): zeroed blocks, as `glCompressedTexImage2D` keeps them; found by
   `m8_draw`'s new ASTC levels test (not yet rerun).
@@ -285,9 +290,6 @@ name). Fixed on the way:
   `Stuff:amigent/work/ogles2-m8-3/cache` must be emptied (the reruns of
   `srgb_texture_decode` and `separate_shader` read the old files until it
   was).
-Open: `copy_image.compressed`'s sRGB ASTC copies (same format) failed at
-level 2 and below, the RGBA ones passed: `m8_draw`'s ASTC levels test
-(130x124, 8 levels, void-extent blocks) is to tell sampling from copying.
 `copy_image.compressed` and `.mixed` are slow (dEQP decodes the references
 on the 68k: 15 cases a minute).
 

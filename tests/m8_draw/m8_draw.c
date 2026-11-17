@@ -1330,12 +1330,14 @@ static int astc_levels_are(GLuint p, GLuint t, int r, int g, int b, const char *
     glBindTexture(GL_TEXTURE_2D, t);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    for (l = 0; l < 8 && ok; l++) {
+    for (l = 0; l < 8; l++) { /* every level: which ones are wrong */
+        GLubyte px[4];
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, l);
         glClear(GL_COLOR_BUFFER_BIT);
         draw_cover(p);
-        if (!pixel_is(32, 32, r, g, b, 255, 3)) {
-            printf("     %s: level %d\n", what, l);
+        glReadPixels(32, 32, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, px);
+        if (abs(px[0] - r) > 3 || abs(px[1] - g) > 3 || abs(px[2] - b) > 3 || px[3] != 255) {
+            printf("     %s: level %d is %d %d %d %d\n", what, l, px[0], px[1], px[2], px[3]);
             ok = 0;
         }
     }
@@ -1357,21 +1359,27 @@ static void test_astc_levels(void)
     }
     for (k = 0; k < 26 * 31; k++)
         memcpy(blocks + k * 16, ve, 16);
+    while (glGetError() != GL_NO_ERROR) /* an earlier test's */
+        ;
     glUseProgram(p);
     glUniform1i(glGetUniformLocation(p, "tex"), 0);
     glGenTextures(3, t);
     for (s = 0; s < 3; s++) { /* linear, sRGB, sRGB */
-        GLenum f = s ? GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR : GL_COMPRESSED_RGBA_ASTC_5x4_KHR;
+        GLenum f = s ? GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR : GL_COMPRESSED_RGBA_ASTC_5x4_KHR, e;
         glBindTexture(GL_TEXTURE_2D, t[s]);
         glTexStorage2D(GL_TEXTURE_2D, 8, f, 130, 124);
+        if ((e = glGetError()) != GL_NO_ERROR)
+            printf("     texture %d: glTexStorage2D 0x%04x\n", s, (unsigned)e);
         for (l = 0; l < 8; l++) {
             int w = 130 >> l, h = 124 >> l;
             w = w ? w : 1;
             h = h ? h : 1;
             glCompressedTexSubImage2D(GL_TEXTURE_2D, l, 0, 0, w, h, f, ((w + 4) / 5) * ((h + 3) / 4) * 16, blocks);
+            if ((e = glGetError()) != GL_NO_ERROR)
+                printf("     texture %d: level %d's glCompressedTexSubImage2D 0x%04x\n", s, l, (unsigned)e);
         }
     }
-    check(glGetError() == GL_NO_ERROR && astc_levels_are(p, t[0], 128, 64, 192, "linear"),
+    check(astc_levels_are(p, t[0], 128, 64, 192, "linear"),
           "ASTC levels: a linear 5x4 texture's 8 levels (128, 64, 192)");
     check(astc_levels_are(p, t[1], 55, 13, 134, "sRGB"),
           "ASTC levels: an sRGB 5x4 texture's 8 levels (128, 64, 192 decoded to 55, 13, 134)");

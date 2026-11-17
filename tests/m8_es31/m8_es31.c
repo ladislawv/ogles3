@@ -57,6 +57,13 @@ static GLint get_int(GLenum pname)
     return v;
 }
 
+static GLint get_tex_level(GLenum target, GLint level, GLenum pname)
+{
+    GLint v = -1;
+    glGetTexLevelParameteriv(target, level, pname, &v);
+    return v;
+}
+
 static GLint get_inti(GLenum pname, GLuint index)
 {
     GLint v = -12345;
@@ -668,6 +675,87 @@ static void geometry(void)
     }
 }
 
+/* Compressed textures' state (docs/GLES3_PLAN.md, the evening of
+ * 2026-11-16): glTexStorage2D of compressed formats (ETC2/EAC, ASTC; not
+ * ETC1, not 3D), and glCopyImageSubData between two formats of one view
+ * class (ES 3.2 table 8.27), not between classes. */
+static void compressed(void)
+{
+    static const GLubyte zeros[16 * 4];
+    static const struct { GLenum a, b; int bytes; const char *what; } pairs[] = {
+        { GL_COMPRESSED_R11_EAC, GL_COMPRESSED_SIGNED_R11_EAC, 8, "R11 to signed R11" },
+        { GL_COMPRESSED_SIGNED_RG11_EAC, GL_COMPRESSED_RG11_EAC, 16, "signed RG11 to RG11" },
+        { GL_COMPRESSED_RGB8_ETC2, GL_COMPRESSED_SRGB8_ETC2, 8, "ETC2 RGB8 to sRGB8" },
+        { GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC, GL_COMPRESSED_RGBA8_ETC2_EAC, 16, "ETC2 sRGB8 alpha to RGBA8" },
+        { GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2, GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2, 8,
+          "ETC2 punch-through to its sRGB" },
+        { GL_COMPRESSED_RGBA_ASTC_4x4_KHR, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR, 16, "ASTC 4x4 to its sRGB" },
+    };
+    GLuint t[2];
+    unsigned i;
+    char what[96];
+    glGenTextures(2, t);
+    for (i = 0; i < sizeof(pairs) / sizeof(pairs[0]); i++) {
+        GLenum e0, e1;
+        glBindTexture(GL_TEXTURE_2D, t[0]);
+        glCompressedTexImage2D(GL_TEXTURE_2D, 0, pairs[i].a, 8, 8, 0, pairs[i].bytes * 4, zeros);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); /* complete: one level */
+        glBindTexture(GL_TEXTURE_2D, t[1]);
+        glCompressedTexImage2D(GL_TEXTURE_2D, 0, pairs[i].b, 8, 8, 0, pairs[i].bytes * 4, zeros);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        e0 = glGetError();
+        glCopyImageSubDataEXT(t[0], GL_TEXTURE_2D, 0, 0, 0, 0, t[1], GL_TEXTURE_2D, 0, 0, 0, 0, 8, 8, 1);
+        e1 = glGetError();
+        sprintf(what, "compressed: a copy within a view class, %s", pairs[i].what);
+        check(e0 == GL_NO_ERROR && e1 == GL_NO_ERROR, what);
+        if (e0 || e1)
+            printf("     images 0x%04x, copy 0x%04x\n", (unsigned)e0, (unsigned)e1);
+    }
+    /* another class: refused */
+    glBindTexture(GL_TEXTURE_2D, t[1]);
+    glCompressedTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_R11_EAC, 8, 8, 0, 32, zeros);
+    glCopyImageSubDataEXT(t[0], GL_TEXTURE_2D, 0, 0, 0, 0, t[1], GL_TEXTURE_2D, 0, 0, 0, 0, 8, 8, 1);
+    check(glGetError() == GL_INVALID_OPERATION, "compressed: ASTC to R11 (another class) GL_INVALID_OPERATION");
+    glDeleteTextures(2, t);
+    glGenTextures(2, t);
+    glBindTexture(GL_TEXTURE_2D, t[0]);
+    glTexStorage2D(GL_TEXTURE_2D, 4, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR, 130, 124);
+    check(glGetError() == GL_NO_ERROR && get_tex_level(GL_TEXTURE_2D, 3, GL_TEXTURE_WIDTH) == 16,
+          "compressed: glTexStorage2D of sRGB ASTC 5x4, 4 levels");
+    glCompressedTexSubImage2D(GL_TEXTURE_2D, 3, 0, 0, 16, 15, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR, 4 * 4 * 16,
+                              zeros);
+    check(glGetError() == GL_NO_ERROR, "compressed: its level 3 replaced (16x15, edge blocks)");
+    /* m8_draw's ASTC levels: all 8 levels of 130x124, each replaced whole */
+    {
+        static GLubyte blocks[26 * 31 * 16];
+        GLuint t8;
+        int l, bad = -1;
+        GLenum e = GL_NO_ERROR;
+        glGenTextures(1, &t8);
+        glBindTexture(GL_TEXTURE_2D, t8);
+        glTexStorage2D(GL_TEXTURE_2D, 8, GL_COMPRESSED_RGBA_ASTC_5x4_KHR, 130, 124);
+        if ((e = glGetError()) != GL_NO_ERROR)
+            bad = 99;
+        for (l = 0; l < 8 && bad < 0; l++) {
+            int w = 130 >> l, h = 124 >> l;
+            w = w ? w : 1;
+            h = h ? h : 1;
+            glCompressedTexSubImage2D(GL_TEXTURE_2D, l, 0, 0, w, h, GL_COMPRESSED_RGBA_ASTC_5x4_KHR,
+                                      ((w + 4) / 5) * ((h + 3) / 4) * 16, blocks);
+            if ((e = glGetError()) != GL_NO_ERROR)
+                bad = l;
+        }
+        check(bad < 0, "compressed: an ASTC 5x4 storage of 8 levels, each level replaced");
+        if (bad >= 0)
+            printf("     level %d: 0x%04x\n", bad, (unsigned)e);
+        glDeleteTextures(1, &t8);
+    }
+    glBindTexture(GL_TEXTURE_2D, t[1]);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_ETC1_RGB8_OES, 8, 8);
+    check(glGetError() != GL_NO_ERROR, "compressed: glTexStorage2D of ETC1 refused");
+    glDeleteTextures(2, t);
+}
+
 static GLenum cb_source, cb_type, cb_severity;
 static GLuint cb_id;
 static int cb_calls;
@@ -797,6 +885,7 @@ int main(int argc, char **argv)
         buffers();
         attrib_binding();
         others(gpu);
+        compressed();
         khr_debug();
         geometry();
         check(glGetError() == GL_NO_ERROR, "ES 3.1: no GL error left over");

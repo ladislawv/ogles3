@@ -329,10 +329,18 @@ int v3d_texture_alloc_mipchain(V3DDevice* device, V3DTexture* tex, v3d_u8 want_l
     if (want_levels > V3D_MAX_MIP_LEVELS) want_levels = V3D_MAX_MIP_LEVELS;
     if (tex->num_levels >= want_levels) return 0;  /* already big enough */
 
-    /* pot_* per MESA's v3d_get_dimension_mpad(dim, 1): next power of two of
-     * the level-1 dimension, doubled back to level-0 scale. */
-    pot_w = v3d_next_pot(v3d_minify((v3d_u32)tex->width, 1)) * 2;
-    pot_h = v3d_next_pot(v3d_minify((v3d_u32)tex->height, 1)) * 2;
+    /* pot_* per MESA's v3d_get_dimension_mpad(dim, 1, block): the level-1
+     * dimension in blocks, to the next power of two, back in texels,
+     * doubled back to level-0 scale. The block size counts (Mesa: "through
+     * testing it was found that the block dimension should be used"): the
+     * same as the texels' power of two for blocks of 1, 4 and 8, not for
+     * ASTC's 5, 6, 10 and 12 (ogles3: levels 2 on of a 130x124 ASTC 5x4
+     * texture read the error colour, 2026-11-17). */
+    {
+        v3d_u32 bw = tex->block ? tex->block : 1, bh = tex->block_h ? tex->block_h : bw;
+        pot_w = bw * v3d_next_pot(v3d_blocks(v3d_minify((v3d_u32)tex->width, 1), bw)) * 2;
+        pot_h = bh * v3d_next_pot(v3d_blocks(v3d_minify((v3d_u32)tex->height, 1), bh)) * 2;
+    }
 
     memcpy(saved_levels, tex->levels, sizeof(tex->levels));
     for (i = (int)want_levels - 1; i >= 0; i--)
