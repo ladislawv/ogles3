@@ -1,0 +1,28 @@
+WaitBOVP, priority 0, work 5000 us: 1200 waits in 20501 ms
+  idle counter: 2623914 rounds a second
+  frames the counter moved during a wait: 0: 1170, 1: 0, 2: 0, 3+: 30
+  line at the return: 1080-1080; ms between returns: 17:1169 33:30
+  wait 35: 28333 us, line 292 -> 1080, counter +4
+  wait 40: 28333 us, line 292 -> 1080, counter +4
+  wait 164: 28333 us, line 292 -> 1080, counter +4
+  wait 166: 28334 us, line 292 -> 1080, counter +4
+  wait 263: 28333 us, line 292 -> 1080, counter +4
+  wait 286: 28334 us, line 292 -> 1080, counter +4
+  wait 291: 28334 us, line 292 -> 1080, counter +4
+  wait 403: 28333 us, line 292 -> 1080, counter +4
+  wait 408: 28330 us, line 292 -> 1080, counter +4
+  wait 413: 28333 us, line 292 -> 1080, counter +4
+  wait 482: 28334 us, line 292 -> 1080, counter +4
+  wait 511: 28334 us, line 292 -> 1080, counter +4
+  wait 516: 28442 us, line 292 -> 1080, counter +4
+  wait 528: 28333 us, line 292 -> 1080, counter +4
+  wait 533: 28333 us, line 292 -> 1080, counter +4
+  wait 651: 28336 us, line 292 -> 1080, counter +4
+  wait 656: 28334 us, line 292 -> 1080, counter +4
+  wait 774: 28333 us, line 292 -> 1080, counter +4
+  wait 779: 28333 us, line 292 -> 1080, counter +4
+  wait 897: 28333 us, line 293 -> 1080, counter +4
+  wait 902: 28333 us, line 292 -> 1080, counter +4
+  wait 966: 28333 us, line 292 -> 1080, counter +4
+  wait 1019: 28333 us, line 292 -> 1080, counter +4
+  wait 1022: 28333 us, line 292 -> 1080, counter +4

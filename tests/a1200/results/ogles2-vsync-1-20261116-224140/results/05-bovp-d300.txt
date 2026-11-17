@@ -1,0 +1,29 @@
+WaitBOVP, priority 0, work 5000 us, a task at 15 spinning 300 us every 97 ms (213 spins): 1200 waits in 20535 ms
+  idle counter: 2679316 rounds a second
+  frames the counter moved during a wait: 0: 1169, 1: 0, 2: 0, 3+: 31
+  line at the return: 1080-1080; ms between returns: 17:1168 33:30 50:1
+  wait 31: 28334 us, line 292 -> 1080, counter +4
+  wait 76: 28333 us, line 292 -> 1080, counter +4
+  wait 126: 28334 us, line 292 -> 1080, counter +4
+  wait 193: 28332 us, line 292 -> 1080, counter +4, a spin of the disturber inside it
+  wait 204: 28333 us, line 292 -> 1080, counter +4, a spin of the disturber inside it
+  wait 209: 28333 us, line 292 -> 1080, counter +4, a spin of the disturber inside it
+  wait 289: 28340 us, line 292 -> 1080, counter +4, a spin of the disturber inside it
+  wait 326: 28334 us, line 292 -> 1080, counter +4
+  wait 331: 28333 us, line 292 -> 1080, counter +4
+  wait 386: 28333 us, line 292 -> 1080, counter +4, a spin of the disturber inside it
+  wait 448: 28333 us, line 292 -> 1080, counter +4
+  wait 453: 28180 us, line 302 -> 1080, counter +4
+  wait 459: 28337 us, line 292 -> 1080, counter +4, a spin of the disturber inside it
+  wait 570: 28333 us, line 292 -> 1080, counter +4
+  wait 575: 45005 us, line 292 -> 1080, counter +8
+  wait 580: 28334 us, line 292 -> 1080, counter +4
+  wait 655: 28334 us, line 292 -> 1080, counter +4
+  wait 690: 28333 us, line 292 -> 1080, counter +4
+  wait 695: 28340 us, line 292 -> 1080, counter +4
+  wait 796: 28333 us, line 292 -> 1080, counter +4, a spin of the disturber inside it
+  wait 812: 28333 us, line 292 -> 1080, counter +4, a spin of the disturber inside it
+  wait 817: 28333 us, line 292 -> 1080, counter +4, a spin of the disturber inside it
+  wait 861: 28334 us, line 292 -> 1080, counter +4
+  wait 866: 28336 us, line 292 -> 1080, counter +4
+  spins inside a wait: 147, of them in a wait that slept through a refresh: 13

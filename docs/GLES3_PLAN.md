@@ -815,6 +815,61 @@ OpenGL ES 3.2's features"):
   `draw_buffers_indexed`; then `m8-5`, `m5-1` and drawbench (the blend
   emission changed shape: it must cost the same).
 
+**Vsync on the HVS's frame counter (2026-11-16, a user's report).** With
+`OGLES3_CCT_VSYNC` a swap now and then took 33 ms although the frame was
+ready 15 ms early (the reporter's `VsyncTest`, `tests/vsync/VsyncTest.c`:
+13 of 2940 swaps; 14 on the station). `tests/vsync/vsync_probe` (no GL;
+package `vsync-1`, run `ogles2-vsync-1-20261116-224140`) timed the waits
+against the Pi's display scaler (HVS, channel 1: `SCALER_DISPSTAT1`, the
+line it outputs and a frame counter; only read). On the station
+(VideoCore.card 1.5 of 03.02.2026, without the card's later vblank
+interrupt; rtg.library 43.787; HDMI 1920x1080 at 60.000 Hz) `WaitBOVP`
+spins (a priority -1 counter kept 1% of its rounds; inside a vsync program
+at priority 10, none) until the HVS's line is the display's height, which
+it is for about 117 us a refresh: a task that does not run then spins a
+refresh more (30 of 1200 waits at priority 0 on an idle system; a task at
+15 spinning 2 ms at drifting times, 53). M6's "they sleep" (§7.2 of
+DEVELOPMENT_PLAN.md) does not hold there. `WaitTOF` follows the chipset's
+50 Hz, unrelated to the HDMI (a window's copy is therefore not in step).
+The counter moves once a refresh, as the line goes from the last to 0.
+`display.c` now waits on it on a screen of its own and on one a window is
+all of (`hvs_wait`): at priority 10 from the start, a timer.device sleep to
+about a millisecond before the change, then reads; a refresh that began
+after the last frame went out, its scan still in the picture's top eighth,
+is taken at once (the task ran late), one further on is let go (it would
+tear). `WaitBOVP` stays where the counter is not there (`hvs_probe`: channel
+1 on, two equal refreshes of 5-50 ms). The log names the wait at the first
+swap and counts it at destroy. Package `vsync-2` (the library in `LIBS:`
+replaced for the run and put back), run `ogles2-vsync-2-20261116-225726`
+(old) and `-231119` (new): 3000 frames of 5 ms work, 17 swaps of 33 ms
+before, 2 of 27-35 ms after (each followed by one of 6 ms: the program held
+up outside the swap; the log: no wait slept through a refresh); with a
+busy task 19 and 0; 15 ms work 9 and 0; at priority 20 none after; the CPU a priority -1
+task gets during `VsyncTest`: none before, 140 million rounds a second
+after (247 million idle). Found on the way: a read between the counter's
+change and the line's showed the new count at the last line (taken for a
+late wake-up, a refresh lost: runs `-230334`, and a few in `-225726`);
+the last line counts as the start. Tearing (package `vsync-3`: `m6_vsync`'s
+white bar, the developer watching, runs `ogles2-vsync-3-20261116-233649`
+new and `-233839` old): ways 5 and 7 (vsync off) tear with both, 6 and 8
+(vsync on) tear with neither; the old perhaps stutters more (way 6: 359
+frames in 6 s against 361). Its first run (`-233151`) found the limit that
+keeps a stopped display from hanging the wait counted from the wait's
+start: after a long stall (vsync switched on) it let one frame out at line
+574; it counts from the counter's last move now. What a viewer sees,
+measured (`tests/vsync/vsync_watch`: the bar with `glClear` and a scissor,
+after each swap the refresh it went out at and the line from the HVS;
+package `vsync-4`, old and new alternately, 30 s each, about 1737
+refreshes; run `ogles2-vsync-4-20261116-234302`): refreshes skipped (the
+frame shown twice: a stutter) idle 13 old against 1 new, with the busy
+task 10 against 1, with 5 ms of work 7 against 0; judder over 2 ms 37/30/14
+against 3/5/2; frames whose swap returned past the picture's top eighth
+6/5/0 against 1/0/1. Of the new's two skips one is a wake-up at line 146,
+just past the eighth (135), let go; the other the program held up after
+its swap (the library's log: no refresh lost). Not yet: ogles2 1.x has
+the same wait; the reporter's sound case (AHI's paula.audio mixing) not
+run. The work as a report: `docs/vsync_fix_report.html`.
+
 **Release 1.0 (2026-11-14, the developer's call): 1.0-beta2 made the full
 release, on GitHub as `v1.0`.** `OGLES3_RELEASE` 1.0; the library and
 `v3dglslc3` are beta2's, unchanged (version 1.0, dated 05.11.2026: only

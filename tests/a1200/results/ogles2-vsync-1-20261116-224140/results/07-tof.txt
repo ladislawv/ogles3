@@ -1,0 +1,28 @@
+WaitTOF, priority 0, work 5000 us: 1200 waits in 24058 ms
+  idle counter: 8583147 rounds a second
+  frames the counter moved during a wait: 0: 109, 1: 0, 2: 0, 3+: 1091
+  line at the return: 3-1080; ms between returns: 18:4 20:1189 22:4 24:1 36:1
+  wait 0: 15083 us, line 529 -> 422, counter +4
+  wait 1: 14960 us, line 761 -> 645, counter +4
+  wait 2: 15226 us, line 983 -> 886, counter +4
+  wait 3: 14839 us, line 98 -> 7, counter +4
+  wait 4: 15058 us, line 312 -> 204, counter +4
+  wait 5: 15049 us, line 541 -> 432, counter +4
+  wait 6: 15028 us, line 770 -> 659, counter +4
+  wait 7: 14989 us, line 997 -> 883, counter +4
+  wait 8: 15261 us, line 96 -> 7, counter +4
+  wait 9: 14805 us, line 338 -> 213, counter +4
+  wait 10: 15045 us, line 550 -> 441, counter +4
+  wait 11: 15014 us, line 778 -> 667, counter +4
+  wait 12: 15043 us, line 1004 -> 895, counter +4
+  wait 13: 15022 us, line 107 -> 7, counter +4
+  wait 14: 15172 us, line 334 -> 233, counter +4
+  wait 15: 14893 us, line 570 -> 450, counter +4
+  wait 16: 15088 us, line 788 -> 681, counter +4
+  wait 17: 15018 us, line 1019 -> 908, counter +4
+  wait 18: 15003 us, line 120 -> 8, counter +4
+  wait 19: 15253 us, line 345 -> 250, counter +4
+  wait 20: 14819 us, line 588 -> 463, counter +4
+  wait 21: 15006 us, line 800 -> 688, counter +4
+  wait 22: 15114 us, line 1026 -> 921, counter +4
+  wait 23: 14951 us, line 133 -> 18, counter +4

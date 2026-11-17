@@ -1,0 +1,9 @@
+ogles2 vsync run 4
+Monday 16-Nov-26 23:43:02
+1 old idle done
+1 new idle done
+2 old busy done
+2 new busy done
+3 old w5 done
+3 new w5 done
+finished

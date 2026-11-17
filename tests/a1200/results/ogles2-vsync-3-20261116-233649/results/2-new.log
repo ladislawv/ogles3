@@ -1,0 +1,28 @@
+    39 close (count 0)
+    40 open (count 1)
+    41 display: fullscreen, 640x480, BGRA
+    42 device: context pools for 640x480, D16, 18196864 bytes of GPU memory in use
+    43 aglCreateContext2: context 0x0836A07C, OpenGL ES 3.1, 640x480
+    44 glLinkProgram: PROGDIR:b5dddc8cd309fdea4d334b4b.v3dp (5 variants, 920 bytes of code)
+    45 vsync: the HVS's frame counter, a refresh of 16666 us, 1080 lines
+    46 aglDestroyContext: context 0x0836A07C: freeing
+    47 device: context freed, 0 bytes of GPU memory still in use
+    48 vsync: 419 waits on the HVS's frame counter; 0 went at once (a refresh had begun), 0 slept through a refresh (woken at line 0 at most), 0 returned past the vertical blank (at most line 0)
+    49 aglDestroyContext: context 0x0836A07C (35836 frames, 0 dropped, 0 binning blocks added)
+    50 timing: 35836 jobs, each on average: 388 us of CPU work before its flush, 17 us waiting for binning, 1 us for the render
+    51 timing: and in each flush 54 us building the render list, 47 us for the CPU cache before the GPU, 2 us after
+    52 timing: 35836 swaps, 586 us from one to the next on average, 1 us of it presenting
+    53 timing: per frame 6 draws, 139 us in them; in all 0 ms in glBuffer(Sub)Data, 0 ms in glTex(Sub)Image2D
+    54 display: fullscreen, 640x480, BGRA
+    55 device: context pools for 640x480, D16, 18196864 bytes of GPU memory in use
+    56 aglCreateContext2: context 0x0836A07C, OpenGL ES 3.1, 640x480
+    57 glLinkProgram: PROGDIR:b5dddc8cd309fdea4d334b4b.v3dp (5 variants, 920 bytes of code)
+    58 vsync: the HVS's frame counter, a refresh of 16666 us, 1080 lines
+    59 aglDestroyContext: context 0x0836A07C: freeing
+    60 device: context freed, 0 bytes of GPU memory still in use
+    61 vsync: 419 waits on the HVS's frame counter; 0 went at once (a refresh had begun), 0 slept through a refresh (woken at line 0 at most), 0 returned past the vertical blank (at most line 0)
+    62 aglDestroyContext: context 0x0836A07C (419 frames, 0 dropped, 0 binning blocks added)
+    63 timing: 419 jobs, each on average: 16523 us of CPU work before its flush, 16 us waiting for binning, 2 us for the render
+    64 timing: and in each flush 58 us building the render list, 54 us for the CPU cache before the GPU, 2 us after
+    65 timing: 419 swaps, 16666 us from one to the next on average, 1 us of it presenting
+    66 timing: per frame 8 draws, 156 us in them; in all 0 ms in glBuffer(Sub)Data, 0 ms in glTex(Sub)Image2D

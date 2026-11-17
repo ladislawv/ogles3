@@ -1,0 +1,4 @@
+Directory "LIBS:" on Monday 16-Nov-26
+ogles3.library.beta1         434988 ----rwed 28-Oct-26 20:47:28
+ogles3.library               771976 ----rwed Today     21:54:24
+2 files - 1178K bytes - 2360 blocks used

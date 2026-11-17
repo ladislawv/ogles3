@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ogles3 vsync fix</title>
+<style>
+:root {
+  --bg: #fbfbf9; --fg: #1d1f21; --muted: #5d6166; --line: #dcdcd6; --head: #f0efe9;
+  --accent: #2f5d8a; --old: #a3412f; --new: #2e7046; --code-bg: #efeee8; --panel: #ffffff;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17191b; --fg: #e4e4e0; --muted: #9da1a6; --line: #33373b; --head: #22262a;
+    --accent: #7fb0de; --old: #e58a75; --new: #7ccb95; --code-bg: #262a2e; --panel: #1d2023;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17191b; --fg: #e4e4e0; --muted: #9da1a6; --line: #33373b; --head: #22262a;
+  --accent: #7fb0de; --old: #e58a75; --new: #7ccb95; --code-bg: #262a2e; --panel: #1d2023;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+main { max-width: 920px; margin: 0 auto; padding: 32px 16px 64px; }
+h1 { font-size: 1.7rem; line-height: 1.25; margin: 0 0 6px; }
+h2 { font-size: 1.25rem; margin: 40px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+h3 { font-size: 1.02rem; margin: 24px 0 8px; }
+p { margin: 8px 0; }
+.meta { color: var(--muted); font-size: .93rem; margin-bottom: 20px; }
+code {
+  font: .86em/1.4 ui-monospace, "Cascadia Mono", Consolas, monospace;
+  background: var(--code-bg); padding: 1px 5px; border-radius: 4px; white-space: nowrap;
+}
+.wrap { overflow-x: auto; margin: 10px 0 14px; }
+table { border-collapse: collapse; width: 100%; font-size: .94rem; background: var(--panel); }
+th, td { border: 1px solid var(--line); padding: 7px 10px; text-align: left; vertical-align: top; }
+th { background: var(--head); font-weight: 600; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.old { color: var(--old); font-weight: 600; }
+.new { color: var(--new); font-weight: 600; }
+.caption { color: var(--muted); font-size: .88rem; margin: -4px 0 14px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 16px 0; }
+.tile { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
+.tile .k { color: var(--muted); font-size: .85rem; }
+.tile .v { font-size: 1.25rem; font-weight: 600; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.tile .v .arrow { color: var(--muted); font-weight: 400; margin: 0 4px; }
+figure { margin: 16px 0; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+figcaption { color: var(--muted); font-size: .88rem; margin-top: 6px; }
+svg text { fill: var(--fg); font: 12px system-ui, sans-serif; }
+svg .muted { fill: var(--muted); }
+ul { padding-left: 22px; margin: 8px 0; }
+li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+
+<h1>ogles3: vsync swaps that wait two refreshes — investigation and fix</h1>
+<div class="meta">2026-11-16 · The report: a user's, "aglSwapBuffers with OGLES3_CCT_VSYNC sometimes waits two vblanks" (its <code>VsyncTest.c</code> is in <code>tests/vsync/</code>) · The work: branch <code>vsync</code> from <code>gles3</code></div>
+
+<h2>Summary</h2>
+<p>With <code>OGLES3_CCT_VSYNC</code> on a screen of the library's own, <code>aglSwapBuffers</code> waited with
+<code>WaitBOVP</code>. On the test station <code>WaitBOVP</code> busy-polls the Pi's display scaler (HVS) until its
+output line equals the display's height, and the line has that value for only about <strong>117 µs</strong> per
+refresh. Whenever the task lost the CPU across those 117 µs (another task, an interrupt), the poll missed the
+refresh and spun a whole refresh more: a swap of 33 ms, the frame shown twice. The spinning also took all the CPU
+below priority 10 for the length of every wait.</p>
+<p>The swap now waits on the HVS's own <strong>frame counter</strong>. It sleeps on timer.device until shortly before
+the refresh, and if it wakes late it still sees that the refresh began, so the frame goes out at once instead of a
+refresh later.</p>
+
+<div class="tiles">
+  <div class="tile"><div class="k">Skipped refreshes per 30 s</div>
+    <div class="v"><span class="old">7–13</span><span class="arrow">→</span><span class="new">0–1</span></div></div>
+  <div class="tile"><div class="k">VsyncTest swaps ≥ 33 ms (2940 swaps)</div>
+    <div class="v"><span class="old">17</span><span class="arrow">→</span><span class="new">2</span></div></div>
+  <div class="tile"><div class="k">CPU left to other tasks</div>
+    <div class="v"><span class="old">none</span><span class="arrow">→</span><span class="new">≈ 57 %</span></div></div>
+</div>
+
+<h2>The station</h2>
+<div class="wrap"><table>
+  <tr><th>Part</th><th>Version</th><th>Note</th></tr>
+  <tr><td>Machine</td><td>A1200, PiStorm (Pi 4), Emu68</td><td></td></tr>
+  <tr><td><code>ogles3.library</code></td><td>1.0</td><td>the <code>es32</code> build in <code>LIBS:</code> as "old"</td></tr>
+  <tr><td>VideoCore.card</td><td>1.5 (03.02.2026, git <code>db8770a</code>)</td><td><strong>without</strong> the card's vblank
+    interrupt (added upstream on 2026-10-23, flype44's PR #4; a "VideoCore.card flyped" sits unused in
+    <code>LIBS:Picasso96</code>)</td></tr>
+  <tr><td>rtg.library</td><td>43.787 (06.06.2026)</td><td>iComp P96</td></tr>
+  <tr><td>gic400.library</td><td>1.4</td><td></td></tr>
+  <tr><td>Display</td><td>HDMI 1920x1080 at 60.000 Hz</td><td>the 640x480 screen is scaled to it</td></tr>
+</table></div>
+
+<h2>How the cause was found</h2>
+
+<h3>The card's source</h3>
+<p>Emu68-tools' VideoCore.card, cloned read-only in WSL <code>~/emu68-tools</code>:</p>
+<div class="wrap"><table>
+  <tr><th>Function</th><th>What it does</th></tr>
+  <tr><td><code>VC6_GetVBeamPos</code></td><td>returns <code>SCALER_DISPSTAT1 &amp; 0xfff</code>, the HVS's output line</td></tr>
+  <tr><td><code>VC6_WaitVerticalSync</code></td><td>the polling path P96 uses without a board interrupt: spins until that line
+    <strong>equals</strong> the display's height</td></tr>
+  <tr><td>refresh measurement</td><td>reads <code>SCALER_DISPSTAT1</code> bits 17:12, a frame counter</td></tr>
+</table></div>
+
+<h3>The probe</h3>
+<p><code>tests/vsync/vsync_probe.c</code> (no GL; it only reads HVS registers; package <code>vsync-1</code>, run
+<code>ogles2-vsync-1-20261116-224140</code>):</p>
+
+<figure>
+<svg viewBox="0 0 860 170" width="100%" role="img" aria-label="The HVS line over the end of one refresh and the start of the next">
+  <line x1="40" y1="130" x2="840" y2="130" stroke="currentColor" stroke-opacity=".35"/>
+  <line x1="40" y1="20" x2="40" y2="130" stroke="currentColor" stroke-opacity=".35"/>
+  <text x="4" y="34" class="muted">1080</text>
+  <text x="22" y="134" class="muted">0</text>
+  <!-- picture lines rising to 1080 -->
+  <polyline points="40,92 300,30" fill="none" stroke-width="2.5" style="stroke:var(--accent)"/>
+  <!-- hold at 1080 -->
+  <rect x="300" y="22" width="46" height="108" fill-opacity=".14" style="fill:var(--old)"/>
+  <line x1="300" y1="30" x2="346" y2="30" stroke-width="3" style="stroke:var(--old)"/>
+  <!-- wrap -->
+  <line x1="346" y1="30" x2="346" y2="128" stroke-width="2.5" style="stroke:var(--accent)"/>
+  <!-- stall at 7 -->
+  <line x1="346" y1="127" x2="560" y2="127" stroke-width="2.5" style="stroke:var(--accent)"/>
+  <!-- next picture -->
+  <polyline points="560,127 840,62" fill="none" stroke-width="2.5" style="stroke:var(--accent)"/>
+  <line x1="346" y1="16" x2="346" y2="146" stroke-dasharray="4 3" stroke-width="1.5" style="stroke:var(--new)"/>
+  <text x="352" y="152" style="fill:var(--new);fill:var(--new)">frame counter changes</text>
+  <text x="250" y="16" style="fill:var(--old)">line 1080: ~117 µs</text>
+  <text x="380" y="116">line 7: ~660 µs (vertical blank)</text>
+  <text x="80" y="70" class="muted">the picture (one line per ~15 µs)</text>
+  <text x="640" y="80" class="muted">next picture</text>
+</svg>
+<figcaption>The HVS's line around a refresh (not to scale). <code>WaitBOVP</code> only notices the refresh during the
+red 117 µs; the frame counter (green) changes once per refresh and stays changed, so a late reader still sees it.</figcaption>
+</figure>
+
+<div class="wrap"><table>
+  <tr><th>Measurement</th><th>Result</th></tr>
+  <tr><td>The HVS's timing</td><td>The frame counter changes every 16 666–16 667 µs, as the line goes from 1080 to 0.
+    Line 1080 lasts about 117 µs. The line then runs to 7 at once and stays there for about 660 µs (the vertical blank).</td></tr>
+  <tr><td><code>WaitBOVP</code></td><td>Always returns at line 1080, and it spins: a priority -1 counter task got
+    2.6 M rounds/s against 247 M on an idle system.</td></tr>
+  <tr><td>Misses at priority 0, idle system</td><td>30 of 1200 waits. Each one was called at line 292 and returned at
+    line 1080 of the <em>next</em> refresh (28.3 ms).</td></tr>
+  <tr><td>A task at priority 15 spinning 2 ms every 97 ms (phase drifting)</td><td>53 misses. 31 of the spins lay inside
+    a missed wait, about the share whose 2 ms covers the 117 µs moment.</td></tr>
+  <tr><td>0 ms of work</td><td>Nearly every call returned at once, because line 1080 was still showing. That is the
+    reporter's "every other swap returns at once".</td></tr>
+  <tr><td><code>WaitTOF</code></td><td>Runs at 50 Hz (the PAL chipset), out of step with the HDMI. That makes the window
+    path's vsync unsynchronised (see "Open").</td></tr>
+  <tr><td>A prototype wait on the frame counter</td><td>Lost no refresh under the same disturber. Late wake-ups returned
+    0.3–1.5 ms after the refresh began instead.</td></tr>
+</table></div>
+
+<h3>The reporter's program</h3>
+<p><code>VsyncTest</code> (unchanged, <code>tests/vsync/VsyncTest.c</code>) reproduced the report: 14 swaps of 33 ms in
+2940 here, 13 in the report.</p>
+<p>M6's finding in <code>display.c</code> and DEVELOPMENT_PLAN §7.2, "<code>WaitTOF</code> and <code>WaitBOVP</code>
+follow the HDMI refresh and sleep", does not hold on this setup. The priority-10 boost had been measured with the
+earlier wait.</p>
+
+<h2>The fix</h2>
+<p>In <code>ogles3/display.c</code> and <code>ogles3/ogles3_internal.h</code>. On a screen of the library's own, and on
+one that a window covers completely:</p>
+<div class="wrap"><table>
+  <tr><th>Part</th><th>What it does</th></tr>
+  <tr><td><code>hvs_probe</code><br>(at the first wait)</td><td>HVS channel 1 must be on (<code>SCALER_DISPCTRL1</code>
+    bit 31) with 200–4096 lines, and it must show two refreshes of 5–50 ms that agree within 300 µs. Otherwise the swap
+    keeps <code>WaitBOVP</code>. The log names the method used.</td></tr>
+  <tr><td><code>hvs_wait</code>: priority</td><td>The task runs at priority 10 for the whole wait. It is asleep for most
+    of it, so this costs nothing, and when woken it runs before every task below 10.</td></tr>
+  <tr><td><code>hvs_wait</code>: sleep</td><td>It sleeps on timer.device until about 1 ms before the counter's change.
+    The time left is worked out from the line, slightly short. Then it reads the counter until it changes.</td></tr>
+  <tr><td><code>hvs_wait</code>: late wake-up</td><td>A refresh that began after the last frame went out, while the scan
+    is still at the top (in the picture's top eighth, or at the last line just before the counter moves), is taken at
+    once: the task woke late. Further down the frame would tear, so it waits for the next refresh.</td></tr>
+  <tr><td><code>hvs_wait</code>: stopped display</td><td>If the counter doesn't move for 3 refreshes, the wait gives up
+    instead of hanging.</td></tr>
+  <tr><td>Log at the context's destroy</td><td>Waits, frames that went out at once, refreshes slept through (and how far
+    into the frame those wake-ups came), and returns past the vertical blank.</td></tr>
+</table></div>
+
+<h3>Defects of the first versions, found by the runs and fixed</h3>
+<div class="wrap"><table>
+  <tr><th>#</th><th>Defect</th><th>Seen in</th><th>Fix</th></tr>
+  <tr><td>1</td><td>A read that falls between the counter's change and the line's wrap shows the new count at line 1080.
+    This was taken for a late wake-up and cost a refresh.</td><td><code>ogles2-vsync-2-20261116-230334</code>:
+    92 in 3000</td><td>The last line counts as the refresh's start.</td></tr>
+  <tr><td>2</td><td>The "display stopped" limit counted from the start of the wait. After a long stall (vsync being
+    switched on) it let one frame out at line 574.</td><td><code>ogles2-vsync-3-20261116-233151</code></td><td>It counts
+    from the counter's last move.</td></tr>
+</table></div>
+
+<h2>Results</h2>
+
+<h3>VsyncTest</h3>
+<p class="caption">Package <code>vsync-2</code>; old: run <code>ogles2-vsync-2-20261116-225726</code>, new: run
+<code>-231119</code>. Swaps of 33 ms or more.</p>
+<div class="wrap"><table>
+  <tr><th>Condition</th><th class="n">old</th><th class="n">new</th></tr>
+  <tr><td>5 ms of work, 2940 swaps</td><td class="n old">17</td><td class="n new">2 <span style="font-weight:400">(27 and
+    35 ms, each followed by 6 ms)</span></td></tr>
+  <tr><td>same, plus a busy task (priority 15, 2 ms once a second)</td><td class="n old">19</td><td class="n new">0</td></tr>
+  <tr><td>15 ms of work, 1140 swaps</td><td class="n old">9</td><td class="n new">0</td></tr>
+  <tr><td>priority 20, 1140 swaps</td><td class="n">–</td><td class="n new">0</td></tr>
+  <tr><td>CPU a priority -1 task gets meanwhile</td><td class="n old">0</td><td class="n new">140 M rounds/s
+    <span style="font-weight:400">(247 M idle)</span></td></tr>
+</table></div>
+
+<h3>What a viewer sees</h3>
+<p class="caption">Measured from the HVS: <code>tests/vsync/vsync_watch.c</code>, package <code>vsync-4</code>, run
+<code>ogles2-vsync-4-20261116-234302</code>. Old and new ran alternately, 30 s each (about 1737 refreshes).</p>
+<div class="wrap"><table>
+  <tr><th rowspan="2">Condition</th><th colspan="2" class="n">Skipped refreshes</th><th colspan="2" class="n">Judder &gt; 2 ms</th>
+    <th colspan="2" class="n">Late past the top eighth</th></tr>
+  <tr><th class="n">old</th><th class="n">new</th><th class="n">old</th><th class="n">new</th><th class="n">old</th><th class="n">new</th></tr>
+  <tr><td>idle</td><td class="n old">13</td><td class="n new">1</td><td class="n old">37</td><td class="n new">3</td>
+    <td class="n old">6</td><td class="n new">1</td></tr>
+  <tr><td>busy task</td><td class="n old">10</td><td class="n new">1</td><td class="n old">30</td><td class="n new">5</td>
+    <td class="n old">5</td><td class="n new">0</td></tr>
+  <tr><td>5 ms of work</td><td class="n old">7</td><td class="n new">0</td><td class="n old">14</td><td class="n new">2</td>
+    <td class="n">0</td><td class="n new">1</td></tr>
+</table></div>
+<p>Where the new library's two remaining skips come from:</p>
+<ul>
+  <li><strong>Busy run:</strong> one wake-up came at line 146, just past the eighth (135), so the library let that
+    refresh go.</li>
+  <li><strong>Idle run:</strong> the program was held up after its swap had returned; the library's log shows no lost
+    refresh.</li>
+</ul>
+
+<h3>Tearing, watched by the developer</h3>
+<p class="caption"><code>m6_vsync</code>'s white bar, package <code>vsync-3</code>; runs <code>-233649</code> new and
+<code>-233839</code> old.</p>
+<div class="wrap"><table>
+  <tr><th>Ways</th><th>old library</th><th>new library</th></tr>
+  <tr><td>5 and 7 (vsync off)</td><td>tear</td><td>tear</td></tr>
+  <tr><td>6 and 8 (vsync on)</td><td>no tearing; possibly more stutter (way 6: 359 frames in 6 s)</td><td>no tearing
+    (way 6: 361 frames in 6 s)</td></tr>
+</table></div>
+<p>The measurement above confirms the extra stutter of the old library.</p>
+
+<h2>Files</h2>
+<div class="wrap"><table>
+  <tr><th>Path</th><th>What</th></tr>
+  <tr><td><code>ogles3/display.c</code>, <code>ogles3/ogles3_internal.h</code></td><td>the fix</td></tr>
+  <tr><td><code>tests/vsync/vsync_probe.c</code></td><td>the waits timed against the HVS, no GL</td></tr>
+  <tr><td><code>tests/vsync/vsync_watch.c</code></td><td>skipped refreshes, judder and late frames as a viewer sees them</td></tr>
+  <tr><td><code>tests/vsync/VsyncTest.c</code></td><td>the reporter's program</td></tr>
+  <tr><td><code>tests/a1200/vsync-1</code></td><td>package: the probe</td></tr>
+  <tr><td><code>tests/a1200/vsync-2</code></td><td>package: <code>VsyncTest</code>, old and new</td></tr>
+  <tr><td><code>tests/a1200/vsync-3</code></td><td>package: the bar to watch; <code>OLD=0</code> / <code>NEW=0</code> run one
+    library only</td></tr>
+  <tr><td><code>tests/a1200/vsync-4</code></td><td>package: <code>vsync_watch</code>, old and new</td></tr>
+  <tr><td><code>docs/GLES3_PLAN.md</code></td><td>the entry "Vsync on the HVS's frame counter"</td></tr>
+  <tr><td><code>docs/DEVELOPMENT_PLAN.md</code></td><td>§7.2 and §13: notes that the M6 findings changed</td></tr>
+  <tr><td><code>tests/a1200/results/ogles2-vsync-*</code></td><td>the runs' results, in the worktree</td></tr>
+</table></div>
+<p>The packages build with <code>B=~/ogles3-build/m68k-vsync</code>. Packages 2–4 copy their library into
+<code>LIBS:</code> for their runs and put the original back.</p>
+
+<h2>Open</h2>
+<div class="wrap"><table>
+  <tr><th>Item</th><th>Note</th></tr>
+  <tr><td>The cut-off for a late wake-up</td><td>The picture's top eighth. A quarter would have caught the busy run's one
+    skip (a wake-up at line 146), but frames started that late could tear in the top quarter.</td></tr>
+  <tr><td>ogles2 1.x</td><td>Has the same <code>WaitBOVP</code> wait; the same fix would go into its own repository.</td></tr>
+  <tr><td>Window mode</td><td>Still uses <code>WaitTOF</code> before its copy. On this station that is 50 Hz and out of
+    step with the HDMI. The frame counter would serve a window on an RTG screen too.</td></tr>
+  <tr><td>The reporter's sound case</td><td>AHI's paula.audio mixing on the 68k has not been run.</td></tr>
+  <tr><td>A newer VideoCore.card</td><td>With the vblank interrupt, <code>WaitBOVP</code> would sleep. The counter wait
+    doesn't depend on which card version is installed.</td></tr>
+  <tr><td>Merge</td><td>The work is on branch <code>vsync</code>; not merged into <code>gles3</code> yet.</td></tr>
+</table></div>
+
+</main>
+</body>
+</html>

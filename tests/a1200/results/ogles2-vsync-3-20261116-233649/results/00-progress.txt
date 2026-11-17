@@ -1,0 +1,5 @@
+ogles2 vsync run 3
+Monday 16-Nov-26 23:36:49
+new pass 1 done
+new pass 2 done
+finished

@@ -1,0 +1,30 @@
+CNT: a frame 16656 us, lines to 1080
+HVS frame counter, priority 0, work 5000 us, a task at 15 spinning 2000 us every 97 ms (104 spins): 600 waits in 10013 ms
+  idle counter: 146986519 rounds a second
+  frames the counter moved during a wait: 0: 0, 1: 0, 2: 0, 3+: 600
+  line at the return: 0-1000; ms between returns: 15:6 16:8 17:575 18:7 19:2 32:1
+  wait 0: 8556 us, line 510 -> 0, counter +4
+  wait 1: 11665 us, line 300 -> 0, counter +4
+  wait 2: 11666 us, line 300 -> 0, counter +4
+  wait 3: 11667 us, line 300 -> 0, counter +4
+  wait 4: 11820 us, line 300 -> 7, counter +4
+  wait 5: 11514 us, line 310 -> 0, counter +4, a spin of the disturber inside it
+  wait 6: 11665 us, line 300 -> 0, counter +4
+  wait 7: 11666 us, line 300 -> 0, counter +4
+  wait 8: 11666 us, line 300 -> 0, counter +4
+  wait 9: 11667 us, line 300 -> 0, counter +4
+  wait 10: 11695 us, line 300 -> 7, counter +4
+  wait 11: 11638 us, line 302 -> 0, counter +4, a spin of the disturber inside it
+  wait 12: 11667 us, line 300 -> 0, counter +4
+  wait 13: 11667 us, line 300 -> 0, counter +4
+  wait 14: 11666 us, line 300 -> 0, counter +4
+  wait 15: 11667 us, line 300 -> 0, counter +4
+  wait 16: 11666 us, line 300 -> 0, counter +4
+  wait 17: 11666 us, line 300 -> 0, counter +4, a spin of the disturber inside it
+  wait 18: 11667 us, line 300 -> 0, counter +4
+  wait 19: 11666 us, line 300 -> 0, counter +4
+  wait 20: 11666 us, line 300 -> 0, counter +4
+  wait 21: 11667 us, line 300 -> 0, counter +4
+  wait 22: 11666 us, line 300 -> 0, counter +4
+  wait 23: 11666 us, line 300 -> 0, counter +4, a spin of the disturber inside it
+  spins inside a wait: 72, of them in a wait that slept through a refresh: 72
