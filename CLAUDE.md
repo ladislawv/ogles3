@@ -44,7 +44,7 @@ repositories: git in WSL needs credentials (CONTRIBUTING.md, "Access").
 - PowerShell mangles `$`, `\` and quotes passed to `wsl bash -c`: write a script file and
   run `wsl -d Ubuntu-24.04 bash <script>` (the name `wsl -l` lists; on some machines `Ubuntu`).
 - Windows Python writes CRLF; files here are LF (`.gitattributes`). Make patches to the
-  ported sources against the clones the builds use (`~/ioq3-upstream`, `~/ioq3-amiga`, in
+  ported sources against the clones the builds use (`~/ioq3-upstream`, `~/ioq3-amiga-ogles3`, in
   WSL), not against a Windows checkout: git on Windows turns LF into CRLF there.
 - An ogles3.library (ogles2.library on `main`) already in memory stays there: test scripts
   run `Avail FLUSH` first.

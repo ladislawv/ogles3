@@ -299,6 +299,47 @@ group's cases from the last one without a result, from the package's
 `caselists/<group>.txt` (dEQP's order), into
 `tests/a1200/out/extra-lists/<name>.txt` (not in git; `m8-3/build.sh` copies
 them into the package), then `ARGS="LIST=<name> NAME=<name>"`.
+**The regression run on the final library (2026-11-17, evening; paused
+at 22:3x by the developer).** `tests/a1200/a_regress.sh`, every program
+compiled on the PC:
+- **The GLES2 regression set** with ES 2.0 contexts, none failed: `m5-1`
+  257, `m6-6` 391, `m6-8` 121, `m6-10` 210, `m7-2` 66, `m7-3` 105, `m7-4`
+  129; the corpus `m2-5` 0 differ; `m8-5` 348; `m8-6` 500 iterations.
+  The set had failed 14 + 1 + 1 checks first: written for ogles2 1.x, it
+  got ES 3.1 contexts (the default since 1.0, 2026-10-28; its last run
+  was 2026-10-23), with ES 3's rules (depth textures read as (d, 0, 0),
+  colour attachments of different sizes, the 43 compressed formats).
+  Now **`ENV:OGLES3/Version`** (20, 30, 31) gives a context that asks for
+  none its version (`context.c`, `release/ogles3.doc`), and the set's
+  `Run-M1` scripts set 20 (unset at their end; `a_regress.sh` unsets it
+  after each package too). `m6_ext`'s `GL_VERSION` check looked for 1.3
+  (ogles2's release), now the library's name; `m2_texture` read 16
+  compressed formats at most, now 64.
+- **dEQP-GLES2 whole: 17,110 of 17,165 passed**, 27 failed: the 25 cube
+  map texture cases and `vertex.texturecubelod` of --deviations-- (as on
+  2026-10-30), and `shaders.swizzles...mediump_ivec2_rgrr_vertex`, whose
+  program the PC's compiler ended on ("compile_bridge: the host compiler
+  ended"): to rerun alone with its sources.
+- **dEQP-GLES3:** 32 lists (10,034 passed, none failed), then
+  `shaders-builtin_functions` 1,347 of 1,637 when paused.
+- **Speed seen on the way:** gl4es `m6-1` 6-15% and SDL2 `m6-3` up to 35%
+  slower than 2026-10-23 (SDL3 `m6-4` the same): both ask for no version,
+  so ES 3.1 contexts now; to run with `OGLES3/Version` 20 to tell.
+- **To do on resuming:** start `compile_bridge.py --port 6802`, then
+  `BRIDGE=1 ARGS="LIST=gles3-bf-rest NAME=gles3-bf-rest" a_run.sh m8-2`
+  (the group's last 290 cases: `tests/a1200/out/extra-lists/`), then
+  `FROM=shaders-builtin_variable bash tests/a1200/a_regress.sh deqp3
+  deqp31 speed`; then `m8-1` and `m8-4` with their own ES3=1 library in
+  `LIBS:` (they check a 3.0-only build; the 3.1 one installed failed 7 and
+  2 of their checks), the ES 3.1 one put back (`LIBS_INSTALL=1` with
+  `m8-5`); Quake III `m6-2` and `m6-5` (their build took
+  `~/ioq3-amiga`, the 1.x copy's clone: `ports/ioq3/sources.sh` now
+  defaults to `~/ioq3-amiga-ogles3`, its repository's); the swizzle case.
+- A background batch stopped from the agent's side left its shells
+  running (Git Bash): two batches ran at once, a dEQP-GLES3 on the GPU
+  beside `m8-5` (one alpha-to-coverage check failed then). Stop one by
+  its process group's Windows PIDs (`ps -W`, `taskkill /F /PID`).
+
 **The cache by compiler; geometry programs with alpha to coverage
 (2026-11-17, evening).**
 - **The program cache keyed on the compiler:** `OGLES3Cache:<compiler>/<d>/`,

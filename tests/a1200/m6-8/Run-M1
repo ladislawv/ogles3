@@ -26,6 +26,9 @@ Assign LIBS: M6R8:libs ADD
 ; earlier run would otherwise be used instead of this package's.
 Avail FLUSH >NIL:
 SetEnv OGLES3/LogFile M6R8:results/ogles2.log
+; ES 2.0 contexts unless a test asks (the library's default is 3.1):
+; this package checks OpenGL ES 2.0's rules, as ogles2 1.x has them
+SetEnv OGLES3/Version 20
 
 ; Probes M and U: the CPU makes the levels and tiles the uploads, as before the
 ; TFU. The same checks, and their timings to compare with step 2's.
@@ -61,4 +64,5 @@ Echo "finished" >>M6R8:results/00-progress.txt
 Date >>M6R8:results/00-progress.txt
 Assign M6R8:
 Echo ""
+UnSetEnv OGLES3/Version
 Echo "Done. Results are in results/."

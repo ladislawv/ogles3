@@ -140,8 +140,10 @@ static void test_strings(void)
         sprintf(msg, "GL_EXTENSIONS has %s", want[k]);
         check(e && strstr(e, want[k]) != 0, msg);
     }
-    sprintf(msg, "GL_VERSION \"%s\" (1.3)", v ? v : "(null)");
-    check(v && strstr(v, "1.3") != 0, msg);
+    /* ogles2 1.3's release number until this library became ogles3.library
+     * 1.0 (2026-10-28): its own name now */
+    sprintf(msg, "GL_VERSION \"%s\" (ogles3.library)", v ? v : "(null)");
+    check(v && strstr(v, "ogles3.library") != 0, msg);
 }
 
 /* OES_texture_npot: REPEAT and a mipmapping filter on 100x60. Left half

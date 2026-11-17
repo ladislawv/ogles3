@@ -187,6 +187,12 @@ ogles3.library/--background--                   ogles3.library/--background--
                        the one before) and a new one starts.
        OGLES3/MSAA     4 or 0: 4x multisampling for contexts created
                        without OGLES3_CCT_PISTORM_MSAA.
+       OGLES3/Version  20, 30 or 31: the OpenGL ES version of contexts
+                       created without OGLES3_CCT_PISTORM_ES_VERSION
+                       (default: the highest, 3.1), e.g. 20 for a program
+                       written for OpenGL ES 2.0 that expects its rules
+                       (depth textures read as luminance, colour
+                       attachments of one size).
 
    CONFORMANCE
        Khronos dEQP, each list run whole on an A1200: dEQP-GLES31 13,746

@@ -6,27 +6,35 @@
 # tools/compile_bridge/compile_bridge.py --port 6802 in WSL first), and the
 # speed (drawbench). docs/GLES3_PLAN.md, "The GLES2 regression set" and the
 # full runs. A line per run into tests/a1200/out/regress-<date>.txt.
-#   bash tests/a1200/a_regress.sh [packages|deqp2|deqp3|deqp31|speed ...]   (default: all, in that order)
+#   bash tests/a1200/a_regress.sh [packages|deqp2|deqp3|deqp31|speed|<package> ...]   (default: all, in that order)
+# FROM=<group>: a dEQP part from that must-pass list on (a paused run resumed).
 # The library and compiler under test go into LIBS: first (LIBS_INSTALL=1 with m8-5).
 set -u
 HERE=$(cd "$(dirname "$0")" && pwd)
 OUT=$HERE/out
 SUM=$OUT/regress-$(date +%Y%m%d-%H%M).txt
 say() { echo "$(date +%T) $*" | tee -a "$SUM"; }
+CTL=${AMIGENT_CTL:-"/c/- CPP/amigent/.venv/Scripts/amigent-ctl.exe"}
+STATION=$(cygpath -w "$HERE/../../tools/amictl/station.local")
+export AMIGENT_HOST=${AMIGENT_HOST:-$(python -c "import json,sys;print(json.load(open(sys.argv[1]))['host'])" "$STATION")}
 one() { # package, then a_run.sh's last line
     local r
-    r=$(bash "$HERE/a_run.sh" "$1" 2>&1 | grep -E "PASS,|NO RESULTS|STATION DOWN|failed|did not" | tail -1)
+    r=$(bash "$HERE/a_run.sh" "$1" 2>&1 | grep -E "PASS,|NO RESULTS|STATION DOWN|failed|did not|another a_run" | tail -1)
     say "$1: ${r#* $1: }"
-    case $r in *"STATION DOWN"*) exit 4 ;; esac
+    case $r in *"STATION DOWN"* | *"another a_run"* | "") say "stopped: ${r:-no answer from a_run.sh}"; exit 4 ;; esac
+    # the GLES2 regression packages' ES 2.0 (their Run-M1), not left for the next
+    "$CTL" unsetenv OGLES3/Version > /dev/null 2>&1
 }
 deqp() { # package: each must-pass list (not the -pNN parts)
     local p=$1 g first=1 r
-    for g in $(ls "$OUT/ogles2-$p/caselists" 2>/dev/null | grep -v -- '-p[0-9]' | sed 's/\.txt$//'); do
+    # FROM=<group>: that group and the ones after it (a paused run resumed)
+    for g in $(ls "$OUT/ogles2-$p/caselists" 2>/dev/null | grep -v -- '-p[0-9]' | sed 's/\.txt$//' |
+               awk -v f="${FROM:-}" 'f == "" || $0 >= f'); do
         r=$(NOBUILD=$([ $first = 1 ] && echo 0 || echo 1) BRIDGE=1 TIMEOUT=${T:-14400} ARGS="LIST=$g NAME=$g" \
-            bash "$HERE/a_run.sh" "$p" 2>&1 | grep -E "^   $p: $g:|NO RESULTS|STATION DOWN|failed|did not" | tail -1)
+            bash "$HERE/a_run.sh" "$p" 2>&1 | grep -E "^   $p: $g:|NO RESULTS|STATION DOWN|failed|did not|another a_run" | tail -1)
         first=0
         say "$p $g: ${r#*: $g: }"
-        case $r in *"STATION DOWN"*) exit 4 ;; esac
+        case $r in *"STATION DOWN"* | *"another a_run"* | "") say "stopped: ${r:-no answer from a_run.sh}"; exit 4 ;; esac
     done
 }
 say "regression run: ${*:-all}"
@@ -40,7 +48,8 @@ for part in ${*:-packages deqp2 deqp3 deqp31 speed}; do
     deqp3) deqp m8-2 ;;
     deqp31) deqp m8-3 ;;
     speed) one drawbench ;;
-    *) say "unknown part $part" ;;
+    m5-1 | m6-6 | m6-8 | m6-10 | m7-2 | m7-3) BUILD_ENV='B=$BS' one "$part" ;; # built against the sync build
+    *) one "$part" ;; # a package by its name
     esac
 done
 say "done: $SUM"

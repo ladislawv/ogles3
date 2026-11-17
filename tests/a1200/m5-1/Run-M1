@@ -26,6 +26,9 @@ Assign LIBS: M5R1:libs ADD
 ; earlier run would otherwise be used instead of this package's.
 Avail FLUSH >NIL:
 SetEnv OGLES3/LogFile M5R1:results/ogles2.log
+; ES 2.0 contexts unless a test asks (the library's default is 3.1):
+; this package checks OpenGL ES 2.0's rules, as ogles2 1.x has them
+SetEnv OGLES3/Version 20
 
 If NOT {FROM} GT 1 VAL
   Echo "Step 1 of 7: framebuffer objects, then a big frame (nothing to see)"
@@ -83,4 +86,5 @@ Echo "finished" >>M5R1:results/00-progress.txt
 Date >>M5R1:results/00-progress.txt
 Assign M5R1:
 Echo ""
+UnSetEnv OGLES3/Version
 Echo "Done. Results are in results/."

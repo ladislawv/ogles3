@@ -24,6 +24,9 @@ Date >>M7R2:results/00-progress.txt
 Assign LIBS: M7R2:libs ADD
 Avail FLUSH >NIL:
 SetEnv OGLES3/LogFile M7R2:results/ogles2.log
+; ES 2.0 contexts unless a test asks (the library's default is 3.1):
+; this package checks OpenGL ES 2.0's rules, as ogles2 1.x has them
+SetEnv OGLES3/Version 20
 
 If NOT {FROM} GT 1 VAL
   Echo "Step 1 of 2: S3TC textures (nothing to see)"
@@ -48,4 +51,5 @@ Echo "finished" >>M7R2:results/00-progress.txt
 Date >>M7R2:results/00-progress.txt
 Assign M7R2:
 Echo ""
+UnSetEnv OGLES3/Version
 Echo "Done. Results are in results/."

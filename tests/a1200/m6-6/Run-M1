@@ -26,6 +26,9 @@ Assign LIBS: M6R6:libs ADD
 ; earlier run would otherwise be used instead of this package's.
 Avail FLUSH >NIL:
 SetEnv OGLES3/LogFile M6R6:results/ogles2.log
+; ES 2.0 contexts unless a test asks (the library's default is 3.1):
+; this package checks OpenGL ES 2.0's rules, as ogles2 1.x has them
+SetEnv OGLES3/Version 20
 
 If NOT {FROM} GT 1 VAL
   Echo "Step 1 of 5: the extensions (nothing to see)"
@@ -90,4 +93,5 @@ Echo "finished" >>M6R6:results/00-progress.txt
 Date >>M6R6:results/00-progress.txt
 Assign M6R6:
 Echo ""
+UnSetEnv OGLES3/Version
 Echo "Done. Results are in results/."

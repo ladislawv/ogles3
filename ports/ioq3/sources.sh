@@ -32,7 +32,7 @@ clone_pinned() {
 [ "${1:-}" != --functions-only ] || return 0
 
 if [ -z "${IOQ3_SRC:-}" ]; then
-    IOQ3_SRC=$HOME/ioq3-amiga
+    IOQ3_SRC=$HOME/ioq3-amiga-ogles3 # its repository's name: ~/ioq3-amiga is the 1.x copy's (2026-11-17)
     clone_pinned "$IOQ3_SRC" "$IOQ3_AMIGA_URL" "$IOQ3_AMIGA_COMMIT" || exit 1
 fi
 if [ -n "${IOQ3_WANT_UPSTREAM:-}" ] && [ -z "${IOQ3_UP_SRC:-}" ]; then

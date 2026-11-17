@@ -57,9 +57,24 @@ struct OGLES3Context *ogles2_aglCreateContext2(ULONG *errcode, struct TagItem *t
     ULONG stencil = GetTagData(OGLES3_CCT_STENCIL, 0, tags);
     BOOL debug_shader_log = GetTagData(OGLES3_CCT_DEBUG_SHADER_LOG, FALSE, tags) ? TRUE : FALSE;
     struct OGLES3Context *with = (struct OGLES3Context *)GetTagData(OGLES3_CCT_SHARE_WITH, 0, tags);
-    ULONG asked = GetTagData(OGLES3_CCT_PISTORM_ES_VERSION, OGLES3_ES_MAX, tags); /* none asked: the highest */
+    ULONG asked;
     UBYTE version;
     ULONG why = OGLES3_CCE_OK;
+    char env[8];
+
+    /* None asked: ENV:OGLES3/Version (20, 30 or 31) if set, else the
+     * highest (2026-11-17: the GLES2 regression set, written for ogles2
+     * 1.x, asks for ES 2.0 so; as ENV:OGLES3/MSAA below). */
+    asked = OGLES3_ES_MAX;
+    if (GetVar((STRPTR) "OGLES3/Version", (STRPTR)env, sizeof(env), GVF_GLOBAL_ONLY) > 0) {
+        ULONG e = (env[0] >= '1' && env[0] <= '9' && env[1] >= '0' && env[1] <= '9') ? (ULONG)(env[0] - '0') * 10 +
+                                                                                           (ULONG)(env[1] - '0') : 0;
+        if (env[1] == '.' && env[0] >= '1' && env[0] <= '9' && env[2] >= '0' && env[2] <= '9') /* "2.0" */
+            e = (ULONG)(env[0] - '0') * 10 + (ULONG)(env[2] - '0');
+        if (e == 20 || e == 30 || e == 31)
+            asked = e;
+    }
+    asked = GetTagData(OGLES3_CCT_PISTORM_ES_VERSION, asked, tags);
 
     /* The version (docs/GLES3_PLAN.md §3): 20, or for 30 and 31 (and when
      * none is asked for) the highest ES 3.x the library has, if that is at
