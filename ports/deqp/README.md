@@ -166,6 +166,14 @@ stages B and C). Two things follow:
   `modules_gles3_tes3TestPackage.cpp.o`): the restored sources are older
   than them.
 
+## The precision checks on the Pi's ARM cores (`C3=1`)
+
+`C3=1 MODULE=gles3|gles31 bash ports/deqp/build.sh` builds a second
+dEQP, into `$B/deqp-<module>-c3`, with its own copy of the sources. Its
+built-in function precision tests check their values on Core 3 and Core 1
+(the Core 3 SDK's `core3.library`); packages `m8-2c` and `m8-3c` run it.
+This build is left as it is. See `c3/README.md`.
+
 ## Known deviation
 
 V3D always filters cube maps seamlessly, across the faces' edges, as GLES3

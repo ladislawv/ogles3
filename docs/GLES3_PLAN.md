@@ -349,6 +349,56 @@ same source. **The A1200 has it:** `LIBS:core3.library` 1.4, `C3Info`
   port's `amiga-compat.cpp`), and `deSetRoundingMode` skipping a write of
   the mode already set: about a fifth of that group's time.
 
+**Item 1, done: the precision checks on the ARM cores (2026-11-18;
+`ports/deqp/c3/README.md`).** A second dEQP build, `C3=1 MODULE=gles3|gles31
+bash ports/deqp/build.sh`, into `$B/deqp-<module>-c3`. Its packages are
+`tests/a1200/m8-2c` and `m8-3c` (m8-2's and m8-3's, with that binary and
+`bin/deqp-c3.c3m`; Run-M1 `VERIFY=1`). The plain build and m7-1, m8-2 and
+m8-3 are left as they were.
+- **How it works.** `patches/c3/0001-precision-checks-on-core3.patch`
+  (applied for `C3=1` only) hands each case's values to the kernels after
+  the shader ran: the inputs and outputs in Fast RAM, the case named by its
+  function group and its own name. The values are split between Core 3 and
+  Core 1, one module loaded per core, each with its own heap.
+  `testStatement()`'s loop then logs only the values flagged there, so the
+  log and the result are the same. After any failure there, it checks every
+  value on the m68k, as the plain build does.
+- **Making the module work.** The module is the same source with
+  `DEQP_C3_KERNEL`, plus `tcuFloatFormat`, `tcuInterval` and delibs' maths.
+  It needed three changes:
+  - What it refers to and never calls is stubbed: 64 stubs (the test case,
+    the log, libstdc++'s streams and exception classes).
+  - glibc's libm sets `errno`, which is thread-local: musl 1.2.5's maths
+    replaces it.
+  - delibs' `toLower` and the derived functions' symbol names used C++
+    locales and `std::ostringstream`: ASCII and `snprintf` replace them.
+- **On the A1200 (23:27, before it went offline)**, all 24 cases of
+  `dEQP-GLES3...precision.sin.*` passed, as on the m68k. 331,258 values
+  were checked on the cores, 0.9 s on Core 3 and 0.9 s on Core 1. The run
+  took 8.2 s, against 33.7 s with the checks on the m68k (the first try,
+  when the setup kernel faulted on a locale stub). `VERIFY=1` did not take
+  effect then (libnix's `getenv` reads nothing: the settings now use
+  `GetVar`). The run with it (`precision.m*`, 174 cases) was cut off by the
+  station going offline.
+- **Checked on the PC** (`ports/deqp/c3/selftest/run.sh`), without the
+  Amiga. Every case of every function at every precision (705) runs
+  through the module under `qemu-aarch64_be`, loaded as core3.library
+  loads it. It also runs through the same source built for the PC with
+  glibc. Each case uses dEQP's inputs, with outputs at the reference
+  intervals' midpoints, low and high ends:
+  - No fault and no stub hit. The first run stopped at `smoothstep` on the
+    `ostringstream` stub; it would have turned Core 3 off on the Amiga.
+  - The same verdicts in all 3 x 705 cases.
+  - The same references except in the last bits of `ldexp` highp with
+    tiny or subnormal results (`exp2` in directed rounding: musl's `pow`
+    against glibc's) and one `atan` vec4 value. Neither changes a verdict.
+- **Next, on the A1200:**
+  - `VERIFY=1` over the whole group (the m68k checks every value too and
+    logs any value where the two differ).
+  - The group's time against the plain m8-2's (about 70 minutes for 1,347
+    cases).
+  - m8-3c's `builtin_functions.precision` (FrExp, LdExp, Fma).
+
 **The regression run on the final library (2026-11-17, evening; paused
 at 22:3x by the developer).** `tests/a1200/a_regress.sh`, every program
 compiled on the PC:

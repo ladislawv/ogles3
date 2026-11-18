@@ -18,6 +18,10 @@
 # applied to a copy of the sources in $B/deqp/src; src/ adds the AmigaOS 3
 # platform (one ogles2 context in a window), delibs' OS layer for one task
 # and libnix's gaps.
+# C3=1 (gles3, gles31): the same with the built-in functions' precision
+# checks also on the Pi's free ARM cores (c3/README.md), into
+# $B/deqp-<module>-c3 with its module deqp-c3.c3m; the plain build is left
+# as it is.
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
 ln -sfn "$(cd "$HERE/../.." && pwd)" "$HOME/.ogles2-repo" # a path without the space of "- CPP"
@@ -30,6 +34,16 @@ gles3) OUT=$B/deqp-gles3 ;;
 gles31) OUT=$B/deqp-gles31 ;;
 *) echo "MODULE is gles2, gles3 or gles31"; exit 1 ;;
 esac
+C3=${C3:-0}
+if [ "$C3" = 1 ]; then
+    [ "$MODULE" = gles2 ] && { echo "C3=1: dEQP-GLES2 has no built-in precision checks"; exit 1; }
+    OUT=$OUT-c3
+    # the Core 3 SDK (core3.h; c3/build_module.sh builds the module with it),
+    # through a link without the space of "- CPP"
+    C3_SDK=${C3_SDK:-"/mnt/c/- CPP/Core3_SDK_1.4"}
+    [ -f "$C3_SDK/include/core3.h" ] || { echo "no Core 3 SDK in $C3_SDK (C3_SDK=...)"; exit 1; }
+    ln -sfn "$C3_SDK" "$HOME/.core3-sdk"
+fi
 TC16=${TC16:-$HOME/amiga-gcc162-install}
 J=${J:-8}
 CTS_URL=${CTS_URL:-https://github.com/KhronosGroup/VK-GL-CTS.git}
@@ -83,12 +97,20 @@ for d in zlib libpng; do
     mkdir -p "$ROOT/external/$d"
     rsync -a --delete "$DEPS/$d/" "$ROOT/external/$d/"
 done
-for p in "$HERE"/patches/*.patch "$HERE/patches/$MODULE"/*.patch; do
-    [ -f "$p" ] || continue
-    (cd "$ROOT" && git apply "$p") || { echo "deqp: $p does not apply"; exit 1; }
+PATCH_DIRS=("$HERE/patches" "$HERE/patches/$MODULE")
+[ "$C3" = 1 ] && PATCH_DIRS+=("$HERE/patches/c3")
+for d in "${PATCH_DIRS[@]}"; do
+    for p in "$d"/*.patch; do
+        [ -f "$p" ] || continue
+        (cd "$ROOT" && git apply "$p") || { echo "deqp: $p does not apply"; exit 1; }
+    done
 done
 mkdir -p "$ROOT/amiga"
 cp -r "$HERE"/src/. "$ROOT/amiga/"
+if [ "$C3" = 1 ]; then
+    mkdir -p "$ROOT/amiga/c3"
+    cp "$HERE"/c3/*.c "$HERE"/c3/*.cpp "$HERE"/c3/*.h "$ROOT/amiga/c3/"
+fi
 mkdir -p "$OBJ"
 rm -f "$OBJ/FAILED"
 
@@ -110,6 +132,10 @@ DEFS="-DDE_OS=DE_OS_UNIX -DDE_PTR_SIZE=4 -DNDEBUG
 -U__INT32_TYPE__ -D__INT32_TYPE__=int -U__UINT32_TYPE__
 -U__INT_LEAST32_TYPE__ -D__INT_LEAST32_TYPE__=int -U__UINT_LEAST32_TYPE__
 -DDEQP_TARGET_NAME=\"AmigaOS3\" -DDEQP_SUPPORT_${MODULE^^}=1 -DQP_SUPPORT_PNG -DPNG_ARM_NEON_OPT=0"
+if [ "$C3" = 1 ]; then
+    INC="$INC -I$ROOT/amiga/c3 -I$HOME/.core3-sdk/include"
+    DEFS="$DEFS -DDEQP_C3"
+fi
 FLAGS="-O2 -mcpu=68020 -m68881 -noixemul -fno-strict-aliasing"
 CXXFLAGS="-std=gnu++17 $FLAGS $DEFS $INC"
 CFLAGS="-std=gnu99 $FLAGS $DEFS $INC -DZ_HAVE_UNISTD_H"
@@ -137,6 +163,7 @@ external/libpng png.c pngset.c pngget.c pngrutil.c pngtrans.c pngwutil.c pngread
 external/libpng pngwrite.c pngrtran.c pngwtran.c pngmem.c pngerror.c pngpread.c
 EOF
 )
+[ "$C3" = 1 ] && C_SRC="$C_SRC amiga/c3/deqp-amiga-c3.c"
 CXX_SRC="$(expand <<'EOF'
 framework/delibs/decpp deAppendList.cpp deArrayBuffer.cpp deArrayUtil.cpp deBlockBuffer.cpp
 framework/delibs/decpp deCommandLine.cpp deDefs.cpp deDirectoryIterator.cpp deDynamicLibrary.cpp
@@ -232,4 +259,9 @@ rm -rf "$OUT/$MODULE"
 mkdir -p "$OUT/$MODULE"
 cp -r "$ROOT/data/$MODULE/data" "$ROOT/data/$MODULE/shaders" "$OUT/$MODULE/"
 [ "$MODULE" = gles3 ] && cp -r "$ROOT/external/graphicsfuzz/data/gles3/graphicsfuzz" "$OUT/gles3/"
+if [ "$C3" = 1 ]; then
+    bash "$HERE/c3/build_module.sh" "$ROOT" "$OUT/deqp-c3.c3m" > "$OBJ/c3module.log" 2>&1 ||
+        { tail -30 "$OBJ/c3module.log"; echo "deqp: c3/build_module.sh failed ($OBJ/c3module.log)"; exit 1; }
+    ls -l "$OUT/deqp-c3.c3m"
+fi
 ls -l "$OUT/deqp-$MODULE"

@@ -1,0 +1,751 @@
+diff --git a/modules/glshared/glsBuiltinPrecisionTests.cpp b/modules/glshared/glsBuiltinPrecisionTests.cpp
+--- a/modules/glshared/glsBuiltinPrecisionTests.cpp
++++ b/modules/glshared/glsBuiltinPrecisionTests.cpp
+@@ -58,6 +58,28 @@
+ #include <utility>
+ #include <limits>
+ 
++#ifdef DEQP_C3
++// ports/deqp/c3: every value's check also on the Pi's free ARM cores (the
++// Core 3 SDK's core3.library); the m68k then logs only the values flagged.
++#include "deqpC3.h"
++#endif
++#ifdef DEQP_C3_KERNEL
++// de::toString() of a number for the names of derived functions' symbols,
++// without std::ostringstream (libstdc++'s streams are not on the ARM cores)
++static inline std::string deqpC3Num(int n)
++{
++    char b[16];
++    snprintf(b, sizeof(b), "%d", n);
++    return b;
++}
++#define DEQP_C3_NUM(n) deqpC3Num(int(n))
++#else
++#define DEQP_C3_NUM(n) de::toString(n)
++#endif
++#if defined(DEQP_C3) && !defined(DEQP_C3_KERNEL)
++#define DEQP_C3_M68K // testStatement() hands the values to the ARM cores
++#endif
++
+ // Uncomment this to get evaluation trace dumps to std::cerr
+ // #define GLS_ENABLE_TRACE
+ 
+@@ -794,7 +816,7 @@ public:
+     template <typename T>
+     VariableP<T> genSym(const string &baseName)
+     {
+-        return variable<T>(baseName + de::toString(m_symCounter()));
++        return variable<T>(baseName + DEQP_C3_NUM(m_symCounter()));
+     }
+ 
+     void addStatement(const StatementP &stmt)
+@@ -2792,7 +2814,7 @@ string vecNamePrefix<bool>(void)
+ template <typename T, int Size>
+ string vecName(void)
+ {
+-    return vecNamePrefix<T>() + "vec" + de::toString(Size);
++    return vecNamePrefix<T>() + "vec" + DEQP_C3_NUM(Size);
+ }
+ 
+ template <typename T, int Size>
+@@ -4692,6 +4714,7 @@ struct Context
+     }
+ 
+     string name;
++    string factory; // the function group's name (the CaseFactory's), for Core 3
+     TestContext &testContext;
+     RenderContext &renderContext;
+     FloatFormat floatFormat;
+@@ -4970,6 +4993,47 @@ void PrecisionCase::testStatement(const Variables<In, Out> &variables, const Inp
+         executor->execute(int(numValues), inputArr, outputArr);
+     }
+ 
++#ifdef DEQP_C3_M68K
++    // The check of every value on the ARM cores: the loop below then takes
++    // only the values flagged there (outside the expected range), so what it
++    // logs and m_status get are the same. Not there (or failed): all of them.
++    // DEQP_C3_VERIFY (ENV:): all of them still, compared with the flags.
++    vector<uint8_t> c3Status;
++    bool c3Done         = false;
++    const bool c3Verify = deqpC3Verify() != 0;
++    if (!GLS_LOG_ALL_RESULTS && inCount > 0 && deqpC3Available())
++    {
++        DeqpC3PrecJob job;
++        deMemset(&job, 0, sizeof(job));
++        c3Status.resize(numValues);
++        job.version   = DEQP_C3_VERSION;
++        job.factory   = (uint32_t)(uintptr_t)m_ctx.factory.c_str();
++        job.sub       = (uint32_t)(uintptr_t)getName();
++        job.precision = (uint32_t)m_ctx.precision;
++        job.numValues = (uint32_t)numValues;
++        job.in[0]     = (uint32_t)(uintptr_t)&inputs.in0.front();
++        job.in[1]     = inCount > 1 ? (uint32_t)(uintptr_t)&inputs.in1.front() : 0u;
++        job.in[2]     = inCount > 2 ? (uint32_t)(uintptr_t)&inputs.in2.front() : 0u;
++        job.in[3]     = inCount > 3 ? (uint32_t)(uintptr_t)&inputs.in3.front() : 0u;
++        job.out[0]    = outCount > 0 ? (uint32_t)(uintptr_t)&outputs.out0.front() : 0u;
++        job.out[1]    = outCount > 1 ? (uint32_t)(uintptr_t)&outputs.out1.front() : 0u;
++        job.inSize[0] = sizeof(In0);
++        job.inSize[1] = sizeof(In1);
++        job.inSize[2] = sizeof(In2);
++        job.inSize[3] = sizeof(In3);
++        job.outSize[0] = sizeof(Out0);
++        job.outSize[1] = sizeof(Out1);
++        job.fmt[0]    = (uint32_t)fmt.getMinExp();
++        job.fmt[1]    = (uint32_t)fmt.getMaxExp();
++        job.fmt[2]    = (uint32_t)fmt.getFractionBits();
++        job.fmt[3]    = (uint32_t)fmt.hasSubnormal();
++        job.fmt[4]    = (uint32_t)fmt.hasInf();
++        job.status    = (uint32_t)(uintptr_t)&c3Status.front();
++        c3Done        = deqpC3Check(&job) >= 0;
++    }
++    int c3Differ = 0;
++#endif
++
+     // Initialize environment with unused values so we don't need to bind in inner loop.
+     {
+         const typename Traits<In0>::IVal in0;
+@@ -4998,6 +5062,11 @@ void PrecisionCase::testStatement(const Variables<In, Out> &variables, const Inp
+         typename Traits<Out0>::IVal reference0;
+         typename Traits<Out1>::IVal reference1;
+ 
++#ifdef DEQP_C3_M68K
++        if (c3Done && !c3Verify && !c3Status[valueNdx])
++            continue;
++#endif
++
+         if (valueNdx % (size_t)TOUCH_WATCHDOG_VALUE_FREQUENCY == 0)
+             m_testCtx.touchWatchdog();
+ 
+@@ -5055,6 +5124,13 @@ void PrecisionCase::testStatement(const Variables<In, Out> &variables, const Inp
+         if (!result)
+             ++numErrors;
+ 
++#ifdef DEQP_C3_M68K
++        if (c3Done && c3Verify && result != !c3Status[valueNdx] && ++c3Differ <= 10)
++            log() << TestLog::Message << "Core 3 check: value " << valueNdx << " "
++                  << (result ? "passed" : "failed") << " here, "
++                  << (c3Status[valueNdx] ? "flagged" : "passed") << " there" << TestLog::EndMessage;
++#endif
++
+         if ((!result && numErrors <= maxMsgs) || GLS_LOG_ALL_RESULTS)
+         {
+             MessageBuilder builder = log().message();
+@@ -5108,6 +5184,11 @@ void PrecisionCase::testStatement(const Variables<In, Out> &variables, const Inp
+         log() << TestLog::Message << "(Skipped " << (numErrors - maxMsgs) << " messages.)" << TestLog::EndMessage;
+     }
+ 
++#ifdef DEQP_C3_M68K
++    if (c3Done && c3Verify)
++        deqpC3Verified(getName(), c3Differ);
++#endif
++
+     if (numErrors == 0)
+     {
+         log() << TestLog::Message << "All " << numValues << " inputs passed." << TestLog::EndMessage;
+@@ -5416,6 +5497,337 @@ PrecisionCase *createFuncCase(const Context &context, const string &name, const
+     return nullptr;
+ }
+ 
++#ifdef DEQP_C3_KERNEL
++// On the ARM cores (ports/deqp/c3): the case's statement rebuilt as
++// FuncCase/InOutFuncCase::runTest() build it, then testStatement()'s loop
++// over job.first..first+count without the log: job.status[i] = 1 for a value
++// outside its expected range (a failure or a quality warning there), 0 else.
++// The number flagged, or -1 when this side cannot (the m68k does them all).
++
++// addBuiltinPrecisionTests()'s formats
++FloatFormat c3Format(int precision)
++{
++    switch (precision)
++    {
++    case glu::PRECISION_LOWP:
++        return FloatFormat(0, 0, 7, false, tcu::YES);
++    case glu::PRECISION_MEDIUMP:
++        return FloatFormat(-13, 13, 9, false);
++    default:
++        return FloatFormat(-126, 127, 23, true, tcu::MAYBE, tcu::YES, tcu::MAYBE);
++    }
++}
++
++// testStatement()'s loop over values [first, first + count), without the log.
++// pick >= 0 (the self-test): each output set from its reference interval
++// first (0 its midpoint, 1 its low end, 2 its high end), *hash then takes
++// the outputs' 32-bit words (the same on both byte orders).
++template <typename T>
++struct C3Pick;
++
++template <>
++struct C3Pick<float>
++{
++    static float get(const Interval &i, int pick)
++    {
++        const double d = i.empty() ? 0.0 : pick == 0 ? i.midpoint() : pick == 1 ? i.lo() : i.hi();
++        return d != d ? 0.0f : float(d); // NaN
++    }
++};
++
++template <>
++struct C3Pick<int>
++{
++    static int get(const Interval &i, int pick)
++    {
++        const double d = C3Pick<float>::get(i, pick);
++        return (d > -2147483648.0 && d < 2147483647.0) ? int(d) : 0;
++    }
++};
++
++template <>
++struct C3Pick<bool>
++{
++    static bool get(const Interval &i, int pick)
++    {
++        return C3Pick<float>::get(i, pick) != 0.0f;
++    }
++};
++
++template <>
++struct C3Pick<Void>
++{
++    static Void get(const Void &, int)
++    {
++        return Void();
++    }
++};
++
++template <typename T, int Size>
++struct C3Pick<Vector<T, Size>>
++{
++    template <typename IV>
++    static Vector<T, Size> get(const IV &iv, int pick)
++    {
++        Vector<T, Size> r;
++        for (int i = 0; i < Size; i++)
++            r[i] = C3Pick<T>::get(iv[i], pick);
++        return r;
++    }
++};
++
++template <typename T, int Rows, int Cols>
++struct C3Pick<Matrix<T, Rows, Cols>>
++{
++    template <typename IV>
++    static Matrix<T, Rows, Cols> get(const IV &iv, int pick)
++    {
++        Matrix<T, Rows, Cols> r;
++        for (int row = 0; row < Rows; row++)
++            for (int col = 0; col < Cols; col++)
++                r(row, col) = C3Pick<T>::get(iv(row, col), pick);
++        return r;
++    }
++};
++
++template <typename T>
++void c3Hash(uint32_t &hash, const T &value)
++{
++    if (sizeof(T) % 4 != 0)
++        return; // Void
++    for (size_t i = 0; i < sizeof(T); i += 4)
++    {
++        uint32_t w;
++        deMemcpy(&w, (const char *)&value + i, 4);
++        if (w == 0x80000000u)
++            w = 0; // -0 as 0: the sign of a zero (rounding modes) never decides a check
++        hash = (hash ^ w) * 16777619u;
++    }
++}
++
++template <typename In, typename Out>
++int c3CheckRange(const Variables<In, Out> &variables, const Statement &stmt, Precision precision,
++                 const typename In::In0 *in0, const typename In::In1 *in1, const typename In::In2 *in2,
++                 const typename In::In3 *in3, typename Out::Out0 *out0, typename Out::Out1 *out1, uint8_t *status,
++                 size_t first, size_t count, int pick, uint32_t *hash)
++{
++    typedef typename In::In0 In0;
++    typedef typename In::In1 In1;
++    typedef typename In::In2 In2;
++    typedef typename In::In3 In3;
++    typedef typename Out::Out0 Out0;
++    typedef typename Out::Out1 Out1;
++
++    const FloatFormat fmt      = c3Format(precision);
++    const FloatFormat highpFmt = c3Format(glu::PRECISION_HIGHP);
++    const int inCount          = numInputs<In>();
++    const int outCount         = numOutputs<Out>();
++    const In0 none0            = In0();
++    const In1 none1            = In1();
++    const In2 none2            = In2();
++    const In3 none3            = In3();
++    Environment env;
++    int flagged = 0;
++
++    {
++        const typename Traits<In0>::IVal i0;
++        const typename Traits<In1>::IVal i1;
++        const typename Traits<In2>::IVal i2;
++        const typename Traits<In3>::IVal i3;
++        const typename Traits<Out0>::IVal r0;
++        const typename Traits<Out1>::IVal r1;
++
++        env.bind(*variables.in0, i0);
++        env.bind(*variables.in1, i1);
++        env.bind(*variables.in2, i2);
++        env.bind(*variables.in3, i3);
++        env.bind(*variables.out0, r0);
++        env.bind(*variables.out1, r1);
++    }
++
++    for (size_t valueNdx = first; valueNdx < first + count; valueNdx++)
++    {
++        bool result = true;
++
++        env.lookup(*variables.in0) = convert<In0>(fmt, round(fmt, inCount > 0 ? in0[valueNdx] : none0));
++        env.lookup(*variables.in1) = convert<In1>(fmt, round(fmt, inCount > 1 ? in1[valueNdx] : none1));
++        env.lookup(*variables.in2) = convert<In2>(fmt, round(fmt, inCount > 2 ? in2[valueNdx] : none2));
++        env.lookup(*variables.in3) = convert<In3>(fmt, round(fmt, inCount > 3 ? in3[valueNdx] : none3));
++
++        {
++            EvalContext ctx(fmt, precision, env);
++            stmt.execute(ctx);
++        }
++
++        if (outCount > 1)
++        {
++            const typename Traits<Out1>::IVal reference1 = convert<Out1>(highpFmt, env.lookup(*variables.out1));
++            if (pick >= 0)
++            {
++                out1[valueNdx] = C3Pick<Out1>::get(reference1, pick);
++                c3Hash(*hash, out1[valueNdx]);
++            }
++            if (!contains(reference1, out1[valueNdx]))
++                result = false;
++        }
++        if (outCount > 0)
++        {
++            const typename Traits<Out0>::IVal reference0 = convert<Out0>(highpFmt, env.lookup(*variables.out0));
++            if (pick >= 0)
++            {
++                out0[valueNdx] = C3Pick<Out0>::get(reference0, pick);
++                c3Hash(*hash, out0[valueNdx]);
++            }
++            if (!contains(reference0, out0[valueNdx]))
++                result = false;
++        }
++
++        status[valueNdx] = result ? 0 : 1;
++        if (!result)
++            ++flagged;
++    }
++
++    return flagged;
++}
++
++// deqp_c3_check's: the m68k's values, after the checks that both sides
++// agree on the case (the format, the values' sizes)
++template <typename In, typename Out>
++int c3CheckValues(const Variables<In, Out> &variables, const Statement &stmt, DeqpC3PrecJob &job)
++{
++    typedef typename In::In0 In0;
++    typedef typename In::In1 In1;
++    typedef typename In::In2 In2;
++    typedef typename In::In3 In3;
++    typedef typename Out::Out0 Out0;
++    typedef typename Out::Out1 Out1;
++
++    const Precision precision = Precision(job.precision);
++    const FloatFormat fmt     = c3Format(precision);
++    const int inCount         = numInputs<In>();
++    const int outCount        = numOutputs<Out>();
++
++    if (job.fmt[0] != (uint32_t)fmt.getMinExp() || job.fmt[1] != (uint32_t)fmt.getMaxExp() ||
++        job.fmt[2] != (uint32_t)fmt.getFractionBits() || job.fmt[3] != (uint32_t)fmt.hasSubnormal() ||
++        job.fmt[4] != (uint32_t)fmt.hasInf())
++        return -1;
++    if (inCount < 1 || job.inSize[0] != sizeof(In0) || (inCount > 1 && job.inSize[1] != sizeof(In1)) ||
++        (inCount > 2 && job.inSize[2] != sizeof(In2)) || (inCount > 3 && job.inSize[3] != sizeof(In3)) ||
++        (outCount > 0 && job.outSize[0] != sizeof(Out0)) || (outCount > 1 && job.outSize[1] != sizeof(Out1)) ||
++        job.first + job.count > job.numValues)
++        return -1;
++
++    return c3CheckRange(variables, stmt, precision, C3_PTR(const In0, job.in[0]), C3_PTR(const In1, job.in[1]),
++                        C3_PTR(const In2, job.in[2]), C3_PTR(const In3, job.in[3]), C3_PTR(Out0, job.out[0]),
++                        C3_PTR(Out1, job.out[1]), C3_PTR(uint8_t, job.status), job.first, job.count, -1, nullptr);
++}
++
++// The self-test's (job.version DEQP_C3_SELFTEST, ports/deqp/c3/selftest):
++// numValues of the case's own inputs (a fixed seed), outputs from their
++// reference (job.first: which end), the check of them. job.result: the
++// number flagged, job.status: the outputs' hash.
++template <typename In, typename Out>
++int c3SelfTestValues(const Variables<In, Out> &variables, const Statement &stmt, DeqpC3PrecJob &job)
++{
++    const Precision precision = Precision(job.precision);
++    Random rnd(0xdeadbeefu);
++    const Inputs<In> inputs(
++        generateInputs(instance<DefaultSamplings<In>>(), c3Format(precision), precision, job.numValues, rnd));
++    const size_t numValues = inputs.in0.size();
++    Outputs<Out> outputs(numValues);
++    vector<uint8_t> status(numValues);
++    uint32_t hash = 2166136261u;
++
++    if (numValues == 0)
++        return 0;
++    const int flagged =
++        c3CheckRange(variables, stmt, precision, &inputs.in0.front(),
++                     numInputs<In>() > 1 ? &inputs.in1.front() : nullptr,
++                     numInputs<In>() > 2 ? &inputs.in2.front() : nullptr,
++                     numInputs<In>() > 3 ? &inputs.in3.front() : nullptr, &outputs.out0.front(),
++                     numOutputs<Out>() > 1 ? &outputs.out1.front() : nullptr, &status.front(), 0, numValues,
++                     int(job.first & 3), &hash);
++    if (job.first & 0x100) // pick + 256: every value's inputs and outputs, as 32-bit words
++        for (size_t i = 0; i < numValues; i++)
++        {
++            uint32_t w[4] = {0, 0, 0, 0};
++            deMemcpy(w, &inputs.in0[i], de::min(sizeof(inputs.in0[i]), sizeof(w)));
++            printf("  %u: in0 %08x %08x %08x %08x", (unsigned)i, w[0], w[1], w[2], w[3]);
++            if (numInputs<In>() > 1)
++            {
++                deMemset(w, 0, sizeof(w));
++                deMemcpy(w, &inputs.in1[i], de::min(sizeof(inputs.in1[i]), sizeof(w)));
++                printf(" in1 %08x %08x %08x %08x", w[0], w[1], w[2], w[3]);
++            }
++            deMemset(w, 0, sizeof(w));
++            deMemcpy(w, &outputs.out0[i], de::min(sizeof(outputs.out0[i]), sizeof(w)));
++            printf(" out0 %08x %08x %08x %08x\n", w[0], w[1], w[2], w[3]);
++        }
++    job.status = hash;
++    job.count  = (uint32_t)numValues;
++    return flagged;
++}
++
++template <typename In, typename Out>
++int c3Values(const Variables<In, Out> &variables, const Statement &stmt, DeqpC3PrecJob &job)
++{
++    return job.version == DEQP_C3_SELFTEST ? c3SelfTestValues(variables, stmt, job) :
++                                             c3CheckValues(variables, stmt, job);
++}
++
++template <typename Sig>
++int c3CheckFunc(const Func<Sig> &func, DeqpC3PrecJob &job)
++{
++    typedef typename Sig::Ret Ret;
++    typedef typename Sig::Arg0 Arg0;
++    typedef typename Sig::Arg1 Arg1;
++    typedef typename Sig::Arg2 Arg2;
++    typedef typename Sig::Arg3 Arg3;
++
++    switch (func.getOutParamIndex())
++    {
++    case -1: // FuncCase
++    {
++        typedef InTypes<Arg0, Arg1, Arg2, Arg3> In;
++        typedef OutTypes<Ret> Out;
++        Variables<In, Out> variables;
++
++        variables.out0 = variable<Ret>("out0");
++        variables.out1 = variable<Void>("out1");
++        variables.in0  = variable<Arg0>("in0");
++        variables.in1  = variable<Arg1>("in1");
++        variables.in2  = variable<Arg2>("in2");
++        variables.in3  = variable<Arg3>("in3");
++
++        ExprP<Ret> expr = applyVar(func, variables.in0, variables.in1, variables.in2, variables.in3);
++        StatementP stmt = variableAssignment(variables.out0, expr);
++
++        return c3Values(variables, *stmt, job);
++    }
++    case 1: // InOutFuncCase
++    {
++        typedef InTypes<Arg0, Arg2, Arg3> In;
++        typedef OutTypes<Ret, Arg1> Out;
++        Variables<In, Out> variables;
++
++        variables.out0 = variable<Ret>("out0");
++        variables.out1 = variable<Arg1>("out1");
++        variables.in0  = variable<Arg0>("in0");
++        variables.in1  = variable<Arg2>("in1");
++        variables.in2  = variable<Arg3>("in2");
++        variables.in3  = variable<Void>("in3");
++
++        ExprP<Ret> expr = applyVar(func, variables.in0, variables.out1, variables.in1, variables.in2);
++        StatementP stmt = variableAssignment(variables.out0, expr);
++
++        return c3Values(variables, *stmt, job);
++    }
++    default:
++        return -1;
++    }
++}
++#endif
++
+ class CaseFactory
+ {
+ public:
+@@ -5425,6 +5837,15 @@ public:
+     virtual MovePtr<TestNode> createCase(const Context &ctx) const = 0;
+     virtual string getName(void) const                             = 0;
+     virtual string getDesc(void) const                             = 0;
++#ifdef DEQP_C3_KERNEL
++    // the check of case `sub` (createCase()'s cases by name) on the ARM cores
++    virtual int c3Check(const string &sub, DeqpC3PrecJob &job) const
++    {
++        DE_UNREF(sub);
++        DE_UNREF(job);
++        return -1;
++    }
++#endif
+ };
+ 
+ class FuncCaseFactory : public CaseFactory
+@@ -5463,6 +5884,17 @@ public:
+         return MovePtr<TestNode>(group);
+     }
+ 
++#ifdef DEQP_C3_KERNEL
++    int c3Check(const string &sub, DeqpC3PrecJob &job) const
++    {
++        return sub == "scalar" ? c3CheckFunc(m_funcs.func, job) :
++               sub == "vec2"   ? c3CheckFunc(m_funcs.func2, job) :
++               sub == "vec3"   ? c3CheckFunc(m_funcs.func3, job) :
++               sub == "vec4"   ? c3CheckFunc(m_funcs.func4, job) :
++                                 -1;
++    }
++#endif
++
+     string getName(void) const
+     {
+         return m_name;
+@@ -5493,6 +5925,17 @@ public:
+         return MovePtr<TestNode>(group);
+     }
+ 
++#ifdef DEQP_C3_KERNEL
++    int c3Check(const string &sub, DeqpC3PrecJob &job) const
++    {
++        return sub == "scalar" ? c3CheckFunc(instance<GenF<1>>(), job) :
++               sub == "vec2"   ? c3CheckFunc(instance<GenF<2>>(), job) :
++               sub == "vec3"   ? c3CheckFunc(instance<GenF<3>>(), job) :
++               sub == "vec4"   ? c3CheckFunc(instance<GenF<4>>(), job) :
++                                 -1;
++    }
++#endif
++
+     const FuncBase &getFunc(void) const
+     {
+         return instance<GenF<1>>();
+@@ -5516,6 +5959,13 @@ public:
+         return MovePtr<TestNode>(group);
+     }
+ 
++#ifdef DEQP_C3_KERNEL
++    int c3Check(const string &sub, DeqpC3PrecJob &job) const
++    {
++        return sub == "mat2" ? c3CheckFunc(instance<GenF<2>>(), job) : -1;
++    }
++#endif
++
+     const FuncBase &getFunc(void) const
+     {
+         return instance<GenF<2>>();
+@@ -5543,6 +5993,21 @@ public:
+         return MovePtr<TestNode>(group);
+     }
+ 
++#ifdef DEQP_C3_KERNEL
++    int c3Check(const string &sub, DeqpC3PrecJob &job) const
++    {
++        int r = -1;
++
++        if (this->checkCase<2, 2>(sub, job, r) || this->checkCase<3, 2>(sub, job, r) ||
++            this->checkCase<4, 2>(sub, job, r) || this->checkCase<2, 3>(sub, job, r) ||
++            this->checkCase<3, 3>(sub, job, r) || this->checkCase<4, 3>(sub, job, r) ||
++            this->checkCase<2, 4>(sub, job, r) || this->checkCase<3, 4>(sub, job, r) ||
++            this->checkCase<4, 4>(sub, job, r))
++            return r;
++        return -1;
++    }
++#endif
++
+     const FuncBase &getFunc(void) const
+     {
+         return instance<GenF<2, 2>>();
+@@ -5556,6 +6021,17 @@ private:
+ 
+         group->addChild(createFuncCase(ctx, name, instance<GenF<Rows, Cols>>()));
+     }
++
++#ifdef DEQP_C3_KERNEL
++    template <int Rows, int Cols>
++    bool checkCase(const string &sub, DeqpC3PrecJob &job, int &r) const
++    {
++        if (sub != dataTypeNameOf<Matrix<float, Rows, Cols>>())
++            return false;
++        r = c3CheckFunc(instance<GenF<Rows, Cols>>(), job);
++        return true;
++    }
++#endif
+ };
+ 
+ template <typename Sig>
+@@ -5571,6 +6047,14 @@ public:
+         return MovePtr<TestNode>(createFuncCase(ctx, ctx.name.c_str(), m_func));
+     }
+ 
++#ifdef DEQP_C3_KERNEL
++    int c3Check(const string &sub, DeqpC3PrecJob &job) const
++    {
++        DE_UNREF(sub); // the case is the group's own (<precision>_<shader>)
++        return c3CheckFunc(m_func, job);
++    }
++#endif
++
+     string getName(void) const
+     {
+         return de::toLower(m_func.getName());
+@@ -5740,8 +6224,9 @@ TestCaseGroup *createFuncGroup(const PrecisionTestContext &ctx, const CaseFactor
+             const ShaderType shaderType = ctx.shaderTypes[shaderNdx];
+             const string shaderName(glu::getShaderTypeName(shaderType));
+             const string name = precName + "_" + shaderName;
+-            const Context caseCtx(name, ctx.testCtx, ctx.renderCtx, fmt, highpFmt, precision, shaderType,
+-                                  ctx.numRandoms);
++            Context caseCtx(name, ctx.testCtx, ctx.renderCtx, fmt, highpFmt, precision, shaderType, ctx.numRandoms);
++
++            caseCtx.factory = factory.getName();
+ 
+             group->addChild(factory.createCase(caseCtx).release());
+         }
+@@ -5771,6 +6256,135 @@ void addBuiltinPrecisionTests(TestContext &testCtx, RenderContext &renderCtx, co
+         dstGroup.addChild(createFuncGroup(ctx, *cases.getFactories()[ndx]));
+ }
+ 
++#ifdef DEQP_C3_KERNEL
++// The ES 3 and ES 3.1 functions, made once by deqp_c3_setup (no static
++// objects with constructors on the ARM cores).
++const CaseFactories *c3Cases[2];
++
++const CaseFactory *c3Factory(const char *name)
++{
++    for (int set = 0; set < 2; set++)
++    {
++        if (!c3Cases[set])
++            continue;
++        const vector<const CaseFactory *> factories = c3Cases[set]->getFactories();
++        for (size_t ndx = 0; ndx < factories.size(); ++ndx)
++            if (factories[ndx]->getName() == name)
++                return factories[ndx];
++    }
++    return nullptr;
++}
++
++// The self-test (ports/deqp/c3/selftest): every function's cases at every
++// precision, test.numValues of their inputs each, the outputs from their
++// reference intervals (test.pick); a line per case (printf: C3Log on the ARM
++// cores, stdout on the PC), the totals in test.
++bool c3SelfTestCase(DeqpC3SelfTest &test, const CaseFactory &factory, const string &sub, int precision)
++{
++    DeqpC3PrecJob job;
++    deMemset(&job, 0, sizeof(job));
++    job.version   = DEQP_C3_SELFTEST;
++    job.precision = (uint32_t)precision;
++    job.numValues = test.numValues;
++    job.first     = test.pick;
++    const int r   = factory.c3Check(sub, job);
++    if (r < 0)
++        return false;
++    printf("selftest %s %s %s: %d of %u flagged, hash %08x\n", factory.getName().c_str(), sub.c_str(),
++           glu::getPrecisionName(Precision(precision)), r, (unsigned)job.count, (unsigned)job.status);
++    test.cases++;
++    test.flagged += (uint32_t)r;
++    test.hash = (test.hash ^ job.status) * 16777619u;
++    return true;
++}
++
++void c3SelfTest(DeqpC3SelfTest &test)
++{
++    const string subs[] = {"scalar",
++                           "vec2",
++                           "vec3",
++                           "vec4",
++                           dataTypeNameOf<Matrix<float, 2, 2>>(),
++                           dataTypeNameOf<Matrix<float, 3, 2>>(),
++                           dataTypeNameOf<Matrix<float, 4, 2>>(),
++                           dataTypeNameOf<Matrix<float, 2, 3>>(),
++                           dataTypeNameOf<Matrix<float, 3, 3>>(),
++                           dataTypeNameOf<Matrix<float, 4, 3>>(),
++                           dataTypeNameOf<Matrix<float, 2, 4>>(),
++                           dataTypeNameOf<Matrix<float, 3, 4>>(),
++                           dataTypeNameOf<Matrix<float, 4, 4>>()};
++
++    test.cases   = 0;
++    test.flagged = 0;
++    test.hash    = 2166136261u;
++    for (int set = 0; set < 2; set++)
++    {
++        if (!c3Cases[set])
++            continue;
++        const vector<const CaseFactory *> factories = c3Cases[set]->getFactories();
++        for (size_t ndx = 0; ndx < factories.size(); ++ndx)
++            for (int precision = 0; precision < glu::PRECISION_LAST; precision++)
++            {
++                // a SimpleFuncCaseFactory's one case takes any name
++                if (c3SelfTestCase(test, *factories[ndx], "-", precision))
++                    continue;
++                for (size_t i = 0; i < DE_LENGTH_OF_ARRAY(subs); i++)
++                    c3SelfTestCase(test, *factories[ndx], subs[i], precision);
++            }
++    }
++}
++#endif
++
+ } // namespace BuiltinPrecisionTests
+ } // namespace gls
+ } // namespace deqp
++
++#ifdef DEQP_C3_KERNEL
++// The kernels (core3.library, C3_FindSymbol). deqp_c3_setup(DeqpC3Setup *):
++// the heap and the functions, once per module loaded; deqp_c3_check
++// (DeqpC3PrecJob *): a case's values job.first.. on that module's heap;
++// deqp_c3_selftest (DeqpC3SelfTest *): c3SelfTest().
++// Each returns 1, or 2 when it cannot (the m68k then does it all).
++extern "C" C3_EXPORT uint32_t deqp_c3_setup(uint32_t arg, const C3Services *svc)
++{
++    using namespace deqp::gls::BuiltinPrecisionTests;
++    DeqpC3Setup *const setup = C3_PTR(DeqpC3Setup, arg);
++
++    if (setup->version != DEQP_C3_VERSION)
++        return 2;
++    c3cxx::init(svc, C3_PTR(void, setup->heap), setup->heapSize);
++    c3Cases[0] = createES3BuiltinCases().release();
++    c3Cases[1] = createES31BuiltinCases().release();
++    return 1;
++}
++
++extern "C" C3_EXPORT uint32_t deqp_c3_selftest(uint32_t arg, const C3Services *svc)
++{
++    using namespace deqp::gls::BuiltinPrecisionTests;
++    DeqpC3SelfTest *const test = C3_PTR(DeqpC3SelfTest, arg);
++
++    c3cxx::set_services(svc);
++    if (test->version != DEQP_C3_VERSION || !c3Cases[0])
++        return 2;
++    c3SelfTest(*test);
++    return 1;
++}
++
++extern "C" C3_EXPORT uint32_t deqp_c3_check(uint32_t arg, const C3Services *svc)
++{
++    using namespace deqp::gls::BuiltinPrecisionTests;
++    DeqpC3PrecJob *const job = C3_PTR(DeqpC3PrecJob, arg);
++
++    c3cxx::set_services(svc);
++    if (job->version != DEQP_C3_VERSION || !c3Cases[0])
++        return 2;
++    const CaseFactory *const factory = c3Factory(C3_PTR(const char, job->factory));
++    if (!factory)
++        return 2;
++    const int flagged = factory->c3Check(C3_PTR(const char, job->sub), *job);
++    if (flagged < 0)
++        return 2;
++    job->result = (uint32_t)flagged;
++    return 1;
++}
++#endif
