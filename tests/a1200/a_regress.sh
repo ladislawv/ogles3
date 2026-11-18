@@ -7,9 +7,16 @@
 # speed (drawbench). docs/GLES3_PLAN.md, "The GLES2 regression set" and the
 # full runs. A line per run into tests/a1200/out/regress-<date>.txt.
 #   bash tests/a1200/a_regress.sh [packages|deqp2|deqp3|deqp31|speed|<package> ...]   (default: all, in that order)
-# FROM=<group>: a dEQP part from that must-pass list on (a paused run resumed).
+# FROM=<group>: the first dEQP part from that must-pass list on (a paused run
+# resumed), the parts after it whole.
 # The library and compiler under test go into LIBS: first (LIBS_INSTALL=1 with m8-5).
+# C3=1: dEQP-GLES3 and -GLES31 from m8-2c and m8-3c, the precision checks on
+# the Pi's ARM cores (ports/deqp/c3: the same results, the built-in function
+# groups in a fraction of the time).
 set -u
+D3=m8-2
+D31=m8-3
+[ "${C3:-}" = 1 ] && { D3=m8-2c; D31=m8-3c; }
 HERE=$(cd "$(dirname "$0")" && pwd)
 OUT=$HERE/out
 SUM=$OUT/regress-$(date +%Y%m%d-%H%M).txt
@@ -36,6 +43,7 @@ deqp() { # package: each must-pass list (not the -pNN parts)
         say "$p $g: ${r#*: $g: }"
         case $r in *"STATION DOWN"* | *"another a_run"* | "") say "stopped: ${r:-no answer from a_run.sh}"; exit 4 ;; esac
     done
+    FROM= # the paused part's: the parts after it whole
 }
 say "regression run: ${*:-all}"
 for part in ${*:-packages deqp2 deqp3 deqp31 speed}; do
@@ -45,8 +53,8 @@ for part in ${*:-packages deqp2 deqp3 deqp31 speed}; do
         for p in m5-1 m6-6 m6-8 m6-10 m7-2 m7-3; do BUILD_ENV='B=$BS' one $p; done
         for p in m7-4 m2-5 m6-3 m6-4 m6-1 m6-2 m6-5 m8-1 m8-4 m8-6; do one $p; done ;;
     deqp2) deqp m7-1 ;;
-    deqp3) deqp m8-2 ;;
-    deqp31) deqp m8-3 ;;
+    deqp3) deqp $D3 ;;
+    deqp31) deqp $D31 ;;
     speed) one drawbench ;;
     m5-1 | m6-6 | m6-8 | m6-10 | m7-2 | m7-3) BUILD_ENV='B=$BS' one "$part" ;; # built against the sync build
     *) one "$part" ;; # a package by its name

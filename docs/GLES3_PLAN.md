@@ -394,12 +394,18 @@ changed `build.sh`, are byte for byte the ones m8-2 and m8-3 had on
   - The same references except in the last bits of `ldexp` highp with
     tiny or subnormal results (`exp2` in directed rounding: musl's `pow`
     against glibc's) and one `atan` vec4 value. Neither changes a verdict.
-- **Next, on the A1200:**
-  - `VERIFY=1` over the whole group (the m68k checks every value too and
-    logs any value where the two differ).
-  - The group's time against the plain m8-2's (about 70 minutes for 1,347
-    cases).
-  - m8-3c's `builtin_functions.precision` (FrExp, LdExp, Fma).
+- **On the A1200, 2026-11-18 (the package of 01:39):**
+  - `precision.m*` with `VERIFY=1`: 180 of 180 passed. 3,114,096 values
+    were checked on the cores (16.2 s on Core 3, 15.2 s on Core 1), and
+    the m68k's own check of every one differed on 0. Took 710 s.
+  - The same 180 without verify took 110.7 s; with the plain m8-2, 667.0 s
+    (its program cache warm, all passed): **6x**.
+  - m8-3c, dEQP-GLES31's `precision.f*` and `ldexp` (144 cases: vertex,
+    fragment and compute) with `VERIFY=1`: 108 passed and 36 not supported
+    (`fma`: `GL_EXT_gpu_shader5`). 1,682,957 values were checked on the
+    cores, and 0 differed from the m68k's check.
+  - The regression run resumed with them (`a_regress.sh`, `C3=1`: m8-2c and
+    m8-3c for dEQP-GLES3 and -GLES31).
 
 **The regression run on the final library (2026-11-17, evening; paused
 at 22:3x by the developer).** `tests/a1200/a_regress.sh`, every program
