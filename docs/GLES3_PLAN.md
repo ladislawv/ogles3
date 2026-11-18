@@ -493,6 +493,33 @@ compiled on the PC:
     - `shaders.multisample_interpolation` 48: `interpolate_at_offset` 36
       (all 4 subgroups), `interpolate_at_sample` 12, "Image verification
       failed". Probably the same cause.
+    - **All 93 fixed (2026-11-19, 00:00), three causes.** (1) The library:
+      a 4x draw's fragment key kept the plain variant's `msaa` 0 and
+      `ignore_sample_mask` 1 (only alpha to coverage set them); now as
+      Mesa's `v3d_update_compiled_fs`, from the draw framebuffer
+      (`ctx->fb_msaa`, made with `fb_nrt` by `ogles2_fb_update`; the
+      variant cache keyed on it, `var_msaa`; `ogles2_vk_fs_want`'s `msaa`;
+      `variant-key-test` 703 of 703). An ES 3 program drawn into a 4x
+      target gets a variant of its own, compiled at its first such draw
+      (the code differs only where a shader writes `gl_SampleMask` or uses
+      `interpolateAt*`, framebuffer fetch or a logic op). That fixed
+      `sample_mask` (36) and `interpolate_at_sample` (12) and 18 of
+      `interpolate_at_offset`. (2) Mesa patch 0020: v3d's
+      `load_interpolated_input` ignored the offset without MSAA (Mesa's
+      v3d does not offer `OES_shader_multisample_interpolation`, so its CI
+      never runs these): the single-sample targets' 12. (3) Patch 0021: a
+      `centroid` input's raw varying is at the centroid, and its quad
+      differences are not its gradient on the pixels a triangle covers in
+      part (the quad's diagonal, the error growing with the offset: seen
+      in the result image, `IMAGES=1`); the gradient solved from those and
+      the centroids' differences: the last 6. Now `sample_variables` 143,
+      `multisample_interpolation` 129, `sample_shading` 18 passed, none
+      failed; `multisample` (GLES3 32, GLES31 8 not supported), `fbo`
+      (GLES3 2,025, GLES31 110) and GLES31 `texture` 2,048 as before.
+      Both compilers rebuilt (the host's: the bridge's; `replay.py` 908 of
+      908 and `build_m68k.sh` for `v3dglslc3`, not yet in the A1200's
+      `LIBS:`). A test of these clears the package's `cache/` first: the
+      cache is keyed on the A1200's compiler, not the bridge's.
   - **drawbench (22:01, `ogles2-drawbench-20261118-220052`) against
     2026-10-31's (`-20261031-174119`):** ogles2 1.4's numbers in the same
     run are within a few per cent of then (the machine the same), but
@@ -936,7 +963,7 @@ completeness rule), its internal format now recorded on it
 it is rendered first, as for a texture. Depth, stencil and multisample
 renderbuffers and multisample textures: still `GL_INVALID_OPERATION`.
 
-**Item 6, sample shading (2026-11-16, built, not run; ES3 contexts).**
+**Item 6, sample shading (2026-11-16; run and fixed 2026-11-19: the regression run's "All 93 fixed"; ES3 contexts).**
 `OES_sample_variables`, `OES_sample_shading` and
 `OES_shader_multisample_interpolation`. The compiler's context turns
 `OES_sample_variables` on (`v3dglslc.c`; Mesa gates all three on it, its

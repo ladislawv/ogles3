@@ -150,24 +150,24 @@ static void one(const char *dir, const char *name)
                 skipped++;
                 continue;
             }
-            ogles2_vk_fs_want(want, kk, prim_of(kk), kk[22], ogles2_vk_bits(kk), j == 2);
+            ogles2_vk_fs_want(want, kk, prim_of(kk), kk[22], ogles2_vk_bits(kk), j == 2, j == 2);
             check(!memcmp(want, kk, OGLES3_VK_FS_BYTES), name, "a fragment key computed from itself is Mesa's");
             check(ogles2_vk_fs_fits(kk, want), name, "a fragment key fits itself");
             if (j == 0 || !(m = plain_mate(&plain, kk)))
                 continue;
-            ogles2_vk_fs_want(want, key(m), prim_of(kk), kk[22], ogles2_vk_bits(kk), j == 2);
+            ogles2_vk_fs_want(want, key(m), prim_of(kk), kk[22], ogles2_vk_bits(kk), j == 2, j == 2);
             check(!memcmp(want, kk, OGLES3_VK_FS_BYTES), name,
                   j == 2 ? "the .v3da's key from the plain one and alpha to coverage"
                          : "the .v3dw's key from the plain one and its 32-bit samplers");
             if (j == 1) {
-                ogles2_vk_fs_want(want, key(m), prim_of(kk), kk[22], ogles2_vk_bits(key(m)), 0);
+                ogles2_vk_fs_want(want, key(m), prim_of(kk), kk[22], ogles2_vk_bits(key(m)), 0, 0);
                 check(ogles2_vk_fs_fits(kk, want), name, "a .v3dw variant serves fewer 32-bit samplers");
-                ogles2_vk_fs_want(want, key(m), prim_of(kk), kk[22], ogles2_vk_bits(kk), 0);
+                ogles2_vk_fs_want(want, key(m), prim_of(kk), kk[22], ogles2_vk_bits(kk), 0, 0);
                 check(ogles2_vk_bits(kk) == ogles2_vk_bits(key(m)) || !ogles2_vk_fs_fits(key(m), want), name,
                       "a plain variant does not serve more 32-bit samplers");
             }
             if (j == 2) {
-                ogles2_vk_fs_want(want, key(m), prim_of(kk), kk[22], ogles2_vk_bits(kk), 0);
+                ogles2_vk_fs_want(want, key(m), prim_of(kk), kk[22], ogles2_vk_bits(kk), 0, 0);
                 check(!ogles2_vk_fs_fits(kk, want) && ogles2_vk_fs_fits(key(m), want), name,
                       "without alpha to coverage the plain variant serves, the .v3da's not");
             }

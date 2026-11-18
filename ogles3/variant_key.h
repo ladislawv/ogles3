@@ -31,11 +31,12 @@ ULONG ogles2_vk_bits(const UBYTE *key);
 /* The fragment key for a draw: `base` (the closest variant's: the fields a
  * draw does not change keep the compiler's values, such as point sprites')
  * with the fields computed from the draw: the primitive class, the colour
- * buffers drawn into, the 32-bit samplers, alpha to coverage (a 4x MSAA
- * default framebuffer with GL_SAMPLE_ALPHA_TO_COVERAGE); every target 8-bit
+ * buffers drawn into, the 32-bit samplers, a multisampled framebuffer
+ * (msaa: the key's msaa, ignore_sample_mask off) and alpha to coverage on
+ * it (GL_SAMPLE_ALPHA_TO_COVERAGE), as Mesa's; every target 8-bit
  * or 16F (stage A): no software blending, formats, blend state, f32_color_rb,
  * norm_16 or snorm, the logic op COPY. */
-void ogles2_vk_fs_want(UBYTE *want, const UBYTE *base, int prim, UBYTE cbufs, ULONG bits, BOOL a2c);
+void ogles2_vk_fs_want(UBYTE *want, const UBYTE *base, int prim, UBYTE cbufs, ULONG bits, BOOL a2c, BOOL msaa);
 /* The render targets' fields of the fragment key (GLES3 plan stage B item
  * 10, Mesa's v3d_update_compiled_fs): the 32-bit float and integer
  * targets the shader writes 32 bits a channel to (f32_color_rb), and with a

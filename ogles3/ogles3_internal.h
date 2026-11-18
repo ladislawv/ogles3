@@ -665,6 +665,7 @@ struct OGLES3Program
      * es3_variants): each stage's 32-bit samplers, alpha to coverage. */
     ULONG var_bits[3];              /* vertex, fragment, geometry */
     BOOL var_ps;                    /* the per-sample fragment variant (OES_sample_shading) */
+    UBYTE var_msaa;                 /* chosen for a multisampled framebuffer (ctx->fb_msaa) */
     BOOL var_a2c;
     struct OGLES3VkTargets var_tg;  /* and the render targets' key fields (variant_key.h) */
     UBYTE var_f32;                  /* the fragment variant's f32_color_rb (draw: ctx->fb_wide) */
@@ -907,6 +908,7 @@ struct OGLES3Context
     struct OGLES3RtFormat fb_rt[OGLES3_MAX_DRAW_BUFFERS]; /* the drawn targets' formats (kind NONE: none) */
     UBYTE fb_soft_blend;            /* a drawn target the tile buffer cannot blend: the shader blends (Mesa) */
     UBYTE fb_wide;                  /* the drawn targets of 32 bits a channel (F32, INT, UINT): bit i */
+    UBYTE fb_msaa;                  /* the draw framebuffer is multisampled (4x): the fragment key's msaa */
     BOOL fb_default_made;           /* the fb_ fields are the default framebuffer's, as fb_update made them */
     BOOL vab_moved;                 /* ES 3.1: glVertexAttribBinding gave an attribute another binding once */
     UBYTE draw_rts;                 /* the draw buffers a draw writes (ogles2_draw_clear: those it clears) */

@@ -1,0 +1,97 @@
+ogles2: v3d's interpolateAtOffset of a centroid input from the centroid.
+A centroid input's raw varying (emit_fragment_varying's vp) is the value
+at the centroid, but ntq_emit_load_interpolated_input moved it by its quad
+differences from the sample position, so with 4x MSAA a centroid input's
+interpolateAtOffset was wrong where the centroid is not the centre: the
+pixels a triangle covers in part, growing with the offset (dEQP-GLES31
+multisample_interpolation.interpolate_at_offset.centroid_qualifier on
+multisampled textures and renderbuffers: the quad's diagonal). The input
+remembers its qualifier (struct v3d_interp_input's centroid); the
+varying's gradient is solved from its quad differences and the
+centroids' (ntq_get_barycentric_centroid's offsets from the centre, the
+fixed-function centroid's), and the value moved from the centroid to the
+centre plus the offset; W's part is the sample's as before. Without MSAA
+the centroid is the centre: nothing changes.
+
+--- a/src/broadcom/compiler/v3d_compiler.h
++++ b/src/broadcom/compiler/v3d_compiler.h
+@@ -581,6 +581,7 @@
+    struct qreg vp;
+    struct qreg C;
+    unsigned mode; /* interpolation mode */
++   bool centroid; /* ogles2: vp evaluated at the centroid */
+ };
+ 
+ struct v3d_ra_node_info {
+--- a/src/broadcom/compiler/nir_to_vir.c
++++ b/src/broadcom/compiler/nir_to_vir.c
+@@ -1071,6 +1071,7 @@
+                 c->interp[input_idx].vp = vary;
+                 c->interp[input_idx].C = vir_MOV(c, c_reg);
+                 c->interp[input_idx].mode = var->data.interpolation;
++                c->interp[input_idx].centroid = var->data.centroid;
+         }
+ 
+         /* For gl_PointCoord input or distance along a line, we'll be called
+@@ -3156,7 +3157,8 @@
+                                  struct qreg C,
+                                  struct qreg offset_x,
+                                  struct qreg offset_y,
+-                                 unsigned mode)
++                                 unsigned mode,
++                                 bool centroid)
+ {
+         if (mode == INTERP_MODE_FLAT)
+                 return C;
+@@ -3173,9 +3175,38 @@
+                 vir_FADD(c, vir_FSUB(c, vir_uniform_f(c, 0.5f), sample_offset_y),
+                             offset_y);
+ 
+-        struct qreg pInterp =
+-                vir_FADD(c, p, vir_FADD(c, vir_FMUL(c, vir_FDX(c, p), scaleX),
+-                                           vir_FMUL(c, vir_FDY(c, p), scaleY)));
++        struct qreg pInterp;
++        if (centroid && c->fs_key->msaa) {
++                /* ogles2: a centroid input's p is the varying at the
++                 * centroid (cx, cy from the pixel centre), not at the
++                 * sample: from there to the centre plus the offset
++                 * (interpolateAtOffset ignores the qualifier). Its quad
++                 * differences are not its gradient either, each pixel's p
++                 * being at its own centroid: dFdx(p) = gx (1 + dFdx(cx)) +
++                 * gy dFdx(cy) and dFdy(p) = gx dFdy(cx) + gy (1 +
++                 * dFdy(cy)) for a varying linear on the screen, solved for
++                 * (gx, gy). W's part below is the sample's, as before. */
++                struct qreg cx, cy;
++                ntq_get_barycentric_centroid(c, &cx, &cy);
++                struct qreg one = vir_uniform_f(c, 1.0f);
++                struct qreg dpx = vir_FDX(c, p), dpy = vir_FDY(c, p);
++                struct qreg a = vir_FADD(c, one, vir_FDX(c, cx));
++                struct qreg b = vir_FDX(c, cy);
++                struct qreg e = vir_FDY(c, cx);
++                struct qreg d = vir_FADD(c, one, vir_FDY(c, cy));
++                struct qreg rdet = vir_RECIP(c, vir_FSUB(c, vir_FMUL(c, a, d),
++                                                            vir_FMUL(c, b, e)));
++                struct qreg gx = vir_FMUL(c, vir_FSUB(c, vir_FMUL(c, dpx, d),
++                                                         vir_FMUL(c, dpy, b)), rdet);
++                struct qreg gy = vir_FMUL(c, vir_FSUB(c, vir_FMUL(c, dpy, a),
++                                                         vir_FMUL(c, dpx, e)), rdet);
++                pInterp = vir_FADD(c, p,
++                                   vir_FADD(c, vir_FMUL(c, gx, vir_FSUB(c, offset_x, cx)),
++                                               vir_FMUL(c, gy, vir_FSUB(c, offset_y, cy))));
++        } else {
++                pInterp = vir_FADD(c, p, vir_FADD(c, vir_FMUL(c, vir_FDX(c, p), scaleX),
++                                                     vir_FMUL(c, vir_FDY(c, p), scaleY)));
++        }
+ 
+         if (mode == INTERP_MODE_NOPERSPECTIVE)
+                 return vir_FADD(c, pInterp, C);
+@@ -4046,7 +4077,8 @@
+                         struct qreg result =
+                               ntq_emit_load_interpolated_input(c, p, C,
+                                                                offset_x, offset_y,
+-                                                               interp_mode);
++                                                               interp_mode,
++                                                               c->interp[input_idx].centroid);
+                         ntq_store_def(c, &instr->def, i, result);
+                 }
+                 break;

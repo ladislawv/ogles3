@@ -1523,6 +1523,7 @@ void ogles2_fb_update(struct OGLES3Context *ctx)
         ctx->fb_nrt = 1;
         ctx->fb_soft_blend = 0;
         ctx->fb_wide = 0;
+        ctx->fb_msaa = ctx->msaa ? 1 : 0;
         memset(ctx->fb_rt, 0, sizeof(ctx->fb_rt));
         ctx->fb_rt[0].out = V3D_OUTPUT_IMAGE_FORMAT_RGBA8; /* the bitmap's */
         ctx->fb_rt[0].type = V3D_INTERNAL_TYPE_8;
@@ -1538,6 +1539,7 @@ void ogles2_fb_update(struct OGLES3Context *ctx)
     ctx->fb_nrt = 1;
     ctx->fb_soft_blend = 0;
     ctx->fb_wide = 0;
+    ctx->fb_msaa = ogles2_fbo_samples(fb) != 0;
     memset(ctx->fb_rt, 0, sizeof(ctx->fb_rt));
     for (a = 0; a < OGLES3_MAX_DRAW_BUFFERS; a++)
         if (fb->draw_buf[a] != GL_NONE && fb->att[ATT_COLOR + a].type != GL_NONE) {

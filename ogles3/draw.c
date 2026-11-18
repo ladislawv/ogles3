@@ -3035,7 +3035,7 @@ static BOOL es3_variants(struct OGLES3Context *ctx, struct OGLES3Program *p, GLe
     prim = fsmode == GL_POINTS ? OGLES3_VK_POINTS
          : fsmode == GL_LINES || fsmode == GL_LINE_LOOP || fsmode == GL_LINE_STRIP ? OGLES3_VK_LINES
                                                                                    : OGLES3_VK_TRIANGLES;
-    ogles2_vk_fs_want(want, (*fs)->key, prim, cbufs, bits[1], a2c);
+    ogles2_vk_fs_want(want, (*fs)->key, prim, cbufs, bits[1], a2c, ctx->fb_msaa);
     ogles2_vk_fs_targets(want, tg);
     f = find_xs(im, OGLES3_VARIANT_FS, want, fown, ps);
     if (!f) {
@@ -3271,6 +3271,7 @@ static __attribute__((noinline)) BOOL pick_variants(struct OGLES3Context *ctx, s
     p->var_bits[2] = bits[2];
     p->var_a2c = a2c;
     p->var_ps = ps;
+    p->var_msaa = ctx->fb_msaa;
     if (im->format2)
         p->var_tg = tg;
     p->var_f32 = fs->key ? ogles2_vk_fs_f32(fs->key) : 0;
@@ -3582,12 +3583,11 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
     /* A 4x MSAA default framebuffer, or multisampled renderbuffers, with
      * GL_SAMPLE_ALPHA_TO_COVERAGE (Mesa turns alpha into the sample mask in
      * the fragment shader). */
-    a2c = (ctx->state.caps & OGLES3_CAP_SAMPLE_ALPHA_TO_COVERAGE) != 0 &&
-          (ctx->draw_fb ? ogles2_fbo_samples(ctx->draw_fb) != 0 : ctx->msaa);
+    a2c = (ctx->state.caps & OGLES3_CAP_SAMPLE_ALPHA_TO_COVERAGE) != 0 && ctx->fb_msaa;
     /* GL_SAMPLE_SHADING above one of the 4 samples (Mesa's st_atom_shader.c:
      * MinSampleShadingValue * samples > 1): the shader's inputs a sample's */
     ps = (ctx->state.caps & OGLES3_CAP_SAMPLE_SHADING) && ctx->state.min_sample_shading > 0.25f &&
-         im->format2 && (ctx->draw_fb ? ogles2_fbo_samples(ctx->draw_fb) != 0 : ctx->msaa);
+         im->format2 && ctx->fb_msaa;
     fim = im;
     bits[0] = bits[1] = bits[2] = 0;
     if (im->format2) {
@@ -3626,7 +3626,7 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
     if (p->var_ok && p->var_mode == mode && p->var_fsmode == fsmode && p->var_fim == fim &&
         p->var_nrt == ctx->fb_nrt && p->var_cbufs == (ctx->draw_fb ? ctx->fb_draw_mask : 1) &&
         p->var_bits[0] == bits[0] && p->var_bits[1] == bits[1] && p->var_bits[2] == bits[2] && p->var_a2c == a2c &&
-        p->var_ps == ps &&
+        p->var_ps == ps && p->var_msaa == ctx->fb_msaa &&
         (!im->format2 || (tg_made ? same_targets(&p->var_tg, &tg)
                                   : !p->var_tg.soft && p->var_tg.f32 == ctx->fb_wide))) { /* an ES3 program's */
         cs = p->var[0];

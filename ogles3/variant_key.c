@@ -37,18 +37,21 @@ static void set_bits(UBYTE *k, ULONG bits)
     k[3] = (UBYTE)(bits >> 24);
 }
 
-void ogles2_vk_fs_want(UBYTE *want, const UBYTE *base, int prim, UBYTE cbufs, ULONG bits, BOOL a2c)
+void ogles2_vk_fs_want(UBYTE *want, const UBYTE *base, int prim, UBYTE cbufs, ULONG bits, BOOL a2c, BOOL msaa)
 {
     memcpy(want, base, OGLES3_VK_FS_BYTES);
     set_bits(want, bits);
     want[FK_POINTS] = prim == OGLES3_VK_POINTS;
     want[FK_LINES] = prim == OGLES3_VK_LINES;
-    if (a2c) { /* as Mesa's for a multisampled job with alpha to coverage */
-        want[FK_MSAA] = want[FK_MSAA + 1] = 1;
-        want[FK_IGNORE_MASK] = 0;
-    } else {   /* the closest variant's, without it (1.x's: no MSAA in the key) */
-        want[FK_MSAA + 1] = 0;
-    }
+    /* Mesa's v3d_update_compiled_fs: a multisampled job's key has msaa and
+     * alpha to coverage (gl_SampleMask written, interpolateAtSample and
+     * interpolateAtOffset per sample); any other's ignores the sample mask
+     * (dEQP-GLES31 sample_variables.sample_mask and
+     * multisample_interpolation, 2026-11-18: a 4x target had the plain
+     * key's) */
+    want[FK_MSAA] = msaa || a2c;
+    want[FK_MSAA + 1] = a2c;
+    want[FK_IGNORE_MASK] = !(msaa || a2c);
     want[FK_SOFTWARE_BLEND] = 0;
     want[FK_CBUFS] = cbufs;
     want[FK_F32] = want[FK_F32 + 1] = want[FK_F32 + 2] = 0;

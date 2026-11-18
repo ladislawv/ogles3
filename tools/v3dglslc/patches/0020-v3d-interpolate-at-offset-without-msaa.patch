@@ -1,0 +1,35 @@
+ogles2: v3d's interpolateAtOffset honours the offset without MSAA too.
+load_interpolated_input returned the pre-computed (pixel centre) value when
+the fragment key has no msaa, so interpolateAtOffset into a single-sample
+target ignored its offset (dEQP-GLES31 multisample_interpolation's
+interpolate_at_offset on the default framebuffer and single-sample
+textures and renderbuffers; Mesa's v3d does not offer
+OES_shader_multisample_interpolation, so its CI does not run them). The
+input's raw varying is kept either way (emit_fragment_varying), and in a
+single-sample job the sample is the pixel centre: the result is centre +
+offset. Only interpolateAt* produce load_interpolated_input (v3d lowers
+them, lower_interpolate_at; other inputs are load_input).
+
+--- a/src/broadcom/compiler/nir_to_vir.c
++++ b/src/broadcom/compiler/nir_to_vir.c
+@@ -4019,12 +4019,15 @@
+                                 (nir_intrinsic_base(instr) + offset) * 4 +
+                                 nir_intrinsic_component(instr) + i;
+ 
+-                        /* If we are not in MSAA or if we are not interpolating
+-                         * a user varying, just return the pre-computed
+-                         * interpolated input.
++                        /* If we are not interpolating a user varying, just
++                         * return the pre-computed interpolated input.
++                         * ogles2: without MSAA too, interpolateAtOffset's
++                         * offset applies (the sample is the pixel centre,
++                         * so this is centre + offset; dEQP-GLES31
++                         * multisample_interpolation on single-sample
++                         * targets).
+                          */
+-                        if (!c->fs_key->msaa ||
+-                            c->interp[input_idx].vp.file == QFILE_NULL) {
++                        if (c->interp[input_idx].vp.file == QFILE_NULL) {
+                                 ntq_store_def(c, &instr->def, i,
+                                               vir_MOV(c, c->inputs[input_idx]));
+                                 continue;
