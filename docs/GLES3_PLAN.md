@@ -456,6 +456,32 @@ compiled on the PC:
     amigentd not; a reset by hand. The group again: 544 of 544 passed
     (49 s, its programs cached), so not the case itself. With the GLES2
     `rgrr` case above, the second trouble in a swizzle group: watched.
+  - **A second freeze (15:23)** in `transform_feedback`, at case 665 of
+    1,320 (`array.interleaved.lines.mediump_mat3x2`, its program linked,
+    so in the draw); the group again: 987 passed, 333 not supported. The
+    rest of dEQP-GLES3 then: `texture` 5,831 (64 not supported), `ubo`
+    2,357, `uniform_api` 2,181, `vertex_array_objects` 10,
+    `vertex_arrays` 1,005, none failed. **dEQP-GLES3 whole: none failed.**
+  - **dEQP-GLES31 (m8-3c), paused 18:56 for a restart of the PC:**
+    `android_extension_pack` 56 not supported, `atomic_counter` 298,
+    `blend_equation_advanced` 102, `compute` 195, `layout_binding` 104 (64
+    not supported); `copy_image` 10,205 of 12,395 (9,499 passed, 706 not
+    supported, none failed; `ogles2-m8-3c-20261118-161308-paused`):
+    `non_compressed` and `compressed` whole, `mixed` 1,394 of 3,584, at
+    about 20 a minute (ASTC decoded by dEQP), so the group would not
+    have fit `a_regress.sh`'s 4 hours.
+  - **To do on resuming:** the bridge; `NOBUILD=1 BRIDGE=1 TIMEOUT=14400
+    ARGS="LIST=ci31rest NAME=ci31rest" bash tests/a1200/a_run.sh m8-3c`
+    (`copy_image`'s last 2,190 cases, `tests/a1200/out/extra-lists/`);
+    then `C3=1 FROM=debug bash tests/a1200/a_regress.sh deqp31 speed`.
+    The extra lists in the package's `caselists/` (`gles3-bf-rest`, a
+    GLES3 list) are run by `a_regress.sh` as groups too: to leave out.
+  - **A stopped batch ran on:** the task stopped from the agent's side left
+    `a_regress.sh` running (the Git Bash trap below), and it went on
+    through 9 groups with "NO RESULTS" (the Amiga's lock), then, the lock
+    removed, ran `layout_binding` for real. Kill its process group by the
+    Windows PIDs (`ps -ef`, `/proc/<pid>/cmdline`, `Stop-Process`) before
+    touching the locks.
   - **The reset left `runpkg.lock`** in the package's work drawer, and
     every run of the package after it ended with "NO RESULTS" until it was
     removed. Fixed in amigent (`ladislawv/amigent` 5bc4234, not pushed):
