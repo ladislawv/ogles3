@@ -446,8 +446,9 @@ compiled on the PC:
 - **dEQP-GLES3:** 32 lists (10,034 passed, none failed), then
   `shaders-builtin_functions` 1,347 of 1,637 when paused.
 - **Resumed 2026-11-18 with m8-2c (`C3=1`), running:** the group's last
-  290 passed; then `shaders-builtin_variable` to `state_query`, 33 lists,
-  18,094 passed and none failed (until 14:38); `texture` and on in progress.
+  290 passed; then `shaders-builtin_variable` to `state_query`, 36 lists,
+  20,240 passed and none failed (until 14:38, `swizzle_math_operations`'
+  544 from its second run); `texture` and on in progress.
   - **The A1200 froze once (14:13)** in `shaders-swizzle_math_operations`
     after 423 of its 544 cases, at `vector_divide.mediump_vec3_x_x_fragment`
     (its shader compiled, its program not: the log's last line; the
