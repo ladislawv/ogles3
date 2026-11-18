@@ -354,7 +354,9 @@ same source. **The A1200 has it:** `LIBS:core3.library` 1.4, `C3Info`
 bash ports/deqp/build.sh`, into `$B/deqp-<module>-c3`. Its packages are
 `tests/a1200/m8-2c` and `m8-3c` (m8-2's and m8-3's, with that binary and
 `bin/deqp-c3.c3m`; Run-M1 `VERIFY=1`). The plain build and m7-1, m8-2 and
-m8-3 are left as they were.
+m8-3 are left as they were: the plain `deqp-gles3` and `deqp-gles31`, rebuilt with the
+changed `build.sh`, are byte for byte the ones m8-2 and m8-3 had on
+2026-11-17.
 - **How it works.** `patches/c3/0001-precision-checks-on-core3.patch`
   (applied for `C3=1` only) hands each case's values to the kernels after
   the shader ran: the inputs and outputs in Fast RAM, the case named by its

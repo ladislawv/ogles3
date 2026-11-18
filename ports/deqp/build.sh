@@ -209,8 +209,14 @@ $(cd "$ROOT" && for d in modules/glshared modules/$MODULE modules/$MODULE/accura
 # Compiles what changed, in up to $J jobs; a failure leaves its log beside its
 # object. A change to this script, a patch or a header in src/include
 # recompiles everything (headers are not tracked otherwise).
-NEWEST=$(find "$HERE/build.sh" "$HERE/patches" "$HERE/src/include" -type f -printf '%T@ %p\n' |
-    sort -n | tail -1 | cut -d' ' -f2-)
+# C3=1 also c3/ (its header); the plain build never its files.
+if [ "$C3" = 1 ]; then
+    NEWEST=$(find "$HERE/build.sh" "$HERE/patches" "$HERE/src/include" "$HERE/c3" -type f -printf '%T@ %p\n' |
+        sort -n | tail -1 | cut -d' ' -f2-)
+else
+    NEWEST=$(find "$HERE/build.sh" "$HERE/patches" "$HERE/src/include" -type f -not -path "$HERE/patches/c3/*" \
+        -printf '%T@ %p\n' | sort -n | tail -1 | cut -d' ' -f2-)
+fi
 cc_one() { # compiler flags source
     local o=$OBJ/$(echo "$3" | tr / _).o
     o=${o%.*}.o
