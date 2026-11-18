@@ -7,11 +7,19 @@ byte) and sends the written files back.
 
     python3 tools/compile_bridge/compile_bridge.py [--port 6802] [--compiler PATH]
     python3 tools/compile_bridge/compile_bridge.py --check
+    python3 tools/compile_bridge/compile_bridge.py --replay FILE...
 
 The station's address and token are amictl's (station.local). It runs until
 stopped (Ctrl-C), connecting again whenever the link ends. --check needs no
 Amiga: the test shaders (tools/v3dglslc/test/shaders) as LINK requests
 through the same path, each .v3dp compared with the command line's.
+
+A request the compiler ends on (it crashed: "the host compiler ended",
+dEQP-GLES2's swizzles.vector_swizzles.mediump_ivec2_rgrr_vertex on
+2026-11-17) is kept, the frame as it was sent, in
+~/compile_bridge-crashes/ (CRASH_DIR), and sent again once to a compiler
+started anew: the run goes on if that one answers. --replay sends kept
+frames to a new compiler each and says how it ends.
 """
 import os
 import shutil
@@ -51,6 +59,7 @@ class Compiler:
         self.path = path
         self.p = None
         self.mtime = None
+        self.code = None
         self.log = open(os.path.join(tempfile.gettempdir(), "compile_bridge.log"), "ab")
 
     def start(self):
@@ -71,16 +80,76 @@ class Compiler:
             self.restart()
         if not self.p or self.p.poll() is not None:
             self.start()
-        self.p.stdin.write(b"V3Q1" + u32(op) + u32(crc) + string(vs) + string(fs) + string(bindings) +
-                           string(keys) + string(out_path.encode()))
-        self.p.stdin.flush()
-        head = self.p.stdout.read(12)
+        frame = (b"V3Q1" + u32(op) + u32(crc) + string(vs) + string(fs) + string(bindings) + string(keys) +
+                 string(out_path.encode()))
+        answer = self.send(frame)
+        if answer is None:
+            kept = keep_crash(frame, self.code)
+            print("%s the host compiler ended (exit %s) on an op %d request: kept in %s; again with a new one" %
+                  (time.strftime("%H:%M:%S"), self.code, op, kept), flush=True)
+            answer = self.send(frame)
+            if answer is None:
+                print("%s it ended again (exit %s)" % (time.strftime("%H:%M:%S"), self.code), flush=True)
+                return 2, b"compile_bridge: the host compiler ended"
+            print("%s the new one answered %d" % (time.strftime("%H:%M:%S"), answer[0]), flush=True)
+        return answer
+
+    def send(self, frame):
+        """(result, log) of one frame, or None when the compiler ended on it
+        (self.code: its exit code); the next frame starts a new one."""
+        if not self.p or self.p.poll() is not None:
+            self.start()
+        try:
+            self.p.stdin.write(frame)
+            self.p.stdin.flush()
+            head = self.p.stdout.read(12)
+        except (BrokenPipeError, OSError):
+            head = b""
         if len(head) != 12 or head[:4] != b"V3A1":
             self.p.kill()
+            self.code = self.p.wait()
             self.p = None
-            return 2, b"compile_bridge: the host compiler ended"
+            return None
         result, n = struct.unpack(">iI", head[4:])
         return result, self.p.stdout.read(n)
+
+
+def keep_crash(frame, code):
+    d = os.environ.get("CRASH_DIR", os.path.expanduser("~/compile_bridge-crashes"))
+    os.makedirs(d, exist_ok=True)
+    f = os.path.join(d, "%s-exit%s.v3q" % (time.strftime("%Y%m%d-%H%M%S"), code))
+    with open(f, "wb") as fh:
+        fh.write(frame)
+    return f
+
+
+def replay(comp, files):
+    """Kept frames, each to a new compiler: how it ends."""
+    bad = 0
+    for f in files:
+        with open(f, "rb") as fh:
+            frame = fh.read()
+        comp.restart()
+        d = tempfile.mkdtemp(prefix="v3dr")
+        try:
+            # its output path was a directory of the bridge's, gone: the
+            # same name in a new one
+            pos, parts = 12, []
+            for _ in range(5):  # vs, fs, bindings, keys, the output path
+                n = struct.unpack(">I", frame[pos:pos + 4])[0]
+                pos += 4
+                parts.append(None if n == NULL else frame[pos:pos + n])
+                pos += 0 if n == NULL else n
+            out = os.path.join(d, os.path.basename(parts[4].decode())).encode()
+            answer = comp.send(frame[:12] + b"".join(string(x) for x in parts[:4]) + string(out))
+        finally:
+            shutil.rmtree(d, ignore_errors=True)
+        if answer is None:
+            bad += 1
+            print("%s: the compiler ended (exit %s)" % (f, comp.code))
+        else:
+            print("%s: answered %d: %s" % (f, answer[0], answer[1].decode("latin-1").strip()[:300]))
+    return 1 if bad else 0
 
 
 def serve_request(comp, op, crc, vs, fs, bindings, keys, name, xfile):
@@ -180,11 +249,16 @@ def check(comp):
             if not f.endswith(".vert") or not os.path.exists(os.path.join(sh, f[:-5] + ".frag")):
                 continue
             v, fr = os.path.join(sh, f), os.path.join(sh, f[:-5] + ".frag")
-            subprocess.run([comp.path, "-o", ref, v, fr], capture_output=True)
+            g = os.path.join(sh, f[:-5] + ".geom")
+            # a geometry shader: between the two on the command line, in front of
+            # the link state in a request (V3DGLSL_GEOM_MARK, v3dp/v3dglsl_port.h)
+            gs = open(g, "rb").read() if os.path.exists(g) else None
+            subprocess.run([comp.path, "-o", ref, v] + ([g] if gs else []) + [fr], capture_output=True)
             want = os.path.join(ref, "%s-%s.v3dp" % (f[:-5], f[:-5]))
             vs, fs = open(v, "rb").read(), open(fr, "rb").read()
+            bindings = b"GEOM %d\n" % len(gs) + gs if gs else None
             one = Compiler(comp.path)
-            result, log, files = serve_request(one, V3DGLSL_LINK, 0, vs, fs, None, None, "p.v3dp", None)
+            result, log, files = serve_request(one, V3DGLSL_LINK, 0, vs, fs, bindings, None, "p.v3dp", None)
             one.p.stdin.close()
             one.p.wait()
             got = dict(files).get("p.v3dp")
@@ -208,6 +282,8 @@ def main(argv):
     comp = Compiler(path)
     if "--check" in argv:
         return check(comp)
+    if "--replay" in argv:
+        return replay(comp, argv[argv.index("--replay") + 1:])
     cfg = amictl.config()
     while True:
         try:

@@ -422,6 +422,21 @@ compiled on the PC:
   2026-10-30), and `shaders.swizzles...mediump_ivec2_rgrr_vertex`, whose
   program the PC's compiler ended on ("compile_bridge: the host compiler
   ended"): to rerun alone with its sources.
+  - **Looked at on the PC (2026-11-18):** the bridge's request 510 (a
+    link) ended after 7 ms. Two bridges were running then (the stray
+    batch below). The compiler was the 2026-11-16 build, not rebuilt
+    during the run.
+  - The case's program as dEQP writes it (`swizzles.test`'s `in0.rgrr`,
+    an `ivec2` from a float attribute, compared with a uniform `ivec4`)
+    compiles and links on the command line. So the crash needs the
+    request's state keys, or the compiler's state after the requests
+    before it.
+  - **The bridge now keeps such a request.** `compile_bridge.py` saves
+    the frame as sent (`~/compile_bridge-crashes/`), sends it once more
+    to a new compiler (the run goes on if that one answers), and
+    `--replay FILE` sends a kept frame to a fresh one.
+  - `--check` now sends the geometry programs' shader too (38 of 38
+    identical; before, 32 and the 6 geometry ones differing).
 - **dEQP-GLES3:** 32 lists (10,034 passed, none failed), then
   `shaders-builtin_functions` 1,347 of 1,637 when paused.
 - **Speed seen on the way:** gl4es `m6-1` 6-15% and SDL2 `m6-3` up to 35%
@@ -436,7 +451,8 @@ compiled on the PC:
   2 of their checks), the ES 3.1 one put back (`LIBS_INSTALL=1` with
   `m8-5`); Quake III `m6-2` and `m6-5` (their build took
   `~/ioq3-amiga`, the 1.x copy's clone: `ports/ioq3/sources.sh` now
-  defaults to `~/ioq3-amiga-ogles3`, its repository's); the swizzle case.
+  defaults to `~/ioq3-amiga-ogles3`, its repository's; both packages
+  build again, 2026-11-18); the swizzle case.
 - A background batch stopped from the agent's side left its shells
   running (Git Bash): two batches ran at once, a dEQP-GLES3 on the GPU
   beside `m8-5` (one alpha-to-coverage check failed then). Stop one by
