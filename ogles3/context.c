@@ -327,8 +327,9 @@ void ogles2_aglDestroyContext(struct OGLES3Context *ctx)
                        (ULONG)(ctx->n_uwords / ctx->n_draws), (ULONG)(ctx->n_vbytes / ctx->n_draws),
                        (ULONG)(ctx->n_indices / ctx->n_draws));
         if ((ctx->probe & OGLES3_PROBE_PERIODIC) && ctx->n_draws)
-            ogles2_log("timing: per 100 draws %lu index scans, %lu state packet updates",
-                       (ULONG)(ctx->n_scans * 100 / ctx->n_draws), (ULONG)(ctx->n_emits * 100 / ctx->n_draws));
+            ogles2_log("timing: per 100 draws %lu index scans, %lu state packet updates, %lu variant choices",
+                       (ULONG)(ctx->n_scans * 100 / ctx->n_draws), (ULONG)(ctx->n_emits * 100 / ctx->n_draws),
+                       (ULONG)(ctx->n_picks * 100 / ctx->n_draws));
         if ((ctx->probe & OGLES3_PROBE_PERIODIC) && ctx->n_draws)
             ogles2_log("timing: per 100 draws attributes: %lu current values, %lu stream copies reused, %lu stream "
                        "copies made, %lu static buffers' copies, %lu client arrays",

@@ -504,6 +504,40 @@ compiled on the PC:
     on the draw path since 2026-10-31 (es32's items: advanced blending's
     state, sample shading's per-draw checks, the state variables): to find
     with `tools/perf/` before anything else.
+  - **Found and mostly fixed (2026-11-18, evening).** Bisected with a
+    library and its own `drawbench3` per commit (a worktree, `LIBS:`
+    replaced; an older library's dispatch table is shorter, so the client
+    built for a newer one refuses it): 1.0 (649d7b3) as fast as
+    2026-10-31; three steps after it. (A) 821a42c, `EXT_draw_buffers_indexed`:
+    the blend packets made per draw buffer (24 lookups, `memcmp` calls)
+    where 1.0 made one set, `draw_blendfunc_switched` +28%. (B) 49b2bec,
+    geometry shaders stage C: the geometry stage's code in `draw_arrays`
+    (Probe P: every stage of a draw a little slower; `texture_states` out
+    of line with its loop bounds variable), `draw_same` +15%. (C) a few per
+    cent more by 5653559, layout. Fixed: `state.blend_split` (set only by the
+    indexed calls) and 1.0's blend packets while it is 0;
+    `ogles2_advanced_blend` inline (the 15-entry search only for an advanced
+    equation); `texture_states` inlined with the geometry stage's in
+    `gs_stage`, `vpm_gs` and `gs_records` out of line; the variant choice
+    (`pick_variants`), `advanced_blend_ok`'s check and `packets_ok`'s
+    one-off test out of line. Probe P counts "variant choices" now (0 a
+    100 draws in drawbench: the cache hits). drawbench against 1.0 in the
+    same session: `frame_mix` 565 fps (1.0 573, before the fix 513-519),
+    `draw_same` 7,150-7,570 ns (6,562; before 8,368),
+    `draw_blendfunc_switched` 10,400-10,850 (9,515; before 13,629). The
+    rest is in `draw_arrays`' first part (the "shaders" stage, +0.4 us):
+    two ways of moving its rare tests out (one branch for geometry,
+    feedback and counting) each made it slower, not faster: GCC's layout of
+    the whole function moves with them. A build's numbers vary 3-5% from
+    the same source between sessions (where the library lands), so smaller
+    changes are not measurable this way. dEQP after it, the library in
+    `LIBS:`: `draw_buffers_indexed` 76, `fragment_ops` 3,174,
+    `geometry_shading` 198, `blend_equation_advanced` 102, `draw_indirect`
+    203 passed, none failed; `shaders.sample_variables` 107 passed and 36
+    failed (the 9 `num_samples` now pass: `gl_NumSamples` works).
+  - **The PC sampler froze the A1200 twice** (`Run-Bench PC=1`, 22:37 and
+    22:56, each the first sampled run after a reset): not used again until
+    that is understood. A third freeze needed two resets.
   - **A stopped batch ran on:** the task stopped from the agent's side left
     `a_regress.sh` running (the Git Bash trap below), and it went on
     through 9 groups with "NO RESULTS" (the Amiga's lock), then, the lock

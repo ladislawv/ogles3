@@ -59,6 +59,7 @@ void ogles2_state_init(struct OGLES3Context *ctx)
         s->blend_eq_rgb[i] = s->blend_eq_alpha[i] = GL_FUNC_ADD;
     }
     s->blend_rts = 0;
+    s->blend_split = 0;
     s->clear_depth = 1.0f;
     s->line_width = 1.0f;
     s->generate_mipmap_hint = GL_DONT_CARE;
@@ -771,6 +772,7 @@ static void blend_func(struct OGLES3Context *ctx, UBYTE rts, GLenum srcRGB, GLen
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
+    s->blend_split = (UBYTE)(rts == ALL_RTS ? s->blend_split & ~1 : s->blend_split | 1);
     for (k = 0; k < OGLES3_MAX_DRAW_BUFFERS; k++)
         if (rts & (1 << k)) {
             s->blend_src_rgb[k] = srcRGB;
@@ -816,15 +818,13 @@ static ULONG advanced_mode(GLenum e)
     return 0;
 }
 
-/* Draw buffer 0's advanced equation while it blends (Mesa's
+/* An equation's advanced mode, for ogles2_advanced_blend (ogles3_internal.h):
+ * draw buffer 0's while it blends (Mesa's
  * _mesa_get_advanced_blend_sh_constant): the shader blends then, the tile
  * buffer not (draw.c). */
-ULONG ogles2_advanced_blend(const struct OGLES3Context *ctx)
+ULONG ogles2_advanced_mode(GLenum e)
 {
-    const struct OGLES3State *s = &ctx->state;
-    if (!(s->caps & OGLES3_CAP_BLEND) || !(s->blend_rts & 1))
-        return 0;
-    return advanced_mode(s->blend_eq_rgb[0]);
+    return advanced_mode(e);
 }
 
 static void blend_equation(struct OGLES3Context *ctx, UBYTE rts, GLenum modeRGB, GLenum modeAlpha)
@@ -837,6 +837,7 @@ static void blend_equation(struct OGLES3Context *ctx, UBYTE rts, GLenum modeRGB,
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;
     }
+    ctx->state.blend_split = (UBYTE)(rts == ALL_RTS ? ctx->state.blend_split & ~2 : ctx->state.blend_split | 2);
     for (k = 0; k < OGLES3_MAX_DRAW_BUFFERS; k++)
         if (rts & (1 << k)) {
             ctx->state.blend_eq_rgb[k] = modeRGB;

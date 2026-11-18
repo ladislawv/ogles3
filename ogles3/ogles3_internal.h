@@ -176,6 +176,11 @@ struct OGLES3State
     GLenum blend_src_rgb[OGLES3_MAX_DRAW_BUFFERS], blend_dst_rgb[OGLES3_MAX_DRAW_BUFFERS];
     GLenum blend_src_alpha[OGLES3_MAX_DRAW_BUFFERS], blend_dst_alpha[OGLES3_MAX_DRAW_BUFFERS];
     GLenum blend_eq_rgb[OGLES3_MAX_DRAW_BUFFERS], blend_eq_alpha[OGLES3_MAX_DRAW_BUFFERS];
+    /* the draw buffers' blending may differ (EXT_draw_buffers_indexed's
+     * glBlendFunci, glBlendEquationi and their kin): bit 0 the factors, bit 1
+     * the equations; 0, every buffer's as buffer 0's (draw.c's packets then
+     * made once, as before the indexed calls; drawbench, 2026-11-18) */
+    UBYTE blend_split;
     GLfloat blend_color[4];
     GLfloat bounding_box[8];        /* OES_primitive_bounding_box: kept, never used */
     /* stencil, [0] front and [1] back */
@@ -842,6 +847,7 @@ struct OGLES3Context
     double stage[8], p_stage[8];
     double n_uwords, n_vbytes, n_indices; /* probe P: uniform stream words, vertex bytes, indices copied */
     double n_scans, n_emits;        /* probe P: index scans, state packets made (emit_state_all) */
+    double n_picks;                 /* probe P: draws whose variants were chosen anew (draw.c pick_variants) */
     ULONG n_a_const, n_a_hit, n_a_stream, n_a_static, n_a_client; /* probe P: draws' attributes by source */
     /* draw.c: the state the uniform recipes read besides the constant
      * buffers, as at the last draw, and its version. */
@@ -1197,8 +1203,18 @@ BOOL ogles2_fbo_read_ready(struct OGLES3Context *ctx);  /* and, read from, not m
 int ogles2_indexed_query(struct OGLES3Context *ctx, GLenum pname, GLuint index, GLint64 *v);
 int ogles2_indexed_mask(struct OGLES3Context *ctx, GLenum pname, GLuint index, GLint64 *v);
 /* KHR_blend_equation_advanced: the advanced mode the draws blend with
- * (Mesa's enum pipe_advanced_blend_mode, 1 to 15), 0 for none (state.c). */
-ULONG ogles2_advanced_blend(const struct OGLES3Context *ctx);
+ * (Mesa's enum pipe_advanced_blend_mode, 1 to 15), 0 for none. Inline, a
+ * few tests: a draw asks several times (drawbench, 2026-11-18); the other
+ * equations' enums all lie below GL_MULTIPLY_KHR (0x9294), the first
+ * advanced one. ogles2_advanced_mode: an equation's mode (state.c). */
+ULONG ogles2_advanced_mode(GLenum e);
+static inline ULONG ogles2_advanced_blend(const struct OGLES3Context *ctx)
+{
+    const struct OGLES3State *s = &ctx->state;
+    if (!(s->caps & OGLES3_CAP_BLEND) || !(s->blend_rts & 1) || s->blend_eq_rgb[0] < 0x9294 /* GL_MULTIPLY_KHR */)
+        return 0;
+    return ogles2_advanced_mode(s->blend_eq_rgb[0]);
+}
 BOOL ogles2_fbo_draws_beyond_0(const struct OGLES3Framebuffer *fb);
 int ogles2_image_query(struct OGLES3Context *ctx, GLenum pname, GLuint index, GLint64 *v);
 int ogles2_vab_query(struct OGLES3Context *ctx, GLenum pname, GLuint index, GLint64 *v); /* draw.c's bindings */

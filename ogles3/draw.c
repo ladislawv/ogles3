@@ -52,7 +52,8 @@ struct dedup
     UBYTE stencil[2][5];  /* the STENCIL_CFG bytes last sent, front and back */
     UWORD cw_l, cw_t, cw_w, cw_h;
     UWORD vp_w, vp_h, vp_cx2, vp_cy2;
-    UBYTE b_cfg[OGLES3_MAX_DRAW_BUFFERS][6]; /* each target's BLEND_CFG, as blend_cfgs makes them */
+    ULONG b_cfg[OGLES3_MAX_DRAW_BUFFERS][2]; /* each target's BLEND_CFG bytes (union bcfg) */
+    UBYTE b_uni, b_one;   /* b_cfg[0] made for all targets alike (b_uni), b_one those without alpha */
     UBYTE b_en;           /* the BLEND_ENABLES mask */
     UWORD b_color[4];
     ULONG cwm_mask;
@@ -1079,9 +1080,12 @@ static BOOL wants_wide(struct OGLES3Context *ctx, struct OGLES3Program *p)
 }
 
 /* Every sampler uniform of the program: its texture index in each stage
- * that uses it reads the texture unit glUniform1i gave it. */
-static BOOL texture_states(struct OGLES3Context *ctx, struct OGLES3Program *p,
-                           struct tex_states *ts, BOOL gs)
+ * that uses it reads the texture unit glUniform1i gave it. Inlined, so that
+ * a draw's (gs FALSE) has its loop bounds fixed (drawbench, 2026-11-18: out
+ * of line with gs a variable, every draw paid for the geometry stage's). */
+static inline __attribute__((always_inline)) BOOL texture_states(struct OGLES3Context *ctx,
+                                                                 struct OGLES3Program *p,
+                                                                 struct tex_states *ts, BOOL gs)
 {
     const struct OGLES3Image *im = p->image;
     UWORD u, k, n;
@@ -1849,7 +1853,8 @@ struct gs_draw
  * geometry shader fitted into half the VPM (a binning and a render program
  * at once), else into all of it; FALSE when even that cannot be. vs: the
  * (binning or render) vertex variant before gs. */
-static BOOL vpm_gs(const struct OGLES3Variant *vs, const struct OGLES3Variant *gs, struct gs_vpm *out)
+static __attribute__((noinline)) BOOL vpm_gs(const struct OGLES3Variant *vs, const struct OGLES3Variant *gs,
+                                             struct gs_vpm *out)
 {
     ULONG A = vs->separate_segments ? 1 : 0, Ad = vs->vpm_input_size, Vd = vs->vpm_output_size;
     ULONG size = (ULONG)ogles2_device()->deviceInfo.vpm_size / 512; /* sectors: 16 channels x 4 bytes x 8 */
@@ -1897,7 +1902,7 @@ static BOOL vpm_gs(const struct OGLES3Variant *vs, const struct OGLES3Variant *g
  * v3d_emit_tes_gs_shader_params (bin, then render), V3D 4.2's packing
  * (v3d_packet.xml): 36 bytes before the GL shader state record, which
  * GL_SHADER_STATE_INCLUDING_GS points at. */
-static void gs_records(ULONG *w, const struct gs_draw *g)
+static __attribute__((noinline)) void gs_records(ULONG *w, const struct gs_draw *g)
 {
     static const UBYTE fmt[6] = {0, 0, 0, 1, 1, 2}; /* mesa_prim POINTS, LINE_STRIP, TRIANGLE_STRIP */
     int k;
@@ -2460,18 +2465,76 @@ static void emit_state_all(struct OGLES3Context *ctx, struct dedup *dd, int prim
      * (Mesa's blend_dst_alpha_one). */
     if (!(g & OGLES3_SG_BLEND)) {
         /* unchanged */
+    } else if (be && !s->blend_split) {
+        /* Every draw buffer blends as buffer 0 (the rule): a BLEND_CFG for
+         * all targets, one of their own for those without alpha, as before
+         * EXT_draw_buffers_indexed (drawbench, 2026-11-18) */
+        union bcfg { UBYTE b[8]; ULONG w[2]; } base;
+        UBYTE en = (UBYTE)(s->blend_rts & 0x0F), one = 0;
+        UWORD c[4];
+        base.w[1] = 0;
+        base.b[0] = blend_factor_for(s->blend_dst_rgb[0], s->blend_eq_rgb[0]);
+        base.b[1] = blend_factor_for(s->blend_src_rgb[0], s->blend_eq_rgb[0]);
+        base.b[2] = blend_mode(s->blend_eq_rgb[0]);
+        base.b[3] = blend_factor_for(s->blend_dst_alpha[0], s->blend_eq_alpha[0]);
+        base.b[4] = blend_factor_for(s->blend_src_alpha[0], s->blend_eq_alpha[0]);
+        base.b[5] = blend_mode(s->blend_eq_alpha[0]);
+        for (k = 0; k < ctx->fb_nrt; k++)
+            if ((ctx->fb_draw_mask & (1 << k)) && ctx->fb_rt[k].no_alpha)
+                one |= (UBYTE)(1 << k);
+        for (k = 0; k < 4; k++)
+            c[k] = half(s->blend_color[k]);
+        if (!dd->blend || !dd->be || !dd->b_uni || dd->b_en != en || dd->b_one != one ||
+            dd->b_cfg[0][0] != base.w[0] || dd->b_cfg[0][1] != base.w[1] || dd->b_color[0] != c[0] ||
+            dd->b_color[1] != c[1] || dd->b_color[2] != c[2] || dd->b_color[3] != c[3]) {
+            const UBYTE *b = base.b;
+            BlendEnables(v, en);
+            if (one != 0x0F)
+                BlendCfg(v, (UBYTE)(0x0F & ~one), b[0], b[1], b[2], b[3], b[4], b[5]);
+            if (one)
+                BlendCfg(v, one, alpha_one(b[0]), alpha_one(b[1]), b[2], alpha_one(b[3]), alpha_one(b[4]), b[5]);
+            BlendConstantColor(v, c[3], c[2], c[1], c[0]);
+            dd->b_cfg[0][0] = base.w[0];
+            dd->b_cfg[0][1] = base.w[1];
+            dd->b_uni = TRUE;
+            dd->b_one = one;
+            dd->b_en = en;
+            for (k = 0; k < 4; k++)
+                dd->b_color[k] = c[k];
+        }
     } else if (be) {
-        UBYTE cfg[OGLES3_MAX_DRAW_BUFFERS][6], en = (UBYTE)(s->blend_rts & 0x0F), done, mask;
+        /* Each target's six BLEND_CFG bytes, padded to two words to compare
+         * them as such; a target blending as draw buffer 0 (the rule: only
+         * glBlendFunci and its kin make them differ) copies its bytes, not
+         * the six lookups (drawbench, 2026-11-18: draw_blendfunc_switched
+         * 49% slower with the per-target lookups and memcmp calls). */
+        union bcfg { UBYTE b[8]; ULONG w[2]; } cfg[OGLES3_MAX_DRAW_BUFFERS], base;
+        UBYTE en = (UBYTE)(s->blend_rts & 0x0F), done, mask;
         UWORD c[4];
         int j;
+        base.w[1] = 0;
+        base.b[0] = blend_factor_for(s->blend_dst_rgb[0], s->blend_eq_rgb[0]);
+        base.b[1] = blend_factor_for(s->blend_src_rgb[0], s->blend_eq_rgb[0]);
+        base.b[2] = blend_mode(s->blend_eq_rgb[0]);
+        base.b[3] = blend_factor_for(s->blend_dst_alpha[0], s->blend_eq_alpha[0]);
+        base.b[4] = blend_factor_for(s->blend_src_alpha[0], s->blend_eq_alpha[0]);
+        base.b[5] = blend_mode(s->blend_eq_alpha[0]);
         for (k = 0; k < OGLES3_MAX_DRAW_BUFFERS; k++) {
-            UBYTE *b = cfg[k];
-            b[0] = blend_factor_for(s->blend_dst_rgb[k], s->blend_eq_rgb[k]);
-            b[1] = blend_factor_for(s->blend_src_rgb[k], s->blend_eq_rgb[k]);
-            b[2] = blend_mode(s->blend_eq_rgb[k]);
-            b[3] = blend_factor_for(s->blend_dst_alpha[k], s->blend_eq_alpha[k]);
-            b[4] = blend_factor_for(s->blend_src_alpha[k], s->blend_eq_alpha[k]);
-            b[5] = blend_mode(s->blend_eq_alpha[k]);
+            UBYTE *b = cfg[k].b;
+            if (k == 0 || (s->blend_dst_rgb[k] == s->blend_dst_rgb[0] && s->blend_src_rgb[k] == s->blend_src_rgb[0] &&
+                           s->blend_eq_rgb[k] == s->blend_eq_rgb[0] && s->blend_dst_alpha[k] == s->blend_dst_alpha[0] &&
+                           s->blend_src_alpha[k] == s->blend_src_alpha[0] &&
+                           s->blend_eq_alpha[k] == s->blend_eq_alpha[0])) {
+                cfg[k] = base;
+            } else {
+                cfg[k].w[1] = 0;
+                b[0] = blend_factor_for(s->blend_dst_rgb[k], s->blend_eq_rgb[k]);
+                b[1] = blend_factor_for(s->blend_src_rgb[k], s->blend_eq_rgb[k]);
+                b[2] = blend_mode(s->blend_eq_rgb[k]);
+                b[3] = blend_factor_for(s->blend_dst_alpha[k], s->blend_eq_alpha[k]);
+                b[4] = blend_factor_for(s->blend_src_alpha[k], s->blend_eq_alpha[k]);
+                b[5] = blend_mode(s->blend_eq_alpha[k]);
+            }
             if (k < ctx->fb_nrt && (ctx->fb_draw_mask & (1 << k)) && ctx->fb_rt[k].no_alpha) {
                 b[0] = alpha_one(b[0]);
                 b[1] = alpha_one(b[1]);
@@ -2481,7 +2544,9 @@ static void emit_state_all(struct OGLES3Context *ctx, struct dedup *dd, int prim
         }
         for (k = 0; k < 4; k++)
             c[k] = half(s->blend_color[k]);
-        if (!dd->blend || !dd->be || dd->b_en != en || memcmp(dd->b_cfg, cfg, sizeof(cfg)) ||
+        for (k = 0, j = 0; k < OGLES3_MAX_DRAW_BUFFERS; k++)
+            j |= dd->b_cfg[k][0] != cfg[k].w[0] || dd->b_cfg[k][1] != cfg[k].w[1];
+        if (!dd->blend || !dd->be || dd->b_uni || dd->b_en != en || j ||
             dd->b_color[0] != c[0] || dd->b_color[1] != c[1] || dd->b_color[2] != c[2] ||
             dd->b_color[3] != c[3]) {
             BlendEnables(v, en);
@@ -2489,14 +2554,18 @@ static void emit_state_all(struct OGLES3Context *ctx, struct dedup *dd, int prim
                 if (done & (1 << k))
                     continue;
                 for (j = k, mask = 0; j < OGLES3_MAX_DRAW_BUFFERS; j++)
-                    if (!(done & (1 << j)) && !memcmp(cfg[j], cfg[k], 6))
+                    if (!(done & (1 << j)) && cfg[j].w[0] == cfg[k].w[0] && cfg[j].w[1] == cfg[k].w[1])
                         mask |= (UBYTE)(1 << j);
                 done |= mask;
-                BlendCfg(v, mask, cfg[k][0], cfg[k][1], cfg[k][2], cfg[k][3], cfg[k][4], cfg[k][5]);
+                BlendCfg(v, mask, cfg[k].b[0], cfg[k].b[1], cfg[k].b[2], cfg[k].b[3], cfg[k].b[4], cfg[k].b[5]);
             }
             BlendConstantColor(v, c[3], c[2], c[1], c[0]);
-            memcpy(dd->b_cfg, cfg, sizeof(cfg));
+            for (k = 0; k < OGLES3_MAX_DRAW_BUFFERS; k++) {
+                dd->b_cfg[k][0] = cfg[k].w[0];
+                dd->b_cfg[k][1] = cfg[k].w[1];
+            }
             dd->b_en = en;
+            dd->b_uni = FALSE;
             for (k = 0; k < 4; k++)
                 dd->b_color[k] = c[k];
         }
@@ -2643,13 +2712,11 @@ static inline __attribute__((always_inline)) ULONG draw_packets(UBYTE *b, UBYTE 
  * logged, and v3dcore's writers used). */
 static UBYTE packets_state;
 
-static BOOL packets_ok(V3DContext *v)
+static __attribute__((noinline)) BOOL packets_check(V3DContext *v)
 {
     UBYTE ref[128], mine[128];
     v3d_static_buffer sb, *saved;
     ULONG n;
-    if (packets_state)
-        return packets_state == 1;
     memset(&sb, 0, sizeof(sb));
     memset(ref, 0, sizeof(ref));
     sb.start = ref;
@@ -2681,6 +2748,13 @@ static BOOL packets_ok(V3DContext *v)
         ogles2_log("draw: the direct packet writer differs from v3dcore's (%ld bytes, %lu): v3dcore's "
                    "used", (LONG)sb.used, n);
     return packets_state == 1;
+}
+
+/* Its one test, inline; the check itself once, out of line (drawbench,
+ * 2026-11-18: inlined whole, it grew the draw functions' frames and code) */
+static inline BOOL packets_ok(V3DContext *v)
+{
+    return packets_state ? packets_state == 1 : packets_check(v);
 }
 
 /* ---- glDrawArrays ---- */
@@ -3097,21 +3171,157 @@ static __attribute__((noinline)) void scan_u16(const UWORD *in, ULONG count, ULO
     *hi_out = (ULONG)h;
 }
 
+/* draw_arrays' choice of the program's variants when the last one does not
+ * fit the draw (p->var_ok, its keys): sets them and their code addresses
+ * (and a geometry stage's into *gsd); FALSE: nothing drawn (an error set,
+ * or logged). */
+static __attribute__((noinline)) BOOL pick_variants(struct OGLES3Context *ctx, struct OGLES3Program *p,
+                                                    struct OGLES3Draw *d, GLenum mode, GLenum fsmode,
+                                                    const struct OGLES3Image *fim, const ULONG *bits, BOOL a2c,
+                                                    BOOL ps, struct OGLES3VkTargets *tgp, BOOL tg_made,
+                                                    const struct OGLES3Variant **csp,
+                                                    const struct OGLES3Variant **vsp,
+                                                    const struct OGLES3Variant **fsp, ULONG *code,
+                                                    struct gs_draw *gsd)
+{
+    const struct OGLES3Image *im = p->image;
+    const struct OGLES3Variant *cs, *vs, *fs;
+    struct OGLES3VkTargets tg;
+    struct gs_draw *g = 0;
+    if (tg_made)
+        tg = *tgp;
+    if (ctx->probe & OGLES3_PROBE_PERIODIC)
+        ctx->n_picks++;
+    UBYTE cbufs = (UBYTE)((1 << ctx->fb_nrt) - 1);
+    cs = ogles2_image_variant(im, OGLES3_VARIANT_CS, 0, im->geometry ? GL_TRIANGLES : mode);
+    vs = ogles2_image_variant(im, OGLES3_VARIANT_VS, 0, im->geometry ? GL_TRIANGLES : mode);
+    fs = ogles2_image_variant(fim, OGLES3_VARIANT_FS, cbufs, fsmode);
+    if (!cs || !vs || !fs) {
+        ogles2_log("glDrawArrays: the program has no shader for this primitive; nothing drawn");
+        return FALSE;
+    }
+    if (d->missed != im && (fs->is_points != (fsmode == GL_POINTS) ||
+                            fs->is_lines != (fsmode == GL_LINES || fsmode == GL_LINE_LOOP ||
+                                             fsmode == GL_LINE_STRIP))) {
+        d->missed = im; /* plan 7.8: the closest variant is used; logged once per program */
+        ogles2_log("glDrawArrays: no fragment shader variant for primitive %ld; using the closest",
+                   (ULONG)mode);
+    }
+    if (d->missed_rt != im && (fs->cbufs ? fs->cbufs : 1) != cbufs) {
+        d->missed_rt = im; /* logged once per program */
+        ogles2_log("glDrawArrays: no fragment shader variant for %ld render targets "
+                   "(EXT_draw_buffers): the program draws into the first only", (ULONG)ctx->fb_nrt);
+    }
+    {
+        /* An OpenGL ES 3 program: the variants for this state's keys
+         * (above); a GLES2 one keeps 1.x's. */
+        const struct OGLES3Image *vown = im, *fown = fim;
+        if (im->format2 && !tg_made) {
+            vk_targets(ctx, &tg);
+            tg_made = TRUE;
+        }
+        struct gs_pick gp;
+        if (im->geometry) { /* EXT_geometry_shader: the closest geometry variants first */
+            GLenum gmode = im->gs_out == GL_POINTS ? GL_POINTS : GL_TRIANGLES;
+            gp.bin = ogles2_image_variant(im, OGLES3_VARIANT_GS_BIN, 0, gmode);
+            gp.gs = ogles2_image_variant(im, OGLES3_VARIANT_GS, 0, gmode);
+            gp.bown = gp.gown = im;
+            if (!gp.bin || !gp.gs) {
+                ogles2_log("glDrawArrays: the program has no geometry shader variant; nothing drawn");
+                return FALSE;
+            }
+        }
+        if (im->format2)
+            es3_variants(ctx, p, fsmode, ctx->draw_fb ? ctx->fb_draw_mask : 1, bits, a2c, &tg, &vs, &fs,
+                         &vown, &fown, im->geometry ? &gp : 0, ps);
+        code[0] = code_address(d, im, cs);
+        code[1] = code_address(d, vown, vs);
+        code[2] = code_address(d, fown, fs);
+        if (im->geometry) {
+            g = gsd;
+            g->bin = gp.bin;
+            g->gs = gp.gs;
+            g->code[0] = code_address(d, gp.bown, gp.bin);
+            g->code[1] = code_address(d, gp.gown, gp.gs);
+        }
+    }
+    if (!code[0] || !code[1] || !code[2] || (g && (!g->code[0] || !g->code[1]))) {
+        ogles2_error(ctx, GL_OUT_OF_MEMORY);
+        return FALSE;
+    }
+    p->var[0] = cs;
+    p->var[1] = vs;
+    p->var[2] = fs;
+    p->var_code[0] = code[0];
+    p->var_code[1] = code[1];
+    p->var_code[2] = code[2];
+    if (g) {
+        p->var[3] = g->bin;
+        p->var[4] = g->gs;
+        p->var_code[3] = g->code[0];
+        p->var_code[4] = g->code[1];
+    }
+    p->var_mode = mode;
+    p->var_fsmode = fsmode;
+    p->var_fim = fim;
+    p->var_nrt = ctx->fb_nrt;
+    p->var_cbufs = (UBYTE)(ctx->draw_fb ? ctx->fb_draw_mask : 1);
+    p->var_bits[0] = bits[0];
+    p->var_bits[1] = bits[1];
+    p->var_bits[2] = bits[2];
+    p->var_a2c = a2c;
+    p->var_ps = ps;
+    if (im->format2)
+        p->var_tg = tg;
+    p->var_f32 = fs->key ? ogles2_vk_fs_f32(fs->key) : 0;
+    p->var_ok = TRUE;
+    *csp = cs;
+    *vsp = vs;
+    *fsp = fs;
+    if (tg_made)
+        *tgp = tg;
+    return TRUE;
+}
+
+/* EXT_geometry_shader: a draw's geometry stage's textures, images, blocks
+ * and uniforms, into its own tex_states (the stage in row 0). Out of line:
+ * draw_arrays' body as small as before (drawbench, 2026-11-18). */
+static __attribute__((noinline)) BOOL gs_stage(struct OGLES3Context *ctx, struct OGLES3Program *p,
+                                               struct OGLES3Draw *d, struct gs_draw *g)
+{
+    const struct OGLES3Variant *gv[2];
+    if (!d->gs_tst && !(d->gs_tst = AllocVec(sizeof(struct tex_states), MEMF_ANY | MEMF_CLEAR)))
+        return FALSE;
+    memset(d->gs_tst, 0, TEX_STATES_CLEAR);
+    gv[0] = g->bin;
+    gv[1] = g->gs;
+    if (!ubo_copies(ctx, p, gv, 2, d->gs_tst) || !spill_area(ctx, gv, 2) ||
+        !image_states(ctx, p, gv, 2, d->gs_tst, TRUE) || !texture_states(ctx, p, d->gs_tst, TRUE))
+        return FALSE;
+    return (g->unif[0] = write_uniforms(ctx, p, g->bin, d->gs_tst)) != 0 &&
+           (g->unif[1] = write_uniforms(ctx, p, g->gs, d->gs_tst)) != 0;
+}
+
 /* KHR_blend_equation_advanced (Mesa's draw_validate.c): blending with an
  * advanced equation, a draw buffer past the first not GL_NONE, or a
  * fragment shader without that equation's blend_support (the file's
  * ADVANCED_BLEND), is GL_INVALID_OPERATION; an empty draw's too (Mesa
  * validates before it skips one: dEQP-GLES31 debug.negative_coverage). */
-static BOOL advanced_blend_ok(struct OGLES3Context *ctx, const struct OGLES3Image *im)
+static __attribute__((noinline)) BOOL advanced_blend_check(struct OGLES3Context *ctx, const struct OGLES3Image *im)
 {
-    if (__builtin_expect(ogles2_advanced_blend(ctx) != 0, 0)) {
-        ULONG m = ogles2_advanced_blend(ctx);
-        if ((ctx->draw_fb && ogles2_fbo_draws_beyond_0(ctx->draw_fb)) || !im || !(im->blend_modes & (1UL << m))) {
-            ogles2_error(ctx, GL_INVALID_OPERATION);
-            return FALSE;
-        }
+    ULONG m = ogles2_advanced_blend(ctx);
+    if ((ctx->draw_fb && ogles2_fbo_draws_beyond_0(ctx->draw_fb)) || !im || !(im->blend_modes & (1UL << m))) {
+        ogles2_error(ctx, GL_INVALID_OPERATION);
+        return FALSE;
     }
     return TRUE;
+}
+
+/* Inline, its few tests (ogles2_advanced_blend's) at each draw; the rest
+ * out of line (drawbench, 2026-11-18: a call each draw before) */
+static inline BOOL advanced_blend_ok(struct OGLES3Context *ctx, const struct OGLES3Image *im)
+{
+    return __builtin_expect(ogles2_advanced_blend(ctx) == 0, 1) || advanced_blend_check(ctx, im);
 }
 
 /* A draw mode GL knows: ES 3.1 contexts' the adjacency ones too
@@ -3433,89 +3643,12 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
             g->code[1] = p->var_code[4];
         }
     } else {
-        UBYTE cbufs = (UBYTE)((1 << ctx->fb_nrt) - 1);
-        cs = ogles2_image_variant(im, OGLES3_VARIANT_CS, 0, im->geometry ? GL_TRIANGLES : mode);
-        vs = ogles2_image_variant(im, OGLES3_VARIANT_VS, 0, im->geometry ? GL_TRIANGLES : mode);
-        fs = ogles2_image_variant(fim, OGLES3_VARIANT_FS, cbufs, fsmode);
-        if (!cs || !vs || !fs) {
-            ogles2_log("glDrawArrays: the program has no shader for this primitive; nothing drawn");
+        /* a new choice (out of line: draw_arrays' common path as short as
+         * before the geometry stage's cases; drawbench, 2026-11-18) */
+        if (!pick_variants(ctx, p, d, mode, fsmode, fim, bits, a2c, ps, &tg, tg_made, &cs, &vs, &fs, code, &gsd))
             return;
-        }
-        if (d->missed != im && (fs->is_points != (fsmode == GL_POINTS) ||
-                                fs->is_lines != (fsmode == GL_LINES || fsmode == GL_LINE_LOOP ||
-                                                 fsmode == GL_LINE_STRIP))) {
-            d->missed = im; /* plan 7.8: the closest variant is used; logged once per program */
-            ogles2_log("glDrawArrays: no fragment shader variant for primitive %ld; using the closest",
-                       (ULONG)mode);
-        }
-        if (d->missed_rt != im && (fs->cbufs ? fs->cbufs : 1) != cbufs) {
-            d->missed_rt = im; /* logged once per program */
-            ogles2_log("glDrawArrays: no fragment shader variant for %ld render targets "
-                       "(EXT_draw_buffers): the program draws into the first only", (ULONG)ctx->fb_nrt);
-        }
-        {
-            /* An OpenGL ES 3 program: the variants for this state's keys
-             * (above); a GLES2 one keeps 1.x's. */
-            const struct OGLES3Image *vown = im, *fown = fim;
-            if (im->format2 && !tg_made) {
-                vk_targets(ctx, &tg);
-                tg_made = TRUE;
-            }
-            struct gs_pick gp;
-            if (im->geometry) { /* EXT_geometry_shader: the closest geometry variants first */
-                GLenum gmode = im->gs_out == GL_POINTS ? GL_POINTS : GL_TRIANGLES;
-                gp.bin = ogles2_image_variant(im, OGLES3_VARIANT_GS_BIN, 0, gmode);
-                gp.gs = ogles2_image_variant(im, OGLES3_VARIANT_GS, 0, gmode);
-                gp.bown = gp.gown = im;
-                if (!gp.bin || !gp.gs) {
-                    ogles2_log("glDrawArrays: the program has no geometry shader variant; nothing drawn");
-                    return;
-                }
-            }
-            if (im->format2)
-                es3_variants(ctx, p, fsmode, ctx->draw_fb ? ctx->fb_draw_mask : 1, bits, a2c, &tg, &vs, &fs,
-                             &vown, &fown, im->geometry ? &gp : 0, ps);
-            code[0] = code_address(d, im, cs);
-            code[1] = code_address(d, vown, vs);
-            code[2] = code_address(d, fown, fs);
-            if (im->geometry) {
-                g = &gsd;
-                g->bin = gp.bin;
-                g->gs = gp.gs;
-                g->code[0] = code_address(d, gp.bown, gp.bin);
-                g->code[1] = code_address(d, gp.gown, gp.gs);
-            }
-        }
-        if (!code[0] || !code[1] || !code[2] || (g && (!g->code[0] || !g->code[1]))) {
-            ogles2_error(ctx, GL_OUT_OF_MEMORY);
-            return;
-        }
-        p->var[0] = cs;
-        p->var[1] = vs;
-        p->var[2] = fs;
-        p->var_code[0] = code[0];
-        p->var_code[1] = code[1];
-        p->var_code[2] = code[2];
-        if (g) {
-            p->var[3] = g->bin;
-            p->var[4] = g->gs;
-            p->var_code[3] = g->code[0];
-            p->var_code[4] = g->code[1];
-        }
-        p->var_mode = mode;
-        p->var_fsmode = fsmode;
-        p->var_fim = fim;
-        p->var_nrt = ctx->fb_nrt;
-        p->var_cbufs = (UBYTE)(ctx->draw_fb ? ctx->fb_draw_mask : 1);
-        p->var_bits[0] = bits[0];
-        p->var_bits[1] = bits[1];
-        p->var_bits[2] = bits[2];
-        p->var_a2c = a2c;
-        p->var_ps = ps;
-        if (im->format2)
-            p->var_tg = tg;
-        p->var_f32 = fs->key ? ogles2_vk_fs_f32(fs->key) : 0;
-        p->var_ok = TRUE;
+        if (im->geometry)
+            g = &gsd;
     }
 
     /* A colour write of the wrong width (16-bit floats into a 32-bit float
@@ -3576,25 +3709,13 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
     }
     if (!texture_states(ctx, p, &tst, FALSE))
         goto nomem;
-    /* The geometry stage's: its own tex_states, the stage in row 0 */
-    if (g) {
-        const struct OGLES3Variant *gv[2];
-        if (!d->gs_tst && !(d->gs_tst = AllocVec(sizeof(struct tex_states), MEMF_ANY | MEMF_CLEAR)))
-            goto nomem;
-        memset(d->gs_tst, 0, TEX_STATES_CLEAR);
-        gv[0] = g->bin;
-        gv[1] = g->gs;
-        if (!ubo_copies(ctx, p, gv, 2, d->gs_tst) || !spill_area(ctx, gv, 2) ||
-            !image_states(ctx, p, gv, 2, d->gs_tst, TRUE) || !texture_states(ctx, p, d->gs_tst, TRUE))
-            goto nomem;
-    }
     mark(ctx, 2);
     uniform_state(ctx);
     unif[0] = vertex_uniforms(ctx, p, 0, cs, &tst);
     unif[1] = vertex_uniforms(ctx, p, 1, vs, &tst);
     unif[2] = write_uniforms(ctx, p, fs, &tst);
-    if (g && (!(g->unif[0] = write_uniforms(ctx, p, g->bin, d->gs_tst)) ||
-              !(g->unif[1] = write_uniforms(ctx, p, g->gs, d->gs_tst))))
+    /* The geometry stage's textures and uniforms (out of line) */
+    if (__builtin_expect(g != 0, 0) && !gs_stage(ctx, p, d, g))
         goto nomem;
     defattr = default_attribs(ctx, d);
     if (!unif[0] || !unif[1] || !unif[2] || !defattr)
