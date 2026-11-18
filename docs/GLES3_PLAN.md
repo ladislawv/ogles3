@@ -445,6 +445,21 @@ compiled on the PC:
     identical; before, 32 and the 6 geometry ones differing).
 - **dEQP-GLES3:** 32 lists (10,034 passed, none failed), then
   `shaders-builtin_functions` 1,347 of 1,637 when paused.
+- **Resumed 2026-11-18 with m8-2c (`C3=1`), running:** the group's last
+  290 passed; then `shaders-builtin_variable` to `state_query`, 33 lists,
+  18,094 passed and none failed (until 14:38); `texture` and on in progress.
+  - **The A1200 froze once (14:13)** in `shaders-swizzle_math_operations`
+    after 423 of its 544 cases, at `vector_divide.mediump_vec3_x_x_fragment`
+    (its shader compiled, its program not: the log's last line; the
+    bridge's requests all answered, no compiler crash). Ping answered,
+    amigentd not; a reset by hand. The group again: 544 of 544 passed
+    (49 s, its programs cached), so not the case itself. With the GLES2
+    `rgrr` case above, the second trouble in a swizzle group: watched.
+  - **The reset left `runpkg.lock`** in the package's work drawer, and
+    every run of the package after it ended with "NO RESULTS" until it was
+    removed. Fixed in amigent (`ladislawv/amigent` 5bc4234, not pushed):
+    the lock has a twin in `RAM:`, which a reset empties; a lock without
+    it is removed with a line saying so.
 - **Speed seen on the way:** gl4es `m6-1` 6-15% and SDL2 `m6-3` up to 35%
   slower than 2026-10-23 (SDL3 `m6-4` the same): both ask for no version,
   so ES 3.1 contexts now; to run with `OGLES3/Version` 20 to tell.
