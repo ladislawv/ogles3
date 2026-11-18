@@ -470,12 +470,40 @@ compiled on the PC:
     `non_compressed` and `compressed` whole, `mixed` 1,394 of 3,584, at
     about 20 a minute (ASTC decoded by dEQP), so the group would not
     have fit `a_regress.sh`'s 4 hours.
-  - **To do on resuming:** the bridge; `NOBUILD=1 BRIDGE=1 TIMEOUT=14400
-    ARGS="LIST=ci31rest NAME=ci31rest" bash tests/a1200/a_run.sh m8-3c`
-    (`copy_image`'s last 2,190 cases, `tests/a1200/out/extra-lists/`);
-    then `C3=1 FROM=debug bash tests/a1200/a_regress.sh deqp31 speed`.
-    The extra lists in the package's `caselists/` (`gles3-bf-rest`, a
-    GLES3 list) are run by `a_regress.sh` as groups too: to leave out.
+  - **Resumed (19:05-22:01):** `copy_image`'s last 2,190 (list `ci31rest`):
+    1,720 passed, 470 not supported, none failed, so **`copy_image` whole:
+    11,219 passed, 1,176 not supported, none failed** (as 2026-11-17's
+    parts). Then `debug` to `vertex_attribute_binding`, 40 lists (the
+    package's extra GLES3 list `gles3-bf-rest` taken out first: `a_regress.sh`
+    runs every list in `caselists/` as a group): 18,427 passed, 6,236 not
+    supported, 93 failed; `shaders-builtin_functions` 1,985 (920 not
+    supported) in 13 minutes. **dEQP-GLES31 whole: 30,241 passed, 7,468
+    not supported, 93 failed**, all 93 in item 6 (sample shading, written
+    2026-11-16 and run here for the first time):
+    - `shaders.sample_variables.num_samples` 9: "the program binary was
+      refused: state variable not implemented: state.numsamples 38"
+      (`gl_NumSamples`). **Fixed, not yet run:** `OGLES3_STATE_NUM_SAMPLES`
+      (38), one int, the draw framebuffer's samples, at least 1 (Mesa's
+      `prog_statevars.c`; `v3dp.c`, `draw.c`).
+    - `shaders.sample_variables.sample_mask` 36 (`discard_half_*` and
+      `inverse_*`, 6 each): only the 4x targets fail ("Expecting color
+      non-zero and non-saturated green channel"): the `gl_SampleMask`
+      write has no effect. To look at first: whether a 4x draw gets a
+      fragment variant compiled with the key's `msaa` set.
+    - `shaders.multisample_interpolation` 48: `interpolate_at_offset` 36
+      (all 4 subgroups), `interpolate_at_sample` 12, "Image verification
+      failed". Probably the same cause.
+  - **drawbench (22:01, `ogles2-drawbench-20261118-220052`) against
+    2026-10-31's (`-20261031-174119`):** ogles2 1.4's numbers in the same
+    run are within a few per cent of then (the machine the same), but
+    ogles3's draws are slower: `draw_same` 6,479 to 8,023 ns (+24%),
+    `draw_blend_toggled` +33%, `draw_blendfunc_switched` 9,533 to 14,237
+    (+49%), `draw_depthfunc_switched` +25%, `draw_texture_switched` +22%,
+    `draw_matrix_pointers` +23%, `frame_mix` 559 to 513 fps (-8%); the
+    calls alone are the same or faster (`glBindTexture` -25%). Something
+    on the draw path since 2026-10-31 (es32's items: advanced blending's
+    state, sample shading's per-draw checks, the state variables): to find
+    with `tools/perf/` before anything else.
   - **A stopped batch ran on:** the task stopped from the agent's side left
     `a_regress.sh` running (the Git Bash trap below), and it went on
     through 9 groups with "NO RESULTS" (the Amiga's lock), then, the lock

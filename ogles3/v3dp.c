@@ -333,10 +333,11 @@ struct OGLES3Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                 (void)name;
                 (void)size;
                 if (kind == 2) {
+                    BOOL one = st == OGLES3_STATE_ADVANCED_BLENDING_MODE || st == OGLES3_STATE_NUM_SAMPLES;
                     if (st != OGLES3_STATE_DEPTH_RANGE && st != OGLES3_STATE_FB_WPOS_Y_TRANSFORM &&
-                        st != OGLES3_STATE_FB_PNTC_Y_TRANSFORM && st != OGLES3_STATE_ADVANCED_BLENDING_MODE)
+                        st != OGLES3_STATE_FB_PNTC_Y_TRANSFORM && !one)
                         FAIL("state variable not implemented: ", STR(name), st);
-                    if (off + (st == OGLES3_STATE_ADVANCED_BLENDING_MODE ? 1 : 4) > nvalues)
+                    if (off + (one ? 1 : 4) > nvalues)
                         FAIL("state variable outside the constant buffer", 0, ~0UL);
                     sv[im->nstatevars].stage = (UBYTE)si;
                     sv[im->nstatevars].offset = (UWORD)off;

@@ -817,6 +817,16 @@ static void update_state_vars(struct OGLES3Context *ctx, struct OGLES3Program *p
                 ogles2_cbuf_set(p, sv->stage, sv->offset, m);
             continue;
         }
+        case OGLES3_STATE_NUM_SAMPLES: {
+            /* OES_sample_variables' gl_NumSamples, Mesa's prog_statevars.c:
+             * the draw framebuffer's samples, at least 1 (an int) */
+            ULONG n = ctx->draw_fb ? ogles2_fbo_samples(ctx->draw_fb) : ctx->msaa ? 4 : 0;
+            if (!n)
+                n = 1;
+            if (p->cbuf[sv->stage][sv->offset] != n)
+                ogles2_cbuf_set(p, sv->stage, sv->offset, n);
+            continue;
+        }
         case OGLES3_STATE_FB_PNTC_Y_TRANSFORM:
             /* upper-left sprite origin: inverted on a flipped buffer only */
             v[0] = ctx->fb_flip ? -1.0f : 1.0f;

@@ -276,6 +276,7 @@ struct OGLES3Array
 #define OGLES3_U_PISTORM_VP_HEIGHT 0x101 /* PiStorm3D's scale_p_y */
 
 /* Mesa's gl_state_index values at the validated commit, for STAGE_PARAMS. */
+#define OGLES3_STATE_NUM_SAMPLES        38 /* OES_sample_variables' gl_NumSamples: one int */
 #define OGLES3_STATE_DEPTH_RANGE        39
 #define OGLES3_STATE_FB_WPOS_Y_TRANSFORM 63
 #define OGLES3_STATE_FB_PNTC_Y_TRANSFORM 64
