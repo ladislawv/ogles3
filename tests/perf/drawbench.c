@@ -70,7 +70,9 @@ static const char *fs_src[3] = {
 
 static GLuint prog[3];
 static GLint u_mvp[3], u_color[3];
-static GLuint tex[4], vbo, ibo;
+static GLuint tex[4], vbo, ibo, svbo, sibo; /* svbo, sibo: GL_STATIC_DRAW, made once */
+#define MESHES 64   /* draw_static_meshes: more than a job's index copies kept (draw.c's 16) */
+static GLuint mvbo, mibo; /* MESHES meshes, each NV vertices and NI indices, GL_STATIC_DRAW */
 static UBYTE vdata[NV * VSTRIDE];
 static UWORD idata[NI];
 static float mvp[16];
@@ -145,6 +147,29 @@ static void setup(void)
         glBufferSubData(GL_ARRAY_BUFFER, k * NV * VSTRIDE, NV * VSTRIDE, vdata);
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, k * NI * 2, NI * 2, idata);
     }
+    /* A model's way: vertices and indices given once (GL_STATIC_DRAW) */
+    glGenBuffers(1, &svbo);
+    glGenBuffers(1, &sibo);
+    glBindBuffer(GL_ARRAY_BUFFER, svbo);
+    glBufferData(GL_ARRAY_BUFFER, NV * VSTRIDE, vdata, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, NI * 2, idata, GL_STATIC_DRAW);
+    /* A scene's way: many models in one buffer, each drawn once a frame */
+    glGenBuffers(1, &mvbo);
+    glGenBuffers(1, &mibo);
+    glBindBuffer(GL_ARRAY_BUFFER, mvbo);
+    glBufferData(GL_ARRAY_BUFFER, MESHES * NV * VSTRIDE, 0, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, MESHES * NI * 2, 0, GL_STATIC_DRAW);
+    for (k = 0; k < MESHES; k++) {
+        static UWORD mi[NI];
+        glBufferSubData(GL_ARRAY_BUFFER, k * NV * VSTRIDE, NV * VSTRIDE, vdata);
+        for (i = 0; i < NI; i++)
+            mi[i] = (UWORD)(idata[i] + k * NV);
+        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, k * NI * 2, NI * 2, mi);
+    }
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
     for (k = 0; k < 3; k++)
         glEnableVertexAttribArray(k);
     memset(mvp, 0, sizeof(mvp));
@@ -241,6 +266,33 @@ static void t_draw(int n)
     pointers(0);
     for (i = 0; i < n; i++)
         glDrawElements(GL_TRIANGLES, NI, GL_UNSIGNED_SHORT, 0);
+}
+/* Draws from static vertex and element buffers (a model's way) */
+static void t_draw_static(int n)
+{
+    int i;
+    glBindBuffer(GL_ARRAY_BUFFER, svbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sibo);
+    pointers(0);
+    for (i = 0; i < n; i++)
+        glDrawElements(GL_TRIANGLES, NI, GL_UNSIGNED_SHORT, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    pointers(0);
+}
+/* Draws of MESHES different static meshes in turn (a scene of models: few
+ * of a job's draws repeat an earlier one's indices) */
+static void t_draw_meshes(int n)
+{
+    int i;
+    glBindBuffer(GL_ARRAY_BUFFER, mvbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mibo);
+    pointers(0);
+    for (i = 0; i < n; i++)
+        glDrawElements(GL_TRIANGLES, NI, GL_UNSIGNED_SHORT, (void *)((ULONG)(i % MESHES) * NI * 2));
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    pointers(0);
 }
 /* Draws from client arrays (gl4es's way, Quake III through it) */
 static void t_draw_client(int n)
@@ -407,6 +459,8 @@ int main(int argc, char **argv)
         {"glBufferSubData_960B", t_subdata, 200},
         {"glBufferData_960B", t_bufdata, 200},
         {"draw_same", t_draw, 100},
+        {"draw_static_indexed", t_draw_static, 100},
+        {"draw_static_meshes", t_draw_meshes, 100},
         {"draw_client_arrays", t_draw_client, 100},
         {"draw_blend_toggled", t_draw_blend, 100},
         {"draw_then_depth_clear", t_clear_mid, 20},

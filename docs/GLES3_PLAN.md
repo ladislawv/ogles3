@@ -178,7 +178,25 @@ vsync-4 (tearing), drawbench, Quake III, rtt_churn; dEQP-GLES3 `fbo`,
 `LIBS_INSTALL=1` (an installed library wins: the trap that made 78d6b58's
 Quake III number a 1.3's).
 
-**Order:** A first (small, its gain measurable at once), then B.
+**A, done and measured (2026-11-19): not taken.** Written as above (with
+one change: the job's index copy looked up first, a direct one remembered
+in it with `sub` `0xFFFFFFFF`, so that only a miss calls buffer.c) and
+measured against the same build without the direct path, two new
+drawbench tests (`draw_static_indexed`: static vertex and element buffers,
+the same indices each draw; `draw_static_meshes`: 64 static meshes in
+turn, more than the job's 16 index copies, as a scene of models). The
+path works (Probe P's "indices" stage 1.19 -> 0.28 us a draw on the
+meshes) but the vertex stage pays 0.65 us for it (the array loop, the
+lookup, the call), so the meshes gain about 0.25 us (2%, within the
+noise), and the repeated draws lose about as much (`draw_static_indexed`
+7,350 -> 7,400-8,000 ns, `frame_mix` 556-569 -> 517-545). ogles3 already
+had what made it worthwhile in ogles2pi3 1.4: its indices copied once a
+job (`struct index_copy`) two to a long word, and its ranges kept
+(`struct index_range`): a new mesh's draw is mostly the index scan (3.6
+us of "checks"), which the direct path does not save. The library change
+reverted; the two drawbench tests kept.
+
+**Order:** B next.
 
 **Item 9, geometry shaders: stage A, the compiler and the file
 (2026-11-16).** The plan for item 9, in four stages: (A) the compiler
