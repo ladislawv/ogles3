@@ -1,5 +1,28 @@
 # OpenGL ES 3.0 and 3.1 on ogles2.library
 
+**Release 1.0.1 (2026-11-19, the developer's call: the archives in `release/dist/` brought up to
+`es32`, named 1.0.1).** The library and `v3dglslc3` are 1.1 (19.11.2026): the installer's
+`Version` checks and the compiler's `$VER` say so, so `Install-ogles3` and `OGLES3Open` take them for
+newer than 1.0. Programs built with the 1.0.1 SDK need 1.1 (43 entry points more than 1.0's, and
+`OGLES3Open` refuses a smaller function table): GettingStarted and ReadMe-SDL say so. The ReadMe's
+"New in 1.0.1" names what a 1.0 user gets (the ES 3.2 plan's extensions, the vsync wait, 16-bit
+uploads, the render chain, the cache per compiler, `ENV:OGLES3/Version`); fixes of things 1.0
+never had (the draw path's slowdown, sample shading, stencil textures in ES 3.0 contexts) are not
+listed. README.md says that the complete conformance runs are 1.0's and 1.0.1's only of the
+groups its changes touch. `build_release.sh dist sdl` made five archives;
+`ogles3-1.0.1-demos.zip` is made by hand as 1.0's was: 1.0's with the 1.1 library, the ReadMe's
+version, and ten shader files more. The demos are unchanged since 1.0, but run from 1.0's archive
+with 1.1 Boing 2026 compiled draw-time variants of four programs (`.v3dx`, 9 s; their keys changed
+since 1.0) and Boing Ocean six shader checks (`.v3ds`, 20 ms each), into `T:`, lost at each reboot.
+Those ten (the same names with the 1.1 compiler and the one before) are in the zip's `shaders/`
+now. New package `tests/a1200/demos`: the release's demos archive unpacked as a user has it, each
+demo 150 frames the ES 3 and the ES 2.0 way (Juggler also MODERN), a log each; run
+`ogles2-demos-20261119-161524` (the 1.1 compiler in `LIBS:`, those files gone from `T:`): no
+compile in any of the nine (each log's one "compiler:" line names it), Boing 2026 33 fps (11
+while compiling), the rest as before. `SHA256SUMS` lists all six. Also in it: `destroy` clears a texture's stale bits as it clears
+`rendered` (a deleted texture's 16-bit levels were expanded for nothing by its `before_change`;
+found by the review of ogles2pi3's port plan).
+
 **16-bit texture uploads (2026-11-19, a user's report: `C:\- CPP\ogles3
 fix\bug2`).** `glTexSubImage3D` of 256x256 tiles into a 1024x1024x4
 array: RGB565, RGB5_A1 and RGBA4 3.7 times slower a texel than RGBA8

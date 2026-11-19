@@ -24,11 +24,11 @@
  * ES 3.0 and 3.1 (docs/GLES3_PLAN.md), a library of its own beside
  * ogles2.library 1.x. */
 #define OGLES3_LIB_VERSION  1
-#define OGLES3_LIB_REVISION 0
-#define OGLES3_LIB_DATE     "05.11.2026"
+#define OGLES3_LIB_REVISION 1
+#define OGLES3_LIB_DATE     "19.11.2026"
 /* the release's name (its archives, release/build_release.sh): a release may
    rebuild a library without a new version.revision */
-#define OGLES3_RELEASE      "1.0"
+#define OGLES3_RELEASE      "1.0.1"
 
 struct OGLES3Library
 {

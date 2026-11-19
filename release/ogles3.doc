@@ -22,7 +22,7 @@ ogles3.library/--background--                   ogles3.library/--background--
        their standard names, and the agl* context calls described here.
 
    VERSION
-       ogles3.library 1.0, release 1.0 (known issue: see CONFORMANCE).
+       ogles3.library 1.1, release 1.0.1 (known issue: see CONFORMANCE).
        It is a library of its own, beside ogles2.library 1.x (OpenGL ES
        2.0), which it does not replace: programs built for ogles2 keep
        using that. Their files do not meet either: ogles3's compiler is
@@ -85,7 +85,7 @@ ogles3.library/--background--                   ogles3.library/--background--
        A context is OpenGL ES 3.1 unless OGLES3_CCT_PISTORM_ES_VERSION asks
        for another: 20 gives OpenGL ES 2.0, 30 and 31 give 3.1 (the
        highest the library has). GL_VERSION reads "OpenGL ES 3.1
-       ogles3.library 1.0" ("OpenGL ES 2.0 ..." in a 2.0 context), and
+       ogles3.library 1.1" ("OpenGL ES 2.0 ..." in a 2.0 context), and
        GL_SHADING_LANGUAGE_VERSION "OpenGL ES GLSL ES 3.10" ("1.00"). A
        3.1 context takes GLSL ES 1.00, 3.00 and 3.10 shaders; a 2.0 context
        1.00 only. Contexts share objects only with contexts of their own

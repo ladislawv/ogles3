@@ -9,15 +9,18 @@ It is the same API that phones, browsers and game engines use, and the same `agl
 AmigaOS 4's ogles2.library has: OpenGL ES 2.0, 3.0 and 3.1 code from Linux, Android, the web or
 OS4 compiles and runs on the classic Amiga.
 
-**Version 1.0, release 1.0.** The complete conformance runs of OpenGL ES 2.0, 3.0 and 3.1 are
-made (dEQP-GLES31: none failed; see below). Known issue: twice in those runs the whole Amiga
-stopped hours in, on a case that passes when run again; that is still being looked at. Please
-report what goes wrong.
+**Version 1.1, release 1.0.1.** New since 1.0: extensions toward OpenGL ES 3.2 (geometry
+shaders, texture buffers, cube map arrays, ASTC, `glCopyImageSubData`, advanced blending, sample
+shading and others: `release/ogles3.doc`), vsync without lost refreshes, 16-bit textures
+uploaded as fast a byte as RGBA8, a frame's render queued behind the running one, the shader
+cache kept per compiler (`release/ReadMe`). The complete conformance runs of OpenGL ES 2.0, 3.0
+and 3.1 were made on 1.0 (dEQP-GLES31: none failed; see below); 1.0.1's runs are of the groups
+its changes touch. Known issue: twice in 1.0's runs the whole Amiga stopped hours in, on a case
+that passes when run again; that is still being looked at. Please report what goes wrong.
 
 Upgrading from 1.0-beta1: ogles3's shader compiler now has its own message port (beta1's shared
 ogles2's, so with both libraries in use one sent its shaders to the other's compiler). Install
-the library and `v3dglslc3` together (the installer does). 1.0 is 1.0-beta2's library and
-compiler, unchanged.
+the library and `v3dglslc3` together (the installer does).
 
 ogles3.library is the successor of [ogles2.library](https://github.com/ladislawv/ogles2) 1.x
 (OpenGL ES 2.0), built from the same source, as a library of its own: both can be installed at
@@ -57,7 +60,7 @@ once, and programs written for ogles2 keep using it.
 
 ## The demos
 
-Four demos made for OpenGL ES 3 come with the library (and in `ogles3-1.0-demos.zip`):
+Four demos made for OpenGL ES 3 come with the library (and in `ogles3-1.0.1-demos.zip`):
 
 - **Juggler RT**: Eric Graham's 1987 Juggler ray traced in real time. In 1987 one picture took
   his Amiga about an hour; here compute shaders trace every pixel of every frame, with shadows
@@ -88,10 +91,10 @@ code.
 
 | Archive | For | Contents |
 |---|---|---|
-| `ogles3-1.0.lha` | users | the library, the shader compiler, `Install-ogles3`, `OGLES3Log`, eight examples |
-| `ogles3-1.0-sdk.lha` | Amiga programmers | the same plus the SDK: headers, import libraries for GCC and vbcc, the autodoc `ogles3.doc`, the guide `GettingStarted.txt`, example sources |
-| `ogles3-1.0-sdk.zip` | cross-development on a PC | the SDK alone |
-| `ogles3-1.0-sdl.lha` / `.zip` | SDL programmers | SDL2 and SDL3 with the ogles3 backend, the MiniGL SDK SDL links, two examples; unpacks over the SDK |
+| `ogles3-1.0.1.lha` | users | the library, the shader compiler, `Install-ogles3`, `OGLES3Log`, eight examples |
+| `ogles3-1.0.1-sdk.lha` | Amiga programmers | the same plus the SDK: headers, import libraries for GCC and vbcc, the autodoc `ogles3.doc`, the guide `GettingStarted.txt`, example sources |
+| `ogles3-1.0.1-sdk.zip` | cross-development on a PC | the SDK alone |
+| `ogles3-1.0.1-sdl.lha` / `.zip` | SDL programmers | SDL2 and SDL3 with the ogles3 backend, the MiniGL SDK SDL links, two examples; unpacks over the SDK |
 
 The current archives are in [`release/dist/`](release/dist/). ogles2.library 1.3's are in [its repository](https://github.com/ladislawv/ogles2).
 

@@ -1,0 +1,61 @@
+; Run-M1 - ogles2 demos run: the release's demos archive as a user has it.
+;   See ReadMe.txt. CD to this directory, then:   Execute Run-M1
+; Each demo runs 150 frames in a window, the OpenGL ES 3 way and then the
+; ES 2.0 way (Juggler also MODERN), each with a log of its own in
+; results/: every program's binary must come from shaders/ (no
+; "compiler:" line). libs/ is added to LIBS: for the run and removed at
+; the end.
+.bra {
+.ket }
+
+FailAt 21
+If NOT EXISTS libs/ogles3.library
+  Echo "Please CD into the ogles2-demos directory first,"
+  Echo "then run:  Execute Run-M1"
+  Quit 20
+EndIf
+Assign DMR: ""
+If NOT EXISTS DMR:results
+  MakeDir DMR:results
+EndIf
+Echo "ogles2 demos run" >>DMR:results/00-progress.txt
+Date >>DMR:results/00-progress.txt
+List LIBS:ogles3#? >DMR:results/00-libs.txt
+Assign LIBS: DMR:libs ADD
+Avail FLUSH >NIL:
+Version DMR:libs/ogles3.library FULL >DMR:results/00-version.txt
+
+SetEnv OGLES3/LogFile DMR:results/1-boing2026.log
+DMR:boing2026-ogles3 FRAMES=150 NOSOUND >DMR:results/1-boing2026.txt
+SetEnv OGLES3/LogFile DMR:results/2-boing2026-es2.log
+DMR:boing2026-ogles3 FRAMES=150 NOSOUND ES2 >DMR:results/2-boing2026-es2.txt
+Echo "boing2026 done" >>DMR:results/00-progress.txt
+
+SetEnv OGLES3/LogFile DMR:results/3-boingocean.log
+DMR:boingocean-ogles3 FRAMES=150 >DMR:results/3-boingocean.txt
+SetEnv OGLES3/LogFile DMR:results/4-boingocean-es2.log
+DMR:boingocean-ogles3 FRAMES=150 ES2 >DMR:results/4-boingocean-es2.txt
+Echo "boingocean done" >>DMR:results/00-progress.txt
+
+SetEnv OGLES3/LogFile DMR:results/5-boingswarm.log
+DMR:boingswarm-ogles3 FRAMES=150 >DMR:results/5-boingswarm.txt
+SetEnv OGLES3/LogFile DMR:results/6-boingswarm-es2.log
+DMR:boingswarm-ogles3 FRAMES=150 ES2 >DMR:results/6-boingswarm-es2.txt
+Echo "boingswarm done" >>DMR:results/00-progress.txt
+
+SetEnv OGLES3/LogFile DMR:results/7-juggler.log
+DMR:juggler-ogles3 FRAMES=150 >DMR:results/7-juggler.txt
+SetEnv OGLES3/LogFile DMR:results/8-juggler-modern.log
+DMR:juggler-ogles3 FRAMES=150 MODERN >DMR:results/8-juggler-modern.txt
+SetEnv OGLES3/LogFile DMR:results/9-juggler-es2.log
+DMR:juggler-ogles3 FRAMES=150 ES2 >DMR:results/9-juggler-es2.txt
+Echo "juggler done" >>DMR:results/00-progress.txt
+
+UnSetEnv OGLES3/LogFile
+Avail FLUSH >NIL:
+Assign LIBS: DMR:libs REMOVE
+List DMR:results >DMR:results/99-files.txt
+Echo "finished" >>DMR:results/00-progress.txt
+Date >>DMR:results/00-progress.txt
+Assign DMR:
+Echo "Done. Results are in results/."

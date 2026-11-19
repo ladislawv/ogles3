@@ -12,7 +12,7 @@ and SDL3. With it, SDL programs draw through the PiStorm's VideoCore GPU
 | Licence | zlib (as SDL) | zlib (as SDL) |
 
 Both are static link libraries built with clib2; there is no `SDL2.library`.
-They ship as a separate archive, `ogles3-1.0-sdl.lha` (or `.zip` for a PC), which unpacks
+They ship as a separate archive, `ogles3-1.0.1-sdl.lha` (or `.zip` for a PC), which unpacks
 over the ogles3 SDK archive: `SDK/SDL2/`, `SDK/SDL3/`, `SDK/MiniGL/` (PiStorm3D's MiniGL SDK,
 which SDL links for its desktop-GL path), this guide as `SDK/doc/SDL.md`, and two examples
 (`SDK/examples-sdl/`: `sdl2_sprites`, the 2D renderer; `sdl3_gles2`, a program's own GLES2
@@ -67,7 +67,7 @@ code; built in `Examples/SDL/`). Or build them from the source tree (below).
   same GLSL ES shaders. That includes SDL's `testgles2` and the GLES2 renderer
   itself, which were not modified for AmigaOS 3.
 - **Real shaders.** GLSL ES 1.00, 3.00 and 3.10, framebuffer objects, float textures,
-  4x MSAA and the extensions of ogles3.library 1.0, none of which MiniGL offers.
+  4x MSAA and the extensions of ogles3.library 1.1, none of which MiniGL offers.
 - **Vsync without tearing**, in a window and full screen.
 - **Nothing lost.** Audio, input, timers, threads and MiniGL programs work as in
   the SDL_68k releases.

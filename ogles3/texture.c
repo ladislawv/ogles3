@@ -556,8 +556,10 @@ static void destroy(struct OGLES3Context *ctx, struct OGLES3TexState *ts, struct
 {
     struct OGLES3Buffer *b = t->tbo;
     int u;
-    for (u = 0; u < t->nf; u++)
+    for (u = 0; u < t->nf; u++) {
         t->f[u].rendered = 0; /* going: nothing to read back (SDL's render targets: 38 ms) */
+        t->f[u].stale = 0;    /* nor a 16-bit level's RAM copy to expand */
+    }
     before_change(ctx, ts, t); /* a queued draw must not read it; a job drawing into it rendered */
     free_levels(t);
     FreeVec(t);
