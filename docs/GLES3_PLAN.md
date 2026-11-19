@@ -348,8 +348,33 @@ first): `m8-5` 348, `m6-8`, `m6-10`, `m7-2`, `m7-3`, `m7-4`, `m7-6` pass;
 `m5-1` and `m6-6` one memory check each (-27.9 MB: the on-target
 compiler started during the test, no job queued there; to be confirmed);
 dEQP-GLES3 `texture` 5,831 passed, none failed (with the upload fix).
-**Still to run:** the other dEQP groups of the list above, `m5-1` again,
-and the demos' fps with and without NoQueue.
+**The demos with the chain and without (2026-11-19, 1.0.1's library; `ENV:OGLES3/NoQueue` set or
+not, 600 frames each, the order on, off, off, on; the demos archive's package):** Boing 2026 33.58
+and 33.54 fps against 33.03 and 33.05 (1.6 % faster with it), Boing Ocean 48.92 and 48.89 against
+46.13 and 46.16 (6 %), Boing Swarm 75.5 and 75.6 against 75.6 and 75.5, Juggler 76.6 all four,
+Juggler MODERN 28.8 and 28.8 against 28.9 and 28.8: the chain helps the demos that render into
+textures before the frame (several jobs a frame), costs nothing in the others. Nothing of B left to
+run. **`m5-1` again (2026-11-19, 1.0.1's
+code):** compiling on the Amiga 256 PASS and 1 FAIL, "destroy returns the memory (-27862400 bytes
+difference)", the log showing the compiler server started for the test's first shader
+(`v3dglslc3 SERVER`, 19 MB, resident from then on); compiling on the PC (`BRIDGE=1`, no compiler
+started there) 257 PASS, 0 FAIL (`ogles2-m5-1-20261119-230941` and `-230954`). So the earlier
+m5-1 and m6-6 failures were the compiler's start, not a leak; the memory check counts what the
+compiler keeps.
+
+**The dEQP groups the day's changes touch, on 1.0.1's code (2026-11-19, evening; each package's
+library in `LIBS:`, `LIBS_INSTALL=1`; the shaders compiled on the PC):** the render chain (every
+job's submission; its two hazards), the 16-bit uploads and their stale RAM copies, stencil textures
+refused outside ES 3.1, `destroy`'s stale bits; not the shaders, the API checks or the rest of the
+lists, which none of them reach. None failed: dEQP-GLES3 (`m8-2c`, ES 3.0 contexts)
+`occlusion_query` 62/62, `fence_sync` 10/10, `transform_feedback` 987 passed and 333 not supported,
+`state_query` 952/952, `multisample` 32 passed and 32 not supported, and the day's earlier `texture`
+5,831 and `fbo` 2,025; dEQP-GLES31 (`m8-3c`) `texture` 2,048 and 521 not supported,
+`geometry_shading` 198 and 9, `sample_shading` 18 and 10, `compute` 195/195, `synchronization`
+104/104, `draw_indirect` 203 and 18, `image_load_store` 747/747; dEQP-GLES2 (`m7-1`) `fbo` 705 and 4
+quality warnings, `texture` 783 with its 24 known failures. Each as its last run before (the GLES3
+`transform_feedback` had none complete). The GLES3 sync group's list is `fence_sync`, not `sync`
+(the earlier batches named it `sync`, which a_run.sh skips without a word: no such list).
 
 **Item 9, geometry shaders: stage A, the compiler and the file
 (2026-11-16).** The plan for item 9, in four stages: (A) the compiler
