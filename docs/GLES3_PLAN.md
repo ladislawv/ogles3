@@ -1,5 +1,185 @@
 # OpenGL ES 3.0 and 3.1 on ogles2.library
 
+**Plan: ogles2pi3's two speedups into ogles3 (2026-11-19, the developer's
+request; not begun).** From `ladislawv/ogles2pi3`, branch
+`ogles2pi3-beta2` (`C:\- CPP\ogles2pi3`), commits 78d6b58 and f25dfaf.
+ogles2pi3 splits its library into V3D and VC4 backends and ogles3 does
+not, so nothing merges with git: both are written again into ogles3's
+`draw.c`, `job.c`, `fbo.c`, `share.c` and v3dcore, from the net change
+`git diff 429b11c f25dfaf` (429b11c the commit before them). Its other
+speed work since the split is VC4's or the test station's. Checked
+against both trees' code (the line numbers below are ogles3's at 2deb7ff).
+
+**A. Kept index copies** (78d6b58's first part; a day). An element buffer
+of `GL_STATIC_*` usage read as 16-bit indices gets a little-endian GPU
+copy of the whole of it, kept as one of the buffer's copies; a draw whose
+indices need no rebasing reads them there instead of copying, swapping
+and rebasing them into its job (ogles3 makes that copy once a job: `struct
+index_copy`, `d->ic`, in `draw_arrays` after `mark(ctx, 5)`). Measured in ogles2pi3 with
+SA68 on the Pi 4: indices 1.42 -> 0.02 ms a frame. (78d6b58's Quake III
+88.4 -> 91.4 fps was a run of an installed 1.3, as f25dfaf's note says; on
+the build Quake III gave 88.0: it gains little.)
+1. `buffer.c`: `ogles2_buffer_index_copy(ctx, b)`, as ogles2pi3's
+   (`git show 78d6b58 -- ogles2/buffer.c`) with ogles3's names: a free slot
+   of `b->copy[]`, else `drop_copy(&b->copy[0])`;
+   `v3d_mem_alloc(ogles2_device(), &c->mem, (b->size & ~1UL) + 4)`; the
+   bytes swapped by pairs; `c->type = GL_ELEMENT_ARRAY_BUFFER` (no
+   attribute's type, so `ogles2_buffer_copy`'s lookup never matches it),
+   `c->convert = 0`, `c->serial = b->serial`, `c->used_job =
+   ctx->job_serial`, **and `b->copied = TRUE`**: ogles3's `patch_copies`
+   looks at a buffer's copies only when `copied` is set (`buffer.c` 708),
+   and with it a `glBufferSubData` or `glCopyBufferSubData` retires the
+   copy (no `convert`: `drop_copy`, freed after its last job; ogles2pi3
+   has no such flag). Not for a stream buffer (`ogles2_buffer_stream`,
+   which counts `GL_STATIC_READ` and `_COPY` as static too), a mapped one,
+   one without data or under 2 bytes. A GPU write into the buffer
+   (transform feedback, storage, image stores) bumps its serial when read
+   back (`gpu_written_now`, `texels_back`), so a copy of an older serial is
+   never used. No cache call: the flush cleans the whole data cache
+   (`job.c` 863, `clean_all`).
+2. `draw.c`: `struct elements` gets `buf` and `offset`; `draw_elements`
+   sets them where it takes the element buffer (`ogles2_buffer_element`,
+   the original `indices` argument as the offset), 0 for client indices.
+3. `draw_arrays`, before the vertex data (the arrays read from `first`): the
+   direct path when all of: `el && el->buf`, `el->type ==
+   GL_UNSIGNED_SHORT`, `itype_gl == GL_UNSIGNED_SHORT` (no widening for
+   `gl_VertexID`), an even `el->offset`, `(ULONG)first == el->min` (no base
+   vertex: `draw_elements` passes `first = lo + basevertex`, `el.min =
+   lo`), no `gd` (GPU-read or indirect), not `ogles2_draw_rare` (feedback,
+   counts), and every array the program reads (`p->slot_attrib`, enabled)
+   a static buffer (`ctx->array[g].buffer && !ogles2_buffer_stream`). Then
+   `count = first + count`, `first = 0` (static arrays are addressed
+   `base + first * stride`, `draw.c` 1727: they start at the copy), and at
+   the indices `idx_addr = copy + el->offset`, `idx_size = count * 2`,
+   past the `ic` copy. Primitive restart stays right (the index 0xFFFF is
+   not rebased; the packet's restart bit as before). Instanced arrays
+   (divisors) are static buffers too and start at instance 0 anyway.
+4. Measured with a drawbench test of its own (`tests/perf/drawbench.c`,
+   e.g. `draw_static_indexed`: static vertex and element buffers):
+   drawbench's draw tests read stream buffers, which never take this path.
+   Then Quake III (m6-2, m6-5), Probe P's "indices" stage.
+5. Checked: dEQP-GLES3 `draw`, `instanced`, `primitive_restart`,
+   `vertex_arrays`, `buffer`; dEQP-GLES31 `draw_base_vertex`,
+   `draw_indirect`; dEQP-GLES2 `draw`; m5-1, m8-5.
+
+**B. The render chain** (78d6b58's queue as f25dfaf replaced it; 3-5
+days). A job flushed while this context's last render still runs is binned
+at once and its render written to the render thread's queue behind the
+running one (the hardware holds one queued: up to two renders on the GPU;
+a third job waits for the older). Measured in ogles2pi3: SA68 at 1920x1080
+with framebuffer-object effects 18.1 -> 15.1 ms a frame (then the GPU is
+the limit); Quake III chains nothing. Pieces:
+1. **v3dcore** (its five files differ from 429b11c's only in
+   `V3D_RETIRE_MAX` and `g_v3d_cl_generation`: f25dfaf's hunks nearly as
+   they are). `v3d_context.h`: the control-list arrays [3] (`binning_mem`,
+   `render_mem`, `tile_list_mem`, `state_mem` and their buffers), slot [2]
+   allocated at the first chain (`v3d_context_alloc_slot2`, about 8 MB;
+   freed in `v3d_context_free`), `slot2_ready`, `last_slot` (78d6b58's
+   `queued_slot` unused by f25dfaf: not ported); its comments of two slots
+   and "GPU execution strictly serial" rewritten. `v3d_frame.c`:
+   `v3d_frame_retire_upto(device, frame, seq)`, `v3d_frame_retire` its call
+   with `render_seq`. `v3d_submit_timeout.c` 166: done once the count has
+   passed the wanted one modulo 256, `(v3d_u8)(currentFrameCount -
+   lastFrame - 1) < 128` (with two renders in flight it may be one short
+   or two past).
+2. **`ogles3_internal.h`**: the context's `pend_seq`, `pend_ta` and the
+   older render's `pp_active`, `pp_frame`, `pp_serial`, `pp_seq`, `pp_fb`
+   (`pp_tg` only for `target_dma`, a no-op: not needed); `job_own_pools`,
+   `no_queue`, `n_queued`, `n_chain_waits`;
+   `ogles2_fbo_want_own_pools`. ogles2pi3's backend hooks
+   (`job_can_queue`, `job_seq`, `job_retire_upto`) become static functions
+   of `job.c`.
+3. **`job.c`**: `job_own_pools` at the job's start (in `ogles2_job_begin` at
+   `ctx->job_fb = ctx->draw_fb`, 238, only when `draw_fb` and its target
+   were made); `pp_done` (the
+   older render's blocks retired up to `pp_seq`, `ogles2_fbo_rendered` of
+   `pp_fb`) called by `ogles2_job_finish` before `after_render`, which
+   waits for `pend_frame` only (renders run in order); `no_queue` from
+   `ENV:OGLES3/NoQueue` (not OGLES2: ogles3's variables), read once and
+   logged; `can_queue` (not with probe S, `OGLES3_PROBE_SEMAPHORE`; not
+   when `build_slot == last_slot`; slot [2] allocated or refused, logged);
+   `end_slot` (after a chained submission `3 - s - last_slot`, else the
+   other of 0 and 1; `last_slot = s`). In `ogles2_job_flush` (1007-1208):
+   the decision before anything else, from what the job's start found (a
+   first version deciding after `ogles2_fbo_target(…, TRUE)` failed m5-1 in
+   ogles2pi3): an open job, `ctx->pend`, an object job or the frame's end,
+   **`may_defer(ctx, fb != 0)`** (ogles3's refuses a `job_storage` job,
+   also an object's: its caches are cleaned in `after_render`), not
+   NoQueue, **not `ctx->job_xfb` (H2)** and **no binning-stage texture or
+   block read (H1)**, below; neither render on the context's pools (else
+   `ogles2_fbo_want_own_pools` and no chain this time); `can_queue`. Then
+   re-checked after `ogles2_fbo_target(…, TRUE)` (1057: pools made anew, or
+   the running render's: an ordinary job), after `take_gpu` (1063: `pend`
+   gone or `pend_done` set by another task: ordinary; two renders already
+   on the GPU: wait for the older, `n_chain_waits`, `pp_done`; that wait
+   failing: `ogles2_job_finish`, ordinary), the binning at once, and inside
+   the binning's success (after `v3d_frame_render_submitted`, 1119) the
+   chained submission: `pend` to `pp`, the new job `pend` with `pend_frame
+   + 1`, `pend_seq = v->frame.render_seq`, `pend_ta`; ogles3's
+   `g_v3d_cl_generation++` and `frame_active = FALSE` kept. The deferred
+   path sets `pend_seq` and `pend_ta` too (1128-1132); a binning failure of
+   a job that was to chain finishes the older first (1166).
+   **`v->build_slot = 1 - v->build_slot` (1145 and 1187, the latter also
+   the probe-S and failure paths) becomes `end_slot`: with slot [2] it
+   would give 255.** Comments of `list_room` (644-649), `take_gpu`,
+   `ogles2_job_finish` (930-932: "one past ours at most") rewritten.
+4. **`fbo.c`**: `want_own_pools` in the object (after `pool_tiles`, 110);
+   `pools()` 1658 `if (tiles <= mine && !fb->want_own_pools)` (ogles2pi3's
+   `fbo_v3d.c` 91: part of the chain, not in its `ogles2/` diff's obvious
+   files); `ogles2_fbo_want_own_pools` (logged once); `before_fb_change`
+   (312-318), `before_rb_change` (321-335) and
+   `ogles2_fbo_texture_changing` (351-357) also for `pp_fb` while
+   `pp_active`.
+5. **`share.c` 98**: `ogles2_job_user` also matches `pp_serial` while
+   `pp_active`. Without it every caller of `ogles2_job_user` and
+   `ogles2_job_uses` takes the older render for finished: queries'
+   counters and results (`query.c` 216-220, 297-309), fences (`sync.c`
+   92-100), buffer renaming and waits (`buffer.c` 180-182, 213-215,
+   720-721, 745, 1085, 1128), textures' `before_change` and the TFU
+   (`texture.c` 444-468, 6696-6698), deferred frees (`share.c` 115).
+   `texture.c` 3439-3442 (`image_writes_done`) for symmetry. Already right
+   (they call `ogles2_job_finish`, which then waits for both):
+   `glReadPixels` and CPU clears (`frame.c`), `blit.c` 338, `copy.c` 72,
+   `compute.c` 374, `texture.c` 4162 and 6360-6366, `fbo.c` 1661.
+6. `context.c`: the chained jobs' count in the closing timing lines.
+**Two hazards ogles2pi3 has not met** (before the chain no binning ran
+beside a render: the flush began with `ogles2_job_finish`): **H1**, a
+binning-stage variant (`OGLES3_VARIANT_CS`, `_GS_BIN`) that samples a
+texture or reads a block the running render writes would read it before
+it is written: a per-job flag set by `draw.c` when a binning-stage variant
+has TMU, uniform block or image uniforms, and no chain with it set (the
+built-in image's `no_textures` is 0, so test the recipes, not that);
+**H2**, transform feedback: the new job's binner writes the feedback
+buffers' words, which `ogles2_buffer_words` reuses in place without
+asking whether a running render reads them (`buffer.c` 1081-1084): no
+chain with `ctx->job_xfb` (the counts alone, `job_counts`, are the
+binner's only: fine). Not affected: the vsync work (a4f6ab7 changed
+`display.c` and the HVS's counter, not V3D's render count or `job.c`);
+`ogles2_xfb_gpu_counts` (read after the binning, which the chain still
+waits for); the retire change of 5653559 (its flush and finish wait for
+both; the list now holds three jobs' blocks, its thresholds reached
+sooner); the cache invalidation now during a render (as Mesa's kernel
+does). minigl.library submitting more than 127 renders while ours waited
+would fool the modulo test (the old test could misjudge at a wrap too).
+**Test:** ogles2pi3's `tests/m8_queue/m8_queue.c` (its own 640x480 screen,
+a 64x64 object cleared to a colour of its frame each frame and drawn,
+every second frame `glReadPixels` of the centre checked, a context
+destroyed with a job chained, a second context's memory back within 4 KB;
+step 2 with NoQueue as the control) with `OGLES3*` names, in a package of
+its own (m8-1 to m8-6 are ogles3's: `tests/a1200/m8-7`), its Makefile rule
+as `rtt_churn`'s; added: a vertex shader sampling the texture the previous
+object job rendered (H1) and transform feedback into a buffer the previous
+job drew from (H2). Then m5-1, m7-6, m2-5, m6-8, m8-5, m8-6, vsync-3 and
+vsync-4 (tearing), drawbench, Quake III, rtt_churn; dEQP-GLES3 `fbo`,
+`occlusion_query`, `sync`, `transform_feedback`, `texture.vertex`,
+`state_query`; dEQP-GLES31 `geometry_shading`, `texture.multisample`,
+`sample_shading`, `copy_image`, `compute`, `synchronization`,
+`draw_indirect`, `image_load_store`; dEQP-GLES2 `fbo`. With
+`LIBS_INSTALL=1` (an installed library wins: the trap that made 78d6b58's
+Quake III number a 1.3's).
+
+**Order:** A first (small, its gain measurable at once), then B.
+
 **Item 9, geometry shaders: stage A, the compiler and the file
 (2026-11-16).** The plan for item 9, in four stages: (A) the compiler
 compiles a geometry stage and the file holds it; (B) the library reads it
