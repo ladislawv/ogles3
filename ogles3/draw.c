@@ -1928,11 +1928,13 @@ static __attribute__((noinline)) void gs_records(ULONG *w, const struct gs_draw 
 /* The GL shader state record and its attribute records, one per vertex
  * input slot (Mesa's emit_shader_state_record and v3d_emit_gl_shader_state,
  * V3D 4.2), after a geometry stage's records (g; NULL: none); the address
- * of the first. */
-static ULONG shader_record(struct OGLES3Context *ctx, struct OGLES3Program *p, ULONG defattr,
-                           const ULONG code[3], const ULONG unif[3], const struct OGLES3Variant *cs,
-                           const struct OGLES3Variant *vs, const struct OGLES3Variant *fs,
-                           GLenum mode, const struct attr_src *src, int nslots, const struct gs_draw *g)
+ * of the first. Inlined into its two callers below, so that the common
+ * one's g is a constant NULL and its tests go (drawbench, 2026-11-19). */
+static inline __attribute__((always_inline)) ULONG
+shader_record_body(struct OGLES3Context *ctx, struct OGLES3Program *p, ULONG defattr, const ULONG code[3],
+                   const ULONG unif[3], const struct OGLES3Variant *cs, const struct OGLES3Variant *vs,
+                   const struct OGLES3Variant *fs, GLenum mode, const struct attr_src *src, int nslots,
+                   const struct gs_draw *g)
 {
     V3DContext *v = ctx->v3d;
     int nrec = nslots ? nslots : 1;
@@ -2077,6 +2079,28 @@ addresses:
     }
     v->current_buf = saved;
     return (ULONG)block; /* the record, or the geometry stage's records before it */
+}
+
+/* A draw without a geometry stage's record (g NULL: the template path as
+ * before EXT_geometry_shader) */
+static ULONG shader_record(struct OGLES3Context *ctx, struct OGLES3Program *p, ULONG defattr,
+                           const ULONG code[3], const ULONG unif[3], const struct OGLES3Variant *cs,
+                           const struct OGLES3Variant *vs, const struct OGLES3Variant *fs, GLenum mode,
+                           const struct attr_src *src, int nslots)
+{
+    return shader_record_body(ctx, p, defattr, code, unif, cs, vs, fs, mode, src, nslots, 0);
+}
+
+/* and one with a geometry stage's records first (out of line) */
+static __attribute__((noinline)) ULONG shader_record_gs(struct OGLES3Context *ctx, struct OGLES3Program *p,
+                                                        ULONG defattr, const ULONG code[3], const ULONG unif[3],
+                                                        const struct OGLES3Variant *cs,
+                                                        const struct OGLES3Variant *vs,
+                                                        const struct OGLES3Variant *fs, GLenum mode,
+                                                        const struct attr_src *src, int nslots,
+                                                        const struct gs_draw *g)
+{
+    return shader_record_body(ctx, p, defattr, code, unif, cs, vs, fs, mode, src, nslots, g);
 }
 
 /* ---- state packets ---- */
@@ -2347,7 +2371,7 @@ static void emit_state_all(struct OGLES3Context *ctx, struct dedup *dd, int prim
     edo = (s->caps & OGLES3_CAP_POLYGON_OFFSET_FILL) ? TRUE : FALSE;
     /* be: Mesa's v3dx_emit.c, the tile buffer does not blend while the
      * shader does (a 32-bit float or integer target in the framebuffer) */
-    be = (s->caps & OGLES3_CAP_BLEND) && s->blend_rts && !ctx->fb_soft_blend && !ogles2_advanced_blend(ctx)
+    be = (s->caps & OGLES3_CAP_BLEND) && !ctx->fb_soft_blend && !(ogles2_draw_rare && ogles2_advanced_blend(ctx))
              ? TRUE : FALSE; /* an advanced mode: the shader blends (KHR_blend_equation_advanced) */
     /* 4x MSAA (the job's, job.c): the rasterizer samples four
      * points a pixel (Mesa v3dx_emit.c), and glSampleCoverage's mask, as
@@ -2711,6 +2735,8 @@ static inline __attribute__((always_inline)) ULONG draw_packets(UBYTE *b, UBYTE 
  * the test's own, for both endings (0 not checked yet, 1 the same, 2 not:
  * logged, and v3dcore's writers used). */
 static UBYTE packets_state;
+
+ULONG ogles2_draw_rare; /* ogles3_internal.h */
 
 static __attribute__((noinline)) BOOL packets_check(V3DContext *v)
 {
@@ -3270,8 +3296,7 @@ static __attribute__((noinline)) BOOL pick_variants(struct OGLES3Context *ctx, s
     p->var_bits[1] = bits[1];
     p->var_bits[2] = bits[2];
     p->var_a2c = a2c;
-    p->var_ps = ps;
-    p->var_msaa = ctx->fb_msaa;
+    p->var_sx = (UBYTE)(ps | ctx->fb_msaa << 1);
     if (im->format2)
         p->var_tg = tg;
     p->var_f32 = fs->key ? ogles2_vk_fs_f32(fs->key) : 0;
@@ -3518,15 +3543,17 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
     ULONG unif[3], code[3], defattr, rec, idx_addr = 0, idx_size = 0, ioffset;
     int a, nslots = 0, i;
     struct gs_draw gsd, *g = 0; /* EXT_geometry_shader: the draw's geometry stage, if it has one */
-    /* GL_PRIMITIVES_GENERATED counts it (not the library's own draws), and
-     * whether only the binner knows its counts (below) */
-    BOOL gen = ctx->gen_active && !ctx->query_paused, gpu_count;
+    /* GL_PRIMITIVES_GENERATED counts it (not the library's own draws): GEN;
+     * whether only the binner knows its counts: ctx->draw_gpu_count (below).
+     * Neither held in a register through the draw (drawbench, 2026-11-19:
+     * the values live from its start to its end cost every stage) */
+#define GEN (ctx->gen_active && !ctx->query_paused)
 
     /* GL_RASTERIZER_DISCARD: no fragments, and without transform feedback a
      * draw then has no effect at all: nothing is drawn. With it, binning
      * still feeds back (CFG_BITS discards every primitive, emit_state);
      * and still counts the primitives generated. */
-    if ((ctx->state.caps & OGLES3_CAP_RASTERIZER_DISCARD) && !ogles2_xfb_drawing(ctx) && !gen)
+    if ((ctx->state.caps & OGLES3_CAP_RASTERIZER_DISCARD) && !ogles2_xfb_drawing(ctx) && !GEN)
         return;
     if (!(d = draw_state(ctx))) {
         ogles2_error(ctx, GL_OUT_OF_MEMORY);
@@ -3547,47 +3574,60 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
      * shader's inputs). Feeding back, its job is its own (the open one, if
      * it fed back, rendered first: ogles2_xfb_gpu_counts reads what the
      * job wrote). */
-    if (im->geometry ? !gs_takes(im->gs_in, mode) : mode > GL_TRIANGLE_FAN) {
-        ogles2_error(ctx, GL_INVALID_OPERATION);
-        return;
-    }
-    if (!advanced_blend_ok(ctx, im)) /* KHR_blend_equation_advanced */
-        return;
-    if (im->geometry) {
-        if (!packets_ok(v)) { /* v3dcore's writers: no GL_SHADER_STATE_INCLUDING_GS */
-            if (!d->gs_refused_logged) {
-                d->gs_refused_logged = TRUE;
-                ogles2_log("draw: a geometry shader without the library's own draw packets is not drawn "
-                           "(logged once)");
-            }
+    /* The rare cases (a geometry stage, primitives counted, feedback, a
+     * buffer's copies apart, advanced blending, sample shading) only while
+     * ogles2_draw_rare is set or the program has a geometry stage: two
+     * reads in the common case (drawbench, 2026-11-19) */
+    if (__builtin_expect(ogles2_draw_rare | im->geometry, 0)) {
+        if (im->geometry ? !gs_takes(im->gs_in, mode) : mode > GL_TRIANGLE_FAN) {
+            ogles2_error(ctx, GL_INVALID_OPERATION);
             return;
         }
-        fsmode = im->gs_out == GL_POINTS ? GL_POINTS : im->gs_out == GL_LINE_STRIP ? GL_LINES : GL_TRIANGLES;
+        if (!advanced_blend_ok(ctx, im)) /* KHR_blend_equation_advanced */
+            return;
+        if (im->geometry) {
+            if (!packets_ok(v)) { /* v3dcore's writers: no GL_SHADER_STATE_INCLUDING_GS */
+                if (!d->gs_refused_logged) {
+                    d->gs_refused_logged = TRUE;
+                    ogles2_log("draw: a geometry shader without the library's own draw packets is not drawn "
+                               "(logged once)");
+                }
+                return;
+            }
+            fsmode = im->gs_out == GL_POINTS ? GL_POINTS : im->gs_out == GL_LINE_STRIP ? GL_LINES : GL_TRIANGLES;
+        }
+        /* Counts only the binner knows: a geometry shader's output fed back or
+         * counted, or a draw counted whose primitives restart or whose command
+         * the GPU wrote. Its job is its own (the open one rendered first), read
+         * back after it (ogles2_xfb_gpu_counts). EXT_geometry_shader's
+         * feedback of an indexed or GPU-read indirect draw, or of one with no
+         * room for all it writes (the writes stop at the end; ES 3.1 contexts),
+         * too. */
+        ctx->draw_gpu_count = im->geometry ? GEN || ogles2_xfb_drawing(ctx)
+                  : (GEN && ((el && el->restart) || (gd && gd->ind_addr))) ||
+                    (__builtin_expect(ctx->xfb_begun, 0) && ogles2_xfb_drawing(ctx) &&
+                     (el || (gd && gd->ind_addr) || !ogles2_xfb_fits(ctx, mode, count, instances)));
+        /* a buffer's two GPU copies one apart: settled before the job is built */
+        if (__builtin_expect(ogles2_mixed_writes_seen, 0))
+            ogles2_buffers_settle(ctx);
+        if (__builtin_expect(ctx->draw_gpu_count, 0) && v && v->frame_active)
+            ogles2_job_flush(ctx, FALSE);
+        /* GL_SAMPLE_SHADING above one of the 4 samples (Mesa's st_atom_shader.c:
+         * MinSampleShadingValue * samples > 1): the shader's inputs a sample's */
+        ps = (ctx->state.caps & OGLES3_CAP_SAMPLE_SHADING) && ctx->state.min_sample_shading > 0.25f &&
+             im->format2 && ctx->fb_msaa;
+    } else {
+        if (mode > GL_TRIANGLE_FAN) {
+            ogles2_error(ctx, GL_INVALID_OPERATION);
+            return;
+        }
+        ctx->draw_gpu_count = 0;
+        ps = 0;
     }
-    /* Counts only the binner knows: a geometry shader's output fed back or
-     * counted, or a draw counted whose primitives restart or whose command
-     * the GPU wrote. Its job is its own (the open one rendered first), read
-     * back after it (ogles2_xfb_gpu_counts). EXT_geometry_shader's
-     * feedback of an indexed or GPU-read indirect draw, or of one with no
-     * room for all it writes (the writes stop at the end; ES 3.1 contexts),
-     * too. */
-    gpu_count = im->geometry ? gen || ogles2_xfb_drawing(ctx)
-              : (gen && ((el && el->restart) || (gd && gd->ind_addr))) ||
-                (__builtin_expect(ctx->xfb_begun, 0) && ogles2_xfb_drawing(ctx) &&
-                 (el || (gd && gd->ind_addr) || !ogles2_xfb_fits(ctx, mode, count, instances)));
-    /* a buffer's two GPU copies one apart: settled before the job is built */
-    if (__builtin_expect(ogles2_mixed_writes_seen, 0))
-        ogles2_buffers_settle(ctx);
-    if (__builtin_expect(gpu_count, 0) && v && v->frame_active)
-        ogles2_job_flush(ctx, FALSE);
     /* A 4x MSAA default framebuffer, or multisampled renderbuffers, with
      * GL_SAMPLE_ALPHA_TO_COVERAGE (Mesa turns alpha into the sample mask in
      * the fragment shader). */
     a2c = (ctx->state.caps & OGLES3_CAP_SAMPLE_ALPHA_TO_COVERAGE) != 0 && ctx->fb_msaa;
-    /* GL_SAMPLE_SHADING above one of the 4 samples (Mesa's st_atom_shader.c:
-     * MinSampleShadingValue * samples > 1): the shader's inputs a sample's */
-    ps = (ctx->state.caps & OGLES3_CAP_SAMPLE_SHADING) && ctx->state.min_sample_shading > 0.25f &&
-         im->format2 && ctx->fb_msaa;
     fim = im;
     bits[0] = bits[1] = bits[2] = 0;
     if (im->format2) {
@@ -3596,8 +3636,11 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
         if (ogles2_wide_seen) { /* sampler_bits' own first test, without its calls */
             bits[0] = sampler_bits(ctx, p, 0);
             bits[1] = sampler_bits(ctx, p, 1);
-            if (im->geometry)
-                bits[2] = sampler_bits(ctx, p, 2);
+            /* the geometry stage's: 0 for a program without one, as its
+             * last choice's; with one, a change makes the choice again
+             * (not compared at each draw: drawbench, 2026-11-19) */
+            if (im->geometry && (bits[2] = sampler_bits(ctx, p, 2)) != p->var_bits[2])
+                p->var_ok = FALSE;
         }
         /* The targets' key: with software blending all of vk_targets';
          * without, its 32-bit targets alone (fb_wide), compared as that
@@ -3625,8 +3668,8 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
     }
     if (p->var_ok && p->var_mode == mode && p->var_fsmode == fsmode && p->var_fim == fim &&
         p->var_nrt == ctx->fb_nrt && p->var_cbufs == (ctx->draw_fb ? ctx->fb_draw_mask : 1) &&
-        p->var_bits[0] == bits[0] && p->var_bits[1] == bits[1] && p->var_bits[2] == bits[2] && p->var_a2c == a2c &&
-        p->var_ps == ps && p->var_msaa == ctx->fb_msaa &&
+        p->var_bits[0] == bits[0] && p->var_bits[1] == bits[1] && p->var_a2c == a2c &&
+        p->var_sx == (UBYTE)(ps | ctx->fb_msaa << 1) &&
         (!im->format2 || (tg_made ? same_targets(&p->var_tg, &tg)
                                   : !p->var_tg.soft && p->var_tg.f32 == ctx->fb_wide))) { /* an ES3 program's */
         cs = p->var[0];
@@ -3827,7 +3870,8 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
                 goto nomem;
         }
     mark(ctx, 4);
-    if (!(rec = shader_record(ctx, p, defattr, code, unif, cs, vs, fs, mode, src, nslots, g)))
+    if (!(rec = __builtin_expect(g != 0, 0) ? shader_record_gs(ctx, p, defattr, code, unif, cs, vs, fs, mode, src, nslots, g)
+                                            : shader_record(ctx, p, defattr, code, unif, cs, vs, fs, mode, src, nslots)))
         goto nomem;
     mark(ctx, 5);
     if (el) {
@@ -3938,12 +3982,12 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
           (g ? ogles2_xfb_before_draw(ctx, im->gs_out == GL_POINTS ? GL_POINTS : GL_TRIANGLES,
                                       g->bin->per_vertex_point_size)
              : ogles2_xfb_before_draw(ctx, mode, cs->writes_psiz));
-    if (__builtin_expect(gen && !gpu_count, 0)) /* GL_PRIMITIVES_GENERATED, on the CPU */
+    if (__builtin_expect(ogles2_draw_rare, 0) && GEN && !ctx->draw_gpu_count) /* GL_PRIMITIVES_GENERATED, on the CPU */
         ogles2_query_gen_add(ctx, prims_of(mode, el ? (ULONG)el->count & 0x7FFFFFFFUL : (ULONG)count) *
                                       (ULONG)instances);
     if (__builtin_expect(gd != 0, 0) && gd->ind_addr) {
         indirect_packets(v, cs, vs, rec, nslots, mode, el, itype_gl, idx_addr, idx_size, gd->ind_addr, g);
-        if (gpu_count)
+        if (ctx->draw_gpu_count)
             ogles2_xfb_gpu_counts(ctx, xfb);
         mark(ctx, 7);
         return;
@@ -3961,8 +4005,8 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
             if (g)
                 gs_packets(b, g);
         }
-        if (xfb || gpu_count)
-            xfb_after(ctx, gpu_count, xfb, mode, count, instances);
+        if (xfb || ctx->draw_gpu_count)
+            xfb_after(ctx, ctx->draw_gpu_count, xfb, mode, count, instances);
         mark(ctx, 7);
         return;
     }
@@ -3978,8 +4022,8 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
             if (g)
                 gs_packets(b, g);
         }
-        if (xfb || gpu_count)
-            xfb_after(ctx, gpu_count, xfb, mode, count, instances);
+        if (xfb || ctx->draw_gpu_count)
+            xfb_after(ctx, ctx->draw_gpu_count, xfb, mode, count, instances);
         mark(ctx, 7);
         return;
     }
@@ -3999,8 +4043,8 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
          * gl_VertexID (the addresses moved back, above). */
         VertexArrayPrims(v, HW_PRIM(mode), (ULONG)count, vid ? (ULONG)first : 0);
     }
-    if (xfb || gpu_count)
-        xfb_after(ctx, gpu_count, xfb, mode, count, instances);
+    if (xfb || ctx->draw_gpu_count)
+        xfb_after(ctx, ctx->draw_gpu_count, xfb, mode, count, instances);
     mark(ctx, 7);
     return;
 
@@ -4009,6 +4053,7 @@ nomem:
     v->frame_corrupted = TRUE;
     ogles2_error(ctx, GL_OUT_OF_MEMORY);
 }
+#undef GEN
 
 /* The vertex input slot of column k of an attribute (a matrix's columns are
  * generic attributes of their own), -1 if the shader does not read it. */

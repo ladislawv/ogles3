@@ -1161,6 +1161,7 @@ BOOL ogles2_mixed_writes_seen;
 void ogles2_buffer_mixed_seen(void)
 {
     ogles2_mixed_writes_seen = TRUE;
+    ogles2_draw_rare = 1;
 }
 
 /* Before a draw or a dispatch builds its job (draw.c, compute.c): each
@@ -1204,6 +1205,7 @@ void ogles2_buffer_image_written(struct OGLES3Context *ctx, struct OGLES3Buffer 
     if (cs != 4) {
         ogles2_gpu_writes_seen = TRUE;
         ogles2_mixed_writes_seen = TRUE;
+        ogles2_draw_rare = 1;
         if (serial)
             b->tex_job = serial;
         else

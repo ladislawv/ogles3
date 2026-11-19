@@ -562,6 +562,41 @@ compiled on the PC:
     `geometry_shading` 198, `blend_equation_advanced` 102, `draw_indirect`
     203 passed, none failed; `shaders.sample_variables` 107 passed and 36
     failed (the 9 `num_samples` now pass: `gl_NumSamples` works).
+  - **The rest (2026-11-19, morning).** Two throwaway builds with the ES 3.2
+    work's tests taken out of `draw_arrays` (not committed) showed what
+    they cost: 0.7 us a draw for the geometry, feedback, counting,
+    advanced blending and sample shading tests at its start, though each is
+    a field and a branch (on Emu68 every field read costs: seven fields),
+    and 0.3 us for the variant cache's new keys and the blend-enable test.
+    Now: `ogles2_draw_rare`, set and never cleared by the first
+    `GL_PRIMITIVES_GENERATED` query, transform feedback, mixed buffer
+    writes, advanced blend equation or `GL_SAMPLE_SHADING`; while it is 0 a
+    program without a geometry stage reads it and `im->geometry` only.
+    `var_ps` and `var_msaa` one byte (`var_sx`); the geometry stage's
+    sampler bits not compared at each draw (a change clears `var_ok`
+    where they are made); the blend-enable test without `blend_rts` (set
+    with the cap) and the advanced mode only with the flag; `gen` and
+    `gpu_count` not held through the draw (`GEN`, `ctx->draw_gpu_count`);
+    `shader_record` made twice from one body (`g` a constant `NULL` in the
+    common one). Of these the flag and the cache's keys were measurable;
+    the others are within the noise. **The limit of measuring:** release
+    1.0 itself, with only 2 to 6 KB of unused code put before
+    `draw.c`'s functions (nothing it runs changes), draws `draw_same` in
+    6,775-6,890 ns instead of 6,176-6,518, its `frame_mix` 579-594 as
+    before; aligning functions and labels to 16 bytes makes both 1.0 and
+    the work about 5% slower. So up to 0.6 us of `draw_same` is where the
+    code lies under Emu68, not what it does. Against those builds the
+    work is about 0.3 us (4%) a draw slower, `frame_mix` 562-574 against
+    580-594 (3%). The ablation of all that is left of the new tests in
+    `draw_arrays` gains 0.2 us and no `frame_mix`. Not chased further.
+    Checked on the A1200 with this build in `LIBS:`: dEQP-GLES3 `draw` 323,
+    `transform_feedback` 987, `fragment_ops` 3,174, `draw_buffers_indexed`
+    76, `rasterizer_discard` 51, `occlusion_query` 62, `instanced` 45,
+    `negative_api` 314; dEQP-GLES31 `geometry_shading` 198,
+    `blend_equation_advanced` 102, `draw_indirect` 203,
+    `shaders.sample_variables` 143, `multisample_interpolation` 129,
+    `sample_shading` 18, `texture` 2,048, `state_query` 1,095 passed, none
+    failed.
   - **The PC sampler froze the A1200 twice** (`Run-Bench PC=1`, 22:37 and
     22:56, each the first sampled run after a reset): not used again until
     that is understood. A third freeze needed two resets.

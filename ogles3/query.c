@@ -208,8 +208,10 @@ void ogles2_glBeginQuery(struct OGLES3Context *ctx, GLenum target, GLuint id)
     if (k != 1) {
         q->primitives = 0;
         *slot(qs, k) = q;
-        if (k == 3)
+        if (k == 3) {
             ctx->gen_active = TRUE;
+            ogles2_draw_rare = 1; /* draw.c's rare cases */
+        }
         return;
     }
     /* A counter a job not yet rendered still writes is left to it. */

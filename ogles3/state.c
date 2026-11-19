@@ -31,7 +31,9 @@ static ULONG cap_bit(const struct OGLES3Context *ctx, GLenum cap)
     /* ES 3.1: glSampleMaski's mask on the samples covered (draw.c) */
     case GL_SAMPLE_MASK: return ogles2_es31(ctx) ? OGLES3_CAP_SAMPLE_MASK : 0;
     /* OES_sample_shading (ES3 contexts): a sample at a time (draw.c) */
-    case GL_SAMPLE_SHADING_OES: return ogles2_es3(ctx) ? OGLES3_CAP_SAMPLE_SHADING : 0;
+    case GL_SAMPLE_SHADING_OES:
+        ogles2_draw_rare = 1; /* draw.c's rare cases */
+        return ogles2_es3(ctx) ? OGLES3_CAP_SAMPLE_SHADING : 0;
     /* KHR_blend_equation_advanced_coherent's: on by default, nothing changes */
     case GL_BLEND_ADVANCED_COHERENT_KHR: return ogles2_es3(ctx) ? OGLES3_CAP_BLEND_ADV_COHERENT : 0;
     default:                          return 0;
@@ -832,7 +834,7 @@ static void blend_equation(struct OGLES3Context *ctx, UBYTE rts, GLenum modeRGB,
     int k;
     /* an advanced one by itself (glBlendEquation's, glBlendEquationi's) */
     if (modeRGB == modeAlpha && advanced_mode(modeRGB) && ogles2_es3(ctx))
-        ;
+        ogles2_draw_rare = 1; /* draw.c's rare cases */
     else if (!blend_eq_ok(modeRGB) || !blend_eq_ok(modeAlpha)) {
         ogles2_error(ctx, GL_INVALID_ENUM);
         return;

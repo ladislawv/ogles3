@@ -664,8 +664,9 @@ struct OGLES3Program
     /* An OpenGL ES 3 program's last choice also by these (draw.c's
      * es3_variants): each stage's 32-bit samplers, alpha to coverage. */
     ULONG var_bits[3];              /* vertex, fragment, geometry */
-    BOOL var_ps;                    /* the per-sample fragment variant (OES_sample_shading) */
-    UBYTE var_msaa;                 /* chosen for a multisampled framebuffer (ctx->fb_msaa) */
+    UBYTE var_sx;                   /* bit 0 the per-sample fragment variant (OES_sample_shading),
+                                     * bit 1 chosen for a multisampled framebuffer (ctx->fb_msaa):
+                                     * one byte compared at each draw */
     BOOL var_a2c;
     struct OGLES3VkTargets var_tg;  /* and the render targets' key fields (variant_key.h) */
     UBYTE var_f32;                  /* the fragment variant's f32_color_rb (draw: ctx->fb_wide) */
@@ -909,6 +910,7 @@ struct OGLES3Context
     UBYTE fb_soft_blend;            /* a drawn target the tile buffer cannot blend: the shader blends (Mesa) */
     UBYTE fb_wide;                  /* the drawn targets of 32 bits a channel (F32, INT, UINT): bit i */
     UBYTE fb_msaa;                  /* the draw framebuffer is multisampled (4x): the fragment key's msaa */
+    UBYTE draw_gpu_count;           /* draw.c: the draw's counts only the binner knows (draw_arrays) */
     BOOL fb_default_made;           /* the fb_ fields are the default framebuffer's, as fb_update made them */
     BOOL vab_moved;                 /* ES 3.1: glVertexAttribBinding gave an attribute another binding once */
     UBYTE draw_rts;                 /* the draw buffers a draw writes (ogles2_draw_clear: those it clears) */
@@ -1349,6 +1351,12 @@ void ogles2_query_xfb_add(struct OGLES3Context *ctx, ULONG primitives);
 void ogles2_query_gen_add(struct OGLES3Context *ctx, ULONG primitives);
 void ogles2_xfb_gpu_counts(struct OGLES3Context *ctx, BOOL fed);
 extern BOOL ogles2_mixed_writes_seen;
+/* draw.c: set (and never cleared) once a draw may need its rare cases:
+ * GL_PRIMITIVES_GENERATED begun, transform feedback begun, a buffer's two
+ * GPU copies apart, an advanced blend equation, GL_SAMPLE_SHADING named.
+ * While 0 a draw without a geometry stage reads nothing else for them
+ * (drawbench, 2026-11-19: their seven fields cost 0.7 us a draw). */
+extern ULONG ogles2_draw_rare;
 void ogles2_buffer_mixed_seen(void);
 void ogles2_buffers_settle(struct OGLES3Context *ctx);
 struct OGLES3Buffer *ogles2_texture_unit_buffer(struct OGLES3Context *ctx, int unit, int *cs);

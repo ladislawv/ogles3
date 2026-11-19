@@ -328,6 +328,7 @@ void ogles2_glBeginTransformFeedback(struct OGLES3Context *ctx, GLenum primitive
         }
     o->active = TRUE;
     ctx->xfb_begun = TRUE;
+    ogles2_draw_rare = 1;
     o->paused = FALSE;
     o->mode = primitiveMode;
     o->program = ctx->program;
