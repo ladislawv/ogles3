@@ -2998,6 +2998,31 @@ static void storage_of(struct OGLES3Texture *t)
 /* A 16-bit texel stored little-endian (the GPU's order) from the 68k. */
 #define LE16_STORE(p, v) (*(UWORD *)(p) = (UWORD)(((v) << 8) | ((v) >> 8)))
 
+/* The three 16-bit packings of an RGBA8 texel read as one long (R in the
+ * top byte): the GL packing, red in the top bits. */
+#define PK565(c) (((c) >> 16 & 0xF800) | ((c) >> 13 & 0x07E0) | ((c) >> 11 & 0x001F))
+#define PK4444(c) (((c) >> 16 & 0xF000) | ((c) >> 12 & 0x0F00) | ((c) >> 8 & 0x00F0) | ((c) >> 4 & 0x000F))
+#define PK5551(c) (((c) >> 16 & 0xF800) | ((c) >> 13 & 0x07C0) | ((c) >> 10 & 0x003E) | ((c) >> 7 & 1))
+/* Two 16-bit texels (the first in the top half) little-endian each: as the
+ * GPU's bytes in one long. */
+#define LE16X2(v) (((v) >> 8 & 0x00FF00FFUL) | ((v) << 8 & 0xFF00FF00UL))
+/* n texels of one 16-bit packing, two a long store where `d` allows (a
+ * texel a store cost a third of the 16-bit uploads' time: the 2026-11-19
+ * report, tests/a1200/upload). */
+#define PACK16(PK)                                              \
+    do {                                                        \
+        i = 0;                                                  \
+        if (!((ULONG)d & 3))                                    \
+            for (; i + 1 < n; i += 2, d += 4) {                 \
+                c = ((ULONG)PK(p[i]) << 16) | PK(p[i + 1]);     \
+                *(ULONG *)d = LE16X2(c);                        \
+            }                                                   \
+        for (; i < n; i++, d += 2) {                            \
+            UWORD v = (UWORD)PK(p[i]);                          \
+            LE16_STORE(d, v);                                   \
+        }                                                       \
+    } while (0)
+
 /* n RGBA8 texels into the stored format, in the GPU's byte order (16-bit
  * texels little-endian, the GL packing: red in the top bits). Each format
  * in a loop of its own, a texel read as one long (R in the top byte): a
@@ -3009,28 +3034,13 @@ static void pack(const struct OGLES3Texture *t, const UBYTE *s, UBYTE *d, ULONG 
     ULONG i, c;
     switch (t->hw_type) {
     case V3D_TEXTURE_DATA_FORMAT_RGB565:
-        for (i = 0; i < n; i++, d += 2) {
-            UWORD v;
-            c = p[i];
-            v = (UWORD)(((c >> 16) & 0xF800) | ((c >> 13) & 0x07E0) | ((c >> 11) & 0x001F));
-            LE16_STORE(d, v);
-        }
+        PACK16(PK565);
         return;
     case V3D_TEXTURE_DATA_FORMAT_RGBA4:
-        for (i = 0; i < n; i++, d += 2) {
-            UWORD v;
-            c = p[i];
-            v = (UWORD)(((c >> 16) & 0xF000) | ((c >> 12) & 0x0F00) | ((c >> 8) & 0x00F0) | ((c >> 4) & 0x000F));
-            LE16_STORE(d, v);
-        }
+        PACK16(PK4444);
         return;
     case V3D_TEXTURE_DATA_FORMAT_RGB5A1:
-        for (i = 0; i < n; i++, d += 2) {
-            UWORD v;
-            c = p[i];
-            v = (UWORD)(((c >> 16) & 0xF800) | ((c >> 13) & 0x07C0) | ((c >> 10) & 0x003E) | ((c >> 7) & 1));
-            LE16_STORE(d, v);
-        }
+        PACK16(PK5551);
         return;
     case V3D_TEXTURE_DATA_FORMAT_R8: /* luminance (red of the copy) or alpha */
         if (t->swizzle[3] == v3d_SWIZZLE_RED)
@@ -3635,11 +3645,47 @@ static BOOL raw_keep(struct OGLES3Texture *t, struct OGLES3Face *f, int l, GLenu
     return TRUE;
 }
 
-static void store_box(struct OGLES3Texture *t, int k, int l, const UBYTE *src, int x, int y, int w,
-                      int h)
+/* The application's texels, of `type`, are the stored format's own
+ * 16-bit packing (GL's and the GPU's: red in the top bits), only the byte
+ * order apart: the GPU's copy takes them byte-swapped (swap16_row) and not
+ * through the RAM copy (pack), whose 8-bit channels give back the same
+ * bits (2026-11-19 report: 16-bit uploads 3.7 times slower a texel than
+ * RGBA8; tests/a1200/upload). */
+static BOOL direct16(GLenum type, UBYTE hw)
+{
+    return (type == GL_UNSIGNED_SHORT_5_6_5 && hw == V3D_TEXTURE_DATA_FORMAT_RGB565) ||
+           (type == GL_UNSIGNED_SHORT_4_4_4_4 && hw == V3D_TEXTURE_DATA_FORMAT_RGBA4) ||
+           (type == GL_UNSIGNED_SHORT_5_5_5_1 && hw == V3D_TEXTURE_DATA_FORMAT_RGB5A1);
+}
+
+/* n 16-bit words from the 68k's order into the GPU's, two a long where
+ * both ends allow. */
+static void swap16_row(const UBYTE *s, UBYTE *d, ULONG n)
+{
+    if (!(((ULONG)s | (ULONG)d) & 3)) {
+        const ULONG *p = (const ULONG *)s;
+        ULONG *q = (ULONG *)d, v;
+        for (; n >= 2; n -= 2) {
+            v = *p++;
+            *q++ = LE16X2(v);
+        }
+        s = (const UBYTE *)p;
+        d = (UBYTE *)q;
+    }
+    for (; n; n--, s += 2, d += 2) {
+        d[0] = s[1];
+        d[1] = s[0];
+    }
+}
+
+/* A box of face k's level l into the GPU's copy: from the RAM copy's
+ * texels at `src`, `in` bytes a row; or, `app` given (direct16), from the
+ * application's, `app_row` bytes a row. */
+static void store_box_from(struct OGLES3Texture *t, int k, int l, const UBYTE *src, ULONG in, const UBYTE *app,
+                           ULONG app_row, int x, int y, int w, int h)
 {
     V3DTexture tmp;
-    ULONG row = (ULONG)w * t->cpp, in;
+    ULONG row = (ULONG)w * t->cpp;
     UBYTE *packed;
     BOOL whole = x == 0 && y == 0 && w == t->f[k].w[l] && h == t->f[k].h[l];
     int j;
@@ -3649,7 +3695,6 @@ static void store_box(struct OGLES3Texture *t, int k, int l, const UBYTE *src, i
                           x / (int)kw, y / (int)kh, (int)bdiv((ULONG)w, kw), (int)bdiv((ULONG)h, kh));
         return;
     }
-    in = (ULONG)w * copy_bytes(class_of(t->f[0].format[0], t->f[0].type[0]));
     /* The level's exact texels (raw_keep), as they are */
     {
         const UBYTE *r = raw_of(t, &t->f[k], l);
@@ -3663,21 +3708,30 @@ static void store_box(struct OGLES3Texture *t, int k, int l, const UBYTE *src, i
     }
     /* RGBA8 is stored as the RAM copy holds it: straight from there. */
     if (t->hw_type == V3D_TEXTURE_DATA_FORMAT_RGBA8) {
-        if (whole && store_tfu(t, k, l, src, (ULONG)w * 4, w, h))
+        if (whole && store_tfu(t, k, l, src, in, w, h))
             return;
-        v3d_texture_store(ogles2_device(), face_gpu(t, k, l, &tmp), (v3d_u8)l, src, (ULONG)w * 4, x, y, w, h);
+        v3d_texture_store(ogles2_device(), face_gpu(t, k, l, &tmp), (v3d_u8)l, src, in, x, y, w, h);
         return;
     }
     if (!(packed = AllocVec(row * h + 4, MEMF_ANY)))
         return;
     for (j = 0; j < h; j++)
-        if (float_type(t->hw_type) || depth_type(t->hw_type) || encoded_type(t->hw_type) || int_type(t->hw_type))
+        if (app)
+            swap16_row(app + (ULONG)j * app_row, packed + (ULONG)j * row, (ULONG)w);
+        else if (float_type(t->hw_type) || depth_type(t->hw_type) || encoded_type(t->hw_type) || int_type(t->hw_type))
             pack_wide(t, src + (ULONG)j * in, packed + (ULONG)j * row, (ULONG)w);
         else
             pack(t, src + (ULONG)j * in, packed + (ULONG)j * row, (ULONG)w);
     if (!whole || !store_tfu(t, k, l, packed, row, w, h))
         v3d_texture_store(ogles2_device(), face_gpu(t, k, l, &tmp), (v3d_u8)l, packed, row, x, y, w, h);
     FreeVec(packed);
+}
+
+/* The RAM copy's texels at `src` (w texels a row) into the GPU's copy. */
+static void store_box(struct OGLES3Texture *t, int k, int l, const UBYTE *src, int x, int y, int w, int h)
+{
+    store_box_from(t, k, l, src, (ULONG)w * copy_bytes(class_of(t->f[0].format[0], t->f[0].type[0])), 0, 0, x, y,
+                   w, h);
 }
 
 static void upload_level(struct OGLES3Texture *t, int k, int l)
@@ -4931,8 +4985,9 @@ static void tex_sub_image(struct OGLES3Context *ctx, GLenum target, GLint level,
     struct OGLES3Face *f;
     GLenum err;
     UBYTE *sub;
-    ULONG cb;
-    int y, k;
+    const UBYTE *src;
+    ULONG cb, row, image;
+    int k;
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
         return;
     type = half_type(ctx, type);
@@ -4971,32 +5026,21 @@ static void tex_sub_image(struct OGLES3Context *ctx, GLenum target, GLint level,
         return;
     before_change(ctx, ts, t);
     cb = copy_bytes(level_class(f, level));
-    if (!(sub = AllocVec((ULONG)width * height * cb, MEMF_ANY))) {
+    src = unpack_image(ctx, pixels, format, type, width, height, &row, &image);
+    /* Into the RAM copy where it goes, and the GPU's copy from there. */
+    sub = f->shadow[level] + ((ULONG)yoffset * f->w[level] + xoffset) * cb;
+    convert(sub, (ULONG)f->w[level] * cb, src, format, type, width, height, row);
+    if ((type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV || format == GL_STENCIL_INDEX) &&
+        !keep_stencil(t, f, level, src, row, xoffset, yoffset, width, height))
         ogles2_error(ctx, GL_OUT_OF_MEMORY);
-        return;
-    }
-    {
-        ULONG row, image;
-        const UBYTE *src = unpack_image(ctx, pixels, format, type, width, height, &row, &image);
-        convert(sub, (ULONG)width * cb, src, format, type, width, height, row);
-        if ((type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV || format == GL_STENCIL_INDEX) &&
-            !keep_stencil(t, f, level, src, row, xoffset, yoffset, width, height))
-            ogles2_error(ctx, GL_OUT_OF_MEMORY);
-    }
-    for (y = 0; y < height; y++)
-        memcpy(f->shadow[level] + ((ULONG)(yoffset + y) * f->w[level] + xoffset) * cb,
-               sub + (ULONG)y * width * cb, (ULONG)width * cb);
     f->blank &= ~(1UL << level);
-    {
-        ULONG row, image;
-        raw_keep(t, f, level, format, type, unpack_image(ctx, pixels, format, type, width, height, &row, &image), row,
-                 xoffset, yoffset, width, height);
-    }
-    if (t->gpu && level < t->gpu->num_levels && consistent(f, level))
-        store_box(t, k, level, sub, xoffset, yoffset, width, height);
-    else if (!t->gpu && ctx->v3d && !upload_all(t)) /* renamed: a new copy, whole */
+    raw_keep(t, f, level, format, type, src, row, xoffset, yoffset, width, height);
+    if (t->gpu && level < t->gpu->num_levels && consistent(f, level)) {
+        BOOL direct = direct16(type, t->hw_type);
+        store_box_from(t, k, level, sub, (ULONG)f->w[level] * cb, direct ? src : 0, row, xoffset, yoffset, width,
+                       height);
+    } else if (!t->gpu && ctx->v3d && !upload_all(t)) /* renamed: a new copy, whole */
         ogles2_error(ctx, GL_OUT_OF_MEMORY);
-    FreeVec(sub);
 }
 
 /* Timed for probe P (frame.c). */
@@ -5183,8 +5227,8 @@ void ogles2_glTexSubImage3D(struct OGLES3Context *ctx, GLenum target, GLint leve
     UBYTE *sub;
     ULONG cb, row, in;
     const UBYTE *src;
-    int y, k;
-    BOOL stored;
+    int k;
+    BOOL stored, direct;
     if (!tex3d_entry(ctx, target) || !(ts = ts_get(ctx)) || !(t = image_texture_3d(ctx, ts, target)))
         return;
     type = half_type(ctx, type);
@@ -5218,26 +5262,22 @@ void ogles2_glTexSubImage3D(struct OGLES3Context *ctx, GLenum target, GLint leve
     before_change(ctx, ts, t);
     cb = copy_bytes(level_class(f, level));
     src = unpack_image(ctx, pixels, format, type, width, height, &row, &in);
-    if (!(sub = AllocVec((ULONG)width * height * cb, MEMF_ANY))) {
-        ogles2_error(ctx, GL_OUT_OF_MEMORY);
-        return;
-    }
     stored = t->gpu && level < t->gpu->num_levels && consistent(f, level) && depth_ok(t, level);
+    direct = direct16(type, t->hw_type);
     for (k = zoffset; k < zoffset + depth; k++) {
         struct OGLES3Face *fk = &t->f[k];
-        convert(sub, (ULONG)width * cb, src + (ULONG)(k - zoffset) * in, format, type, width, height, row);
-        for (y = 0; y < height; y++)
-            memcpy(fk->shadow[level] + ((ULONG)(yoffset + y) * fk->w[level] + xoffset) * cb,
-                   sub + (ULONG)y * width * cb, (ULONG)width * cb);
+        /* Into the RAM copy where it goes, and the GPU's copy from there. */
+        sub = fk->shadow[level] + ((ULONG)yoffset * fk->w[level] + xoffset) * cb;
+        convert(sub, (ULONG)fk->w[level] * cb, src + (ULONG)(k - zoffset) * in, format, type, width, height, row);
         fk->blank &= ~(1UL << level);
         if ((type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV || format == GL_STENCIL_INDEX) &&
             !keep_stencil(t, fk, level, src + (ULONG)(k - zoffset) * in, row, xoffset, yoffset, width, height))
             ogles2_error(ctx, GL_OUT_OF_MEMORY);
         raw_keep(t, fk, level, format, type, src + (ULONG)(k - zoffset) * in, row, xoffset, yoffset, width, height);
         if (stored)
-            store_box(t, k, level, sub, xoffset, yoffset, width, height);
+            store_box_from(t, k, level, sub, (ULONG)fk->w[level] * cb, direct ? src + (ULONG)(k - zoffset) * in : 0,
+                           row, xoffset, yoffset, width, height);
     }
-    FreeVec(sub);
     if (!stored && !t->gpu && ctx->v3d && !upload_all(t)) /* renamed: a new copy, whole */
         ogles2_error(ctx, GL_OUT_OF_MEMORY);
 }

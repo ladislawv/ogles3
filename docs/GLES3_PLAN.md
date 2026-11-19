@@ -1,5 +1,53 @@
 # OpenGL ES 3.0 and 3.1 on ogles2.library
 
+**16-bit texture uploads (2026-11-19, a user's report: `C:\- CPP\ogles3
+fix\bug2`).** `glTexSubImage3D` of 256x256 tiles into a 1024x1024x4
+array: RGB565, RGB5_A1 and RGBA4 3.7 times slower a texel than RGBA8
+(ogles2 1.3 as slow), also with RGBA/UNSIGNED_BYTE data, so the cost was
+the 16-bit store. The reporter's test is `tests/perf/upload_test.c`,
+package `tests/a1200/upload` (`Run-M1 SIZE= REPS=`). Timed by stage on the
+A1200 (a build with clocks around each, not kept), a 16-bit format's 64
+tiles: `pack` (RGBA8 copy to the 16-bit texels, a texel a word store) 50
+ms, the RAM copy's `memcpy` 20, `convert` 20, the CPU's UIF tiling 12
+(already on the block path below). Three changes:
+- `v3d_hw.c`: the UIF block path (`v3d_store_uif_blocks`, was
+  `v3d_store_uif32_blocks`) for 2-byte texels too (a block 16x8 of them; a
+  block row is still 32 bytes of the source), with `v3d_uif_fast_check`
+  comparing both sizes, with and without XOR, against the general path.
+- `texture.c`: `glTexSubImage2D` and `3D` convert into the RAM copy where
+  the box goes (no temporary and copy), and `store_box_from` stores from
+  there with its stride; when the type is the texture's own packing
+  (`direct16`: 5_6_5 into RGB565, 4_4_4_4 into RGBA4, 5_5_5_1 into
+  RGB5_A1) the GPU's copy takes the application's words byte-swapped two a
+  long (`swap16_row`), not packed back from the RAM copy (the same bits:
+  8-bit channels expanded from 5, 6 or 4 bits keep them on top).
+- `pack`'s 16-bit formats two texels a long store (`PACK16`), for the
+  other cases (RGBA bytes into a 16-bit texture, glTexImage2D's whole
+  levels).
+
+Measured (`ogles2-upload-20261119-130921`, measure pass, 64 tiles):
+
+| format, data | before | after |
+|---|---|---|
+| RGBA8, RGBA bytes | 70 ms (59 Mtexel/s) | 74 ms (57) |
+| RGB565, 5_6_5 | 203-211 ms (20) | 60 ms (70) |
+| RGB5_A1, 5_5_5_1 | 226-230 ms (18) | 66 ms (64) |
+| RGBA4, 4_4_4_4 | 214 ms (20) | 63 ms (67) |
+| RGB565, RGB bytes | 221-232 ms (18) | 100 ms (42) |
+| RGB5_A1 and RGBA4, RGBA bytes | 209-217 ms (19-20) | 95-101 ms (42-44) |
+
+dEQP-GLES3's `texture` list after it (`ogles2-m8-2c-20261119-131523`):
+5,831 passed, none failed, 64 not supported, as on 2026-11-18.
+
+A 16-bit texel now costs less than an RGBA8 one; a byte still more (136
+MB/s against 221): the RAM copy is RGBA8 for every format, 16 MB written
+for 4 M texels whatever the texture. Equal a byte needs a RAM copy in the
+16-bit packing (every reader of `shadow[]` changed): not done.
+ogles2.library 1.x (`C:\- CPP\ogles2`) has the same path and is not
+changed here. An earlier "no change" measurement was a stale library: a
+dEQP run stopped with Ctrl-C left ogles3.library open (`open (count 2)` in
+the log), so `Avail FLUSH` kept the old one; rebooted.
+
 **Plan: ogles2pi3's two speedups into ogles3 (2026-11-19, the developer's
 request; not begun).** From `ladislawv/ogles2pi3`, branch
 `ogles2pi3-beta2` (`C:\- CPP\ogles2pi3`), commits 78d6b58 and f25dfaf.
