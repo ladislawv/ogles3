@@ -23,6 +23,15 @@ while compiling), the rest as before. `SHA256SUMS` lists all six. Also in it: `d
 `rendered` (a deleted texture's 16-bit levels were expanded for nothing by its `before_change`;
 found by the review of ogles2pi3's port plan).
 
+**Quake III before and after 2026-11-19's work (the same day).** renderergl2's timedemo (1,260
+frames; `tools/perf/q3cmp.sh build`'s `ogles2-q3o3`, the data at `Stuff:Quake3-GLES2`, run with
+`amigent-ctl run`: `runpkg` takes no `:` in a script argument), the library in `LIBS:`, alternating
+after a warm-up: `es32` at 5f1559b (before the upload fixes and the render chain) 91.6, 91.6, 91.6
+against 1.0.1's 92.3, 92.1, 92.1 fps. (ogles2pi3 with the same upload fixes ported: first 1.2 %
+slower, then, with the order of each pair reversed and each step's build timed, 0.5 % over nine runs
+each, inside the run-to-run spread: the first run of a pair is faster, the station slowing over a
+session. Its `PI3_PLAN.md`.)
+
 **16-bit texture uploads (2026-11-19, a user's report: `C:\- CPP\ogles3
 fix\bug2`).** `glTexSubImage3D` of 256x256 tiles into a 1024x1024x4
 array: RGB565, RGB5_A1 and RGBA4 3.7 times slower a texel than RGBA8
