@@ -95,7 +95,8 @@ struct OGLES3Context *ogles2_job_user(struct OGLES3Context *ctx, ULONG serial)
         return 0;
     m = ctx->share ? ctx->share->first : ctx;
     for (; m; m = ctx->share ? m->share_next : 0)
-        if ((m->v3d && m->v3d->frame_active && serial == m->job_serial) || (m->pend && serial == m->pend_serial))
+        if ((m->v3d && m->v3d->frame_active && serial == m->job_serial) || (m->pend && serial == m->pend_serial) ||
+            (m->pend && m->pp_active && serial == m->pp_serial)) /* job.c's chain: the older render too */
             return m;
     return 0;
 }

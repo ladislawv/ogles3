@@ -3727,6 +3727,9 @@ static void draw_arrays(struct OGLES3Context *ctx, struct OGLES3Program *p, GLen
     else
         ogles2_job_begin(ctx);
     vid = cs->uses_vid || vs->uses_vid;
+    /* job.c's chain: a binning variant reading through the TMU could read
+     * what a render still running beside this job's binning writes */
+    ctx->job_bin_tmu |= cs->tmu_reads | (g ? g->bin->tmu_reads : 0);
     if (__builtin_expect(gd != 0 || ogles2_gpu_writes_seen, 0))
         ctx->draw_fed = gd && gd->fed; /* gpu_array adds the arrays' (stale without GPU writes: never read) */
     itype_gl = !el ? 0

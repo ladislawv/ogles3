@@ -38,6 +38,8 @@
  * MiniGL Open Source License (LICENSE, section 1).
  */
 #include <exec/execbase.h>
+#include <dos/var.h>
+#include <proto/dos.h>
 #include <proto/exec.h>
 #include "ogles3_internal.h"
 #include "v3d_context.h"
@@ -236,6 +238,10 @@ void ogles2_job_begin(struct OGLES3Context *ctx)
         }
     }
     ctx->job_fb = ctx->draw_fb;
+    /* The chain (ogles2_job_flush): what this job's start found, its tile
+     * pools its object's own, and no binning variant's TMU read yet. */
+    ctx->job_own_pools = ctx->draw_fb && !bad && tg.ta_addr;
+    ctx->job_bin_tmu = FALSE;
     ctx->job_layers = layers;
     /* 4x MSAA on the default framebuffer (plan 7.2): 32x32 tiles, Mesa's
      * v3d_choose_tile_size for one 32-bpp target; the hardware derives the
@@ -910,6 +916,65 @@ static void after_render(struct OGLES3Context *ctx, struct OGLES3Framebuffer *fb
     }
 }
 
+/* The chain (ogles2_job_flush): the older of two renders (pp) has
+ * finished, its blocks retired (only up to its tag: pend's are in use) and
+ * its object's colour marked. A failed wait leaves them to pend's
+ * after_render, which resets and reports. */
+static void pp_done(struct OGLES3Context *ctx, v3d_wait_result wr)
+{
+    ctx->pp_active = FALSE;
+    if (wr != v3d_wait_result_success)
+        return;
+    v3d_frame_retire_upto(ogles2_device(), &ctx->v3d->frame, ctx->pp_seq);
+    if (ctx->pp_fb)
+        ogles2_fbo_rendered(ctx, ctx->pp_fb);
+}
+
+/* ENV:OGLES3/NoQueue (anything but "0"): no chain, every job waits for the
+ * running render as before; read once a context. */
+static BOOL no_queue(struct OGLES3Context *ctx)
+{
+    if (!ctx->no_queue) {
+        char b[8];
+        BOOL off = GetVar((STRPTR) "OGLES3/NoQueue", (STRPTR)b, sizeof(b), GVF_GLOBAL_ONLY) > 0 && b[0] != '0';
+        ctx->no_queue = off ? 2 : 1;
+        if (off)
+            ogles2_log("job: ENV:OGLES3/NoQueue: jobs wait for the running render (no chain)");
+    }
+    return ctx->no_queue == 2;
+}
+
+/* The chain: a third control-list slot for the next job, as two renders
+ * may be on the GPU. Not with probe S (its render goes with the binning),
+ * not when the slot built in is the running render's (never: job_end_slot
+ * keeps them apart). */
+static BOOL can_queue(struct OGLES3Context *ctx)
+{
+    V3DContext *v = ctx->v3d;
+    if (ctx->probe & OGLES3_PROBE_SEMAPHORE)
+        return FALSE;
+    if (v->build_slot == v->last_slot)
+        return FALSE;
+    if (!v->slot2_ready && v3d_context_alloc_slot2(ogles2_device(), v) < 0) {
+        ogles2_log("job: no memory for a third control-list slot: jobs wait for the running render as before");
+        return FALSE;
+    }
+    return TRUE;
+}
+
+/* A submitted job: the next one builds in another slot. Neither the older
+ * render's nor the queued one's while this job is queued behind another
+ * (chained: the third); otherwise [0] and [1] in turn (from [2], [0]:
+ * everything earlier has finished). Replaces `1 - build_slot`, which would
+ * give 255 from [2]. */
+static void job_end_slot(struct OGLES3Context *ctx, BOOL chained)
+{
+    V3DContext *v = ctx->v3d;
+    v3d_u8 s = v->build_slot;
+    v->build_slot = chained ? (v3d_u8)(3 - s - v->last_slot) : (v3d_u8)(s == 0 ? 1 : 0);
+    v->last_slot = s;
+}
+
 /* The render this context left running: waited for (unless another
  * submitter already saw it finish: take_gpu), then what follows a render. */
 void ogles2_job_finish(struct OGLES3Context *ctx)
@@ -928,12 +993,15 @@ void ogles2_job_finish(struct OGLES3Context *ctx)
     ReleaseSemaphore(&OGLES3LibBase->lock);
     if (!done) {
         /* Nothing was submitted after it (take_gpu would have marked it
-         * done), so the count is one past ours at most: no wrap-around
-         * case the wait cannot tell. */
+         * done): the count is at most two short of ours (a chained pair) or
+         * one past, which the wait tells modulo 256. The GPU renders in
+         * order: pend's end is pp's too. */
         t0 = ogles2_clock_us();
         wr = v3d_wait_render_timeout(ctx->pend_frame);
         ctx->sum_render += (double)(ULONG)(ogles2_clock_us() - t0);
     }
+    if (ctx->pp_active)
+        pp_done(ctx, wr);
     after_render(ctx, ctx->pend_fb, &ctx->pend_tg, wr, FALSE);
 }
 
@@ -1019,9 +1087,33 @@ BOOL ogles2_job_flush(struct OGLES3Context *ctx, BOOL frame_end)
 
     struct zs_save *store_zs = 0;
     ULONG t0, t1, t2, t3;
-    BOOL defer;
+    BOOL defer, queue = FALSE;
 
-    ogles2_job_finish(ctx); /* the previous render, if it still runs */
+    /* The chain (from ogles2pi3; see ogles2_job_finish, pp_done): this
+     * job's render behind the running one, neither waited for. Decided from
+     * what the job's start found (its tile pools), nothing computed here
+     * (deciding after ogles2_fbo_target failed ogles2pi3's m5-1); checked
+     * again below. Only a job that may be left running (may_defer: a
+     * framebuffer object's, or the frame's end on a screen of our own; not
+     * one storing into buffers, whose caches are cleaned after its render);
+     * not one whose binning feeds back (its words could be what the running
+     * render reads) or reads through the TMU (it could read what the running
+     * render has not written yet): both the binner's, which now runs beside
+     * that render. Both renders on the context's pools: the object among
+     * them gets its own from its next job on. */
+    if (v->frame_active && ctx->pend && (fb || frame_end) && may_defer(ctx, fb != 0) && !ctx->job_xfb &&
+        !ctx->job_bin_tmu && !no_queue(ctx)) {
+        if (!(fb && ctx->job_own_pools) && !ctx->pend_ta) {
+            if (fb)
+                ogles2_fbo_want_own_pools(fb);
+            else if (ctx->pend_fb)
+                ogles2_fbo_want_own_pools(ctx->pend_fb);
+        } else if (can_queue(ctx)) {
+            queue = TRUE;
+        }
+    }
+    if (!queue)
+        ogles2_job_finish(ctx); /* the previous render, if it still runs */
     s = v->build_slot;
     if (!v->frame_active) {
         if (frame_end)
@@ -1055,12 +1147,40 @@ BOOL ogles2_job_flush(struct OGLES3Context *ctx, BOOL frame_end)
             ts = tg.ts_addr;
         }
     }
+    if (queue && (!ctx->pend || (fb ? tg.ta_addr : 0) == ctx->pend_ta)) {
+        /* Its pools were made anew (which waited for the running render)
+         * or are the running render's after all: an ordinary job. */
+        queue = FALSE;
+        ogles2_job_finish(ctx);
+    }
     defer = may_defer(ctx, fb != 0);
     if (!v3d_gpu_lock(gpu, GPU_LOCK_TIMEOUT_MS)) {
         drop = "the GPU stayed busy (another program holds the submission lock)";
         goto out;
     }
     take_gpu(ctx); /* with the lock: a render left running finishes first */
+    if (queue) {
+        BOOL done;
+        ObtainSemaphore(&OGLES3LibBase->lock);
+        done = ctx->pend_done;
+        ReleaseSemaphore(&OGLES3LibBase->lock);
+        if (!ctx->pend || done) {
+            /* Another program's submission waited for ours (and its render
+             * ran after it): the counts no longer follow ours; an ordinary
+             * job. */
+            queue = FALSE;
+            ogles2_job_finish(ctx);
+        } else if (ctx->pp_active) {
+            /* Two renders on the GPU already: the older one ends first. */
+            v3d_wait_result w = v3d_wait_render_timeout(ctx->pp_frame);
+            ctx->n_chain_waits++;
+            pp_done(ctx, w);
+            if (w != v3d_wait_result_success) {
+                queue = FALSE;
+                ogles2_job_finish(ctx); /* pend failed too: its reset and report */
+            }
+        }
+    }
     if (!fb && !ogles2_display_lock(&ctx->display)) {
         v3d_gpu_unlock(gpu);
         drop = "the render bitmap could not be locked";
@@ -1117,6 +1237,41 @@ BOOL ogles2_job_flush(struct OGLES3Context *ctx, BOOL frame_end)
                                      (v3d_address)((ULONG)v->render_buf[s].start +
                                                    v->render_buf[s].used));
         v3d_frame_render_submitted(&v->frame);
+        if (queue) {
+            /* Its render behind pend's on the GPU: pend becomes the older
+             * one (pp) and this the newer; it ends one render after pend's,
+             * whatever the count read at its submission. Another submitter
+             * waits for it (take_gpu). */
+            if (!fb)
+                ogles2_display_unlock(&ctx->display); /* as below for a render left running */
+            ctx->pp_active = TRUE;
+            ctx->pp_frame = ctx->pend_frame;
+            ctx->pp_serial = ctx->pend_serial;
+            ctx->pp_seq = ctx->pend_seq;
+            ctx->pp_fb = ctx->pend_fb;
+            ctx->pend_frame = (UBYTE)(ctx->pend_frame + 1);
+            ctx->pend_serial = ctx->job_serial;
+            ctx->pend_seq = v->frame.render_seq;
+            ctx->pend_ta = fb ? tg.ta_addr : 0;
+            ctx->pend_fb = fb;
+            if (fb)
+                ctx->pend_tg = tg;
+            ctx->pend_done = FALSE;
+            ObtainSemaphore(&OGLES3LibBase->lock);
+            OGLES3LibBase->pend_ctx = ctx;
+            OGLES3LibBase->pend_task = FindTask(0);
+            OGLES3LibBase->pend_frame = ctx->pend_frame;
+            ReleaseSemaphore(&OGLES3LibBase->lock);
+            ctx->n_queued++;
+            v3d_gpu_unlock(gpu);
+            ctx->frames++;
+            job_end_slot(ctx, TRUE);
+            g_v3d_cl_generation++;
+            v->frame_active = FALSE;
+            if (frame_end)
+                ctx->zs_saved = FALSE;
+            return TRUE;
+        }
         if (defer) {
             /* The render runs on; ogles2_job_finish waits for it. The
              * screen's bitmap is unlocked now: it is on display, so it does
@@ -1128,6 +1283,8 @@ BOOL ogles2_job_flush(struct OGLES3Context *ctx, BOOL frame_end)
             ctx->pend = TRUE;
             ctx->pend_frame = frame_no;
             ctx->pend_serial = ctx->job_serial;
+            ctx->pend_seq = v->frame.render_seq;
+            ctx->pend_ta = fb ? tg.ta_addr : 0;
             ctx->pend_fb = fb;
             ctx->pend_done = FALSE;
             ObtainSemaphore(&OGLES3LibBase->lock);
@@ -1142,7 +1299,7 @@ BOOL ogles2_job_flush(struct OGLES3Context *ctx, BOOL frame_end)
             if (fb)
                 ctx->pend_tg = tg;
             ctx->frames++;
-            v->build_slot = 1 - v->build_slot;
+            job_end_slot(ctx, FALSE);
             g_v3d_cl_generation++;
             v->frame_active = FALSE;
             if (fb) {
@@ -1162,7 +1319,10 @@ waited:
         after_render(ctx, fb, &tg, wr, TRUE);
     } else {
         /* A job the GPU did not finish leaves it busy or stopped: reset it
-         * before anyone submits again (plan 9 M4). */
+         * before anyone submits again (plan 9 M4); a render this one was to
+         * queue behind is waited for first (the reset would cut it short). */
+        if (queue)
+            ogles2_job_finish(ctx);
         ogles2_device_reset("a binning job it did not finish");
         if (fb) {
             target_dma(&tg, TRUE);
@@ -1184,7 +1344,7 @@ waited:
                    (LONG)v->frame.job_spills);
     }
     ctx->frames++;
-    v->build_slot = 1 - v->build_slot;
+    job_end_slot(ctx, FALSE);
     g_v3d_cl_generation++;
 
 out:

@@ -348,6 +348,10 @@ struct OGLES3Variant
      * vpm_output_size and input_slots as above): its SIMD width, output
      * primitive (Mesa's enum mesa_prim) and invocations */
     UBYTE gs_simd_width, gs_out_prim, gs_invocations;
+    /* Last: program.c's built-in variants are initialised by position. */
+    UBYTE tmu_reads;              /* it reads through the TMU (textures, texel buffers, images): a
+                                   * binning variant's makes its job wait for a running render
+                                   * (job.c's chain, ctx->job_bin_tmu) */
 };
 #define OGLES3_VS_KEY_BYTES 88  /* struct v3d_vs_key as the file writes it */
 #define OGLES3_GS_KEY_BYTES 84  /* struct v3d_gs_key (EXT_geometry_shader) */
@@ -840,6 +844,7 @@ struct OGLES3Context
     double sum_build, sum_bin, sum_render, sum_present, sum_frame;
     double sum_list, sum_pre, sum_post; /* the flush's own: render list, cache before, after */
     ULONG n_jobs, n_swaps;
+    ULONG n_queued, n_chain_waits;  /* job.c's chain: jobs queued behind a running render; waits for the older */
     ULONG n_renames;                /* textures renamed (texture.c) */
     ULONG n_draws;                  /* draws issued (draw.c) */
     double sum_draw, sum_bufdata, sum_teximage; /* microseconds in draws, buffer data, texture images */
@@ -925,6 +930,17 @@ struct OGLES3Context
     ULONG pend_serial;              /* its job_serial */
     struct OGLES3Framebuffer *pend_fb; /* NULL: the default framebuffer */
     struct OGLES3Target pend_tg;
+    ULONG pend_seq;                 /* its blocks' retire tag (v3d_frame's render_seq after its submission) */
+    ULONG pend_ta;                  /* its tile pools' address, 0: the context's */
+    /* The chain (job.c, from ogles2pi3): a job flushed while pend runs is
+     * binned at once and its render queued behind pend's on the GPU; pend
+     * becomes the older render, pp, and the new one pend. */
+    BOOL pp_active;
+    UBYTE pp_frame;                 /* its v3d_submit_render count (pend_frame - 1) */
+    ULONG pp_serial, pp_seq;        /* its job_serial and retire tag */
+    struct OGLES3Framebuffer *pp_fb; /* NULL: the default framebuffer */
+    BOOL job_own_pools;             /* the open job's framebuffer object has tile pools of its own */
+    UBYTE no_queue;                 /* ENV:OGLES3/NoQueue: 0 not read yet, 1 unset, 2 set (no chain) */
     UBYTE marker_depth;             /* EXT_debug_marker: groups pushed (debug.c) */
     struct OGLES3Debug *dbg;        /* KHR_debug's state (debug_khr.c), NULL until first used */
     UBYTE gles2_ext;                /* a GLES2 extension's entry is calling its ES 3.0 one (gles2_ext.c) */
@@ -944,6 +960,8 @@ struct OGLES3Context
     BOOL draw_fed;                  /* the draw being built reads, as the GPU wrote them, words transform
                                      * feedback wrote in the open job (draw.c: it waits for the feedback) */
     BOOL job_storage;               /* a draw of the open job stores into storage buffers (ES 3.1, draw.c) */
+    BOOL job_bin_tmu;               /* a binning variant of the open job reads through the TMU (draw.c): it
+                                     * could read what a running render writes, so no chain (job.c) */
 };
 
 #define OGLES3_DISCARD_COLOR   1
@@ -1226,6 +1244,8 @@ struct OGLES3Buffer *ogles2_buffer_get(struct OGLES3Context *ctx, GLuint name); 
 BOOL ogles2_fbo_target(struct OGLES3Context *ctx, struct OGLES3Framebuffer *fb, BOOL surfaces,
                        struct OGLES3Target *t);
 void ogles2_fbo_rendered(struct OGLES3Context *ctx, struct OGLES3Framebuffer *fb);
+/* job.c's chain: tile pools of fb's own from its next job on (fbo.c) */
+void ogles2_fbo_want_own_pools(struct OGLES3Framebuffer *fb);
 UBYTE ogles2_fbo_take_discarded(struct OGLES3Framebuffer *fb); /* OGLES3_DISCARD_* since its last job */
 /* glReadPixels from the bound framebuffer object: RGBA8 rows, GL's order. */
 BOOL ogles2_fbo_read(struct OGLES3Context *ctx, int x, int y, int w, int h, UBYTE *rgba, ULONG stride);

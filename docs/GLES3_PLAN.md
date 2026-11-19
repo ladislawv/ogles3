@@ -246,6 +246,27 @@ reverted; the two drawbench tests kept.
 
 **Order:** B next.
 
+**B, done (2026-11-19; the regression run not finished).** Written as
+above: a third control-list slot (`v3d_context_alloc_slot2`, 4 MB + 64 KB
++ 32 KB + 4 MB), a job queued behind a running render (`pend` and `pp`,
+`job_end_slot`, `v3d_frame_retire_upto`), the render wait on the frame
+count modulo 256 (`v3d_submit_timeout.c`), objects drawn into with tile
+pools of their own (`want_own_pools`), and the two hazards: a job whose
+binning reads through the TMU (`job_bin_tmu`, from the variants'
+`tmu_reads`, H1) or writes transform feedback (`job_xfb`, H2) is not
+queued. `ENV:OGLES3/NoQueue` turns the chain off. Test `tests/m8_queue`,
+package `m8-7` (the run, H1 and H2, then again with NoQueue): 5 of 5,
+58 jobs queued a context, the memory given back; a build without the
+H2 condition drew 58 of 60 frames wrong, so the test sees the hazard.
+The regression run before it was stopped (the 16-bit upload report
+first): `m8-5` 348, `m6-8`, `m6-10`, `m7-2`, `m7-3`, `m7-4`, `m7-6` pass;
+`m8-6` 500 iterations; `m2-5` all 14 pictures the same; GLES2 `fbo` 705;
+`m5-1` and `m6-6` one memory check each (-27.9 MB: the on-target
+compiler started during the test, no job queued there; to be confirmed);
+dEQP-GLES3 `texture` 5,831 passed, none failed (with the upload fix).
+**Still to run:** the other dEQP groups of the list above, `m5-1` again,
+and the demos' fps with and without NoQueue.
+
 **Item 9, geometry shaders: stage A, the compiler and the file
 (2026-11-16).** The plan for item 9, in four stages: (A) the compiler
 compiles a geometry stage and the file holds it; (B) the library reads it

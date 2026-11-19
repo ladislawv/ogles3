@@ -108,6 +108,7 @@ struct OGLES3Framebuffer
     GLenum draw_buf[OGLES3_MAX_DRAW_BUFFERS]; /* glDrawBuffersEXT: COLOR_ATTACHMENTi or NONE */
     v3d_mem pool_alloc, pool_state; /* tile pools of its own when bigger than the context's */
     ULONG pool_tiles;
+    BOOL want_own_pools;        /* job.c's chain: pools of its own from its next job on */
     GLenum read_buf;            /* ES 3.0's glReadBuffer: COLOR_ATTACHMENTi or NONE */
     /* ES 3.1's glFramebufferParameteri: the size and samples of a framebuffer
      * without attachments (drawn with stage D item 6) */
@@ -313,8 +314,8 @@ static void before_fb_change(struct OGLES3Context *ctx, struct OGLES3Framebuffer
 {
     if (ctx->v3d && ctx->v3d->frame_active && ctx->job_fb == fb && fb)
         ogles2_job_flush(ctx, FALSE);
-    if (ctx->pend && ctx->pend_fb)
-        ogles2_job_finish(ctx);
+    if (ctx->pend && (ctx->pend_fb || (ctx->pp_active && ctx->pp_fb)))
+        ogles2_job_finish(ctx); /* job.c's chain: the older render's too */
 }
 
 /* The open job draws into a framebuffer that uses rb. */
@@ -322,7 +323,7 @@ static void before_rb_change(struct OGLES3Context *ctx, struct OGLES3Renderbuffe
 {
     struct OGLES3Framebuffer *fb = ctx->job_fb;
     int a;
-    if (ctx->pend && ctx->pend_fb)
+    if (ctx->pend && (ctx->pend_fb || (ctx->pp_active && ctx->pp_fb)))
         ogles2_job_finish(ctx);
     if (!ctx->v3d || !ctx->v3d->frame_active || !fb)
         return;
@@ -352,8 +353,8 @@ void ogles2_fbo_texture_changing(struct OGLES3Context *ctx, struct OGLES3Texture
 {
     if (ctx->v3d && ctx->v3d->frame_active && draws_into(ctx->job_fb, t))
         ogles2_job_flush(ctx, FALSE);
-    if (ctx->pend && draws_into(ctx->pend_fb, t)) /* the running render writes it */
-        ogles2_job_finish(ctx);
+    if (ctx->pend && (draws_into(ctx->pend_fb, t) || (ctx->pp_active && draws_into(ctx->pp_fb, t))))
+        ogles2_job_finish(ctx); /* a running render writes it (job.c's chain: either of two) */
 }
 
 /* A deleted renderbuffer's memory goes: the jobs that use it rendered first
@@ -1655,7 +1656,9 @@ static BOOL pools(struct OGLES3Context *ctx, struct OGLES3Framebuffer *fb, struc
                   (t->layers ? t->layers : 1); /* a layered job's: each layer's tile lists and state */
     ULONG ct = ctx->msaa ? 32 : 64, mine = (ULONG)((v->width + ct - 1) / ct) * ((v->height + ct - 1) / ct);
     t->ta_addr = t->ta_size = t->ts_addr = 0;
-    if (tiles <= mine)
+    /* job.c's chain: an object whose job would bin on the context's pools
+     * while a render on them still runs gets its own (from its next job) */
+    if (tiles <= mine && !fb->want_own_pools)
         return TRUE;
     if (fb->pool_tiles < tiles) {
         ogles2_job_finish(ctx); /* a running render may use the old pools */
@@ -1855,6 +1858,17 @@ BOOL ogles2_fbo_target(struct OGLES3Context *ctx, struct OGLES3Framebuffer *fb, 
         t->packed_zs = !t->has_s;
     }
     return TRUE;
+}
+
+/* job.c's chain: fb's jobs bin on tile pools of their own from its next
+ * job on, so that one can run beside a render on the context's pools. */
+void ogles2_fbo_want_own_pools(struct OGLES3Framebuffer *fb)
+{
+    if (fb && !fb->want_own_pools) {
+        fb->want_own_pools = TRUE;
+        ogles2_log("job: framebuffer object %lu: tile pools of its own, so that its jobs can be queued",
+                   (ULONG)fb->name);
+    }
 }
 
 void ogles2_fbo_rendered(struct OGLES3Context *ctx, struct OGLES3Framebuffer *fb)

@@ -3448,7 +3448,7 @@ static void image_writes_done(struct OGLES3Texture *t)
     for (m = t->img_share ? t->img_share->first : 0; s && m; m = m->share_next) {
         if (m->v3d && m->v3d->frame_active && m->job_serial == s)
             ogles2_job_flush(m, FALSE);
-        if (m->pend && m->pend_serial == s)
+        if (m->pend && (m->pend_serial == s || (m->pp_active && m->pp_serial == s)))
             ogles2_job_finish(m);
     }
 }

@@ -172,23 +172,24 @@ struct V3DContext {
      * state_buf holds shader state and attribute records, uniforms and texture/sampler state --
      * what the earlier library's `scl` (state control list, the 4th of CL_Draw_Triangle's
      * 4x4KB chunks) held -- plus each draw's vertex and index arrays (gl_EmitPrimitiveV3D). */
-    /* Each of these 4 is a 2-element array, indexed by build_slot below;
-     * gl_FramePresent alternates build_slot after every submitted pass.
-     * They are the only 4 things the CPU directly writes bytes into during
-     * CL-build, so they are the only things that need a second copy to keep
-     * CL-building off the bytes of a submitted render that may still be
-     * executing: nothing GPU-execution-only -- zbuffer_mem/tile_state_mem/
-     * tile_alloc_mem/the framebuffer itself -- needs one, since GPU
-     * execution stays strictly serial between frames. (gl_FrameBegin
-     * currently waits for the outstanding render, in MGLFlushPendingRender,
-     * before it resets any slot, so the two do not overlap.) */
-    v3d_mem binning_mem[2], render_mem[2], tile_list_mem[2], state_mem[2];
-    v3d_static_buffer binning_buf[2];
-    v3d_static_buffer render_buf[2];
-    v3d_static_buffer tile_list_buf[2];
-    v3d_static_buffer state_buf[2];
+    /* Each of these 4 is an array indexed by build_slot below: the
+     * only things the CPU writes bytes into while it builds a job, so the
+     * only things that need another copy to keep building off the bytes of
+     * a submitted render that may still run. ogles3: [0] and [1] in turn;
+     * [2], allocated only when first needed (v3d_context_alloc_slot2), when
+     * a job's render is queued behind the running one (job.c's chain: up to
+     * two renders on the GPU, each holding a slot, the next job building in
+     * the third). The tile pools and the framebuffers the renders use are
+     * job.c's to keep apart. */
+    v3d_mem binning_mem[3], render_mem[3], tile_list_mem[3], state_mem[3];
+    v3d_static_buffer binning_buf[3];
+    v3d_static_buffer render_buf[3];
+    v3d_static_buffer tile_list_buf[3];
+    v3d_static_buffer state_buf[3];
+    v3d_u8 slot2_ready;  /* ogles3: [2] allocated */
+    v3d_u8 last_slot;    /* ogles3: the slot of the last job submitted (job.c) */
     v3d_static_buffer* current_buf;   /* points at whichever of the above is being written -- same pattern as the earlier library's SetBuffer()/context->currentBuf */
-    v3d_u8 build_slot;   /* which slot [0]/[1] the CPU is currently building into */
+    v3d_u8 build_slot;   /* which slot [0], [1] or [2] the CPU is currently building into */
 
     /* A SINGLE render-completion flag, not per-CL-slot -- only one bitmap
      * lock is ever in play, regardless of which of the 2 CL-buffer slots is
@@ -418,6 +419,10 @@ int v3d_context_init(V3DContext* context, V3DDevice* device, v3d_u16 width, v3d_
 
 /* Frees every pool/buffer allocated by v3d_context_init, the lazily allocated shader_code_mem and scratch_color_mem, and the frame's spill pool and retire list. */
 void v3d_context_free(V3DDevice* device, V3DContext* context);
+
+/* ogles3: allocates the third control-list slot ([2]) once; 0 on success
+ * (or already there), negative if out of memory (nothing kept). */
+int v3d_context_alloc_slot2(V3DDevice* device, V3DContext* context);
 
 /* Re-sizes an initialised context for a new render-target size: frees and
  * reallocates only what depends on the size (Z buffer, tile state, tile

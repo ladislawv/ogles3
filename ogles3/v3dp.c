@@ -600,6 +600,9 @@ struct OGLES3Image *ogles2_v3dp_load(const UBYTE *file, ULONG len, char *why, UL
                     v->uses_storage = 1;
                 if (rt[j] == OGLES3_U_IMAGE_TMU_CONFIG_P0)
                     v->uses_images = 1;
+                if (rt[j] == OGLES3_U_TMU_CONFIG_P0 || rt[j] == OGLES3_U_TMU_CONFIG_P1 ||
+                    rt[j] == OGLES3_U_IMAGE_TMU_CONFIG_P0)
+                    v->tmu_reads = 1;
                 if ((rt[j] == OGLES3_U_IMAGE_TMU_CONFIG_P0 && (rd2[j] >> 24) >= OGLES3_MAX_STAGE_IMAGES) ||
                     (rt[j] >= OGLES3_U_IMAGE_WIDTH && rt[j] <= OGLES3_U_IMAGE_ARRAY_SIZE &&
                      rd2[j] >= OGLES3_MAX_STAGE_IMAGES))
