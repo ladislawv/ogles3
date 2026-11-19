@@ -28,6 +28,10 @@ Echo "The uploads, a 640x480 screen for a few seconds."
 UPR:bin/upload_test SIZE={SIZE} REPS={REPS} >UPR:results/1-upload.txt
 Echo "step 1 done" >>UPR:results/00-progress.txt
 Avail FLUSH >NIL:
+Echo "glTexImage2D, each drawn once, a 640x480 screen for a few seconds."
+UPR:bin/upload_test SIZE={SIZE} REPS={REPS} IMAGE >UPR:results/2-image.txt
+Echo "step 2 done" >>UPR:results/00-progress.txt
+Avail FLUSH >NIL:
 Assign LIBS: UPR:libs REMOVE
 UnSetEnv OGLES3/LogFile
 List UPR:results >UPR:results/99-files.txt

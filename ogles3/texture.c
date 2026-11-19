@@ -67,6 +67,8 @@ struct OGLES3Face
                                      * copy loses bits (raw_keep); 0: none */
     UBYTE raw_hw[MAX_LEVELS];       /* the stored format raw[] is in */
     ULONG rendered;                /* levels the GPU drew into since: the copy is stale */
+    ULONG stale;                    /* levels whose RAM copy is behind raw[] (a 16-bit level given in
+                                     * its own packing): expanded from there when read (fresh_level) */
     ULONG blank;                    /* levels never given texels (glTexImage2D without pixels):
                                      * the copy is zeros, as a new GPU copy is (MEMF_CLEAR) */
     GLenum sized[MAX_LEVELS];       /* ES 3.0: the sized format where format and type do not say the
@@ -208,6 +210,8 @@ struct OGLES3Sampler
 static ULONG smp_serial; /* the sampler versions given out */
 
 static void sync(struct OGLES3Texture *t);
+static void sync_ex(struct OGLES3Texture *t, BOOL expand);
+static void fresh_level(struct OGLES3Face *f, int l);
 static BOOL sized_storage(GLenum ifmt, GLenum *format, GLenum *type);
 static BOOL es3_sized(GLenum ifmt);
 static void rect_defaults(struct OGLES3Texture *t);
@@ -348,6 +352,7 @@ static void free_levels(struct OGLES3Texture *t)
                 FreeVec(t->f[k].raw[l]);
             t->f[k].raw[l] = 0;
         }
+        t->f[k].stale = 0;
         t->f[k].defined = 0;
         t->f[k].blank = 0;
     }
@@ -418,14 +423,14 @@ void ogles2_textures_free(struct OGLES3Context *ctx)
  * from the RAM copies at its next upload or draw. Only when the job's
  * retire list is nearly full is the job rendered first instead, which
  * costs a wait and the frame's depth and stencil (plan 7.2). */
-static void before_change(struct OGLES3Context *ctx, struct OGLES3TexState *ts,
-                          struct OGLES3Texture *t)
+static void before_change_ex(struct OGLES3Context *ctx, struct OGLES3TexState *ts, struct OGLES3Texture *t,
+                             BOOL expand)
 {
     struct OGLES3Context *m, *user;
     V3DContext *v;
     /* Its base level's view is made again at its next draw. */
     if (t->view) {
-        before_change(ctx, ts, t->view);
+        before_change_ex(ctx, ts, t->view, TRUE);
         free_view(t);
     }
     /* Its records are made again at the next draw: a new level can change
@@ -437,7 +442,7 @@ static void before_change(struct OGLES3Context *ctx, struct OGLES3TexState *ts,
      * made current. */
     for (m = ctx->share->first; m; m = m->share_next)
         ogles2_fbo_texture_changing(m, t);
-    sync(t);
+    sync_ex(t, expand);
     /* A job not rendered yet uses it: an open one, or one submitted and
      * still running (M6 overlap), of any member: the old copy goes with
      * that job (share.c: serials are unique across contexts). */
@@ -466,6 +471,13 @@ static void before_change(struct OGLES3Context *ctx, struct OGLES3TexState *ts,
                "(too many renamed blocks in this frame)", (ULONG)t->name);
     ogles2_job_flush(user, FALSE);
     ogles2_job_finish(user);
+}
+
+/* As before_change_ex, the RAM copies all made current (a caller that
+ * reads them). */
+static void before_change(struct OGLES3Context *ctx, struct OGLES3TexState *ts, struct OGLES3Texture *t)
+{
+    before_change_ex(ctx, ts, t, TRUE);
 }
 
 /* ---- names and binding ---- */
@@ -3006,6 +3018,31 @@ static void storage_of(struct OGLES3Texture *t)
 /* Two 16-bit texels (the first in the top half) little-endian each: as the
  * GPU's bytes in one long. */
 #define LE16X2(v) (((v) >> 8 & 0x00FF00FFUL) | ((v) << 8 & 0xFF00FF00UL))
+
+/* n 16-bit words from the 68k's order into the GPU's, two a long where
+ * both ends allow. */
+static void swap16_row(const UBYTE *s, UBYTE *d, ULONG n)
+{
+    if (!(((ULONG)s | (ULONG)d) & 3)) {
+        const ULONG *p = (const ULONG *)s;
+        ULONG *q = (ULONG *)d, v;
+        for (; n >= 2; n -= 2) {
+            v = *p++;
+#ifdef __m68k__ /* four instructions, not LE16X2's seven (64 glTexImage2D of 256x256 RGB565: 40 -> 36 ms) */
+            __asm__("ror.w #8,%0\n\tswap %0\n\tror.w #8,%0\n\tswap %0" : "+d"(v));
+            *q++ = v;
+#else
+            *q++ = LE16X2(v);
+#endif
+        }
+        s = (const UBYTE *)p;
+        d = (UBYTE *)q;
+    }
+    for (; n; n--, s += 2, d += 2) {
+        d[0] = s[1];
+        d[1] = s[0];
+    }
+}
 /* n texels of one 16-bit packing, two a long store where `d` allows (a
  * texel a store cost a third of the 16-bit uploads' time: the 2026-11-19
  * report, tests/a1200/upload). */
@@ -3453,14 +3490,21 @@ static void image_writes_done(struct OGLES3Texture *t)
     }
 }
 
-/* The RAM copies of every level the GPU drew into, read back. */
-static void sync(struct OGLES3Texture *t)
+/* The RAM copies of every level the GPU drew into, read back; with
+ * `expand`, those behind their exact texels (stale) made current too: not
+ * for a caller that stores from the exact texels (upload_all) or writes
+ * the level without reading it (the uploads), for which raw[] stays what
+ * the level holds. */
+static void sync_ex(struct OGLES3Texture *t, BOOL expand)
 {
     int k, l;
     if (t->img_serial)
         image_writes_done(t);
     for (k = 0; k < t->nf; k++) {
         struct OGLES3Face *f = &t->f[k];
+        if (expand)
+            for (l = 0; f->stale && l < MAX_LEVELS; l++)
+                fresh_level(f, l);
         if (!f->rendered)
             continue;
         for (l = 0; l < MAX_LEVELS; l++)
@@ -3471,6 +3515,11 @@ static void sync(struct OGLES3Texture *t)
             }
         f->rendered = 0;
     }
+}
+
+static void sync(struct OGLES3Texture *t)
+{
+    sync_ex(t, TRUE);
 }
 
 /* A whole level stored by the TFU from a raster copy in the stored format
@@ -3546,6 +3595,16 @@ static BOOL raw_fmt(GLenum format, GLenum type, UBYTE *hw, UBYTE *cpp)
         *cpp = format == GL_RED ? 2 : format == GL_RG ? 4 : 8;
         return TRUE;
     }
+    /* The 16-bit packings: kept so that the RAM copy's RGBA8 expansion
+     * waits until something reads it (fresh_level; 2026-11-19, a user's
+     * report: 16-bit uploads cost more a byte than RGBA8's). */
+    if ((format == GL_RGB && type == GL_UNSIGNED_SHORT_5_6_5) ||
+        (format == GL_RGBA && (type == GL_UNSIGNED_SHORT_4_4_4_4 || type == GL_UNSIGNED_SHORT_5_5_5_1))) {
+        *hw = type == GL_UNSIGNED_SHORT_5_6_5   ? V3D_TEXTURE_DATA_FORMAT_RGB565
+            : type == GL_UNSIGNED_SHORT_4_4_4_4 ? V3D_TEXTURE_DATA_FORMAT_RGBA4 : V3D_TEXTURE_DATA_FORMAT_RGB5A1;
+        *cpp = 2;
+        return TRUE;
+    }
     if (format == GL_RGB && (type == GL_UNSIGNED_INT_10F_11F_11F_REV || type == GL_UNSIGNED_INT_5_9_9_9_REV)) {
         *hw = type == GL_UNSIGNED_INT_5_9_9_9_REV ? V3D_TEXTURE_DATA_FORMAT_RGB9E5
                                                   : V3D_TEXTURE_DATA_FORMAT_R11FG11FB10F;
@@ -3562,6 +3621,10 @@ static void raw_texels(GLenum format, GLenum type, const UBYTE *s, UBYTE *d, ULO
 {
     ULONG i;
     int c, nc = format == GL_RED ? 1 : format == GL_RG ? 2 : format == GL_RGB ? 3 : 4;
+    if (type == GL_UNSIGNED_SHORT_5_6_5 || type == GL_UNSIGNED_SHORT_4_4_4_4 || type == GL_UNSIGNED_SHORT_5_5_5_1) {
+        swap16_row(s, d, n);
+        return;
+    }
     if (type == GL_BYTE) {
         for (i = 0; i < n; i++) {
             for (c = 0; c < nc; c++)
@@ -3602,12 +3665,56 @@ static void pack_wide(const struct OGLES3Texture *t, const UBYTE *src, UBYTE *d,
 static void raw_pack_box(struct OGLES3Texture *t, struct OGLES3Face *f, int l, int x, int y, int w, int h)
 {
     UBYTE *r = raw_of(t, f, l);
+    ULONG cb = copy_bytes(level_class(f, l));
     int j;
     if (!r || !f->shadow[l])
         return;
-    for (j = 0; j < h; j++)
-        pack_wide(t, f->shadow[l] + ((ULONG)(y + j) * f->w[l] + x) * 16, r + ((ULONG)(y + j) * f->w[l] + x) * t->cpp,
-                  (ULONG)w);
+    for (j = 0; j < h; j++) {
+        const UBYTE *s = f->shadow[l] + ((ULONG)(y + j) * f->w[l] + x) * cb;
+        UBYTE *d = r + ((ULONG)(y + j) * f->w[l] + x) * t->cpp;
+        if (cb == 4) /* a 16-bit packing's (RGBA8 class) */
+            pack(t, s, d, (ULONG)w);
+        else
+            pack_wide(t, s, d, (ULONG)w);
+    }
+}
+
+/* Face f's level l's RAM copy made current from its exact texels, if it
+ * is behind them (stale: a 16-bit level given in its own packing). The
+ * expansion is convert's (make_packed_tables), so the copy holds what
+ * converting the application's texels would have given. */
+static void fresh_level(struct OGLES3Face *f, int l)
+{
+    const ULONG (*tab)[256];
+    const UBYTE *s;
+    ULONG *d, i, n;
+    if (!(f->stale & (1UL << l)))
+        return;
+    f->stale &= ~(1UL << l);
+    if (!f->raw[l] || !f->shadow[l])
+        return;
+    switch (f->raw_hw[l]) {
+    case V3D_TEXTURE_DATA_FORMAT_RGB565: tab = (const ULONG (*)[256])t565; break;
+    case V3D_TEXTURE_DATA_FORMAT_RGBA4:  tab = (const ULONG (*)[256])t4444; break;
+    case V3D_TEXTURE_DATA_FORMAT_RGB5A1: tab = (const ULONG (*)[256])t5551; break;
+    default: return;
+    }
+    if (!packed_tables)
+        make_packed_tables();
+    s = f->raw[l];
+    d = (ULONG *)f->shadow[l];
+    n = (ULONG)f->w[l] * f->h[l];
+    for (i = 0; i < n; i++, s += 2) /* little-endian: the high byte second */
+        d[i] = tab[0][s[1]] | tab[1][s[0]];
+}
+
+/* (format, type) a 16-bit packing that a texture of that packing keeps as
+ * given (raw_keep), its RAM copy expanded only when read (fresh_level):
+ * where a GPU copy is made from them. */
+static BOOL packed16(const struct OGLES3Context *ctx, GLenum format, GLenum type)
+{
+    return ctx->v3d && ((format == GL_RGB && type == GL_UNSIGNED_SHORT_5_6_5) ||
+                        (format == GL_RGBA && (type == GL_UNSIGNED_SHORT_4_4_4_4 || type == GL_UNSIGNED_SHORT_5_5_5_1)));
 }
 
 /* A box of face f's level l given (`src`, `row` bytes a row) in (format,
@@ -3631,13 +3738,16 @@ static BOOL raw_keep(struct OGLES3Texture *t, struct OGLES3Face *f, int l, GLenu
         return FALSE;
     }
     if (!(r = raw_of(t, f, l))) {
-        if (!(r = AllocVec((ULONG)f->w[l] * f->h[l] * cpp + 4, MEMF_ANY)))
+        BOOL part = x || y || w != f->w[l] || h != f->h[l], blank = (f->blank & (1UL << l)) != 0;
+        /* a blank level's packed texels are zeros, as its RAM copy's */
+        if (!(r = AllocVec((ULONG)f->w[l] * f->h[l] * cpp + 4, MEMF_ANY | (part && blank ? MEMF_CLEAR : 0))))
             return FALSE;
+        fresh_level(f, l); /* the copy current before the texels it is behind go */
         if (f->raw[l])
             FreeVec(f->raw[l]);
         f->raw[l] = r;
         f->raw_hw[l] = hw;
-        if (x || y || w != f->w[l] || h != f->h[l])
+        if (part && !blank)
             raw_pack_box(t, f, l, 0, 0, f->w[l], f->h[l]); /* the rest as the RAM copy has it */
     }
     for (j = 0; j < h; j++)
@@ -3645,44 +3755,11 @@ static BOOL raw_keep(struct OGLES3Texture *t, struct OGLES3Face *f, int l, GLenu
     return TRUE;
 }
 
-/* The application's texels, of `type`, are the stored format's own
- * 16-bit packing (GL's and the GPU's: red in the top bits), only the byte
- * order apart: the GPU's copy takes them byte-swapped (swap16_row) and not
- * through the RAM copy (pack), whose 8-bit channels give back the same
- * bits (2026-11-19 report: 16-bit uploads 3.7 times slower a texel than
- * RGBA8; tests/a1200/upload). */
-static BOOL direct16(GLenum type, UBYTE hw)
-{
-    return (type == GL_UNSIGNED_SHORT_5_6_5 && hw == V3D_TEXTURE_DATA_FORMAT_RGB565) ||
-           (type == GL_UNSIGNED_SHORT_4_4_4_4 && hw == V3D_TEXTURE_DATA_FORMAT_RGBA4) ||
-           (type == GL_UNSIGNED_SHORT_5_5_5_1 && hw == V3D_TEXTURE_DATA_FORMAT_RGB5A1);
-}
-
-/* n 16-bit words from the 68k's order into the GPU's, two a long where
- * both ends allow. */
-static void swap16_row(const UBYTE *s, UBYTE *d, ULONG n)
-{
-    if (!(((ULONG)s | (ULONG)d) & 3)) {
-        const ULONG *p = (const ULONG *)s;
-        ULONG *q = (ULONG *)d, v;
-        for (; n >= 2; n -= 2) {
-            v = *p++;
-            *q++ = LE16X2(v);
-        }
-        s = (const UBYTE *)p;
-        d = (UBYTE *)q;
-    }
-    for (; n; n--, s += 2, d += 2) {
-        d[0] = s[1];
-        d[1] = s[0];
-    }
-}
-
-/* A box of face k's level l into the GPU's copy: from the RAM copy's
- * texels at `src`, `in` bytes a row; or, `app` given (direct16), from the
- * application's, `app_row` bytes a row. */
-static void store_box_from(struct OGLES3Texture *t, int k, int l, const UBYTE *src, ULONG in, const UBYTE *app,
-                           ULONG app_row, int x, int y, int w, int h)
+/* A box of face k's level l into the GPU's copy: its exact texels if it
+ * keeps them (raw_keep), else from the RAM copy's texels at `src`, `in`
+ * bytes a row. */
+static void store_box_from(struct OGLES3Texture *t, int k, int l, const UBYTE *src, ULONG in, int x, int y, int w,
+                           int h)
 {
     V3DTexture tmp;
     ULONG row = (ULONG)w * t->cpp;
@@ -3716,9 +3793,7 @@ static void store_box_from(struct OGLES3Texture *t, int k, int l, const UBYTE *s
     if (!(packed = AllocVec(row * h + 4, MEMF_ANY)))
         return;
     for (j = 0; j < h; j++)
-        if (app)
-            swap16_row(app + (ULONG)j * app_row, packed + (ULONG)j * row, (ULONG)w);
-        else if (float_type(t->hw_type) || depth_type(t->hw_type) || encoded_type(t->hw_type) || int_type(t->hw_type))
+        if (float_type(t->hw_type) || depth_type(t->hw_type) || encoded_type(t->hw_type) || int_type(t->hw_type))
             pack_wide(t, src + (ULONG)j * in, packed + (ULONG)j * row, (ULONG)w);
         else
             pack(t, src + (ULONG)j * in, packed + (ULONG)j * row, (ULONG)w);
@@ -3730,8 +3805,7 @@ static void store_box_from(struct OGLES3Texture *t, int k, int l, const UBYTE *s
 /* The RAM copy's texels at `src` (w texels a row) into the GPU's copy. */
 static void store_box(struct OGLES3Texture *t, int k, int l, const UBYTE *src, int x, int y, int w, int h)
 {
-    store_box_from(t, k, l, src, (ULONG)w * copy_bytes(class_of(t->f[0].format[0], t->f[0].type[0])), 0, 0, x, y,
-                   w, h);
+    store_box_from(t, k, l, src, (ULONG)w * copy_bytes(class_of(t->f[0].format[0], t->f[0].type[0])), x, y, w, h);
 }
 
 static void upload_level(struct OGLES3Texture *t, int k, int l)
@@ -3801,7 +3875,7 @@ static BOOL upload_all(struct OGLES3Texture *t)
     V3DDevice *dev = ogles2_device();
     const struct OGLES3Face *f0 = &t->f[0];
     int l, k, n = 1;
-    sync(t);
+    sync_ex(t, FALSE); /* store_box takes a stale level's exact texels */
     free_gpu(t);
     if (!base_ok(t))
         return TRUE; /* nothing to sample yet (a cube map: until all faces agree) */
@@ -4305,6 +4379,7 @@ void ogles2_texture_rendered(struct OGLES3Texture *t, int k, int l)
         FreeVec(t->f[k].raw[l]);
         t->f[k].raw[l] = 0;
     }
+    t->f[k].stale &= ~(1UL << l); /* read back whole from the GPU's (sync) */
     t->f[k].rendered |= 1UL << l;
     t->f[k].blank &= ~(1UL << l);
 }
@@ -4369,7 +4444,7 @@ static BOOL read_float(struct OGLES3Texture *t, int k, int l, int x, int y, int 
 BOOL ogles2_texture_read(struct OGLES3Texture *t, int k, int l, int x, int y, int w, int h,
                          UBYTE *rgba, ULONG stride)
 {
-    const struct OGLES3Face *f = &t->f[k];
+    struct OGLES3Face *f = &t->f[k];
     int j;
     if (level_class(f, l) == CLASS_FLOAT)
         return !int_components(f->format[l]) && read_float(t, k, l, x, y, w, h, rgba, stride);
@@ -4379,6 +4454,7 @@ BOOL ogles2_texture_read(struct OGLES3Texture *t, int k, int l, int x, int y, in
         return TRUE;
     if (!f->shadow[l]) /* no GPU copy (a state-only context): the RAM copy */
         return FALSE;
+    fresh_level(f, l);
     for (j = 0; j < h; j++)
         memcpy(rgba + (ULONG)j * stride, f->shadow[l] + ((ULONG)(y + j) * f->w[l] + x) * 4, (ULONG)w * 4);
     return TRUE;
@@ -4699,7 +4775,7 @@ void ogles2_texture_params_restore(struct OGLES3Texture *t, const struct OGLES3T
 
 static void set_level(struct OGLES3Context *ctx, struct OGLES3Texture *t, int k, GLint level, UBYTE *img,
                       GLsizei width, GLsizei height, GLenum format, GLenum type, BOOL given, GLenum sized,
-                      BOOL sized_given, GLenum ifmt);
+                      BOOL sized_given, GLenum ifmt, BOOL later);
 
 /* OES_required_internalformat: a sized colour format's base format (0 for
  * any other value). */
@@ -4722,6 +4798,19 @@ static GLenum sized_color_base(GLenum ifmt)
  * sized format; NOT_FILLED for one that format and type cannot fill
  * (GL_INVALID_OPERATION). */
 #define NOT_FILLED 0xFFFFFFFFUL /* no GL value: 0 is an internal format to refuse too */
+/* OES_texture_stencil8 is an ES 3.1 context's (context.c's EXT_ES31): an
+ * ES 3.0 or GLES2 context refuses its stencil textures, GL_INVALID_ENUM
+ * (dEQP-GLES3 fbo.completeness.renderable.texture.stencil.stencil_index8:
+ * an ES 3.0 context made one, and its framebuffer was complete). TRUE:
+ * refused, the error set. */
+static BOOL stencil8_refused(struct OGLES3Context *ctx, GLenum ifmt, GLenum format)
+{
+    if (ogles2_es31(ctx) || (ifmt != GL_STENCIL_INDEX8 && ifmt != GL_STENCIL_INDEX && format != GL_STENCIL_INDEX))
+        return FALSE;
+    ogles2_error(ctx, GL_INVALID_ENUM);
+    return TRUE;
+}
+
 static GLenum sized_base(GLenum ifmt, GLenum format, GLenum type)
 {
     GLenum base = sized_color_base(ifmt), f, ty;
@@ -4797,7 +4886,7 @@ static void tex_image(struct OGLES3Context *ctx, GLenum target, GLint level, GLi
     UBYTE *img;
     const UBYTE *src = 0;
     ULONG cb, row = 0, image;
-    BOOL sized;
+    BOOL sized, direct;
     int k;
     if (!ogles2_context_valid(ctx) || !(ts = ts_get(ctx)))
         return;
@@ -4822,6 +4911,8 @@ static void tex_image(struct OGLES3Context *ctx, GLenum target, GLint level, GLi
      * the same image as BGRA_EXT. */
     if ((GLenum)internalformat == GL_BGRA8_EXT && format == GL_BGRA_EXT)
         internalformat = GL_BGRA_EXT;
+    if (stencil8_refused(ctx, (GLenum)internalformat, format))
+        return;
     /* OES_required_internalformat (GLES 3 programs and dEQP's clip_control
      * cases pass GL_RGBA8). */
     if (sized_base((GLenum)internalformat, format, type) == NOT_FILLED) {
@@ -4869,10 +4960,11 @@ static void tex_image(struct OGLES3Context *ctx, GLenum target, GLint level, GLi
     if (!unpack_source(ctx, &pixels, unpack_bytes(ctx, format, type, width, height, 1),
                        datum_bytes(type)))
         return;
-    before_change(ctx, ts, t);
+    before_change_ex(ctx, ts, t, FALSE); /* the level replaced, not read */
     t->es3_rules = ogles2_es3(ctx);
     cb = copy_bytes(class_of(format, type));
-    img = width && height ? AllocVec((ULONG)width * height * cb, MEMF_ANY | MEMF_CLEAR) : 0;
+    direct = width && height && pixels && packed16(ctx, format, type);
+    img = width && height ? AllocVec((ULONG)width * height * cb, MEMF_ANY | (direct ? 0 : MEMF_CLEAR)) : 0;
     if (width && height && !img) {
         ogles2_error(ctx, GL_OUT_OF_MEMORY);
         return;
@@ -4881,12 +4973,22 @@ static void tex_image(struct OGLES3Context *ctx, GLenum target, GLint level, GLi
         ogles2_wide_seen |= wide_class(format, type);
     if (img && pixels) {
         src = unpack_image(ctx, pixels, format, type, width, height, &row, &image);
-        convert(img, (ULONG)width * cb, src, format, type, width, height, row);
+        if (!direct)
+            convert(img, (ULONG)width * cb, src, format, type, width, height, row);
     }
-    set_level(ctx, t, k, level, img, width, height, format, type, pixels != 0, keep, sized, given);
+    set_level(ctx, t, k, level, img, width, height, format, type, pixels != 0, keep, sized, given, direct);
     if (src && (type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV || format == GL_STENCIL_INDEX) &&
         !keep_stencil(t, &t->f[k], level, src, row, 0, 0, width, height))
         ogles2_error(ctx, GL_OUT_OF_MEMORY);
+    if (direct) { /* its texels as given, the RAM copy behind them; else converted after all */
+        if (raw_keep(t, &t->f[k], level, format, type, src, row, 0, 0, width, height))
+            t->f[k].stale |= 1UL << level;
+        else
+            convert(img, (ULONG)width * cb, src, format, type, width, height, row);
+        if (t->gpu && level < t->gpu->num_levels && consistent(&t->f[k], level))
+            store_box(t, k, level, img, 0, 0, width, height);
+        return;
+    }
     /* exact texels: the GPU's copy again from them, if set_level made it */
     if (src && img && raw_keep(t, &t->f[k], level, format, type, src, row, 0, 0, width, height) && t->gpu &&
         level < t->gpu->num_levels && consistent(&t->f[k], level))
@@ -4913,6 +5015,7 @@ static void put_level(struct OGLES3Face *f, int level, UBYTE *img, GLsizei width
     if (f->raw[level]) /* and its exact texels (raw_keep) */
         FreeVec(f->raw[level]);
     f->raw[level] = 0;
+    f->stale &= ~(1UL << level);
     f->w[level] = (UWORD)width;
     f->h[level] = (UWORD)height;
     f->format[level] = format;
@@ -4936,6 +5039,7 @@ static void drop_level(struct OGLES3Face *f, int level)
     if (f->raw[level])
         FreeVec(f->raw[level]);
     f->raw[level] = 0;
+    f->stale &= ~(1UL << level);
     f->defined &= ~(1UL << level);
     f->blank &= ~(1UL << level);
     f->rendered &= ~(1UL << level);
@@ -4946,7 +5050,7 @@ static void drop_level(struct OGLES3Face *f, int level)
  * with the jobs that use the texture (before_change). */
 static void set_level(struct OGLES3Context *ctx, struct OGLES3Texture *t, int k, GLint level, UBYTE *img,
                       GLsizei width, GLsizei height, GLenum format, GLenum type, BOOL given, GLenum sized,
-                      BOOL sized_given, GLenum ifmt)
+                      BOOL sized_given, GLenum ifmt, BOOL later)
 {
     struct OGLES3Face *f = &t->f[k];
     put_level(f, level, img, width, height, format, type, given, sized, sized_given, ifmt);
@@ -4960,7 +5064,7 @@ static void set_level(struct OGLES3Context *ctx, struct OGLES3Texture *t, int k,
     if (!t->gpu || (level == 0 && (faces(t) == 1 || t->gpu->width != f->w[0])) ||
         level >= t->gpu->num_levels || t->gpu->width != t->f[0].w[0] || t->gpu->height != t->f[0].h[0]) {
         free_gpu(t);
-    } else if (consistent(f, level) && img) {
+    } else if (consistent(f, level) && img && !later) {
         upload_level(t, k, level);
     }
 }
@@ -5024,21 +5128,24 @@ static void tex_sub_image(struct OGLES3Context *ctx, GLenum target, GLint level,
         return;
     if (!width || !height || !pixels)
         return;
-    before_change(ctx, ts, t);
+    before_change_ex(ctx, ts, t, FALSE); /* a box written, the rest not read */
     cb = copy_bytes(level_class(f, level));
     src = unpack_image(ctx, pixels, format, type, width, height, &row, &image);
-    /* Into the RAM copy where it goes, and the GPU's copy from there. */
     sub = f->shadow[level] + ((ULONG)yoffset * f->w[level] + xoffset) * cb;
-    convert(sub, (ULONG)f->w[level] * cb, src, format, type, width, height, row);
-    if ((type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV || format == GL_STENCIL_INDEX) &&
-        !keep_stencil(t, f, level, src, row, xoffset, yoffset, width, height))
-        ogles2_error(ctx, GL_OUT_OF_MEMORY);
+    if (packed16(ctx, format, type) &&
+        raw_keep(t, f, level, format, type, src, row, xoffset, yoffset, width, height)) {
+        f->stale |= 1UL << level; /* the texels as given; the RAM copy behind them */
+    } else {
+        /* Into the RAM copy where it goes, and the GPU's copy from there. */
+        convert(sub, (ULONG)f->w[level] * cb, src, format, type, width, height, row);
+        if ((type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV || format == GL_STENCIL_INDEX) &&
+            !keep_stencil(t, f, level, src, row, xoffset, yoffset, width, height))
+            ogles2_error(ctx, GL_OUT_OF_MEMORY);
+        raw_keep(t, f, level, format, type, src, row, xoffset, yoffset, width, height);
+    }
     f->blank &= ~(1UL << level);
-    raw_keep(t, f, level, format, type, src, row, xoffset, yoffset, width, height);
     if (t->gpu && level < t->gpu->num_levels && consistent(f, level)) {
-        BOOL direct = direct16(type, t->hw_type);
-        store_box_from(t, k, level, sub, (ULONG)f->w[level] * cb, direct ? src : 0, row, xoffset, yoffset, width,
-                       height);
+        store_box_from(t, k, level, sub, (ULONG)f->w[level] * cb, xoffset, yoffset, width, height);
     } else if (!t->gpu && ctx->v3d && !upload_all(t)) /* renamed: a new copy, whole */
         ogles2_error(ctx, GL_OUT_OF_MEMORY);
 }
@@ -5124,7 +5231,7 @@ void ogles2_glTexImage3D(struct OGLES3Context *ctx, GLenum target, GLint level, 
     ULONG cb, row, in;
     const UBYTE *src;
     int k, max;
-    BOOL sized;
+    BOOL sized, direct;
     if (!tex3d_entry(ctx, target) || !(ts = ts_get(ctx)) || !(t = image_texture_3d(ctx, ts, target)))
         return;
     type = half_type(ctx, type);
@@ -5142,6 +5249,8 @@ void ogles2_glTexImage3D(struct OGLES3Context *ctx, GLenum target, GLint level, 
         return;
     if ((GLenum)internalformat == GL_BGRA8_EXT && format == GL_BGRA_EXT) /* as glTexImage2D takes it */
         internalformat = GL_BGRA_EXT;
+    if (stencil8_refused(ctx, (GLenum)internalformat, format))
+        return;
     if (sized_base((GLenum)internalformat, format, type) == NOT_FILLED) {
         ogles2_error(ctx, GL_INVALID_OPERATION);
         return;
@@ -5173,7 +5282,7 @@ void ogles2_glTexImage3D(struct OGLES3Context *ctx, GLenum target, GLint level, 
     if (!unpack_source(ctx, &pixels, unpack_bytes(ctx, format, type, width, height, depth),
                        datum_bytes(type)))
         return;
-    before_change(ctx, ts, t);
+    before_change_ex(ctx, ts, t, FALSE); /* the level replaced, not read */
     t->es3_rules = TRUE;
     if (!faces_room(t, depth)) {
         ogles2_error(ctx, GL_OUT_OF_MEMORY);
@@ -5183,21 +5292,26 @@ void ogles2_glTexImage3D(struct OGLES3Context *ctx, GLenum target, GLint level, 
         ogles2_wide_seen |= wide_class(format, type);
     cb = copy_bytes(class_of(format, type));
     src = unpack_image(ctx, pixels, format, type, width, height, &row, &in);
+    direct = pixels && packed16(ctx, format, type);
     for (k = 0; k < depth; k++) {
-        UBYTE *img = width && height ? AllocVec((ULONG)width * height * cb, MEMF_ANY | MEMF_CLEAR) : 0;
+        UBYTE *img = width && height ? AllocVec((ULONG)width * height * cb, MEMF_ANY | (direct ? 0 : MEMF_CLEAR)) : 0;
         if (width && height && !img) {
             ogles2_error(ctx, GL_OUT_OF_MEMORY);
             depth = k; /* the level has the layers it got */
             break;
         }
-        if (img && pixels)
+        if (img && pixels && !direct)
             convert(img, (ULONG)width * cb, src + (ULONG)k * in, format, type, width, height, row);
         put_level(&t->f[k], level, img, width, height, format, type, pixels != 0, keep, sized, given);
         if (img && pixels && (type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV || format == GL_STENCIL_INDEX) &&
             !keep_stencil(t, &t->f[k], level, src + (ULONG)k * in, row, 0, 0, width, height))
             ogles2_error(ctx, GL_OUT_OF_MEMORY);
-        if (img && pixels) /* exact texels (uploaded below) */
-            raw_keep(t, &t->f[k], level, format, type, src + (ULONG)k * in, row, 0, 0, width, height);
+        if (img && pixels) { /* exact texels (uploaded below) */
+            if (raw_keep(t, &t->f[k], level, format, type, src + (ULONG)k * in, row, 0, 0, width, height) && direct)
+                t->f[k].stale |= 1UL << level; /* the RAM copy behind them */
+            else if (direct)
+                convert(img, (ULONG)width * cb, src + (ULONG)k * in, format, type, width, height, row);
+        }
     }
     for (k = depth; k < t->nf; k++)
         drop_level(&t->f[k], level);
@@ -5259,15 +5373,23 @@ void ogles2_glTexSubImage3D(struct OGLES3Context *ctx, GLenum target, GLint leve
         return;
     if (!width || !height || !depth || !pixels)
         return;
-    before_change(ctx, ts, t);
+    before_change_ex(ctx, ts, t, FALSE); /* a box written, the rest not read */
     cb = copy_bytes(level_class(f, level));
     src = unpack_image(ctx, pixels, format, type, width, height, &row, &in);
     stored = t->gpu && level < t->gpu->num_levels && consistent(f, level) && depth_ok(t, level);
-    direct = direct16(type, t->hw_type);
+    direct = packed16(ctx, format, type);
     for (k = zoffset; k < zoffset + depth; k++) {
         struct OGLES3Face *fk = &t->f[k];
-        /* Into the RAM copy where it goes, and the GPU's copy from there. */
         sub = fk->shadow[level] + ((ULONG)yoffset * fk->w[level] + xoffset) * cb;
+        if (direct && raw_keep(t, fk, level, format, type, src + (ULONG)(k - zoffset) * in, row, xoffset, yoffset,
+                               width, height)) {
+            fk->stale |= 1UL << level; /* the texels as given; the RAM copy behind them */
+            fk->blank &= ~(1UL << level);
+            if (stored)
+                store_box_from(t, k, level, sub, (ULONG)fk->w[level] * cb, xoffset, yoffset, width, height);
+            continue;
+        }
+        /* Into the RAM copy where it goes, and the GPU's copy from there. */
         convert(sub, (ULONG)fk->w[level] * cb, src + (ULONG)(k - zoffset) * in, format, type, width, height, row);
         fk->blank &= ~(1UL << level);
         if ((type == GL_FLOAT_32_UNSIGNED_INT_24_8_REV || format == GL_STENCIL_INDEX) &&
@@ -5275,8 +5397,7 @@ void ogles2_glTexSubImage3D(struct OGLES3Context *ctx, GLenum target, GLint leve
             ogles2_error(ctx, GL_OUT_OF_MEMORY);
         raw_keep(t, fk, level, format, type, src + (ULONG)(k - zoffset) * in, row, xoffset, yoffset, width, height);
         if (stored)
-            store_box_from(t, k, level, sub, (ULONG)fk->w[level] * cb, direct ? src + (ULONG)(k - zoffset) * in : 0,
-                           row, xoffset, yoffset, width, height);
+            store_box_from(t, k, level, sub, (ULONG)fk->w[level] * cb, xoffset, yoffset, width, height);
     }
     if (!stored && !t->gpu && ctx->v3d && !upload_all(t)) /* renamed: a new copy, whole */
         ogles2_error(ctx, GL_OUT_OF_MEMORY);
@@ -5373,6 +5494,8 @@ static void tex_storage(struct OGLES3Context *ctx, GLenum target, GLsizei levels
         }
         format = ifmt; /* a compressed level's format, its type 0 (dxt_image's) */
         type = 0;
+    } else if (stencil8_refused(ctx, ifmt, 0)) {
+        return;
     } else if (!sized_storage(ifmt, &format, &type)) {
         ogles2_error(ctx, es3_sized(ifmt) ? GL_INVALID_OPERATION : GL_INVALID_ENUM);
         return;
@@ -5946,7 +6069,7 @@ static void dxt_image(struct OGLES3Context *ctx, struct OGLES3TexState *ts, GLen
     }
     if (img && data)
         CopyMem((APTR)data, img, bytes);
-    set_level(ctx, t, k, level, img, width, height, format, 0, data != 0, 0, FALSE, format);
+    set_level(ctx, t, k, level, img, width, height, format, 0, data != 0, 0, FALSE, format, FALSE);
 }
 
 void ogles2_glCompressedTexImage2D(struct OGLES3Context *ctx, GLenum target, GLint level,
@@ -6714,7 +6837,6 @@ static BOOL generate_tfu(struct OGLES3Context *ctx, struct OGLES3TexState *ts, s
 {
     struct OGLES3Face *f = &t->f[0];
     struct OGLES3Context *m, *user;
-    ULONG made = ((1UL << n) - 1) & ~1UL; /* levels 1 .. n-1 */
     int l, r;
     if ((ctx->probe & OGLES3_PROBE_CPU_MIPMAP) || !ctx->v3d || faces(t) != 1 || layered(t) || n < 2 || !t->gpu ||
         !t->gpu->texture_mem.hostptr || t->gpu->num_levels < n || !v3d_tfu_supports_mipmaps(t->hw_type))
@@ -6748,8 +6870,8 @@ static BOOL generate_tfu(struct OGLES3Context *ctx, struct OGLES3TexState *ts, s
                        "the CPU makes the levels", (ULONG)t->name, (ULONG)f->w[0], (ULONG)f->h[0]);
         return FALSE;
     }
-    f->rendered |= made;
-    f->blank &= ~made;
+    for (l = 1; l < n; l++) /* their exact texels, if kept, are the old levels' */
+        ogles2_texture_rendered(t, 0, l);
     if (!ts->logged_tfu) {
         ts->logged_tfu = TRUE;
         ogles2_log("glGenerateMipmap: the TFU (texture %ld, %ldx%ld, %ld levels; logged once)",
@@ -6909,6 +7031,10 @@ void ogles2_glGenerateMipmap(struct OGLES3Context *ctx, GLenum target)
             if (f->shadow[l])
                 FreeVec(f->shadow[l]);
             f->shadow[l] = img;
+            if (f->raw[l]) /* the old level's exact texels (store_box would take them) */
+                FreeVec(f->raw[l]);
+            f->raw[l] = 0;
+            f->stale &= ~(1UL << l);
             f->w[l] = (UWORD)w;
             f->h[l] = (UWORD)h;
             f->format[l] = f->format[l - 1];

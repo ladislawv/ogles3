@@ -16,11 +16,12 @@ ms, the RAM copy's `memcpy` 20, `convert` 20, the CPU's UIF tiling 12
   comparing both sizes, with and without XOR, against the general path.
 - `texture.c`: `glTexSubImage2D` and `3D` convert into the RAM copy where
   the box goes (no temporary and copy), and `store_box_from` stores from
-  there with its stride; when the type is the texture's own packing
-  (`direct16`: 5_6_5 into RGB565, 4_4_4_4 into RGBA4, 5_5_5_1 into
-  RGB5_A1) the GPU's copy takes the application's words byte-swapped two a
-  long (`swap16_row`), not packed back from the RAM copy (the same bits:
-  8-bit channels expanded from 5, 6 or 4 bits keep them on top).
+  there with its stride; when the type is the texture's own packing (5_6_5
+  into RGB565, 4_4_4_4 into RGBA4, 5_5_5_1 into RGB5_A1) the GPU's copy
+  takes the application's words byte-swapped two a long (`swap16_row`),
+  not packed back from the RAM copy (the same bits: 8-bit channels
+  expanded from 5, 6 or 4 bits keep them on top). (Replaced by the second
+  step below: the words kept as the level's exact texels.)
 - `pack`'s 16-bit formats two texels a long store (`PACK16`), for the
   other cases (RGBA bytes into a 16-bit texture, glTexImage2D's whole
   levels).
@@ -39,10 +40,61 @@ Measured (`ogles2-upload-20261119-130921`, measure pass, 64 tiles):
 dEQP-GLES3's `texture` list after it (`ogles2-m8-2c-20261119-131523`):
 5,831 passed, none failed, 64 not supported, as on 2026-11-18.
 
-A 16-bit texel now costs less than an RGBA8 one; a byte still more (136
-MB/s against 221): the RAM copy is RGBA8 for every format, 16 MB written
-for 4 M texels whatever the texture. Equal a byte needs a RAM copy in the
-16-bit packing (every reader of `shadow[]` changed): not done.
+A 16-bit texel then cost less than an RGBA8 one but a byte still more
+(136 MB/s against 221): the RAM copy is RGBA8 for every format, 16 MB
+written for 4 M texels whatever the texture.
+
+**The second step (2026-11-19, the developer's request: a byte as fast as
+RGBA8's, and glTexImage2D too).** The 16-bit packings join the exact
+texels (`raw_fmt`, `raw_texels` swapping words): a level given in its own
+packing keeps the words as the GPU stores them (`raw[]`), the GPU's copy is
+stored from there (`store_box` already took `raw[]` first), and its RGBA8
+RAM copy is left behind them (`OGLES3Face.stale`) until something reads
+it: `fresh_level` expands it with `convert`'s tables (the same bytes as
+converting the application's texels), from `sync` (every reader goes
+through it: `before_change`, the reads, glCopyImageSubData, the views) and
+from `ogles2_texture_read`'s RAM path. The uploads and `upload_all` skip
+the expansion (`before_change_ex`, `sync_ex` with `expand` FALSE): a box
+written into a stale level from other data (RGBA bytes) goes into the RAM
+copy and is packed into `raw[]` (`raw_pack_box`, now for RGBA8-class levels
+too), which stays the level's truth. glTexImage2D (`set_level`'s
+`later`: stored once, from `raw[]`) and glTexImage3D take the same path. The
+first exact texels of a blank level are zeros (`MEMF_CLEAR`), not packed
+from its RAM copy. A level whose `raw[]` goes (a new level, a render,
+`ogles2_texture_rendered`) drops its stale bit; `generate_tfu` now marks
+its levels through `ogles2_texture_rendered` (it kept their exact texels:
+a later store would have taken the old level's), and the CPU's
+glGenerateMipmap drops a replaced level's exact texels (the same, latent
+for the float formats). `swap16_row` byte-swaps with `ror.w #8; swap;
+ror.w #8; swap` (Emu68).
+
+| 64 x 256x256, measure pass | RGBA8 | RGB565 | RGB5_A1 | RGBA4 |
+|---|---|---|---|---|
+| glTexSubImage3D (`20261119-142222`) | 75 ms, 218 MB/s | 45 ms, 183 | 45 ms, 181 | 48 ms, 171 |
+| the same, 256 tiles (`-142245`) | 220 ms, 297 MB/s | 112 ms, 292 | 109 ms, 301 | 111 ms, 296 |
+| glTexImage2D, drawn once each (`-142222`) | 90 ms, 176 MB/s | 36 ms, 218 | 37 ms, 210 | 36 ms, 217 |
+
+A byte now costs what an RGBA8 byte does (16-bit glTexImage2D less): the
+64-tile glTexSubImage3D's gap is each new layer's first exact texels (2 MB
+cleared, once; RGBA8's RAM copy is cleared at glTexStorage3D, under
+"create"). RGBA bytes into a 16-bit texture stay at 96-103 ms (convert and
+pack). The 16-bit levels' RAM copy is still allocated (RGBA8, every reader
+expects it): the time is saved, not the memory (the exact texels add 2
+bytes a texel). `upload_test IMAGE` is the glTexImage2D case (Run-M1's
+step 2).
+**`OES_texture_stencil8` in ES 3.0 contexts (found by the second step's
+dEQP run, 2026-11-19).** dEQP-GLES3 `fbo` failed
+`completeness.renderable.texture.stencil.stencil_index8` ("checked as
+complete, expected incomplete"): the m8-2c package's library is an `ES3=1`
+build (ES 3.0 contexts), whose GL_EXTENSIONS lacks the extension (it is
+`EXT_ES31`), but glTexImage2D, glTexImage3D and glTexStorage took
+`GL_STENCIL_INDEX8` / `GL_STENCIL_INDEX` all the same. Not the upload
+change: the committed HEAD built with `ES3=1` failed it too. The earlier
+m8-2c runs that passed it (`20261119-000112`, `-125323`) ran ES 3.1
+contexts: an installed ES 3.1 library in `LIBS:` won over the package's
+(run them with `LIBS_INSTALL=1`; the log's "OpenGL ES 3.x" line says which
+ran). Fixed: `stencil8_refused`, GL_INVALID_ENUM outside ES 3.1 contexts.
+
 ogles2.library 1.x (`C:\- CPP\ogles2`) has the same path and is not
 changed here. An earlier "no change" measurement was a stale library: a
 dEQP run stopped with Ctrl-C left ogles3.library open (`open (count 2)` in

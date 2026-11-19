@@ -6,11 +6,14 @@
     SIZE x SIZE are uploaded with glTexSubImage3D (the calls timed, then glFinish timed).
     The same texel count for every format: a 16-bit tile is half the bytes of a 32-bit one.
 
-    UploadTest [SIZE=n] [REPS=n] [ATLAS=n] [LAYERS=n]
+    UploadTest [SIZE=n] [REPS=n] [ATLAS=n] [LAYERS=n] [IMAGE]
       SIZE    tile side in texels (default 256)
       REPS    tiles uploaded per format (default 64)
       ATLAS   array side (default 1024)
       LAYERS  array layers (default 4)
+      IMAGE   (ogles3; added to the report's test) each tile a whole SIZE x SIZE
+              GL_TEXTURE_2D given with glTexImage2D and drawn once (a small
+              triangle): a level 0 reaches the GPU's copy at the next draw.
 */
 #include <exec/types.h>
 #include <exec/memory.h>
@@ -76,8 +79,17 @@ static void put_ms(const char *label, unsigned long long us)
 
 int main(void)
 {
-    LONG args[4] = { 0 };
-    struct RDArgs *rda = ReadArgs((CONST_STRPTR)"SIZE/K/N,REPS/K/N,ATLAS/K/N,LAYERS/K/N", args, NULL);
+    LONG args[5] = { 0 };
+    struct RDArgs *rda = ReadArgs((CONST_STRPTR)"SIZE/K/N,REPS/K/N,ATLAS/K/N,LAYERS/K/N,IMAGE/S", args, NULL);
+    BOOL image = args[4] != 0;
+#ifndef USE_OGLES2
+    static const GLfloat tri[] = { -0.1f, -0.1f, 0.1f, -0.1f, -0.1f, 0.1f };
+    static const char *vs = "attribute vec2 p; varying vec2 uv; "
+                            "void main() { uv = p * 5.0 + 0.5; gl_Position = vec4(p, 0.0, 1.0); }";
+    static const char *fs = "precision mediump float; varying vec2 uv; uniform sampler2D s; "
+                            "void main() { gl_FragColor = texture2D(s, uv); }";
+    GLuint prog = 0;
+#endif
     ULONG size = args[0] ? *(LONG *)args[0] : 256, reps = args[1] ? *(LONG *)args[1] : 64;
     ULONG atlas = args[2] ? *(LONG *)args[2] : 1024, layers = args[3] ? *(LONG *)args[3] : 4;
     ULONG err = 0, id = INVALID_ID, f, r, i, per_row;
@@ -121,6 +133,35 @@ int main(void)
     }
     aglMakeCurrent(ctx);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 2);
+#ifndef USE_OGLES2
+    if (image) {
+        GLuint v = glCreateShader(GL_VERTEX_SHADER), g = glCreateShader(GL_FRAGMENT_SHADER);
+        GLint ok = 0;
+        glShaderSource(v, 1, &vs, NULL);
+        glCompileShader(v);
+        glShaderSource(g, 1, &fs, NULL);
+        glCompileShader(g);
+        prog = glCreateProgram();
+        glAttachShader(prog, v);
+        glAttachShader(prog, g);
+        glBindAttribLocation(prog, 0, "p");
+        glLinkProgram(prog);
+        glGetProgramiv(prog, GL_LINK_STATUS, &ok);
+        if (!ok) {
+            PutStr((CONST_STRPTR)"UploadTest: the IMAGE mode's program did not link\n");
+            image = FALSE;
+        } else {
+            glUseProgram(prog);
+            glUniform1i(glGetUniformLocation(prog, "s"), 0);
+            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, tri);
+            glEnableVertexAttribArray(0);
+        }
+    }
+    if (image)
+        Printf((CONST_STRPTR)"UploadTest " LIBNAME ": %lu glTexImage2D of %lux%lu per format, each drawn once\n", reps,
+               size, size);
+    else
+#endif
     Printf((CONST_STRPTR)"UploadTest " LIBNAME ": %lu tiles of %lux%lu per format, array %lux%lux%lu\n", reps, size, size,
            atlas, atlas, layers);
     for (r = 0; r < 2; r++) {   /* pass 0 warms up, pass 1 is the measure */
@@ -136,12 +177,24 @@ int main(void)
             glBindTexture(GL_TEXTURE_2D, tex);
             glTexImage2D(GL_TEXTURE_2D, 0, fmts[f].internal, atlas, atlas, 0, fmts[f].format, fmts[f].type, NULL);
 #else
-            glBindTexture(GL_TEXTURE_2D_ARRAY, tex);
-            glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, fmts[f].internal, atlas, atlas, layers);
+            if (image) {
+                glBindTexture(GL_TEXTURE_2D, tex);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            } else {
+                glBindTexture(GL_TEXTURE_2D_ARRAY, tex);
+                glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, fmts[f].internal, atlas, atlas, layers);
+            }
 #endif
             glFinish();
             t1 = now_us();
             for (i = 0; i < reps; i++) {
+#ifndef USE_OGLES2
+                if (image) {
+                    glTexImage2D(GL_TEXTURE_2D, 0, fmts[f].internal, size, size, 0, fmts[f].format, fmts[f].type, buf);
+                    glDrawArrays(GL_TRIANGLES, 0, 3);
+                    continue;
+                }
+#endif
 #ifdef USE_OGLES2
                 ULONG cell = i % (per_row * per_row);
                 glTexSubImage2D(GL_TEXTURE_2D, 0, cell % per_row * size, cell / per_row * size, size, size,
