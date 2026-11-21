@@ -1,5 +1,5 @@
-ogles3 SDL archive: SDL2 and SDL3 for AmigaOS 3 with OpenGL ES 3.1
-==================================================================
+ogles3 SDL archive: SDL2 and SDL3 for AmigaOS 3 with OpenGL ES 3.1+
+===================================================================
 
 SDL2 (2.33.0) and SDL3 (3.4.14) for 68k AmigaOS 3, built from Steffen
 Haeuser's SDL2_68k and SDL3_68k with the ogles3 project's OpenGL ES

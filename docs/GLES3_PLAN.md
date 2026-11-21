@@ -22,6 +22,18 @@ compile in any of the nine (each log's one "compiler:" line names it), Boing 202
 while compiling), the rest as before. `SHA256SUMS` lists all six. Also in it: `destroy` clears a texture's stale bits as it clears
 `rendered` (a deleted texture's 16-bit levels were expanded for nothing by its `before_change`;
 found by the review of ogles2pi3's port plan).
+**The 1.0.1 archives rebuilt for their texts (2026-11-21, the developer's request; library and
+compiler unchanged):** the authors named "Ladislav Vojnic (ladislawv), Aleksandar Vojnic (R-Typer)"
+(README.md, release/ReadMe at its top and in Credits, ogles3.doc's AUTHORS, LICENSE's copyright
+line); release/ReadMe laid out anew (a contents list, numbered sections, the examples one to an
+entry, the 1.0-beta1 note in "5. Upgrading"; "no geometry shaders" corrected to ogles3.doc's "no
+OpenGL ES 3.2 contexts and no tessellation shaders"); "OpenGL ES 3.1+" where a text names what the
+library is or offers (README.md, ReadMe, Install-ogles3, GettingStarted, ReadMe-SDL, ogles3.doc's
+PURPOSE), "3.1" kept where it is a version a program asks for or reads (the 20/30/31 tag, GL_VERSION),
+the core's own (366 entry points, "every function of OpenGL ES 3.1"), the conformance lists, and the
+two demos written for ES 3.1. `build_release.sh dist sdl` made five; it clears `release/dist/`, so
+the hand-made demos zip was kept aside and given the new LICENSE and its ReadMe.txt's "3.1+" in place;
+`SHA256SUMS` lists all six.
 
 **Quake III before and after 2026-11-19's work (the same day).** renderergl2's timedemo (1,260
 frames; `tools/perf/q3cmp.sh build`'s `ogles2-q3o3`, the data at `Stuff:Quake3-GLES2`, run with

@@ -1,8 +1,8 @@
-# ogles3.library: OpenGL ES 3.1 for the classic Amiga
+# ogles3.library: OpenGL ES 3.1+ for the classic Amiga
 
 **Modern GPU graphics for AmigaOS 3.x.** On an Amiga with a
 [PiStorm](https://github.com/captain-amygdala/pistorm) and a Raspberry Pi 4, `ogles3.library`
-gives 68k programs real OpenGL ES 3.1, with compute shaders and GLSL ES 3.10, drawn by the Pi's
+gives 68k programs real OpenGL ES 3.1+, with compute shaders and GLSL ES 3.10, drawn by the Pi's
 VideoCore GPU (Broadcom V3D 4.2) under [Emu68](https://github.com/michalsc/Emu68).
 
 It is the same API that phones, browsers and game engines use, and the same `agl*` context calls
@@ -28,11 +28,11 @@ once, and programs written for ogles2 keep using it.
 
 ## Why it matters
 
-- **OpenGL ES 3.1.** Compute shaders, shader storage buffers, image load/store, atomic
+- **OpenGL ES 3.1+.** Compute shaders, shader storage buffers, image load/store, atomic
   counters, indirect draws, separate shader programs, multisample textures; and all of OpenGL
   ES 3.0: instancing, uniform buffers, vertex array objects, transform feedback, multisampled
   framebuffer objects, integer and float render targets, 3D and array textures, sampler
-  objects, ETC2/EAC, sync and queries. Programs get an OpenGL ES 3.1 context by default, an
+  objects, ETC2/EAC, sync and queries. Programs get an OpenGL ES 3.1+ context by default, an
   OpenGL ES 2.0 one when they ask.
 - **Real shaders.** GLSL ES 1.00, 3.00 and 3.10, compiled by Mesa's own V3D compiler, running
   *on the Amiga*: a program hands the library its shader source, and it is compiled at link
@@ -117,12 +117,12 @@ Source written for ogles2 builds against the ogles3 SDK with its `#include` line
 ## Writing a program
 
 ```c
-#include <proto/ogles3.h>        /* OpenGL ES 3.1 and agl*, through the library */
+#include <proto/ogles3.h>        /* OpenGL ES 3.1+ and agl*, through the library */
 #include <GLES3/gl31.h>          /* the ES 3.x enumerants */
 
 if (OGLES3Open()) {              /* libogles3.a: opens ogles3.library */
     ULONG err;
-    void *ctx = aglCreateContextTags2(&err, OGLES3_CCT_DEPTH, 24, TAG_DONE); /* ES 3.1 */
+    void *ctx = aglCreateContextTags2(&err, OGLES3_CCT_DEPTH, 24, TAG_DONE); /* ES 3.1+ */
     aglMakeCurrent(ctx);
     /* ... GL calls, aglSwapBuffers() per frame ... */
     aglDestroyContext(ctx);
@@ -231,7 +231,7 @@ link them. Third-party code and the ports keep their own licences and notices (`
 
 ## Credits
 
-ogles3 is developed by R-Typer and Ladislawv, with Claude Opus 5.5 (Anthropic's AI assistant).
+ogles3 is developed by Ladislav Vojnic (ladislawv), Aleksandar Vojnic (R-Typer).
 
 It builds on: PiStorm3D (`minigl.library` for PiStorm) by Steffen "MagicSN" Haeuser, and its V3D
 backend, which this library builds on, by Dennis van der Boon; the V3D assembler and V3D

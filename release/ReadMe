@@ -1,234 +1,316 @@
 ogles3.library 1.1 (release 1.0.1) for AmigaOS 3.x on PiStorm
 ==============================================================
 
-OpenGL ES 3.1 for 68k AmigaOS, drawn by the Raspberry Pi 4's GPU (Broadcom
-V3D 4.2) through PiStorm and Emu68. Programs get OpenGL ES 3.1 contexts,
-and OpenGL ES 3.0 and 2.0 ones when they ask: compute shaders, storage
-buffers and images, instancing, uniform buffers, transform feedback,
-multisampled framebuffers, GLSL ES 3.10 and 3.00, and everything of
-OpenGL ES 2.0. The agl* context calls are those of AmigaOS 4's
-ogles2.library.
+By Ladislav Vojnic (ladislawv), Aleksandar Vojnic (R-Typer)
 
-The complete Khronos conformance runs of OpenGL ES 2.0, 3.0 and 3.1
-have been made on an A1200 (see "Conformance"); a rare problem seen there
-is still being looked at. Please report what goes wrong.
+OpenGL ES 3.1+ for 68k AmigaOS, drawn by the Raspberry Pi 4's GPU
+(Broadcom V3D 4.2) through PiStorm and Emu68.
 
-New in 1.0.1 (library and compiler 1.1; install both: Install-ogles3)
-- Extensions toward OpenGL ES 3.2 (ogles3.doc lists them): geometry
-  shaders with layered rendering, texture buffers, cube map arrays,
-  multisample 2D array textures, stencil textures, ASTC textures,
-  glCopyImageSubData, advanced blend equations, sample shading,
-  framebuffer fetch, per-draw-buffer blending, border clamping, sRGB
-  decode control, robustness queries.
+- Programs get OpenGL ES 3.1+ contexts, and OpenGL ES 3.0 and 2.0 ones
+  when they ask.
+- Compute shaders, storage buffers and images, instancing, uniform
+  buffers, transform feedback, multisampled framebuffers, GLSL ES 3.10
+  and 3.00, and everything of OpenGL ES 2.0.
+- The agl* context calls are those of AmigaOS 4's ogles2.library.
+
+The complete Khronos conformance runs of OpenGL ES 2.0, 3.0 and 3.1 have
+been made on an A1200 (see 12, "Conformance"); a rare problem seen there
+is still being looked at. Please report what goes wrong, with the log
+(see 10, "Logging").
+
+Contents
+--------
+   1. New in 1.0.1
+   2. Requirements
+   3. What is in this archive
+   4. Installing
+   5. Upgrading
+   6. Using it without installing
+   7. ogles3 and ogles2
+   8. Shaders
+   9. The examples
+  10. Logging
+  11. For programmers
+  12. Conformance
+  13. Licence
+  14. Credits
+
+
+1. New in 1.0.1
+---------------
+Library and shader compiler 1.1: install both (Execute Install-ogles3).
+
+- Extensions toward OpenGL ES 3.2 (the SDK's ogles3.doc lists them):
+  geometry shaders with layered rendering, texture buffers, cube map
+  arrays, multisample 2D array textures, stencil textures, ASTC
+  textures, glCopyImageSubData, advanced blend equations, sample
+  shading, framebuffer fetch, per-draw-buffer blending, border
+  clamping, sRGB decode control, robustness queries.
 - Vsync without lost refreshes: with OGLES3_CCT_VSYNC a swap now sleeps
-  until the display's next refresh and no longer spins (a swap now and
-  then took two refreshes; a user's report).
-- 16-bit textures (RGB565, RGB5_A1, RGBA4) upload as fast a byte as
-  RGBA8 ones (they took 3.7 times as long a texel; a user's report).
-- A frame's render may queue on the GPU behind the one it is drawing
-  (ENV:OGLES3/NoQueue turns that off).
-- The compiled-shader cache is kept per compiler (OGLES3Cache:<compiler>/),
-  so a new v3dglslc3 never takes an old one's binaries (the drawers of
-  compilers no longer installed may be deleted).
-- ENV:OGLES3/Version sets the OpenGL ES version of contexts that ask for
-  none (20, 30 or 31).
+  until the display's next refresh instead of spinning. Before, a swap
+  now and then took two refreshes (a user's report).
+- 16-bit textures (RGB565, RGB5_A1, RGBA4) upload as fast per byte as
+  RGBA8 ones. Before, they took 3.7 times as long per texel (a user's
+  report).
+- A frame's render may queue on the GPU behind the one it is drawing.
+  ENV:OGLES3/NoQueue turns that off.
+- The compiled-shader cache is kept per compiler, in
+  OGLES3Cache:<compiler>/, so a new v3dglslc3 never takes an old one's
+  binaries. The drawers of compilers no longer installed may be
+  deleted.
+- ENV:OGLES3/Version sets the OpenGL ES version of contexts that ask
+  for none (20, 30 or 31).
 
-Upgrading from 1.0-beta1: the shader compiler now has its own message
-port. In 1.0-beta1 it shared ogles2's, so when programs of both libraries
-ran in a session, one library's shaders went to the other's compiler (ES
-3 shaders failed to compile), and flushing one library stopped the
-other's compiler. Install ogles3.library and v3dglslc3 together:
-Install-ogles3 replaces both.
 
-ogles3 and ogles2
------------------
-ogles3.library is a new library beside ogles2.library 1.x (OpenGL ES 2.0),
-not a replacement for it: programs written for ogles2 keep using
-ogles2.library, and both can be installed at once. Each has its own
-shader compiler (ogles3's is LIBS:v3dglslc3) and its own cache of compiled
-shaders (OGLES3Cache:). Programs use ogles3 when they are built with its
-SDK.
-
-Requirements
-------------
-- An Amiga with a PiStorm and a Raspberry Pi 4B or CM4 (the GPU is the Pi's)
+2. Requirements
+---------------
+- An Amiga with a PiStorm and a Raspberry Pi 4B or CM4 (the GPU is the
+  Pi's)
 - Emu68 (tested: 1.1.0-beta.1)
 - AmigaOS 3.x (tested: 3.2) with Picasso96 or CyberGraphX
 - A 32-bit RTG screen for programs that render into a window
 
-What is in this archive
------------------------
-  Install-ogles3      the installer (an AmigaDOS script, see below)
-  Libs/ogles3.library the library
-  Libs/v3dglslc3      the shader compiler (Mesa's V3D compiler, 19 MB)
-  C/OGLES3Log         writes the library's log while a program runs
-  Examples/           small programs with their compiled shaders
-  SDK/                headers, import libraries, documentation and the
-                      examples' sources, for programmers (only in
-                      ogles3-1.0.1-sdk.lha; see "For programmers")
-  LICENSE, licences/  licences and notices
 
-Installing
-----------
+3. What is in this archive
+--------------------------
+  Install-ogles3       the installer (an AmigaDOS script, see 4)
+  Libs/ogles3.library  the library
+  Libs/v3dglslc3       the shader compiler (Mesa's V3D compiler, 19 MB)
+  C/OGLES3Log          writes the library's log while a program runs
+  Examples/            small programs with their compiled shaders (see 9)
+  SDK/                 headers, import libraries, documentation and the
+                       examples' sources, for programmers (only in
+                       ogles3-1.0.1-sdk.lha; see 11)
+  LICENSE, licences/   licences and notices
+
+
+4. Installing
+-------------
 From a Shell, in this drawer:
 
     Execute Install-ogles3
 
 It asks before each step:
+
 - copies ogles3.library to LIBS: (a LIBS:v3dglslc3 already installed is
-  replaced with this release's without asking: the library uses that one
-  first, and the two must be of the same release);
-- copies the shader compiler v3dglslc3 to LIBS: (optional, see "Shaders");
+  replaced with this release's without asking: the library uses that
+  one first, and the two must be of the same release);
+- copies the shader compiler v3dglslc3 to LIBS: (optional, see 8);
 - makes the drawer SYS:OGLES3Cache and adds "Assign OGLES3Cache:
-  SYS:OGLES3Cache" to S:User-Startup, so compiled shaders are kept across
-  reboots (optional; without it they are kept in T: until the next reboot);
+  SYS:OGLES3Cache" to S:User-Startup, so compiled shaders are kept
+  across reboots (optional; without it they are kept in T: until the
+  next reboot);
 - copies OGLES3Log to C: (optional).
+
 "Execute Install-ogles3 ALL" does all four without asking. Nothing of an
 installed ogles2.library is touched.
 
-To remove it: delete LIBS:ogles3.library, LIBS:v3dglslc3, C:OGLES3Log and
-SYS:OGLES3Cache, and the lines between ";BEGIN ogles3" and ";END ogles3"
-in S:User-Startup.
+To remove it: delete LIBS:ogles3.library, LIBS:v3dglslc3, C:OGLES3Log
+and SYS:OGLES3Cache, and the lines between ";BEGIN ogles3" and
+";END ogles3" in S:User-Startup.
 
-Using it without installing
----------------------------
-A program finds ogles3.library and the compiler in its own drawer when they
-are not installed: the library in LIBS:, else PROGDIR:libs/, else beside the
-program; the compiler likewise (LIBS:v3dglslc3, PROGDIR:libs/v3dglslc3,
-PROGDIR:v3dglslc3). So a program can be shipped with a libs/ drawer holding
-ogles3.library (and v3dglslc3, if it needs to compile shaders). A
-program's own copy also replaces an installed one that is too old for it,
-unless another program is using the old one at that moment (AmigaOS keeps
-one ogles3.library in memory for all programs).
 
-To try the examples this way: copy Libs/ogles3.library into Examples/libs/
-and run the programs in Examples/.
+5. Upgrading
+------------
+Install ogles3.library and v3dglslc3 together: Install-ogles3 replaces
+both.
 
-Shaders
--------
-The GPU runs machine code compiled from each program's GLSL. ogles3 finds
-a program's compiled form ("binary", a .v3dp file named by a hash of the
-GLSL text) in the program's shaders/ drawer, beside the program, or in
-OGLES3Cache: (or T:). When there is none, the compiler v3dglslc3 compiles
-it (about 0.2 s per program; its first start takes about a second) and the
-result goes into OGLES3Cache:, so the next run needs no compiler. Some
-draws need another variant of a program (for float or integer render
-targets, for instance); the compiler makes it at that draw, and it is
-kept in the cache too.
+From 1.0-beta1: the shader compiler now has its own message port. In
+1.0-beta1 it shared ogles2's, so when programs of both libraries ran in
+a session, one library's shaders went to the other's compiler (ES 3
+shaders failed to compile), and flushing one library stopped the
+other's compiler.
+
+
+6. Using it without installing
+------------------------------
+A program finds ogles3.library and the compiler in its own drawer when
+they are not installed:
+
+  the library    LIBS:, else PROGDIR:libs/, else beside the program
+  the compiler   LIBS:v3dglslc3, else PROGDIR:libs/v3dglslc3, else
+                 PROGDIR:v3dglslc3
+
+So a program can be shipped with a libs/ drawer holding ogles3.library
+(and v3dglslc3, if it needs to compile shaders). A program's own copy
+also replaces an installed one that is too old for it, unless another
+program is using the old one at that moment (AmigaOS keeps one
+ogles3.library in memory for all programs).
+
+To try the examples this way: copy Libs/ogles3.library into
+Examples/libs/ and run the programs in Examples/.
+
+
+7. ogles3 and ogles2
+--------------------
+ogles3.library is a new library beside ogles2.library 1.x (OpenGL ES
+2.0), not a replacement for it: programs written for ogles2 keep using
+ogles2.library, and both can be installed at once. Each has its own
+shader compiler (ogles3's is LIBS:v3dglslc3) and its own cache of
+compiled shaders (OGLES3Cache:). Programs use ogles3 when they are built
+with its SDK.
+
+
+8. Shaders
+----------
+The GPU runs machine code compiled from each program's GLSL. ogles3
+finds a program's compiled form ("binary", a .v3dp file named by a hash
+of the GLSL text) in the program's shaders/ drawer, beside the program,
+or in OGLES3Cache: (or T:).
+
+When there is none, the compiler v3dglslc3 compiles it (about 0.2 s per
+program; its first start takes about a second) and the result goes into
+OGLES3Cache:, so the next run needs no compiler. Some draws need another
+variant of a program (for float or integer render targets, for
+instance); the compiler makes it at that draw, and it is kept in the
+cache too.
 
 Programs that ship their binaries (as the examples do) run without the
 compiler. Programs that make shaders at run time need it.
 
-The examples
-------------
-  Examples/triangle   a turning coloured triangle in a window
-  Examples/cube       a textured cube with a depth buffer, in a window you
-                      can resize
-  Examples/boingocean the Boing ball floating on a ray-marched ocean, all
-                      drawn by shaders; drag with the mouse to move the
-                      camera, keys 1 to 4 draw it at 1/1 to 1/4 size
-  Examples/boing2026  the 1984 Boing Ball remade: it bounces in a neon room
-                      with a soft shadow, a reflecting floor, bloom, 4x
-                      antialiasing and its "boing" on Paula; "boing2026
-                      TOUR" shows each effect in turn. Its keys and
-                      options: Examples/boing2026.txt
-  Examples/boing2026-ogles3
-                      Boing 2026 in OpenGL ES 3: the ball dives into a pool
-                      whose waves, caustics and the light they throw on
-                      the walls are worked out on the GPU; the mouse moves
-                      the light. Key 9 the dry floor with sparks, E the
-                      ES 2.0 way to compare. FULLSCREEN: 1280 x 720.
-                      Its keys and options: Examples/boing2026-ogles3.txt
-  Examples/boingocean-ogles3
-                      Boing Ocean in OpenGL ES 3: in high dynamic range,
-                      with clouds, blooming sun glints, a checkerboard that
-                      no longer crawls and caustics on the ball; key E the
-                      ES 2.0 way to compare. FULLSCREEN: 1280 x 720. Its
-                      keys and options: Examples/boingocean-ogles3.txt
-  Examples/boingswarm-ogles3
-                      Boing Swarm, OpenGL ES 3.1: 16384 boids, each one
-                      simulated on the GPU by compute shaders and drawn
-                      with instancing; the 68k only sends the time. Its
-                      keys and options: Examples/boingswarm-ogles3.txt
-  Examples/juggler-ogles3
-                      Juggler RT, OpenGL ES 3.1: Eric Graham's 1987
-                      Juggler ray traced in real time by compute shaders,
-                      every pixel of every frame, with shadows and mirror
-                      balls, from his own sums and scene files. Key M the
-                      1987 HAM look or 2026's smooth edges and soft
-                      shadows, E the ES 2.0 way. Its keys and options:
-                      Examples/juggler-ogles3.txt
+
+9. The examples
+---------------
 Close the window or press Esc to quit. Their .v3dp files are in
 Examples/shaders/: they run without the compiler.
 
-Logging
--------
-The library logs to T:ogles3.log, or to the file named in the environment
-variable OGLES3/LogFile (SetEnv OGLES3/LogFile RAM:ogles3.log). OGLES3Log
-writes the buffered log while a program still runs. A program that fails
-usually says why there. Each context adds a few lines when it is destroyed,
-so T:ogles3.log (in RAM, as a rule) is kept to 256 KB: at that size it
-becomes T:ogles3.log.old and a new one starts. OGLES3/LogMax sets the cap
-in KB (0: none); a file named in OGLES3/LogFile has none unless it is set.
+  triangle
+      A turning coloured triangle in a window.
 
-For programmers
----------------
-The SDK comes in two forms: ogles3-1.0.1-sdk.lha (this archive with
-SDK/ added) and ogles3-1.0.1-sdk.zip (the SDK alone, for building on a
-PC with a cross compiler). It holds:
+  cube
+      A textured cube with a depth buffer, in a window you can resize.
 
-SDK/include    <proto/ogles3.h> (every OpenGL ES 3.1 function and agl*),
-               <libraries/ogles3.h> (tags, errors, extra enumerants), the
-               dispatch table, and Khronos' GLES2/, GLES3/ and KHR/ headers
-SDK/lib        libogles3.a (GCC) and ogles3.lib (vbcc), the import library
-SDK/doc        GettingStarted.txt: writing, building, debugging and shipping
-               a program, moving one from ogles2.library, and a prompt for
-               working with an AI assistant; ogles3.doc: the agl* calls,
-               context versions, shaders and binaries, extensions and
-               deviations
-SDK/examples   the examples' sources and a Makefile (GCC and vbcc)
+  boingocean
+      The Boing ball floating on a ray-marched ocean, all drawn by
+      shaders. Drag with the mouse to move the camera; keys 1 to 4 draw
+      it at 1/1 to 1/4 size.
+
+  boing2026
+      The 1984 Boing Ball remade: it bounces in a neon room with a soft
+      shadow, a reflecting floor, bloom, 4x antialiasing and its "boing"
+      on Paula. "boing2026 TOUR" shows each effect in turn.
+      Keys and options: Examples/boing2026.txt
+
+  boing2026-ogles3
+      Boing 2026 in OpenGL ES 3: the ball dives into a pool whose waves,
+      caustics and the light they throw on the walls are worked out on
+      the GPU; the mouse moves the light. Key 9 the dry floor with
+      sparks, E the ES 2.0 way to compare. FULLSCREEN: 1280 x 720.
+      Keys and options: Examples/boing2026-ogles3.txt
+
+  boingocean-ogles3
+      Boing Ocean in OpenGL ES 3: in high dynamic range, with clouds,
+      blooming sun glints, a checkerboard that no longer crawls and
+      caustics on the ball; key E the ES 2.0 way to compare.
+      FULLSCREEN: 1280 x 720.
+      Keys and options: Examples/boingocean-ogles3.txt
+
+  boingswarm-ogles3
+      Boing Swarm, OpenGL ES 3.1: 16384 boids, each one simulated on the
+      GPU by compute shaders and drawn with instancing; the 68k only
+      sends the time.
+      Keys and options: Examples/boingswarm-ogles3.txt
+
+  juggler-ogles3
+      Juggler RT, OpenGL ES 3.1: Eric Graham's 1987 Juggler ray traced
+      in real time by compute shaders, every pixel of every frame, with
+      shadows and mirror balls, from his own sums and scene files. Key M
+      the 1987 HAM look or 2026's smooth edges and soft shadows, E the
+      ES 2.0 way.
+      Keys and options: Examples/juggler-ogles3.txt
+
+
+10. Logging
+-----------
+The library logs to T:ogles3.log, or to the file named in the
+environment variable OGLES3/LogFile:
+
+    SetEnv OGLES3/LogFile RAM:ogles3.log
+
+OGLES3Log writes the buffered log while a program still runs. A program
+that fails usually says why there.
+
+Each context adds a few lines when it is destroyed, so T:ogles3.log (in
+RAM, as a rule) is kept to 256 KB: at that size it becomes
+T:ogles3.log.old and a new one starts. OGLES3/LogMax sets the cap in KB
+(0: none); a file named in OGLES3/LogFile has none unless it is set.
+
+
+11. For programmers
+-------------------
+The SDK comes in two forms:
+
+  ogles3-1.0.1-sdk.lha  this archive with SDK/ added
+  ogles3-1.0.1-sdk.zip  the SDK alone, for building on a PC with a
+                        cross compiler
+
+It holds:
+
+  SDK/include   <proto/ogles3.h> (every OpenGL ES 3.1+ function and
+                agl*), <libraries/ogles3.h> (tags, errors, extra
+                enumerants), the dispatch table, and Khronos' GLES2/,
+                GLES3/ and KHR/ headers
+  SDK/lib       libogles3.a (GCC) and ogles3.lib (vbcc), the import
+                library
+  SDK/doc       GettingStarted.txt: writing, building, debugging and
+                shipping a program, moving one from ogles2.library, and
+                a prompt for working with an AI assistant.
+                ogles3.doc: the agl* calls, context versions, shaders
+                and binaries, extensions and deviations.
+  SDK/examples  the examples' sources and a Makefile (GCC and vbcc)
 
 A context is OpenGL ES 3.1 unless the program asks for another with the
-tag OGLES3_CCT_PISTORM_ES_VERSION (20 gives OpenGL ES 2.0). Source written
-for ogles2.library 1.x builds with its #include lines changed to
+tag OGLES3_CCT_PISTORM_ES_VERSION (20 gives OpenGL ES 2.0). Source
+written for ogles2.library 1.x builds with its #include lines changed to
 <proto/ogles3.h>: the OGLES2_ names are still defined.
 
 The import library and the headers are MIT-licensed: programs of any
 licence may use them. The source of everything here, the compiler's
 included, is at https://github.com/ladislawv/ogles3.
 
-Conformance
------------
+
+12. Conformance
+---------------
 The Khronos dEQP conformance lists, each run whole on an A1200 (October
 2026, every shader compiled by this library's compiler):
+
   dEQP-GLES31  13,746 passed, none failed (24,056 cases are OpenGL ES
                3.2's or of extensions not offered: "not supported")
   dEQP-GLES3   42,860 passed, 2 failed once (not seen again in reruns),
                1,892 not supported
   dEQP-GLES2   17,091 passed, 25 cube map cases fail by design (below);
                the other failures of that run are fixed in this release
+
 Twice in those runs the whole Amiga stopped, hours into a run, on a case
-that passes when run again; that is still being looked at. The SDK's
-ogles3.doc lists the deviations: cube maps always filter seamlessly,
-multisampling is always 4x, 32-bit float textures filter nearest, and
-there are no geometry or tessellation shaders (OpenGL ES 3.2).
+that passes when run again; that is still being looked at.
 
-Licence
--------
+The SDK's ogles3.doc lists the deviations: cube maps always filter
+seamlessly, multisampling is always 4x, 32-bit float textures filter
+nearest, and there are no OpenGL ES 3.2 contexts and no tessellation
+shaders.
+
+
+13. Licence
+-----------
 ogles3.library incorporates PiStorm3D's V3D backend and is distributed
-under the Hyperion MiniGL Open Source License (licences/
-License_MiniGL_Library.txt): for AmigaOS only, with the source published.
-The import library, headers, examples and OGLES3Log are MIT. v3dglslc3 is
-Mesa (MIT; licences/Mesa/). LICENSE lists every part.
+under the Hyperion MiniGL Open Source License
+(licences/License_MiniGL_Library.txt): for AmigaOS only, with the source
+published. The import library, headers, examples and OGLES3Log are MIT.
+v3dglslc3 is Mesa (MIT; licences/Mesa/). LICENSE lists every part.
 
-Credits
--------
-ogles3 is developed by R-Typer and Ladislawv, with Claude Opus 5.5
-(Anthropic's AI assistant).
 
-It builds on: PiStorm3D (minigl.library for PiStorm) by Steffen "MagicSN"
-Haeuser, whose V3D backend this library builds on, with Dennis van der
-Boon; the V3D assembler by Macoy Madson; Mesa's V3D driver and compiler
-(Broadcom, VMware and the Mesa contributors); Emu68 by Michal Schulz;
-PiStorm by Claude Schwarz and contributors; bebbo's amiga-gcc; vbcc by
-Volker Barthelmann and Frank Wille.
+14. Credits
+-----------
+ogles3 is developed by Ladislav Vojnic (ladislawv), Aleksandar Vojnic
+(R-Typer).
+
+It builds on:
+- PiStorm3D (minigl.library for PiStorm) by Steffen "MagicSN" Haeuser,
+  whose V3D backend this library builds on, with Dennis van der Boon;
+- the V3D assembler by Macoy Madson;
+- Mesa's V3D driver and compiler (Broadcom, VMware and the Mesa
+  contributors);
+- Emu68 by Michal Schulz;
+- PiStorm by Claude Schwarz and contributors;
+- bebbo's amiga-gcc;
+- vbcc by Volker Barthelmann and Frank Wille.
